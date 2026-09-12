@@ -27,6 +27,12 @@ export const SERIES = [
 		tagline: 'Why chips and algorithms evolve together — accelerators, number formats, and the economics of every token.',
 		level: 'Intermediate',
 	},
+	{
+		id: 'comp-arch',
+		name: 'Computer Architecture & ASIC',
+		tagline: 'From transistors to TPUs — how chips actually work, and how AI silicon gets designed. A ground-up course.',
+		level: 'From first principles',
+	},
 ] as const;
 
 export type SeriesId = (typeof SERIES)[number]['id'];
