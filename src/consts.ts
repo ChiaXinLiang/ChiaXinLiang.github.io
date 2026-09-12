@@ -21,6 +21,12 @@ export const SERIES = [
 		tagline: 'GPU memory math, CUDA kernels, KV caches, and serving LLMs at scale — for people who run models on real hardware.',
 		level: 'Advanced',
 	},
+	{
+		id: 'efficient-ai',
+		name: 'Efficient AI & Co-Design',
+		tagline: 'Why chips and algorithms evolve together — accelerators, number formats, and the economics of every token.',
+		level: 'Intermediate',
+	},
 ] as const;
 
 export type SeriesId = (typeof SERIES)[number]['id'];
