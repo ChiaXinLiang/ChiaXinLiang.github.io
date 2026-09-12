@@ -6,8 +6,7 @@ import { defineConfig, fontProviders } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-	// TODO: 換成你的 GitHub 帳號 → site: 'https://<USERNAME>.github.io',
-	site: 'https://example.com',
+	site: 'https://chiaxinliang.github.io',
 	integrations: [mdx(), sitemap()],
 	fonts: [
 		{
