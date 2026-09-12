@@ -18,9 +18,19 @@ const countBySeries = (id: string) => posts.filter((p) => p.data.series === id).
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 		<style>
+			.hero h1 {
+				background: linear-gradient(90deg, var(--accent), var(--accent-2));
+				-webkit-background-clip: text;
+				background-clip: text;
+				-webkit-text-fill-color: transparent;
+				color: var(--accent);
+			}
 			.hero p {
 				font-size: 1.15em;
 				color: rgb(var(--gray-dark));
+			}
+			.hero .identity {
+				font-weight: 600;
 			}
 			.series-grid {
 				display: grid;

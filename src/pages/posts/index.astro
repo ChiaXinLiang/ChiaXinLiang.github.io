@@ -1,0 +1,53 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('posts')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title="Posts" description="Short notes, quick takes, and things I learned." />
+		<style>
+			ul {
+				list-style: none;
+				padding: 0;
+			}
+			li {
+				margin-bottom: 0.6rem;
+			}
+			.date {
+				color: rgb(var(--gray));
+				font-family: monospace;
+				font-size: 0.8em;
+				margin-right: 0.75rem;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Posts</h1>
+			<p>Short notes, quick takes, and things I learned. The long reads are in <a href="/blog/">Blog</a>.</p>
+			<ul>
+				{
+					posts.map((post) => (
+						<li>
+							<span class="date">
+								<FormattedDate date={post.data.pubDate} />
+							</span>
+							<a href={`/posts/${post.id}/`}>{post.data.title}</a>
+						</li>
+					))
+				}
+			</ul>
+		</main>
+		<Footer />
+	</body>
+</html>
