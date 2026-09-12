@@ -79,13 +79,6 @@ const { title, description, pubDate, updatedDate, linkedinDate, heroImage, readi
 							<span>Published <FormattedDate date={pubDate} /></span>
 							{readingMinutes && <span> · {readingMinutes} min read</span>}
 							{
-								linkedinDate && (
-									<div class="linkedin-date">
-										LinkedIn post: <FormattedDate date={linkedinDate} />
-									</div>
-								)
-							}
-							{
 								updatedDate && (
 									<div class="last-updated-on">
 										Last updated on <FormattedDate date={updatedDate} />
