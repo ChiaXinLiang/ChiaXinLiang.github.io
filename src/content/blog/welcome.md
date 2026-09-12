@@ -2,6 +2,7 @@
 title: 'Two series, one goal: understand what makes AI fast'
 description: 'What this blog covers — LLM fundamentals for newcomers, and AI systems performance engineering for the people running the GPUs.'
 pubDate: 'Sep 12 2026'
+tags: ['meta']
 ---
 
 A modern GPU cluster reporting 100% utilization can be wasting most of its compute. A "bigger" GPU can run the same model slower. And the difference between a profitable AI product and a money pit often comes down to engineering decisions nobody sees.

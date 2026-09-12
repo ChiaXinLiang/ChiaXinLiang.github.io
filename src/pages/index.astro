@@ -2,47 +2,121 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import FormattedDate from '../components/FormattedDate.astro';
+import { SITE_DESCRIPTION, SITE_TITLE, SERIES } from '../consts';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const latest = posts.slice(0, 5);
+const countBySeries = (id: string) => posts.filter((p) => p.data.series === id).length;
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			.hero p {
+				font-size: 1.15em;
+				color: rgb(var(--gray-dark));
+			}
+			.series-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 1.5rem;
+				margin: 2rem 0 3rem;
+			}
+			@media (max-width: 720px) {
+				.series-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+			.series-card {
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 12px;
+				padding: 1.25rem 1.5rem;
+				text-decoration: none;
+				display: block;
+				transition: box-shadow 0.2s ease;
+			}
+			.series-card:hover {
+				box-shadow: var(--box-shadow);
+			}
+			.series-card h3 {
+				margin: 0 0 0.4rem;
+				color: rgb(var(--black));
+			}
+			.series-card .level {
+				display: inline-block;
+				font-size: 0.75em;
+				font-weight: 700;
+				letter-spacing: 0.02em;
+				color: var(--accent);
+				margin-bottom: 0.5rem;
+			}
+			.series-card p {
+				margin: 0;
+				font-size: 0.95em;
+				color: rgb(var(--gray));
+			}
+			.latest li {
+				margin-bottom: 0.6rem;
+			}
+			.latest .date {
+				color: rgb(var(--gray));
+				font-size: 0.85em;
+				margin-left: 0.5rem;
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<section class="hero">
+				<h1>Notes on making AI work — and work fast</h1>
+				<p>
+					Technical write-ups on large language models and the systems that run them:
+					how LLMs work from first principles, and how to squeeze real performance out
+					of GPUs, CUDA, and serving stacks. One concept per article, concrete numbers,
+					original diagrams, primary sources cited.
+				</p>
+			</section>
+
+			<section>
+				<h2>Series</h2>
+				<div class="series-grid">
+					{
+						SERIES.map((s) => (
+							<a class="series-card" href={`/series/${s.id}/`}>
+								<span class="level">{s.level}</span>
+								<h3>{s.name}</h3>
+								<p>{s.tagline}</p>
+								<p style="margin-top:.6rem">
+									{countBySeries(s.id)} article{countBySeries(s.id) === 1 ? '' : 's'} →
+								</p>
+							</a>
+						))
+					}
+				</div>
+			</section>
+
+			<section class="latest">
+				<h2>Latest</h2>
+				<ul>
+					{
+						latest.map((post) => (
+							<li>
+								<a href={`/blog/${post.id}/`}>{post.data.title}</a>
+								<span class="date">
+									<FormattedDate date={post.data.pubDate} />
+								</span>
+							</li>
+						))
+					}
+				</ul>
+			</section>
 		</main>
 		<Footer />
 	</body>

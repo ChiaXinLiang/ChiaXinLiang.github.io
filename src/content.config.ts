@@ -14,6 +14,10 @@ const blog = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: z.optional(image()),
+			// Content organization: which series + topic this post belongs to
+			series: z.enum(['llm-basics', 'ai-performance']).optional(),
+			topic: z.string().optional(),
+			tags: z.array(z.string()).optional(),
 		}),
 });
 
