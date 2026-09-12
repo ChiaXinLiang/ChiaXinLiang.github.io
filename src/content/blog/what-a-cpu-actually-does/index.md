@@ -1,7 +1,8 @@
 ---
 title: 'What a CPU Actually Does: Fetch, Decode, Execute — and the Pipeline'
 description: "Your laptop's CPU performs one conceptually simple loop billions of times per second. Understanding it is the foundation for understanding every chip — including the ones that run AI."
-pubDate: 'Sep 26 2026'
+pubDate: 'Sep 12 2026'
+linkedinDate: 'Sep 26 2026'
 heroImage: './cover.png'
 series: 'comp-arch'
 topic: 'CPU Fundamentals'

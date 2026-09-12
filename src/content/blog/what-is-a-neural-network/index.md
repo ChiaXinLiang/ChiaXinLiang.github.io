@@ -1,7 +1,8 @@
 ---
 title: 'What Is a Neural Network, Really?'
 description: "Strip away the brain metaphors: a neural network is weighted sums and simple squashing functions, stacked. That's it — and that's enough to run ChatGPT."
-pubDate: 'Sep 13 2026'
+pubDate: 'Sep 12 2026'
+linkedinDate: 'Sep 15 2026'
 heroImage: './cover.png'
 series: 'llm-basics'
 topic: 'Neural Networks'

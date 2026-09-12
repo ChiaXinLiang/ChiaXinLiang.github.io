@@ -1,7 +1,8 @@
 ---
 title: 'Goodput: Your "100% Utilized" Cluster Is Mostly Wasted'
 description: "Meta measured that 70–75% of a fully-utilized cluster's compute produced nothing useful. The metric that exposes the gap is called goodput."
-pubDate: 'Sep 24 2026'
+pubDate: 'Sep 12 2026'
+linkedinDate: 'Sep 24 2026'
 heroImage: './cover.png'
 series: 'ai-performance'
 topic: 'Foundations'

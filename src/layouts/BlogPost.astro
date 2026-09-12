@@ -13,7 +13,7 @@ type Props = CollectionEntry<'blog'>['data'] & {
 	next?: NavLink;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, readingMinutes, prev, next } =
+const { title, description, pubDate, updatedDate, linkedinDate, heroImage, readingMinutes, prev, next } =
 	Astro.props;
 ---
 
@@ -55,7 +55,12 @@ const { title, description, pubDate, updatedDate, heroImage, readingMinutes, pre
 				margin-bottom: 0.5em;
 				color: rgb(var(--gray));
 			}
-			.last-updated-on {
+			.linkedin-date {
+		font-size: 0.8em;
+		color: rgb(var(--gray));
+		margin-top: 0.3em;
+	}
+	.last-updated-on {
 				font-style: italic;
 			}
 		</style>
@@ -71,8 +76,15 @@ const { title, description, pubDate, updatedDate, heroImage, readingMinutes, pre
 				<div class="prose">
 					<div class="title">
 						<div class="date">
-							<FormattedDate date={pubDate} />
+							<span>Published <FormattedDate date={pubDate} /></span>
 							{readingMinutes && <span> · {readingMinutes} min read</span>}
+							{
+								linkedinDate && (
+									<div class="linkedin-date">
+										LinkedIn post: <FormattedDate date={linkedinDate} />
+									</div>
+								)
+							}
 							{
 								updatedDate && (
 									<div class="last-updated-on">

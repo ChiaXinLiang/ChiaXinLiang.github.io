@@ -1,7 +1,8 @@
 ---
 title: 'How Models Learn: Gradient Descent and Backprop in Plain Words'
 description: "Training a neural network is finding the bottom of a valley you can't see, one step at a time — and billing every weight for its exact share of every mistake."
-pubDate: 'Sep 13 2026'
+pubDate: 'Sep 12 2026'
+linkedinDate: 'Sep 22 2026'
 heroImage: './cover.png'
 series: 'llm-basics'
 topic: 'Neural Networks'

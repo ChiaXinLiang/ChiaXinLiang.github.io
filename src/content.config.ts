@@ -11,6 +11,9 @@ const blog = defineCollection({
 			description: z.string(),
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
+			// LinkedIn promotion date (from the series SCHEDULE) — separate from
+			// pubDate, which is the date the article was uploaded to the blog.
+			linkedinDate: z.coerce.date().optional(),
 			heroImage: z.optional(image()),
 			series: z.enum(['llm-basics', 'ai-performance', 'efficient-ai', 'comp-arch']).optional(),
 			topic: z.string().optional(),
