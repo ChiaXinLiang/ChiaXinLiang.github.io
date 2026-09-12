@@ -72,13 +72,13 @@ Modern AI was not one recent invention. It was a 60-year wait for hardware to ca
 
 ## Sources
 
-- Rosenblatt, F. (1958). "The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain," *Psychological Review*; NYT coverage, July 8, 1958
-- Minsky, M. & Papert, S. (1969). *Perceptrons*, MIT Press
-- Rumelhart, D., Hinton, G., Williams, R. (1986). "Learning representations by back-propagating errors," *Nature*
-- Krizhevsky, A., Sutskever, I., Hinton, G. (2012). "ImageNet Classification with Deep Convolutional Neural Networks," *NeurIPS*
-- Vaswani, A. et al. (2017). "Attention Is All You Need," *NeurIPS*
-- OpenAI (2018). "AI and Compute"
-- Brown, T. et al. (2020). "Language Models are Few-Shot Learners" (GPT-3), *NeurIPS*
+- Rosenblatt, F. (1958). ["The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain"](https://doi.org/10.1037/h0042519), *Psychological Review* · [NYT coverage, July 8, 1958](https://www.nytimes.com/1958/07/08/archives/new-navy-device-learns-by-doing-psychologist-shows-embryo-of.html)
+- Minsky, M. & Papert, S. (1969). [*Perceptrons*](https://mitpress.mit.edu/9780262630221/perceptrons/), MIT Press
+- Rumelhart, D., Hinton, G., Williams, R. (1986). ["Learning representations by back-propagating errors"](https://doi.org/10.1038/323533a0), *Nature*
+- Krizhevsky, A., Sutskever, I., Hinton, G. (2012). ["ImageNet Classification with Deep Convolutional Neural Networks"](https://proceedings.neurips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html), *NeurIPS*
+- Vaswani, A. et al. (2017). ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762), *NeurIPS*
+- OpenAI (2018). ["AI and Compute"](https://openai.com/research/ai-and-compute)
+- Brown, T. et al. (2020). ["Language Models are Few-Shot Learners"](https://arxiv.org/abs/2005.14165) (GPT-3), *NeurIPS*
 
 ---
 
