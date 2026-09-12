@@ -9,7 +9,7 @@ A modern GPU cluster reporting 100% utilization can be wasting most of its compu
 
 This blog documents what I'm learning about that invisible layer, in two parallel series:
 
-**Fundamental of LLM** — for engineers getting into AI: where models came from, how neural networks actually learn, why the Transformer won, and how an LLM turns your prompt into tokens. No prior ML background assumed.
+**Fundamental of LLM** — for engineers getting into AI: how neural networks actually learn, why the Transformer won, and how an LLM turns your prompt into tokens. No prior ML background assumed.
 
 **AI Performance Engineering** — for people who run models on real hardware: GPU memory math, CUDA kernels, the KV cache, batching and quantization, serving at scale, and the cluster infrastructure that keeps thousands of GPUs fed.
 

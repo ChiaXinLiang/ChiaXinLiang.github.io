@@ -12,7 +12,7 @@ export const SERIES = [
 	{
 		id: 'llm-basics',
 		name: 'Fundamental of LLM',
-		tagline: 'From perceptrons to Transformers — how modern AI actually works, no ML background assumed.',
+		tagline: 'How modern AI actually works — neural networks, Transformers, and how LLMs generate text. No ML background assumed.',
 		level: 'Beginner friendly',
 	},
 	{
