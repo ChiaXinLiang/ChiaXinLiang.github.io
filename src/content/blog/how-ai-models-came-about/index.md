@@ -24,6 +24,8 @@ The mechanism was almost embarrassingly simple. Each of the 400 sensors connects
 
 Guess, measure the error, adjust the weights. Hold onto that loop — it is still how GPT-class models are trained today.
 
+![The perceptron's learning loop: inputs × adjustable weights → sum → threshold → guess, with error feedback nudging the weights](./perceptron-loop.png)
+
 ## 1969: The wall
 
 In 1969, Marvin Minsky and Seymour Papert published a book proving mathematically that a single-layer perceptron cannot learn some trivially simple patterns. The canonical example is XOR: answer "yes" when exactly one of two inputs is on. No possible setting of the knobs gets it right.
@@ -43,6 +45,8 @@ Then progress stalled again. Networks big enough to be interesting needed more d
 The 2012 ImageNet competition asked programs to recognize objects across 1.2 million photos. A team led by Hinton's students Alex Krizhevsky and Ilya Sutskever entered a deep network trained on two consumer gaming GPUs.
 
 Their model, AlexNet, scored a 15.3% top-5 error rate. The best non-neural competitor: 26.2%. In a field where a one-point gain was a good year, an 11-point gap was an earthquake.
+
+![ImageNet 2012 top-5 error: best non-neural 26.2% vs AlexNet 15.3% — an 11-point gap](./alexnet-gap.png)
 
 The pivotal detail: AlexNet's learning algorithm was essentially the one from 1986. What changed was scale — a thousand times more training data and GPUs that could do the arithmetic fast enough. The algorithm had been waiting 26 years for the hardware.
 
