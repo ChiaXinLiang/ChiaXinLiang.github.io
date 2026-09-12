@@ -7,21 +7,9 @@ import { SITE_DESCRIPTION, SERIES } from '../../consts';
 import { getCollection } from 'astro:content';
 
 const all = (await getCollection('blog')).sort(
-	(a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf(),
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
-
-// Group a series' posts by topic, preserving first-seen order
-function byTopic(seriesId: string) {
-	const posts = all.filter((p) => p.data.series === seriesId);
-	const topics = new Map<string, typeof posts>();
-	for (const p of posts) {
-		const t = p.data.topic ?? 'Other';
-		if (!topics.has(t)) topics.set(t, []);
-		topics.get(t)!.push(p);
-	}
-	return topics;
-}
-
+const countBySeries = (id: string) => all.filter((p) => p.data.series === id).length;
 const unclassified = all.filter((p) => !p.data.series);
 ---
 
@@ -30,33 +18,57 @@ const unclassified = all.filter((p) => !p.data.series);
 	<head>
 		<BaseHead title="Blog" description={SITE_DESCRIPTION} />
 		<style>
-			.series {
-				margin-bottom: 3rem;
-				scroll-margin-top: 2rem;
+			.series-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 1.5rem;
+				margin: 2rem 0 3rem;
 			}
-			.series > h2 {
-				margin-bottom: 0.25rem;
+			@media (max-width: 720px) {
+				.series-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+			.series-card {
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 12px;
+				padding: 1.5rem 1.75rem;
+				text-decoration: none;
+				display: block;
+				transition: box-shadow 0.2s ease, transform 0.2s ease;
+			}
+			.series-card:hover {
+				box-shadow: var(--box-shadow);
+				transform: translateY(-2px);
+			}
+			.series-card h2 {
+				margin: 0 0 0.4rem;
+				font-size: 1.4em;
+				color: rgb(var(--black));
 			}
 			.level {
 				display: inline-block;
 				font-size: 0.75em;
 				font-weight: 700;
+				letter-spacing: 0.02em;
 				color: var(--accent);
+				margin-bottom: 0.5rem;
 			}
-			.tagline {
+			.series-card p {
+				margin: 0;
+				font-size: 0.95em;
 				color: rgb(var(--gray));
-				margin: 0.25rem 0 1rem;
 			}
-			.topic h3 {
-				font-size: 1.05em;
-				margin: 1rem 0 0.4rem;
+			.count {
+				margin-top: 0.75rem !important;
+				font-weight: 600;
+				color: rgb(var(--gray-dark)) !important;
 			}
-			ul {
+			.notes ul {
 				list-style: none;
 				padding: 0;
-				margin: 0;
 			}
-			li {
+			.notes li {
 				margin-bottom: 0.45rem;
 			}
 			.date {
@@ -64,49 +76,31 @@ const unclassified = all.filter((p) => !p.data.series);
 				font-size: 0.85em;
 				margin-left: 0.5rem;
 			}
-			.empty {
-				color: rgb(var(--gray));
-				font-style: italic;
-			}
 		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
 			<h1>Blog</h1>
-			{
-				SERIES.map((s) => {
-					const topics = byTopic(s.id);
-					return (
-						<section class="series" id={s.id}>
-							<h2>{s.name}</h2>
+			<p>Pick a series — each one is a sequenced set of articles you can read in order.</p>
+			<div class="series-grid">
+				{
+					SERIES.map((s) => (
+						<a class="series-card" href={`/series/${s.id}/`}>
 							<span class="level">{s.level}</span>
-							<p class="tagline">{s.tagline}</p>
-							{topics.size === 0 && <p class="empty">First articles landing soon — this series is in production.</p>}
-							{[...topics.entries()].map(([topic, list]) => (
-								<div class="topic">
-									<h3>{topic}</h3>
-									<ul>
-										{list.map((post) => (
-											<li>
-												<a href={`/blog/${post.id}/`}>{post.data.title}</a>
-												<span class="date">
-													<FormattedDate date={post.data.pubDate} />
-												</span>
-											</li>
-										))}
-									</ul>
-								</div>
-							))}
-						</section>
-					);
-				})
-			}
+							<h2>{s.name}</h2>
+							<p>{s.tagline}</p>
+							<p class="count">
+								{countBySeries(s.id)} article{countBySeries(s.id) === 1 ? '' : 's'} →
+							</p>
+						</a>
+					))
+				}
+			</div>
 			{
 				unclassified.length > 0 && (
-					<section class="series" id="notes">
+					<section class="notes">
 						<h2>Notes</h2>
-						<p class="tagline">Meta posts and everything that doesn't fit a series.</p>
 						<ul>
 							{unclassified.map((post) => (
 								<li>

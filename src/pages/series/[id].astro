@@ -1,0 +1,104 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { SERIES } from '../../consts';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+	return SERIES.map((s) => ({ params: { id: s.id } }));
+}
+
+const { id } = Astro.params;
+const series = SERIES.find((s) => s.id === id)!;
+const posts = (await getCollection('blog'))
+	.filter((p) => p.data.series === id)
+	.sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+
+// Group by topic, preserving first-seen (reading) order
+const topics = new Map<string, typeof posts>();
+for (const p of posts) {
+	const t = p.data.topic ?? 'Other';
+	if (!topics.has(t)) topics.set(t, []);
+	topics.get(t)!.push(p);
+}
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={series.name} description={series.tagline} />
+		<style>
+			.crumb {
+				font-size: 0.9em;
+			}
+			.level {
+				display: inline-block;
+				font-size: 0.8em;
+				font-weight: 700;
+				color: var(--accent);
+			}
+			h1 {
+				margin: 0.2em 0 0.3em;
+			}
+			.tagline {
+				color: rgb(var(--gray));
+				margin-bottom: 2rem;
+			}
+			.topic {
+				margin-bottom: 1.75rem;
+			}
+			.topic h3 {
+				font-size: 1.1em;
+				margin-bottom: 0.5rem;
+				border-bottom: 1px solid rgb(var(--gray-light));
+				padding-bottom: 0.3rem;
+			}
+			.topic ol {
+				padding-left: 1.4rem;
+				margin: 0;
+			}
+			.topic li {
+				margin-bottom: 0.45rem;
+			}
+			.date {
+				color: rgb(var(--gray));
+				font-size: 0.85em;
+				margin-left: 0.5rem;
+			}
+			.empty {
+				color: rgb(var(--gray));
+				font-style: italic;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<p class="crumb"><a href="/blog/">← All series</a></p>
+			<span class="level">{series.level}</span>
+			<h1>{series.name}</h1>
+			<p class="tagline">{series.tagline}</p>
+			{posts.length === 0 && <p class="empty">First articles landing soon — this series is in production.</p>}
+			{
+				[...topics.entries()].map(([topic, list]) => (
+					<section class="topic">
+						<h3>{topic}</h3>
+						<ol>
+							{list.map((post) => (
+								<li>
+									<a href={`/blog/${post.id}/`}>{post.data.title}</a>
+									<span class="date">
+										<FormattedDate date={post.data.pubDate} />
+									</span>
+								</li>
+							))}
+						</ol>
+					</section>
+				))
+			}
+		</main>
+		<Footer />
+	</body>
+</html>
