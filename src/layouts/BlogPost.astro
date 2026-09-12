@@ -6,9 +6,15 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 
-type Props = CollectionEntry<'blog'>['data'] & { readingMinutes?: number };
+type NavLink = { href: string; title: string };
+type Props = CollectionEntry<'blog'>['data'] & {
+	readingMinutes?: number;
+	prev?: NavLink;
+	next?: NavLink;
+};
 
-const { title, description, pubDate, updatedDate, heroImage, readingMinutes } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, readingMinutes, prev, next } =
+	Astro.props;
 ---
 
 <html lang="en">
@@ -79,9 +85,75 @@ const { title, description, pubDate, updatedDate, heroImage, readingMinutes } = 
 						<hr />
 					</div>
 					<slot />
+					{
+						(prev || next) && (
+							<nav class="post-nav">
+								{prev ? (
+									<a class="nav-card prev" href={prev.href}>
+										<span class="dir">← Previous</span>
+										<span class="nav-title">{prev.title}</span>
+									</a>
+								) : (
+									<span />
+								)}
+								{next ? (
+									<a class="nav-card next" href={next.href}>
+										<span class="dir">Next →</span>
+										<span class="nav-title">{next.title}</span>
+									</a>
+								) : (
+									<span />
+								)}
+							</nav>
+						)
+					}
 				</div>
 			</article>
 		</main>
 		<Footer />
 	</body>
 </html>
+
+<style>
+	.post-nav {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		margin-top: 3rem;
+		border-top: 1px solid rgb(var(--gray-light));
+		padding-top: 1.5rem;
+	}
+	.nav-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 10px;
+		padding: 0.9rem 1.1rem;
+		text-decoration: none;
+		transition: box-shadow 0.2s ease;
+	}
+	.nav-card:hover {
+		box-shadow: var(--box-shadow);
+	}
+	.nav-card.next {
+		text-align: right;
+	}
+	.dir {
+		font-size: 0.8em;
+		font-weight: 700;
+		color: var(--accent);
+	}
+	.nav-title {
+		font-size: 0.95em;
+		color: rgb(var(--gray-dark));
+	}
+	@media (max-width: 720px) {
+		.post-nav {
+			grid-template-columns: 1fr;
+		}
+		.nav-card.next {
+			text-align: left;
+		}
+	}
+</style>

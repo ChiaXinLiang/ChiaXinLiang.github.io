@@ -13,12 +13,20 @@ type Props = CollectionEntry<'posts'>;
 
 const post = Astro.props;
 const { Content } = await render(post);
+const all = (await getCollection('posts')).sort(
+	(a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf(),
+);
+const idx = all.findIndex((p) => p.id === post.id);
+const prev = idx > 0 ? all[idx - 1] : undefined;
+const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : undefined;
 ---
 
 <BlogPost
 	title={post.data.title}
 	description={post.data.description ?? post.data.title}
 	pubDate={post.data.pubDate}
+	prev={prev && { href: `/posts/${prev.id}/`, title: prev.data.title }}
+	next={next && { href: `/posts/${next.id}/`, title: next.data.title }}
 >
 	<Content />
 </BlogPost>

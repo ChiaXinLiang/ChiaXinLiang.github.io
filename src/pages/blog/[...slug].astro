@@ -14,8 +14,22 @@ type Props = CollectionEntry<'blog'>;
 const post = Astro.props;
 const { Content } = await render(post);
 const readingMinutes = Math.max(1, Math.round((post.body ?? '').split(/\s+/).length / 200));
+
+// Prev/next within the same series (reading order); non-series posts navigate
+// among other non-series posts chronologically.
+const all = (await getCollection('blog'))
+	.filter((p) => (post.data.series ? p.data.series === post.data.series : !p.data.series))
+	.sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+const idx = all.findIndex((p) => p.id === post.id);
+const prev = idx > 0 ? all[idx - 1] : undefined;
+const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : undefined;
 ---
 
-<BlogPost {...post.data} readingMinutes={readingMinutes}>
+<BlogPost
+	{...post.data}
+	readingMinutes={readingMinutes}
+	prev={prev && { href: `/blog/${prev.id}/`, title: prev.data.title }}
+	next={next && { href: `/blog/${next.id}/`, title: next.data.title }}
+>
 	<Content />
 </BlogPost>
