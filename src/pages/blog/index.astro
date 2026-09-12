@@ -1,113 +1,125 @@
 ---
-import { Image } from 'astro:assets';
-import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { SITE_DESCRIPTION, SERIES } from '../../consts';
+import { getCollection } from 'astro:content';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+const all = (await getCollection('blog')).sort(
+	(a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf(),
 );
+
+// Group a series' posts by topic, preserving first-seen order
+function byTopic(seriesId: string) {
+	const posts = all.filter((p) => p.data.series === seriesId);
+	const topics = new Map<string, typeof posts>();
+	for (const p of posts) {
+		const t = p.data.topic ?? 'Other';
+		if (!topics.has(t)) topics.set(t, []);
+		topics.get(t)!.push(p);
+	}
+	return topics;
+}
+
+const unclassified = all.filter((p) => !p.data.series);
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<BaseHead title="Blog" description={SITE_DESCRIPTION} />
 		<style>
-			main {
-				width: 960px;
+			.series {
+				margin-bottom: 3rem;
+				scroll-margin-top: 2rem;
+			}
+			.series > h2 {
+				margin-bottom: 0.25rem;
+			}
+			.level {
+				display: inline-block;
+				font-size: 0.75em;
+				font-weight: 700;
+				color: var(--accent);
+			}
+			.tagline {
+				color: rgb(var(--gray));
+				margin: 0.25rem 0 1rem;
+			}
+			.topic h3 {
+				font-size: 1.05em;
+				margin: 1rem 0 0.4rem;
 			}
 			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
+				list-style: none;
 				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
 				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
+			}
+			li {
+				margin-bottom: 0.45rem;
 			}
 			.date {
-				margin: 0;
 				color: rgb(var(--gray));
+				font-size: 0.85em;
+				margin-left: 0.5rem;
 			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
+			.empty {
+				color: rgb(var(--gray));
+				font-style: italic;
 			}
 		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<Image width={720} height={360} src={post.data.heroImage} alt="" />
-									)}
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
+			<h1>Blog</h1>
+			{
+				SERIES.map((s) => {
+					const topics = byTopic(s.id);
+					return (
+						<section class="series" id={s.id}>
+							<h2>{s.name}</h2>
+							<span class="level">{s.level}</span>
+							<p class="tagline">{s.tagline}</p>
+							{topics.size === 0 && <p class="empty">First articles landing soon — this series is in production.</p>}
+							{[...topics.entries()].map(([topic, list]) => (
+								<div class="topic">
+									<h3>{topic}</h3>
+									<ul>
+										{list.map((post) => (
+											<li>
+												<a href={`/blog/${post.id}/`}>{post.data.title}</a>
+												<span class="date">
+													<FormattedDate date={post.data.pubDate} />
+												</span>
+											</li>
+										))}
+									</ul>
+								</div>
+							))}
+						</section>
+					);
+				})
+			}
+			{
+				unclassified.length > 0 && (
+					<section class="series" id="notes">
+						<h2>Notes</h2>
+						<p class="tagline">Meta posts and everything that doesn't fit a series.</p>
+						<ul>
+							{unclassified.map((post) => (
+								<li>
+									<a href={`/blog/${post.id}/`}>{post.data.title}</a>
+									<span class="date">
 										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
+									</span>
+								</li>
+							))}
+						</ul>
+					</section>
+				)
+			}
 		</main>
 		<Footer />
 	</body>

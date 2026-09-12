@@ -89,7 +89,7 @@ const countBySeries = (id: string) => posts.filter((p) => p.data.series === id).
 				<div class="series-grid">
 					{
 						SERIES.map((s) => (
-							<a class="series-card" href={`/series/${s.id}/`}>
+							<a class="series-card" href={`/blog#${s.id}`}>
 								<span class="level">{s.level}</span>
 								<h3>{s.name}</h3>
 								<p>{s.tagline}</p>
