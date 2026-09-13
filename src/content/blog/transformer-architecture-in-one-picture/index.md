@@ -68,6 +68,18 @@ The 2017 original had two towers (an encoder reading the source sentence, a deco
 
 That "only look backward" rule, called causal masking, has a huge practical consequence: past tokens' computations can be cached and reused while generating — the KV cache that dominates the serving economics covered in [the performance series](/blog/goodput-vs-utilization/).
 
+## What's changed since 2017 (and what hasn't)
+
+If the blueprint is eight years old, is the picture above out of date? Remarkably little. Modern models (Llama-class, DeepSeek-class) still run the same confer-digest stack; the deltas are refinements you can now name in one line each:
+
+- **Positions**: fixed sine-wave stamps gave way to *rotary embeddings* (RoPE), which encode relative distance and extrapolate better to long contexts
+- **Normalization**: moved *before* each sub-layer (pre-norm) and simplified (RMSNorm) — deep stacks train more stably
+- **Feed-forward**: gated variants (SwiGLU) squeeze more capability per weight
+- **Attention**: grouped-query and latent variants (GQA, [DeepSeek's MLA](/blog/blackwell-to-rubin-memory-math/)) shrink the KV cache that serving pays for
+- **The biggest fork — Mixture of Experts**: replace each block's feed-forward with many parallel "experts" and route each token to a couple of them. A 1T-parameter MoE might activate only ~32B weights per token — capability of the full library, compute bill of a branch visit
+
+Every one of these is an *efficiency* edit — same blueprint, lower cost per unit of capability. That's worth noticing: post-2017 architecture research has largely been performance engineering wearing a research hat, which is exactly why this blog runs [a whole series on the co-design between models and silicon](/blog/blackwell-to-rubin-memory-math/).
+
 ## Takeaway
 
 - The Transformer is one block — attention (tokens confer) + feed-forward (tokens digest), with residuals and normalization — stacked N times. GPT-3 is 96 of them.

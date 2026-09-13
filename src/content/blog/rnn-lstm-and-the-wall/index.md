@@ -74,6 +74,14 @@ By 2017, both flaws were biting at once: memory still degraded over long ranges 
 
 That architecture is the next article. It's called attention.
 
+## The bridge era: attention was born inside RNNs
+
+One historical beat usually gets skipped, and it makes the next article land better: **attention was invented as a patch for RNNs**, three years before it replaced them.
+
+The setting was 2014 translation systems, which worked by having one LSTM squeeze the entire source sentence into a single fixed vector, and a second LSTM unfold the translation from it. That one-vector bottleneck strangled long sentences — imagine summarizing a 60-word German sentence into one fixed-size code, then translating from the summary alone. [Bahdanau, Cho, and Bengio's fix](https://arxiv.org/abs/1409.0473) was to let the translating LSTM *look back* at every source word at every step, weighting them by learned relevance — attention, in its original supporting role. Translation quality on long sentences jumped immediately.
+
+For three years the field ran hybrids: recurrence for the backbone, attention for the long-range lookups. The 2017 insight was noticing which half was pulling the weight. If attention handles the relationships, what exactly is the recurrence *for*? Delete it, keep attention, and the sequential wall goes with it — the title "Attention Is All You Need" is literally a verdict on this question. Architecture history rarely moves in clean breaks; the revolution shipped as a bug-fix first.
+
 ## Takeaway
 
 - RNNs read sequences with a running memory (hidden state) — one cell, reused across time. It made machines competent at language for two decades.

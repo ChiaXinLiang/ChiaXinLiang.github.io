@@ -81,6 +81,19 @@ This is the architecture-meets-hardware moment this series keeps circling. [CNNs
 
 One honest cost, which becomes a running theme in the performance series: all-pairs comparison means the work grows with the *square* of the sequence length. Double the document, quadruple the attention compute. Much of modern LLM engineering — from FlashAttention to sparse attention — is the industry negotiating with that square. ([The KV cache](/blog/goodput-vs-utilization/), a serving-side consequence, gets its own article later.)
 
+## The square, priced in numbers
+
+"Grows with the square" deserves a table, because the practical consequences are wild:
+
+| context length | attention pairs | relative cost |
+|---|---|---|
+| 1,000 tokens | 1 million | 1× |
+| 10,000 tokens | 100 million | 100× |
+| 100,000 tokens | 10 billion | 10,000× |
+| 1M tokens (today's frontier claims) | 1 trillion | 1,000,000× |
+
+A 100× longer document costs 10,000× the attention compute — and the keys and values that must sit in GPU memory for the lookup grow linearly too, which is the [KV cache's memory bill](/blog/goodput-vs-utilization/). This single table explains an enormous amount of the modern landscape: why long-context pricing is premium, why papers on linear attention and state-space hybrids keep coming, why [DeepSeek's sparse attention triggered an API price cut](/blog/blackwell-to-rubin-memory-math/), and why "context window" is a marketing number with a very real cost function behind it. When you meet those topics later in this blog, this is the table they're all negotiating with.
+
 ## Takeaway
 
 - Attention = every token directly scores its relevance to every other token, then takes a weighted average of their content. A lookup, softly blurred.

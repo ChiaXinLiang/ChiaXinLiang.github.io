@@ -90,6 +90,14 @@ CNNs dominated vision for a decade, and they still run in your phone's camera. B
 
 Hold that thought. In a few articles, we'll meet text — where the structure is *"any word can relate to any other word, near or far"* — and see why CNN-style locality fails there, why the recurrent networks of the next article struggled too, and why the architecture that finally fit language's structure ended up conquering everything, images included.
 
+## Why CNNs and GPUs found each other
+
+There's a hardware subplot here that foreshadows this blog's other series. Convolution looks like a bespoke operation, but implementations unroll it into **giant matrix multiplications** — thousands of independent patch-times-filter products with no ordering constraints between them. That's precisely the workload GPUs were built for (originally to shade millions of independent pixels for games).
+
+The numbers behind the 2012 moment: AlexNet trained on **two consumer GTX 580 gaming cards** (~$500 each) for about six days. The authors estimated the same run on the CPUs of the day would have taken months — long enough that nobody would have bothered iterating. The experiment only became *runnable* because an architecture whose core op was embarrassingly parallel met a mass-market chip built for embarrassingly parallel math. Neither was designed for the other; the fit was luck, then strategy. NVIDIA noticed what its gaming chips were being used for, invested in CUDA and cuDNN for neural workloads, and a graphics company became the most valuable AI company on earth.
+
+Keep this pattern; it's the thesis of the [Efficient AI series](/blog/blackwell-to-rubin-memory-math/): **architectures win when they fit the hardware of their moment, and hardware evolves toward the architectures that win.** CNNs-meet-GPUs was the first round. Transformers-meet-tensor-cores was the second. Whatever wins next will fit the silicon of 2030.
+
 ## Takeaway
 
 - Plain networks waste millions of weights on images and re-learn every pattern per location; CNNs fix both with one move — a small filter slid across the whole image.
