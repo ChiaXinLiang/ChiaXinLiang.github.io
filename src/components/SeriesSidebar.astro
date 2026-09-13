@@ -1,12 +1,11 @@
 ---
 import { getCollection } from 'astro:content';
 import { SERIES } from '../consts';
+import { publishedSeriesOrder } from '../lib/published-series';
 interface Props { seriesId: string; currentId: string; }
 const { seriesId, currentId } = Astro.props;
 const series = SERIES.find((item) => item.id === seriesId);
-const posts = (await getCollection('blog'))
-  .filter((post) => post.data.series === seriesId)
-  .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999) || a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+const posts = publishedSeriesOrder((await getCollection('blog')).filter(post => post.data.series === seriesId));
 const topics = new Map<string, typeof posts>();
 for (const post of posts) {
   const topic = post.data.topic ?? 'Other';
@@ -28,7 +27,7 @@ for (const post of posts) {
               {list.map((post) => (
                 <li>
                   <a href={`/blog/${post.id}/`} aria-current={post.id === currentId ? 'page' : undefined}>
-                    <span class="article-number" aria-hidden="true">{post.data.order ?? posts.indexOf(post) + 1}.</span>
+                    <span class="article-number" aria-hidden="true">{posts.indexOf(post) + 1}.</span>
                     <span>{post.data.title}</span>
                   </a>
                 </li>

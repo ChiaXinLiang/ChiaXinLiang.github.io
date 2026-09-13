@@ -4,14 +4,15 @@ import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import { SERIES } from '../../consts';
 import { getCollection } from 'astro:content';
+import { publishedSeriesOrder } from '../../lib/published-series';
 export async function getStaticPaths() { const posts = await getCollection('blog'); return SERIES.filter(s => posts.some(p => p.data.series === s.id)).map(s => ({ params: { id: s.id } })); }
 const { id } = Astro.params;
 const series = SERIES.find(s => s.id === id)!;
-const posts = (await getCollection('blog')).filter(p => p.data.series === id);
+const posts = publishedSeriesOrder((await getCollection('blog')).filter(p => p.data.series === id));
 const total = posts.length;
 if (total > 30) throw new Error(`${id} exceeds the 30-article curriculum limit (${total}).`);
 const entries = [
-  ...posts.map(p => ({ title: p.data.title, topic: p.data.topic ?? 'Other', order: p.data.order ?? 999, href: `/blog/${p.id}/` })),
+  ...posts.map((p, index) => ({ title: p.data.title, topic: p.data.topic ?? 'Other', order: index + 1, href: `/blog/${p.id}/` })),
 ].sort((a,b) => a.order-b.order);
 const topics = [...new Set(entries.map(p => p.topic))];
 ---
