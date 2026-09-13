@@ -1,6 +1,6 @@
 ---
 title: "Distillation 1: Teacher\u2013Student Objectives and Temperature"
-description: "Distillation 1: Teacher\u2013Student Objectives and Temperature. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "Knowledge distillation trains a student using information produced by a teacher."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"

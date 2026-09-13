@@ -155,6 +155,12 @@ Floating-point operations do not have perfect real-number associativity. Combini
 
 This distinction also helps debugging. Large or structured differences can indicate wrong gate order, missing reset, or incorrect chunk boundaries. Small differences that grow gradually can instead reflect accumulation order. Establish the reference and tolerance before declaring either pattern harmless.
 
+## 15. Connect dynamics to scan execution
+
+The affine composition perspective helps explain how a content-dependent recurrence can expose whole-sequence parallelism while retaining a state for incremental generation. It also makes the assumptions visible: the transition representation must support affordable composition, temporal order must be preserved, and chunk boundaries must carry the correct initial state.
+
+Study [state-space dynamics and discretization](/blog/state-space-models-dynamics-discretization/) for the continuous-to-discrete foundation, then [scans, recurrence, and hybrids](/blog/state-space-execution-scans-recurrence-hybrids/) for execution. These foundations do not make every recurrent rule identical to Mamba or establish equal task quality. They explain which algebraic structure and state-management contract need verification before a backend comparison.
+
 ## Sources
 
 - [Gated Delta Networks: Improving Mamba2 with Delta Rule](https://arxiv.org/abs/2412.06464).

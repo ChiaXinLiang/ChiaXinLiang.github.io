@@ -1,6 +1,6 @@
 ---
 title: "Quantization 1: Scales, Clipping, Calibration, and Error"
-description: "Quantization 1: Scales, Clipping, Calibration, and Error. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "Quantization represents numerical values using a restricted set of codes and a rule for reconstruction."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"

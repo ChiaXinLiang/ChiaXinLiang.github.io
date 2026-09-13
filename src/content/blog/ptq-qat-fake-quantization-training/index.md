@@ -1,6 +1,6 @@
 ---
 title: "Quantization 2: PTQ, QAT, and Fake-Quantized Training"
-description: "Quantization 2: PTQ, QAT, and Fake-Quantized Training. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "Post-training quantization prepares a trained model for a lower-precision execution path."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"

@@ -20,7 +20,7 @@ The examples below are arithmetic illustrations rather than measured results. Ef
 
 ## 1. Convert the units before doing any performance arithmetic
 
-![Section overview: Bandwidth, Latency, and the Communication Cost Model. Define the message; Model one transfer; Add the communication schedule; Locate exposed time](./section-overview.svg)
+![Section overview: Bandwidth, Latency, and the Communication Cost Model. Define the message; Model one transfer; Add the communication schedule; Locate exposed time](./section-overview.png)
 
 *The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
 

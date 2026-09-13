@@ -1,6 +1,6 @@
 ---
 title: "Efficiency Objectives: Accuracy, Latency, Memory, and Pareto Tradeoffs"
-description: "Efficiency Objectives: Accuracy, Latency, Memory, and Pareto Tradeoffs. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "An efficient model is useful only in relation to a task and an operating environment."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"

@@ -166,6 +166,12 @@ For a useful report, give the task count, success definition, budget, uncertaint
 
 For regression tracking, retain exact prompts, answer checks, and policy settings where publication permits. A changed verifier or token budget can alter results even when the checkpoint is unchanged. Versioning those components makes later comparisons reproducible.
 
+## 15. Distinguish adaptation and imitation objectives
+
+Supervised post-training can use original labels or teacher-produced targets, but those target populations carry different information. [Probability distillation](/blog/distillation-temperature-teacher-student/) derives the temperature-scaled KL objective, while [feature and sequence distillation](/blog/distillation-features-data-deployment/) explains alignment and target-selection bias.
+
+[LoRA](/blog/lora-low-rank-updates-memory/) and [QLoRA](/blog/qlora-quantized-base-adapter-numerics/) change trainable state and base representation rather than defining a reward or reasoning objective. Record the loss, data, parameterization, and inference policy separately. That distinction prevents reduced adaptation memory from being interpreted as reduced reasoning-token cost or an independently established task-quality improvement.
+
 ## Sources
 
 - [DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning](https://arxiv.org/abs/2501.12948).

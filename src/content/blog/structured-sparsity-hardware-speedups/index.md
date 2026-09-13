@@ -1,6 +1,6 @@
 ---
 title: "Pruning 2: Structured Sparsity and Real Hardware Speedups"
-description: "Pruning 2: Structured Sparsity and Real Hardware Speedups. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "Pruning can remove many parameters without producing a faster deployment."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"

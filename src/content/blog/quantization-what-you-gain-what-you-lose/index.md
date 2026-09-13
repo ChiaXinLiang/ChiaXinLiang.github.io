@@ -102,6 +102,12 @@ The frontier is below 4 bits and beyond weights: FP4 KV caches, quantization-awa
 - Weight-only quantization (GPTQ, AWQ) buys bandwidth and capacity but not arithmetic speed; weight+activation (FP8, SmoothQuant) buys tensor-core throughput for prefill; KV-cache quantization buys batch size. Pick per bottleneck, not by fashion.
 - Quality loss is sequential, not average: flat perplexity can hide real accuracy drops on long reasoning chains, so evaluate low-bit configs at your actual generation lengths.
 
+## Method foundations and controlled selection
+
+The preparation mechanisms deserve separate derivations. [Scales, clipping, and calibration](/blog/quantization-scales-clipping-calibration/) explains the finite-grid error tradeoff. [GPTQ, AWQ, and SmoothQuant](/blog/gptq-awq-smoothquant-mechanisms/) distinguishes compensation from activation-aware protection and range migration. [PTQ and QAT](/blog/ptq-qat-fake-quantization-training/) separates fixed preparation from learning through a simulated grid.
+
+When one format harms selected layers, [mixed-precision allocation](/blog/mixed-precision-layer-sensitivity-budget/) connects sensitivity to a discrete budget. Evaluate the complete exported artifact: local reconstruction is a surrogate, and the supported packing and kernels determine execution. These foundations explain why a nominal bit width cannot specify either quality or latency by itself.
+
 ## Sources
 
 - Frantar, Ashkboos, Hoefler, Alistarh — *GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers* (2022): https://arxiv.org/abs/2210.17323

@@ -1,6 +1,6 @@
 ---
 title: "QLoRA: Quantized Base Weights and Adapter Numerics"
-description: "QLoRA: Quantized Base Weights and Adapter Numerics. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "QLoRA combines a frozen quantized base with trainable low-rank adapters."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"

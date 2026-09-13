@@ -177,6 +177,12 @@ Finally preserve the conclusion's scope. A measured advantage on one device and 
 
 This audit turns a headline into a testable chain: disclosed mechanism, predicted resource effect, observed execution, and validated task behavior. Each link can be examined independently. The chain is a useful standard for the entire series because it makes architectural innovation concrete while keeping uncertainty and workload dependence visible.
 
+## 17. Separate compressed preparation from architecture
+
+Distillation, low-rank adaptation, and quantization can change the prepared artifact without defining the original architecture. A fair comparison records those changes alongside the disclosed structure and numerical backend. In particular, a low trainable-parameter count does not establish low inference cost, and a small payload does not establish a smaller context state.
+
+The [compression experiment guide](/blog/compression-experiment-quality-deployment/) develops this separation through controlled candidates and a quality-resource frontier. For the theoretical mechanisms, compare [LoRA's factorized update](/blog/lora-low-rank-updates-memory/) with [teacher/student distillation](/blog/distillation-temperature-teacher-student/). Their preparation interfaces and deployed execution differ even when both are described broadly as efficient model methods.
+
 ## Sources
 
 - [Official gpt-oss repository](https://github.com/openai/gpt-oss).

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img">
+<title>Architecture shapes must fit the execution system</title>
+<rect width="1400" height="1000" fill="#f7fbff"/>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#367bb5"/></marker></defs>
+<text x="50" y="58" text-anchor="start" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17334a">Architecture shapes must fit the execution system</text>
+<text x="50" y="100" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536579">FLOPs describe useful arithmetic; tile utilization, memory, and boundaries affect latency</text>
+<text x="85" y="195" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#17334a">65 columns: spills into a second tile</text>
+<rect x="100" y="245" width="410" height="180" rx="10" fill="#b7d7f2" stroke="#367bb5" stroke-width="2"/>
+<rect x="520" y="245" width="410" height="180" rx="10" fill="#ecf1f7" stroke="#c8d7e5" stroke-width="2"/>
+<rect x="520" y="245" width="7" height="180" rx="0" fill="#14a6a0" stroke="none" stroke-width="2"/>
+<text x="1000" y="295" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#17334a">Tile width: 64</text>
+<text x="1000" y="345" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#17334a">1 useful edge column</text>
+<text x="85" y="485" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#17334a">64 columns: one full tile</text>
+<rect x="100" y="525" width="410" height="180" rx="10" fill="#14a6a0" stroke="none" stroke-width="2"/>
+<text x="130" y="625" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#17334a">Same kernel assumption</text>
+<path d="M660 740L1240 740" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<path d="M660 740L660 510" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<path d="M680 720L950 570" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M950 570L1200 570" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<text x="820" y="545" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Compute ceiling</text>
+<text x="740" y="690" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Bandwidth × intensity</text>
+<text x="870" y="780" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Arithmetic intensity →</text>
+<rect x="50" y="815" width="1300" height="145" rx="10" fill="#fff8dc" stroke="#d4b359" stroke-width="2"/>
+<text x="75" y="852" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">The tile example is conceptual; actual kernels can mask edges or select specialized schedules.</text>
+<text x="75" y="883" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Fewer mathematical operations need not remove a tile or a graph boundary.</text>
+<text x="75" y="914" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Measure complete quality and execution under the target device, backend, and workload.</text>
+</svg>

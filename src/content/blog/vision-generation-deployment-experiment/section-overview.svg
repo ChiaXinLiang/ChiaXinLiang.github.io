@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img">
+<title>Useful generation depends on quality and the whole pipeline</title>
+<rect width="1400" height="1000" fill="#f7fbff"/>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#367bb5"/></marker></defs>
+<text x="50" y="58" text-anchor="start" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17334a">Useful generation depends on quality and the whole pipeline</text>
+<text x="50" y="100" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536579">A faster attempt can be less useful if fidelity falls or retries increase</text>
+<text x="85" y="190" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#17334a">Illustrative pipeline time composition</text>
+<text x="85" y="300" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="400" fill="#17334a">Baseline</text>
+<rect x="345" y="260" width="64" height="70" rx="10" fill="#91c5ee" stroke="none" stroke-width="2"/>
+<rect x="409" y="260" width="640" height="70" rx="10" fill="#14a6a0" stroke="none" stroke-width="2"/>
+<rect x="1049" y="260" width="96" height="70" rx="10" fill="#de7d58" stroke="none" stroke-width="2"/>
+<text x="85" y="435" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="400" fill="#17334a">Faster denoising</text>
+<rect x="345" y="395" width="64" height="70" rx="10" fill="#91c5ee" stroke="none" stroke-width="2"/>
+<rect x="409" y="395" width="160" height="70" rx="10" fill="#14a6a0" stroke="none" stroke-width="2"/>
+<rect x="569" y="395" width="96" height="70" rx="10" fill="#de7d58" stroke="none" stroke-width="2"/>
+<text x="350" y="520" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="400" fill="#17334a">Condition encoding / repeated prediction / decoding</text>
+<rect x="85" y="605" width="555" height="155" rx="10" fill="#e4f2ff" stroke="#367bb5" stroke-width="2"/>
+<text x="110" y="650" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#17334a">Distributional similarity</text>
+<text x="110" y="705" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Feature mean + covariance ≠ every task</text>
+<rect x="740" y="605" width="570" height="155" rx="10" fill="#e6f5ee" stroke="#14a6a0" stroke-width="2"/>
+<text x="765" y="650" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#17334a">Condition fidelity + usable outputs</text>
+<text x="765" y="705" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Cost per usable output ≈ attempt cost / p</text>
+<rect x="50" y="815" width="1300" height="145" rx="10" fill="#fff8dc" stroke="#d4b359" stroke-width="2"/>
+<text x="75" y="852" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Fixed pipeline stages limit end-to-end speedup even when denoising becomes much cheaper.</text>
+<text x="75" y="883" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Resolution, guidance, sample counts, and selection policy belong in every comparison.</text>
+<text x="75" y="914" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Bars are an illustrative accounting model, not a measured deployment benchmark.</text>
+</svg>

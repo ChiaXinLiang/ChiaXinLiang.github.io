@@ -1,6 +1,6 @@
 ---
 title: "Distillation 2: Features, Data, and Deployment Tradeoffs"
-description: "Distillation 2: Features, Data, and Deployment Tradeoffs. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "Matching teacher probabilities is one way to distill a model."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"

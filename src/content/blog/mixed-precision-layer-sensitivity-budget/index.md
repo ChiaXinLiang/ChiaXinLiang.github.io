@@ -1,6 +1,6 @@
 ---
 title: "Mixed Precision: Layer Sensitivity and a Deployment Budget"
-description: "Mixed Precision: Layer Sensitivity and a Deployment Budget. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "Mixed precision treats numerical representation as a resource allocation problem."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"

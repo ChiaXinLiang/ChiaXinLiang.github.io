@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img">
+<title>Pruning removes regions; merging summarizes related regions</title>
+<rect width="1400" height="1000" fill="#f7fbff"/>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#367bb5"/></marker></defs>
+<text x="50" y="58" text-anchor="start" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17334a">Pruning removes regions; merging summarizes related regions</text>
+<text x="50" y="100" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536579">Token size and spatial correspondence explain what a reduction preserves</text>
+<text x="90" y="200" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#17334a">Original patch tokens</text>
+<rect x="90" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="138" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="186" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="234" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="282" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="330" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="90" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="138" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="186" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="234" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="282" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="330" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="90" y="366" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="138" y="366" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="186" y="366" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="234" y="366" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="282" y="366" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="330" y="366" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="90" y="414" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="138" y="414" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="186" y="414" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="234" y="414" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="282" y="414" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="330" y="414" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="90" y="462" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="138" y="462" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="186" y="462" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="234" y="462" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="282" y="462" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="330" y="462" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="90" y="510" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="138" y="510" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="186" y="510" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="234" y="510" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="282" y="510" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="330" y="510" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<text x="520" y="200" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#17334a">Pruned selection</text>
+<rect x="520" y="270" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="568" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="616" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="664" y="270" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="712" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="760" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="520" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="568" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="616" y="318" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="664" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="712" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="760" y="318" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="520" y="366" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="568" y="366" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="616" y="366" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="664" y="366" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="712" y="366" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="760" y="366" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="520" y="414" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="568" y="414" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="616" y="414" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="664" y="414" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="712" y="414" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="760" y="414" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="520" y="462" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="568" y="462" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="616" y="462" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="664" y="462" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="712" y="462" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="760" y="462" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="520" y="510" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="568" y="510" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="616" y="510" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="664" y="510" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="712" y="510" width="46" height="46" rx="1" fill="#ecf1f7" stroke="white" stroke-width="2"/>
+<rect x="760" y="510" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<text x="950" y="200" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#17334a">Merged representation</text>
+<rect x="950" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="998" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="1046" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="1094" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="1142" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="1190" y="270" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="950" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="998" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="1046" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="1094" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="1142" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="1190" y="318" width="46" height="46" rx="1" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<rect x="950" y="366" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="998" y="366" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="1046" y="366" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="1094" y="366" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="1142" y="366" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="1190" y="366" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="950" y="414" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="998" y="414" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="1046" y="414" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="1094" y="414" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="1142" y="414" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="1190" y="414" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="950" y="462" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="998" y="462" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="1046" y="462" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="1094" y="462" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="1142" y="462" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="1190" y="462" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="950" y="510" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="998" y="510" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="1046" y="510" width="46" height="46" rx="1" fill="#d5bc7b" stroke="white" stroke-width="2"/>
+<rect x="1094" y="510" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="1142" y="510" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="1190" y="510" width="46" height="46" rx="1" fill="#547f43" stroke="white" stroke-width="2"/>
+<rect x="950" y="270" width="285" height="94" rx="10" fill="#91c5ee" stroke="white" stroke-width="2"/>
+<text x="1040" y="325" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#17334a">size 12</text>
+<rect x="1094" y="366" width="141" height="190" rx="10" fill="#547f43" stroke="white" stroke-width="2"/>
+<text x="1105" y="465" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#17334a">size 12</text>
+<text x="90" y="640" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#17334a">Fixed count ≠ fixed token identities</text>
+<text x="90" y="710" text-anchor="start" font-family="Arial,sans-serif" font-size="28" font-weight="400" fill="#17334a">Merge: h = (s(i)h(i) + s(j)h(j)) / (s(i) + s(j))</text>
+<rect x="50" y="815" width="1300" height="145" rx="10" fill="#fff8dc" stroke="#d4b359" stroke-width="2"/>
+<text x="75" y="852" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Weighted merging tracks how many original patches a token represents.</text>
+<text x="75" y="883" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Similarity selection, gathering, and aggregation cost time; smaller later shapes must save more.</text>
+<text x="75" y="914" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Spatial tasks need correspondence; a logical mask alone need not shrink dense execution.</text>
+</svg>

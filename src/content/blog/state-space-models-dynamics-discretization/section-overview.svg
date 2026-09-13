@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img">
+<title>State-space dynamics connect continuous decay to token memory</title>
+<rect width="1400" height="1000" fill="#f7fbff"/>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#367bb5"/></marker></defs>
+<text x="50" y="58" text-anchor="start" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17334a">State-space dynamics connect continuous decay to token memory</text>
+<text x="50" y="100" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536579">Discretization determines the transition; write and read maps determine accessible information</text>
+<text x="85" y="190" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#17334a">Continuous: dh/dt = Ah + Bu</text>
+<path d="M110 480L635 480" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<path d="M110 480L110 250" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<path d="M130 260.0L153 285.2931990474655" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M153 285.2931990474655L176 307.21931431569567" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M176 307.21931431569567L199 326.22657906909944" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M199 326.22657906909944L222 342.7035568185257" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M222 342.7035568185257L245 356.9870846841789" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M245 356.9870846841789L268 369.36915932137947" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M268 369.36915932137947L291 380.10290617742595" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M291 380.10290617742595L314 389.4077541084456" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M314 389.4077541084456L337 397.4739211403828" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M337 397.4739211403828L360 404.4663030760626" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M360 404.4663030760626L383 410.52784444271583" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M383 410.52784444271583L406 415.782460691889" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M406 415.782460691889L429 420.3375713899655" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M429 420.3375713899655L452 424.2862961850436" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M452 424.2862961850436L475 427.70935844209237" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M475 427.70935844209237L498 430.6767354621969" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M498 430.6767354621969L521 433.2490890211521" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M521 433.2490890211521L544 435.4790054717541" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M544 435.4790054717541L567 437.41207076107025" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M567 437.41207076107025L590 439.08780233915274" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<circle cx="130" cy="260.0" r="7" fill="#de7d58"/>
+<circle cx="222" cy="342.7035568185257" r="7" fill="#de7d58"/>
+<circle cx="314" cy="389.4077541084456" r="7" fill="#de7d58"/>
+<circle cx="406" cy="415.782460691889" r="7" fill="#de7d58"/>
+<circle cx="498" cy="430.6767354621969" r="7" fill="#de7d58"/>
+<circle cx="590" cy="439.08780233915274" r="7" fill="#de7d58"/>
+<text x="100" y="545" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#17334a">Discrete samples depend on Δ and method</text>
+<rect x="790" y="245" width="400" height="250" rx="10" fill="#e4f2ff" stroke="#367bb5" stroke-width="2"/>
+<text x="825" y="300" text-anchor="start" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="#17334a">Retained state h</text>
+<text x="825" y="360" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="400" fill="#17334a">Ā: evolution</text>
+<text x="825" y="415" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="400" fill="#17334a">B̄: write   C: read</text>
+<path d="M670 365L780 365" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="100" y="685" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#17334a">Fixed coefficients → lag-only convolution kernel</text>
+<text x="100" y="745" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#17334a">Input-dependent coefficients → selective recurrence</text>
+<rect x="50" y="815" width="1300" height="145" rx="10" fill="#fff8dc" stroke="#d4b359" stroke-width="2"/>
+<text x="75" y="852" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Zero-order hold uses Ā = exp(ΔA) and an input integral; Euler and bilinear rules differ.</text>
+<text x="75" y="883" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Fixed-system stability requires assumptions; input-dependent products need separate reasoning.</text>
+<text x="75" y="914" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">The decay curve is a conceptual dynamics example, not sequence-model quality evidence.</text>
+</svg>

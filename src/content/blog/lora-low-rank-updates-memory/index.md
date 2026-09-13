@@ -1,6 +1,6 @@
 ---
 title: "LoRA: Low-Rank Updates and Training-State Memory"
-description: "LoRA: Low-Rank Updates and Training-State Memory. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "Low-rank adaptation changes which parameters are trained."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img">
+<title>A sampler approximates a denoising trajectory</title>
+<rect width="1400" height="1000" fill="#f7fbff"/>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#367bb5"/></marker></defs>
+<text x="50" y="58" text-anchor="start" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17334a">A sampler approximates a denoising trajectory</text>
+<text x="50" y="100" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536579">Step count, network evaluations, and numerical error are different quantities</text>
+<path d="M120 720L1270 720" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<path d="M120 720L120 220" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="650" y="775" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="400" fill="#17334a">Integration time →</text>
+<text x="135" y="205" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#17334a">State</text>
+<path d="M150 270.0L175 298.1347901159199" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M175 298.1347901159199L200 324.18651071903236" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M200 324.18651071903236L225 348.30939002917853" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M225 348.30939002917853L250 370.6462373751599" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M250 370.6462373751599L275 391.32928863711356" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M275 391.32928863711356L300 410.48098909324654" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M300 410.48098909324654L325 428.21471830544186" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M325 428.21471830544186L350 444.63546133511704" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M350 444.63546133511704L375 459.8404302629834" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M375 459.8404302629834L400 473.9196396921534" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M400 473.9196396921534L425 486.9564396416187" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M425 486.9564396416187L450 499.02800898486976" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M450 499.02800898486976L475 510.2058123548519" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M475 510.2058123548519L500 520.5560232201724" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M500 520.5560232201724L525 530.1399156371999" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M525 530.1399156371999L550 539.0142269972625" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M550 539.0142269972625L575 547.231493916434" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M575 547.231493916434L600 554.8403632564018" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M600 554.8403632564018L625 561.8858801176868" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M625 561.8858801176868L650 568.409754510155" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M650 568.409754510155L675 574.4506082795318" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M675 574.4506082795318L700 580.0442037517444" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M700 580.0442037517444L725 585.2236554486831" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M725 585.2236554486831L750 590.0196261287564" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M750 590.0196261287564L775 594.4605083128138" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M775 594.4605083128138L800 598.5725923700872" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M800 598.5725923700872L825 602.3802221592279" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M825 602.3802221592279L850 605.9059391458511" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M850 605.9059391458511L875 609.1706158497724" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M875 609.1706158497724L900 612.1935794119538" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M900 612.1935794119538L925 614.9927260126876" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M925 614.9927260126876L950 617.5846268183811" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M950 617.5846268183811L975 619.984626084155" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M975 619.984626084155L1000 622.2069319930317" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M1000 622.2069319930317L1025 624.2647007694884" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M1025 624.2647007694884L1050 626.1701145653328" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M1050 626.1701145653328L1075 627.9344535789927" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M1075 627.9344535789927L1100 629.568162835172" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M1100 629.568162835172L1125 631.0809140202117" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M1125 631.0809140202117L1150 632.4816627392286" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<circle cx="150" cy="270.0" r="12" fill="#de7d58"/>
+<circle cx="400" cy="485.0" r="12" fill="#de7d58"/>
+<path d="M150 270.0L400 485.0" stroke="#de7d58" stroke-width="2" fill="none"/>
+<circle cx="650" cy="592.5" r="12" fill="#de7d58"/>
+<path d="M400 485.0L650 592.5" stroke="#de7d58" stroke-width="2" fill="none"/>
+<circle cx="900" cy="646.25" r="12" fill="#de7d58"/>
+<path d="M650 592.5L900 646.25" stroke="#de7d58" stroke-width="2" fill="none"/>
+<circle cx="1150" cy="673.125" r="12" fill="#de7d58"/>
+<path d="M900 646.25L1150 673.125" stroke="#de7d58" stroke-width="2" fill="none"/>
+<text x="780" y="260" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#14847d">Smooth target trajectory</text>
+<text x="780" y="310" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#b75332">Coarse numerical updates</text>
+<text x="160" y="610" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="400" fill="#17334a">A higher-order step can require</text>
+<text x="160" y="650" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="400" fill="#17334a">several predictor evaluations.</text>
+<rect x="50" y="815" width="1300" height="145" rx="10" fill="#fff8dc" stroke="#d4b359" stroke-width="2"/>
+<text x="75" y="852" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">ODE and SDE samplers use different trajectory constructions; correct time direction matters.</text>
+<text x="75" y="883" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">DPM-Solver exploits the known semilinear structure rather than only a generic order label.</text>
+<text x="75" y="914" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">The curve is conceptual and reports no image-quality or device-timing measurement.</text>
+</svg>

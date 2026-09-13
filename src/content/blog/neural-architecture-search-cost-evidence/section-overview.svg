@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img">
+<title>Architecture search separates exploration from deployment</title>
+<rect width="1400" height="1000" fill="#f7fbff"/>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#367bb5"/></marker></defs>
+<text x="50" y="58" text-anchor="start" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17334a">Architecture search separates exploration from deployment</text>
+<text x="50" y="100" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536579">A shared evaluator ranks candidates; the final discrete artifact needs independent evidence</text>
+<circle cx="250" cy="230" r="25" fill="#14a6a0"/>
+<text x="105" y="180" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#17334a">Choices in the search space</text>
+<path d="M250 255L120 350" stroke="#367bb5" stroke-width="2" fill="none"/>
+<circle cx="120" cy="370" r="20" fill="#14a6a0"/>
+<path d="M250 255L250 350" stroke="#367bb5" stroke-width="2" fill="none"/>
+<circle cx="250" cy="370" r="20" fill="#14a6a0"/>
+<path d="M250 255L380 350" stroke="#367bb5" stroke-width="2" fill="none"/>
+<circle cx="380" cy="370" r="20" fill="#14a6a0"/>
+<path d="M250 390L100 500" stroke="#367bb5" stroke-width="2" fill="none"/>
+<circle cx="100" cy="520" r="15" fill="#14a6a0"/>
+<path d="M250 390L175 500" stroke="#367bb5" stroke-width="2" fill="none"/>
+<circle cx="175" cy="520" r="15" fill="#14a6a0"/>
+<path d="M250 390L250 500" stroke="#367bb5" stroke-width="2" fill="none"/>
+<circle cx="250" cy="520" r="15" fill="#14a6a0"/>
+<path d="M250 390L325 500" stroke="#367bb5" stroke-width="2" fill="none"/>
+<circle cx="325" cy="520" r="15" fill="#14a6a0"/>
+<path d="M250 390L400 500" stroke="#367bb5" stroke-width="2" fill="none"/>
+<circle cx="400" cy="520" r="15" fill="#14a6a0"/>
+<rect x="555" y="220" width="310" height="380" rx="10" fill="#e6f5ee" stroke="#14a6a0" stroke-width="2"/>
+<text x="585" y="270" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#17334a">Shared supernet</text>
+<circle cx="610" cy="350" r="18" fill="#14a6a0"/>
+<circle cx="780" cy="350" r="18" fill="#14a6a0"/>
+<circle cx="610" cy="480" r="18" fill="#14a6a0"/>
+<circle cx="780" cy="480" r="18" fill="#14a6a0"/>
+<path d="M610 350L610 480" stroke="#367bb5" stroke-width="2" fill="none"/>
+<path d="M610 350L780 480" stroke="#367bb5" stroke-width="2" fill="none"/>
+<path d="M780 350L610 480" stroke="#367bb5" stroke-width="2" fill="none"/>
+<path d="M780 350L780 480" stroke="#367bb5" stroke-width="2" fill="none"/>
+<path d="M440 420L550 420" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<path d="M875 420L980 420" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<rect x="995" y="290" width="310" height="260" rx="10" fill="#e4f2ff" stroke="#367bb5" stroke-width="2"/>
+<text x="1020" y="345" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#17334a">Selected subnet</text>
+<text x="1020" y="400" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#17334a">Export + task quality</text>
+<text x="1020" y="450" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#17334a">+ target latency</text>
+<text x="110" y="700" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="400" fill="#17334a">Search bill: evaluator training + measurements + selection + final preparation</text>
+<rect x="50" y="815" width="1300" height="145" rx="10" fill="#fff8dc" stroke="#d4b359" stroke-width="2"/>
+<text x="75" y="852" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Weight sharing reduces repeated preparation but can distort candidate rankings.</text>
+<text x="75" y="883" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">A latency predictor or relaxed graph is not the measured final deployment.</text>
+<text x="75" y="914" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Record the search space, evaluation policy, preparation cost, and accepted operating point.</text>
+</svg>

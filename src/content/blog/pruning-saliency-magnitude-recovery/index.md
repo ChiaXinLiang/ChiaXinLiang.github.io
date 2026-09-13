@@ -1,6 +1,6 @@
 ---
 title: "Pruning 1: Magnitude, Saliency, and Recovery Training"
-description: "Pruning 1: Magnitude, Saliency, and Recovery Training. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "Pruning removes selected connections or components from a learned network."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"

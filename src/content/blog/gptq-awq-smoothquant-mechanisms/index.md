@@ -1,6 +1,6 @@
 ---
 title: "LLM Quantization Methods: GPTQ, AWQ, and SmoothQuant"
-description: "LLM Quantization Methods: GPTQ, AWQ, and SmoothQuant. Mathematical methods, worked examples, and AI-infrastructure tradeoffs."
+description: "GPTQ, AWQ, and SmoothQuant are often listed together as quantization options, but they solve different preparation problems."
 pubDate: "2026-09-13"
 updatedDate: "2026-09-13"
 series: "efficient-ml"
