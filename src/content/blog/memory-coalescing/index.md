@@ -3,7 +3,7 @@ title: 'Memory Coalescing: Tiny Code Changes, Massive Speedups'
 description: 'How swapping 2 index variables changes requested memory sectors, with access diagrams, counted bytes, and shared-memory layout tradeoffs.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'mem-1'
 order: 3
 series: "gpu-performance"
@@ -28,7 +28,6 @@ The worst common case: each thread reads an address 16 KB away from its neighbor
 
 Nothing about the arithmetic changed. The instruction count didn't change. Only the *shape* of the addresses did.
 
-![Coalesced versus strided warp access: 32 loads landing in 1 128-byte cache line versus 32 separate lines](./fig-coalescing.png)
 
 ## A worked example you can do on paper
 
@@ -77,7 +76,6 @@ Knowing the failure mode, the classic fixes all become 1 idea: *reshape the acce
 
 **Padding away bank conflicts.** Shared memory has its own granularity: 32 banks, each 4 bytes wide, and a warp achieves full speed only when its 32 accesses land in 32 different banks. A `tile[32][32]` array puts every element of a column in the same bank (32 mod 32 = 0), so reading a tile column serializes into a 32-way bank conflict, 32 round trips where 1 should do. Declare the tile as `tile[32][33]` and each row starts 1 bank later than the previous row, so a column now spans all 32 banks. 1 wasted column of padding, 128 bytes per tile, buys back a 32x serialization. This exact pair of fixes is the canonical transpose optimization in NVIDIA's shared-memory material.
 
-![Shared-memory tiling for transpose: coalesced global reads and writes, with a 33-wide tile to eliminate bank conflicts](./fig-tile-padding.png)
 
 **TMA: hardware takes over the copy.** On Hopper and Blackwell, the Tensor Memory Accelerator is a dedicated copy engine per SM that moves multidimensional tiles between global and shared memory from a single descriptor: base address, tensor shape, tile size. 1 thread issues the copy; the TMA hardware computes all the addresses, handles out-of-bounds edges, and streams the tile asynchronously while the warps compute on the previous 1. The register and instruction cost of address arithmetic, a real tax in older pipelined-copy code, drops to nearly nothing. This is coalescing as a hardware service: the descriptor tells the engine the layout, and the engine generates optimal transactions. CUTLASS and Triton lean on it heavily for Hopper-class GEMM and attention kernels.
 

@@ -9,14 +9,13 @@ order: 8
 topic: "Distillation and Adaptation"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Knowledge distillation trains a student using information produced by a teacher. Its efficiency benefit comes from changing the deployed model or its behavior, while moving additional work into preparation. The student is not automatically faster because its training objective mentions a teacher. It needs an architecture and execution path that actually cost less under the target workload.
 
 The classical formulation uses softened class probabilities. This article derives the temperature-dependent objective and its gradient, explains what information the soft distribution contributes, and connects those choices to calibration, data, and deployment evidence. The same language is often applied to language-model imitation, but token-level and sequence-level objectives have different statistical effects.
 
-![Concept overview: Distillation 1: Teacher–Student Objectives and Temperature](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 For one observed label, the target puts all probability mass on that class. This tells the learner which outcome was recorded but does not directly encode the teacher's relative preference among alternatives.
 
 The hard objective remains useful during distillation. Teacher predictions can be wrong or poorly calibrated. Ground-truth supervision provides another source of information when labels are available, and its weight should be chosen through validation rather than discarded by default.
-
 
 
 ![Deep-dive illustration: Begin with supervised learning](./deep-dive.png)

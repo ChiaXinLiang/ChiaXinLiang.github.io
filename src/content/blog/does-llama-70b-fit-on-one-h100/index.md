@@ -3,7 +3,7 @@ title: 'Does Llama-70B Fit on 1 H100? Weights, KV Cache, and Headroom'
 description: "Derive a complete inference memory budget for a 70B model, including quantization metadata, grouped-query attention, and usable context capacity."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'math-1'
 order: 5
 series: "ai-performance"
@@ -38,7 +38,6 @@ Each term represents a different mechanism. Weights hold learned parameters. KV 
 
 Do not sum allocated memory and reserved memory blindly. A caching allocator can reserve a block containing already allocated tensors; counting both duplicates the same bytes. Similarly, a serving engine may preallocate its cache pool during startup, so the apparent “free memory” after loading is not necessarily available for unrelated tensors.
 
-![Memory budget separates weights, cache, and serving headroom](./figure-01.png)
 
 ## Weight precision gives a lower bound
 
@@ -90,7 +89,6 @@ $$
 
 Shared-prefix caching can reduce physical duplication, but it must actually be supported and active. Merely receiving similar prompts does not entitle a capacity calculator to subtract their prefixes.
 
-![Cache grows linearly with total retained tokens](./figure-02.png)
 
 ## A worked 1-GPU budget
 
@@ -179,7 +177,6 @@ print(131072 * kv_bytes_per_token / 2**30)  # 40 GiB
 
 Replace the rounded parameter count with the checkpoint's actual tensor count. Replace the illustrative metadata term with the format's exact layout. Replace capacity and headroom with measurements. The script's value is its explicit assumptions, not the apparent precision of the final integer.
 
-![Capacity feasibility and latency feasibility require separate checks](./figure-03.png)
 
 ## Takeaway
 

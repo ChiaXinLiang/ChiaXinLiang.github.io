@@ -3,7 +3,7 @@ title: "CUDA Correctness: Memory Errors, Races, Barriers, and Compute Sanitizer"
 description: "Define address and ownership invariants, distinguish memory safety from numerical agreement, and use sanitizer tools according to their documented detection scope."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "cuda-2"
 order: 12
@@ -48,7 +48,6 @@ Index arithmetic must fit its type before the bounds check. Narrow multiplicatio
 A mask should guard every potentially invalid access. Masking stores while leaving out-of-range loads unguarded is insufficient. For shared staging, invalid logical lanes can write a neutral value into an allocated shared slot so all consumers see initialized data.
 
 Alignment is another invariant for operations that require it. The relevant pointer and offset must satisfy the supported alignment rule. A tensor shape being divisible by a vector width does not establish that its base pointer or view offset is suitably aligned.
-
 
 
 ![Deep-dive illustration: Prove physical address validity](./deep-dive.png)

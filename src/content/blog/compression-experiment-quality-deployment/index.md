@@ -9,14 +9,13 @@ order: 14
 topic: "Experiments"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 A compression experiment should answer a deployment question. Can a smaller or lower-precision artifact preserve required quality while improving capacity, latency, throughput, or preparation cost under a defined workload? Without that question, a collection of compressed checkpoints can produce numbers that are difficult to compare or use.
 
 This guide connects the methods in this series through a controlled evaluation protocol. It includes mathematical accounting and a worked selection example, but it does not fabricate a GPU benchmark. The outcome is a reproducible decision record that separates algorithmic preparation, numerical correctness, task quality, and complete execution.
 
-![Concept overview: A Reproducible Compression Experiment: Quality and Deployment](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -71,7 +70,6 @@ $$
 The expression assumes these categories are counted at the relevant peak and avoids summing unrelated maxima. Lifetimes and overlap determine actual peak allocation.
 
 Quantization scales, sparse indices, padding, and retained wider tensors belong in weight representation accounting. Cache state and temporary buffers can dominate another workload. Measure the intended maximum operating case rather than extrapolating from a short, low-concurrency demonstration.
-
 
 
 ![Deep-dive illustration: Account for the full memory envelope](./deep-dive.png)

@@ -9,14 +9,13 @@ order: 7
 topic: "Quantization"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Mixed precision treats numerical representation as a resource allocation problem. Instead of assigning every layer the same number of bits, it spends precision where approximation is expensive and removes it where the model tolerates the change. The useful outcome is a deployable checkpoint that satisfies a quality requirement under an actual resource budget.
 
 This article develops that allocation problem from layer sensitivity to memory accounting and hardware support. A low average bit width is only an intermediate result. The selected formats must still execute efficiently, preserve important behavior, and fit together in a supported graph.
 
-![Concept overview: Mixed Precision: Layer Sensitivity and a Deployment Budget](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 The sets can differ by layer. An embedding, a projection, and a normalization operation need not support the same formats. Keep unsupported choices out of the search space instead of hoping an exporter will repair them afterward.
 
 Storage precision also differs from accumulation precision. A layer can read packed weights while accumulating in a wider datatype. Record both in the configuration so that the allocation is a concrete numerical contract.
-
 
 
 ![Deep-dive illustration: Define the allocation variables](./deep-dive.png)

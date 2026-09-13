@@ -3,7 +3,7 @@ title: "Cross-Entropy and KL Divergence: Why Language Models Optimize Log Loss"
 description: "Derive cross-entropy from likelihood, decompose it into entropy plus KL divergence, and calculate a next-token loss without confusing probability with factual confidence."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 series: "llm-basics"
 level: advanced
 code: 'stat-4'
@@ -60,7 +60,6 @@ For this p, entropy is approximately 0.8018 nats. Even predicting the true distr
 
 If q matches p, the cross-entropy equals H(p). If q shifts mass away from outcomes that p produces, cross-entropy increases. The difference in our example is approximately 0.0268 nats. That excess is the KL divergence from p to q.
 
-![Worked target and model distributions separate entropy from excess cross-entropy.](figure-01.png)
 
 *Original analytical example. Distributions and values are illustrative and calculated with natural logarithms.*
 
@@ -144,7 +143,6 @@ This equals the inverse geometric mean of the observed-token probabilities. It d
 
 Perplexity is useful for evaluating modeled text likelihood under a fixed setup. It does not directly measure factual correctness, reasoning success, user satisfaction, or safety. A model can assign high probability to familiar but false text. Use task evaluations and evidence checks for those separate claims.
 
-![3 token probabilities produce mean log loss of 1.3863 nats and perplexity four.](figure-02.png)
 
 *Original worked-example figure. Values follow directly from the probabilities stated in this article.*
 
@@ -160,7 +158,6 @@ Normalization also determines whose mistakes receive more weight. Averaging the 
 
 For example, a short sequence with 10 evaluated tokens and a long sequence with 90 evaluated tokens contribute 1 tenth and 9 tenths of a pooled token average. In an equal sequence average they each contribute 0.5. If the long sequence comes from a domain the application rarely uses, that weighting difference can change which improvement appears most valuable. Keep masks, sample weights, and corpus mixture fixed in an objective comparison, or explicitly describe the intentional change.
 
-![4 input features connect to 3 output logits before softmax normalization.](figure-03.png)
 
 *Redrawn from [Dive into Deep Learning, Fig. 4.1.1](https://d2l.ai/chapter_linear-classification/softmax-regression.html#fig-softmaxreg). The diagram shows the source's fully connected structure; softmax normalization follows the logits.*
 

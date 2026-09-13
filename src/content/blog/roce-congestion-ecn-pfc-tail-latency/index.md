@@ -3,7 +3,7 @@ title: "Congestion and RoCE: ECN, PFC, and Tail Latency"
 description: "Derive queue growth and feedback headroom, distinguish end-to-end congestion control from priority pauses, and diagnose synchronized RDMA traffic through tail behavior."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-networking"
 code: "network-5"
 order: 9
@@ -36,7 +36,6 @@ When demand exceeds capacity, the queue grows. When demand falls below capacity,
 For an illustrative 100 GB/s arrival burst entering a 50 GB/s outgoing resource, the queue grows at 50 GB/s. Over 10 microseconds, that adds 500000 bytes. A brief synchronized burst can therefore create substantial buffering demand even if long-term average traffic is below link capacity.
 
 Plot arrivals, queue occupancy, and outgoing traffic on compatible intervals. A coarse average can smooth away the burst that caused the pause or tail event. The observation method should resolve the relevant timescale sufficiently to support the hypothesis.
-
 
 
 ![Deep-dive illustration: Congestion begins with demand at a shared resource](./deep-dive.png)

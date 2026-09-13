@@ -3,7 +3,7 @@ title: "FSDP and ZeRO: What Gets Sharded and What Must Be Materialized"
 description: "Build a per-rank memory model for optimizer, gradient, and parameter sharding, then account for all-gather peaks and exposed communication."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "distributed-training"
 code: "train-3"
 order: 3
@@ -54,7 +54,6 @@ for the idealized fully partitioned case. These expressions omit activations, wo
 Take P equal to 7 billion, D equal to 8, w equal to 2, g equal to 2, and o equal to 12 bytes. The replicated persistent state is 112 GB. The 3 stage estimates are 38.5 GB, 26.25 GB, and 14 GB per rank. All quantities here use decimal GB consistently.
 
 The diminishing benefit depends on the original state mix. If an optimizer has much smaller state, optimizer sharding removes less memory. If activations dominate the measured peak, even complete persistent-state partitioning may leave the main capacity constraint intact. Begin with the actual tensor inventory rather than applying a stage number as a universal memory multiplier.
-
 
 
 ![Deep-dive illustration: Derive the stage-by-stage persistent budget](./deep-dive.png)

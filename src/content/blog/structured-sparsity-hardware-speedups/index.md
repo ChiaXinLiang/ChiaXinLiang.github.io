@@ -9,14 +9,13 @@ order: 3
 topic: "Pruning and Sparsity"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Pruning can remove many parameters without producing a faster deployment. The execution system must recognize and exploit the removed structure. A matrix containing zeros is still a dense matrix if its kernel reads and multiplies every entry. A sparse representation can skip work but introduce indices, irregular memory access, and less efficient arithmetic.
 
 Structured pruning changes this tradeoff by removing components aligned with executable shapes or supported sparse patterns. This article compares channel removal, blocks, and fine-grained structured sparsity, then derives storage and timing models. Its central picture is a matrix transformed into several physical representations, each with a different path to real hardware execution.
 
-![Concept overview: Pruning 2: Structured Sparsity and Real Hardware Speedups](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -40,7 +39,6 @@ $$
 This expression illustrates coordinate selection under compatible element-wise activation. In a converted model, the retained rows and columns form new smaller tensors. More complex architectures require additional dependency handling.
 
 Residual additions need compatible coordinate structure across branches. Normalization parameters, grouped convolutions, attention projections, and tied representations can constrain which channels may be removed together. A local channel decision can therefore propagate through several components. The conversion must preserve the complete graph rather than edit one tensor in isolation.
-
 
 
 ![Deep-dive illustration: Follow channel dependencies](./deep-dive.png)

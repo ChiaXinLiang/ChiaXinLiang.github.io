@@ -3,7 +3,7 @@ title: 'Attention in Plain Words: Tokens Score the Context They Are Allowed to S
 description: "The mechanism inside every modern LLM is a lookup that's softly blurred: each word asks the whole sentence what's relevant, and blends the answers. No relay, direct connections with finite context."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'tf-1'
 order: 8
 series: "llm-basics"
@@ -22,7 +22,6 @@ You resolved that instantly — *it* means the animal, because "tired" fits anim
 
 Attention is exactly that: a direct, all-pairs connection.
 
-![Attention resolving "it": the word directly consults every other word in the sentence and finds "animal" and "tired" most relevant — no relay through a running memory](./attention-lines.png)
 
 ## The mechanism: a soft lookup
 
@@ -34,11 +33,9 @@ Here is the whole idea in 1 metaphor. For each word, the model computes 3 things
 
 Each word's query is compared against every word's key, producing a **relevance score** for every pair. The scores are normalized into weights that sum to 1, and each word's new representation is the **weighted average of all the values** — mostly *animal*'s content with a dash of everything else, in our example.
 
-![Q, K, and V projections feed scaled score comparison, causal masking, row normalization, and weighted value combination. Adapted with equations from Vaswani et al., 2017, Figure 2.](./attention-equation-flow.png)
 
 Read the diagram as 2 matrix multiplications with different jobs. Q multiplied by transposed K produces a score for each permitted query–key pairing. After scaling, masking, and normalization, those scores become weights. Multiplying the weight matrix by V produces the gathered vector. The key dimension controls the score scale; the value dimension controls the gathered vector’s width. These dimensions need not be equal in every implementation.
 
-![A separate toy example uses query position 2 and key dimension 2. Masking excludes position 3, giving weights 0.669762, 0.330238, and 0, and output vector 1.339523, 0.660477.](./attention-numerical-example.png)
 
 The numerical figure is a separate toy calculation, not measured attention from a trained model. Its final key has a matching dot product but belongs to a future position. The mask excludes it before softmax, so its value contributes 0. This shows why masking is an information rule rather than a judgment about semantic relevance. The remaining values form a weighted vector; attention does not directly select the next output token.
 

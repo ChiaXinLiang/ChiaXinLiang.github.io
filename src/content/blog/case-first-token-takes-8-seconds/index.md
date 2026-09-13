@@ -3,7 +3,7 @@ title: 'Case File: First Token Takes 8 Seconds'
 description: "A TTFT detective story: how a 128k-token prompt turns prefill into a 41-petaFLOP compute wall, and 4 ranked fixes from chunked prefill to prefill-only silicon."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'case-1'
 order: 17
 series: "llm-serving"
@@ -59,7 +59,6 @@ FLOPs_attn ≈ ½ · (4 · S² · d) · layers
 
 Total: about **41 PFLOPs for 1 request**. Note which term won: at 128k tokens the quadratic attention part (22.5) has overtaken the linear part (18.4). Setting the 2 expressions equal gives the crossover: S* = N / (d · layers) = 70e9 / (8192 · 80) ≈ **107k tokens**. Below that, prompt cost grows essentially linearly with length; above it, the S² term takes over and every additional token costs more than the last.
 
-![Prefill FLOPs for a 70B model at 8k, 32k and 128k tokens, split into linear-layer and attention compute, showing attention growing from 7% to 55% of the bill](./prefill-flops.png)
 
 **Now divide by the hardware.** 1 H100 SXM delivers 989 TFLOPS of dense BF16 through its Tensor Cores (NVIDIA's spec sheet number), so the 8-GPU node peaks at 7.9 PFLOPS. At 100% model FLOPs utilization the prefill would take 41 / 7.9 ≈ 5.2 seconds. Real prefills on a tensor-parallel node land at 55–65% MFU once you account for all-reduce communication, kernel launch edges, and the softmax/normalization work that runs on the vector units. At 62% MFU:
 
@@ -91,7 +90,6 @@ The second deep point: tensor parallelism is already helping, and it has a ceili
 
 ## The fixes, ranked
 
-![4 fixes ranked: chunked prefill protects co-scheduled decodes, prefix caching cuts recomputation, a disaggregated prefill pool isolates and scales prefill, and prefill-specialized silicon changes the hardware ratio](./fix-ladder.png)
 
 **Fix 1: chunked prefill, deployed first, for the collateral damage.** The 8-second monolithic prefill was not only slow for its own user; it froze every co-scheduled chat stream, because a batch executing 1 giant prefill emits no decode tokens. Chunked prefill (introduced as Sarathi-Serve, now standard in vLLM and friends) slices the 128k prompt into chunks of a few 1000 tokens and interleaves decode steps between chunks. TPOT spikes for chat users vanished within an hour of enabling it. Be precise about what it does *not* do: the document request's own TTFT stays around 8 seconds, in fact a few percent worse due to chunk-boundary overhead. Chunked prefill is a fairness fix, not a speed fix.
 

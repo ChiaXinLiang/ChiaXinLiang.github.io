@@ -3,7 +3,7 @@ title: "Qwen3.6: Reading a Hybrid Multimodal Model Configuration"
 description: "Audit the published Qwen3.6-35B-A3B layer layout, distinct head dimensions, expert selection, and multimodal state to build a defensible capacity estimate."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "qwen-1"
 order: 14
@@ -32,7 +32,6 @@ $$
 This simple check matters because applying a conventional attention-cache formula to all 40 layers would misclassify the recurrent state. Conversely, treating the entire model as constant-state recurrence would omit the 10 explicit-attention layers.
 
 The ordering also matters for behavior. Attention blocks appear at particular depths among recurrent blocks rather than as a separate preprocessing stage. Their outputs influence subsequent recurrent and expert computation through the language model's residual structure.
-
 
 
 ![Deep-dive illustration: Expand the repeated layout](./deep-dive.png)

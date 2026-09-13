@@ -3,7 +3,7 @@ title: "Attention State 2: MLA and Latent Cache Reconstruction"
 description: "Derive low-rank key-value projections, weight absorption, and positional side state to explain how MLA changes retained attention representations."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "attn-2"
 order: 6
@@ -34,7 +34,6 @@ $$
 The superscript C labels content components, and j labels a head. This notation isolates the main factorization. The actual architecture includes other projections and positional terms. A smaller rank restricts the family of expanded representations relative to unconstrained independent projections.
 
 The model learns under that constraint. Calling the reconstructed keys “approximate” can be misleading when they are the exact keys defined by the architecture; approximation arises when comparing this learned family with a different unconstrained model, not necessarily in runtime reconstruction.
-
 
 
 ![Deep-dive illustration: Start with a low-rank factorization](./deep-dive.png)

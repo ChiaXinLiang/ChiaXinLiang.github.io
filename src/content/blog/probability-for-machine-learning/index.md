@@ -3,7 +3,7 @@ title: "Probability for Machine Learning: Distributions, Expectation, and Uncert
 description: "Build the probability foundation for MLE, MAP, and language-model log loss with discrete and continuous distributions, conditional probability, and numerical examples."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 series: "llm-basics"
 level: beginner
 code: 'stat-1'
@@ -29,7 +29,6 @@ The letter P denotes an event probability, while theta names a model parameter. 
 
 For a classifier with several exclusive labels, a categorical distribution replaces the 2 Bernoulli outcomes. The probabilities must be nonnegative and sum to 1 across the allowed labels. A language model uses a categorical distribution across its token vocabulary at each position, conditioned on the prefix. The vocabulary may be large, but the normalization principle is the same.
 
-![A categorical distribution assigns nonnegative probabilities that sum to 1.](figure-01.png)
 
 *Original worked-example diagram illustrating probability normalization; no source figure is reproduced.*
 
@@ -102,7 +101,6 @@ The probability of an incident given an alarm is 0.009 divided by 0.0585, approx
 
 This is a base-rate example, not a claim about a real monitoring system. It shows why a conditional score needs the underlying population rate. The next article on [MAP estimation](/blog/map-estimation-and-priors/) applies the same identity to uncertain parameters: a prior distribution combines with the likelihood of observations to form a posterior.
 
-![An alarm's detection rate differs from the probability of an incident given an alarm.](figure-02.png)
 
 *Original numerical Bayes-rule example. Rates are illustrative assumptions, not monitoring measurements.*
 
@@ -146,7 +144,6 @@ In machine learning, people often call irreducible observation variability aleat
 
 For example, a language model can confidently predict a common continuation that states an incorrect fact. Its token distribution describes a modeled continuation, not a calibrated certificate that the proposition is true. Reliability evaluation needs task-specific observations and, where appropriate, access to verifiable evidence.
 
-![Outcome variability, parameter uncertainty, and task reliability are different questions.](figure-03.png)
 
 *Original conceptual comparison; these categories do not imply that a softmax score measures them all.*
 

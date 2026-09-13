@@ -3,7 +3,7 @@ title: 'Why GPUs Sit Idle: The Memory-Bandwidth Bottleneck'
 description: "An H100 needs ~295 FLOPs per byte of HBM traffic to stay busy; decode-phase inference delivers about 1. Here's the arithmetic behind idle tensor cores."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'exec-1'
 order: 1
 series: "gpu-performance"
@@ -22,7 +22,6 @@ NVIDIA GPUs run a model called SIMT: single instruction, multiple threads. Threa
 
 The key design decision, and the thing that makes GPUs different from CPUs, is how they deal with latency. A load from HBM takes on the order of 400 to 800 cycles to come back. A CPU attacks that latency with big caches, prefetchers, and [out-of-order execution](/blog/out-of-order-execution/), spending enormous silicon area to keep 1 thread moving. A GPU does almost none of that. Instead, when a warp issues a load and can't proceed, the SM's warp scheduler simply picks a different resident warp that is ready and issues its instruction. The switch costs 0 cycles, because every resident warp keeps its own slice of the register file permanently. Nothing gets saved or restored.
 
-![4 warps alternating compute and memory stalls on one SM scheduler, with the scheduler row staying continuously busy because some warp is always ready](./warp-switching.png)
 
 This is latency *hiding*, not latency *reduction*. The load still takes 600-odd cycles; the GPU just arranges to have hundreds of other warps in flight so that somebody always has work. It works beautifully, with 1 condition attached: the warps that keep the pipes busy must eventually have arithmetic to do. If every warp is doing nothing but loading bytes and performing 1 multiply-add per byte, then latency is hidden but the machine is now limited by something no amount of warp switching can fix: the total number of bytes per second the HBM interface can deliver.
 
@@ -40,7 +39,6 @@ For an H100 SXM in BF16 (dense, without the 2:4 sparsity marketing multiplier):
 
 A kernel whose intensity is above 295 is compute-bound: the memory system can keep up, and performance is set by the math units. A kernel below 295 is memory-bound: the tensor cores finish their work early and wait, and performance is set entirely by bandwidth. The classic way to draw this is the roofline model of Williams, Waterman, and Patterson: attainable performance as a flat compute ceiling joined to a sloped bandwidth line, meeting at the ridge point.
 
-![Roofline for an H100 in BF16 showing the 3.35 TB/s bandwidth slope meeting the 989 TFLOPS ceiling at about 295 FLOPs per byte, with decode GEMV pinned near 1 FLOP per byte and prefill GEMM near the ceiling](./h100-roofline.png)
 
 Where does LLM inference land? It depends dramatically on the phase. [Prefill](/blog/how-an-llm-generates-text/) processes the whole prompt at once, so every weight loaded from memory gets multiplied against hundreds or thousands of token activations. That's a matrix-matrix multiply (GEMM) with high intensity, comfortably compute-bound. Decode generates 1 token at a time, so each weight is used exactly once per forward pass. That's a matrix-vector multiply (GEMV), and its intensity is stuck near the bottom of the roofline.
 
@@ -63,7 +61,6 @@ Now put both on a clock:
 
 The compute finishes 295× faster than the memory can feed it. During those 10 microseconds, the math units are doing useful work for 34 nanoseconds. Utilization of the FLOP capability: about **0.3%**.
 
-![Two time bars for the same GEMV: streaming 33.5 MB of weights takes 10 microseconds while the tensor-core math takes 0.03 microseconds, leaving compute idle 99.7% of the time](./gemv-two-clocks.png)
 
 Scale this up and the whole decode story falls out. A 7B model in BF16 is about 13.5 GB of weights, and generating 1 token requires touching essentially all of them. At 3.35 TB/s, that read takes 13.5 GB / 3.35 TB/s ≈ **4.0 ms**, which caps single-stream decode at roughly **250 tokens per second** on an H100 no matter how clever the kernels are. Measured numbers land below that because attention, KV-cache reads, and kernel launch overheads eat into it, but the ceiling itself is pure bandwidth arithmetic. Compute capability never enters the formula.
 

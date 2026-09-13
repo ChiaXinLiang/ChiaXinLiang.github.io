@@ -3,7 +3,7 @@ title: "Asynchronous Tile Loading: TMA, Barriers, and Buffer Ownership"
 description: "Build a tile pipeline from copy completion and buffer ownership, then derive its latency, shared-memory budget, and correctness conditions."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "mem-4"
 order: 23
@@ -41,7 +41,6 @@ $$
 The approximation assumes independent copy and compute resources, adequate buffering, and no hidden contention. For illustrative values of eight tiles, a three-unit copy and five-unit computation produce sixty-four units serially and forty-three units in the ideal pipeline. This is a schedule calculation, not a measured GPU result.
 
 The speedup approaches the sum of copy and compute time divided by their maximum for a long stream. It cannot eliminate both costs. If transfers and computation compete for the same limiting memory path, their overlapped durations may increase. Measure the overlap rather than inferring it from the presence of asynchronous instructions.
-
 
 
 ![Deep-dive illustration: Derive the pipeline's ideal schedule](./deep-dive.png)

@@ -3,7 +3,7 @@ title: "DeepSeek-V4.1-Flash 2: CSA2 Sharing and Hierarchical Sparse Indexing"
 description: "Separate cache sharing from sparse selection, derive hierarchical candidate costs, and explain what Full, Reindex, and Reuse disclose about CSA2."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "ds-2"
 order: 9
@@ -33,7 +33,6 @@ $$
 The superscript I identifies indexer representations in this explanatory notation. Main attention representations need not be identical to indexer representations. Selecting an index and calculating its attention weight are different operations, even if both use learned projections.
 
 Reusing an index set therefore does not force identical outputs across layers. Layer-specific queries or other transformations can produce different weights over the same selected positions. Conversely, refreshing weights does not mean the layer refreshed the candidate search.
-
 
 
 ![Deep-dive illustration: Separate representation, selection, and weighting](./deep-dive.png)

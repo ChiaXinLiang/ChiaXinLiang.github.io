@@ -3,7 +3,7 @@ title: "Performance Regression CI: Keeping a Speedup After the Next Commit"
 description: "Build correctness-first performance gates with controlled baselines, practical regression budgets, paired uncertainty, and diagnostic artifacts."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-performance"
 code: "bench-2"
 order: 15
@@ -68,7 +68,6 @@ For an illustrative B=10 milliseconds and C=10.4 milliseconds, R=1.04 and the ti
 Define budgets before observing a candidate. Choosing a threshold after seeing the result turns policy into a justification for a preferred outcome. Different cases can have different budgets when their operational consequences differ, but those reasons should be explicit.
 
 Keep absolute impact alongside percentage. A large percentage increase in a negligible path may matter less than a small increase in a frequently repeated operation. The application outcome remains the final context for prioritization.
-
 
 
 ![Deep-dive illustration: Define a regression ratio and practical budget](./deep-dive.png)

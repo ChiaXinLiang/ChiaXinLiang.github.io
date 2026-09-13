@@ -3,7 +3,7 @@ title: 'Case File: Throughput Collapses at 30 Concurrent Users'
 description: "A serving cluster that hums at 25 users falls off a cliff at 30 — the culprit is a 32 GB KV cache pool, and the fix is arithmetic, not hardware."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'case-2'
 order: 18
 series: "llm-serving"
@@ -38,7 +38,6 @@ vLLM's scheduler handles this by preempting a low-priority sequence, in one of 2
 
 Except time is exactly the thing being measured. A preempted 4,000-token request that gets recomputed costs the GPU a full second-scale prefill that produces 0 new output tokens. Do that continuously and the cliff appears.
 
-![Admission crosses the memory limit: LOW CONCURRENCY — More sequences reuse each weight read — Aggregate throughput improves; KV CAPACITY LIMIT — Growing contexts fill the KV pool — The limit depends on live token count; PREEMPTION — Recompute competes with decode — Throughput can collapse. Original qualitative schematic · PagedAttention (2023)](./fig-cliff.png)
 
 ## The worked example: finding the cliff by hand
 
@@ -67,7 +66,6 @@ Let's predict the exact user count where this deployment runs out, using a Llama
 
 The pool holds about 23 fully-resident requests, a couple fewer once you account for contexts growing as decode proceeds. Below that, adding users makes throughput go *up*, because decode is memory-bandwidth-bound and bigger batches amortize the cost of streaming 37 GB of weights per step. At 24-26 users the pool is essentially full and the scheduler is squeezing new arrivals into blocks freed by finishing requests. At 30 users there is structurally no room: 5 or 6 requests are perpetually preempted, recomputed, and preempted again. The load test found the cliff at "around 30." The equal-length arithmetic says 24. That is a capacity warning, not an exact prediction of a 30-user measured threshold.
 
-![An 80 GB GPU memory budget: FIXED COSTS — 37 GB weights + 3 GB activations — 8 GB reserved for runtime/headroom; KV POOL — 80 − 37 − 3 − 8 = 32 GB — 1.34 GB per representative request; ADMISSION BOUND — floor(32 / 1.34) = 23 requests — The next request must wait. Illustrative budget · Llama 3 architecture; decimal GB](./fig-memory.png)
 
 2 counterfactuals make the geometry vivid. If this model used old-style multi-head attention with 64 KV heads, KV would cost 2.5 MiB per token, each request would need 10.7 GB, and the same pool would hold **2** users. GQA's 8× reduction is the only reason 23 fit at all, which is why you should never size a deployment from parameter count alone; the KV-head count is a first-class input. Conversely, quantize the cache itself to FP8 and the per-token cost halves to 160 KiB, moving the cliff from ~24 users to ~47.
 
@@ -110,7 +108,6 @@ The observability fix is knowing which counters tell the truth. `nvidia-smi` mem
 
 **5. Route prefill elsewhere.** At larger scale, the reason this incident happens at all is that prefill and decode fight for 1 pool. [Disaggregating them](/blog/the-prefill-decode-disaggregation-story/) gives decode nodes a KV budget that prefill bursts can't invade.
 
-![The preemption feedback loop: POOL FULL — Scheduler preempts a sequence — Its discarded KV must be rebuilt; RECOMPUTE — Prefill consumes compute and time — Active decodes make less progress; BREAK THE LOOP — Admit by KV token budget — Use validated KV quantization. Original scheduler schematic · vLLM preemption docs](./fig-thrash.png)
 
 ## Common misconceptions
 

@@ -3,7 +3,7 @@ title: 'Quantization from FP16 to INT4: What You Gain, What You Lose'
 description: "Every halving of weight bytes doubles the decode ceiling. Here's the exact math for a 70B model on an H100, and where the quality cliffs hide."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'opt-3'
 order: 3
 series: "llm-serving"
@@ -30,7 +30,6 @@ The more important taxonomy is *what* you quantize, because there are 3 separate
 - **Weight + activation (W8A8, FP8).** Both operands of the matmul are low-precision, so the tensor cores themselves run at 8-bit rates, doubling peak FLOPS. This is what helps *prefill*, which is compute-bound. It is also much harder, because activations are not frozen: they change every token, and a handful of channels in large transformers carry outlier values 20-100x larger than the rest (Dettmers et al. documented this in LLM.int8()). SmoothQuant's trick is to migrate that difficulty offline, rescaling channels so activations get flatter and weights absorb the variance.
 - **KV cache.** The cache is read once per token per layer, and at long context or large batch it out-weighs the weights themselves. Quantizing it to INT8 or FP8 (increasingly INT4/FP4 for the key half) doubles or quadruples how many sequences fit, which shows up as batch size, which shows up as throughput.
 
-![The three quantization targets: weights, activations, and KV cache, with methods and failure modes for each](./quant-targets.png)
 
 ![Deep dive: The formats, and what a "bit" buys](./deep-dive-component-01.png)
 
@@ -57,7 +56,6 @@ Take Llama-3.1-70B, 70.6B parameters, served on H100 SXM (80 GB HBM3 at 3.35 TB/
 
 These are ceilings; real kernels deliver maybe 60-80% of them, and per-token KV reads shave more as context grows. But the ratios survive contact with reality: every halving of weight bytes roughly halves per-token latency or halves the GPU count, and the ranking never changes. If you want to sanity-check the fit calculations themselves, the method is in [GPU memory math](/blog/gpu-memory-math-will-it-fit/).
 
-![Weight bytes and theoretical decode ceiling for a 70B model at FP16, FP8, and INT4 on H100](./quant-ladder.png)
 
 ## Going deeper: where the quality actually goes
 

@@ -3,7 +3,7 @@ title: "AI Cluster Topology: PCIe, NVLink, NVSwitch, and Scale-Out Fabrics"
 description: "Draw accelerator and NIC paths, derive topology-cut limits, and map communication groups onto physical locality without confusing aggregate bandwidth with usable capacity."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-networking"
 code: "network-2"
 order: 2
@@ -68,7 +68,6 @@ $$
 This is a bottleneck bound, not a complete latency model. Pipelined segments need not add their full serialization times, but no required bottleneck can sustain more traffic than its available capacity. Shared traffic further reduces what one exchange can obtain.
 
 A server with several high-rate adapters therefore needs a mapping that can use them effectively. Port count and aggregate advertised rate do not establish balanced traffic across adapters. Inspect per-adapter counters and application path selection when one part of the server underperforms.
-
 
 
 ![Deep-dive illustration: Trace the GPU-to-NIC path before the leaf switch](./deep-dive.png)

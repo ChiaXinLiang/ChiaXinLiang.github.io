@@ -3,7 +3,7 @@ title: 'CUDA Graphs: Record Once, Replay Forever'
 description: 'How graph capture changes repeated kernel launch overhead, with lifecycle constraints and a checked latency accounting example.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'orch-2'
 order: 19
 series: "gpu-performance"
@@ -24,7 +24,6 @@ None of this matters during prefill. Prefill kernels chew through thousands of t
 
 Decode processes 1 token per sequence per step. At small batch sizes the tensors are tiny, every kernel is memory-bound, and individual kernels finish in 2-10 microseconds. Now the asynchrony stops saving you. The GPU drains its queue faster than the CPU can refill it, and the timeline inverts: instead of the CPU running ahead of the GPU, the GPU idles between kernels, waiting for the next launch to arrive. Your profiler shows a GPU timeline that looks like a barcode, thin slivers of work separated by white gaps.
 
-![Timeline comparison of eager kernel launches with GPU idle gaps versus a single CUDA graph replay with densely packed kernels](./launch-timeline.png)
 
 The brutal part is that the gaps are invisible to naive utilization metrics. `nvidia-smi` happily reports high utilization because the sampling window sees *some* kernel active. The gaps only show up in a trace, or in the number that actually matters, tokens per second.
 
@@ -56,7 +55,6 @@ At 2.5 ms per token you were generating 400 tokens/s per sequence; at 2.05 ms yo
 
 A CUDA graph is a DAG: nodes are kernels (or memcpys, memsets, even child graphs), edges are dependencies. The lifecycle has 3 phases, and keeping them straight explains almost every practical constraint.
 
-![Three-phase CUDA graph lifecycle: capture records the DAG, instantiate bakes it into an executable, replay launches it every step](./graph-lifecycle.png)
 
 **Capture.** You call `cudaStreamBeginCapture` on a stream, run your normal decode step, and call `cudaStreamEndCapture`. Nothing executes; instead, every operation issued to that stream (and streams that become dependent on it through events) is recorded as a node with its exact launch parameters: grid dimensions, kernel arguments, and, critically, the *pointer values* of every buffer. In PyTorch this is wrapped by `torch.cuda.CUDAGraph` and `torch.cuda.graph`.
 

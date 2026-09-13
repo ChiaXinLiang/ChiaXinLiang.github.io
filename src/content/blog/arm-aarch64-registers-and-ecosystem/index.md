@@ -3,7 +3,7 @@ title: "Arm and AArch64: Registers, Instructions, and the Processor Ecosystem"
 description: "Read AArch64 assembly through a worked array sum, and distinguish the architecture, ABI, CPU core, and system."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'isa-2'
 order: 7
 series: "comp-arch"
@@ -28,7 +28,6 @@ Architecture revisions and optional features also matter. Supporting AArch64 doe
 
 For a deployment, name the relevant architecture features and the actual CPU implementation. “Arm server” alone omits core count, clock behavior, caches, memory channels, and vector capabilities—the details that determine many workload outcomes.
 
-![X0 and W0 are full-width and lower-width views of 1 register](./figure-01.png)
 
 *Redrawn from [Arm A64 ISA Guide, register model](https://documentation-service.arm.com/static/674d8b61c7fc0d1f211dc776).*
 
@@ -93,7 +92,6 @@ Assume the pointer addresses a valid readable array of `n` elements and the envi
 
 The function is pedagogical rather than performance-tuned. Its scalar dependency chain and branch per element make it a useful foundation for later discussions of SIMD, branch prediction, and loop transformations.
 
-![The loop carries pointer, remaining count, and accumulated sum](./figure-02.png)
 
 ## Trace 3 elements by hand
 
@@ -179,7 +177,6 @@ When moving an application from x86-64 to AArch64, check native dependencies and
 
 **RISC guarantees 1-cycle execution.** Instruction encoding and register-oriented design do not make a DRAM load complete in 1 cycle. Measure the implementation and workload.
 
-![AArch64 compatibility does not imply identical performance](./figure-03.png)
 
 ## Takeaway
 

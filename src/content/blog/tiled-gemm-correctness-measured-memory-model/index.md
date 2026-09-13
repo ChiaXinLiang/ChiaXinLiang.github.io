@@ -3,7 +3,7 @@ title: "Tiled GEMM: From a Correct Kernel to a Measured Memory Model"
 description: "Derive output-tile ownership and operand reuse, budget shared memory and accumulators, and compare logical traffic with actual matrix-kernel execution."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "ktune-5"
 order: 13
@@ -36,7 +36,6 @@ Record the actual storage strides and dtypes. A transpose or view changes pointe
 Define accumulator precision and numerical tolerance. Fused operations and reduction ordering can differ from a sequential reference while computing the same mathematical sum within a valid finite-precision contract. Memory corruption and missing reduction terms require a different diagnosis.
 
 Handle empty and partial dimensions through the supported interface. The host can provide a no-work path or reject unsupported shapes. A convenient square aligned benchmark does not establish correctness for all claimed inputs.
-
 
 
 ![Deep-dive illustration: Define shapes, layouts, and the required result](./deep-dive.png)

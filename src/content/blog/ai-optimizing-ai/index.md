@@ -3,7 +3,7 @@ title: 'AI Optimizing AI: Kernels Written by Models, for Models'
 description: "AlphaTensor's 47 multiplications, R1-generated kernels, and why 100T-parameter serving forces the optimization loop to close on itself."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'future-1'
 order: 16
 series: "llm-serving"
@@ -26,7 +26,6 @@ The **verifier** is what makes performance work uniquely suited to automation. A
 
 **Search** connects them. Sample many candidates, keep survivors, feed compiler errors and profiler output back into the prior, repeat. Every system that has produced a headline result in this space is a variation on that loop, differing mainly in where the learning happens: at proposal time, at feedback time, or baked into the weights by training.
 
-![Prior, verifier, search: PROPOSE — A learned model generates — candidate algorithms or kernels; VERIFY — Compile; test numerical error — Measure speed on target hardware; SEARCH — Keep valid, faster candidates — Feed failures back; repeat. Original schematic · Fawzi et al. (2022); KernelBench (2025)](./pattern.png)
 
 3 data points from 2025 show the loop working at different depths.
 
@@ -52,7 +51,6 @@ That number is not science fiction. Kimi K2, an open-weights MoE you can downloa
 
 An exhaustive manual sweep is impractical. Constraint pruning, cost models, classical autotuning, and learned proposals can all reduce the required trials; the learned systems described here are promising additions: priors plus verifiers plus search, running continuously, re-tuning as traffic shifts and hardware generations turn over. At 100T scale, AI optimizing AI stops being a research direction and becomes the deployment plan.
 
-![A hypothetical 100T model: WEIGHTS — 100T × 4.5 bits ≈ 56 TB — 13.5 TB/rack → at least 5 racks; COARSE GRID — 5 × 6 × 6 × 8 × 3 × 12 × 6 — 311,040 configuration trials; SWEEP COST — 15 minutes per configuration — 77,760 hours ≈ 8.9 pod-years. Illustrative arithmetic · NVIDIA GB200 NVL72 specifications](./hundred-t.png)
 
 ![Deep dive: A worked example: why 100T parameters forces the issue](./deep-dive-component-01.png)
 
@@ -93,7 +91,6 @@ Random fuzzing is evidence within a test distribution, not proof of functional e
 
 Look at what the flywheel does once it closes. A model generates a better kernel; the kernel makes serving cheaper; cheaper serving means more search and more RL steps per dollar; more search trains a better kernel-generator. DeepSeek already demonstrated the economic half of this loop with human-written kernels, when [a few hundred lines of PTX helped cut API prices in half](/blog/when-a-kernel-cuts-api-prices/). The automation half is what 2025's results sketched in outline.
 
-![The self-optimization loop: BETTER KERNELS — Fewer bytes or fewer launches — Lower serving cost per token; CHEAPER SEARCH — More verified candidates — within the same compute budget; BETTER PROPOSALS — Train or refine the generator — Then verify the next kernel. Original conceptual diagram · not measured performance data](./flywheel.png)
 
 Which brings me to the metric this series has been circling throughout these articles without quite naming: **tokens per dollar per watt**. Every topic we covered is a term in it. The [memory math from Blackwell to Rubin](/blog/blackwell-to-rubin-memory-math/) sets the hardware term. [Goodput versus utilization](/blog/goodput-vs-utilization/) sets the honesty term, because a wasted FLOP burns the watt without producing the token. [Tokens per megawatt](/blog/tokens-per-megawatt/) sets the ceiling, because power is the input nobody can overprovision their way around. Kernels, parallelism, quantization, disaggregation: all of them are just levers on the same ratio.
 

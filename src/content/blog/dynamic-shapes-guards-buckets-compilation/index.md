@@ -3,7 +3,7 @@ title: "Dynamic Shapes: Guards, Buckets, Padding, and Compilation Cost"
 description: "Model compiled variants and guard validity, derive linear and attention padding overhead, and choose shape policies using the real workload distribution."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "pt-4"
 order: 16
@@ -58,7 +58,6 @@ The expression assumes compilation costs are included once per relevant cache li
 For an illustrative variant costing 2 seconds to compile and saving 1 millisecond per use, 2000 comparable uses are needed to recover the setup cost under a simple fixed-cost model. A rarely used shape may never reach that point.
 
 A steady-state benchmark excludes this tradeoff unless compilation is measured separately. Keep cold-start, first-use, and reused-execution populations distinct. The deployment's lifetime and cache behavior determine which result matters.
-
 
 
 ![Deep-dive illustration: Model total compilation and execution cost](./deep-dive.png)

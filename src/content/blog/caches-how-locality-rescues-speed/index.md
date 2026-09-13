@@ -3,7 +3,7 @@ title: 'Caches: How Locality Rescues a 100x Speed Gap'
 description: "A DRAM access costs your CPU around 200 cycles. Caches hide that almost entirely, and the trick behind them — locality — is the same 1 FlashAttention uses on a GPU."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'mem-2'
 order: 4
 series: "comp-arch"
@@ -40,7 +40,6 @@ A cache is a small, fast memory that bets on both. It keeps recently used data c
 
 The unit of that second bet has a name: the **cache line**. On essentially every mainstream CPU today, x86 and most ARM designs alike, a cache line is 64 bytes. The cache never moves a single byte or a single 8-byte word; it moves lines. Ask for 1 4-byte float and the hardware fetches the aligned 64-byte block containing it, all 16 floats.
 
-![1 cache miss fetches a full 64-byte line, so the next 15 sequential accesses hit for free](./cache-line.png)
 
 This is spatial locality made mechanical. If you're walking an array front to back, the miss on element 0 pre-pays for elements 1 through 15. 1 slow trip to DRAM buys 16 fast accesses. If your access pattern actually has spatial locality, the cache line converts a 100x penalty into a small amortized surcharge.
 
@@ -70,7 +69,6 @@ Read those 2 lines again, because they contain the single most counterintuitive 
 
 The reason is that the hit rate is the wrong number to stare at. What matters is the **miss rate**, and from 5% to 1% is a 5x reduction. Misses are so expensive that they dominate the average even when they're rare: at 95%, the occasional miss contributes 10 of the 14 cycles, which is 71% of all memory time spent on 5% of accesses.
 
-![Average memory access time at 90, 95, 99, and 100 percent hit rates, showing the steep payoff of the last few points](./hit-rate-math.png)
 
 Run the numbers at 90% and the picture gets grim: 4 + 0.1 × 200 = 24 cycles, 4 times worse than the 99% machine, on identical hardware. This is why performance engineers obsess over the last few points of hit rate. It's also why "the cache hit rate is 95%, memory isn't our problem" is one of the most common wrong conclusions in profiling.
 
@@ -98,7 +96,6 @@ Now sum every element, 2 ways.
 
 **Column order** (`for j: for i: sum += A[i][j]`): consecutive accesses are 16 KB apart (1 full row of 4096 floats). Every access lands in a different cache line, and by the time you wrap around to the second column, the 64 MB you've streamed through has evicted everything. Miss rate: essentially 100%. AMAT = 4 + 1.0 × 200 = **204 cycles** per access.
 
-![Row-order versus column-order traversal of a row-major matrix, with per-access cost of 16.5 versus 204 cycles](./traversal-order.png)
 
 Same data. Same number of additions. Same instruction count, near enough. About 12x apart in modeled memory cost, purely from the order of 2 nested loops. In practice hardware prefetchers (more on them below) narrow the measured gap, but factors of 5 to 10x show up reliably on real machines, and you can reproduce this in 20 lines of C tonight.
 

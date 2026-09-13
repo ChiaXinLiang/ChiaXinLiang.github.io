@@ -3,7 +3,7 @@ title: '1 Rack, 72 GPUs: The NVL72 by the Numbers'
 description: "72 Blackwell GPUs, 13.5 TB of HBM3e, 130 TB/s of NVLink, 130 kW: why NVIDIA's GB200 NVL72 rack behaves like a single accelerator, with the napkin math to prove it."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'rack-1'
 order: 7
 series: "ai-performance"
@@ -20,7 +20,6 @@ That framing is not marketing fluff. It is the most consequential shift in AI ha
 
 The GB200 NVL72 is a liquid-cooled rack containing 18 compute trays and 9 NVLink switch trays. Each compute tray holds 2 GB200 "superchips," and each superchip pairs 1 Grace CPU with 2 Blackwell GPUs over NVLink-C2C, a 900 GB/s coherent chip-to-chip link. Multiply it out: 36 Grace CPUs and 72 Blackwell GPUs per rack.
 
-![Anatomy of a GB200 NVL72 rack: 18 compute trays and 9 NVLink switch trays with headline specs](./inside-the-rack.png)
 
 The headline numbers, from NVIDIA's official spec sheet:
 
@@ -36,7 +35,6 @@ The number that changes system design is not the exaFLOPS. It is the shape of th
 
 Before NVL72, the standard building block was an 8-GPU HGX board. Inside those 8 GPUs you had NVLink; the moment your model needed a ninth GPU, traffic fell off a cliff onto InfiniBand or Ethernet, typically 400 Gb/s per GPU, which is 50 GB/s. NVLink 5 advertises 1.8 TB/s bidirectionally, or approximately 900 GB/s in 1 direction. Compared with 1 400 Gb/s link at 50 GB/s in 1 direction, that is an 18x nominal bandwidth difference, and the latency gap (sub-microsecond NVLink hops versus multi-microsecond RDMA) is just as brutal for the small, latency-sensitive messages that tensor parallelism generates.
 
-![Per-GPU bandwidth inside the NVLink domain versus across racks, an 18x nominal one-direction cliff](./bandwidth-cliff.png)
 
 Parallelism strategies live or die on this cliff:
 
@@ -61,7 +59,6 @@ Take a hypothetical dense 1-trillion-parameter transformer served in FP8. You ca
 
 **Capacity.** 11.2 TB ÷ 0.25 MB ≈ **45 million cached tokens**. At a 128k context length that is about **350 concurrent full-context sequences** on 1 rack, with the whole model resident in HBM and every all-reduce staying on NVLink.
 
-![Memory budget for a 1T-parameter FP8 model on NVL72: weights, overhead, and KV cache](./memory-budget.png)
 
 **Now the bandwidth check**, because capacity is only half the story. Decode is memory-bound: each generated token must stream the weights plus each sequence's KV history out of HBM (see [the memory wall](/blog/the-memory-wall-latency-numbers/) for why compute barely matters here).
 

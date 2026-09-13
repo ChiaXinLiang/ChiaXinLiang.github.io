@@ -3,7 +3,7 @@ title: "Instruction-Level Parallelism: Dependency Chains, Registers, and Spills"
 description: "Derive latency hiding through independent instruction chains, separate ILP from warp-level concurrency, and measure register and spill tradeoffs."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "ktune-4"
 order: 22
@@ -52,7 +52,6 @@ m\gtrsim\lceil L/\tau\rceil.
 $$
 
 For illustrative latency 4 cycles and interval 1 cycle, 4 independent chains can provide enough ready work in the idealized schedule. This calculation explains the mechanism; it does not prescribe 4 accumulators for every kernel or instruction.
-
 
 
 ![Deep-dive illustration: Derive the single-chain latency bound](./deep-dive.png)

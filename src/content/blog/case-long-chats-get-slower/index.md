@@ -3,7 +3,7 @@ title: "Case File: Long Chats Get Slower and Slower"
 description: "Model KV-cache growth, distinguish capacity from attention traffic, and test why long conversations slow down even when weights and GPU utilization remain stable."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'case-7'
 order: 23
 series: "llm-serving"
@@ -26,7 +26,6 @@ Separate 3 lengths: the serialized prompt length, the reused prefix length, and 
 
 Record input and output lengths per turn and per request cohort. Later turns may generate longer answers, use tools more frequently, or arrive at busier times. Compare token intervals at matched active batch sizes before attributing every latency change to context growth. Good observability makes the context hypothesis testable instead of merely intuitive.
 
-![A growing chat adds cached keys and values even when the model weights stay fixed.](figure-01.png)
 
 *Original explanatory schematic based on the standard KV-cache mechanism; context sizes are illustrative.*
 
@@ -62,7 +61,6 @@ If the batch contains 16 short sequences, their raw KV total is 8 GiB. Growing t
 
 The calculation also reveals a capacity violation under the previous 52-GiB cache budget. In reality the engine would need to admit fewer sequences, limit their histories, distribute the model differently, or handle memory pressure through another supported policy. Never present a throughput estimate for an impossible memory configuration as an achievable benchmark.
 
-![Raw cache size rises from 512 MiB to 4 GiB for each illustrative sequence.](figure-02.png)
 
 *Original calculation figure. The model dimensions are hypothetical and the cache equation is stated in the text.*
 
@@ -116,7 +114,6 @@ Lower concurrency for long contexts or route them to a separate pool. This can r
 
 Prefix caching helps repeated prompt processing; paged allocation helps cache management and sharing opportunities. Neither removes the information that full attention must consult during decode. The separate article on [KV cache as a first-class serving resource](/blog/kv-cache-first-class-citizen/) develops those management decisions.
 
-![A diagnostic checklist connects observed behavior with targeted experiments.](figure-03.png)
 
 *Original diagnostic summary; investigate the listed mechanisms with controlled measurements.*
 

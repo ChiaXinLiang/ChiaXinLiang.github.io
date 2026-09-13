@@ -3,7 +3,7 @@ title: "Expert, Context, and Sequence Parallelism: Choosing a Process Mesh"
 description: "Distinguish expert routing, long-context attention partitioning, and sequence-sharded activations, then derive a consistent process layout."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "distributed-training"
 code: "train-6"
 order: 6
@@ -46,7 +46,6 @@ S_{\mathrm{dispatch}}\approx NkHb.
 $$
 
 This counts duplicated token payload sent for selected experts before accounting for local routes, packing, metadata, compression, and implementation reuse. The return path can create another comparable state transfer. Actual inter-rank bytes depend on which selected experts are local and how tokens are aggregated.
-
 
 
 ![Deep-dive illustration: Expert parallelism follows sparse routing](./deep-dive.png)

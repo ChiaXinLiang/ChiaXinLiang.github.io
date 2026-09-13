@@ -3,7 +3,7 @@ title: "Kubernetes and Slurm: Topology-Aware Placement and Resource Guarantees"
 description: "Model multidimensional job feasibility, distinguish device allocation from performance isolation, and verify local and cross-node placement for distributed AI jobs."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-performance"
 code: "infra-3"
 order: 14
@@ -36,7 +36,6 @@ $$
 The assignment a maps components to nodes. These inequalities omit device topology, allocation granularity, reservations, and runtime overhead, so satisfying them is necessary only within the simplified model, not a complete deployment certificate.
 
 Physical GPU memory also matters. A logical GPU allocation does not guarantee that a model's weights, activations, workspace, and cache fit. Shared-device or partitioned-device mechanisms have their own capacity and isolation semantics that must be included explicitly.
-
 
 
 ![Deep-dive illustration: Represent demand as several resources and communication groups](./deep-dive.png)

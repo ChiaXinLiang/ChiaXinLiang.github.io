@@ -3,7 +3,7 @@ title: 'From DRAM to HBM: How Memory Went 3D'
 description: "A DDR5 module moves ~50 GB/s; an HBM3e package moves 8 TB/s. The 160× gap comes from geometry, not faster cells — here is the full story."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'mem-3'
 order: 12
 series: "comp-arch"
@@ -20,7 +20,6 @@ Strip away every acronym and a DRAM bit is astonishingly simple: 1 transistor an
 
 The wiring follows a grid. A horizontal **wordline** connects to the transistor gates of every cell in a row; raising it switches all those transistors on at once. A vertical **bitline** connects to 1 cell per row and carries the charge out. This grid is why DRAM addresses come in row and column halves, and why your memory chip is physically a vast checkerboard of identical cells — billions of them per die.
 
-![Schematic of a single DRAM cell: wordline, bitline, access transistor, storage capacitor, and sense amplifier, annotated with charge and refresh numbers](./one-bit-of-dram.png)
 
 The bucket is absurdly small. A modern cell capacitor holds roughly 10–30 femtofarads. Charge it to a fraction of a volt and you have stored a few tens of thousands of electrons. That is the physical entirety of 1 bit of your data: about 40,000 electrons, held in a structure etched so deep and narrow that its aspect ratio resembles a drinking straw a metre long.
 
@@ -62,7 +61,6 @@ A high-end server CPU with 12 channels of DDR5-6400 reaches 12 × 51.2 ≈ **614
 
 > 8 stacks × ~1 TB/s ≈ **8 TB/s per package**
 
-![Bar comparison: 64 wires at 6.4 Gb/s gives 51.2 GB/s for DDR5, while 1,024 wires at 9.6 Gb/s gives 1.2 TB/s for 1 HBM3e stack](./width-times-rate.png)
 
 Notice what did *not* change: per-wire speed. 6.4 versus 9.6 Gb/s is a factor of 1.5; GDDR7 graphics memory actually runs its pins 3 times faster than HBM3e. The 160× package-level gap is almost entirely width, with a helping of stack count. HBM is not fast memory. HBM is *wide* memory, and the whole trick is making that width physically routable.
 
@@ -86,7 +84,6 @@ Width was unroutable on a motherboard, so HBM abandons the motherboard. 2 struct
 
 **Move 1: stack the dies.** An HBM package is 8 to 12 DRAM dies (16 in HBM4's tallest configurations) stacked vertically on top of a base logic die. Each DRAM die is ground down to a few tens of microns thick — thinner than a human hair — and connected to its neighbors by **through-silicon vias**, or TSVs: holes etched straight through the silicon and filled with copper, thousands of them per die, at pitches measured in tens of microns. Signals travel between dies over distances of microns rather than centimetres. The base die at the bottom of the stack collects all of it, handles test and repair logic, and presents the 1,024-bit interface to the outside.
 
-![Cross-section of an HBM package: stacked thinned DRAM dies with vertical TSVs on a base logic die, sitting beside the GPU die on a silicon interposer over the package substrate](./inside-an-hbm-stack.png)
 
 **Move 2: shrink the board to a chip.** Even 1,024 wires from stack to processor cannot cross a normal package substrate, whose wiring pitch is too coarse. So both the GPU die and the HBM stacks are mounted on a **silicon interposer**: a slab of silicon, patterned with the same lithography used for chips, serving purely as ultra-fine wiring. Where a PCB ball-grid pitch is around 800 microns, interposer microbumps sit at roughly 50-micron pitch, a couple of 100 times more connections per unit area. The stack sits millimetres from the GPU, and 1,024 traces cross the gap without breaking a sweat. TSMC's CoWoS ("chip-on-wafer-on-substrate") is the best-known industrial version of this assembly.
 

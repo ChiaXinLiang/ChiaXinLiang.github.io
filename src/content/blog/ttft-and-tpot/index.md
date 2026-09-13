@@ -3,7 +3,7 @@ title: 'TTFT and TPOT: The 2 Numbers That Define LLM UX'
 description: "Why the first token and every token after it obey different physics, and how to estimate both from a model's size and a GPU spec sheet."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'llm-5'
 order: 13
 series: "llm-basics"
@@ -24,7 +24,6 @@ When your prompt arrives at an LLM server, the model processes it in 2 phases wi
 
 **Decode** produces the reply. Autoregressive generation is strictly sequential: token 47 cannot be computed until token 46 exists, because token 46 is part of its input. So the model runs once per output token, and each of those runs pushes exactly *1* token through the network. The matrices are the same size as ever — the model must still read all its weights — but they now multiply a single vector instead of a big batch of them. Almost no arithmetic per byte fetched. Decode is therefore **bandwidth-bound**: its speed is set by how fast memory can feed weights (and the growing KV cache) to the compute units, in gigabytes per second.
 
-![Timeline of 1 LLM request showing the parallel prefill phase, then sequential decode tokens, with TTFT and TPOT brackets](./prefill-decode.png)
 
 The 2 headline metrics map directly onto these phases:
 
@@ -76,7 +75,6 @@ It must also read the KV cache. For a 7B model with 32 layers and a 4,096-wide h
 TPOT ≈ 7.0 + 0.55 + 0.05 ≈ 7.6 ms  →  ~130 tokens/s
 ```
 
-![Bar chart of the per-token decode time budget: 7 ms reading weights, 0.55 ms reading KV cache, 0.05 ms of arithmetic](./decode-budget.png)
 
 The GPU spends over 99% of each decode step *waiting for memory*. You could double its FLOPS and the token stream would not speed up measurably; double its memory bandwidth and TPOT nearly halves. This single fact explains why inference-oriented hardware generations chase bandwidth so aggressively — the arithmetic behind that chase is worked through in [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/).
 
@@ -113,7 +111,6 @@ Everything above describes 1 request on an idle GPU. Production servers are neit
 
 A percentile is a point in the latency distribution: p50 (the median) is the experience of a typical request; p99 is the threshold that the slowest 1% of requests exceed. Inference latency distributions are heavily right-skewed, so the 2 can differ by an order of magnitude. A service can honestly report a 210 ms median TTFT while its p99 sits at 1.4 seconds.
 
-![Right-skewed TTFT distribution with the median at 210 ms and the 99th percentile at 1.4 s far out in the tail](./p50-p99.png)
 
 Where does the tail come from? Mostly from requests interfering with each other:
 

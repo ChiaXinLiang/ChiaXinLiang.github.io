@@ -3,7 +3,7 @@ title: 'The Default CUDA Stream Is a Hidden Global Barrier'
 description: 'How default-stream ordering can serialize a pipeline, and how explicit streams, pinned memory, and events alter its dependencies.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'orch-1'
 order: 10
 series: "gpu-performance"
@@ -33,7 +33,6 @@ The CUDA programming guide defines the legacy default stream's behavior precisel
 
 In other words, every single call on the legacy default stream is wrapped in an implicit device-wide barrier. It is `cudaDeviceSynchronize` semantics smuggled into an innocent-looking kernel launch.
 
-![Legacy default stream barrier: 1 call on stream 0 drains 3 concurrent streams and blocks their subsequent work](./default-stream-barrier.png)
 
 Here is the part that bites people in production: the trap composes across your entire process. You carefully build a multi-stream pipeline, and then a third-party library, a logging helper, or a debug `cudaMemcpy` someone added in a hurry launches on stream 0. Your pipeline doesn't error. It doesn't warn. Every stream quietly drains before that call and quietly waits after it. In a profiler trace you see your beautiful overlap collapse into a picket fence, and nothing in the code diff looks suspicious because a bare kernel launch (`kernel<<<grid, block>>>()` with no fourth argument) is the most natural line of CUDA anyone writes.
 
@@ -71,7 +70,6 @@ Read the timeline column by column. At 2–4 ms, chunk 2 is copying in while chu
 
 Now do the copy-time accounting, because this is the number that generalizes. The pipeline runs 10 ms and contains 6 ms of compute. So only 4 ms of the 12 ms of copy work is *exposed* (visible in the end-to-end time): the very first H2D (nothing to overlap with yet) and the very last D2H (nothing left to overlap with). The other 8 ms of copying is *hidden* behind compute or behind the other copy engine. In steady state with enough chunks, exposed copy time approaches just the pipeline fill and drain, and the end-to-end time approaches max(copy-in, compute, copy-out) per chunk times N. Deeper pipelines amortize the ramps; that is why inference servers chunk weight uploads and activations rather than moving 1 giant buffer.
 
-![3-chunk pipeline timeline at equal scale: serialized 18 ms versus pipelined 10 ms with 8 of 12 copy milliseconds hidden](./pipeline-timeline.png)
 
 1 `cudaMemcpy` on stream 0 between chunk boundaries and the table above degenerates back to the serial line. The barrier drains the H2D engine, the SMs, and the D2H engine before it runs, then holds all 3 idle until it finishes. That is the entire thesis of this article in 1 sentence.
 

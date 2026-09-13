@@ -3,7 +3,7 @@ title: "NUMA Tuning: CPU Affinity, Memory Placement, and IRQ Locality"
 description: "Separate CPU execution from host-memory placement, derive remote-access costs, and align workers, buffers, and device progress with measured topology."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-performance"
 code: "infra-1"
 order: 12
@@ -59,7 +59,6 @@ For illustrative local latency 100 nanoseconds, remote latency 180 nanoseconds, 
 Application time does not scale directly with this average. Caches, memory-level parallelism, prefetching, and arithmetic can hide or change access cost. A pointer-dependent workload exposes latency differently from a streaming copy. Select a benchmark that resembles the stage being tuned.
 
 Measure useful stage time and access behavior together. A lower remote fraction with unchanged throughput can mean another bottleneck dominates. A better throughput result without changed placement can reflect different scheduling or background conditions rather than the intended NUMA mechanism.
-
 
 
 ![Deep-dive illustration: Derive a simple remote-latency model](./deep-dive.png)

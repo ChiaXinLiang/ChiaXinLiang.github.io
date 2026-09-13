@@ -9,14 +9,13 @@ order: 16
 topic: "Sequence Dynamics"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 State-space models summarize an input sequence through an evolving state. Their mathematical foundation comes from dynamical systems: an input drives a hidden state, and a readout produces an output. Discretization connects continuous dynamics to token-by-token computation, while structure determines whether the model can also be evaluated efficiently over a whole sequence.
 
 This article derives the basic dynamics, discrete transitions, stability, and convolution relationship. It then explains what changes when parameters depend on input. The examples are illustrative foundations for understanding sequence architectures, not benchmark evidence that one architecture universally outperforms attention.
 
-![Concept overview: State-Space Models: Dynamics, Discretization, and Stability](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 A governs how existing state evolves, B maps input into state, and C reads state into output. Some systems also include a direct input-to-output term; the simplified equations omit it to isolate the recurrence.
 
 A sequence model places these dynamics inside a learned architecture with projections, nonlinearities, and other components. The linear system is an important mechanism, but it is not a complete language model by itself.
-
 
 
 ![Deep-dive illustration: Define continuous linear dynamics](./deep-dive.png)

@@ -9,14 +9,13 @@ order: 4
 topic: "Diffusion Models"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 A diffusion sampler turns a learned prediction into a numerical trajectory from noise toward data. Fewer updates can reduce generation work, but the chosen solver must remain compatible with the model's noise schedule and prediction type. Counting steps without counting network evaluations or evaluating quality gives an incomplete efficiency claim.
 
 This article connects discrete denoising to stochastic and ordinary differential equations. It derives simple integration rules, explains the structural innovation in DPM-Solver, and develops a fair comparison protocol. The plotted trajectories are conceptual; no trained diffusion model or GPU benchmark was executed here.
 
-![Concept overview: Efficient Diffusion Sampling: Solvers, ODEs, and SDEs](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 The drift and diffusion define how the data distribution evolves toward a noise distribution. Time runs forward for corruption and backward for generation under the corresponding reverse construction.
 
 The coefficient convention matters. A discrete checkpoint can be used through an appropriate continuous noise-level interface, but an arbitrary time mapping can change the numerical problem. Preserve the scheduler's definitions and model conditioning rather than identifying timestep indices with continuous time without conversion.
-
 
 
 ![Deep-dive illustration: Define the continuous forward process](./deep-dive.png)

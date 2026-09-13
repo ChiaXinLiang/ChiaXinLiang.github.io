@@ -3,7 +3,7 @@ title: 'Case File: Same Model, 3x Slower on the "Bigger" GPU'
 description: 'An illustrative GPU migration produces 3× slower decoding. Follow bandwidth and parallelism measurements to identify the bottleneck.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'case-4'
 order: 20
 series: "llm-serving"
@@ -53,7 +53,6 @@ Put the 2 cards side by side and read the lines in the order a procurement doc r
 
 The L40S wins the architecture line, the FP16 line, and the FP8 line outright, and 2 of them beat 1 A100 on total VRAM. The only line it loses is the one that governs decode, and it loses it by 2.36x. The L40S is a superb card for what it was built for: graphics, video, and compute-dense inference such as diffusion models or high-batch prefill. It pairs Ada's big tensor throughput with GDDR6, which is far cheaper than HBM per gigabyte precisely because it moves far fewer bytes per second. (The [DRAM-to-HBM article](/blog/from-dram-to-hbm/) covers why that gap exists physically.)
 
-![Newer silicon, less memory bandwidth: A100 80GB SXM — 312 TFLOPS dense FP16 — 2,039 GB/s HBM2e; L40S — 1 GPU — 362 TFLOPS dense FP16 — 864 GB/s GDDR6; WORKLOAD DECIDES — Prefill can benefit from more FLOPs — Batch-1 decode needs bandwidth. Data: NVIDIA A100 and L40S specifications](./spec-sheet-trap.png)
 
 A useful habit: when someone says "bigger GPU," ask *bigger at what?* Every GPU is a point in a 3-dimensional space of FLOPS, bandwidth, and capacity, and workloads project onto different axes. Batch-1 decode projects almost entirely onto bandwidth.
 
@@ -77,7 +76,6 @@ Take the actual workload: a 13B-parameter dense model served in FP16, typical ch
 
 Predicted ratio: 2.7x. Observed in the ticket: 52 tokens/s down to 18, a 2.9x regression, with the last few percent coming from scheduler and launch overhead that a 52 ms step hides less well than you would hope. 2 datasheet numbers and 1 MBU estimate reproduce the entire incident.
 
-![Predicting the decode regression: SAME BYTE BILL — 26 GB weights + 3.4 GB KV — 29.4 GB moved per decode token; A100 — 75% MBU — 29.4 / (2,039 × 0.75) = 19.2 ms — ≈ 52 tokens per second; L40S — 65% MBU — 29.4 / (864 × 0.65) = 52.3 ms — ≈ 19 tokens per second. Illustrative model · MBU assumptions differ by GPU](./decode-prediction.png)
 
 Notice what the calculation never asked for: TFLOPS, VRAM size, architecture generation, CUDA version. For a compute check, those 26 GFLOPs per token would take the L40S about 0.07 ms at datasheet FP16 throughput. The memory traffic takes 52 ms. During decode this "1,466 TFLOPS" card runs its tensor cores at well under 1 percent duty cycle.
 
@@ -91,7 +89,6 @@ Second, the interconnect tax. L40S has no NVLink; the 2 cards talk over PCIe Gen
 
 Run the TP=2 numbers with the same 65 percent MBU: 29.4 GB across 1,728 GB/s effective-peak gives about 26 ms of memory time, plus ~3 ms of all-reduce, near 29 ms per token, or about 34 tokens/s. Better than 1 L40S, still 35 percent below the A100 baseline, and nowhere near the "2 GPUs, 2 times the performance" mental model. Many teams skip TP entirely and run 2 independent replicas for throughput, which is often the right call, but then every individual user's stream runs at single-card speed: 19 tokens/s.
 
-![Two cards add communication overhead: HBM/GDDR BANDWIDTH — Two L40S: 1,728 GB/s combined — One A100: 2,039 GB/s; TENSOR PARALLELISM — 80 small all-reduces per step — Assume ≈ 3 ms additional latency; PREDICTED TP2 STEP — ≈ 26 ms memory + 3 ms collectives — ≈ 34 tokens/s; baseline ≈ 52. Illustrative latency model · NVIDIA specifications](./tp2-pcie.png)
 
 What *would* make the L40S instance competitive is cutting bytes, not adding cards. Quantize weights to FP8 (which the L40S executes natively) and the 26 GB read becomes 13 GB; W4A16 pushes it near 6.5 GB. FP8 weights plus FP8 cache give about 14.7 GB of traffic; W4A16 payload plus FP8 cache gives about 8.2 GB before scales. At the assumed 65% bandwidth efficiency, the latter has a ceiling near 68 tokens/s, subject to conversion and other overhead. This is why quantization is a candidate for this L40S workload, and why "can we quantize?" is the first question to ask before this migration, not after. The trade-offs live in [quantization: what you gain, what you lose](/blog/quantization-what-you-gain-what-you-lose/).
 

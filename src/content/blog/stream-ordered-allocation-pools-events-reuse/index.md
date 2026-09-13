@@ -3,7 +3,7 @@ title: "Stream-Ordered Allocation: Memory Pools, Events, and Safe Reuse"
 description: "Model allocation and release as stream dependencies, derive cross-stream ownership, and distinguish live allocation pressure from retained pool capacity."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "orch-3"
 order: 15
@@ -36,7 +36,6 @@ $$
 Multiple consumers require release to follow every supported use. One consumer's completion is not sufficient if another stream still accesses the buffer. Aliases and views share the same underlying allocation lifetime. A helper that retains a view therefore remains part of the consumer inventory until its supported work is complete.
 
 Draw the dependency graph before selecting an allocator. An asynchronous API can reduce unnecessary host blocking, but it cannot remove the dependencies required by the computation. A faster host return is not evidence that memory is ready for every execution domain.
-
 
 
 ![Deep-dive illustration: Treat memory lifetime as part of the execution graph](./deep-dive.png)

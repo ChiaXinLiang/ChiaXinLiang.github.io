@@ -3,7 +3,7 @@ title: "DeepSeek-V4.1-Flash 1: Causal Encoder-Decoder and Phase-Specific Work"
 description: "Read the released causal encoder-decoder design, distinguish prefill from decode work, and derive workload-sensitive cost and cache ownership models."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "ds-1"
 order: 8
@@ -33,7 +33,6 @@ $$
 The derivative notation expresses the intended dependency restriction, not a requirement to calculate those derivatives in serving. Masks, recurrence rules, and architectural operations must jointly enforce the restriction. A component's name alone is not evidence about its attention mask.
 
 This distinction lets a causal encoder process prefix representations that remain compatible with autoregressive generation. It also prevents an incorrect analogy with a translation encoder that can freely inspect an entire source sequence.
-
 
 
 ![Deep-dive illustration: Clarify what causal encoding means](./deep-dive.png)

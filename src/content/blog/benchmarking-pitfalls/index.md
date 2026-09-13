@@ -3,7 +3,7 @@ title: 'Benchmarking Pitfalls: Why Most Published Numbers Mislead'
 description: 'How workload, precision, caching, and batching change serving benchmarks, with matched comparisons and explicit goodput definitions.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'serve-3'
 order: 10
 series: "ai-performance"
@@ -34,7 +34,6 @@ A serving benchmark is a function with at least 6 inputs. Publish the output wit
 
 **The statistic.** Mean, median, p99. Latency distributions in queued systems are heavy-tailed, so the mean is dragged around by outliers while p50 hides them entirely. 2 services with identical p50 TPOT can differ 5x at p99, and your angriest users live at p99.
 
-![Six unstated benchmark variables that silently move the headline number](./unstated-variables.png)
 
 ## A worked example: 3 honest numbers from 1 GPU
 
@@ -48,7 +47,6 @@ Setup: Llama-3.1-8B, BF16 weights (about 16 GB), 1 H100 SXM with 3.35 TB/s of HB
 
 Same silicon, same weights, same software. 160 vs 3,000 vs 12,000. The spread between the 2 *marketing* numbers, A and C, is 75x, and neither of them describes what you can sell. Only B does, and B is the number nobody puts in a launch tweet because it requires admitting an SLO.
 
-![Three honest benchmark configurations on one H100 producing a 75x spread](./three-configs.png)
 
 ![Deep dive: A worked example: 3 honest numbers from 1 GPU](./deep-dive-component-01.png)
 
@@ -93,7 +91,6 @@ The reason this matters beyond hygiene is that serving architecture decisions ha
 
 So the discipline, in 1 sentence: *write the SLO down before you run anything, generate load open-loop at realistic ISL:OSL, report p99 alongside p50, state every 1 of the 6 variables, and publish goodput, not the biggest number the GPU can emit.* A benchmark is a contract with a future reader. Most published numbers break that contract not by lying but by omitting the terms.
 
-![Goodput versus raw throughput as concurrency rises, with the SLO knee marked](./goodput-slo.png)
 
 ## Takeaway
 

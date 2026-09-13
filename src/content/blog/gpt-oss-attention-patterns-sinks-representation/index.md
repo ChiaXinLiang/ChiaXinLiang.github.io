@@ -3,7 +3,7 @@ title: "gpt-oss 2: Attention Patterns, Sinks, and Numerical Representation"
 description: "Derive alternating local-global masks and learnable sink normalization, then distinguish quantized expert weights from KV state and arithmetic precision."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "oss-2"
 order: 13
@@ -33,7 +33,6 @@ $$
 The window convention here includes the current token, matching the reference's mask boundary. Off-by-one definitions matter when comparing kernels. A backend using a different “window size” convention must translate it correctly.
 
 Alternating layers create different paths for recent and distant information. A local layer can receive a representation already influenced by a preceding global layer. It is therefore incorrect to say that every local layer makes the entire model unable to use older context.
-
 
 
 ![Deep-dive illustration: Derive the alternating mask](./deep-dive.png)

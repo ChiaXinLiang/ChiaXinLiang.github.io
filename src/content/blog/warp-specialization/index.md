@@ -3,7 +3,7 @@ title: 'Assembly Lines Inside a GPU: Warp Specialization'
 description: "How producer-consumer warps, TMA, and async barriers turn a GPU SM into a pipeline — the pattern behind FlashAttention-3 and peak Hopper GEMMs."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './section-overview.png'
 code: 'ktune-3'
 order: 18
 series: "gpu-performance"
@@ -36,7 +36,6 @@ Both engines report completion through **asynchronous barriers** (`mbarrier` obj
 
 With those pieces, the natural kernel shape is a bounded buffer straight out of an operating systems textbook. Shared memory holds a ring of K tile stages. **Producer warps** issue TMA loads into empty stages and arrive on "stage full" barriers. **Consumer warpgroups** wait on "full," run WGMMAs against the stage, then arrive on "stage empty" so the producer can reuse it. An epilogue or **storer** role drains accumulators back out, often via TMA stores. Producers and consumers never touch the same synchronization except through the ring's barriers.
 
-![Warp-specialized SM: a producer warpgroup drives TMA loads into a 4-stage shared-memory ring guarded by full/empty barriers, while two consumer warpgroups run tensor-core MMAs and an epilogue path stores results](./producer-consumer.png)
 
 1 more Hopper feature makes the split efficient rather than merely tidy: **register reallocation**. `setmaxnreg` lets warpgroups resize their register allocation at runtime. Producer warps, which only babysit TMA descriptors, shrink to as few as 24-40 registers each; consumer warpgroups grow to 224-240 to hold giant accumulator tiles. In FlashAttention-3's FP16 forward kernel the producer warpgroup drops to 24-32 registers while each consumer warpgroup takes ~160-240, which is exactly how the kernel affords 2 consumer warpgroups' worth of accumulators without spilling. The deadweight of "every warp carries every job's registers" is gone.
 
@@ -60,7 +59,6 @@ Real GEMMs escape this because tiles are shared. Every block in the same output 
 - **Monolithic kernel** (load, sync, compute, sync — serial per stage), 8 K-slices: 8 × (0.5 + 0.56) = **8.5 µs** per output tile.
 - **Warp-specialized pipeline**: the producer's loads run under the consumer's MMAs, so steady state costs max(0.5, 0.56) per stage. Total ≈ 0.5 + 8 × 0.56 = **5.0 µs**, a 1.7× speedup from overlap alone, and the tensor cores are now busy essentially 90% of the tile's lifetime instead of 53%.
 
-![Timeline comparison: a monolithic kernel alternates 0.5 µs loads and 0.56 µs MMA bursts serially for 8.5 µs, while a warp-specialized pipeline overlaps producer loads with consumer compute and finishes in about 5.0 µs](./pipeline-timeline.png)
 
 The ring depth falls out of the same numbers. Each stage must hide 1 load latency, so you want enough stages that the producer stays a step or 2 ahead: with 48 KB stages and Hopper's 228 KB of shared memory per SM, a 4-stage ring (192 KB) fits, and that is exactly the regime real CUTLASS Hopper kernels run in — huge shared memory buffers, few threads, low classical "occupancy," near-peak throughput.
 
@@ -86,7 +84,6 @@ Warp specialization solves overlap *within* a tile. 3 more mechanisms extend the
 
 **Thread block clusters, DSMEM, and TMA multicast.** Hopper added a level between block and grid: a cluster of blocks co-scheduled on the same GPC, where each block can read and write the *other* blocks' shared memory (distributed shared memory, DSMEM). For GEMM the killer feature is TMA multicast: 1 TMA request fetches a B tile from HBM once and deposits it into the shared memory of every block in the cluster simultaneously. In our worked example, a cluster of 4 blocks sharing B tiles cuts B's HBM traffic 4×, which is a large part of how the "effective 0.5 µs load" is actually achieved rather than assumed.
 
-![TMA multicast in a thread block cluster: one HBM fetch of a B tile passes through L2 once and is deposited into the shared memories of four SMs at the same time, with DSMEM links between the blocks](./cluster-multicast.png)
 
 **Ping-pong scheduling.** Specialization also overlaps *compute with compute*. In FlashAttention-3, attention needs both matrix multiplies (tensor cores) and softmax exponentials (the multi-function units, a much slower resource that is otherwise idle during GEMMs). FA3 runs 2 consumer warpgroups and uses barriers to stagger them: while warpgroup A runs its GEMMs, warpgroup B runs its softmax on the previous block, then they swap. The paper credits this overlap, on top of the producer-consumer TMA pipeline, for pushing FP16 forward from ~570 to ~620-740 TFLOPS depending on shape. Those figures are the authors' own benchmarks, though they line up with independent reproductions in vLLM and SGLang deployments.
 

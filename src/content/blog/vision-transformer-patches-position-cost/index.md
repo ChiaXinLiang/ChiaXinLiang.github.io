@@ -9,14 +9,13 @@ order: 1
 topic: "Efficient Vision"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 A Vision Transformer turns an image into a sequence of patch tokens and processes that sequence with transformer blocks. This creates a direct relationship between image resolution, patch size, attention cost, and the information available to the model. Understanding that relationship is the starting point for efficient vision design.
 
 This article derives the patch interface and major computation terms, then explains position information and architectural assumptions. The original ViT work provides the primary design; the numerical examples here are illustrative. An efficient deployment still needs task-quality and backend measurements for its actual resolution and batch.
 
-![Concept overview: Vision Transformers: Patches, Positions, and Computational Cost](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 N is the number of patch tokens before adding any special token. If dimensions are not divisible, resizing, cropping, or padding requires an explicit policy. Those changes affect both computation and what image information is retained.
 
 Preserve preprocessing in quality comparisons. A model evaluated at one resolution is answering a different information-budget question from the same architecture evaluated on a larger or differently cropped image.
-
 
 
 ![Deep-dive illustration: Define the image tensor](./deep-dive.png)

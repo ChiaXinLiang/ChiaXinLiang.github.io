@@ -3,7 +3,7 @@ title: "Network Failures and Stragglers: Diagnosing Distributed Job Stalls"
 description: "Distinguish slow participation from failed transport, derive group-tail amplification, and connect bounded failure detection to safe checkpoint-based recovery."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-networking"
 code: "network-8"
 order: 11
@@ -38,7 +38,6 @@ $$
 This bookkeeping assumes the step counters describe the same protocol boundary. Independently incremented counters with different meanings cannot be combined safely. The minimum can help identify a lagging participant, but it does not certify a recoverable checkpoint.
 
 Distinguish absence of progress from expected long work. A very large prefill, checkpoint save, compilation, or input operation may legitimately take longer than ordinary iterations. The detector needs phase context rather than treating every interval without a step update as a network failure.
-
 
 
 ![Deep-dive illustration: Define useful progress at a group-wide boundary](./deep-dive.png)

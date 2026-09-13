@@ -9,14 +9,13 @@ order: 2
 topic: "Pruning and Sparsity"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Pruning removes selected connections or components from a learned network. Its appeal is straightforward: a model can contain more parameters than a deployment needs for its task. The difficult questions are which parameters to remove, how to recover useful behavior, and whether the resulting representation actually executes more efficiently.
 
 This article treats pruning as a constrained change to a trained function. It develops magnitude and loss-based importance criteria, explains their assumptions, and follows the recovery experiment. The next article addresses structured patterns and hardware execution. Separating those questions prevents a sparse checkpoint from being mistaken for a demonstrated speedup.
 
-![Concept overview: Pruning 1: Magnitude, Saliency, and Recovery Training](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -32,7 +31,6 @@ $$
 The zero-norm notation counts retained entries rather than defining an ordinary vector norm. The problem combines discrete structure selection with possible weight recovery. Solving it exactly is generally impractical for a large network, motivating importance heuristics and approximate optimization.
 
 A mask can remain applied to a dense tensor during experimentation. That establishes sparse semantics but not compressed storage or skipped arithmetic. Deployment requires a compatible representation and kernel. Keep the mathematical intervention separate from its execution.
-
 
 
 ![Deep-dive illustration: Represent the intervention with a mask](./deep-dive.png)

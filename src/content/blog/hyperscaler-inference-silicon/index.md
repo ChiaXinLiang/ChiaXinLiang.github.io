@@ -3,7 +3,7 @@ title: 'Every Hyperscaler Ships Inference Silicon Now'
 description: "Google's Ironwood, AWS's Trainium3, and Microsoft's Maia 200 mark the moment buy-vs-build flipped for inference — here's the math behind the flip."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'chip-3'
 order: 5
 series: "efficient-ai"
@@ -26,7 +26,6 @@ The 3 designs, in 1 breath. **Ironwood** (Google, TPU v7): 4,614 TFLOPS of FP8 p
 
 1 caveat before any comparison shopping: every number in the previous paragraph comes from the vendor selling the chip. Microsoft claims Maia 200 has 3× Trainium3's FP4 compute and 30% better performance per dollar than "the latest hardware in our fleet"; those comparisons pit differently-specced parts at different precisions and none of them have been through a neutral referee. Treat all cross-vendor claims in this article as self-reported, because they are.
 
-![3 inference accelerators side by side: Google Ironwood, AWS Trainium3, and Microsoft Maia 200, with vendor-reported compute, memory, and scale-up domain figures](./three-chips.png)
 
 ![Deep dive: What "inference silicon" means](./deep-dive-component-01.png)
 
@@ -62,7 +61,6 @@ Now divide the chip's memory bandwidth by that figure. Ironwood moves 7.37 TB/s,
 
 No amount of extra compute changes these numbers; the matrix units would simply idle while waiting on memory. (Real systems land below the ceiling — attention's KV cache adds reads, and no chip sustains 100% of peak bandwidth — but the proportions hold.) Notice what the arithmetic implies: halving weight precision is worth exactly as much as doubling memory bandwidth, and it costs a lot less. That is Trainium3's W4A8 path in a nutshell — AWS moved 4-bit weight decompression into hardware so the doubling comes free of software overhead, while activations stay at 8 bits where accuracy is more fragile. Maia 200's FP4-first spec sheet is the same bet stated differently.
 
-![Bar chart showing bytes streamed per token for a 70B model at FP16, FP8, and 4-bit weights, and the resulting decode token-rate ceilings at 7.37 TB/s](./decode-ceiling.png)
 
 1 more back-of-envelope check, this time at pod scale. Multiply Ironwood's per-chip 4,614 TFLOPS by 9,216 chips: 4,614 × 9,216 ≈ 42.5 million TFLOPS, which is the advertised 42.5 exaflops — the pod number is just the chip number times the chip count, no marketing multiplier hiding in it. Google puts a pod at roughly 10 MW, which works out to about 4.25 TFLOPS of FP8 per watt, chips and interconnect included. Numbers like that, tokens per megawatt more than tokens per second, are what hyperscaler procurement now optimizes.
 

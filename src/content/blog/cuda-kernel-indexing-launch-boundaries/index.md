@@ -3,7 +3,7 @@ title: "CUDA Kernel Foundations: Indexing, Launch Geometry, and Boundary Masks"
 description: "Derive thread-to-element ownership, handle partial blocks and large indices, and build a correct vector kernel before interpreting memory throughput."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "cuda-1"
 order: 5
@@ -36,7 +36,6 @@ Each valid output element needs one writer in this simple implementation. Every 
 Start with a deterministic reference and several lengths, including a size not divisible by the block width. Include N=0 and small lengths in the host-side contract. An empty vector needs a defined no-work path rather than an invalid launch configuration.
 
 Assume separate supported device buffers for the example unless aliasing is explicitly part of the interface. Pointer overlap changes the correctness analysis for more general operations, especially when one output can overwrite data another thread still needs. The simple result does not authorize arbitrary buffer aliasing.
-
 
 
 ![Deep-dive illustration: State the mathematical operation and ownership contract](./deep-dive.png)

@@ -3,7 +3,7 @@ title: 'Branch Prediction: Why Your CPU Is a Gambler That Wins 95% of the Time'
 description: "Your CPU bets on the outcome of every if-statement before it knows the answer, and the math of why a 95% win rate still isn't good enough."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'arch-2'
 order: 10
 series: "comp-arch"
@@ -26,7 +26,6 @@ If the guess was right, the front end avoids the misprediction recovery penalty;
 
 If the guess was wrong, everything fetched after the branch is garbage. The CPU flushes it: every in-flight instruction on the wrong path is discarded, the front end redirects to the correct address, and the pipeline refills from empty. On current Intel and AMD cores that penalty runs **roughly 15 to 20 cycles**, a figure you can cross-check in Agner Fog's microarchitecture manuals. 15 cycles in which a machine built to complete 4 to 6 instructions per cycle completes approximately none.
 
-![Correctly predicted branches keep the pipeline full; a misprediction flushes the wrong-path work and costs a 15-20 cycle bubble](./pipeline-flush.png)
 
 So everything hinges on the win rate. And this is where the story gets genuinely clever.
 
@@ -36,7 +35,6 @@ The simplest dynamic predictor is 1 bit per branch: remember what this branch di
 
 The fix, proposed by James E. Smith in 1981, is a **2-bit saturating counter**: a tiny state machine with 4 states from "strongly not-taken" to "strongly taken." A taken branch nudges the counter up; a not-taken branch nudges it down; it saturates at the ends. The crucial property is hysteresis. 1 wrong outcome moves a "strong" state to a "weak" 1 but doesn't flip the prediction. The predictor needs to be wrong twice in a row to change its mind. Our 100-iteration loop now mispredicts once per run instead of twice: 99% accuracy from 2 bits of memory.
 
-![2-bit saturating counter state machine: 4 states from strongly not-taken to strongly taken, requiring 2 consecutive misses to flip the prediction. Redrawn from J. E. Smith (1981)](./two-bit-counter.png)
 
 A CPU keeps thousands of these counters in a table, indexed by the branch's address, so every branch in your program gets its own little gambler with its own memory.
 
@@ -102,7 +100,6 @@ Here's the punchline for anyone who works on ML systems: the branch predictor is
 
 A GPU streaming multiprocessor has no branch predictor worth the name. It runs threads in **warps** of 32 (NVIDIA's term; AMD calls them wavefronts) that share 1 instruction stream in SIMT fashion. When threads in a warp disagree on a branch, some want the `if`, some want the `else`, the hardware doesn't guess. It executes *both* paths in sequence, with an active-mask switching off the lanes that didn't choose that path. Idle lanes, no flush.
 
-![Warp divergence on a GPU: all lanes execute the if-path with half masked off, then the else-path with the other half masked, then reconverge](./warp-divergence.png)
 
 Split a warp 50/50 and you run at half throughput through the divergent region; a worst-case 32-way divergent branch runs at 1/32. The NVIDIA CUDA programming guide is blunt about keeping control flow uniform within a warp. GPUs get away with this because instead of speculating past stalls, they hide latency by swapping in other warps, throughput over latency, thousands of gamblers replaced by a scheduler with thousands of alternative jobs. It's the same lesson as [goodput vs utilization](/blog/goodput-vs-utilization/): a busy pipeline isn't the same as useful work, and each architecture picks a different mechanism for keeping the work useful.
 

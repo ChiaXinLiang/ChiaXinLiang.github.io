@@ -3,7 +3,7 @@ title: 'Training in 4-Bit: How Low Can Pretraining Actually Go?'
 description: 'A 12B model trained on 10 trillion tokens with 4-bit matrix operations: numerical limitations, scaling choices, and the reported training evidence.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'fmt-2'
 order: 7
 series: "efficient-ai"
@@ -31,7 +31,6 @@ The trick that makes 4 bits usable is **block scaling**: group nearby values, st
 - **MXFP4** (the OCP open standard, what gpt-oss ships in): blocks of 32 values, each block scaled by an E8M0 factor, meaning the scale itself must be a power of 2.
 - **NVFP4** (NVIDIA's format, native in Blackwell tensor cores): blocks of 16 values, each block scaled by an FP8 E4M3 factor, plus 1 FP32 scale for the whole tensor.
 
-![Anatomy of NVFP4 versus MXFP4 block scaling, per NVIDIA's Blackwell Ultra deep-dive](./fp4-anatomy.png)
 
 Smaller blocks mean each scale factor only has to cover 16 neighbors instead of 32, so it can hug the local distribution more tightly. A real-valued (rather than power-of-2) scale removes another rounding step. Those 2 choices are why NVFP4 is the format that made it into a serious pretraining run. NVIDIA reports the combination holds accuracy within about 1% of FP8 while using roughly 1.8x less memory for the quantized tensors, a vendor-measured figure but 1 consistent with the published training curves.
 
@@ -67,7 +66,6 @@ The outlier itself encodes perfectly. Everything else in the block gets crushed:
 | 0.005 | 0.0625 | 0 | 0.000 | lost |
 | −0.033 | −0.4125 | −0.5 | −0.040 | +21% |
 
-![Worked example: the same block quantized cleanly, then wrecked by a single 10x outlier that stretches the scale](./outlier-block.png)
 
 2 weights flushed to 0, 1 inflated by 90%. 1 extreme value spent the block's entire dynamic range on itself and left nothing for its 15 neighbors. During inference you can hunt outliers offline and special-case them. During training, they appear and move every step, in tensors you never materialize for inspection. This is failure mode number 1.
 
@@ -81,7 +79,6 @@ The NVFP4 pretraining recipe ([arXiv 2509.25149](https://arxiv.org/abs/2509.2514
 
 **2. Stochastic rounding to unbias the gradients.** Instead of rounding to the nearest representable value, round *up or down at random, with probability proportional to proximity*. Concretely: a gradient sitting at 0.1 in scale units, between representable neighbors 0 and 0.5, rounds to 0.5 with probability 0.1/0.5 = 20% and to 0 with probability 80%. The expected value is 0.5 × 0.2 = 0.1, exactly right. Any single update is wrong, but across millions of steps the errors average out instead of piling up in 1 direction. Round-to-nearest would have returned 0 every single time, a 100% bias on that value forever.
 
-![Stochastic rounding on the FP4 grid: round-to-nearest deletes a 0.1 gradient, stochastic rounding preserves it in expectation](./stochastic-rounding.png)
 
 **3. Consistency and selective precision.** A tensor gets quantized along rows in the forward pass and along columns in the backward pass, and if those 2 quantized views disagree, the gradient no longer matches the function being differentiated. The recipe uses 2D block scaling on weights so both passes see the same quantized tensor. And a small minority of numerically sensitive layers, notably the linear layers in the final blocks of the network, simply stay in BF16. The authors report that switching those few layers to higher precision was the difference between a run that tracks FP8 and one that drifts away late in training.
 

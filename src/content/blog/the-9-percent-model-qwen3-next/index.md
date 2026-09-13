@@ -3,7 +3,7 @@ title: 'The 9.3% Model: Qwen3-Next Reports 32B Quality at Lower Training Cost'
 description: "Qwen3-Next pairs linear attention with extreme MoE sparsity to hit 32B-class quality on 9.3% of the reported training cost — here is the arithmetic behind both levers."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'cd-1'
 order: 9
 series: "efficient-ai"
@@ -35,7 +35,6 @@ Qwen3-Next attacks both knobs at once. That is the whole trick.
 
 **Lever 2: hybrid linear attention.** 3 out of every 4 layers replace standard attention with Gated DeltaNet, a linear-attention variant. Instead of storing every past token's key and value and comparing each new token against all of them, a linear-attention layer maintains a fixed-size state — think of it as a running summary matrix — that gets updated once per token. Cost per token: constant, regardless of whether the context holds 1K tokens or 256K. The remaining 1 layer in 4 keeps standard (gated) attention, for reasons we will get to, because pure linear attention has a known weakness.
 
-![Two levers: sparse activation lights up ~3B of 80B parameters per token, and a 3-to-1 hybrid stack keeps full attention in only one of every 4 layers](./fig-two-levers.png)
 
 Neither lever is new on its own. MoE dates to the 1990s and returned at scale with Google's sparsely-gated LSTM work in 2017. Linear attention has a 5-year paper trail. What Qwen3-Next demonstrates is that stacking both, aggressively, holds up at frontier quality — and that the savings can combine, subject to memory and routing overhead.
 
@@ -63,7 +62,6 @@ $$
 
 Qwen reports 9.3% of training cost in GPU-hours. The equal-token FLOP estimate happens to be close, but these are different quantities: their numerical proximity does not verify the reported cost. The useful MoE intuition is: **the training bill tracks active parameters, not total parameters.** An 80B-total model with 3B active costs roughly what a 3B dense model costs to push a token through. The other 77B parameters sit in memory, waiting for the router to call on them, contributing capacity but not FLOPs.
 
-![Equal-token FLOP illustration: 6 × 32B × D versus 6 × 3B × D; 3/32 = 9.375%, distinct from reported GPU-hour cost](./fig-worked-math.png)
 
 2 honest caveats. First, this is an equal-token hypothetical. Qwen states that Next used 15T tokens sampled from Qwen3's 36T-token corpus and reports cost in GPU-hours, not a full audited FLOP accounting. Different token budgets, attention work, and achieved hardware efficiency change the comparison. Second, matching quality while reporting lower GPU-hours is the empirical claim doing the heavy lifting. Scaling folklore long held that sparse models need far more total parameters to match dense quality (Qwen3-Next uses 2.5x) and that training them stably at high sparsity is hard. The benchmark suite tests the quality result; the division illustrates sparse activation under an equal-token assumption.
 
@@ -82,7 +80,6 @@ The "gated" in Gated DeltaNet matters too. The delta rule updates the state sele
 
 There is a stability story underneath as well, and it is easy to miss. High-sparsity MoE training historically suffered from router collapse and loss spikes, each spike costing a rollback and wasted GPU-days. Qwen3-Next ships a bundle of unglamorous fixes (0-centered layernorm weights and careful router normalization among them) aimed precisely at spike-free training. Moonshot's Kimi K2 makes the same point at larger scale: 1 trillion total parameters, 32B active — a 3.2% activation ratio — trained on 15.5 trillion tokens with, per the technical report, 0 loss spikes, credited largely to the MuonClip optimizer. Stability is an efficiency feature. A run that never restarts is a run whose every FLOP counts, which is [goodput by another name](/blog/goodput-vs-utilization/).
 
-![Activation ratios of recent open MoE models: DeepSeek-V3 at 5.5%, gpt-oss-120b at 4.4%, Qwen3-Next at 3.8%, Kimi K2 at 3.2%](./fig-sparsity-trend.png)
 
 Zoom out across 2025-26 open releases and the direction is unmistakable. DeepSeek-V3 activates 5.5% of its parameters, OpenAI's gpt-oss-120b about 4.4%, Qwen3-Next 3.8%, Kimi K2 3.2%. Each generation lights up a smaller fraction of a larger whole, and quality keeps climbing anyway.
 

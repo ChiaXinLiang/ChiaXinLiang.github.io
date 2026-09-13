@@ -3,7 +3,7 @@ title: "Case File: GPU at 100%, but Tokens per Second Are Low"
 description: "Distinguish kernel activity from useful work, model the bandwidth limit of decode, and test whether batching or memory traffic explains low throughput."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'case-3'
 order: 19
 series: "llm-serving"
@@ -23,7 +23,6 @@ First isolate these phases. Record prompt lengths, generated lengths, active bat
 
 Also separate aggregate output throughput from per-request streaming speed. If 8 users each receive 40 tokens per second, aggregate throughput is 320 output tokens per second. Reporting only 40 makes the system look 8 times less productive; reporting only 320 hides whether the user experience is acceptable. Both metrics matter, and neither can be inferred from the activity gauge.
 
-![GPU activity measures time with a kernel running; token throughput measures useful outputs.](figure-01.png)
 
 *Original explanatory diagram based on NVIDIA's documented utilization definition; it is not a reproduction of a source figure.*
 
@@ -67,7 +66,6 @@ For an illustrative grouped-query configuration with 40 layers, 8 KV heads, head
 
 If we use a deliberately simple 1-read traffic estimate, weights plus KV amount to 31.37 GB per step. At 1.2 TB/s this is 26.1 milliseconds, giving a ceiling around 306 aggregate output tokens per second. This calculation is not an exact prediction. It shows why a weights-only explanation can become optimistic as context grows and why the batch that helps weight reuse can also increase cache traffic.
 
-![Illustrative weight-only decode calculation for a batch of 8.](figure-02.png)
 
 *Original worked-example figure. Numbers are assumptions used in this article, not measured hardware results.*
 
@@ -91,7 +89,6 @@ A GPU with higher sustained memory bandwidth may help more than one with a highe
 
 Do not apply all remedies simultaneously. Keep a before/after record for one change, including batch size, context distribution, and service-level goodput. Otherwise an apparent kernel win may simply come from serving shorter prompts or permitting higher latency.
 
-![A diagnostic checklist connects observed behavior with targeted experiments.](figure-03.png)
 
 *Original diagnostic summary; investigate the listed mechanisms with controlled measurements.*
 

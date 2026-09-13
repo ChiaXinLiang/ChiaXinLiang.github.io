@@ -9,14 +9,13 @@ order: 11
 topic: "Distillation and Adaptation"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 QLoRA combines a frozen quantized base with trainable low-rank adapters. It reduces the storage required by the pretrained weights while retaining a wider computation path for adaptation. The method also addresses quantization-constant overhead and transient optimizer-memory pressure. These mechanisms affect different terms in the training resource model.
 
 The phrase 4-bit finetuning can hide that separation. The base weights are stored in a low-bit representation, but the original QLoRA setup does not update every packed base value as an ordinary 4-bit trainable parameter. This article derives the numerical interface and explains what must be counted, validated, and exported.
 
-![Concept overview: QLoRA: Quantized Base Weights and Adapter Numerics](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 The base representation is fixed during the adapter-training procedure considered here. A and B receive optimizer updates. The scalar s follows the chosen adapter convention and must accompany the artifact.
 
 The original paper uses a low-bit storage datatype and usually BFloat16 computation. Other implementations can use different supported paths. Report actual storage and compute formats rather than describing the whole training graph with one nominal bit width.
-
 
 
 ![Deep-dive illustration: Separate base storage and adaptation](./deep-dive.png)

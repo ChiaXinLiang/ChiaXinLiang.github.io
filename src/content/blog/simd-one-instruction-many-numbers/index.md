@@ -3,7 +3,7 @@ title: 'SIMD: 1 Instruction, Many Numbers'
 description: "How a single AVX-512 instruction adds 16 floats at once, why the compiler only sometimes gives you that speedup for free, and how GPUs scaled the same trick to thousands of lanes."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'par-1'
 order: 5
 series: "comp-arch"
@@ -20,7 +20,6 @@ This matters because the other route to speed closed 2 decades ago. Clock freque
 
 In 1966 Michael Flynn proposed a classification of computers so simple it still organizes the whole field. Ask 2 questions about a machine. How many *instruction streams* does it follow at once? And how many *data streams* do those instructions touch? 2 questions with 2 answers each gives 4 boxes.
 
-![Flynn's taxonomy: 4 machine classes arranged by instruction streams and data streams, with SIMD and MIMD highlighted](./flynn-taxonomy.png)
 
 - **SISD** — single instruction, single data. 1 core running scalar code, exactly the fetch-decode-execute machine from [the first article in this series](/blog/what-a-cpu-actually-does/). Each instruction produces 1 result.
 - **SIMD** — single instruction, multiple data. 1 instruction stream, but each instruction operates on a whole batch of values at once. This article.
@@ -37,7 +36,6 @@ The hardware mechanism is the **vector register**. A normal general-purpose regi
 
 A vector instruction names these registers just like scalar code names ordinary ones. The instruction `vaddps zmm2, zmm0, zmm1` reads 2 512-bit registers, adds them lane by lane, and writes 16 sums into a third. Behind it sit 16 floating-point adders physically side by side. The instruction is fetched once, decoded once, and scheduled once; the arithmetic fans out.
 
-![Scalar add versus AVX-512 vector add: 1 addss produces 1 sum, 1 vaddps produces 16 sums lane by lane](./vector-add.png)
 
 The idea is old. The Cray-1 of 1976 built its legend on 8 vector registers of 64 elements each, and supercomputers were "vector machines" for 2 decades. The mainstream caught up in small steps: MMX in 1997 (64-bit), SSE in 1999 (128-bit, the first 4-float registers), AVX in 2011 (256-bit), and AVX-512 reaching servers in 2017. ARM took a parallel path with 128-bit NEON, now in every phone, and the newer SVE extension, which lets hardware choose any width from 128 to 2048 bits while the code stays the same. Fujitsu's A64FX, the chip inside the Fugaku supercomputer, runs SVE at 512 bits.
 
@@ -65,7 +63,6 @@ The vectorized loop is still leaving most of the machine idle. The core can *sta
 
 The fix is to break the chain: keep **8 independent accumulators**, add every eighth vector into each, and fold the 8 together at the end. Now the scheduler always has independent work, the loop becomes throughput-bound at 64 adds ÷ 2 per cycle = 32 cycles, and with the wind-down reduction the whole sum lands around 60 cycles, about 15 nanoseconds. Nearly 70× the scalar baseline.
 
-![Critical-path cycles for summing 1,024 floats: 4,096 scalar, about 280 with AVX-512, about 60 with AVX-512 plus 8 accumulators](./array-sum.png)
 
 2 honest footnotes. First, the accumulator trick is instruction-level parallelism, not SIMD; scalar code with 8 accumulators gains from it too. SIMD contributes the 16×, latency-hiding contributes the rest, and the 2 multiply because they attack different limits, exactly the latency-versus-throughput split from [the pipeline article](/blog/what-a-cpu-actually-does/). Second, both tricks quietly reorder the additions, and floating-point addition is not associative: summing in a different order can produce a slightly different rounding. The math is fine for almost every application, but the *compiler is not allowed to assume that*, which brings us to the practical question.
 

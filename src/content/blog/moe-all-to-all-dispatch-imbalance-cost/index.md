@@ -3,7 +3,7 @@ title: "All-to-All for MoE: Expert Dispatch, Imbalance, and Communication Cost"
 description: "Derive sparse-token dispatch traffic, distinguish expert load from network load, and trace packing, exchange, expert execution, and inverse permutation."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-networking"
 code: "network-6"
 order: 10
@@ -36,7 +36,6 @@ Some models also include shared experts or additional residual structure. Their 
 The router can make nonuniform choices across tokens, layers, and batches. Top-k identifies the number of selected experts, not a guarantee that every expert receives equal load. A destination owner's demand is the sum of assignments to the experts it holds.
 
 Keep token identity and expert identity explicit. Preserve the same identities through every intermediate layout conversion. One token selected for 2 experts creates 2 assignments, and those outputs later combine into one token result. Treating assignments as unique original tokens can break output counts, routing weights, or inverse ordering.
-
 
 
 ![Deep-dive illustration: Begin with the routed mathematical result](./deep-dive.png)

@@ -3,7 +3,7 @@ title: 'The New Golden Age: Why Chips Went Domain-Specific'
 description: "General-purpose CPU performance now grows about 3% a year. Hennessy and Patterson's answer, the domain-specific architecture, is reshaping every chip you own."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'par-4'
 order: 14
 series: "comp-arch"
@@ -24,7 +24,6 @@ Dennard scaling broke around 2004. Below roughly 1 volt, transistor leakage curr
 
 Multicore bought about a decade, but it runs into **Amdahl's Law**: speedup is capped by whatever fraction of the program is serial. If 10% of baseline time is inherently serial, the ideal fixed-work model gives about 8.77× speedup on 64 workers, before overhead. Hennessy and Patterson's chart of single-program performance tells the whole story in 1 line: 25% annual growth in the late CISC era, 52% during the RISC boom, 23% in the early multicore years, 12% after 2011, and about 3.5% by 2015.
 
-![Single-program CPU performance growth by era, from 52 percent per year in the RISC boom to 3.5 percent after 2015. Redrawn from Hennessy and Patterson (2019)](./end-of-the-line.png)
 
 Moore's Law, meanwhile, is not dead but it is limping: transistor counts still rise, more slowly, and the cost per transistor no longer falls the way it used to. So the modern designer's situation is peculiar. You can still *get* billions of transistors. What you cannot do is power them all as general-purpose logic, and you cannot expect next year's process node to bail you out. The question becomes: what is the highest-value way to spend transistors you can no longer afford to waste?
 
@@ -34,7 +33,6 @@ The answer starts with an uncomfortable accounting exercise. Mark Horowitz's ISS
 
 And here is the killer: on a big out-of-order CPU core, the full cost of executing 1 instruction (fetch, decode, rename, schedule, predict, retire, the whole apparatus we walked through in [What a CPU Actually Does](/blog/what-a-cpu-actually-does/)) lands around 70 pJ by Horowitz's estimate. If that instruction is an 8-bit add, the arithmetic you actually wanted is 0.03 pJ of the 70. Less than 1 twentieth of 1 percent of the energy went into the math. The rest paid for *flexibility*: the machinery that lets the same core run a compiler, a web server, or a physics simulation.
 
-![Energy per operation on a 45 nm chip, log scale: 8-bit add 0.03 pJ, instruction overhead about 70 pJ, DRAM access about 2000 pJ. Data from Horowitz, ISSCC 2014](./energy-per-op.png)
 
 Flexibility was a fantastic deal while Dennard scaling paid the power bill. Now it is the single biggest line item, which suggests a blunt strategy: for a workload you understand deeply, strip the flexibility out and spend the recovered energy on arithmetic. That is the entire intellectual content of the DSA movement. The rest is engineering.
 
@@ -82,7 +80,6 @@ Hennessy and Patterson distill the DSA recipe into 5 guidelines, and once you kn
 
 **5. Co-design with a domain-specific software layer.** The TPU is unprogrammable without TensorFlow's graph compiler; a P4 switch chip is meaningless without P4. The language guarantees the regularity the hardware bet on.
 
-![Stylized floorplans: a general-purpose CPU core spends most silicon on control and cache with a small ALU, while a DSA spends most silicon on a MAC array and scratchpad](./cpu-vs-dsa.png)
 
 The common thread is that every guideline trades *generality you were paying for but not using* for throughput and energy. A DSA is not a better CPU. It is a machine that refuses to be a CPU.
 

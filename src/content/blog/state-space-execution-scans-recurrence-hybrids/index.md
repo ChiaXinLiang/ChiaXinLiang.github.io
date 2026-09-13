@@ -9,14 +9,13 @@ order: 17
 topic: "Sequence Dynamics"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 A recurrence appears sequential because each state depends on the previous one. For an affine state update, however, the transition functions can be composed associatively. A parallel scan can organize that composition over a whole sequence, while incremental inference still updates one state at a time.
 
 This article derives the composition law and connects it to selective state-space execution, chunking, and hybrid architectures. The algebra explains available parallelism, but actual efficiency depends on structured matrices, memory traffic, kernel support, and workload. It is not a benchmark claim that every scan automatically beats attention.
 
-![Concept overview: Efficient State-Space Execution: Scans, Recurrence, and Hybrids](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 A_k and b_k can vary by token while remaining fixed for the purpose of evaluating a given forward sequence. Their dependence on input does not prevent composition of the resulting affine functions.
 
 The important distinction is whether the coefficients themselves require an unavailable previous state. The scan argument considered here assumes they can be formed under the model's supported interface before or during the organized computation. Arbitrary nonlinear recurrent functions do not inherit this simple affine composition law.
-
 
 
 ![Deep-dive illustration: Define the affine update](./deep-dive.png)

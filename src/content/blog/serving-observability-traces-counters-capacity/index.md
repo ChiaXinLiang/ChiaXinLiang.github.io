@@ -3,7 +3,7 @@ title: "Serving Observability: Request Traces, GPU Counters, and Capacity Alerts
 description: "Connect request timelines to engine queues and GPU execution, derive consistent latency and capacity metrics, and build alerts that lead to a diagnosis."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-serving"
 code: "serve-8"
 order: 12
@@ -36,7 +36,6 @@ T_{\mathrm{first}}=T_{\mathrm{front}}+T_{\mathrm{queue}}+T_{\mathrm{prefill}}+T_
 $$
 
 Some engines produce the first output token at the end of prefill rather than in a separately identified decode interval. Use a decomposition matching the actual implementation and avoid double-counting it. The equation is a bookkeeping model, not a requirement that every engine expose those exact phase labels.
-
 
 
 ![Deep-dive illustration: Begin with the timeline the client experiences](./deep-dive.png)

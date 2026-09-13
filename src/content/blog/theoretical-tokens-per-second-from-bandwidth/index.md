@@ -3,7 +3,7 @@ title: "Theoretical Tokens per Second from Memory Bandwidth"
 description: "Derive decode throughput from weight traffic, then add batching, KV-cache reads, precision, and compute limits."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'math-2'
 order: 4
 series: "gpu-performance"
@@ -56,7 +56,6 @@ $$
 
 The model does not fit that single GPU in BF16. Using a bandwidth number from 1 device while quietly assuming capacity from 2 devices would make the example misleading. For a 2-GPU deployment, compute each shard's traffic and add communication constraints rather than carrying this number over unchanged.
 
-![A decode step must service weight traffic before emitting tokens](./figure-01.png)
 
 ## A feasible quantized illustration
 
@@ -100,7 +99,6 @@ This simple model explains the economic appeal of continuous batching. A server 
 
 Weight reuse has limits. Large batches demand more arithmetic, activations, cache traffic, and resident state. The bandwidth-only line cannot grow forever because the compute ceiling eventually intervenes. Scheduling limits or memory capacity may stop the experiment before that crossing occurs.
 
-![Batching increases emitted tokens while sharing weight traffic](./figure-02.png)
 
 ## Add attention history
 
@@ -179,7 +177,6 @@ Record checkpoint revision, weight format, cache dtype, GPU variant and count, b
 
 Compute the weight-only ceiling first, then add logical cache traffic and compare with measured memory traffic if profiling permits. A disagreement is useful information: it may expose a wrong model assumption or a software bottleneck. Do not turn the estimated efficiency factor into a constant carried across unrelated workloads.
 
-![Measured throughput sits below workload-specific resource ceilings](./figure-03.png)
 
 ## Takeaway
 

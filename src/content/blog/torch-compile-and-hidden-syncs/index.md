@@ -3,7 +3,7 @@ title: '1 Line of PyTorch and the Hidden Syncs That Limit It'
 description: "torch.compile bought a 1.41x geomean training speedup across 180+ models. A single loss.item() in your loop can quietly hand it back."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'pt-1'
 order: 11
 series: "gpu-performance"
@@ -32,7 +32,6 @@ But compilation only optimizes the work *inside* the captured graph. It cannot s
 
 CUDA execution is asynchronous by default. When Python executes `y = x @ w`, PyTorch does not compute anything; it *enqueues* a kernel onto a CUDA stream and returns immediately, usually microseconds later. The GPU consumes the queue at its own pace. A healthy training loop looks like a 2-lane pipeline: the CPU lane runs ahead, keeping the queue full; the GPU lane never starves.
 
-![Two-lane timeline showing CPU enqueuing kernels ahead of GPU execution, then a loss.item() call draining the queue and leaving an idle GPU bubble](./fig-async-pipeline.png)
 
 Certain operations break the contract because they need an answer *now*, and the answer lives on the GPU:
 
@@ -67,7 +66,6 @@ for batch in loader:
 
 **Sync 3: pageable input copies.** The batch is ~30 MB of features in ordinary pageable memory. The staged copy runs at roughly 6 GB/s effective and blocks the CPU: ~5 ms fully exposed at the top of every step. Fix: `DataLoader(..., pin_memory=True)` plus `batch.to("cuda", non_blocking=True)`. Pinned transfers run over PCIe at full rate through a copy engine, overlapped with the previous step's compute, so the exposed cost drops to ~0. **91 → 86 ms**, assuming the copy really overlaps on a separate stream.
 
-![Bar chart of step time falling from 96 ms to 81 ms as each hidden sync is removed, then to 65 ms with torch.compile](./fig-worked-example.png)
 
 2 semantics-preserving fixes in this illustrative budget: 96 → 86 ms, an 11.6% throughput gain. *Now* add `torch.compile`. Inductor fuses the memory-bound elementwise and normalization chains and the GPU-busy time drops from 80 to ~65 ms, squarely in the paper's training-speedup range. With the preserved 5-millisecond control dependency and roughly 1 millisecond of remaining costs, the illustrative final budget is **71 ms per step, 1.35x end-to-end**. Do it in the other order and you'd have compiled graphs idling behind the same 3 bubbles, and you would conclude, wrongly, that "compile doesn't help my model."
 
@@ -100,7 +98,6 @@ While you're auditing the loop, 2 more checks pay for themselves:
 
 **BF16 over FP16.** Both are 16-bit, but FP16 spends its bits on mantissa (5-bit exponent, max value 65,504) while BF16 keeps FP32's 8-bit exponent and its ~3.4e38 range. FP16 training overflows without a `GradScaler`, an extra sync-prone moving part that periodically checks for infs. BF16 needs no scaler at all, and on Ampere and later it runs Tensor Cores at the same throughput as FP16. Unless you're on pre-Ampere hardware, `torch.autocast(dtype=torch.bfloat16)` is the simpler and more robust default.
 
-![Bit layout of FP16 versus BF16 showing exponent and mantissa fields and the resulting dynamic range](./fig-bf16-fp16.png)
 
 **Verify Tensor Cores actually engage.** Half-precision alone doesn't guarantee it. NVIDIA's matmul performance guide recommends matrix dimensions that are multiples of 8 for FP16/BF16 (16 for INT8) so tiles align cleanly; misaligned shapes fall into tail-effect territory or slower kernels. This is why practitioners pad a 50,257-entry vocabulary to 50,304 (a multiple of 64) and see the output projection speed up. Confirm in the profiler: Tensor Core GEMMs carry kernel names with `hmma`/`s16816`-style fragments, and the profiler's "Tensor Cores Used" column should say yes for your big matmuls.
 

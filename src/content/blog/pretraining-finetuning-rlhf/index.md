@@ -3,7 +3,7 @@ title: 'Pretraining, Fine-Tuning, RLHF: How a Base Model Becomes a Chatbot'
 description: 'The 3-stage training lifecycle, with language-model objectives, compute accounting, and the methods that shape assistant behavior.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'llm-1'
 order: 11
 series: "llm-basics"
@@ -16,7 +16,6 @@ In early 2022, OpenAI put 2 of its models in front of human judges. 1 had 175 bi
 
 This article walks through the full lifecycle: pretraining, supervised fine-tuning, and reinforcement learning from human feedback (RLHF). By the end you should be able to explain why the base model underneath ChatGPT would happily answer your question with 3 more questions, and why fixing that costs less than 2% of the compute that built the model in the first place.
 
-![3-stage lifecycle of an LLM: pretraining on trillions of tokens produces a base model, supervised fine-tuning on tens of thousands of demonstrations produces an instruction model, and RLHF with a reward model produces an assistant](./pipeline.png)
 
 ## Stage 1: pretraining, the expensive part
 
@@ -50,7 +49,6 @@ Now compare 2 models trained with almost the same budget:
 
 Nearly identical compute, but Chinchilla shrank the model 4× and stretched the data 4.7×. It outperformed Gopher across almost every benchmark the authors tested. The rule of thumb that fell out of the paper: for a compute-optimal model, train on roughly **20 tokens per parameter**. Check it: 1.4 × 10¹² ÷ 70 × 10⁹ = 20. Gopher sat at 300 ÷ 280 ≈ 1.1 tokens per parameter, badly undertrained for its size.
 
-![Same compute, 2 recipes: Gopher spent its budget on 280B parameters and 300B tokens while Chinchilla chose 70B parameters and 1.4T tokens, landing on the 20-tokens-per-parameter rule and winning on benchmarks](./chinchilla.png)
 
 There is a practical postscript: a smaller model trained on more data is also cheaper to *serve*, because inference cost scales with N, not D. That is why many production models today are deliberately trained far past 20 tokens per parameter. Compute-optimal is not the same as deployment-optimal.
 
@@ -70,7 +68,6 @@ Reinforcement learning from human feedback, as laid out in the InstructGPT paper
 
 **Part 2: optimize against it.** Now treat text generation as a reinforcement-learning problem. The language model (the "policy") writes an answer, the reward model scores it, and an RL algorithm called PPO (proximal policy optimization) adjusts the policy's weights to make high-scoring answers more likely. Crucially, there is a leash: a KL penalty that punishes the policy for drifting too far from where the SFT model started. Without the leash, the policy finds degenerate text that scores well with the reward model but reads like nonsense, a failure mode called reward hacking.
 
-![The RLHF loop: a prompt goes to the policy model, which generates an answer; the reward model scores it; PPO updates the policy to raise the score while a KL penalty keeps it close to the SFT reference model](./rlhf-loop.png)
 
 Here is the striking part, and the reason this article's opening result is possible. Per the InstructGPT paper, fine-tuning the 175B model cost about 4.9 petaflop/s-days for SFT and about 60 for PPO. Pretraining GPT-3 cost 3,640. The entire alignment pipeline was under 2% of the pretraining bill, and it mattered more to users than a 100× increase in model size. Alignment changes behavior, not knowledge, and behavior is what people experience.
 

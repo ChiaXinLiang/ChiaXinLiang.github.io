@@ -9,14 +9,13 @@ order: 10
 topic: "Distillation and Adaptation"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Low-rank adaptation changes which parameters are trained. LoRA keeps a pretrained weight matrix fixed and learns an additive update represented by 2 smaller matrices. The central efficiency benefit is reduced trainable state, with an execution tradeoff that depends on whether adapters remain separate or are merged for deployment.
 
 This article derives the matrix geometry, initialization, gradients, and memory accounting. A low-rank update is a structural constraint on adaptation, not a claim that the pretrained matrix itself has low rank. That distinction explains both the method's usefulness and the limitations of parameter-count comparisons.
 
-![Concept overview: LoRA: Low-Rank Updates and Training-State Memory](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 The scalar s controls the update scale. The original LoRA paper uses alpha divided by r under its stated convention. Implementations and variants can change scaling, so record the actual expression.
 
 The rank of BA is at most r. W_0 can still be full rank, and so can the adapted matrix W. LoRA constrains the change to the model rather than replacing the whole pretrained mapping with a low-rank approximation.
-
 
 
 ![Deep-dive illustration: Define the adapted linear layer](./deep-dive.png)

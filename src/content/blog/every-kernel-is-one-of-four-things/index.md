@@ -3,7 +3,7 @@ title: '4 Kernel Bottlenecks: What Nsight Can Tell You'
 description: "A field taxonomy for slow CUDA kernels: underutilized, latency-bound, memory-bound, or compute-bound — and how to read the diagnosis straight off an Nsight Compute report."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'ktune-1'
 order: 8
 series: "gpu-performance"
@@ -35,7 +35,6 @@ That rule already splits the world into 3 regions. The fourth bucket hides insid
 
 **4. Compute-bound: the math units are the limit.** SM Throughput is high, and stalls skew toward *Math Pipe Throttle* or *Not Selected* (the warp was ready, another warp got the slot). This is where you want big GEMMs to be. Fixes are about cheaper math: route work to tensor cores, drop precision, or change the algorithm to do fewer FLOPs. If you are compute-bound on tensor cores at high utilization, congratulations, you are done; buy more GPUs.
 
-![Quadrant chart classifying kernels by SM throughput vs memory throughput into underutilized, latency-bound, memory-bound, and compute-bound](./fig-quadrant.png)
 
 ## Worked example: classify this kernel
 
@@ -68,7 +67,6 @@ Walk the decision procedure. Both throughputs low? No, memory is at 87%. So this
 
 1 counterfactual to sharpen the method: suppose the same kernel had reported SM 23% and Memory 31%. Then the procedure sends you to Launch Statistics. Waves per SM ≈ 62 means the grid was plenty, so it would be a candidate for latency or dependency limits, and the 38.7 warp cycles per issued instruction becomes the number to attack.
 
-![Annotated mock Nsight Compute summary showing which metrics drive the memory-bound classification](./fig-nsight-report.png)
 
 ![Deep dive: Worked example: classify this kernel](./deep-dive-component-01.png)
 
@@ -88,7 +86,6 @@ Now count what a warp contributes. A warp of 32 threads each issuing a 4-byte lo
 
 This is the observation Vasily Volkov made famous in his GTC 2010 talk "Better Performance at Lower Occupancy": instruction-level parallelism and thread-level parallelism are interchangeable currencies for latency hiding, and ILP can be cheaper, but additional live values also consume registers and may reduce residency. A kernel at 25% occupancy with 4 independent loads per warp can offer comparable independent work to 1 at 100% occupancy with 1.
 
-![Bar chart showing warps needed per SM to saturate bandwidth: 66 with scalar loads, 17 with float4, 9 with float4 plus 2x unroll](./fig-ilp.png)
 
 The arithmetic behind that diagnosis should use measured traffic at the same memory boundary as the bandwidth ceiling:
 

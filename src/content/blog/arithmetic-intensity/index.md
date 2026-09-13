@@ -3,7 +3,7 @@ title: 'Arithmetic Intensity: Turning Memory-Bound Kernels Compute-Bound'
 description: "Why 1 ratio — FLOPs per byte — decides whether your kernel runs at 989 TFLOPS or 12, and the 2 levers that move it."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'ktune-2'
 order: 9
 series: "gpu-performance"
@@ -16,7 +16,6 @@ An H100 SXM can execute 989 trillion dense BF16 tensor-core operations per secon
 
 That ratio has a name: **arithmetic intensity** (AI), measured in FLOPs per byte. Every kernel has 1, and comparing it against the hardware's ratio tells you which resource you'll run out of first. The comparison is usually drawn as the **roofline model**, introduced by Williams, Waterman, and Patterson in 2009: attainable throughput plotted against arithmetic intensity. On the left, a diagonal roof whose slope is memory bandwidth — double your intensity, double your throughput. On the right, a flat roof at peak FLOPS. The corner where they meet is the **ridge point**, and on an H100 running BF16 it sits near 295 FLOP/byte. For FP8, peak doubles to 1,979 TFLOPS while bandwidth stays put, so the ridge moves out to about 590. Faster math makes it *harder* to be compute-bound, not easier.
 
-![Roofline model for an H100 SXM in BF16, with a decode GEMV, an elementwise bias+GELU kernel, and a fused GEMM plotted against the 295 FLOP/byte ridge point](./fig-roofline.png)
 
 ## Where LLM kernels actually sit
 
@@ -33,7 +32,6 @@ Given a kernel stuck on the bandwidth roof, you have exactly 2 levers, and both 
 1. **Shrink the bytes.** Quantize. FP32 → BF16 halves weight traffic; FP8 halves it again; FP4 once more. An 8× reduction in bytes is an 8× increase in intensity for the same math.
 2. **Reuse the bytes.** Once data is on-chip — in registers, shared memory, or L2 — do more work with it before letting go. Fusion and tiling are both this lever in different clothes.
 
-![2 levers on arithmetic intensity: shrinking bytes per weight from FP32 to FP4, and increasing on-chip reuse with larger GEMM tiles](./fig-levers.png)
 
 ## A worked example: fusing bias + GELU into a GEMM
 
@@ -53,7 +51,6 @@ Now fuse. Every modern GEMM library supports an **epilogue**: after the main K-l
 
 Put times on it. The GEMM's math takes 275 GFLOP ÷ 989 TFLOPS ≈ 278 µs at peak. The 2 elementwise kernels each move 134 MB at 3.35 TB/s, about 40 µs apiece, so the unfused pipeline runs ≈ 358 µs. The fused version runs ≈ 278 µs, because the epilogue math is measured in microseconds against operands already in registers. That's a 22% end-to-end elapsed-time reduction from deleting memory traffic, without making any individual kernel faster. You also drop 2 kernel launches, which matters more than you'd think at decode batch sizes.
 
-![Unfused GEMM, bias, and GELU making 5 HBM passes totaling 335 MB, versus a fused epilogue writing once for 67 MB](./fig-fusion.png)
 
 This is the same move FlashAttention makes at larger scale: instead of materializing the S = QK^T attention matrix to HBM and reading it back for the softmax and the V multiply, it tiles the whole computation so the intermediate never leaves SRAM. Dao et al. report the exact-attention kernel runs up to 3× faster on GPT-2 not by reducing FLOPs (it actually recomputes some) but by cutting HBM traffic. Trading spare FLOPs for scarce bytes is the canonical intensity play.
 

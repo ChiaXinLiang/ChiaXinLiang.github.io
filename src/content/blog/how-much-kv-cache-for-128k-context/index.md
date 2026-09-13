@@ -3,7 +3,7 @@ title: "How Much KV Cache Does a 128k-Token Context Use?"
 description: "Derive long-context cache capacity and traffic from attention geometry, with GQA, concurrency, quantization, and prefix sharing."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'math-3'
 order: 9
 series: "llm-serving"
@@ -26,7 +26,6 @@ It does not normally store the full attention score matrix persistently. That ma
 
 For ordinary full-context attention, persistent KV payload grows linearly with retained tokens. Computation over the history still grows with length, and prefill has its own attention complexity. Storage complexity and arithmetic complexity describe different objects.
 
-![Every retained token contributes K and V state in each layer](./figure-01.png)
 
 ## Derive the formula from tensor dimensions
 
@@ -78,7 +77,6 @@ These are controlled geometry comparisons, not claims that changing only head co
 
 The distinction also affects kernel implementation. Query heads sharing KV state can reuse loaded data, but actual traffic depends on how the kernel schedules that reuse. The logical payload formula predicts capacity; it does not guarantee the minimum possible HBM reads.
 
-![GQA reduces stored KV heads while preserving query heads](./figure-02.png)
 
 ## Context and concurrency multiply
 

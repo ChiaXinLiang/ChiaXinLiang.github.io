@@ -3,7 +3,7 @@ title: 'What Is a Neural Network, Really?'
 description: "Strip away the brain metaphors: a neural network is weighted sums and simple squashing functions, stacked. That's it — and that's enough to run ChatGPT."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'nn-1'
 order: 1
 series: "llm-basics"
@@ -24,7 +24,6 @@ The basic unit — an artificial neuron — takes some input numbers and produce
 2. **Add** the products together, plus 1 extra adjustable number called the *bias*
 3. **Squash** the sum through a simple function so the output stays in a useful range
 
-![An artificial neuron: inputs are multiplied by weights, summed with a bias, then passed through an activation function — redrawn from Michael Nielsen, Neural Networks and Deep Learning (CC BY-NC 3.0)](./neuron.png)
 
 A useful mental model: a neuron is a **weighted vote**. Each input gets a say; the weight decides how much that say counts (and in which direction — weights can be negative). The bias sets how easy the neuron is to convince. The squashing step (the *activation function*) is what keeps stacked neurons from collapsing into 1 boring linear formula — it is the source of all the interesting behavior.
 
@@ -34,7 +33,6 @@ There is genuinely nothing else inside. No symbols, no rules, no little brain. M
 
 1 neuron can only draw 1 straight boundary through its inputs — useful, but weak. The power move is stacking:
 
-![A layered network: each layer's outputs become the next layer's inputs; every connection line is one adjustable weight — redrawn from Michael Nielsen, Neural Networks and Deep Learning (CC BY-NC 3.0)](./layers.png)
 
 - The **input layer** is just your data as numbers: pixel brightnesses, audio samples, or (for LLMs) numeric codes for text pieces
 - Each **hidden layer** neuron takes a weighted vote over the *previous* layer's outputs

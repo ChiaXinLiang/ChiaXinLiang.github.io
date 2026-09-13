@@ -3,7 +3,7 @@ title: "Tensor and Pipeline Parallelism: Partitions, Bubbles, and the Network"
 description: "Derive tensor partitions, pipeline utilization, and boundary traffic, then place process groups on the links their schedules require."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "distributed-training"
 code: "train-5"
 order: 5
@@ -50,7 +50,6 @@ Each rank needs X and its own parameter slice. If the next operation can consume
 For a row-partitioned matrix product, splitting the reduction dimension yields partial outputs whose sum forms the final result. That sum introduces a synchronization dependency, often expressed with all-reduce or a reduce-scatter followed by later distribution. The exact collective depends on the activation layout maintained between operations.
 
 For an H by F weight matrix, ideal parameter storage falls to approximately HF divided by t elements per rank. Arithmetic also partitions ideally, but startup and communication do not necessarily fall with t. Increasing tensor degree eventually makes small local operations and frequent synchronization dominate. The best degree is a workload and topology decision.
-
 
 
 ![Deep-dive illustration: Work a column-partitioned linear layer](./deep-dive.png)

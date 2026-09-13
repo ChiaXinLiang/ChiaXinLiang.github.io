@@ -3,7 +3,7 @@ title: "Triton Kernel Foundations: Programs, Masks, Layouts, and Correctness"
 description: "Translate a vector operation into program-owned tiles, derive safe masks and strides, and distinguish logical tensor layouts from hardware execution."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "triton-1"
 order: 6
@@ -46,7 +46,6 @@ Programs with adjacent identifiers own disjoint intervals, and a grid of ceiling
 For N=1003 and K=256, 4 programs cover 1024 logical positions. Program 3 owns offsets 768 through 1023, of which 235 are valid. The tile shape is 256 even though only 235 positions correspond to useful elements.
 
 A program is not a single hardware thread, and K is not simply a CUDA block width. Compiler layouts and launch configuration distribute tile operations across hardware execution resources. Keep logical ownership separate from assumptions about lane assignment.
-
 
 
 ![Deep-dive illustration: Derive program-owned tile offsets](./deep-dive.png)

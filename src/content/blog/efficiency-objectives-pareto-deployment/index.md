@@ -9,14 +9,13 @@ order: 1
 topic: "Efficiency Foundations"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 An efficient model is useful only in relation to a task and an operating environment. A smaller checkpoint can run slower, a lower arithmetic count can increase memory traffic, and a faster isolated kernel can leave request latency unchanged. Efficiency therefore begins with an explicit objective rather than a preferred compression technique.
 
 This article connects model quality, resource constraints, and experimental evidence. The central picture is a feasible region: configurations satisfying the task and deployment requirements, with a frontier describing the best available tradeoffs. Pruning, quantization, distillation, and architecture search become ways to move through that region rather than interchangeable recipes for making a model small.
 
-![Concept overview: Efficiency Objectives: Accuracy, Latency, Memory, and Pareto Tradeoffs](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -40,7 +39,6 @@ $$
 The equation is an explanatory optimization model rather than an instruction to use one particular optimizer. Some quantities are distributions, and a latency constraint may apply to a defined percentile. The chosen quality threshold must come from the task rather than from whichever compressed result is easiest to publish.
 
 Hard constraints differ from preferences. A configuration that slightly exceeds memory capacity may fail completely, while a modest energy increase can remain acceptable. Combining everything into one score can hide such distinctions unless the weights and feasibility rules are explicit.
-
 
 
 ![Deep-dive illustration: Express a constrained objective](./deep-dive.png)

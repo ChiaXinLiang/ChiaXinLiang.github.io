@@ -3,7 +3,7 @@ title: "FlashAttention: Online Softmax, Exact Tiling, and the I/O Model"
 description: "Derive stable tiled attention, account for score-matrix traffic, and distinguish prefill kernel speed from decode and request-level performance."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-serving"
 code: "attention-1"
 order: 10
@@ -36,7 +36,6 @@ The mask M excludes disallowed query-key pairs, usually by adding negative infin
 Consider N_q=N_k=8192 and a 2-byte stored score representation. One dense matrix occupies 128 MiB. With 32 heads, that becomes 4 GiB before accounting for probabilities, other activations, and the output. The calculation describes a materialized implementation; optimized attention need not allocate this object.
 
 The two matrix products perform useful arithmetic, but storing their connecting matrix introduces a separate cost. A kernel that improves arithmetic throughput while still writing and reading huge intermediates can leave the main bottleneck intact. Begin performance analysis by identifying which tensors are persistent model state, required outputs, and temporary execution artifacts.
-
 
 
 ![Deep-dive illustration: Start with the objects that attention actually produces](./deep-dive.png)

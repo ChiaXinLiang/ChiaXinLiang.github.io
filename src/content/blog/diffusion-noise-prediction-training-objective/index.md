@@ -9,14 +9,13 @@ order: 3
 topic: "Diffusion Models"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 A diffusion model learns to reverse a process that gradually corrupts data with noise. The training task often looks like noise prediction, while generation repeatedly applies a learned denoising rule. The connection between those phases comes from the probabilistic forward process and its reverse-time approximation.
 
 This article derives the core Gaussian identities behind denoising diffusion probabilistic models. It explains why noise prediction is meaningful, how it relates to a variational objective, and which cost terms matter for efficient generation. The image examples are conceptual; no diffusion training or GPU benchmark is reported here.
 
-![Concept overview: Diffusion Foundations: Noise, Reverse Prediction, and Training](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 The schedule determines how quickly signal is attenuated. Valid variance choices and timestep conventions belong in the model configuration.
 
 The forward process is specified rather than learned in the basic formulation considered here. It gives a known statistical relationship between clean and corrupted samples, which makes it possible to construct training examples and derive useful posterior distributions.
-
 
 
 ![Deep-dive illustration: Define the forward corruption process](./deep-dive.png)

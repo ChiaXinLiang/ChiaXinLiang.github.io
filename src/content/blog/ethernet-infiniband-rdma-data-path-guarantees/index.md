@@ -3,7 +3,7 @@ title: "Ethernet, InfiniBand, and RDMA: The Data Path and Its Guarantees"
 description: "Separate link fabrics from memory-access semantics, trace registered-buffer operations and completion, and connect transport guarantees to application synchronization."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-networking"
 code: "network-3"
 order: 3
@@ -48,7 +48,6 @@ $$
 The expression assumes one registration reused for N transfers and no overlap among the listed costs. Real implementations can cache registration and pipeline operations. The model identifies which fixed work can be amortized, not an exact schedule for every adapter.
 
 For an illustrative registration cost of 100 microseconds and 1000 transfers, the amortized setup is 0.1 microseconds per transfer. Registering separately for each transfer would instead add 100 microseconds each time. These values are assumptions, but the distinction explains why allocator and buffer-reuse behavior can matter in network benchmarks.
-
 
 
 ![Deep-dive illustration: Registration makes a memory region accessible under a contract](./deep-dive.png)

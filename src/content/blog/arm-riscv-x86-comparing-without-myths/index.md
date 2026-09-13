@@ -3,7 +3,7 @@ title: "Arm, RISC-V, and x86-64: Comparing Architectures Without Myths"
 description: "Compare a shared array-sum workload across 3 ISAs, separating code size, microarchitecture, vector features, and system constraints."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'isa-4'
 order: 9
 series: "comp-arch"
@@ -28,7 +28,6 @@ Compatibility is another dimension. Instruction availability, ABI, executable fo
 
 These requirements are ordinary experimental control, not a demand for an exhaustive product catalog. State the variables that could explain the result. If the report says only “Arm beat x86,” it leaves too many competing explanations open.
 
-![Compare actual systems and the same useful workload](./figure-01.png)
 
 ## A shared computation gives us common ground
 
@@ -80,7 +79,6 @@ RISC-V compressed forms can reduce some encodings to 16 bits when the target and
 
 Internal micro-operations add another layer. A processor may decode an architectural instruction into simpler internal work, fuse selected operations, or schedule stages separately. Micro-operation count is implementation-specific and is not interchangeable with source assembly count.
 
-![Assembly count, encoded bytes, and internal operations are different metrics](./figure-02.png)
 
 ## A performance equation organizes the comparison
 
@@ -176,7 +174,6 @@ Custom instructions can accelerate a targeted operation, but their value depends
 
 **An open ISA eliminates ecosystem work.** It supports a different implementation model; compilers, libraries, verification, and operating systems still require engineering.
 
-![Evaluate performance, compatibility, energy, and ecosystem separately](./figure-03.png)
 
 ## Takeaway
 

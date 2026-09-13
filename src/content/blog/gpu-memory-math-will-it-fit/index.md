@@ -3,7 +3,7 @@ title: 'GPU Memory Math: Will the Model Fit?'
 description: "How to estimate weights, KV cache, activations, and optimizer states by hand, and know in 5 minutes whether a model fits on your GPU."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'gpumem-1'
 order: 3
 series: "ai-performance"
@@ -47,7 +47,6 @@ The leading 2 is for K and V. Note that it is `n_kv_heads`, not the full attenti
 
 Training adds 2 more tenants, gradients and optimizer states, which we will get to in the going-deeper section. They are why an 8B model that serves comfortably on 1 GPU needs a small cluster to fine-tune in full precision.
 
-![Anatomy of the KV cache formula, with Llama-3-8B numbers plugged in showing 131 KB per token and 1.07 GB per 8k sequence](./kv-cache-anatomy.png)
 
 ## Worked example: Llama-3-8B on 1 H100
 
@@ -84,8 +83,6 @@ So 1 H100 serves this model with a modeled capacity ceiling of 47 concurrent 8k-
 - **Tensor parallelism across 2 GPUs.** Each H100 holds 141.2 GB / 2 = 70.6 GB of FP16 weights, leaving only 1.4 GB before the additional reserve in this budget. The KV cache shards across GPUs as well (each holds its slice of the heads), so head sharding reduces per-device cache cost, but does not rescue a budget already exhausted by weights and reserve. TP=4 or lower-precision weights provides substantially more headroom.
 - **Offload to CPU RAM.** It works for weight storage, but PCIe Gen5 moves ~64 GB/s against HBM3's 3,350 GB/s. Fine for loading, occasionally tolerable for rarely-used expert weights, ruinous for anything on the per-token path.
 
-![Weights-only memory of Llama-3 8B and 70B at FP16, FP8, and INT4 against the 80 GB capacity of an H100, showing which configurations leave room for KV cache](./will-it-fit.png)
-
 
 Use an admission inequality rather than rounding a capacity estimate upward. Let $$H$$ be device capacity, $$u$$ the admitted memory fraction, $$P$$ parameter count, $$b_w$$ effective bytes per weight, $$A$$ separately budgeted activation and workspace memory, and $$k=2Lh_{kv}db_{kv}$$ cache bytes per token. For $$B$$ equal-length requests of $$S$$ live tokens,
 
@@ -113,7 +110,6 @@ The inference math above prices a model at 2 bytes per parameter plus cache. Tra
 
 The optimizer's states alone are 12 bytes per parameter, 6 times the model itself. For Llama-3-8B that is 128 GB of state, which is why "it serves on 1 H100" and "it fine-tunes on 1 H100" are entirely different claims, and why 0's whole contribution was sharding those 16 bytes across data-parallel ranks instead of replicating them. Full fine-tuning of the 8B needs at least 2 80 GB GPUs just for state, plus activation memory, which scales with batch × sequence length × hidden size × layers and is the reason activation checkpointing (recompute instead of store) exists.
 
-![Bytes per parameter for FP16 inference versus mixed-precision training with Adam, 2 bytes versus 16 bytes, following the ZeRO paper's accounting](./training-bytes.png)
 
 Back on the inference side, 2 mechanisms deserve 1 more level of detail.
 

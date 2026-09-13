@@ -3,7 +3,7 @@ title: "GPU Containers: Driver Compatibility, Runtime Libraries, and I/O Paths"
 description: "Trace host-driver and container-library responsibilities, verify executed code and communication paths, and diagnose shared-memory, storage, and placement differences."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-performance"
 code: "infra-2"
 order: 13
@@ -48,7 +48,6 @@ Compatibility rules connect particular components and supported exceptions. CUDA
 The CUDA version printed by a driver-management utility should not be treated as proof of the toolkit installed in the image. Inspect the application's actual dependencies and environment. Multiple runtime libraries can coexist, and the executable may resolve a different one from the version an operator expected.
 
 Preserve supported compatibility documentation beside the tuple. If a deployment uses an exception or compatibility package, record its applicable hardware and software conditions. The reproduction target is the supported executed combination, not a slogan that all newer drivers or all containers are interchangeable.
-
 
 
 ![Deep-dive illustration: Treat compatibility as a constrained software tuple](./deep-dive.png)

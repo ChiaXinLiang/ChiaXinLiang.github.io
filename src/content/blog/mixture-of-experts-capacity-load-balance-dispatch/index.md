@@ -3,7 +3,7 @@ title: "Mixture of Experts 2: Load Balance, Capacity, and Dispatch"
 description: "Derive assignment counts, balancing statistics, and capacity limits, then follow a correct token-expert permutation through distributed dispatch and combination."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "moe-2"
 order: 11
@@ -33,7 +33,6 @@ $$
 The average is not a capacity guarantee. A router can send much more than that average to 1 expert. A buffer sized only for the uniform expectation can overflow on a valid routing result.
 
 A token selecting several experts appears in several groups and later receives several contributions. Preserve each token-expert pair as the logical unit of dispatch. Treating the first selected expert as the token's only owner would discard the remaining computation.
-
 
 
 ![Deep-dive illustration: Count assignments before buffers](./deep-dive.png)

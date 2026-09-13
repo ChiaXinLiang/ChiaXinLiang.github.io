@@ -3,7 +3,7 @@ title: 'Tokens per Second: What It Means and What It Hides'
 description: "The same model on the same GPU can honestly report 24 tokens per second or 6,600 — learn to tell which number a benchmark is showing you."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'llm-6'
 order: 14
 series: "llm-basics"
@@ -28,7 +28,6 @@ The highway analogy holds up well. Per-user throughput is the speed of 1 car. Ag
 
 2 more terms complete the vocabulary, because a request has 2 distinct phases. When your prompt arrives, the model first reads the entire thing in 1 parallel pass called **prefill**. Nothing streams during prefill; you're staring at a blank response. The wait is measured as **time to first token (TTFT)**. Then the model switches to **decode**, generating 1 token at a time, each new token appended to the context before the next is produced. The pace of this phase is measured as **time per output token (TPOT)**, and per-user tokens per second is just 1/TPOT.
 
-![Anatomy of 1 LLM request: a prefill block producing the first token after TTFT, then evenly spaced decode ticks whose spacing is TPOT](./anatomy-of-a-request.png)
 
 The 2 phases stress the hardware differently. Prefill processes thousands of tokens in 1 shot, so it's rich in parallel arithmetic and tends to be limited by the GPU's compute rate. Decode produces a single token per step, and each step must read every model weight from memory to produce it. Almost no arithmetic per byte moved. Decode is limited by memory bandwidth, and that observation gives us the whole ceiling calculation.
 
@@ -51,7 +50,6 @@ Now add batching. If 32 users' requests are decoded together, the GPU still read
 
 There's the other number from the opening line. Nothing about the model changed. The vendor quoting 6,600 and the reviewer measuring 150 are both describing this machine truthfully.
 
-![1 weight read produces 1 token at batch size 1 but 32 tokens at batch size 32, multiplying aggregate throughput while per-user speed stays capped](./one-read-many-tokens.png)
 
 2 refinements complete the napkin math. First, **context length isn't free**. Each token in each user's context stores its attention keys and values in a KV cache (the same keys and values from [the attention article](/blog/attention-in-plain-words/)). For Llama-3-8B that's about 128 KB per token. With 32 users each carrying 4,000 tokens of context, the cache is 32 × 4,000 × 128 KB ≈ 16 GB, and every decode step must read it alongside the 16 GB of weights. Memory traffic doubles, so per-step speed halves to ~105 steps per second, dragging aggregate throughput down to ~3,350 tokens per second. A benchmark run at 128-token prompts will post roughly double the throughput of the same system at 4K prompts. Same hardware, same model, same software.
 
@@ -105,7 +103,6 @@ This is also why serious evaluations report **percentiles** rather than averages
 
 Everything above compresses into 7 questions. If a published number doesn't answer them, the number is decoration.
 
-![Checklist of 7 questions to ask before trusting a tokens-per-second claim: per-user or aggregate, batch size, context length, quantization, TTFT inclusion, percentile, and hardware](./benchmark-checklist.png)
 
 1. **Per-user or aggregate?** A 100× ambiguity if unstated.
 2. **What batch size / concurrency?** Batch 1 flatters latency; batch 256 flatters throughput.

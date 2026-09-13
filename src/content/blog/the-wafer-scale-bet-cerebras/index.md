@@ -3,7 +3,7 @@ title: 'The Wafer-Scale Bet: Cerebras and the SRAM Extreme'
 description: 'Read wafer-scale computation through local memory, bandwidth, external weight traffic, and the tradeoffs of keeping a wafer as 1 device.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'chip-4'
 order: 6
 series: "efficient-ai"
@@ -20,7 +20,6 @@ Cerebras keeps the whole wafer as 1 part. The WSE-3, built on TSMC's 5 nm proces
 
 Set that against the flagship GPU profile from [the first article in this series](/blog/blackwell-to-rubin-memory-math/): an NVIDIA B200 carries 192 GB of HBM3e at 8 TB/s. The wafer has less than a quarter of the capacity and about 2,600 times the bandwidth. It is the precise mirror image of a GPU — bandwidth-rich and capacity-poor, where the GPU is capacity-rich and, by comparison, bandwidth-starved.
 
-![Capacity and bandwidth swap roles: B200 holds 4.4x more memory, WSE-3 reads its memory ~2,600x faster](./mirror-image.png)
 
 ## Why SRAM flips the ratio
 
@@ -47,7 +46,6 @@ Take a 70B-parameter dense model in 16-bit precision. The numbers:
 
 Then comes the other side of the mirror. 140 GB of weights do not fit in 44 GB of SRAM: this model needs at least **⌈140 / 44⌉ = 4 wafers**, with layers pipelined across CS-3 systems (the boxed product around each wafer). On a GPU, capacity is the cheap resource and bandwidth is the scarce 1. On a wafer, the scarcity is reversed: you buy capacity in units of entire wafer-scale systems.
 
-![Decode speed limit worked out: bandwidth divided by bytes per token gives 57 tok/s on a B200 versus a 150,000 tok/s ceiling on wafer SRAM, which then hits the 44GB capacity wall](./decode-ceiling.png)
 
 That is the whole architecture in 1 division and 1 ceiling function. Everything else is consequences.
 
@@ -83,7 +81,6 @@ Saying "just don't cut the wafer" skips the 3 problems that made wafer-scale int
 
 Capacity gets solved by systems design rather than silicon. For **training**, Cerebras streams weights: parameters live in an external MemoryX appliance and flow through the wafer layer by layer, so the SRAM holds activations while model size scales past the on-wafer limit. For **inference**, latency rules out streaming weights per token, so models are partitioned layer-wise across multiple systems in a pipeline. Either way, the design says the quiet part aloud: on-wafer memory is a bandwidth resource, not a capacity resource.
 
-![Dicing versus wafer-scale: conventional flow discards defective dies, Cerebras stitches reticle fields together and routes around dead cores with spares](./wafer-uncut.png)
 
 ## Common misconceptions
 

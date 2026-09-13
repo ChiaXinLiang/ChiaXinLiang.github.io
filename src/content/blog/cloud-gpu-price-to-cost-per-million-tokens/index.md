@@ -3,7 +3,7 @@ title: "From Cloud GPU Price to Cost per Million Tokens"
 description: "Convert measured output throughput into serving cost, with utilization, batching, latency requirements, and uncertainty."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'math-4'
 order: 25
 series: "llm-serving"
@@ -58,7 +58,6 @@ Variable costs, such as storage operations or traffic charges, can be added sepa
 
 GPU-only cost is a meaningful engineering metric if labeled. It is not the same as total operating cost or the retail price of an API. Staffing, support, availability reserves, and provider margins are outside a simple GPU-hour calculation.
 
-![Hourly serving cost divided by useful hourly output gives unit cost](./figure-01.png)
 
 ## Use useful aggregate output throughput
 
@@ -101,7 +100,6 @@ For example, 2 replicas costing $3 per hour each run for 24 hours, so GPU rental
 
 The required bookkeeping is straightforward: define the interval, cost boundary, accepted-output counter, and attribution policy. If 1 fleet serves several models, allocate shared costs consistently and document that policy. A precise token counter paired with an arbitrary allocation rule still yields an uncertain estimate.
 
-![Idle paid capacity raises cost even when active inference is efficient](./figure-02.png)
 
 ## A worked latency-constrained comparison
 
@@ -155,7 +153,6 @@ That interval is a scenario envelope, not a statistical confidence interval. A c
 
 Correlations also matter. Higher demand may improve batching and occupancy while worsening tail latency. Treating all variables as independent can create combinations that the service never actually exhibits. Keep the traffic distribution in the experiment.
 
-![Higher compliant throughput lowers cost at fixed hourly expense](./figure-03.png)
 
 ## Availability has an explicit price
 

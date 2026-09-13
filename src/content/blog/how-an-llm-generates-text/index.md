@@ -3,7 +3,7 @@ title: 'How an LLM Generates Text: Prefill and Decode'
 description: 'Why prompt processing can run in parallel while generation proceeds 1 token at a time, and how temperature changes token probabilities.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'llm-3'
 order: 5
 series: "llm-basics"
@@ -37,7 +37,6 @@ Recall from [the Transformer architecture](/blog/transformer-architecture-in-one
 
 So when your 1,000-token prompt arrives, the model runs *1* forward pass over all 1,000 positions at once. This is **prefill**. The GPU gets served exactly the meal it was built for: enormous, dense matrix multiplications with plenty of work per byte of weights fetched. Each weight matrix is loaded from memory once and applied to 1 thousand token positions. Arithmetic dominates; we call this **compute-bound**. Prefill ends when the model produces the distribution for the first new token. The time you wait for that is the **time to first token (TTFT)**, and it grows with prompt length, because a longer prompt simply means more math.
 
-![Prefill processes all prompt tokens in 1 parallel pass, while decode generates 1 token per full forward pass and feeds each result back in](./prefill-decode.png)
 
 ## Decode: 1 token per pass
 
@@ -66,7 +65,6 @@ Each pass ends with 1 raw score per vocabulary entry, called **logits**. A softm
 
 **Temperature** is a single knob applied before the softmax: divide every logit by a number T. Concretely, suppose the model scores 4 candidate next words at logits 5, 4, 3, and 1. At T = 1 (untouched), softmax gives roughly 66%, 24%, 9%, and 1%. At T = 0.5 every logit doubles before the softmax, and exponentials amplify gaps viciously: the split becomes about 87%, 12%, 2%, and 0.03%. At T = 2 the logits are halved and the distribution flattens to about 47%, 29%, 17%, and 6% — the long shot got 200 times more likely than at T = 0.5. Low temperature sharpens the distribution toward the model's favorite; high temperature gives the tail a real chance. As T approaches 0, sampling collapses into greedy decoding.
 
-![Bar charts of the same 4 logits softmaxed at temperature 0.5, 1.0, and 2.0, showing the distribution sharpening at low temperature and flattening at high temperature](./temperature.png)
 
 In practice temperature is combined with a tail-trimming rule such as **top-p (nucleus) sampling**: keep only the smallest set of tokens whose probabilities sum to p (say 0.9) and renormalize, so the model can be creative among plausible options without ever picking garbage from the far tail. Holtzman et al. introduced this after showing that pure sampling wanders into incoherence while greedy decoding loops and repeats.
 

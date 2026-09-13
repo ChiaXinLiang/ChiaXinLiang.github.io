@@ -3,7 +3,7 @@ title: 'RTL to GDSII: The Chip Design Flow in Plain Words'
 description: "How a few 1000 lines of Verilog become billions of polygons on a photomask, and why most of the money goes to proving it works."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'asic-2'
 order: 16
 series: "comp-arch"
@@ -30,7 +30,6 @@ Then inspection. Before anyone pours concrete, the plans are checked against bui
 
 Finally, the stamped permit set goes to the builder. That is **tapeout**: the GDSII file leaves the design team and goes to the mask shop.
 
-![The 6 stages of the RTL-to-GDSII flow, each paired with its building-construction analogy](./flow.png)
 
 ## Stage by stage
 
@@ -74,7 +73,6 @@ Budget minus total: 2,000 − 1,890 = **+110 ps of slack**. Positive slack means
 
 Then the design gets routed, and the tool extracts the *actual* resistance and capacitance of the real wires. The placer couldn't keep every cell on this path close together, so the measured wire delay comes back at 420 ps instead of the estimated 250. Redo the sum: 80 + 1,500 + 420 + 60 = 2,060 ps. Slack is now **−60 ps**. The path fails, and correct operation at 500 MHz is not guaranteed under the analyzed conditions.
 
-![2 stacked delay bars showing a 2,000 ps timing budget: positive slack before routing, a 60 ps violation after real wire delays are extracted](./timing-slack.png)
 
 Now you fix it, and every fix costs something. Swap gates on the path for higher drive strength versions from the library: faster, but bigger and more power-hungry. Restructure the logic to use 8 levels instead of 10: saves 300 ps, if the logic allows it. Nudge the placement so the cells sit closer: helps this path, possibly hurts a neighbor. Or accept reality and ship at 485 MHz, since 1/2,060 ps ≈ 485 MHz. A real SoC has millions of paths, the tools fix nearly all of them automatically, and engineers spend months on the stubborn last few 100. That months-long endgame is what people mean by "timing closure."
 
@@ -108,7 +106,6 @@ Ask people outside the industry where chip-design effort goes and they guess the
 
 The economics explain the paranoia. A bug caught in simulation costs an engineer-afternoon. The same bug caught after tapeout costs a new mask set, which at advanced nodes is commonly estimated in the tens of millions of dollars, plus roughly a quarter of calendar time while the fab manufactures the corrected chip. Software ships patches; silicon ships atoms.
 
-![Staircase diagram showing the escalating cost of finding a bug: minutes in simulation, days in FPGA emulation, weeks at signoff, months and millions in silicon](./bug-cost.png)
 
 So verification runs in parallel with everything above. Functional simulation executes the RTL against millions of test scenarios, with constrained-random generators inventing corner cases no human would write. Formal verification mathematically proves properties like "this FIFO can never overflow" without simulating at all. Emulation loads the design into racks of FPGAs to run real software before silicon exists. And at the physical level, signoff checks the geometry itself: DRC (design-rule checking) confirms every polygon obeys the factory's rules, and LVS (layout-versus-schematic) confirms the drawn transistors still implement the verified netlist. Only when all of it is clean does anyone say the word tapeout.
 

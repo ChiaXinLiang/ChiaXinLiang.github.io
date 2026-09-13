@@ -3,7 +3,7 @@ title: "RISC-V: A Small Base ISA with an Extensible System"
 description: "Read an RV64I array-sum example and understand base instructions, extensions, privilege, profiles, and implementation freedom."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'isa-3'
 order: 8
 series: "comp-arch"
@@ -28,7 +28,6 @@ RISC-V's modular structure separates a relatively small foundation from optional
 
 The official unprivileged specifications define instruction semantics. Privileged specifications define the environment needed for protected operating systems and machine management. An instruction tutorial focused on user code is only 1 portion of the architecture.
 
-![A base ISA and selected extensions define the software target](./figure-01.png)
 
 ## Registers and their assembly names
 
@@ -81,7 +80,6 @@ The final `jalr` transfers control through the return-address register while dis
 
 Assume valid readable normal memory for the array and the selected ABI. The function uses temporary and argument registers without calling another function, so it does not need a stack frame in this pedagogical leaf example.
 
-![The RISC-V loop follows the same useful state trace as AArch64](./figure-02.png)
 
 ## Trace the result and test signedness
 
@@ -179,7 +177,6 @@ When evaluating an AI system, ask which part uses the ISA: host CPU, embedded co
 
 **RV64 makes every load 64 bits.** `lwu` in our function loads 4 bytes and extends them to the 64-bit register. Access width remains instruction-specific.
 
-![A usable target needs matching instructions, ABI, and system support](./figure-03.png)
 
 ## Takeaway
 

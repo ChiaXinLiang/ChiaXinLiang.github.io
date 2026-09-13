@@ -3,7 +3,7 @@ title: "Hybrid Attention: Combining Recurrent State with Token Attention"
 description: "Derive recurrent associative state and gated delta updates, then compare their memory behavior with explicit token attention in hybrid language models."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "model-4"
 order: 4
@@ -32,7 +32,6 @@ $$
 This description is single-headed and omits positional transformations for clarity. Storage grows with retained tokens. A dense decode step also evaluates the relevant history, although optimized kernels can change traffic and materialization behavior.
 
 Sliding-window attention keeps a bounded recent history instead. That is another independent choice: a local window retains individual recent tokens, whereas a recurrent state aggregates updates. Both can have bounded storage without implementing the same mathematical function.
-
 
 
 ![Deep-dive illustration: Start from explicit token retrieval](./deep-dive.png)

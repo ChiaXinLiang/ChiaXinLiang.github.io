@@ -3,7 +3,7 @@ title: "Case File: p50 Looks Great, but p99 Is Terrible"
 description: "Use queueing theory and a long-tail workload example to explain excellent median latency alongside poor p99, then design a meaningful serving benchmark."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'case-8'
 order: 24
 series: "llm-serving"
@@ -38,7 +38,6 @@ At E[S] equal to 0.1 seconds, utilization 0.5 produces a mean response time of 0
 
 These are means, not p99 estimates. Do not multiply a production p50 by a queueing factor and call the result a tail prediction. The model's value is directional: a small increase in offered work near saturation can cause a large increase in waiting, even if isolated kernel performance is unchanged.
 
-![Queueing amplification grows sharply as a toy server approaches saturation.](figure-01.png)
 
 *Original analytical figure using the M/M/1 mean-response formula; it is not a measured serving benchmark.*
 
@@ -72,7 +71,6 @@ For comparison, if every request deterministically took the same 0.149 seconds, 
 
 Again, none of those values is p99. The calculation shows why a rare long job can affect many short jobs and why trimming only the median service time may fail to fix the user-facing tail. To obtain percentiles for the actual engine, measure an appropriate workload or simulate a model whose assumptions match that engine closely enough.
 
-![1 percent of five-second jobs greatly increases the service-time second moment.](figure-02.png)
 
 *Original worked-example figure. Arrival rate and service times are hypothetical analytical inputs.*
 
@@ -125,7 +123,6 @@ Priority scheduling can improve interactive tails while delaying bulk work. Shor
 
 Admission control bounds the queue and returns a timely overload signal. It protects accepted-request latency but reduces acceptance rate. The decision must be visible in the product and the benchmark. Pair it with retry behavior that avoids synchronized retry storms; otherwise rejecting work simply transforms 1 queue into a later arrival burst.
 
-![A diagnostic checklist connects observed behavior with targeted experiments.](figure-03.png)
 
 *Original diagnostic summary; investigate the listed mechanisms with controlled measurements.*
 

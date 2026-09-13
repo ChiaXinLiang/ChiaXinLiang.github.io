@@ -3,7 +3,7 @@ title: 'The KV Cache Is a First-Class Citizen Now'
 description: "How the KV cache went from a per-process scratch buffer to pooled, tiered, network-attached infrastructure with attention kernels built around it."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'scale-2'
 order: 7
 series: "llm-serving"
@@ -26,7 +26,6 @@ Circa 2022, every serving engine treated KV state the same way: allocate a conti
 
 **Tiered offload.** HBM is the scarcest resource in the building, so hot KV lives there and everything else moves down. Mooncake, the serving platform behind Moonshot's Kimi, was the loudest statement of this design: a "KVCache-centric" architecture that pools the spare DRAM and SSD of the entire cluster into 1 cache, with prefill and decode nodes checking the pool before computing anything ([Qin et al., FAST'25 best paper](https://arxiv.org/abs/2407.00079)). Moonshot's self-reported numbers: up to 525% throughput gains in long-context simulations and 115% more requests served on real workloads under latency SLOs. LMCache does the same job as a pluggable layer for vLLM, decoupling KV storage from the engine entirely ([LMCache](https://github.com/LMCache/LMCache)). The [DistServe retrospective](https://haoailab.com/blogs/distserve-retro/) puts it flatly: inference became a storage-systems problem.
 
-![The KV cache memory hierarchy: hot in GPU HBM, warm in host DRAM, cold on NVMe, with NIXL and GPUDirect RDMA connecting peer GPUs across nodes](./kv-tiers.png)
 
 **A transfer layer.** Once KV blocks live on other machines, moving them must be cheap, and for years every stack hand-rolled its own transport. NIXL, the transfer library underneath NVIDIA's Dynamo, gives 1 API across NVLink, InfiniBand and RoCE with GPUDirect RDMA, PCIe, and local SSD, and picks the fastest available path per transfer ([NIXL](https://github.com/ai-dynamo/nixl)). With GPUDirect RDMA, KV moves NIC-to-HBM without staging through host memory; a 400 Gb/s NIC sustains roughly 50 GB/s, so gigabyte-scale cache entries move in tens of milliseconds while the GPU keeps decoding other requests. This is the same plumbing that carries prefill-to-decode handoffs in disaggregated serving, which is no accident: a cache with a wire format is what made [disaggregation](/blog/the-prefill-decode-disaggregation-story/) practical at all.
 
@@ -56,11 +55,9 @@ Your chatbot has a 2,000-token system prompt (persona, tools, policies, output f
 
 Even the cold NVMe tier beats recomputation by about 5x, and it avoids the projection FLOPs, while transfer and metadata handling still consume resources, so the compute units stay free for decode. The hot paths are roughly 40 to 55 times faster. Per hour, the fleet-level bill drops from 5,600 GPU-seconds to 1 prefill (0.56 s) plus 10,000 fetches. At 10 ms each, those fetches total about 100 transfer-seconds and 6.55 TB of traffic per hour; overlap can hide some latency but does not remove bandwidth or capacity costs. In this hypothetical example, the prefix component of TTFT shrinks; total TTFT still includes scheduling, the uncached suffix, and transfer overhead.
 
-![Bar chart comparing time to make a 2,000-token prefix available: recompute 560 ms versus DRAM fetch 10 ms, RDMA 13 ms, NVMe 110 ms, and the hourly GPU-time bill with and without caching](./hit-economics.png)
 
 The general break-even rule falls out of the same arithmetic. Recompute costs ~0.28 ms per token at these rates; reload costs (bytes per token) ÷ bandwidth. For this model, any tier faster than about **1.17 GB/s** wins. That threshold is why offload tiers keep getting colder: nearly every storage technology in the datacenter clears it.
 
-![3 requests sharing a 2,000-token system prompt map to the same hashed blocks in a global KV pool, paying prefill once and a 10 ms fetch afterwards](./prefix-pool.png)
 
 Reload-versus-recompute is a latency decision only after accounting for the state contract. For m cache bytes per prefix token, S prefix tokens, delivered tier bandwidth beta, transfer startup a, and recompute cost c seconds per token:
 

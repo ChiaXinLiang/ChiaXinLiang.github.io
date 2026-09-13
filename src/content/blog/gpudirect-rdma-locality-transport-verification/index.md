@@ -3,7 +3,7 @@ title: "GPUDirect RDMA: GPU–NIC Locality and Transport Verification"
 description: "Verify direct GPU-memory communication through topology, registration, transport diagnostics, and measured traffic instead of assuming a configuration flag proves the path."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-networking"
 code: "network-4"
 order: 5
@@ -36,7 +36,6 @@ T_s\approx\alpha_s+n/B_{\mathrm{D2H}}+n/B_{\mathrm{net}}+n/B_{\mathrm{H2D}},\qqu
 $$
 
 The parameters include the selected measurement boundary. Real staged implementations can pipeline chunks, and direct transfers can have additional setup or signaling. Use the equations to identify avoided work, then compare the actual timelines instead of treating their ratio as a promised speedup.
-
 
 
 ![Deep-dive illustration: Draw both the direct and staged alternatives](./deep-dive.png)

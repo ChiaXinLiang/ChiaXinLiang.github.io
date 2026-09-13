@@ -3,7 +3,7 @@ title: 'Systolic Arrays: The 1978 Idea Inside Every TPU'
 description: "How a 40-year-old paper about data pulsing through a grid of multipliers became the engine of modern AI accelerators."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'par-3'
 order: 13
 series: "comp-arch"
@@ -33,7 +33,6 @@ Their proposal: lay out a grid of small, identical processing elements, each doi
 
 The variant inside the TPU is called *weight-stationary*, and it is the easiest to hold in your head. Picture an N×N grid. Before computation starts, 1 weight of the matrix W is loaded into each cell, where it sits unmoving. Then the input matrix streams in from the left edge, 1 row of cells per vector element, and partial sums flow downward through the columns.
 
-![Weight-stationary systolic array: weights sit inside a grid of multiply-accumulate cells, inputs flow in from the left 1 cycle apart, and partial sums flow down into accumulators. Redrawn from Jouppi et al. (2017), Fig. 4.](./fig-dataflow.png)
 
 Each cell does the same 3 things every cycle: multiply the input arriving from the left by the weight it holds, add the product to the partial sum arriving from above, then pass the input to its right neighbor and the updated sum to the neighbor below. When a partial sum falls out of the bottom row, it has visited every cell in its column, which means it has accumulated the complete dot product of an input vector with 1 column of W. The bottom edge delivers finished results, 1 per column, cycle after cycle.
 
@@ -46,7 +45,6 @@ Small enough to trace on paper, and the mechanics scale unchanged to 256×256. T
 - Weights (stationary): W = [[5, 6], [7, 8]], so the top-left cell holds 5, top-right holds 6, bottom-left 7, bottom-right 8.
 - Inputs (streaming): 2 vectors, (1, 2) and then (3, 4). Element 1 of each vector enters row 1; element 2 enters row 2 *1 cycle later*. That deliberate skew is what keeps operands aligned.
 
-![Cycle-by-cycle trace of a 2×2 systolic matmul with weights 5, 6, 7, 8 and inputs (1,2) then (3,4), showing partial sums 5, 19, 22, 43, 50 forming as data moves through the grid](./fig-cycles.png)
 
 **Cycle 1.** The value 1 enters the top-left cell: 1×5 = 5. The 5 heads down, the 1 heads right.
 
@@ -64,7 +62,6 @@ Now scale the example and count memory traffic, because this is where the systol
 
 Multiplying 2 256×256 matrices takes 256³ = 16,777,216 multiply-accumulates. A scalar loop that fetches both operands for every MAC performs 33,554,432 operand fetches. A 256×256 weight-stationary array loads each weight once and streams each input element in once: 2 × 256² = 131,072 loads, or 0.4% of the naive traffic. Every value that enters the grid is reused 256 times before the hardware is done with it.
 
-![Bar chart comparing 33,554,432 operand fetches for a scalar loop against 131,072 loads for a systolic array on a 256-by-256 matrix multiply, with TPU v1 figures from Jouppi et al. 2017](./fig-reuse.png)
 
 The TPU v1 numbers show why this matters in practice. Its Matrix Multiply Unit is a 256×256 systolic array: 65,536 8-bit MAC cells. At 700 MHz, counting the multiply and the add separately, that is 65,536 × 700 MHz × 2 = 92 trillion operations per second of peak throughput. If every operand had to come from DRAM, feeding it would take roughly 92 TB/s of bandwidth. The card actually had 34 GB/s of DDR3, a gap of about 2,700×. Reuse inside the array, plus a 24 MiB on-chip buffer for activations, is the entire bridge. The chip was built on a 28 nm process at a clock slower than contemporaneous CPUs, inside a 75 W power envelope, and Google reported it running production inference 15 to 30 times faster than the server CPUs and K80 GPUs of 2015, at 30 to 80 times better performance per watt. Those comparisons are Google's own measurements against hardware 2 process generations behind by publication time, so treat the ratios as directional, but the architectural point survives any discount: the money is in the reuse, not the transistors.
 

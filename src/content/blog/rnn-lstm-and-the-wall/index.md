@@ -3,7 +3,7 @@ title: 'RNN and LSTM: How Machines Learned Sequences — and Why They Hit a Wall
 description: "Recurrent networks read text the way you do: 1 word at a time, carrying a memory. That design worked — until its 2 flaws collided with the age of scale."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'arch-2'
 order: 7
 series: "llm-basics"
@@ -22,7 +22,6 @@ This article covers recurrent networks: the architecture that first made machine
 
 The recurrent neural network (RNN) handles this with 1 elegant move: process tokens 1 at a time, and keep a **hidden state** — a vector of numbers acting as a running summary of everything read so far. Each step takes 2 inputs: the new word, and the summary; it produces an updated summary.
 
-![An RNN unrolled through time: the same cell processes each word in turn, passing a hidden-state "memory" forward — every long-range dependency must survive this relay](./rnn-unrolled.png)
 
 1 cell, 1 set of weights, reused at every time step — the same weight-sharing trick as a CNN's filter, applied across *time* instead of space.
 
@@ -84,7 +83,6 @@ This is the mechanism improved over a simple recurrent hidden-state update. It d
 
 But the second flaw had no patch. An RNN — LSTM included — is **inherently sequential**: step 50 cannot begin until step 49 finishes, because its input *is* step 49's output.
 
-![The sequential bottleneck: an RNN must process tokens 1 after another, no matter how many processors you have — the dependency chain forbids parallelism](./sequential-wall.png)
 
 Recall from [the CPU article's sibling series](/blog/what-a-cpu-actually-does/) — and from everything this blog covers — that modern hardware wins by doing many things *at once*. A GPU offers tens of thousands of parallel lanes. An LSTM training on a 1,000-word document still parallelizes sequences and within-step matrix work, but cannot freely parallelize its recurrent state transitions: 1,000 steps, strictly in order. Just when the field learned (from [the scaling story](/blog/how-models-learn/)) that capability comes from training bigger models on more data, its best language architecture was one that **could not soak up parallel compute**.
 

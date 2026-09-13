@@ -3,7 +3,7 @@ title: 'MAP Estimation: How a Prior Changes What a Model Learns'
 description: 'Derive Beta–Bernoulli MAP, distinguish posterior mode from predictive probability, and connect Gaussian priors to L2 regularization.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './section-overview.png'
 series: "llm-basics"
 level: advanced
 code: 'stat-3'
@@ -55,7 +55,6 @@ The first term rewards explaining the data. The second penalizes parameter setti
 
 For a continuous parameter, the estimate maximizes a density, not the probability mass of a single point. Any exact point ordinarily has 0 probability mass. A posterior mode also need not equal a posterior mean or median. These summaries answer different questions, and the appropriate decision depends on the loss associated with the action we take.
 
-![The posterior combines the likelihood of observations with a prior over parameter values.](./posterior-combination.png)
 
 ## A Beta prior for a Bernoulli probability
 
@@ -117,7 +116,6 @@ It equals the posterior mean in this specific model because the success probabil
 
 This distinction becomes more consequential in nonlinear models. Evaluating a prediction function at the mean parameter generally does not equal averaging that function over the posterior. A single fitted weight vector is not a substitute for an uncertainty distribution merely because its objective has a Bayesian interpretation.
 
-![The same Beta(9,5) posterior yields different summaries: MLE 0.7, MAP 0.6667, and posterior predictive success probability 0.6429.](./three-estimates.png)
 
 ## An arithmetic check and a sensitivity test
 

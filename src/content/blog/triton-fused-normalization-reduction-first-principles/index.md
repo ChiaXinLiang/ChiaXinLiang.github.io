@@ -3,7 +3,7 @@ title: "Triton Fusion: A Reduction or Normalization Kernel From First Principles
 description: "Derive masked row statistics and a fused layer-normalization path, compare numerical reduction methods, and budget traffic and register pressure."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "triton-2"
 order: 17
@@ -38,7 +38,6 @@ RMS normalization is a different operation: it uses the root mean square without
 Gamma and beta must cover the valid columns in the expected order. A value-preserving input permutation still needs the corresponding affine-parameter association, otherwise the normalized row receives a different transform.
 
 Define supported row widths and layout. The example assumes contiguous columns with a supplied row stride. A transposed or column-strided view needs different addressing or an explicit conversion whose cost belongs in the comparison.
-
 
 
 ![Deep-dive illustration: State the normalization precisely](./deep-dive.png)

@@ -3,7 +3,7 @@ title: 'From Paper to Silicon in 24 Months: The Prefill/Decode Disaggregation St
 description: "How a rejected 2024 serving paper became available across major inference stacks, an MLPerf headline, and finally a dedicated class of GPU."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'cd-3'
 order: 11
 series: "efficient-ai"
@@ -28,7 +28,6 @@ Both phases run the same weights through the same matrix multiplies. The differe
 
 The standard way to reason about it is *arithmetic intensity*: how many floating-point operations you perform per byte you move from memory. Every chip has a ridge point, the intensity at which it stops being limited by memory bandwidth and starts being limited by compute. Work above the ridge is compute-bound; work below it is memory-bound. Prefill sits far above the ridge. Decode sits far below it. Running both on the same GPU means the chip is the wrong shape for at least one of them at all times.
 
-![Prefill is compute-bound and decode is memory-bound; on an H100 they sit on opposite sides of the ridge point](./prefill-vs-decode.png)
 
 ## A worked example you can do by hand
 
@@ -49,7 +48,6 @@ The punchline of the arithmetic: prefill wants FLOPs and barely touches bandwidt
 
 What makes this a co-design story rather than just a good idea is the speed and completeness of the pipeline that followed.
 
-![Timeline from the Splitwise and DistServe papers in late 2023 and early 2024 to framework adoption, MLPerf v5.1, and the Rubin CPX chip class](./timeline.png)
 
 **Late 2023 to mid 2024: the papers.** Splitwise (Microsoft and UW, arXiv November 2023, ISCA '24) and DistServe (UCSD and collaborators, arXiv January 2024, OSDI '24) independently proposed the same move: run prefill and decode on *separate GPU pools* and ship the KV cache from 1 to the other. DistServe reported up to 4.5x more requests served within latency targets, or 10x tighter latency targets at the same rate. The DistServe retrospective notes, with some relish, that the paper was initially rejected; reviewers doubted that transferring gigabytes of KV cache between machines could ever be worth it.
 
@@ -68,7 +66,6 @@ The reviewers' original objection deserves a real answer, because it is the mech
 
 For our 70B model, a typical configuration (80 layers, grouped-query attention with 8 KV heads of dimension 128, FP8 cache) stores about 160 KB per token: 2 vectors × 80 layers × 8 heads × 128 dims × 1 byte, per token. A 2,048-token prompt therefore produces roughly 335 MB of KV cache. Over a 400 Gb/s (50 GB/s) datacenter link, that is about 7 ms, hidden under the 290 ms prefill by streaming layers as they complete: layer 1's KV can be in flight while layer 2 is still computing. Inside an NVLink domain at hundreds of GB/s, the transfer approaches a rounding error. Implementations can overlap part of the transfer, but exposed delay depends on link contention, setup, and cache readiness.
 
-![Disaggregated serving architecture: a prefill pool streams KV cache through an interconnect and tiered cache store to a decode pool](./disagg-architecture.png)
 
 2 more mechanisms fall out once the phases are separate, and they are where the production wins actually come from.
 

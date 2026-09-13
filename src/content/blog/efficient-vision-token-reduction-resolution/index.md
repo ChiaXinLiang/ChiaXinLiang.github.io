@@ -9,14 +9,13 @@ order: 2
 topic: "Efficient Vision"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Efficient vision can reduce the number of tokens processed by later transformer blocks. Pruning discards selected tokens, merging combines representations, and changing resolution alters the image information available before embedding. These interventions all reduce work through token count, but they preserve different information and create different execution overhead.
 
 The useful design connects a reduction policy to quality and measured cost. A mask alone does not necessarily shrink a dense operation, and a sophisticated similarity algorithm can consume the savings it was supposed to create. This article derives the major tradeoffs and explains Token Merging as a concrete mechanism.
 
-![Concept overview: Efficient Vision: Token Reduction and Resolution Tradeoffs](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 Constants a and b depend on the actual architecture and counting convention. The expression organizes work rather than predicting device latency exactly.
 
 Reducing S can therefore affect several components, not only attention. The reduction point matters: removing tokens after a block cannot save work already performed in that block. Count the sequence length at each layer and include the selection or merging operation itself.
-
 
 
 ![Deep-dive illustration: Begin with the token-cost model](./deep-dive.png)

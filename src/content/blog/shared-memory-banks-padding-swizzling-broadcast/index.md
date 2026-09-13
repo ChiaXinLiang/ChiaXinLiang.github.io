@@ -3,7 +3,7 @@ title: "Shared-Memory Bank Conflicts: Padding, Swizzling, and Broadcast"
 description: "Derive bank mappings for FP32 warp accesses, explain transpose padding and XOR swizzles, and distinguish read broadcast from conflicting ownership."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "mem-2"
 order: 14
@@ -36,7 +36,6 @@ $$
 The base address adds a constant offset to the mapping. That changes bank labels but not the collision pattern for a uniform stride. Actual alignment and instruction width still matter to the generated requests.
 
 Keep the active-lane mask and instruction scope explicit. A full-warp formula should not be applied unchanged to a partial request or an instruction that is split into multiple transactions. The model is a starting point for analysis, not a replacement for the compiled access.
-
 
 
 ![Deep-dive illustration: Begin with lane addresses, not array dimensions](./deep-dive.png)

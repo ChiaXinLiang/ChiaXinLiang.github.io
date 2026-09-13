@@ -3,7 +3,7 @@ title: "Compiled Training: AOTAutograd, Saved Tensors, and Fusion Boundaries"
 description: "Follow forward and backward graph capture, derive saved-tensor and recomputation tradeoffs, and validate compiled training beyond inference timing."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "pt-3"
 order: 25
@@ -33,7 +33,6 @@ $$
 The update function also depends on optimizer state s. Momentum, adaptive moments, gradient accumulation, and mixed-precision scaling make this state meaningful. A forward-only comparison does not test the complete update function.
 
 Establish which operations belong to the compiled region. The loss can be compiled while the optimizer remains outside it, or a larger step can be captured under supported conditions. State the actual boundary in the benchmark. “Compiled training” is otherwise too broad to interpret.
-
 
 
 ![Deep-dive illustration: Write the differentiation contract](./deep-dive.png)

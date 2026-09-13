@@ -3,7 +3,7 @@ title: 'The Memory Wall: Latency Numbers Every Engineer Should Feel'
 description: "Register to RAM is a 300x cliff, RAM to SSD is 1,000x more — scale it to human time and you'll never write a pointer chase the same way again."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'mem-1'
 order: 3
 series: "comp-arch"
@@ -47,7 +47,6 @@ Multiply everything by a billion, so 1 nanosecond becomes 1 second. Now the tabl
 - **Disk seek: about 4 months.** The file is on a container ship.
 - **Cross-continent network round trip: about 5 years.** You mail a letter and wait for a reply through 2 elections.
 
-![The memory hierarchy scaled so 1 nanosecond equals 1 second, from a 0.3-second register blink to a 5-year network round trip](./latency-ladder.png)
 
 The step that should reorganize your programming instincts is the third 1. A modern out-of-order core can start several instructions every cycle, but only when the operands are on-chip. The moment it needs a value from DRAM, your CPU stands in the hallway for 2 subjective minutes, and it can do that millions of times per second without any profiler line saying "waiting."
 
@@ -85,7 +84,6 @@ The innovation behind prefetching and memory-level parallelism is moving from �
 
 None of this was inevitable. In 1980 a DRAM access cost a handful of CPU cycles and the hierarchy barely mattered. Then the trajectories split. Hennessy and Patterson's textbook has the famous chart: single-core processor performance grew around 52% per year from the mid-80s to the early 2000s, while DRAM latency improved around 7% per year. Compound those for 2 decades and you get a gap of several 100 times; the industry saw it coming, and Wulf and McKee named it in their 1995 paper "Hitting the Memory Wall."
 
-![Processor versus DRAM performance since 1980 on a log scale, diverging to a roughly thousandfold gap. Redrawn from Hennessy and Patterson](./memory-gap.png)
 
 Why couldn't DRAM keep up? Because DRAM is optimized for a different objective: cost per bit. A DRAM cell is 1 transistor and 1 capacitor, packed as densely as physics allows. Reading it means selecting a row, letting thousands of tiny capacitors dump their charge onto long wires, and waiting for sense amplifiers to resolve those faint signals into digital ones. Those analog settling times are set by wire capacitance and cell physics, and they have barely moved: the core row-activation and column-access delays have hovered around 13–15 ns across DDR2, DDR3, DDR4, and DDR5. Each generation transfers data faster once a row is open, which is a bandwidth win, but first-access latency in nanoseconds has been close to flat for 20 years. David Patterson generalized the pattern in a 2004 CACM article: across memory, disk, and network alike, latency lags bandwidth, roughly quadratically.
 
@@ -114,7 +112,6 @@ This is a counterfactual single-interface illustration: 140 GB of BF16 weights d
 
 no matter that the same chip advertises near a petaflop of tensor throughput. During single-stream decode the multipliers idle at under 1% utilization; the workload is a pure bandwidth play. This is exactly the linked-list lesson at warehouse scale: performance set by data movement, with compute along for the ride.
 
-![Decode math for a 70B model: 140 GB of weights read per token over 3.35 TB/s of HBM gives a 42 ms floor, about 24 tokens per second](./decode-wall.png)
 
 The entire modern inference stack is a response to this. Batching lets N concurrent requests share 1 read of the weights, multiplying arithmetic intensity by N. Quantization to 8 or 4 bits shrinks the bytes that must move. KV caches, speculative decoding, HBM stacked ever higher and wider: all of it is memory-wall engineering. It's why I keep insisting that [an ML performance engineer's job](/blog/what-does-an-ml-performance-engineer-do/) is mostly moving bytes, why [goodput and utilization tell such different stories](/blog/goodput-vs-utilization/) on decode-heavy fleets, and why the [Blackwell-to-Rubin roadmap is best read as memory math](/blog/blackwell-to-rubin-memory-math/) rather than FLOPs math. And if the pipeline mechanics of a core stalling on a load are fuzzy, the picture in [What a CPU Actually Does](/blog/what-a-cpu-actually-does/) is the prequel to this article.
 

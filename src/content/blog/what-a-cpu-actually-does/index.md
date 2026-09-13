@@ -3,7 +3,7 @@ title: 'What a CPU Actually Does: Fetch, Decode, Execute — and the Pipeline'
 description: "Your laptop's CPU performs 1 conceptually simple loop billions of times per second. Understanding it is the foundation for understanding every chip — including the ones that run AI."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'arch-1'
 order: 1
 series: "comp-arch"
@@ -24,7 +24,6 @@ Strip away 60 years of refinement and every CPU still does exactly 3 things, for
 2. **Decode** — figure out what that number means: "add these 2 registers," "load from this address," "jump if 0"
 3. **Execute** — do it, and store the result
 
-![The fetch-decode-execute loop: program counter → instruction memory → decoder → ALU/registers, repeating billions of times per second](./fde-loop.png)
 
 That's the whole model of computation your laptop implements. A program is a long list of such instructions; the CPU is a machine that eats the list. When people say a chip runs at "4 GHz," they mean this machinery is clocked 4 billion times per second.
 
@@ -38,7 +37,6 @@ Now think about laundry. Washing takes 30 minutes, drying 30, folding 30. You do
 
 CPUs do exactly this. It's called **pipelining**:
 
-![The pipeline: instruction 1 executes while instruction 2 decodes while instruction 3 fetches — 1 instruction completing per tick](./pipeline.png)
 
 While instruction 1 executes, instruction 2 is being decoded and instruction 3 fetched. Each instruction still takes 3 ticks of *latency*, but the machine completes 1 instruction *per tick* of throughput. Real designs can slice the work more finely to shorten stages and support higher clock frequencies; depths vary substantially by implementation.
 

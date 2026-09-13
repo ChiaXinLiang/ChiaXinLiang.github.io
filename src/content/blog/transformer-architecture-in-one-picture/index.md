@@ -3,7 +3,7 @@ title: 'The Transformer Architecture: Attention, Residuals, and Feed-Forward'
 description: "Attention plus a feed-forward layer, wrapped in residual connections, stacked N times. A simplified dense decoder block provides a reference for understanding current models."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'tf-2'
 order: 9
 series: "llm-basics"
@@ -20,7 +20,6 @@ GPT-3 is 96 copies of the same block, stacked. Many models build on related comp
 
 The equation diagram below illustrates a modern pre-normalized dense block. The original 2017 Transformer placed normalization after each residual addition; this figure deliberately shows the pre-norm variant. Follow each skip path to see which representation is added back, and follow the operator path to see why its output must return to residual width d.
 
-![An illustrative dense pre-normalized decoder block maps causal attention and feed-forward outputs back to the T-by-d residual stream. Skip paths show why U equals X plus attention and Y equals U plus the feed-forward result.](./transformer-equation-block.png)
 
 In this simplified dense decoder, tokens become vectors, pass through **N related blocks**, and produce next-token scores. Its 2 main sublayers are:
 
@@ -72,7 +71,6 @@ The 2017 original had 2 towers (an encoder reading the source sentence, a decode
 - **Encoder-only** (BERT-style): every token attends in both directions; great for *understanding* tasks like search and classification.
 - **Decoder-only** (GPT-style): each token may attend to itself and earlier tokens — because the training game is "predict the next word," and peeking ahead would be cheating. This is the variant that ate the world; when people say "LLM" today they almost always mean a decoder-only Transformer.
 
-![Causal masking: in a decoder-only Transformer each token may attend only to earlier tokens — the rule that makes next-word training honest and the KV cache possible](./causal-mask.png)
 
 That "attend to self and earlier positions" rule, called causal masking, has a huge practical consequence: past tokens' computations can be cached and reused while generating — the KV cache that dominates the serving economics covered in [the performance series](/blog/goodput-vs-utilization/).
 

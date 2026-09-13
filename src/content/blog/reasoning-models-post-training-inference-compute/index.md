@@ -3,7 +3,7 @@ title: "Reasoning Models: Architecture, Post-Training, and Inference-Time Comput
 description: "Separate network structure from learned reasoning behavior, derive supervised and reward objectives, and measure the quality-latency tradeoff of additional inference work."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "reason-1"
 order: 15
@@ -42,7 +42,6 @@ The examples determine which behavior receives training signal. Long solution de
 Data quality, task coverage, and leakage controls matter. A benchmark overlap can create apparent competence without the intended generalization. Report evaluation separation and use independently verified answers when possible.
 
 The R1 paper distinguishes its cold-start examples from the reinforcement-learning-only R1-Zero experiment. Preserve that distinction rather than describing the complete released pipeline as containing no supervised training.
-
 
 
 ![Deep-dive illustration: Derive supervised post-training](./deep-dive.png)

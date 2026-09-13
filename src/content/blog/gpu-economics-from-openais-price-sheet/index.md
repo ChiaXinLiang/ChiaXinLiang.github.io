@@ -3,7 +3,7 @@ title: 'Reading GPU Economics Off OpenAI''s Price Sheet'
 description: "OpenAI's API prices are a compressed datasheet: every ratio on the page maps to a specific bottleneck in the silicon serving your tokens."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'econ-2'
 order: 8
 series: "efficient-ai"
@@ -39,7 +39,6 @@ Here is the standard-tier row for gpt-5.6-sol, OpenAI's mid-flagship, as of Sept
 | Cache write | $5.00 | 1.25x |
 | Output | $20.00 | 5x |
 
-![Bar chart of gpt-5.6-sol prices per million tokens: cached input $0.40, fresh input $4.00, cache write $5.00, output $20.00, each bar annotated with the hardware reason. Data: OpenAI API pricing page, September 2026](./price-ratios.png)
 
 Every model on the page shows the same shape. Cached input is exactly 10% of fresh input across the lineup, from the $10 gpt-6-astra down to the $0.20 gpt-5.6-luna. Cache writes carry a 1.25x premium everywhere. Output runs 5x input on the flagships and 6x on the smaller tiers. Long-context requests pay roughly 2x on input and 1.5x on output. Batch processing is half price; the low-latency "fast mode" tier is double. When 1 shape repeats across a dozen models at wildly different absolute prices, you are looking at cost structure, not positioning.
 
@@ -93,7 +92,6 @@ Now push 1 level down and ask why the ratios take these particular values. Use a
 
 **Why output can cost more than input.** Generating 1 token requires about 2 FLOPs per parameter, so ~140 GFLOPs. At 5 PFLOP/s, that is 28 microseconds of arithmetic. But the GPU must also stream all 70 GB of weights through its compute units for that step, and at 8 TB/s that takes 8,750 microseconds. For a single sequence, the chip spends over 99% of each decode step waiting on memory. In roofline terms, decode at batch size 1 has an arithmetic intensity of about 2 FLOPs per byte moved, while the machine's balance point sits around 600 FLOPs per byte. Prefill, by contrast, amortizes 1 weight pass across thousands of prompt tokens and lands comfortably on the compute side of the roofline.
 
-![2-panel diagram comparing prefill and decode: prefill processes 8,000 tokens in 1 amortized pass over the weights at high arithmetic intensity, while decode re-reads all 70 GB of weights for every generated token and stalls on HBM bandwidth](./prefill-decode.png)
 
 Providers claw back efficiency by batching many users' decode steps together, so 1 weight pass serves dozens of tokens. But batching has a ceiling (KV cache capacity, more below) and a latency cost, and even well-batched decode produces tokens far slower than prefill consumes them. Public serving benchmarks give a feel for the gap: SGLang on a GB200 NVL72 rack reports roughly 26,000 prefill tokens per second per GPU against roughly 13,000 decode tokens per second per GPU on DeepSeek-R1-class models, and that decode figure already assumes aggressive batching and disaggregated serving. Fold in the stricter latency guarantees on output and the 5-6x price multiple is consistent with different engineering and service costs, but does not reveal the provider's margin.
 
@@ -101,7 +99,6 @@ Providers claw back efficiency by batching many users' decode steps together, so
 
 **Why long context costs ~2x.** At 160 KB per token, an 8K-token conversation carries about 1.3 GB of KV state, while a 128K-token 1 carries about 20 GB. On our 288 GB GPU, after 70 GB of weights, the leftover memory fits roughly 160 short-context sequences but only about 10 long-context ones. Fewer concurrent sequences means each expensive weight read is shared fewer ways, so cost per token rises even before you count prefill's quadratic attention bill. OpenAI prices this as roughly 2x on input and 1.5x on output past the short-context threshold. The industry's answer at the hardware level is telling: NVIDIA's Rubin CPX is a GPU built specifically for long-context prefill, pairing heavy compute with cheaper GDDR7 memory because prefill does not need HBM's bandwidth the way decode does.
 
-![2 vertical bars representing 288 GB of GPU memory: at 8K context around 160 sequences fit above the fixed 70 GB weight block, at 128K context only about 10 fit, so weight reads are shared fewer ways and cost per token climbs](./long-context.png)
 
 **Why batch is half price and fast mode is double.** These 2 tiers price the same thing in opposite directions: scheduling freedom. Batch jobs (results within 24 hours) let the provider fill idle capacity and run at maximum utilization, so they cost 50% of standard. Fast mode sells a different latency policy; reserved capacity and scheduling can contribute, but the public price does not disclose occupancy or guarantee 0 queueing, and it costs 2x. Same silicon, different goodput contract.
 

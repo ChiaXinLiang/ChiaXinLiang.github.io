@@ -3,7 +3,7 @@ title: 'The KV Cache, Explained for Engineers'
 description: "Why every decoded token drags gigabytes of history behind it, how to compute the exact size by hand, and how GQA, PagedAttention, and MLA fight back."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './section-overview.png'
 code: 'opt-2'
 order: 2
 series: "llm-serving"
@@ -32,7 +32,6 @@ Here is the crucial observation. The key and value vectors for token 17 are a fu
 
 Every serving system on earth picks option 2. But notice what the trade actually is: you have not eliminated the O(n) term, you have converted it from FLOPs into bytes. And on modern GPUs, bytes are the scarcer currency. That single design decision is why decode is memory-bandwidth-bound and why the [memory wall](/blog/the-memory-wall-latency-numbers/) is the defining constraint of LLM inference.
 
-![Without a cache, each decode step recomputes K and V for the whole prefix, giving quadratic work; with a cache, each step appends one entry and reads the rest](./why-kv-cache.png)
 
 ## The size formula
 
@@ -62,7 +61,6 @@ For calibration, the FP16 weights of the model itself are ~140 GB. On a 4x H100 
 
 Now the counterfactual that shows what GQA bought. If Llama-3-70B used classic multi-head attention, `n_kv_heads` would be 64 instead of 8: **2.5 MiB per token**, 20 GiB per 8k sequence, **320 GiB** for the batch of 16. That does not fit on the node at all. GQA's 8x reduction is the difference between this workload existing and not existing.
 
-![KV cache for Llama-3-70B, 8k context, batch 16: 320 GiB with full multi-head attention, 40 GiB with GQA in FP16, 20 GiB with an FP8 cache](./kv-size-bars.png)
 
 The cache does not just occupy memory, it consumes bandwidth. Each decode step must read the sequence's entire cache once per layer sweep. At batch 16 and 8k context, 1 step reads ~40 GiB of KV plus ~140 GB of weights: call it 180 GB. Across 8 H100s (~3.35 TB/s each, 26.8 TB/s aggregate), that is a hard floor of ~6.7 ms per step even at perfect bandwidth utilization, about 150 tokens/s per sequence, before any compute or communication cost. Longer contexts push the KV term past the weight term, and your [TPOT](/blog/ttft-and-tpot/) degrades with context length even though per-token FLOPs barely change.
 
@@ -90,7 +88,6 @@ Paged allocation rounds each unshared length up to a block boundary. Prefix shar
 
 **Cache quantization** stacks on all of the above. FP8 KV is supported in many engines, with quality depending on model, scales, and workload; INT4 KV cache with per-channel scaling is common at the aggressive end. Note that this is a separate decision from weight quantization; engines expose them as independent knobs because they trade off differently.
 
-![PagedAttention maps each sequence's logical blocks through a block table to scattered physical blocks, so 2 sequences can share their common prefix and free memory has no holes](./paged-attention.png)
 
 ![Deep dive: Going deeper: fragmentation, sharing, and compression](./deep-dive-component-02.png)
 

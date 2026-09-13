@@ -3,7 +3,7 @@ title: 'Speculative Decoding: Draft, Verify, and Accept'
 description: 'How cheap draft tokens are verified in 1 parallel pass, with checked acceptance-rate arithmetic and workload-dependent cost tradeoffs.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'opt-4'
 order: 13
 series: "llm-serving"
@@ -30,7 +30,6 @@ So the recipe, first published by Leviathan, Kalman, and Matias at Google and in
 
 Every verification pass emits at least 1 token, because even if the very first draft token is rejected, the correction comes straight from the target's distribution. And if all k drafts survive, you also get a free "bonus" token: the target's prediction at position k+1 was computed anyway.
 
-![Speculative decoding in one picture: a small draft model proposes 4 tokens sequentially, the target model verifies all of them in a single parallel pass, and the accepted prefix plus a correction token become output](./spec-one-picture.png)
 
 ## Why the output is exactly the same
 
@@ -58,7 +57,6 @@ Expected tokens per cycle: 0.30·1 + 0.21·2 + 0.147·3 + 0.103·4 + 0.240·5 �
 
 Now wall-clock it. Suppose a target decode step takes 30 ms and each draft step takes 2 ms. The verify pass over 5 positions still costs ≈30 ms, because at low batch it's bandwidth-bound and reads the same weights. 1 cycle: 4 × 2 + 30 = 38 ms for 2.77 tokens, so 13.7 ms per token against the 30 ms baseline. **2.2x faster**, and the transcript is statistically indistinguishable from the unassisted model.
 
-![Bar chart of the five possible outcomes of one draft-verify cycle at 70 percent acceptance with four drafted tokens, showing the expected value of 2.77 tokens per target pass](./spec-worked-example.png)
 
 Play with α and you see why acceptance rate is the whole game. At α = 0.5 the expectation drops to 1.94 and the same cycle is only ~1.5x. At α = 0.85 it rises to 3.71 and you clear 2.9x. Every architectural idea in this space, from better draft models to draft trees, is ultimately an attempt to move α, or to get more expected tokens per verify at the same draft cost.
 
@@ -104,7 +102,6 @@ Everything above assumed the verify pass is "free" beyond its weight read. That'
 
 Speculation spends extra FLOPs to save bandwidth-bound time: draft FLOPs, plus target FLOPs on every position that ends up rejected. At low batch the GPU has enormous idle compute, so some of this spend can fit within otherwise unused compute capacity. As continuous batching drives up concurrency, decode arithmetic intensity climbs, and the GPU drifts from memory-bound toward compute-bound. Now every speculative FLOP displaces useful work for some other request in the batch. At α = 0.7 and k = 4, the expected accepted draft prefix is only 1.773 of 4 proposals; later rejected-prefix work is substantial, and at high batch that waste turns into real throughput loss rather than harvested idle time.
 
-![Two-panel diagram showing that at batch 1 speculation harvests idle compute for free, while at high batch the extra draft and rejected-token FLOPs displace other requests' work](./spec-batch-fade.png)
 
 So production schedulers treat speculation as a latency tool, not a throughput tool: enable it for interactive, low-concurrency traffic where [TPOT](/blog/ttft-and-tpot/) is the metric that matters, shrink k or disable it as batch pressure rises. vLLM's implementation exposes exactly this knob for that reason. This is the same logic that drives [prefill/decode disaggregation](/blog/the-prefill-decode-disaggregation-story/): different phases and different traffic mixes want different operating points on the same hardware.
 

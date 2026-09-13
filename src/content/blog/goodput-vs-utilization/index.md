@@ -3,7 +3,7 @@ title: 'Goodput: What GPU Utilization Leaves Out'
 description: "GPU utilization measures activity. Goodput measures retained training progress or serving output that meets its objectives; defining the denominator makes the difference."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'intro-2'
 order: 2
 series: "ai-performance"
@@ -27,7 +27,6 @@ Goodput asks the better question: **of the work this hardware could theoreticall
 - Compute thrown away when a job fails and restarts from a checkpoint
 - Preemptions, network congestion, stragglers holding back the whole cluster
 
-![Utilization vs goodput: illustrative activity-versus-progress comparison; percentages are hypothetical](./goodput-gap.png)
 
 Some overheads leave GPU kernels active, while others leave the device idle. Repeated work can raise activity without advancing retained progress. The dashboard stays green. The money burns.
 
@@ -37,7 +36,6 @@ Meta's infrastructure team analyzed research-cluster reliability in [Revisiting 
 
 The following figure is an illustrative accounting schematic, not a reproduction of Meta's measured fleet results.
 
-![Where the compute goes: a waterfall from theoretical peak down through data stalls, communication, and failures to actual goodput](./waterfall.png)
 
 ## Why this metric changes behavior
 

@@ -3,7 +3,7 @@ title: 'Prefill Gets Its Own Chip: The Roofline Bet Behind Rubin CPX'
 description: "Why NVIDIA put gaming-class GDDR7 on a datacenter GPU: the roofline math that makes HBM a waste of money for prefill."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'chip-2'
 order: 4
 series: "efficient-ai"
@@ -34,7 +34,6 @@ You need 2 numbers. The first belongs to the workload: **arithmetic intensity**,
 
 The rule is 1 comparison. If your workload's arithmetic intensity is below the machine's ridge point, you are memory-bound: the compute units idle while bytes trickle in, and attainable performance equals bandwidth times intensity. If intensity is above the ridge point, you are compute-bound: memory keeps up fine, and you hit the FLOP/s ceiling. Plotted on log-log axes, this gives a slanted line that flattens into a roof, hence the name.
 
-![Roofline chart showing decode stuck on the bandwidth slope where HBM helps 10x, and prefill sitting on the compute roof where HBM adds nothing](./roofline.png)
 
 The strategic question for a chip architect is then: where do prefill and decode land relative to the ridge point, and what does moving the ridge point cost?
 
@@ -73,11 +72,9 @@ The specialization favors reuse-rich prefill; it does not make memory bandwidth 
 
 Disaggregation only works if the KV cache built during prefill reaches the decode GPU quickly. That handoff is real machinery, not hand-waving: for a 200B-class model, a 100K-token context can mean tens of gigabytes of KV state that must move from CPX memory to an HBM Rubin GPU before the first output token. This is why NVIDIA ships Dynamo (the serving layer that orchestrates disaggregated pools) and NIXL (a transfer library that abstracts NVLink, InfiniBand, PCIe, and SSD paths) alongside the silicon. The KV cache has quietly become a first-class infrastructure object with its own transport layer and its own storage tiers.
 
-![Disaggregated serving pipeline: long prompt enters Rubin CPX for compute-bound prefill, KV cache hands off to HBM Rubin GPUs for bandwidth-bound decode](./disagg.png)
 
 At rack scale, NVIDIA packages the split as the Vera Rubin NVL144 CPX: standard HBM Rubin GPUs for decode plus CPX chips for prefill in 1 system, claimed at 8 exaflops of NVFP4 and 7.5x the AI performance of a GB300 NVL72 rack. Treat both numbers as vendor claims until MLPerf-style submissions exist; the comparison spans different workload mixes and precisions. The Next Platform's sharper framing of the economics: the CPX add-in delivers a claimed ~6x on long-context throughput for about 2.25x added compute cost, precisely because the added compute skips the most expensive component on a modern accelerator. HBM can account for on the order of half the bill of materials of a high-end datacenter GPU, and it is supply-constrained; every stack not soldered onto a prefill chip is a stack available for a decode chip that actually needs it.
 
-![Spec comparison card: Rubin CPX with GDDR7, 128 GB, ~2.1 TB/s, 30 PF NVFP4 built for prefill, versus Rubin R200 with HBM4, 288 GB, ~22 TB/s built for decode](./specs.png)
 
 1 number from the launch deserves explicit labeling: NVIDIA's claim that $100M of CPX capex can generate "$5B in token revenue." That figure is pure marketing. It assumes a token price, a utilization rate, a workload mix, and a depreciation schedule, none of which NVIDIA publishes, and it should never be quoted as an engineering result. The roofline argument stands on its own; the revenue projection does not.
 

@@ -3,7 +3,7 @@ title: 'Cost per 1 Million Tokens: Connecting Performance to Money'
 description: 'Translate measured throughput, utilization, precision, and instance cost into cost per million tokens, keeping workload and pricing assumptions explicit.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'serve-4'
 order: 5
 series: "llm-serving"
@@ -53,7 +53,6 @@ Take Llama-70B-class weights served in FP8, so roughly 70 GB of parameters sitti
 
 3,000 × 3600 / 1e6 = 10.8 Mtok per hour. $2.50 / 10.8 = **$0.23 per million tokens.**
 
-![Three horizontal bars on a log-scaled throughput axis showing the same $2.50/hr H100 serving a 70B model: batch size 1 at 45 tok/s costs $15.43 per million tokens, continuous batching at 1,000 tok/s costs $0.69, a tuned stack at 3,000 tok/s costs $0.23](./cost-ladder.png)
 
 Now hold those numbers against the market. GPU aggregators list 70B-class open-weight models at roughly $0.30 to $0.90 per million output tokens (vendor list prices, e.g. Together AI's published rates, so read them as marketing-adjacent). The batch-1 operator at $15.43 is not merely uncompetitive; they are losing money on every request at a 20x markup below their cost. The tuned operator at $0.23 can sell at $0.60 and enjoy a healthy gross margin. Same silicon, same rent. The entire difference between bankruptcy and a business is the serving stack.
 
@@ -65,7 +64,6 @@ The formula above quietly assumed all tokens cost the same to produce. They do n
 
 The asymmetry is physical, not commercial. Prefill (processing your prompt) reads the model weights *once* and applies them to every prompt token in parallel; it is compute-bound, and a single H100 can chew through tens of thousands of prompt tokens per second. Decode (generating the answer) pays a full pass over the weights *per token*; it is bandwidth-bound, and the same GPU manages tens of tokens per second per stream. 1 weight read amortized over 4,000 prompt tokens versus 1 weight read per output token: the cost per token differs by orders of magnitude at the hardware level, and batching only partially closes the gap. If prefill and decode are hazy, the mechanics are in [How an LLM Generates Text](/blog/how-an-llm-generates-text/); the pricing consequences get a full autopsy in [Reading GPU Economics Off OpenAI's Price Sheet](/blog/gpu-economics-from-openais-price-sheet/).
 
-![Diagram contrasting prefill and decode against a shared model-weights block: prefill sends all prompt tokens through the weights in one parallel pass at thousands of tokens per second, while decode sends output tokens one at a time, each re-reading the full weights, at tens of tokens per second per stream](./prefill-decode-cost.png)
 
 The practical consequence for cost modeling: never compute 1 blended $/Mtok for your workload. Compute 1 for input and 1 for output, weighted by your actual traffic shape. A RAG service pushing 8,000-token contexts to produce 200-token answers lives almost entirely in cheap prefill; a code-generation agent emitting 3,000-token diffs lives in expensive decode. 2 services with identical total token counts can differ 5x in real serving cost.
 

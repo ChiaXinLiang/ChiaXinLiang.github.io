@@ -3,7 +3,7 @@ title: "Energy per Useful Token: Power Caps, Clocks, Thermals, and SLOs"
 description: "Integrate measured power over useful serving work, distinguish device from system energy, and evaluate power controls under latency and capacity constraints."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-serving"
 code: "energy-1"
 order: 26
@@ -36,7 +36,6 @@ Power in watts and time in seconds produce joules. Joules per token is meaningfu
 Choose a useful-output policy suited to the service. A conversational service may count delivered tokens in successfully completed responses. A structured-output service may count accepted complete objects instead. An evaluation workload can report both generated work and accepted work to make the difference visible.
 
 If no useful output completes in the interval, energy per useful token is undefined rather than zero. Report the energy and the absence of useful completions separately. This case is important during startup, failure, or overload, when considerable power consumption can coexist with little usable progress.
-
 
 
 ![Deep-dive illustration: Define energy and useful work on the same interval](./deep-dive.png)

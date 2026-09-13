@@ -3,7 +3,7 @@ title: 'How Models Learn: Gradient Descent and Backprop in Plain Words'
 description: "Training a neural network is finding the bottom of a valley you can't see, 1 step at a time — and billing every weight for its exact share of every mistake."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'nn-2'
 order: 2
 series: "llm-basics"
@@ -28,7 +28,6 @@ The catch: for a real model the landscape has billions of dimensions and you can
 
 Here's what you *can* do while blind on a hillside: feel which way the ground slopes under your feet, and step downhill. Repeat.
 
-![Gradient descent: from any starting point, repeatedly step in the direction of steepest descent until the loss reaches a valley — redrawn from Michael Nielsen, Neural Networks and Deep Learning (CC BY-NC 3.0)](./gradient-descent.png)
 
 That is the entire algorithm, called **gradient descent**. The "slope under your feet" is the *gradient* — for each of the billions of weights, the answer to 1 question: *if I nudged this weight slightly, would the loss go up or down, and how steeply?* Take a small step for every weight in its downhill direction, and the loss decreases. Do it millions of times, and a network that started as random noise becomes a digit reader — or a language model.
 
@@ -40,7 +39,6 @@ The step size (the *learning rate*) is a genuine tuning art: too small and train
 
 The answer is **backpropagation** — popularized for multilayer neural networks in a [1986 paper by Rumelhart, Hinton, and Williams](https://doi.org/10.1038/323533a0). Strip the calculus away and it is an accounting procedure:
 
-![Backpropagation: the error at the output is split backward, layer by layer, so every weight receives its exact share of the blame (concept from Rumelhart, Hinton & Williams, 1986)](./backprop.png)
 
 1. Start at the output, where the error is directly measurable
 2. Split that error backward through the last layer: each contributing neuron receives blame in proportion to how strongly it pushed the wrong answer

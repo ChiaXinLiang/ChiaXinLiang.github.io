@@ -3,7 +3,7 @@ title: "Training Offload: CPU, NVMe, Bandwidth, and the Critical Path"
 description: "Count state moved to CPU or NVMe, derive transfer and update bounds, and determine which offload work can actually overlap."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "distributed-training"
 code: "train-7"
 order: 7
@@ -56,7 +56,6 @@ Startup, synchronization, registration, packing, and contention can make the obs
 Suppose 7 billion gradients use 2 bytes each and 7 billion updated compute weights also use 2 bytes each. Moving the gradients out and the weights back transfers 28 GB in total. At an assumed effective 25 GB/s, a serialized two-direction copy budget is at least 1.12 seconds.
 
 A sharded implementation may transfer only local owned slices or use a different data representation. Some systems overlap outgoing and incoming chunks. The example is therefore a deliberately simple accounting baseline. Inspect the actual tensors and ordering to determine the byte volume and concurrency used by a particular offload method.
-
 
 
 ![Deep-dive illustration: Count transfers in both directions](./deep-dive.png)

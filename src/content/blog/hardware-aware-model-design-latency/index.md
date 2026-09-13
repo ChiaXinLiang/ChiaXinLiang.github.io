@@ -9,14 +9,13 @@ order: 12
 topic: "Architecture Design"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 An efficient architecture is efficient on an execution system. Reducing mathematical operations can help, but the mapping from operations to latency depends on matrix shapes, memory traffic, kernel support, and workload. Hardware-aware model design brings those constraints into the architecture decision instead of checking them only after training.
 
 This article builds a performance model for that decision and explains why equal-FLOP models can behave differently. The goal is not to predict every timing from a formula. It is to identify useful design variables, reject misleading proxies, and connect an architecture's quality to measured execution.
 
-![Concept overview: Hardware-Aware Model Design: Shapes, Latency, and Search Spaces](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -39,7 +38,6 @@ $$
 This count describes mathematical work, not elapsed time. It does not include data movement, launch overhead, padding, conversion, or other operators surrounding the multiplication.
 
 Models with the same product MKN can present different tile utilization and parallelism. A thin dimension can limit available work per tile, while a small overall problem can leave much of a large device idle. Preserve shapes alongside operation counts in architecture comparisons.
-
 
 
 ![Deep-dive illustration: Count matrix work precisely](./deep-dive.png)

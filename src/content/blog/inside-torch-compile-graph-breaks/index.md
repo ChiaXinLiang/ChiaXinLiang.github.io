@@ -3,7 +3,7 @@ title: 'Inside torch.compile: Graph Breaks Are Where Your Speed Leaks'
 description: "TorchDynamo captures your model into graphs and TorchInductor turns them into Triton kernels, but 1 data-dependent if-statement splits the graph, stalls the GPU, and quietly eats the 2.27x speedup you were promised."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'pt-2'
 order: 20
 series: "gpu-performance"
@@ -26,7 +26,6 @@ Across 180+ real-world models in the PyTorch benchmark suites, `torch.compile` p
 
 The design decision that makes all of this practical is also the one that bites you: when Dynamo hits Python it cannot trace, it does not give up. It compiles the graph it has so far, hands control back to the regular interpreter for the untraceable part, then starts capturing a fresh graph afterward (the continuation is compiled as a "resume function"). Supported execution can continue through eager fragments, but compilation and backend errors still require correctness checks. It just runs as compiled fragments stitched together with eager Python. Each stitch point is a graph break.
 
-![The torch.compile pipeline from Python bytecode through TorchDynamo, AOTAutograd, and TorchInductor to Triton kernels, and how a single graph break splits 1 compiled region into 2 fragments joined by eager execution](./compile-pipeline.png)
 
 ## What actually breaks a graph
 
@@ -79,8 +78,6 @@ class GatedBlock(nn.Module):
 `torch.where` computes both branches and selects elementwise. That sounds wasteful, but both branch bodies are cheap elementwise math, and Inductor fuses the whole tail (both muls, both adds, the select) into a single Triton kernel that reads `x` and `g` once. At `[8, 2048, 4096]` in fp16, `x` is 134 MB; the fused kernel moves roughly 400 MB total, about 120 us on an H100's 3.35 TB/s HBM. No sync, no break, `fullgraph=True` passes, and the host enqueues the entire step and moves on.
 
 When the branches are genuinely expensive (say, 2 different subnetworks), computing both is not acceptable; that is what `torch.cond` is for, a structured control-flow op that keeps both branches inside the graph as subgraphs and defers the choice to runtime without breaking capture.
-
-![Host and GPU timelines for the data-dependent branch versus the torch.where rewrite: the branch forces the host to block on the mean every block, leaving a GPU bubble, while the rewrite enqueues 1 graph and the host runs ahead](./sync-timeline.png)
 
 
 Break removal is worthwhile when avoided boundary cost exceeds newly introduced device work. Let $$q$$ be hot-path break count, $$h$$ average exposed synchronization and interpreter cost per break, $$f$$ traffic-and-launch cost saved by restored fusion, and $$e$$ extra work introduced by a branchless rewrite. A simplified time comparison is

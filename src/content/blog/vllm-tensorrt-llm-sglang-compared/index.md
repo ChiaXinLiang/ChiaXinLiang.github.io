@@ -3,7 +3,7 @@ title: 'Serving Frameworks Compared: vLLM, TensorRT-LLM, SGLang'
 description: 'Compare 3 LLM serving engines through cache management, scheduling, execution paths, and a workload-matched measurement method.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'serve-2'
 order: 4
 series: "llm-serving"
@@ -26,7 +26,6 @@ A serving framework does 3 jobs: schedule requests into batches, manage the KV c
 
 **SGLang** bet on redundancy across requests. Its signature mechanism, RadixAttention, keeps the KV cache of completed requests in a radix tree keyed by token prefix, so any new request that shares a prefix with anything recently served reuses those KV blocks instead of recomputing prefill. Multi-turn chat (every turn resends the conversation), agent loops (same system prompt and tools thousands of times), and few-shot evaluation are all prefix-heavy, and on such workloads the SGLang paper reported up to 6.4x throughput gains over the systems of the time (self-reported, as always). The second bet was structured output: SGLang compresses the finite-state machine that constrains JSON or grammar-guided decoding so that deterministic stretches of the output (braces, key names, whitespace) are emitted in 1 jump-forward step instead of 1 token per forward pass. Fast, schema-exact JSON became something of a calling card.
 
-![3 columns summarizing the core design bet of vLLM, TensorRT-LLM, and SGLang, with a convergence note at the bottom](./three-designs.png)
 
 ![Deep dive: 3 design bets](./deep-dive-component-01.png)
 
@@ -47,7 +46,6 @@ Now serve a request that ends at 700 tokens (prompt plus output) on a system wit
 
 **Prefix sharing:** now add a realistic wrinkle: an agent service where every request begins with the same 2,000-token system prompt plus tool definitions. That prefix costs 2,000 x 128 KB = 250 MB of KV. With 64 concurrent requests and no sharing, you store it 64 times: 16 GB, nearly a third of your KV budget spent on identical bytes. With RadixAttention (or vLLM's automatic prefix caching, which does the same job), you store it once: 250 MB, freeing 15.75 GB for actual per-request state, and every request skips 2,000 tokens of prefill compute besides. That is the difference between a cache-hit TTFT of tens of milliseconds and a full prefill of a couple hundred, which is why prefix-heavy shops fell in love with SGLang early. ([TTFT and TPOT](/blog/ttft-and-tpot/) covers why that metric split matters.)
 
-![Bar diagram comparing static preallocation, paged allocation, and shared-prefix KV memory for the worked example](./kv-memory-math.png)
 
 Notice what the example does not depend on: which framework's kernels are 7% faster on some microbenchmark. The memory math dominates, and all 3 frameworks now implement all 3 techniques.
 

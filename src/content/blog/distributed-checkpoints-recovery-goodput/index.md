@@ -3,7 +3,7 @@ title: "Distributed Checkpoints and Recovery: Goodput Under Failure"
 description: "Define recoverable training state, derive checkpoint intervals, and verify distributed save/load without confusing asynchronous completion with durability."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "distributed-training"
 code: "train-8"
 order: 8
@@ -65,7 +65,6 @@ $$
 The result is a useful planning baseline: faster checkpointing permits more frequent saves, while more reliable jobs justify longer intervals. It is not a universal optimal policy when failure risk changes over time, planned preemptions are announced, checkpoint bandwidth varies, or the job is nearly finished.
 
 Use the job-level interruption interval, not an unrelated component reliability number. If one device failure stops a large gang-scheduled job, the effective job failure process can differ greatly from the reliability of one GPU. Shared power, networking, and software failures also violate naive independence assumptions.
-
 
 
 ![Deep-dive illustration: Derive a simple checkpoint interval](./deep-dive.png)

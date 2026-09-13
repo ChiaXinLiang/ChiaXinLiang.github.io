@@ -3,7 +3,7 @@ title: 'Prefill and Decode Are Different Workloads — Stop Serving Them Togethe
 description: "Colocating prefill and decode inflates tail TPOT up to 30x; here's the head-of-line blocking math, the KV handoff cost, and why disaggregation wins."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'scale-1'
 order: 6
 series: "llm-serving"
@@ -24,7 +24,6 @@ Autoregressive inference has 2 phases with almost nothing in common except the w
 
 **Decode** generates 1 token per step per stream. Each step must re-read every weight matrix and the full KV cache to produce a single token per sequence, so arithmetic intensity is miserable — a handful of FLOPs per byte. Decode is **memory-bound**: the step-time floor is set by how fast HBM can stream the weights, not by how fast the tensor cores multiply. Its metric is time-per-output-token (TPOT). The [TTFT and TPOT](/blog/ttft-and-tpot/) primer covers why these 2 numbers, not aggregate tokens/s, define user experience.
 
-![Side-by-side comparison of prefill and decode: prefill is compute-bound with high tensor-core utilization, decode is memory-bound with high HBM bandwidth utilization](./fig-workloads.png)
 
 So 1 phase wants maximum FLOPs, the other wants maximum bandwidth; 1 wants small tensor-parallel groups sized for TTFT, the other wants huge batches to amortize the weight reads; 1 finishes in a burst, the other trickles for minutes. A colocated engine must pick 1 configuration — 1 parallelism layout, 1 batching policy, 1 scheduler — and impose it on both. Whatever it picks is wrong for 1 of them.
 
@@ -44,7 +43,6 @@ Use a 70B-parameter dense model in BF16 and 1 H100's resource budget as a hypoth
 
 **Now add traffic.** Say your mix is 90% short prompts (512 tokens ≈ 0.18 s of prefill) and 10% long ones (8,192 tokens ≈ 2.9 s), arriving at 2 requests/s. On average a long prefill lands every 5 seconds. In any 10-second window, a decoding user expects to eat about 2 long-prefill stalls: roughly 5.8 s of their wall-clock time spent waiting on *other people's prompts*. Instead of 10 s / 42 ms ≈ 238 tokens they get about 100. Mean TPOT degrades to ~100 ms — bad but survivable — while **p99 TPOT is ~2.9 s, 70 times the median**. The average hides it; the tail is where colocation dies. This is the same lesson as [Goodput vs. Utilization](/blog/goodput-vs-utilization/): the GPU was "100% busy" the whole time, and a large fraction of that busyness was destroying your SLO.
 
-![Timeline comparison showing a colocated engine where a 2.9-second prefill stalls all decode streams, versus disaggregated pools where decode TPOT stays at 42 ms; interference range 2–30x per DistServe](./fig-hol.png)
 
 Chunked prefill — splitting the prompt into slices and co-scheduling 1 slice per decode iteration — is the standard colocated mitigation, and it genuinely caps the worst-case gap. But look at what the knob trades. A 512-token chunk costs ≈ 2 × 70e9 × 512 ≈ 72 TFLOP ≈ 180 ms per iteration at our 400 TFLOPS effective rate: TPOT for everyone degrades ~4x for the whole duration of the prefill. Shrink the chunk to 128 tokens and the per-iteration tax drops near the 42 ms floor, but now the 8,192-token prompt needs 64 iterations interleaved with decode, and its TTFT stretches past 3 seconds. Chunked prefill does not remove the interference; it lets you choose which SLO absorbs it, smeared instead of spiked.
 
@@ -55,7 +53,6 @@ Chunked prefill — splitting the prompt into slices and co-scheduling 1 slice p
 
 The disaggregated answer is blunt: run prefill and decode on **different GPUs**. A prefill pool runs prompts to their first token, then ships the KV cache to a decode pool that carries the stream to completion. Each pool gets its own right-sized configuration — the prefill pool tunes tensor parallelism for TTFT and runs near the compute roofline; the decode pool packs large batches, tunes for bandwidth, and its iteration time never sees a prompt. The p99 TPOT collapses back to the median because the mechanism that created the tail is physically gone.
 
-![Disaggregated serving architecture: a router with early rejection feeding a compute-optimized prefill pool and a bandwidth-optimized decode pool, KV cache handed off over NVLink or RDMA](./fig-arch.png)
 
 The obvious objection is the handoff. Let's price it. For a Llama-70B-class model with GQA (80 layers, 8 KV heads, head dim 128, FP16), the KV cache is 2 × 8 × 128 × 2 B × 80 ≈ **320 KB per token**. The 8,192-token prompt's cache is ~2.6 GB. Over a 400 Gb/s RDMA NIC that is ~52 ms; inside an NVLink domain at 900 GB/s, ~3 ms. Against 2.9 s of prefill compute, the nominal transfer time is about 0.1–1.8% of that compute time — and in practice it is not even that, because implementations that stream KV **layer by layer** can overlap it, overlapping the transfer of layer *n* with the compute of layer *n+1*. How much handoff remains exposed depends on the implementation, network contention, and streaming granularity.
 

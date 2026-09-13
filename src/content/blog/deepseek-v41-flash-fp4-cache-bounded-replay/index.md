@@ -3,7 +3,7 @@ title: "DeepSeek-V4.1-Flash 3: FP4 Cache and Bounded Replay"
 description: "Calculate FP4 scale overhead, analyze quantization error, and distinguish global cache compression from reconstructing recent sliding-window state."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "ds-3"
 order: 10
@@ -32,7 +32,6 @@ $$
 $$
 
 This equation explains the role of scaling without prescribing a particular scale-selection algorithm. The model card's scale format does not by itself disclose clipping, rounding, handling of nonfinite values, or every layout detail. Do not invent those settings from the format name.
-
 
 
 ![Deep-dive illustration: Read the numerical format precisely](./deep-dive.png)

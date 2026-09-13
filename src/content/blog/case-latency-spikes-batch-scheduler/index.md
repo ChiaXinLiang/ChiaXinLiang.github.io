@@ -3,7 +3,7 @@ title: "Case File: Latency Spikes Every Few Seconds"
 description: "Use a serving timeline, token-budget arithmetic, and controlled experiments to distinguish batch scheduling stalls from periodic CPU or memory interruptions."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'case-5'
 order: 21
 series: "llm-serving"
@@ -24,7 +24,6 @@ Separate time spent computing a token from time spent making it visible. Reverse
 
 Do not summarize the problem only as mean time per output token. A mean of 30 milliseconds can hide hundreds of normal 25-millisecond intervals and 1 800-millisecond gap. Retain per-request interval distributions, maximum gaps, and a timeline around the event. An aggregate percentile over all tokens can also obscure which requests experience repeated interruptions.
 
-![An illustrative sequence of normal decode intervals interrupted by a long prefill.](figure-01.png)
 
 *Original incident timeline. Durations are illustrative, and this is not a source-paper figure.*
 
@@ -54,7 +53,6 @@ Assume isolated prompt processing costs 0.10 milliseconds per token over this ra
 
 If we set a tentative allowance of 25 milliseconds for extra prompt work, this linear approximation suggests only 250 prefill tokens per iteration. Adding 16 decode tokens gives T around 266. The required chunk count becomes ceiling(8192/250), or 33. Such a small budget may damage prompt completion time and throughput, and real mixed-batch timing is not generally linear. Use the arithmetic to choose a search range, then measure.
 
-![Token-budget arithmetic shows how an 8192-token prompt becomes 5 chunks.](figure-02.png)
 
 *Original worked-example diagram based on the scheduling mechanism documented by vLLM; numerical settings are illustrative.*
 
@@ -102,7 +100,6 @@ Then enable or adjust the engine's supported chunked-prefill settings and repeat
 
 Finally repeat with realistic arrival variability. A setting that works for 1 injected prompt may fail when several long prompts arrive together. Include cancellations and disconnects, because unfinished requests should release their resources promptly. Confirm that the test driver actually sends arrivals independently of response completion; a closed-loop driver can mask growing queues.
 
-![A diagnostic checklist connects observed behavior with targeted experiments.](figure-03.png)
 
 *Original diagnostic summary; investigate the listed mechanisms with controlled measurements.*
 

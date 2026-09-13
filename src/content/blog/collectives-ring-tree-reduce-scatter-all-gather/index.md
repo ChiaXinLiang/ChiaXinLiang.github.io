@@ -3,7 +3,7 @@ title: "Collective Communication: Ring, Tree, Reduce-Scatter, and All-Gather"
 description: "Derive collective semantics and traffic, connect ring and tree schedules to message size, and select experiments that expose topology and synchronization costs."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-networking"
 code: "net-2"
 order: 4
@@ -36,7 +36,6 @@ A mean reduction adds division by the appropriate population or weight. Do not a
 All-gather instead produces a concatenation or equivalent layout of the original contributions. It does not sum corresponding elements. Reduce-scatter performs the reduction and partitions the resulting vector among ranks according to the operation's defined layout.
 
 The participants must agree on group membership, data types, counts, and operation ordering. A rank entering a different collective can stall the group or violate the protocol. A collective's semantic contract therefore includes distributed participation, not only the output tensor formula.
-
 
 
 ![Deep-dive illustration: Write the collective result before counting bytes](./deep-dive.png)

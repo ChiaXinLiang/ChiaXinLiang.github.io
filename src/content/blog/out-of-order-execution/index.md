@@ -3,7 +3,7 @@ title: 'Out-of-Order Execution: The Illusion of Sequential Code'
 description: "Your CPU runs instructions in whatever order the data allows, then files the results as if it never cheated — here is how the trick works."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './section-overview.png'
 code: 'arch-3'
 order: 11
 series: "comp-arch"
@@ -21,7 +21,6 @@ This is out-of-order execution, and it is the single most elaborate piece of mac
 ![Instruction scheduling and ordered retirement.](./section-overview.png)
 
 
-
 In [the first article of this series](/blog/what-a-cpu-actually-does/) we built the pipeline: fetch, decode, execute, overlapped so a new instruction enters every cycle. The pipeline's promise is 1 instruction completed per cycle. Its weakness is that the promise only holds when every instruction is ready to run the moment its turn comes.
 
 Real code breaks that constantly, because instructions depend on each other. If instruction 2 adds the value that instruction 1 loads from memory, instruction 2 cannot start until the load finishes. That's called a **data dependency** (specifically a read-after-write dependency: 2 reads what 1 writes). An in-order pipeline, which must start instructions in exactly the order the program lists them, has no choice: it stalls. Instruction 2 waits, and so does everything behind it, even instructions 3 and 4 that have nothing to do with the load.
@@ -34,7 +33,6 @@ The fix sounds almost too obvious: let the people with exact change go around. F
 
 An out-of-order core is a sandwich: in-order at both ends, chaos in the middle.
 
-![Block diagram of an out-of-order core: an in-order front end with fetch, decode, and rename stages feeds an issue queue; execution units run instructions in any order operands allow; a reorder buffer retires results strictly in program order](./ooo-engine.png)
 
 The **front end** fetches and decodes instructions in program order, exactly as written. Before handing them onward, it renames their registers (more on that shortly) and appends each 1 to 2 structures: an **issue queue** (also called a scheduler or reservation stations), which is the waiting room, and a **reorder buffer** (ROB), which is the ledger recording the original program order.
 
@@ -70,7 +68,6 @@ Assume the core can start 1 instruction per cycle, the load takes 4 cycles, the 
 
 Last result lands at the end of **cycle 5**. Then the ROB retires I1, I2, I3, I4 in that order, and to the outside world the program ran sequentially. 8 cycles down to 5 reduces elapsed time by 37.5%; the equivalent fixed-task speedup is 1.6×.
 
-![Cycle-by-cycle timeline comparing the same 4 instructions on an in-order core finishing in 8 cycles versus an out-of-order core finishing in 5, with the multiply and subtract sliding into the shadow of the load](./ooo-timeline.png)
 
 Scale the intuition up: real windows are hundreds of instructions deep, and the stall being hidden is often not a 4-cycle load but a 300-cycle DRAM miss. The out-of-order engine's real job is to find enough independent work to keep the execution units fed while memory takes its time.
 
@@ -114,7 +111,6 @@ I4: MUL P10 ← R8 × R9     # R5 now lives in P10 — no conflict
 
 I3 and I4 can now run immediately, in any order, while the divide grinds. The only dependency left is the real 1, I1 to I2, carried by P7. Renaming deletes every false dependency and leaves the true dataflow graph, which is exactly what the scheduler wants to see.
 
-![Register renaming shown before and after: the original code has 1 true dependency plus write-after-read and write-after-write hazards on R5; after mapping each write to a fresh physical register, only the true dependency remains](./register-renaming.png)
 
 The everyday analogy: a kitchen with 1 cutting board forces cooks to queue even when their recipes are unrelated. Renaming is buying a stack of cutting boards and handing a clean 1 to each cook. The recipes didn't change; the phony contention evaporated.
 

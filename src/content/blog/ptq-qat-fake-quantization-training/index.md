@@ -9,14 +9,13 @@ order: 5
 topic: "Quantization"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Post-training quantization prepares a trained model for a lower-precision execution path. Quantization-aware training exposes simulated quantization effects while optimization can still change parameters. The distinction is about when and how the model adapts to numerical constraints, not simply about which format name appears on the final artifact.
 
 This article follows the forward and backward computation of fake quantization, then connects training choices to deployment conversion. The overview image contrasts the two preparation paths and shows a quantization grid inside the QAT forward pass. A wider-precision shadow parameter can receive a surrogate gradient even though the deployed value will occupy a discrete code.
 
-![Concept overview: Quantization 2: PTQ, QAT, and Fake-Quantized Training](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -41,7 +40,6 @@ $$
 The feasible set describes the supported quantized representation. The equation does not imply that every PTQ method solves this exact optimization. It provides a useful example of adapting numerical preparation to the observed layer behavior.
 
 Calibration cost and data requirements belong in the method comparison. A result described as post-training can still involve substantial reconstruction or parameter-search work. Report the actual procedure rather than interpreting PTQ as always equivalent to rounding every weight independently.
-
 
 
 ![Deep-dive illustration: Explain the PTQ path](./deep-dive.png)

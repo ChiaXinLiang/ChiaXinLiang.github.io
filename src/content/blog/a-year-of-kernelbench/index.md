@@ -3,7 +3,7 @@ title: 'Can LLMs Replace Kernel Engineers Yet? A Year of KernelBench'
 description: 'Read the reported kernel-generation results through verified correctness, search budgets, measured speedups, and reproducible evaluation.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'cd-4'
 order: 12
 series: "efficient-ai"
@@ -24,7 +24,6 @@ The tasks come in 3 levels. Level 1 is single operators such as matmul and convo
 
 The first measurement set the tone. Across levels, frontier models cleared fast_1 less than 20% of the time, and they consistently failed to use tensor cores, the units that provide most of the performance of a modern GPU. The models knew CUDA syntax. They did not know the machine.
 
-![1 year of KernelBench results, from under 20 percent 1-shot to 82 percent with multi-turn RL. Data: Guo and Zhang, KernelBench retrospective, 2025](./ladder.png)
 
 ## A worked example: monkey math
 
@@ -40,7 +39,6 @@ This is the single most useful mental model for LLM kernel generation: the model
 
 The second fix respected how humans actually work. Kernel optimization is iterative: implement, measure, read the profile, revise. Feeding evaluation results, speedups, and profiler breakdowns back into the model across serial turns lifted DeepSeek-R1 from 36% to 72% on Level 2. Same model, same weights, double the score, purely from structuring the interaction like an engineer's inner loop.
 
-![The verifier loop: propose, compile, fuzz against the PyTorch reference, profile, feed errors and hotspots back](./loop.png)
 
 The third fix moved that loop into training. Kevin, a collaboration with Cognition, applied multi-turn reinforcement learning so the model is rewarded for the trajectory, not the single shot. Trained this way, a 32B model (QwQ-32B as the base) went from 56% to 82% correctness on the benchmark's tasks, and mean speedup went from 0.53x to 1.10x over PyTorch eager, beating o4-mini's 0.78x. The mean crossing 1.0x matters: below it, the "optimizer" makes your code slower on average. If you have read [how models learn](/blog/how-models-learn/), the mechanism is familiar gradient machinery; the novelty is that the reward signal comes from a compiler and a wall clock rather than from human preference.
 
@@ -69,7 +67,6 @@ But the deeper lesson of the year is about verifiers, not models. GPU timing is 
 
 And the failures that remain when the harness is airtight are strikingly consistent. Models handle boilerplate, wrappers, and known fusion patterns well. They still struggle with what I would call memory choreography: tensor core intrinsics, swizzled shared-memory layouts that dodge bank conflicts, asynchronous copy pipelines, warp specialization. These are exactly the techniques with the least public training data, and exactly where FlashAttention-class performance lives. Even the best KernelBench submissions underuse the hardware units that matter most.
 
-![What LLMs already do well in kernel work versus where they still fail](./split.png)
 
 ## Common misconceptions
 

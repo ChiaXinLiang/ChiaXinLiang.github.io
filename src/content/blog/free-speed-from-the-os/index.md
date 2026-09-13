@@ -3,7 +3,7 @@ title: 'Free Speed from the OS: Your GPUs Are Starving Because of Your CPUs'
 description: "Cross-NUMA copies, pageable memory, and untuned containers can cut host-to-device bandwidth 3x. Here's the zero-dollar host tuning that gets it back."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'os-1'
 order: 8
 series: "ai-performance"
@@ -26,7 +26,6 @@ Now trace what happens each training step. A DataLoader worker on some CPU core 
 
 The Linux scheduler does not know any of this. It balances load across all cores, cheerfully migrating your data-feeding processes to whichever socket looks idle. Nothing crashes. Nothing logs a warning. The copies are just slower, forever.
 
-![Dual-socket server topology showing a local pinned path from DRAM 0 to the GPU at 26 GB/s versus a remote path from DRAM 1 crossing the inter-socket link](./numa-path.png)
 
 There is a second, independent tax: pageable versus pinned memory. Normal `malloc`'d memory is pageable, meaning the kernel may move or swap those pages at any moment. A DMA engine cannot safely target memory that might move mid-transfer, so when CUDA copies from pageable memory it first has the CPU stage the data into an internal pinned bounce buffer, then DMAs from there. You pay for an extra memcpy, and the copy cannot be asynchronous. Allocate the buffer as pinned (page-locked) instead, via `cudaHostAlloc` or PyTorch's `pin_memory=True`, and the DMA engine reads your buffer directly at full link speed while the CPU does something useful. NVIDIA's CUDA Best Practices Guide is blunt about this: pinned memory is the prerequisite for both peak H2D bandwidth and copy/compute overlap.
 
@@ -48,7 +47,6 @@ Representative achieved bandwidths on a dual-socket PCIe Gen4 box (the shape of 
 | pageable, local node | 12 GB/s | **12.8 ms** |
 | pageable, remote node | 8 GB/s | **19.3 ms** |
 
-![Bar chart comparing achieved host-to-device bandwidth for pinned local, pinned remote, pageable local, and pageable remote configurations, a 3.3x spread](./h2d-bandwidth.png)
 
 The copy-time delta between best and worst is 13.4 ms per step. Whether that hurts depends on overlap. Say the GPU compute for a step takes 180 ms. In the pinned+local case, the copy is asynchronous: while the GPU crunches step *N*, the DMA engine streams batch *N+1* in the background, and the 5.9 ms vanishes entirely. Step time: 180 ms.
 

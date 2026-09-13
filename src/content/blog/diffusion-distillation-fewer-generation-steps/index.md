@@ -9,14 +9,13 @@ order: 5
 topic: "Diffusion Models"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Step distillation trains a diffusion predictor to make larger useful moves during generation. Instead of changing only the numerical solver, it changes the model so that a shorter trajectory can approximate a slower teacher. The repeated inference work can shrink, while teacher execution and student training move cost into preparation.
 
 Progressive distillation provides a concrete example: one student update is trained to match 2 teacher updates, and the process can repeat to reduce the required step count. This article derives that target and explains why it differs from ordinary image reconstruction or classifier distillation. The numerical examples are illustrative, not measured generation results.
 
-![Concept overview: Diffusion Distillation: Fewer Steps and Quality Tradeoffs](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -39,7 +38,6 @@ $$
 For a variance-preserving schedule, the amplitudes satisfy a_t squared plus s_t squared equal to 1. Other formulations can use another schedule while preserving an appropriate predictor conversion.
 
 The ordering of t depends on the corruption convention. In this article, u denotes a less noisy level reached from t during generation. Record actual scheduler coefficients instead of inferring them from labels such as early or late, which can be reversed between implementations.
-
 
 
 ![Deep-dive illustration: Define the noise-level notation](./deep-dive.png)

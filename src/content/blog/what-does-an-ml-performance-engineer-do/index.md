@@ -3,7 +3,7 @@ title: 'What Does an ML Performance Engineer Actually Do?'
 description: "Same model, same answers — delivered faster and cheaper. Inside the role that decides whether AI products make or lose money."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'intro-1'
 order: 1
 series: "ai-performance"
@@ -26,7 +26,6 @@ That distinction matters because it defines the toolbox. Model quality is a rese
 
 Every decision in this job trades between 3 quantities:
 
-![The AI performance triangle: latency, throughput, cost — every optimization pulls on all 3 corners](./triangle.png)
 
 - **Latency** — how fast does 1 user get an answer?
 - **Throughput** — how many users can we serve at once?
@@ -46,7 +45,6 @@ What does that look like concretely? Across a week, a performance engineer might
 - **Rewrite** 1 CUDA kernel that profiling showed was reading memory in a pattern the hardware hates
 - **Do napkin math** on whether next quarter's model fits on current GPUs, or the company needs to buy more
 
-![The performance engineer's layers: 1 role spanning hardware, systems software, serving, and model-level tricks](./layers.png)
 
 Notice the range: from chip-level memory access patterns to fleet-level capacity planning. That breadth — hardware, systems software, and algorithms in 1 head — is exactly why the role is scarce and well paid.
 

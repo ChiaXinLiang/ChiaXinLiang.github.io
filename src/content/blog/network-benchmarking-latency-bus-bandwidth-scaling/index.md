@@ -3,7 +3,7 @@ title: "Network Benchmarking: Latency, Bus Bandwidth, and Multi-Node Scaling"
 description: "Design reproducible collective size and topology sweeps, distinguish timing from derived bandwidth, and connect benchmark evidence to application scaling."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-networking"
 code: "network-7"
 order: 6
@@ -48,7 +48,6 @@ where n is bytes, alpha is startup time, and beta is effective payload bandwidth
 For illustrative alpha=8 microseconds and beta=40 GB/s, a 4 KiB payload has about 0.102 microseconds of serialization, whereas 64 MiB has about 1.678 milliseconds. These points emphasize very different resources. A configuration improving one region can regress the other.
 
 Preserve the raw size-time observations and diagnostic output. A bandwidth curve alone can hide a latency intercept, and a single fitted slope can hide a protocol cliff. Later comparisons should be able to reconstruct what changed without assuming the same model remains valid.
-
 
 
 ![Deep-dive illustration: Build a size sweep around the application's messages](./deep-dive.png)

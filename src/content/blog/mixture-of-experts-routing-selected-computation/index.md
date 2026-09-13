@@ -3,7 +3,7 @@ title: "Mixture of Experts 1: Routing and Selected Computation"
 description: "Derive sparse expert routing, separate total from active parameters, and connect selected computation to memory residency and distributed execution."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "model-2"
 order: 3
@@ -41,7 +41,6 @@ $$
 The router is trainable. Its scores can learn relationships between token representations and useful expert functions. It does not necessarily assign interpretable labels such as “mathematics expert” or “networking expert.” Apparent specialization requires evidence from activations and behavior, not an attractive name.
 
 Softmax probabilities before selection and combine weights after selection are not automatically the same object. Some implementations renormalize selected weights and others use their original values. Inspect the actual forward computation before reproducing it.
-
 
 
 ![Deep-dive illustration: Derive router scores](./deep-dive.png)

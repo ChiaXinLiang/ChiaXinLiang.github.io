@@ -3,7 +3,7 @@ title: 'Inference Engines That Retune Themselves at Runtime'
 description: "Traffic moves 5x in a day while your serving config stands still: how adaptive engines switch precision, reshape parallelism, and migrate KV cache on the fly."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'scale-5'
 order: 15
 series: "llm-serving"
@@ -30,7 +30,6 @@ An adaptive serving stack has, broadly, 4 families of actuators. They differ eno
 
 **KV cache placement.** HBM is the scarcest resource in the box, and a lot of KV cache sitting in it is cold. An agent session waiting 20 seconds on a tool call parks gigabytes of KV in HBM doing nothing. Adaptive engines tier KV across HBM, CPU DRAM, and NVMe: vLLM can swap preempted sequences to CPU, SGLang layers a hierarchical cache under its radix tree, and Mooncake (the engine behind Kimi) is built around a disaggregated KV pool spanning the DRAM and SSD of the whole cluster. On systems using CUDA managed memory, `cudaMemAdvise` hints (`SetPreferredLocation`, `SetAccessedBy`) let the engine steer cold pages toward host RAM without hard-failing when they are touched, so an offload mistake costs a page migration rather than a crash.
 
-![Serving as a feedback controller: SENSE — Queue depth; KV occupancy — Goodput under TTFT/TPOT SLOs; DECIDE — Thresholds, forecast, hysteresis — Account for transition costs; ACTUATE — Batch/chunk: ms; KV moves: seconds — Parallel reshape: tens of seconds+. Original controller schematic · Dynamo; DistServe (2024)](./control-loop.png)
 
 ![Deep dive: The 4 knob families](./deep-dive-component-01.png)
 
@@ -55,7 +54,6 @@ This is a roofline-style bound; real engines land within about 1.3–2x of it on
 
 **20:00, the agents.** Volume is moderate but contexts are long and bursty. A single agent session with a 30k-token history holds 30,000 × 320 KB ≈ 9.6 GB of FP16 KV, and it spends much of its wall-clock time idle, waiting on tool calls. 60 such sessions would be 576 GB, nearly the whole node's HBM, mostly cold. The engine offloads idle-session KV to CPU DRAM over PCIe Gen5 (~64 GB/s per direction): about 0.15 s out and 0.15 s back for that 9.6 GB, invisible next to a multi-second tool call, and it frees HBM for streams that are actually decoding. Hot shared prefixes stay pinned; see [the KV cache article](/blog/kv-cache-explained/) for why prefix reuse is worth protecting.
 
-![4 traffic phases, different actuators: 03:00 / 09:00 — Trough: backfill useful batch work — Ramp: retune chunked prefill; 13:00 PEAK — Use prevalidated precision variants — Raise admission within quality limits; 20:00 AGENTS — Long contexts, idle tool-call intervals — Offload cold KV; pin hot prefixes. Hypothetical day · an architectural proposal, not live data](./traffic-day.png)
 
 ![Deep dive: A worked example: 1 day, 1 node](./deep-dive-component-02.png)
 
@@ -72,7 +70,6 @@ Once you draw the loop, classical control problems show up on schedule.
 
 **Stay stable.** A controller that flips FP8→FP4 at 70% load and back at 69% will oscillate, and every oscillation costs a weight swap. Hysteresis bands, minimum dwell times, and rate limits on expensive actuators are not optional engineering polish; they are the difference between a control system and a self-inflicted incident generator.
 
-![Less traffic creates admission headroom: BEFORE — 200 STREAMS — 70 GB FP8 weights + 256 GB FP16 KV — 326 / 26.8 TB/s ≈ 12.2 ms; AFTER — 400 STREAMS — 35 GB FP4 weights + 256 GB FP8 KV — 291 / 26.8 TB/s ≈ 10.9 ms; LIMITS — Bandwidth floor, not measured TPOT — Quality validation required first. Illustrative dense 70B, 8×H100 model · excludes overhead](./step-bytes.png)
 
 ## A controller must repay the transition
 

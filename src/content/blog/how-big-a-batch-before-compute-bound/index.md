@@ -3,7 +3,7 @@ title: "How Big a Batch Before Decode Becomes Compute-Bound?"
 description: "Derive the roofline crossing for batched decode, then show how KV traffic, GEMM geometry, and capacity can prevent it."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'math-5'
 order: 21
 series: "gpu-performance"
@@ -66,7 +66,6 @@ $$
 
 When $$M$$ is small relative to large weight dimensions, the $$KN$$ term dominates and intensity is approximately $$M$$ FLOP/byte. As $$M$$ grows, activation traffic becomes less negligible. The simple linear increase is therefore an approximation, not an unlimited law.
 
-![Roofline performance rises with intensity until compute becomes the bound](./figure-01.png)
 
 ## Derive the weight-only batch crossing
 
@@ -112,7 +111,6 @@ These numbers omit cache, activations, non-linear operations, and overhead. A su
 
 Per-request streaming depends on step duration. Raising batch from 32 to 512 does not preserve individual speed once compute dominates. Aggregate rate approaches a plateau while each user's token interval grows. A service may reject that tradeoff well before hardware throughput stops increasing.
 
-![Weight time stays roughly fixed while batch arithmetic grows](./figure-02.png)
 
 ## Quantized weights change 1 side of the equation
 
@@ -214,7 +212,6 @@ Do not assume 1 universal efficiency percentage. A short-context projection GEMM
 
 Plot step time, aggregate output rate, individual token interval, and memory occupancy together. A plateau in aggregate rate with rising step time is compatible with compute saturation, but profiling must exclude scheduler stalls or communication. A memory-capacity failure is not evidence of reaching the compute ceiling.
 
-![Deployable batches must satisfy capacity and latency as well as roofline limits](./figure-03.png)
 
 ## Common misconceptions
 

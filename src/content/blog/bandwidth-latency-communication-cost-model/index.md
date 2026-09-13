@@ -3,7 +3,7 @@ title: "Bandwidth, Latency, and the Communication Cost Model"
 description: "Derive startup-plus-transfer costs, convert link rates correctly, and connect message size, topology, and overlap to distributed job time."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-networking"
 code: "network-1"
 order: 1
@@ -52,7 +52,6 @@ $$
 For illustrative alpha=10 microseconds and beta=25 GB/s, the crossover is 250000 bytes, about 244 KiB. A 4 KiB payload has approximately 0.164 microseconds of transfer time, so startup dominates. A 64 MiB payload has about 2.684 milliseconds of transfer time, making the fixed 10 microseconds comparatively small.
 
 This simple calculation prevents a common mistaken expectation: doubling link bandwidth barely improves a tiny message when its dominant cost is startup. Conversely, reducing launch overhead does little for a transfer whose sustained byte movement already lasts several milliseconds.
-
 
 
 ![Deep-dive illustration: Derive the startup-plus-transfer approximation](./deep-dive.png)

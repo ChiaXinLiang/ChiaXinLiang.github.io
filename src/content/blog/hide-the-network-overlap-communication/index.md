@@ -3,7 +3,7 @@ title: 'Hide the Network: Overlap Communication with Compute'
 description: "Why the goal of cluster networking is zero exposed communication, not zero communication — with the ring all-reduce cost model worked out by hand."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'net-1'
 order: 8
 series: "ai-networking"
@@ -28,7 +28,6 @@ The reason 2 separate libraries exist is that the overlap strategies differ. Col
 
 ## From GPU memory to the fabric: the complete path
 
-![Section overview showing the direct GPU HBM-to-PCIe-to-NIC-to-fabric path, host-staging alternative, effective-bandwidth limit, ring cost model, and bucket-readiness equation](./gpu-nic-section-overview.svg)
 
 *Read the figure from 1 to 4: establish the payload route, compare staging costs, model the bottleneck, then examine the exposed tail.*
 
@@ -44,7 +43,6 @@ Arrange N GPUs in a logical ring and split the buffer of S bytes into N chunks. 
 
 **T = 2(N−1)/N × S / B**
 
-![Ring all-reduce cost model: reduce-scatter plus all-gather phases, each GPU sending 2(N-1)/N times S bytes, worked for a 70B model](./ring-allreduce.png)
 
 Now the numbers. A 70B model with BF16 gradients has S = 140 GB to reduce. Take N = 64 GPUs, each with a 400 Gb/s NIC, so B = 50 GB/s per link:
 
@@ -58,7 +56,6 @@ Is 5.5 seconds a lot? Only relative to the compute it could hide behind. Give th
 
 Run the all-reduce *after* the backward pass and your step is 4.4 + 8.8 + 5.5 = 18.7 s. That is a 41% tax, paid every step, for weeks. Run it *during* the backward pass and the step is 13.3 s, because 5.5 s of communication fits comfortably inside 8.8 s of backward compute. Same hardware, same bytes, 1.4× the training throughput.
 
-![Timeline comparing a sequential step where all-reduce adds 5.5 seconds after backward against an overlapped step where bucketed all-reduce hides inside the backward pass](./overlap-timeline.png)
 
 ## How the hiding actually works
 

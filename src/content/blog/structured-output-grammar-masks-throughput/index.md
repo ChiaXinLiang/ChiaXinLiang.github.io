@@ -3,7 +3,7 @@ title: "Structured Output: Grammar Masks and Constrained Decoding Throughput"
 description: "Model constrained generation as a tokenizer-aware state machine, derive masked sampling, and measure useful completed outputs rather than valid prefixes."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-serving"
 code: "serve-5"
 order: 11
@@ -46,7 +46,6 @@ The state can include multiple possible parser configurations, not merely a sing
 An admissible prefix is also different from a completed output. After emitting an opening brace, the prefix can still be valid, but there is no object to deliver yet. End-of-sequence should become permitted only when the implementation's completion rules allow termination. Stopping at a token limit can leave a perfectly admissible prefix incomplete.
 
 The per-request matcher must follow exactly the tokens accepted into that request's output. Sharing mutable matcher state across requests would connect their grammars accidentally. Compiled grammar information may be reusable; the current prefix and transition history belong to the individual generation.
-
 
 
 ![Deep-dive illustration: Treat decoding as a state transition system](./deep-dive.png)

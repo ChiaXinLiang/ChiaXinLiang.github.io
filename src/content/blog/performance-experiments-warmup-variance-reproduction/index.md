@@ -3,7 +3,7 @@ title: "Performance Experiments: Baselines, Warmup, Variance, and Reproduction"
 description: "Define comparable timing populations, derive uncertainty and paired speedup estimates, and distinguish reproducible improvements from drift and changed work."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-performance"
 code: "bench-1"
 order: 6
@@ -58,7 +58,6 @@ The terms depend on the measurement boundary. An event-based device duration and
 Avoid adding unrelated global synchronization merely because it makes timing simple. It can destroy overlap and include other work. Conversely, omitting the necessary boundary can undercount the operation. Verify the timer against the intended dependency timeline.
 
 For distributed execution, preserve rank context and define whether the reported duration is local, maximum across ranks, or client-visible. Averaging local durations can hide the participant that determines group completion. The statistic must match the workload's synchronization semantics.
-
 
 
 ![Deep-dive illustration: Time asynchronous work at its actual completion boundary](./deep-dive.png)

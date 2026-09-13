@@ -3,7 +3,7 @@ title: 'ASIC vs FPGA vs GPU: What Custom Silicon Actually Means'
 description: "Every step from CPU to ASIC removes machinery that decides what to do next. Here is the flexibility-efficiency spectrum, what an FPGA really is, and the arithmetic that tells you when $50M of custom silicon pays off."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'asic-1'
 order: 15
 series: "comp-arch"
@@ -28,7 +28,6 @@ Line up the 4 big compute substrates and you get a spectrum. At 1 end, maximum f
 
 **ASIC.** An application-specific integrated circuit. The circuit is not configured into a flexible fabric; it is etched permanently into silicon. Its fabricated hardware structure is fixed, but it can include programmable processors, instruction streams, and configurable dataflow; application-specific does not mean 1 immutable computation.
 
-![The flexibility-efficiency spectrum from CPU to ASIC, showing what each step removes and roughly what it buys](./spectrum.png)
 
 Why does moving right on this spectrum buy efficiency? Because generality has a measurable energy price. Mark Horowitz's widely cited ISSCC 2014 numbers make it concrete: in 45 nm silicon, an 8-bit integer addition costs about 0.03 picojoules. The overhead of *being a processor* (fetching the instruction, decoding it, reading the register file, managing the pipeline) costs on the order of 70 pJ per instruction. The useful work is a rounding error, less than a thousandth of the energy spent deciding to do it. Specialized hardware wins not by doing arithmetic faster but by deleting the overhead around the arithmetic.
 
@@ -40,7 +39,6 @@ Any logic function of 4 inputs can be described by its truth table, which has 2^
 
 An FPGA is a huge grid of these LUTs (modern ones use 6-input LUTs, 64 bits each), each paired with a flip-flop to hold state between clock cycles, plus a programmable routing fabric: a mesh of wire segments and switch matrices whose connections are also controlled by memory bits. At power-on, the chip loads a *bitstream* (millions to hundreds of millions of configuration bits) that sets every truth table and every routing switch. From that moment it behaves like the circuit you described. Because pure LUT fabric is inefficient at common heavy operations, real FPGAs also embed hardened blocks: DSP slices (real multipliers in real silicon), block RAM, and often full CPU cores.
 
-![Inside an FPGA: a 4-input LUT is a 16-bit memory acting as any logic gate, tiled into a grid of logic blocks joined by programmable routing](./lut-fabric.png)
 
 The price of this trick is well quantified. Kuon and Rose's classic measurement study found that a circuit implemented in FPGA LUT fabric is roughly 35 times larger in area, 3 to 4 times slower, and about 14 times hungrier in dynamic power than the same circuit as a standard-cell ASIC in the same process. Hardened DSP and RAM blocks narrow the area gap to roughly 18x for arithmetic-heavy designs. Every "gate" is really an SRAM read, and every "wire" passes through pass-transistor switches; you pay for flexibility on every signal, every cycle.
 
@@ -74,8 +72,6 @@ Now plug in 2 company sizes.
 - **N = 10,000** (a hyperscaler service): GPUs cost $268M. The ASIC path costs $50M + 1,000 x $8k + $1.84M ≈ **$60M**. The ASIC wins by more than 4x, saving roughly $200M, and the fleet draws 0.7 MW instead of 7 MW, which at today's grid constraints may matter more than the money.
 
 The formula also exposes the second axis, the 1 people forget: **stability**. That $200M saving assumes the workload still looks the same when silicon arrives in year 2 and through year 5. If the models your ASIC was pointed at get replaced by an architecture it handles badly, the per-unit saving collapses and you own $50M of sand. Bitcoin mining ASICs are the cheerful version of this story (the workload is frozen by protocol, so ASICs annihilated GPUs); more than 1 AI accelerator startup is the sad version. Volume times stability is the whole game: high volume and stable workload means ASIC, low volume or shifting workload means stay programmable, and the middle is where FPGAs and long arguments live.
-
-![Break-even chart from the worked example: GPU fleet cost grows at $26.8k per unit from 0, ASIC cost starts at $50M NRE and grows at $984 per unit, crossing near 1,930 units](./breakeven.png)
 
 
 The break-even equation needs a shared unit of delivered work. Let $$F$$ be 1-time development cost, $$c_G$$ the GPU lifetime cost per work unit, and $$c_A$$ the ASIC lifetime cost per equivalent unit. For volume $$N$$,

@@ -3,7 +3,7 @@ title: 'Why Transformers Won: Parallelism Beat Recurrence'
 description: 'How attention changes training dependencies and parallel computation, with complexity equations and the limits of the comparison with recurrence.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'tf-3'
 order: 10
 series: "llm-basics"
@@ -33,13 +33,11 @@ A GPU is precisely the wrong machine for long dependency chains. It's a throughp
 
 The Transformer processes a sequence [as 1 batch of matrix multiplications](/blog/transformer-architecture-in-one-picture/): every token's query-key comparisons happen simultaneously, every token's feed-forward pass happens simultaneously. Positions can be processed together within each sublayer, but projections, attention scores, softmax, and value aggregation still have dependencies. Layers also depend on prior layers — a chain as long as the network is deep, not as long as the document.
 
-![RNN training walks a 2,048-link dependency chain, 1 step waiting on the last; Transformer training collapses the same document into a few dozen layer-sized matrix multiplications that each process every token at once](./serial-vs-parallel.png)
 
 Training adds a second, subtler parallelism win. A language model's training game is next-token prediction, and a Transformer with causal masking computes the prediction for *every* position in 1 forward pass: the loss at token 1,000 and the loss at token 3 are evaluated together, in the same set of matmuls. 1 pass over a 2,048-token document yields 2,048 graded predictions. An RNN earns the same 2,048 training signals, but only by walking the chain end to end. Same pedagogy, wildly different wall-clock.
 
 The paper itself compresses the argument into a small table, and it's worth redrawing because it's the most consequential table in modern AI:
 
-![Redrawn comparison of per-layer complexity, sequential operations, and maximum path length for self-attention versus recurrence, from Vaswani et al. 2017, Table 1](./table1.png)
 
 2 columns matter. **Sequential operations**: O(n) for recurrence, O(1) for self-attention — the dependency-chain argument above. **Maximum path length**: how many hops information needs to travel between 2 tokens. In an RNN a fact from token 3 reaches token 2,000 only by surviving 1,997 rewrites of the hidden state, which is [why gradients vanish](/blog/rnn-lstm-and-the-wall/). In self-attention every token is 1 hop from every other, so the learning signal for long-range dependencies arrives intact. 1 design choice, 2 payoffs: the hardware runs full tilt, *and* the optimization problem gets easier.
 
@@ -84,7 +82,6 @@ Subtraction has a price, and it's fair to state it as plainly as the win.
 
 **Attention is quadratic in sequence length.** Every token scores every other token, so *n* tokens generate *n²* pairs. Double the context, quadruple that work; grow a 4k context to 128k (32×) and the pairwise work grows about a thousandfold. The RNN, whatever its faults, was linear: each new token cost the same as the last.
 
-![Every token attends to every token, so pairwise work grows with the square of context length: doubling tokens from 6 to 12 grows the score grid from 36 to 144 cells](./quadratic-price.png)
 
 **Memory scales with context too.** Serving a Transformer means storing keys and values for every past token (the KV cache), which is why long-context inference is [a memory-bandwidth story](/blog/blackwell-to-rubin-memory-math/) and why so much post-2017 research (FlashAttention, grouped-query attention, sparse and latent attention) amounts to negotiating the quadratic bill down.
 

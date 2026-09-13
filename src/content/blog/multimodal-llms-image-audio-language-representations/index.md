@@ -3,7 +3,7 @@ title: "Multimodal LLMs: How Image and Audio Representations Meet Language"
 description: "Follow images and waveforms through encoders and projectors, derive token and attention scaling, and connect multimodal input contracts to serving capacity."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "multi-1"
 order: 5
@@ -32,7 +32,6 @@ $$
 Here m identifies a modality, E its encoder, and P a connector or projector. This equation describes a family of designs, not every multimodal model. The feature count and width can change through downsampling, pooling, or learned resampling.
 
 The connector must learn a useful relationship between encoder features and language computation. Matching widths is necessary for some interfaces but insufficient for meaningful alignment. Training data and objectives establish how those representations influence outputs.
-
 
 
 ![Deep-dive illustration: Separate signals and representations](./deep-dive.png)

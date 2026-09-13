@@ -3,7 +3,7 @@ title: "Tokenization: Why LLMs Don't See Words"
 description: 'How token vocabularies and segmentation affect sequence lengths, model inputs, and cost, with a checked byte-pair encoding example.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'llm-2'
 order: 4
 series: "llm-basics"
@@ -57,13 +57,11 @@ Recount. The pair `(es, t)` occurs 9 times; the new symbol immediately participa
 
 The tokenizer composed a never-seen word from meaningful parts, no unknown-word token needed. That is the entire trick, and it scales: production tokenizers learn 50,000 to 200,000 merges from terabytes of text instead of 5 merges from 4 words.
 
-![BPE worked example: 4 training words are split to characters, 5 merge rules are learned from pair counts, and the unseen word "lowest" tokenizes as low + est. Example follows Sennrich et al. (2016)](./bpe-merges.png)
 
 ## Why character counting can be difficult
 
 Back to strawberry. After tokenization, the model receives 3 integer IDs, 1 per fragment. Each ID selects 1 row of the embedding matrix: a dense vector of a few thousand numbers that was *learned during training*. Nothing in that vector explicitly lists the letters inside the token. `berry` is not stored as b-e-r-r-y; it is stored as a point in meaning-space near `grape` and `jam`.
 
-![The strawberry pipeline: the word is split into the tokens str, aw, and berry, each mapped to an integer ID and then to a learned embedding vector — the model receives token IDs rather than an explicit letter sequence](./strawberry-tokens.png)
 
 So when you ask "how many r's are in strawberry?", you are asking for a character-level operation through a token-level interface. Reversible token IDs preserve the text, and the model can learn spelling associations, and "berry has two r's" style trivia is thin in web text. Ask the same model to *spell the word out first* — s-t-r-a-w-b-e-r-r-y — and then count, and accuracy jumps, because spelling-out is a mapping it did see in training, and once each letter is its own token, counting can become easier. This is a learned capability problem influenced by representation; tokenization alone does not explain every counting failure.
 
@@ -92,7 +90,6 @@ Vendors have been closing the gap: OpenAI's o200k vocabulary and Llama 3's 128K-
 
 **The vocabulary-size dial.** Why did GPT-2 pick ~50K tokens, GPT-4 ~100K, GPT-4o and Llama 3 ~128-200K? It's a genuine trade-off. A bigger vocabulary compresses text into fewer tokens: cheaper attention, more effective context, faster generation per unit of text. But every token needs an embedding row, and (in the output layer) a score computed at every generation step. At Llama 3's scale (128,256 tokens × 4,096 embedding dimensions) the input table alone is about 525 million parameters, and with an untied output projection the pair costs over 1 billion, a meaningful slice of an 8-billion-parameter model. Push the vocabulary too far and you also mint tokens so rare they're barely seen in training, which is how GPT-2/3 ended up with "glitch tokens" like ` SolidGoldMagikarp` — vocabulary entries (that 1 traced back to a Reddit username) whose embeddings were nearly untrained and triggered bizarre outputs. Vocabulary size, like everything in this series, is an engineering compromise, not a law.
 
-![The vocabulary-size dial: small vocabularies give long sequences and tiny embedding tables, large vocabularies give short sequences and huge embedding tables, with real model vocabularies plotted between the extremes](./vocab-tradeoff.png)
 
 ![Deep dive: Going deeper: bytes, regex, and the vocabulary dial](./deep-dive-component-02.png)
 

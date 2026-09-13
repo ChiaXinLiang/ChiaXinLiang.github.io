@@ -3,7 +3,7 @@ title: 'Compute-Bound vs. Memory-Bound: Arithmetic Intensity and the Roofline'
 description: 'Use arithmetic intensity and the roofline equation to identify resource limits, then compare the estimate with measured kernel behavior.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'exec-2'
 order: 2
 series: "gpu-performance"
@@ -40,7 +40,6 @@ This ratio is not an H100 quirk. An A100 sits at about 153 FLOP/byte in BF16 (31
 
 Williams, Waterman, and Patterson packaged this max() into a single log-log plot in 2009, and it remains the most useful diagram in performance engineering. Put arithmetic intensity on the x-axis and attainable FLOPS on the y-axis. Peak bandwidth draws a slanted line rising from the left (attainable FLOPS = intensity x bandwidth). Peak compute draws a horizontal roof. Where they meet is the ridge point, which is exactly the machine balance.
 
-![Roofline model on log-log axes: a slanted memory-bandwidth line meets a flat compute roof at the ridge point near 295 FLOP/byte; GEMV and batch-1 decode sit low on the slanted line, large GEMM and prefill sit under the flat roof. Redrawn from Williams, Waterman & Patterson (2009)](./roofline.png)
 
 Any kernel is a dot on this plot. Its x-position comes from counting FLOPs and bytes; the roof above that x-position is the best the hardware can do. The vertical gap between the dot and the roof is your remaining optimization headroom, and the shape of the roof at that point tells you what kind of work will close the gap. Under the slanted section, only 2 things help: move fewer bytes, or move the dot right by raising intensity. Under the flat section, only better utilization of the compute units helps. Buying more of the wrong resource moves nothing.
 
@@ -66,7 +65,6 @@ Take a square matrix multiply, C = A x B with all matrices 4096 x 4096 in BF16, 
 
 Every matrix element is used exactly once, touched for 1 multiply-add, then discarded. There is no reuse to exploit, so no amount of cleverness raises this number. At intensity 1 the roofline caps attainable throughput at 1 x 3.35 TB/s = 3.35 TFLOPS, which is the 0.3%-of-peak figure from the opening. The budget check agrees: memory needs 10 µs, compute needs 0.03 µs. The ideal attainable FLOP rate is about 0.3% of peak; this does not establish a literal tensor-core idle fraction.
 
-![Side-by-side worked example: the 4096-cubed GEMM has intensity 1365 FLOP/byte and is compute-bound, while the 4096-squared GEMV has intensity 1 FLOP/byte and is memory-bound, against the H100 balance point of 295](./gemm-vs-gemv.png)
 
 Here is why this pair of toy problems matters: they are literally the 2 phases of LLM inference. [Prefill](/blog/how-an-llm-generates-text/) processes thousands of prompt tokens at once, so every weight matrix multiplies a fat activation matrix and lands GEMM-like on the compute roof. Decode generates 1 token per step per sequence, so at batch size 1 every weight matrix multiplies a single vector: the model becomes a stack of GEMVs at intensity around 1, and each token costs at least (weight bytes / bandwidth). 1 transformer forward pass, 2 opposite corners of the roofline. This single plot is the reason [prefill and decode are increasingly served by different hardware](/blog/the-prefill-decode-disaggregation-story/).
 

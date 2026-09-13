@@ -3,7 +3,7 @@ title: "Training Memory and Step Time: Account for Every State"
 description: "Derive training memory, distinguish persistent state from peak activations, and connect the budget to measured step time."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "distributed-training"
 code: "train-1"
 order: 1
@@ -46,7 +46,6 @@ One illustrative configuration uses 2-byte compute weights, 2-byte gradients, 4-
 This is a configuration example, not a universal Adam constant. Some systems accumulate gradients in higher precision, omit a separate master copy, compress optimizer state, or partition objects across ranks. Optimizer initialization may allocate its state lazily, so a measurement before the first update can substantially understate steady-state training memory. Inspect the actual state dictionaries and tensor dtypes after an optimizer step.
 
 The accounting also explains why changing the compute-weight dtype alone is insufficient. Moving weights from 4 bytes to 2 bytes saves 2P bytes. If optimizer and gradient state dominate the total, that saving helps but does not halve training memory. The relevant denominator is the complete budget, not the single object highlighted by a precision setting.
-
 
 
 ![Deep-dive illustration: Derive the persistent-state budget](./deep-dive.png)

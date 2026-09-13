@@ -3,7 +3,7 @@ title: 'Profiling Basics: Finding Where the Time Actually Goes'
 description: 'A 3-layer profiling method with a checked idle-time example, Amdahl limits, and a workflow that turns traces into testable bottleneck claims.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './section-overview.png'
 code: 'serve-1'
 order: 4
 series: "ai-performance"
@@ -27,7 +27,6 @@ Profiling is how you find out which situation you're in. This article covers the
 
 Profiling an inference stack is a top-down exercise with 3 layers, and the order matters more than the tools.
 
-![The 3-layer profiling stack: Nsight Systems for the end-to-end timeline, Nsight Compute for single-kernel analysis, torch.profiler for framework attribution](./profiling-stack.png)
 
 **Layer 1: the end-to-end timeline (Nsight Systems).** `nsys` records everything that happens on the machine over a window of time: CPU threads, CUDA API calls, kernel executions per GPU stream, memory copies, NCCL collectives. Its output is a timeline you scrub through, and the single most valuable thing on it is the *gaps*. When the GPU row is empty, the GPU is idle, and the cause is almost always above it on the timeline: a CPU thread doing Python work, a synchronization stall, a host-to-device copy nobody overlapped. You cannot see any of this from inside a kernel profiler, which is exactly why the timeline comes first.
 
@@ -44,7 +43,6 @@ The order is the discipline. Timeline first, to find out whether the time is eve
 
 Here is a mock trace, simplified from a pattern that appears in real serving stacks constantly. The setup: an 8B-parameter model in BF16, batch of 32 decode requests, 1 H100. You measure 100 decode iterations and get 2.0 seconds of wall clock, so 20 ms per step, which is your observed TPOT. Then you open the `nsys` trace and sum the GPU busy time: 1.2 seconds. The GPU worked for 12 ms of every 20 ms step and sat idle for 8. 40 percent of your latency is not computation.
 
-![Mock nsys timeline of 1 20 ms decode step showing GPU busy blocks and 3 kinds of idle gaps: scheduler, kernel launches, and sampling sync](./idle-timeline.png)
 
 Zoom into 1 step and the 8 ms of idle time resolves into 3 distinct gaps, each with a different signature and a different fix.
 

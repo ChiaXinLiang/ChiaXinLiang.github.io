@@ -2,7 +2,7 @@
 title: 'Reading a Modern LLM: From Model Configuration to Computational Structure'
 description: 'A method for reading modern model blocks, attention state, sparse experts, and public architecture disclosures, with checked parameter and memory equations.'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './section-overview.png'
 series: "llm-architectures"
 level: beginner
 code: 'model-1'
@@ -66,7 +66,6 @@ The innovation in an attention variant may concern a different part of this comp
 
 Read the mask, head layout, positional treatment, and state representation separately. A single field named “attention” cannot establish all 4. This separation also makes limitations easier to explain: a local window restricts direct access, whereas sharing key and value heads changes the representation used for that access.
 
-![A reading workflow connects configuration fields, implementation operations, checked equations, and evidence-backed conclusions.](./reading-workflow.png)
 
 ## Translate cache structure into a memory equation
 
@@ -126,7 +125,6 @@ This is a structural change, not simply a larger context limit. It changes the o
 
 Its causal encoder should also not be confused with the bidirectional encoder in the original translation Transformer. Similar labels can describe different information constraints. Read the stated causal structure and implementation rather than importing an old diagram based on the word “encoder.” Claims about the design’s efficiency remain workload-dependent and require measured evidence beyond the architectural description.
 
-![Different hypothetical state designs have different scaling: full history grows with tokens, a window stops growing, and recurrent state has a fixed size for a fixed configuration.](./state-scaling.png)
 
 ## Finish with a testable architectural claim
 

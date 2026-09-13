@@ -3,7 +3,7 @@ title: "Debugging NCCL and RDMA: Verify the Path Before Tuning the Knobs"
 description: "Build a layered diagnosis from collective participation and rank readiness to transport selection, GPU-NIC locality, and application overlap."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-networking"
 code: "net-3"
 order: 7
@@ -58,7 +58,6 @@ If ranks arrive at illustrative times 10, 11, 12, and 35 milliseconds, skew is 2
 Compare both readiness and progress traces. Some implementations can make partial progress before all ranks arrive, so one synchronized-start model does not describe every detail. The key question is whether the delay precedes communication eligibility or remains after the required participants are ready.
 
 For overlapped training, inspect bucket readiness and the exposed final tail. A tuning change that reduces an early hidden collective can leave step time unchanged. A host bottleneck that delays the final rank can dominate even when isolated transport bandwidth is excellent.
-
 
 
 ![Deep-dive illustration: Separate late readiness from slow transfer](./deep-dive.png)

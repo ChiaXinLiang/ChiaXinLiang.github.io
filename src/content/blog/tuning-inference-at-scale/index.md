@@ -3,7 +3,7 @@ title: 'Tuning Inference at Scale: Every Throughput Gain Is a Cost Cut'
 description: "4 serving optimizations, none worth more than 1.8x alone, multiply into a 5x throughput gain — and throughput is the denominator of every $/Mtok you pay."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'scale-4'
 order: 8
 series: "llm-serving"
@@ -34,7 +34,6 @@ The numerator is set by your cloud contract or your datacenter's amortization sc
 
 **Chunked prefill.** In a continuous-batching engine, prefill and decode still fight over the same iterations. When an 8,192-token prompt arrives, the naive scheduler runs its whole prefill as 1 enormous batch step, and every in-flight decode stream stalls behind it, often for close to a second. Users see it as a stutter mid-generation; your monitoring sees it as a p99 TPOT spike. Chunked prefill, from the Sarathi line of work (arXiv:2308.16369, refined in Sarathi-Serve, arXiv:2403.02310), slices the prompt into fixed-size chunks of a few 100 tokens and co-schedules 1 chunk per iteration alongside all ongoing decodes. Each iteration carries a bounded token budget, so decode latency rises slightly and stays flat instead of spiking. The throughput win comes from the other direction too: decode-only iterations are memory-bandwidth-bound and leave compute idle, and piggybacked prefill chunks soak up exactly that idle compute. Sarathi-Serve reports up to 2.6x higher serving capacity under an SLO on a Llama-scale model; 1.3–1.5x is a fair expectation for mixed workloads.
 
-![Chunked prefill timeline: a monolithic 8k-token prefill stalls all decode streams and spikes TPOT, while slicing it into 512-token chunks co-scheduled with decode keeps TPOT bounded](./fig-chunked-prefill.png)
 
 **Low-precision inference (FP8, then FP4).** Decode is bound by bytes moved, not FLOPs: every step streams the full weight set and the KV cache through HBM. Casting weights from BF16 to FP8 halves the bytes per step, which directly speeds up bandwidth-bound decode, and on Hopper the FP8 tensor cores double peak matmul throughput for the compute-bound prefill side as well. The freed HBM is not a side benefit, it is the point: memory that stops holding weights starts holding KV cache, which raises the maximum batch size, which is where most of the measured 1.5–1.7x end-to-end gain actually comes from. FP4 on Blackwell repeats the trick; the format details and accuracy tradeoffs are covered in [the NVFP4 vs MXFP4 post](/blog/nvfp4-vs-mxfp4-the-4bit-format-war/).
 
@@ -63,7 +62,6 @@ Now apply a hypothetical stack with explicitly stipulated sequential gains:
 
 Each row is unremarkable on its own. A 1.3x gain is the kind of thing that gets deprioritized in sprint planning. But 1.8 x 1.4 x 1.6 x 1.3 = 5.24, and the same $16 now buys 113 million tokens per hour instead of 21.6 million. Annualize it: at steady 50% load, this node serves about 496 billion tokens a year, and the stack just cut the bill for that traffic from roughly $367,000 to $70,000 per node-year. Multiply by a fleet of 2 100 nodes and the "small" optimizations are a $59M line item.
 
-![Waterfall of the compounding optimization stack: each multiplier applied to the previous cumulative throughput, taking cost from $0.74 to $0.14 per million tokens](./fig-multiplier-stack.png)
 
 The individual numbers are representative midpoints from the papers and engine benchmarks cited below, not guarantees. Your workload will land somewhere else on each 1. The structure, gains multiplying across independent levers, is the part that transfers.
 

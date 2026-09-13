@@ -9,14 +9,13 @@ order: 13
 topic: "Architecture Design"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Neural architecture search automates choices about model structure. For efficient deployment, the search must connect quality to a resource constraint on a particular system. The difficulty is that evaluating an architecture can require training, export, and device measurement. A search method therefore also needs a strategy for making its own preparation cost manageable.
 
 This article separates the search space, optimization mechanism, quality estimator, and hardware evidence. It explains innovations in differentiable search, target-aware search, and shared supernet specialization without treating every selected architecture as equally validated. The search result is a hypothesis until the deployed artifact satisfies the intended task and resource budget.
 
-![Concept overview: Neural Architecture Search: Objectives, Search Cost, and Evidence](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 Quality Q depends on how candidate weights are obtained and evaluated. Timing T depends on device, backend, numerical policy, and workload. Memory M depends on the chosen allocation category and runtime envelope.
 
 Those dependencies belong in the specification. A search over model names with an unexplained quality score and generic FLOP constraint does not fully define an efficient deployment problem.
-
 
 
 ![Deep-dive illustration: Define the architecture variable](./deep-dive.png)

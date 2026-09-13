@@ -3,7 +3,7 @@ title: 'Latency vs. Throughput: Why You Can''t Have Both for Free'
 description: 'Connect request latency, concurrency, and aggregate throughput with queueing and batching equations, including explicit assumptions and tradeoffs.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'llm-4'
 order: 12
 series: "llm-basics"
@@ -40,7 +40,6 @@ The throughput-obsessed kitchen refuses to start the oven until all 8 slots are 
 
 The oven is the GPU's memory system. The 14-minute bake is the 14 GB weight read. The insight that makes LLM serving economics work at all is this: **the oven costs the same to run whether it holds 1 tray or 8.** When the GPU streams the weights through its compute units for a decode step, those weights can be applied to 1 request's next token or to 8 requests' next tokens for almost the same cost. The weight read is shared; only the small per-request math is duplicated.
 
-![Diagram showing 1 14 GB weight read feeding a single token at batch 1 versus 8 tokens at batch 8, with throughput rising from 71 to 500 tokens per second](./batching-lever.png)
 
 ## A worked example you can check by hand
 
@@ -87,7 +86,6 @@ Whether a step is limited by memory or by compute comes down to **arithmetic int
 
 Batching raises arithmetic intensity almost linearly: the same bytes support batch-times more FLOPs. Follow that line and around batch ~300 (in this idealized model) compute finally catches up with memory. Past that crossover, each extra request lengthens the step in proportion, so per-user latency starts climbing steeply while throughput flattens. You've hit the roofline, and the curve bends.
 
-![Schematic curves of system throughput and per-token latency versus batch size, showing a memory-bound region where throughput climbs almost freely and a compute-bound region where latency rises steeply](./tradeoff-curve.png)
 
 In practice the bend arrives much earlier than the naive weight-only math suggests, for 2 reasons.
 

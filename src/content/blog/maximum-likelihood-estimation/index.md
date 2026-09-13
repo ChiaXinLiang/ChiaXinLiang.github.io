@@ -3,7 +3,7 @@ title: 'Maximum Likelihood Estimation: From Observed Data to a Training Objectiv
 description: 'Derive Bernoulli MLE, connect Gaussian noise to squared error, and follow likelihood into language-model log loss.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './section-overview.png'
 series: "llm-basics"
 level: advanced
 code: 'stat-2'
@@ -51,7 +51,6 @@ For 7 successes and 3 failures, this becomes theta to the seventh power times 1 
 
 Likelihood is not a probability distribution over theta. Integrating it over parameter values does not generally give 1. To obtain a posterior distribution over parameters, we need a prior and Bayes' rule, covered in [MAP estimation](/blog/map-estimation-and-priors/). Treating likelihood as a posterior silently introduces assumptions that should be explicit.
 
-![Likelihood and posterior answer different questions: observations are fixed while candidate parameter values vary.](./likelihood-contract.png)
 
 ## Why training uses logarithms
 
@@ -165,7 +164,6 @@ Training on observed sequences minimizes the sum of their next-token NLL terms. 
 
 For a 3-token example with observed-token probabilities 0.5, 0.25, and 0.8, the sequence likelihood is 0.1. Total NLL is about 2.3026 nats and mean token NLL is about 0.7675. Exponentiating the mean gives perplexity approximately 2.154. These quantities depend on tokenization and evaluation conventions; they should not be compared across incompatible tokenizers without explanation.
 
-![Maximum likelihood becomes a sum of observed-token negative log probabilities during language-model training.](./token-log-loss.png)
 
 ## Estimation and optimization are different jobs
 

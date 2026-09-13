@@ -3,7 +3,7 @@ title: 'Tokens per Megawatt: The Power Envelope Is the New Constraint'
 description: "190 GW of AI datacenters are announced and 12 GW exist. What happens to an industry when the scarce resource is not chips but grid connections."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'econ-1'
 order: 3
 series: "efficient-ai"
@@ -16,7 +16,6 @@ There are 190 gigawatts of announced AI datacenter capacity in the pipeline, spr
 
 The numbers come from Bessemer Venture Partners' roadmap of the AI datacenter stack, and the reason for the gap is not money or chips. It is the electrical grid. A modern AI datacenter goes from groundbreaking to racks-online in 12 to 18 months. Getting permission to draw hundreds of megawatts from the grid, a process called interconnection, takes 5 to 7 years in most US markets. The queue is so long that some operators have stopped waiting: about 50 GW of "behind-the-meter" gas generation, power plants built on-site specifically to bypass the grid, was announced in 2025 alone. Even the components have queues now. Lead times for large grid transformers have stretched to 5 years.
 
-![Announced vs operational AI datacenter capacity, and why: build times vs grid interconnection queues. Data from Bessemer Venture Partners](./fig-power-gap.png)
 
 When an input becomes scarce, industries reorganize around the ratio of output to that input. Farming optimizes yield per acre. Mobile chips optimize performance per milliwatt of battery. AI infrastructure has found its version: tokens per megawatt. NVIDIA now markets it explicitly. Google frames every TPU generation around performance per watt. It is worth understanding exactly what this metric means, how to compute it, and what it changes.
 
@@ -44,7 +43,6 @@ Start with 1 megawatt at the grid meter.
 
 That ceiling assumes the offline benchmark scenario: perfectly batched work, no latency constraints, no idle time. Real serving has interactive latency targets, uneven daily load, failures, and maintenance. If your fleet converts 40% of that ceiling into work customers actually accepted, a defensible planning number, you land near **33 trillion sellable tokens per megawatt-year**. At a round $1 per million output tokens, that single megawatt supports on the order of $33M of annual token revenue. The gap between the 82 and the 33 is exactly the goodput-versus-utilization distinction, and it is why serving efficiency is now a board-level topic rather than an engineering detail.
 
-![Worked example: converting 1 megawatt at the grid meter into trillions of tokens per year, step by step](./fig-tokens-per-mw.png)
 
 2 cautions on numbers like these. MLPerf figures are audited, but the marketing composites built on top of them are not: NVIDIA's "5x TPS per megawatt versus Hopper" and the "50x AI factory output" headline are vendor-constructed multiplications, not benchmark results. And any tokens-per-MW claim is model-dependent; a sparser or smaller model shifts every step of the calculation. The method is the durable part.
 

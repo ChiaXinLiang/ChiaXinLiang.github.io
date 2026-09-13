@@ -3,7 +3,7 @@ title: 'Occupancy and the Roofline: Why 100% Occupancy Isn''t the Goal'
 description: "Why the fastest GPU kernels often run at 25-50% occupancy, and how the roofline model tells you when chasing more warps is a waste of time."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'exec-3'
 order: 7
 series: "gpu-performance"
@@ -45,7 +45,6 @@ This is the whole design bargain I described in [CPU vs GPU: latency vs throughp
 
 So more resident warps means more latency-hiding capacity. That part of the folklore is true. The mistake is assuming the relationship is linear all the way to 64 warps. It isn't. Latency hiding saturates: once there are enough independent instructions in flight to cover memory latency, additional warps add nothing. The interesting question is where the knee of that curve sits, and the answer is usually "much lower than 100%."
 
-![Occupancy needed to saturate memory bandwidth falls as instruction-level parallelism per thread rises; performance plateaus well below 100% occupancy. After Volkov, GTC 2010](./latency-hiding.png)
 
 Vasily Volkov made this argument famous in his GTC 2010 talk "Better Performance at Lower Occupancy," and formalized it in his 2016 Berkeley dissertation on latency hiding. The needed concurrency can come from 2 sources: **thread-level parallelism** (more warps) or **instruction-level parallelism** (more independent operations per thread). A thread that issues 4 independent loads before using any of them keeps 4 memory transactions in flight by itself, doing the latency-hiding work of 4 single-load threads. ILP substitutes for occupancy, and ILP is often cheaper because it doesn't shrink your register budget per thread. It grows with it.
 
@@ -70,7 +69,6 @@ Now run the ladder:
 
 The 100% row is the one to stare at. Full occupancy allows just 32 registers per thread, total, for everything: loop counters, addresses, loaded values, accumulators. A GEMM thread that computes an 8×8 output tile needs 64 registers for accumulators alone before it holds a single operand. High-performance kernels keep large working sets in registers *on purpose*, because registers are the only memory fast enough to feed the tensor cores, and that structurally caps occupancy at 25-50%. The kernel work behind DeepSeek's inference economics, which I covered in [When a Kernel Cuts API Prices 50%](/blog/when-a-kernel-cuts-api-prices/), lives in exactly this register-fat regime.
 
-![Register file budget on one SM: 65,536 registers shared by all resident threads, so registers per thread directly determines maximum warps](./register-budget.png)
 
 You can force the compiler's hand with `-maxrregcount` or `__launch_bounds__`, and sometimes that's the right call. But squeeze too hard and the compiler *spills*: values that no longer fit in registers get stored to "local" memory, which physically lives in L1 and beyond. You traded a residency statistic for real memory traffic in your inner loop. Occupancy goes up, performance goes down. Nsight Compute reports spills as `LDL`/`STL` instructions; if forcing occupancy up makes those appear, you almost certainly made the kernel slower.
 
@@ -78,7 +76,6 @@ You can force the compiler's hand with `-maxrregcount` or `__launch_bounds__`, a
 
 The roofline model, introduced by Williams, Waterman, and Patterson in 2009, is the tool that tells you whether to spend another day on occupancy at all. Plot attainable throughput against **arithmetic intensity**, the FLOPs a kernel performs per byte it moves from memory. 2 ceilings bound every kernel: a slanted 1 set by memory bandwidth (throughput = bandwidth × intensity) and a flat 1 set by peak compute. They cross at the *ridge point*.
 
-![Roofline model: memory bandwidth bounds kernels at low arithmetic intensity, peak compute bounds them at high intensity, meeting at the ridge point. Adapted from Williams, Waterman and Patterson (2009)](./roofline.png)
 
 Put numbers on it for an H100 SXM: 3.35 TB/s of HBM3 bandwidth and roughly 990 dense BF16 tensor TFLOP/s (NVIDIA's own spec sheet figures). The ridge point sits near 990e12 / 3.35e12 ≈ **295 FLOPs per byte**. Any kernel below that intensity is memory-bound: its speed limit is bandwidth, full stop. Decode-phase attention reads each KV-cache byte and does about 1 multiply-accumulate with it, roughly 1 FLOP per byte, which puts it 2 orders of magnitude left of the ridge. A large-batch GEMM with big tiles can sit at the ridge or right of it.
 

@@ -3,7 +3,7 @@ title: "Admission Control and QoS: Deadlines, Fairness, and Overload"
 description: "Budget heterogeneous request work and KV state, separate admission from token scheduling, and evaluate useful completion under deadlines and overload."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-serving"
 code: "serve-6"
 order: 27
@@ -48,7 +48,6 @@ The coefficients summarize measured service time under a specified configuration
 Predicted output length is uncertain. A requested maximum is an upper bound under the protocol, not a reliable expectation. Historical distributions can support a statistical estimate, but requests whose generation behavior changes can invalidate it. Keep the estimate's uncertainty and update it using actual outcomes.
 
 Do not interpret the sum of isolated request times as an exact batched execution time. Continuous batching creates shared work and interference. Use the model to rank or budget demand, then validate admission thresholds against measurements at the intended mixed workload.
-
 
 
 ![Deep-dive illustration: Request count is a poor proxy for resource demand](./deep-dive.png)

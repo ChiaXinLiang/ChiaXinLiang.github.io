@@ -3,7 +3,7 @@ title: 'NVFP4 vs MXFP4: Inside the 4-Bit Format War'
 description: 'Compare 2 4-bit formats through block scaling, representable values, storage overhead, and the numerical tradeoffs of quantization.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './section-overview.png'
 code: 'fmt-1'
 order: 2
 series: "efficient-ai"
@@ -25,7 +25,6 @@ On its face this is a ridiculous way to store the parameters of 1 trillion-dolla
 
 Start with the raw material. Both formats store each individual value in **FP4 E2M1**: 1 sign bit, 2 exponent bits, 1 mantissa bit. 2 exponent bits give you 4 exponent settings; 1 mantissa bit gives you 2 mantissa steps per exponent. Work through the encoding and you get exactly the 8 magnitudes listed above, from 0 to 6.
 
-![The complete set of positive values representable in FP4 E2M1, from 0 to 6, showing step size growing from 0.5 near 0 to 2.0 near the maximum](./fp4-number-line.png)
 
 Notice 2 things about this tiny number system. First, like all floating-point formats, it is denser near 0: steps of 0.5 up to 2, then steps of 1, then a final leap of 2 from 4 to 6. Second, its dynamic range is pitiful. The ratio between the largest and smallest nonzero magnitude is 12. Real neural network weight tensors span many orders of magnitude, and a single tensor can hold values from 1e-4 to 40. Map that tensor straight onto the FP4 grid and almost everything collapses to 0 while the outliers clip at 6. The model would be destroyed.
 
@@ -40,7 +39,6 @@ Here is where the 2 formats split:
 - **MXFP4**, defined by the Open Compute Project's Microscaling (MX) specification (an open standard backed by AMD, Arm, Intel, Meta, Microsoft, NVIDIA, Qualcomm, and others), uses **blocks of 32 values**, each sharing 1 **E8M0 scale**: 8 exponent bits, 0 mantissa bits. An E8M0 scale is a pure power of 2, anywhere from 2^-127 to 2^127.
 - **NVFP4**, NVIDIA's proprietary refinement introduced with Blackwell, uses **blocks of 16 values**, each sharing 1 **FP8 E4M3 scale** (a real fractional number, not just a power of 2), plus a second-level **FP32 scale for the whole tensor** that keeps every block scale inside E4M3's representable range.
 
-![Block anatomy of NVFP4 versus MXFP4: 16 FP4 elements with an E4M3 scale and a tensor-level FP32 scale, versus 32 FP4 elements with a power-of-2 E8M0 scale](./block-anatomy.png)
 
 Do the bookkeeping and the storage cost is nearly identical. An MXFP4 block costs 32 × 4 + 8 = 136 bits for 32 values: **4.25 bits per value**. An NVFP4 block costs 16 × 4 + 8 = 72 bits for 16 values: **4.5 bits per value**, plus a single 32-bit tensor scale that amortizes to nothing. Against FP8 with its roughly 8 bits per value, NVFP4's 4.5 bits works out to a 1.78× reduction — the source of NVIDIA's "~1.8× less memory than FP8" figure. NVIDIA pairs that with a claim of **under 1% accuracy loss versus FP8** on measured workloads; that number comes from NVIDIA's own Blackwell Ultra material, so treat it as vendor-reported, but the MLPerf v5.1 results using NVFP4 quantization on DeepSeek-R1 give it independent teeth.
 
@@ -60,7 +58,6 @@ The largest magnitude, called the **absmax**, is 0.90. Each format must pick a s
 
 **MXFP4.** The scale must be a power of 2. Following the MX specification's rule, take floor(log2(0.90)) = −1, subtract FP4's maximum exponent of 2, and get scale = 2^-3 = 0.125. The block ceiling is now 6 × 0.125 = **0.75**. Our absmax does not fit: 0.90 / 0.125 = 7.2, which clips at FP4's maximum of 6 and dequantizes to 0.75. The single largest weight in the block just absorbed an error of −0.15, or **17% of its value**.
 
-![Coverage of the same block by both formats: NVFP4's fractional scale reaches 0.9375 so the 0.90 outlier fits, while MXFP4's power-of-2 scale caps coverage at 0.75 and clips it](./block-coverage.png)
 
 Run all 8 values through both pipelines and tally the damage:
 

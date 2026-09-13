@@ -9,14 +9,13 @@ order: 4
 topic: "Quantization"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Quantization represents numerical values using a restricted set of codes and a rule for reconstruction. Fewer bits can reduce storage and traffic, but the reconstruction introduces error. The scale, clipping range, grouping, and calibration data determine how that error interacts with the learned function.
 
 This article develops uniform quantization before discussing specialized methods. Its central image is a value distribution laid over a finite quantization grid: shrinking the range increases resolution near common values but clips outliers, while expanding the range preserves outliers at the cost of coarser steps. That tension explains much of calibration.
 
-![Concept overview: Quantization 1: Scales, Clipping, Calibration, and Error](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -32,7 +31,6 @@ $$
 The equation specifies a family of quantizers. Rounding mode, signed interval, saturation, and treatment of nonfinite values belong to the actual implementation. A reproduction must preserve them rather than treating every integer cast as an equivalent quantization operation.
 
 Quantized codes are not the original values. A downstream computation either uses an integer-compatible arithmetic path with scale accounting or reconstructs values for another precision. Stored bits and accumulation precision should therefore be reported independently.
-
 
 
 ![Deep-dive illustration: Define encoding and reconstruction](./deep-dive.png)

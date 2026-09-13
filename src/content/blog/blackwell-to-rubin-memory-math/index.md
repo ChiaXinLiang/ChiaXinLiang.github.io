@@ -3,7 +3,7 @@ title: 'Blackwell to Rubin: Capacity Stays Flat, Bandwidth Nearly Triples'
 description: 'Official Blackwell Ultra and Rubin specifications show equal 288 GB capacity and 8 versus 22 TB/s peak bandwidth. Work through the limits and exceptions.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'chip-1'
 order: 1
 series: "efficient-ai"
@@ -22,7 +22,6 @@ Blackwell Ultra and MI355X both specify: **288GB of HBM3e at 8 TB/s** (NVIDIA GB
 
 NVIDIA's [official HGX specifications](https://www.nvidia.com/en-us/data-center/hgx/) list Rubin with 288 GB HBM4 and up to 22 TB/s bandwidth. AMD's [MI400 series specifications](https://www.amd.com/en/products/accelerators/instinct/mi400.html) list MI455X with 432 GB HBM4 and up to 23.3 TB/s. These are vendor peak specifications, not measured application results. This comparison was checked September 13, 2026.
 
-![2 generations of flagship GPUs: memory capacity nearly flat while bandwidth jumps ~2.75×](./capacity-vs-bandwidth.png)
 
 ## Why bandwidth is the axis that matters
 
@@ -40,7 +39,6 @@ The bandwidth jump has a physical cause: [HBM4 doubles the interface width to 2,
 
 There is a second-order signal in AMD's 432GB counter-bet. Bigger memory pools reduce how many GPUs a giant model must be sharded across, which cuts inter-GPU communication — a different efficiency lever aimed at the same bill. 2 vendors, same physics, 2 positions on the capacity-bandwidth trade.
 
-![Why decode speed is a bandwidth division: model bytes ÷ TB/s = tokens/s ceiling](./bandwidth-ceiling.png)
 
 ## What this means for the ecosystem
 

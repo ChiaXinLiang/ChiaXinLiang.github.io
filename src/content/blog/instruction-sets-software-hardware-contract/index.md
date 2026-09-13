@@ -3,7 +3,7 @@ title: "Instruction Sets: The Contract Between Software and Hardware"
 description: "Understand registers, instructions, memory, privilege, and the ABI through a worked load-add-store example."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'isa-1'
 order: 2
 series: "comp-arch"
@@ -28,7 +28,6 @@ The ISA also defines encodings: the bit patterns that identify operations and op
 
 A programmer can rely on the defined behavior, but cannot infer execution time from the mnemonic alone. A load from nearby cache and a load from DRAM have the same architectural meaning while taking very different amounts of time.
 
-![Architecture defines visible behavior; implementation supplies the machinery](./figure-01.png)
 
 ## What the ISA leaves to implementation
 
@@ -65,8 +64,6 @@ The load reads 8 bytes because `x1` names a 64-bit register operand. After it co
 Under a little-endian memory convention, the initial 8 bytes are `07 00 00 00 00 00 00 00`. After the store they are `0c 00 00 00 00 00 00 00`. Endianness describes byte order in memory, not whether the mathematical value is 7 or 12.
 
 For this trace, assume mapped normal memory, appropriate access permissions, and no competing writer. A real system must establish those conditions. The ISA defines the instructions, while the execution environment determines whether address `0x1000` is accessible to this program.
-
-![Trace the architectural state after each instruction](./figure-02.png)
 
 
 The load-add-store example has a compact state specification. Let $$a$$ be the byte address, $$M[a]$$ the initially stored unsigned 64-bit value, and $$v$$ the addend. For a completed sequence without faults,
@@ -151,7 +148,6 @@ Custom instructions and vector extensions can accelerate parts of inference, but
 
 **ISA compatibility guarantees executable compatibility.** Required extensions, ABI, operating system, and libraries also have to match.
 
-![A native program depends on ISA, ABI, and operating-system interfaces](./figure-03.png)
 
 ## Takeaway
 

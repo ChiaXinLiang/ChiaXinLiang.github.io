@@ -3,7 +3,7 @@ title: 'The Fastest GPU Is Useless If It''s Waiting on Storage'
 description: "Checkpoint write storms, input-pipeline stalls, and the math for how often to checkpoint — why storage bandwidth quietly sets your training goodput."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'storage-1'
 order: 9
 series: "ai-performance"
@@ -41,7 +41,6 @@ Start with the size. A 70B-parameter model trained in mixed precision with Adam 
 
 Call it a terabyte. With the state sharded across 1,024 GPUs (0/FSDP style), each rank owns roughly 1 GB — trivial individually. But all 1,024 ranks open files and write at the same moment, because the checkpoint must be a consistent snapshot of 1 training step. The filesystem sees a synchronized burst of a terabyte, plus a metadata storm of file creates, from 1000 clients at once.
 
-![Checkpoint write storms on a training timeline: slow storage stalls 1,024 GPUs for 196 seconds per checkpoint, fast storage for 16 seconds](./checkpoint-storm.png)
 
 While that write drains, the GPUs do nothing. This is a pure goodput subtraction: the cluster is 100% allocated, 100% powered, and 0% productive. If your storage sustains 5 GB/s of aggregate write bandwidth — a perfectly respectable NFS appliance — the stall is 980 / 5 ≈ **196 seconds**. A parallel filesystem striping across NVMe at 60 GB/s takes **16 seconds**. Same GPUs, same model, 12× difference in stall.
 
@@ -74,7 +73,6 @@ Now with real numbers. First, MTBF. Llama 3's 419 unplanned interruptions over 5
 - Expected lost work: 2,400 / 356,000 ≈ 0.7%
 - **Total waste ≈ 1.4%**
 
-![Goodput waste versus checkpoint interval for slow and fast storage, U-shaped curves with minima at Young's optimal interval](./checkpoint-math.png)
 
 Notice the elegant symmetry: at the optimum, checkpoint overhead and expected lost work are exactly equal. Notice also what faster storage buys you: not just shorter stalls, but the *freedom to checkpoint more often*, which shrinks the lost-work term too. Both terms drop by the same √12 ≈ 3.5× factor.
 
@@ -102,7 +100,6 @@ On the standard POSIX path, data moving between an NVMe drive and GPU memory tak
 
 GPUDirect Storage (GDS) removes the detour. Through the cuFile API, the DMA engine in the NVMe drive or the storage NIC writes **directly into GPU memory** over PCIe peer-to-peer, with the CPU only orchestrating, never touching payload bytes ([NVIDIA GDS documentation](https://docs.nvidia.com/gpudirect-storage/)). NVIDIA's own gdsio benchmarks report 2–8× bandwidth gains and large CPU-utilization drops versus the bounce-buffer path — vendor-reported numbers, but the mechanism is sound and the same trick already proved out in networking as GPUDirect RDMA. For checkpoints, the win runs both directions: weights stream from HBM to flash on save and back on restore without squeezing through host DRAM, which matters precisely when 1000 ranks are doing it simultaneously and host memory bandwidth would otherwise become the chokepoint.
 
-![Traditional storage-to-GPU path through the CPU bounce buffer versus GPUDirect Storage direct DMA into GPU memory](./data-path.png)
 
 ### Build the filesystem for the burst: DeepSeek's 3FS
 

@@ -3,7 +3,7 @@ title: 'Serving MoE Giants: No Single Parallelism Is Enough'
 description: "Why a 671B-parameter MoE breaks every single-axis parallelism scheme, and how TP, EP, PP, and DP compose into deployments like DeepSeek's 320-GPU decode unit."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'scale-3'
 order: 14
 series: "llm-serving"
@@ -39,7 +39,6 @@ Each parallelism axis answers a different question, and each fails alone.
 
 **Data parallelism (DP)** clones. 2 replicas serve 2 times the traffic. In modern MoE serving DP shows up *inside* the model too: DeepSeek runs attention data-parallel (each DP rank has its own requests and its own KV cache) while the expert layers below are shared across the whole EP group.
 
-![4 parallelism axes compared: what each splits, what each costs](./fig-parallelism-axes.png)
 
 The composition rule that falls out of the hardware: TP inside the node where NVLink makes all-reduce cheap, EP across the expert dimension because experts are naturally whole units, PP across nodes where bandwidth is scarce, DP wherever you need more throughput. Not chosen. Composed.
 
@@ -53,7 +52,6 @@ Take DeepSeek-V3 in FP8, so weights are approximately 671 GB, and H100-class GPU
 
 **Layout C, TP8 for attention + EP16 for experts, 2 nodes.** Give each GPU 256 / 16 = 16 whole routed experts per MoE layer: 58 layers × 16 experts × 44 MB ≈ 41 GB of expert weight per GPU. Shard the ~18 GB of attention/dense/shared weight TP8 within each node: about 2 GB per GPU. Total ≈ 43 GB, leaving ~37 GB for KV cache and activations. Expert GEMMs stay full-width at 7,168 × 2,048. The new cost is explicit: every token's hidden state (7,168 values, 14 KB in BF16) must be shipped to up to 8 expert-owning GPUs and shipped back, 2 times per MoE layer.
 
-![Per-GPU memory for 3 layouts of DeepSeek-V3 in FP8 against the 80 GB HBM line](./fig-memory-math.png)
 
 Same model, same GPUs, and the difference between "does not fit," "fits but crawls," and "fits with room for a real batch" is purely how you compose the axes. At production scale DeepSeek pushes the same logic much further: the V3 technical report describes a prefill unit of 4 nodes (32 GPUs, attention TP4 + DP8, experts EP32) and a decode unit of 40 nodes, where 320 GPUs run EP320: 256 GPUs hosting 1 routed expert each, and 64 GPUs hosting shared experts and redundant copies of hot ones.
 
@@ -65,7 +63,6 @@ Composing the axes buys you fitting and fat GEMMs. It also creates the 2 failure
 
 **Load balance decides your latency.** The router is trained, not designed, and real traffic is skewed: a burst of coding requests will hammer whichever experts specialized in code. Under EP, an overloaded expert is an overloaded *GPU*, and a decode step finishes only when the slowest GPU finishes. 1 expert receiving 3× average traffic means every token in the batch waits, on every layer where that expert is hot. Training-time tricks (auxiliary balance losses, or V3's auxiliary-loss-free bias adjustment) keep routing statistically reasonable, and capacity limits with token dropping protect training throughput, but in serving you cannot drop a user's token. The deployment-time answer is replication: measure per-expert load, then place *redundant copies* of hot experts on underloaded GPUs and split their traffic. DeepSeek's EPLB (Expert Parallelism Load Balancer) does exactly this, with a hierarchical mode that first balances expert groups across nodes (so group-limited routing keeps most dispatch traffic inside a node) and a global mode for larger EP degrees. Those 64 extra GPUs in the decode unit are load-balancing insurance.
 
-![All-to-all dispatch with a hot expert, and EPLB replicating it onto a spare GPU](./fig-alltoall-eplb.png)
 
 ![Deep dive: Going deeper: all-to-all and the hot-expert problem](./deep-dive-component-02.png)
 

@@ -3,7 +3,7 @@ title: 'Case File: The Quantized Model Isn''t Faster'
 description: 'An illustrative INT4 deployment saves weight traffic but does not improve throughput. Analyze kernel support, overhead, and batching.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'case-6'
 order: 22
 series: "llm-serving"
@@ -28,7 +28,6 @@ Hold that framing and the 3 root causes fall out almost mechanically.
 
 **Suspect 1: the fallback dequant path.** The runtime loaded the INT4 checkpoint but had no fused kernel for this GPU, shape, or quant config, so it fell back to the naive implementation: launch a kernel that dequantizes the INT4 weights into an FP16 buffer, then hand that buffer to a regular cuBLAS GEMM. Count the bytes. The dequant kernel reads 3.9 GB of packed weights and *writes 14 GB of FP16* to HBM; the GEMM then reads that 14 GB back. Total traffic per decode step: roughly 32 GB, versus 14 GB for the plain FP16 model. The quantized model now moves more than 2 times the data of the baseline. This is how INT4 ends up slower, and it is exactly what the 15%-regression configuration was doing.
 
-![Compressed weights need a fused kernel: FALLBACK — Read 3.9 GB INT4 weights — Write 14 GB unpacked FP16; EXTRA HBM TRAFFIC — Read that 14 GB again for GEMM — Total ≈ 32 GB per step; FUSED W4A16 — Unpack in registers/shared memory — Only ≈ 3.9 GB of weight traffic. Illustrative 7B weight arithmetic · Marlin (2024)](./fused-vs-fallback.png)
 
 The fix is a fused kernel: Marlin (from IST Austria's DASLab, now the default GPTQ/AWQ path in vLLM on Ampere and newer), the AWQ GEMM kernels, or a TensorRT-LLM engine built with weight-only quantization enabled. These dequantize in registers and shared memory while streaming data toward the tensor cores, so the FP16 version of the weights never touches HBM at all.
 
@@ -50,7 +49,6 @@ The step time is roughly the larger of the 2. Now solve for where compute catche
 - FP16: 0.0142·B = 4.2 ms at **B ≈ 296**
 - INT4: 0.0142·B = 1.2 ms at **B ≈ 82**
 
-![The crossover is a roofline bound: MEMORY FLOORS — FP16: 14 GB / 3.35 TB/s = 4.2 ms — INT4: 3.9 GB / 3.35 TB/s = 1.2 ms; COMPUTE FLOOR — 14 × B GFLOP / 989 TFLOPS — ≈ 0.0142 × B ms per step; RIDGE BATCHES — INT4: B ≈ 82; FP16: B ≈ 296 — Ideal peaks; excludes KV and overhead. Illustrative bound · NVIDIA H100 specs; not a benchmark](./crossover.png)
 
 Read the chart in 3 zones. Below batch ~82, both formats are riding their memory floors and INT4 delivers nearly its full 3.5x. Between ~82 and ~296, INT4 has already hit the compute wall while FP16 is still memory-bound, so the gap shrinks continuously: at batch 150, FP16 takes 4.2 ms and INT4 takes 2.1 ms, and the "3.5x" quantization is now a 2x speedup. Above ~296, both formats take the same 0.0142·B ms and quantization buys 0 throughput.
 

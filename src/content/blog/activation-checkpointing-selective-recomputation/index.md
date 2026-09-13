@@ -3,7 +3,7 @@ title: "Activation Checkpointing: Selective Recomputation and the Memory–Time 
 description: "Derive checkpoint spacing, identify which saved tensors matter, and evaluate recomputation without confusing it with persistent-state sharding."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "distributed-training"
 code: "train-4"
 order: 4
@@ -46,7 +46,6 @@ $$
 Treating k as continuous gives a minimum near the square root of N. At that point the schematic activation term is about 2A times the square root of N. This is a pedagogical chain model rather than a guarantee for arbitrary neural networks. Input retention, nonuniform layers, recomputation implementation, and intermediate workspaces can change both terms.
 
 For N equal to 64 and A equal to 64 MiB, the uncheckpointed estimate is 4096 MiB. Choosing k equal to 8 gives about 16A, or 1024 MiB, under the simplified model. The estimated reduction concerns the saved-activation component only. A model with many additional gigabytes of weights and optimizer state does not receive the same reduction in total memory.
-
 
 
 ![Deep-dive illustration: Derive a simple chain model](./deep-dive.png)

@@ -3,7 +3,7 @@ title: "Attention State 1: MHA, MQA, and GQA"
 description: "Derive query, key, and value attention, calculate cache storage, and explain why sharing key-value heads changes decode traffic without removing token history."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "model-3"
 order: 2
@@ -33,7 +33,6 @@ $$
 This single-head notation uses head width d_h and additive mask M. The output is not the score matrix: it is a weighted combination of value vectors. Changing keys changes addressing; changing values changes retrieved content. The projections can therefore have different dimensions or sharing patterns even though they start from the same token representation.
 
 The square-root scale controls score magnitude under an idealized variance argument. If independent query and key coordinates have unit variance, their dot product has variance proportional to head width. Dividing by its square root keeps that variance roughly stable. Learned representations need not satisfy those assumptions exactly.
-
 
 
 ![Deep-dive illustration: Assign roles to Q, K, and V](./deep-dive.png)

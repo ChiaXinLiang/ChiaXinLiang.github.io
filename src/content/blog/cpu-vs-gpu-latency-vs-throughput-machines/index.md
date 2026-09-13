@@ -3,7 +3,7 @@ title: 'CPU vs GPU: Latency Machines and Throughput Machines'
 description: "Why a chip with 24 cores beats 1 with 16,896 at some jobs and loses by 100x at others — the design philosophy split, with the die-area budget and Amdahl's law worked by hand."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'par-2'
 order: 6
 series: "comp-arch"
@@ -35,7 +35,6 @@ A GPU makes the opposite bet. Its native workload — originally shading million
 
 An H100 streaming multiprocessor (SM) has no out-of-order window worth the name, no branch predictor in the CPU sense, and small caches. In exchange, the chip carries 132 SMs, each with 128 FP32 lanes, for 16,896 lanes total, clocked lower than a CPU (around 1.8 GHz versus 5+ GHz) and executing in lockstep groups of 32 threads called **warps**. NVIDIA's peak spec for the SXM part is 67 teraFLOPS of FP32 — a vendor-reported peak, achievable only when every lane has work every cycle, but a fair statement of what the silicon can do.
 
-![Conceptual die-area budget of a CPU versus a GPU: the CPU spends most area on control logic and cache with a few ALUs, while the GPU fills the die with ALUs. Redrawn from the NVIDIA CUDA C++ Programming Guide, Fig. 1](./die-budget.png)
 
 The famous first figure of the CUDA Programming Guide makes the point in 1 glance: same silicon budget, opposite allocation. The CPU buys *low latency for 1 thread*; the GPU buys *arithmetic density* and accepts that any individual thread will run slowly and stall often.
 
@@ -64,7 +63,6 @@ Now follow the numbers by hand:
 
 With 99 lanes you get 50x, not 99x: the serial second is already half your runtime. Going from 999 lanes to 9,999 — a 10x increase in hardware — buys you the difference between 91x and 99x. The general speedup formula below makes the saturation at the reciprocal of the serial fraction explicit. A 1% serial fraction caps you at 100x forever, no matter how many billions of transistors you throw at the parallel part.
 
-![Amdahl's law speedup curve for a workload with a 1% serial fraction, saturating at the 100x ceiling as lane count grows](./amdahl-curve.png)
 
 This single curve explains the shape of the industry. It is why GPUs don't bother making individual threads fast (the serial fraction runs on the CPU anyway), why every serious system pairs a GPU with a strong host CPU (someone has to execute that 1% quickly), and why performance work is so often about shrinking `s` — overlapping communication with compute, removing synchronization — rather than adding lanes.
 
@@ -89,7 +87,6 @@ Amdahl tells you how much parallelism helps. It doesn't tell you how the GPU sur
 
 Each SM keeps up to 64 warps (2,048 threads) *resident* simultaneously. Resident means their full register state lives permanently in the SM's register file for the duration of the kernel. Every cycle, the warp scheduler picks among resident warps that are ready and issues from one of them. When warp 7 issues a load and must wait several 100 cycles for HBM, the scheduler simply issues from warp 12 next cycle. Nothing is saved or restored. The context switch costs 0 cycles because every context is already in hardware.
 
-![Timeline comparison: a single CPU thread stalls for hundreds of cycles on a DRAM access, while a GPU warp scheduler interleaves 4 warps so the issue slots stay busy the whole time](./latency-hiding.png)
 
 This is why GPU register files are enormous. Each H100 SM carries 256 KB of registers; across 132 SMs that is about 33 MB of *registers* — more capacity than most desktop CPUs' entire L3 cache. The GPU replaces the CPU's "keep data close so 1 thread never waits" strategy with "keep so many threads in flight that waiting is free." A CPU hides latency with speculation inside 1 thread; a GPU hides it with concurrency across thousands.
 

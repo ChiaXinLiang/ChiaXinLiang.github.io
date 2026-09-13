@@ -3,7 +3,7 @@ title: 'CNN: How Machines Learned to See'
 description: "A convolutional network reads images the way you'd search a photo with a magnifying glass — 1 small pattern at a time. Here's the idea that owned computer vision for a decade."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'arch-1'
 order: 3
 series: "llm-basics"
@@ -26,7 +26,6 @@ Images have structure a plain network ignores: **nearby pixels are related, and 
 
 Instead of looking at the whole image at once, a CNN slides a small window — say 3×3 pixels — across the image, checking for 1 specific pattern at every position:
 
-![Convolution: a small filter slides across the image, producing a map of where its pattern appears — the same few weights reused at every location](./convolution.png)
 
 That window is called a **filter**, and it is just a tiny set of weights — a 3×3 filter has 9. The output is a *map* of where in the image the pattern appears. 1 filter might light up on vertical edges, another on a patch of orange, another on a curve.
 
@@ -41,7 +40,6 @@ Nobody designs the filters, by the way. They're weights — [gradient descent an
 
 The real power is layering, and it's the "votes about votes" story again with a spatial twist. Layer 1's filters find edges. Layer 2's filters slide over *layer 1's maps*, finding combinations of edges — corners, textures, circles. Layer 3 finds combinations of those: an eye, a wheel, a beak. In between, **pooling** layers shrink the maps, so each successive filter effectively sees a wider patch of the original image.
 
-![LeNet-5's pipeline: alternating convolution and pooling layers distill the image into features a small classifier can vote on — redrawn from LeCun et al., 1998](./lenet.png)
 
 The figure above is (a redrawn version of) LeNet-5, [Yann LeCun's 1998 digit reader](http://yann.lecun.com/exdb/publis/pdf/lecun-98.pdf) — the design that read bank checks in production when "neural network" was still a dirty word in grant applications. Fourteen years later, [AlexNet](https://proceedings.neurips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html) was recognizably the same recipe — convolution, pooling, stacking — with more layers, ReLU activations, GPUs to train on, and a million-image dataset. Same idea, more scale: 60 1000 weights to 60 million.
 

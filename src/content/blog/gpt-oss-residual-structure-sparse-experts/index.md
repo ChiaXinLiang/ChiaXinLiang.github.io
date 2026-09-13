@@ -3,7 +3,7 @@ title: "gpt-oss 1: Residual Structure and Sparse Expert Computation"
 description: "Trace the official gpt-oss reference implementation through RMS normalization, residual branches, top-k routing, and gated expert functions."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "oss-1"
 order: 12
@@ -33,7 +33,6 @@ $$
 The expert branch therefore receives the state after attention's residual update. It is not evaluated on an unrelated copy of the original layer input. This ordering affects both the mathematical graph and live-value dependencies in an implementation.
 
 The residual path preserves an additive route for information and gradients. It does not make a branch optional or establish that removing it leaves behavior unchanged. Trained branch outputs remain part of the computation.
-
 
 
 ![Deep-dive illustration: Follow the residual stream](./deep-dive.png)

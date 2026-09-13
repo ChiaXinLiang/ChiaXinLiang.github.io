@@ -3,7 +3,7 @@ title: "Persistent Kernels and Atomic Queues: Scheduling Irregular Work"
 description: "Derive load-balancing bounds and build a correct queue protocol for persistent GPU workers, including publication, termination, and admission constraints."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "gpu-performance"
 code: "orch-4"
 order: 24
@@ -46,7 +46,6 @@ T_{\mathrm{list}}\le\frac{\sum_j c_j}{W}+\left(1-\frac{1}{W}\right)c_{\max}.
 $$
 
 To understand the bound, consider the last finishing job. Before it starts, either all workers have been busy or no unassigned job remains; its start time cannot exceed the remaining total-work average under the ideal assumptions. The final job adds its own duration. Actual GPU workers are not isolated processors, so treat this as a scheduling reference rather than a hardware guarantee.
-
 
 
 ![Deep-dive illustration: Derive the load-balancing bound](./deep-dive.png)

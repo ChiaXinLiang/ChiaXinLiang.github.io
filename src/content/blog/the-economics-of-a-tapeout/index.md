@@ -3,7 +3,7 @@ title: 'The Economics of a Tapeout: Why a Chip Costs $100M Before Unit 1'
 description: "The fixed-cost anatomy of an advanced-node chip: design teams, EDA seats, IP licenses, a $15M mask set, and why volume is the only thing that saves you."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'asic-3'
 order: 17
 series: "comp-arch"
@@ -66,7 +66,6 @@ Verification alone will consume perhaps 40 of those 80 heads. The industry rule 
 
 Total: **$103 million**, and not 1 sellable chip yet. The number is deliberately conservative. Stretch the schedule to 3 years, add a second die, or slip into a full respin plus a market delay, and you are on the road to the IBS figures.
 
-![Stacked breakdown of roughly $103M in non-recurring engineering costs for a hypothetical 5nm chip, dominated by the engineering team](./nre-stack.png)
 
 Notice what the chart says: the mask set, famous as it is, is only about 15% of the bill. The dominant cost is people, and the second biggest is licensed IP. Chip design is a payroll problem with a photolithography deposit attached.
 
@@ -77,7 +76,6 @@ Notice what the chart says: the mask set, famous as it is, is only about 15% of 
 
 The scary part is not the level, it is the slope. IBS's per-node estimates, quoted everywhere in the industry (and worth flagging: they are 1 firm's model, published at different times, and other analysts such as Gartner have produced figures roughly half as large for the same nodes), run like this: about $51M to design a 28nm chip, $106M at 16nm, $298M at 7nm, $542M at 5nm, and $725M at 2nm.
 
-![Bar chart of estimated chip design cost by process node, rising from $51M at 28nm to $725M at 2nm, redrawn from IBS estimates](./node-cost.png)
 
 Why does each node cost more? 3 compounding reasons. Transistor budgets grow, so there is simply more design to do and verify; a 2nm flagship carries tens of billions of transistors. Physical effects get nastier, so tools run longer, rules multiply (the design rule manual at leading nodes runs to thousands of pages), and signoff needs more corners and more margin analysis. And the ecosystem costs rise in lockstep: IP vendors charge more for ported blocks because their own porting costs exploded, and EUV masks cost several times what optical masks did.
 
@@ -97,7 +95,6 @@ Take our $103M chip and assume $50 of marginal cost per good die (wafer, packagi
 - **10 million units:** $10.30 + $50 = **$60.30**. NRE is a rounding error; silicon dominates.
 - **50 million units:** $52.06. The 100-million-dollar design cost has vanished into 2 dollars.
 
-![Log-scale bars showing per-unit cost collapsing from about $10,350 at 10K units to about $52 at 50M units as fixed NRE amortizes](./amortization.png)
 
 This arithmetic explains most of the industry's structure in 1 line. Apple can use the newest node first because it ships over 200 million iPhones a year, so even a half-billion-dollar design program amortizes to a couple of dollars per device. NVIDIA justifies leading-edge tapeouts because data center GPUs carry enormous gross margins, which is the other escape hatch: if you cannot divide NRE by a big volume, divide it by a big price. Google's TPU program works because Google is both designer and customer, capturing the margin a vendor would have taken across millions of deployed chips. And a mid-sized company shipping 200,000 units of a specialized part stays on 28nm or 16nm forever, because at their volume the mature node's 5-10x lower NRE beats any power or density win the new node offers.
 

@@ -3,7 +3,7 @@ title: 'When a Kernel Cuts API Prices 50%: DeepSeek''s Sparse Attention'
 description: 'Read attention-state compression, sparse attention, and API price changes through checked serving-cost estimates and their assumptions.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'cd-2'
 order: 10
 series: "efficient-ai"
@@ -39,7 +39,6 @@ DeepSeek Sparse Attention splits attention into 2 stages, described in the [V3.2
 
 **Stage 2: real attention, top-k only.** The indexer's scores pick the top 2,048 tokens, and full-precision attention runs over those 2,048 alone. Everything else in the layer — the latent KV cache, the 128 query heads, the output projection — works exactly as before, just over a shortlist instead of the whole history.
 
-![DeepSeek Sparse Attention pipeline: a lightning indexer scans all 131,072 cached tokens cheaply, selects the top 2,048, and full attention runs only over the selection. Mechanism from the DeepSeek-V3.2-Exp report.](./dsa-pipeline.png)
 
 The crucial word in "trainable sparse attention" is *trainable*. Fixed sparsity patterns (sliding windows, strided blocks) decide what to ignore before seeing your data. DSA's indexer is a learned component: it was trained to predict which tokens the full model would have attended to. Selection adapts to the content of every individual query.
 
@@ -62,7 +61,6 @@ Now the dollars. Consider a document-analysis call: 100K input tokens, 5K output
 
 A 53% cut on this workload. An agent platform making 10 million such calls a month goes from $644,000 to $301,000. Cached input fell too, from $0.07 to $0.028 per million. And this was not an introductory promotion: when DeepSeek later promoted V3.2 to its main endpoint, the prices stayed.
 
-![Bar chart of DeepSeek API prices before and after the V3.2-Exp release: input per million tokens fell from $0.56 to $0.28 and output from $1.68 to $0.42. Data from DeepSeek's announcement.](./price-cut.png)
 
 ## Separate expensive attention from its indexer
 
@@ -92,7 +90,6 @@ DSA did not appear from nowhere. It is the third step in a lineage of DeepSeek a
 
 **DSA (September 2025).** V3.2-Exp fuses the 2 ideas: fine-grained, per-token selection (sharper than NSA's blocks) running on top of MLA's compact latents. The combination is not accidental. Because MLA in its decode form behaves like multi-query attention — all 128 query heads share the same per-token latent — the 2,048 selected latents are fetched once and reused by every head. A sparse gather that would be scattered, bandwidth-wasting reads in a standard attention layout becomes a dense, reusable working set of about 1.2 million values. The architecture 2 generations back is what makes the sparse kernel efficient today.
 
-![Timeline from MLA (May 2024, compressing the KV cache) through NSA (Feb 2025, trainable hardware-aligned sparsity) to DSA (Sep 2025, per-token selection on top of MLA latents)](./mla-to-dsa.png)
 
 ## Going deeper: training a module whose output is a hard cutoff
 

@@ -3,7 +3,7 @@ title: 'Why AI Chips Are the Easy ASICs, and Where They Get Hard'
 description: "A matrix multiplier is the friendliest circuit a chip designer will ever meet. The memory system, the number formats, and above all the software are another story."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'asic-4'
 order: 18
 series: "comp-arch"
@@ -30,7 +30,6 @@ Matrix multiplication has 3 properties an ASIC designer dreams about.
 
 The architecture that exploits all 3 at once is the **systolic array**, an idea H.T. Kung and Charles Leiserson described around 1978-1982 and the TPU made famous. Picture a grid of MAC cells. Weights are preloaded, 1 per cell, and sit still. Activations enter from the left edge and step 1 cell rightward each clock cycle; partial sums step downward. Each cell does the same tiny job every cycle: multiply the passing value by its resident weight, add to the partial sum arriving from above, pass both along. Results emerge from the bottom edge in a steady rhythm, hence the name: data pulses through the array like blood through a heart.
 
-![Systolic array dataflow: weights stay resident in a grid of MAC cells while activations flow right and partial sums flow down, redrawn after Jouppi et al. (2017)](./systolic-array.png)
 
 The payoff is enormous. Intermediate values travel micrometers to a neighboring cell instead of round-tripping through register files and caches, which is where most of a general-purpose chip's energy per operation goes. 1 small state machine sequences the whole array, so control overhead amortizes across tens of thousands of multipliers. The hard problems that make CPUs take hundreds of engineer-years simply are not present.
 
@@ -52,7 +51,6 @@ That quotient is the chip's *ridge point*: a workload must perform about 2,700 o
 
 Which workloads clear 2,700? Google's own paper answers candidly: the multilayer perceptrons and LSTMs that made up most of 2016 datacenter demand had far lower intensities, because at inference batch sizes their weight matrices stream from memory with little reuse. Those applications achieved roughly a tenth of peak. Only convolutional networks, with their high intrinsic reuse, came close to 92 TOPS.
 
-![Roofline of the TPU v1: a 34 GB/s memory slope meets the 92 TOPS ceiling at 2,700 ops per byte; MLPs and LSTMs sat far below the ridge while CNNs neared peak, data from Jouppi et al. (2017)](./roofline-tpu.png)
 
 So the first-generation TPU was, for most of its actual traffic, a memory-bound machine wearing a compute-monster's spec sheet. Google's fix in the TPU v2 was not more multipliers. It was High Bandwidth Memory, lifting the feed from 34 GB/s to roughly 600 GB/s per chip, a 17× jump that moved the ridge point down to where real workloads live.
 
@@ -98,7 +96,6 @@ And the kernel surface is a long tail. Matmul dominates the FLOPs, not the opera
 
 A startup has neither advantage, and the record shows what happens next. Nervana was acquired by Intel for a reported $400M in 2016 and cancelled in early 2020 with no volume product shipped. Wave Computing, once valued in the billions for its dataflow processor, filed for bankruptcy in April 2020. Graphcore built genuinely interesting silicon, struggled for years to make mainstream models run well on it, and was sold to SoftBank in 2024 for a price reported to be below the capital it had raised. These histories do not isolate a single cause; compiler coverage, financing, market timing, and commercial execution all matter alongside architecture. Sara Hooker's essay [The Hardware Lottery](https://arxiv.org/abs/2009.06489) names the general principle: hardware wins when the software ecosystem and research mainstream align with it, not merely when its architecture is clever.
 
-![Where the difficulty actually lives in an AI ASIC: the visible MAC array is the easy tip; memory system, numerics bets, and the compiler and kernel ecosystem sit beneath the waterline](./hard-parts.png)
 
 The honest budgeting rule that follows: if you are planning an AI chip and your software team is not at least as large as your hardware team, you are planning half a product.
 

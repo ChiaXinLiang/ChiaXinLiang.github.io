@@ -3,7 +3,7 @@ title: "DDP: Gradient Buckets and the Backward Communication Timeline"
 description: "Derive gradient averaging, bucket readiness, and the exposed communication tail in replicated training."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "distributed-training"
 code: "train-2"
 order: 2
@@ -46,7 +46,6 @@ The all-reduce combines local gradients, and the framework’s reduction convent
 Unequal numbers of valid tokens require more care. Suppose rank d has n_d valid loss tokens and computes a local mean gradient g_d. The desired token-weighted global mean is the sum of n_d g_d divided by the sum of n_d, rather than an unweighted average of rank means. Padding masks and variable-length batches can make those 2 expressions different even when each rank has the same number of examples.
 
 Loss weighting can correct the difference if counts and reduction factors are handled consistently. State whether the objective averages examples, valid tokens, sequences, or ranks. A faster distributed configuration is not an equivalent baseline when it silently changes these weights. Numerical equality should be assessed with sensible floating-point tolerances rather than requiring identical accumulation order.
-
 
 
 ![Deep-dive illustration: Derive the synchronized gradient](./deep-dive.png)

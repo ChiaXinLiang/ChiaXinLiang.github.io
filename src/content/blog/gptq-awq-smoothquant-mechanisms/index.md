@@ -9,14 +9,13 @@ order: 6
 topic: "Quantization"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 GPTQ, AWQ, and SmoothQuant are often listed together as quantization options, but they solve different preparation problems. GPTQ uses calibration-dependent reconstruction and error compensation. AWQ uses activation-aware scaling to protect sensitive weight directions. SmoothQuant moves difficult activation ranges into weights through a compatible transformation.
 
 Understanding those mechanisms is more useful than choosing an acronym from a benchmark table. The resulting format, kernel, checkpoint, and workload still determine quality and execution. This article derives their shared linear interface, then separates what each method changes and what evidence a deployment comparison needs.
 
-![Concept overview: LLM Quantization Methods: GPTQ, AWQ, and SmoothQuant](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 This convention makes feature scaling and reconstruction explicit. Papers or implementations can use transposed storage. Translate axes rather than copying a formula into incompatible tensor layouts.
 
 Calibration activations are data, not arbitrary noise. Their feature magnitudes and correlations influence reconstruction sensitivity. Preserve tokenization, preprocessing, sampling, and layer input provenance when comparing methods. A convenient synthetic activation distribution can test algebra but does not establish model quality.
-
 
 
 ![Deep-dive illustration: Establish the linear layer convention](./deep-dive.png)

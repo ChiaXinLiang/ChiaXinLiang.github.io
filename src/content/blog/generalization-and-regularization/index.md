@@ -3,7 +3,7 @@ title: "Generalization and Regularization: Fitting the Data Without Memorizing I
 description: "Separate training error from expected deployment loss, calculate an L2-regularized estimator, and explain validation, early stopping, and the limits of simple bias\u2013variance stories."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 series: "llm-basics"
 level: advanced
 code: 'stat-5'
@@ -44,7 +44,6 @@ Modern neural networks often have more parameters than training examples and can
 
 The loss being compared must also match. Training can use augmentation, dropout, or label smoothing while validation disables those features or uses ordinary labels. Training loss may then exceed validation loss without demonstrating an error. State the evaluation conditions before interpreting the gap.
 
-![Training loss and held-out loss answer different questions about the fitted model.](figure-01.png)
 
 *Original conceptual summary based on the empirical-risk distinction; this figure contains no measured learning curve.*
 
@@ -68,7 +67,6 @@ Unregularized mean squared error at w equal to 3 is 14 divided by 3, about 4.667
 
 Suppose a tiny illustrative validation set contains targets 1 and 2. Its mean squared error is 2.5 at w equal to 3 and 0.5 at w equal to 2. In that example the regularized prediction performs better on validation. A different validation population could reverse the result. 2 held-out points are far too little evidence for a broad guarantee; the calculation demonstrates the tradeoff, not universal superiority.
 
-![The L2 example shrinks the fitted constant from 3 to two while increasing training error.](figure-02.png)
 
 *Original numerical example. Training and validation targets are illustrative and all errors are calculated in the article.*
 
@@ -139,7 +137,6 @@ Language models add contamination concerns: benchmark questions or close variant
 
 For an operational connection, the serving system's performance benchmark also needs a representative population of requests. A model-quality validation set and a latency workload are different artifacts, but both require honest sampling and clear boundaries. Optimizing either against an unrepresentative sample produces a misleading deployment expectation.
 
-![Classical schematic: training loss decreases with complexity while generalization loss can turn upward.](figure-03.png)
 
 *Redrawn from [Dive into Deep Learning, Fig. 3.6.1](https://d2l.ai/chapter_linear-regression/generalization.html#fig-capacity-vs-error). This is classical schematic intuition, not measured data or a universal law for neural networks.*
 

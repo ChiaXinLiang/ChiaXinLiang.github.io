@@ -3,7 +3,7 @@ title: "Comparing LLM Architectures: Evidence, Tradeoffs, and Missing Disclosure
 description: "Build an evidence-based comparison across attention state, experts, multimodal inputs, training, and inference budgets without inventing undisclosed architecture details."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "llm-architectures"
 code: "compare-1"
 order: 7
@@ -50,7 +50,6 @@ $$
 Latent cache, cross-layer sharing, or mixed local-global layers require another expression. Applying this formula to every model because they all use attention can create large errors.
 
 Compare retained representation, eligible history, query work, and actual kernel traffic separately. Theoretical bytes establish capacity implications; measured traffic and time establish execution behavior.
-
 
 
 ![Deep-dive illustration: Compare attention representations](./deep-dive.png)

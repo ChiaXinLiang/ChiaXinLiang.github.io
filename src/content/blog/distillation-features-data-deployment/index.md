@@ -9,14 +9,13 @@ order: 9
 topic: "Distillation and Adaptation"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Matching teacher probabilities is one way to distill a model. Another transfers intermediate representations, relations between examples, or complete generated sequences. These objectives expose different information and create different preparation costs. The central design question is what a constrained student should reproduce to improve the task that matters.
 
 Feature matching does not require the student to become an exact internal copy. Different architectures can represent the same decision using different coordinates. A useful distillation interface therefore specifies alignment, invariances, data, and evaluation. This article connects those theoretical choices to an efficient deployable student.
 
-![Concept overview: Distillation 2: Features, Data, and Deployment Tradeoffs](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -31,7 +30,6 @@ $$
 FitNets introduced intermediate hints and a mapping to support thinner students. The broader mechanism is to provide supervision inside the model rather than only at its final predictions.
 
 Choose the layer correspondence deliberately. Equal layer indices do not imply equal semantic depth when teacher and student architectures differ. A mapping is part of the method and needs documented shapes, initialization, and training status.
-
 
 
 ![Deep-dive illustration: Define an intermediate interface](./deep-dive.png)

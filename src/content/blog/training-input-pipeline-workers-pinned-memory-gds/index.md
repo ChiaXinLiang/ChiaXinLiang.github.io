@@ -3,7 +3,7 @@ title: "The Training Input Pipeline: Workers, Prefetch, Pinned Memory, and GDS"
 description: "Model storage, decoding, batching, transfer, and compute as a pipeline; budget queues and memory; and verify input correctness before tuning workers or direct storage."
 pubDate: "Sep 13 2026"
 updatedDate: "Sep 13 2026"
-heroImage: "./cover.png"
+heroImage: './section-overview.png'
 series: "ai-performance"
 code: "data-1"
 order: 11
@@ -51,7 +51,6 @@ Startup can include the sum of stages before the first batch reaches computation
 For illustrative times of 40 milliseconds reading, 20 decoding, 15 transforming, 10 transferring, and 50 computing, serial execution takes 135 milliseconds. An adequately provisioned independent pipeline could approach a 50-millisecond interval after startup. The calculation explains the opportunity, not a promised measured speedup.
 
 Measure queue occupancy and starvation to test the model. If ready batches disappear before each GPU step, upstream supply is insufficient or too variable. If queues remain full and GPU timing is unchanged, increasing loader concurrency may add resource cost without improving training.
-
 
 
 ![Deep-dive illustration: Derive the steady-state bottleneck approximation](./deep-dive.png)

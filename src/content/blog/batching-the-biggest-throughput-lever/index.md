@@ -3,7 +3,7 @@ title: 'Batching: The Single Biggest Throughput Lever'
 description: "Why serving 1 request at a time wastes 99.7% of your GPU's compute, and how batching decode turns a GEMV into a GEMM for nearly free throughput."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './cover.png'
+heroImage: './deep-dive-component-01.png'
 code: 'opt-1'
 order: 1
 series: "llm-serving"
@@ -26,7 +26,6 @@ Here is the problem with a GEMV on modern hardware. To compute Wx, the GPU must 
 
 Now put a second request on the GPU. Its decode step needs the same weight matrices. If both requests run in the same kernel, W is read from HBM once and multiplied against 2 vectors: a matrix-matrix product, a GEMM with a request dimension of 2. The weight bytes, which dominate the traffic, are amortized across both requests. With B requests, 1 read of W produces B tokens.
 
-![GEMV versus GEMM: at batch 1 each 2-byte weight read from HBM participates in 2 FLOPs; batching B requests reuses the same weight bytes B times, multiplying arithmetic intensity](./gemv-vs-gemm.png)
 
 That is the entire trick. Batching does not make any single request faster. It makes the expensive part, streaming weights, serve many requests at once. Throughput scales almost linearly with batch size, and it keeps scaling until you hit one of 2 walls: the compute units finally saturate, or the KV cache runs out of room. For decode-heavy workloads on modern GPUs, the KV wall almost always arrives first, as the worked example will show.
 
@@ -50,7 +49,6 @@ Each decode step must read the weights once, plus every active request's KV cach
 
 Read the batch-8 row carefully, because it is the punchline of this whole article. Batching 8 requests raised the step time by only 21% (4.93 ms to 5.97 ms) while multiplying token output by 8. Throughput went up 6.6x; each user paid 1 extra millisecond per token. That is why people call the first stretch of the batching curve "almost free."
 
-![Aggregate tokens per second and per-request decode speed for Llama-3-8B on 1 H100 at batch 1, 8, 32, and 64, computed from bandwidth math](./batch-scaling.png)
 
 By batch 32 the trade is no longer free but still excellent: 16.5x the throughput for 1.9x the per-token latency. By batch 64 the KV traffic (32 GB) is twice the weight traffic (16 GB), and each doubling of the batch buys less. The curve bends because the amortized part (weights) is fixed while the unamortized part (each request's private KV reads) grows linearly with B. Long contexts bend it sooner: at 32K context, KV per request is 4 GB and even batch 4 is KV-dominated.
 
@@ -79,7 +77,6 @@ The naive approach is **static batching**: collect B requests, run them as a gro
 
 The Orca paper (Yu et al., OSDI 2022) reframed the problem with 1 observation: because decode produces exactly 1 token per request per step, the natural scheduling unit is the *iteration*, not the request. At every step, the scheduler asks which requests should be in this step's batch. A request that just emitted its end-of-sequence token leaves immediately; a newly arrived request joins at the very next step, its prefill slotted in alongside everyone else's decode. The batch becomes a rolling population rather than a fixed cohort.
 
-![Static batching leaves slots idle until the longest request finishes; continuous batching refills each slot on the next iteration, after Yu et al., OSDI 2022](./continuous-batching.png)
 
 This is **continuous batching** (Orca called it iteration-level scheduling), and it is now the default in every serious serving engine: vLLM, SGLang, TensorRT-LLM, Hugging Face TGI. Anyscale's benchmark writeup measured up to 23x throughput over static batching on bursty request streams, and while that headline number is vendor-reported and workload-dependent, the mechanism is not controversial: continuous batching keeps the *effective* batch size near the maximum the KV capacity allows, at every step, regardless of arrival patterns and length variance.
 

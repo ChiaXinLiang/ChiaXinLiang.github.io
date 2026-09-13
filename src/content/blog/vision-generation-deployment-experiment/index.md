@@ -9,14 +9,13 @@ order: 6
 topic: "Experiments"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: "./cover.png"
+heroImage: './deep-dive.png'
 ---
 
 Efficient vision and generation should be evaluated as complete task systems. A smaller token sequence, fewer denoising evaluations, or reduced weight precision can save a specific resource while changing information, quality, or another pipeline stage. The useful result is an accepted operating point under a reproducible workload.
 
 This guide brings patch design, token reduction, diffusion solvers, and step distillation into one controlled experiment. It derives cost and quality accounting and provides illustrative decisions. It does not report a trained-model or GPU benchmark; the protocol is intended to produce that evidence for an actual deployment.
 
-![Concept overview: Vision and Generation Deployment: A Controlled Experiment](./section-overview.svg)
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
@@ -55,7 +54,6 @@ $$
 The equation explains why resolution can affect tokenwise and pairwise work differently. Actual latency also depends on implementation, dimensions, and memory.
 
 For a dense latent denoiser, resolution similarly changes feature-map shapes, but its exact cost depends on architecture. Do not import the ViT quadratic formula into every diffusion network. Inspect the actual operators and state sizes before using a scaling estimate to predict resource use.
-
 
 
 ![Deep-dive illustration: Account for token and resolution scaling](./deep-dive.png)
