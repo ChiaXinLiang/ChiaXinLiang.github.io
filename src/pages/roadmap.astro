@@ -1,0 +1,67 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SERIES } from '../consts';
+import { getCollection } from 'astro:content';
+import { publishedSeriesOrder } from '../lib/published-series';
+const posts = await getCollection('blog');
+const steps = [
+ {id:'llm-basics', before:[], goal:'Understand tokens, learning objectives, attention, and inference.'},
+ {id:'comp-arch', before:[], goal:'Understand instructions, processors, locality, and memory systems.'},
+ {id:'ai-performance', before:['comp-arch'], goal:'Build a performance model, profile bottlenecks, and budget capacity.'},
+ {id:'llm-architectures', before:['llm-basics'], goal:'Read model configurations and connect structure to state and compute.'},
+ {id:'ai-networking', before:['ai-performance'], goal:'Follow communication paths and reason about collective cost and overlap.'},
+ {id:'gpu-performance', before:['comp-arch','ai-performance'], goal:'Understand GPU execution, memory access, kernels, and compilation.'},
+ {id:'llm-serving', before:['llm-basics','ai-performance','ai-networking','gpu-performance'], goal:'Combine batching, cache management, scheduling, and production measurement.'},
+ {id:'efficient-ai', before:['comp-arch','llm-architectures','gpu-performance'], goal:'Evaluate quantization and algorithm–hardware design tradeoffs.'},
+].map(step => ({...step, ...SERIES.find(s => s.id === step.id)!, articles:publishedSeriesOrder(posts.filter(p=>p.data.series===step.id)).map(p=>({id:p.id,title:p.data.title,href:`/blog/${p.id}/`}))})).filter(s=>s.articles.length);
+const paths = {all:steps.map(s=>s.id),infra:['comp-arch','llm-basics','ai-performance','ai-networking','gpu-performance','llm-serving'],models:['llm-basics','llm-architectures','llm-serving'],hardware:['comp-arch','ai-performance','gpu-performance','llm-architectures','efficient-ai']};
+---
+<!doctype html><html lang="en"><head><BaseHead title="Learning Roadmap" description="An interactive learning map through published AI infrastructure articles." /></head><body><Header /><main>
+<h1>Learning roadmap</h1><p>Start with the foundations, then follow a branch that matches your goal. Connections suggest useful background; you can open any step.</p>
+<section class="roadmap" aria-label="Interactive learning roadmap">
+<div class="controls"><label for="learning-path">Your learning goal</label><select id="learning-path"><option value="all">Explore all series</option><option value="infra">AI infrastructure & serving</option><option value="models">Model foundations & architectures</option><option value="hardware">GPU systems & hardware design</option></select></div>
+<p class="path-order" aria-live="polite"></p><p class="progress" aria-live="polite">Select a step to see its published articles.</p>
+<p class="storage-note">Check off articles as you finish them. Progress is saved in this browser. This map contains published articles only.</p>
+<div class="map">
+<svg class="connections" viewBox="0 0 900 660" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="map-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="currentColor" /></marker></defs><g fill="none" stroke="currentColor" stroke-width="2" marker-end="url(#map-arrow)"><path d="M225 100C225 170 675 130 675 195"/><path d="M675 100C675 170 225 130 225 195"/><path d="M225 265L225 360"/><path d="M225 265C225 330 675 300 675 360"/><path d="M225 430L225 525"/><path d="M675 430C675 490 225 475 225 525"/><path d="M675 430L675 525"/><path d="M675 265L850 265L850 560L805 560"/></g></svg>
+{steps.map((step,i)=><button type="button" class="node" data-step={step.id} aria-pressed="false" aria-controls="step-detail"><span class="step-number">{i+1}</span><strong>{step.name}</strong><span class="tags">{step.tag} · {step.level}</span><span class="node-progress">{step.articles.length} published articles</span></button>)}
+</div>
+<section id="step-detail" class="detail" aria-label="Selected learning step"><h2>Choose a step</h2><p>Select a node above to explore the reading sequence.</p></section>
+<button class="clear-progress" type="button">Reset reading progress</button><p class="reset-note" hidden>Clear saved progress? <button class="confirm-reset" type="button">Clear progress</button> <button class="cancel-reset" type="button">Keep progress</button></p>
+<noscript><p>The interactive map needs JavaScript. You can still follow the reading paths below.</p></noscript>
+<details class="reading-list"><summary>View the complete reading list</summary>{steps.map((step,i)=><section><h2>{i+1}. <a href={`/series/${step.id}/`}>{step.name}</a></h2><p>{step.goal}</p><ol>{step.articles.map(article=><li><a href={article.href}>{article.title}</a></li>)}</ol></section>)}</details>
+<script type="application/json" class="roadmap-data" set:html={JSON.stringify({steps,paths}).replace(/</g,'\u003c')} />
+</section></main><Footer /></body></html>
+<script>
+function initRoadmap(){
+ const root=document.querySelector<HTMLElement>('.roadmap');if(!root||root.dataset.ready)return;root.dataset.ready='true';
+ type Step={id:string;name:string;level:string;goal:string;before:string[];articles:{id:string;title:string;href:string}[]};
+ const {steps,paths}=JSON.parse(root.querySelector('.roadmap-data')!.textContent!) as {steps:Step[];paths:Record<string,string[]>};
+ const valid=new Set(steps.flatMap(s=>s.articles.map(a=>a.id)));const key='ml-notes-reading-progress-v1';let done=new Set<string>();let storage=true;
+ try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))done=new Set(saved.filter(id=>typeof id==='string'&&valid.has(id)));}catch{storage=false;}
+ const select=root.querySelector<HTMLSelectElement>('#learning-path')!;const detail=root.querySelector<HTMLElement>('#step-detail')!;let selected=steps[0].id;
+ function save(){try{localStorage.setItem(key,JSON.stringify([...done]));}catch{storage=false;root!.querySelector('.storage-note')!.textContent='Browser storage is unavailable. Progress lasts for this page visit.';}}
+ const link=(title:string,href:string)=>{const a=document.createElement('a');a.textContent=title;a.href=href;return a;};
+ function update(){
+  const route=paths[select.value];const articles=steps.filter(s=>route.includes(s.id)).flatMap(s=>s.articles);const finished=articles.filter(a=>done.has(a.id)).length;
+  root!.querySelector('.progress')!.textContent=`${finished} of ${articles.length} articles completed in this path`;
+  root!.querySelector('.path-order')!.textContent='Suggested sequence: '+route.map(id=>steps.find(s=>s.id===id)!.name).join(' → ');
+  for(const step of steps){const node=root!.querySelector<HTMLButtonElement>(`[data-step="${step.id}"]`)!;node.classList.toggle('off-path',!route.includes(step.id));node.setAttribute('aria-pressed',String(step.id===selected));const count=step.articles.filter(a=>done.has(a.id)).length;node.querySelector('.node-progress')!.textContent=`${count} / ${step.articles.length} read`;node.classList.toggle('complete',count===step.articles.length);}
+ }
+ function render(){
+  const step=steps.find(s=>s.id===selected)!;detail.replaceChildren();const h=document.createElement('h2');h.textContent=step.name;detail.append(h);const goal=document.createElement('p');goal.textContent=step.goal;detail.append(goal);
+  if(step.before.length){const p=document.createElement('p');p.append('Useful background: ');step.before.forEach((id,i)=>{const prior=steps.find(s=>s.id===id)!;if(i)p.append(' · ');p.append(link(prior.name,`/series/${id}/`));});detail.append(p);}
+  detail.append(link('Open this series →',`/series/${step.id}/`));const list=document.createElement('ol');
+  step.articles.forEach(article=>{const item=document.createElement('li');const label=document.createElement('label');const check=document.createElement('input');check.type='checkbox';check.checked=done.has(article.id);check.setAttribute('aria-label',`Mark ${article.title} as read`);check.addEventListener('change',()=>{if(check.checked)done.add(article.id);else done.delete(article.id);save();update();});label.append(check);item.append(label,link(article.title,article.href));list.append(item);});detail.append(list);update();
+ }
+ root.querySelectorAll<HTMLButtonElement>('[data-step]').forEach(node=>node.addEventListener('click',()=>{selected=node.dataset.step!;render();}));select.addEventListener('change',()=>{selected=paths[select.value][0];render();});
+ const reset=root.querySelector<HTMLElement>('.reset-note')!;root.querySelector('.clear-progress')!.addEventListener('click',()=>{reset.hidden=false;});root.querySelector('.cancel-reset')!.addEventListener('click',()=>{reset.hidden=true;});root.querySelector('.confirm-reset')!.addEventListener('click',()=>{done.clear();save();reset.hidden=true;render();});
+ if(!storage)root.querySelector('.storage-note')!.textContent='Browser storage is unavailable. Progress lasts for this page visit.';render();
+}
+initRoadmap();document.addEventListener('astro:page-load',initRoadmap);
+</script>
+<style>
+main{width:1100px;max-width:calc(100% - 2rem)}h1{margin-bottom:.5rem}.controls{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}select,button{font:inherit;color:rgb(var(--black));background:var(--bg);border:1px solid rgb(var(--gray-light));border-radius:8px;padding:.6rem;cursor:pointer}select{max-width:100%}.path-order,.storage-note{font-size:.75em;color:rgb(var(--gray))}.progress{color:var(--accent);font-weight:700}.map{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,120px);gap:45px 80px;margin:2rem 0; padding:0 2rem}.connections{position:absolute;inset:0;width:100%;height:100%;color:var(--accent);opacity:.45;pointer-events:none}.node{position:relative;display:flex;flex-direction:column;justify-content:center;text-align:left;padding:1rem 1rem 1rem 3.5rem;font-size:.8rem;box-shadow:0 3px 12px rgba(var(--gray-light),.15)}.node strong{font-size:.9rem}.step-number{position:absolute;left:1rem;top:1rem;color:var(--accent);font-size:1.2rem;font-weight:700}.tags{font-size:.65rem;color:rgb(var(--gray));margin:.3rem 0}.node-progress{font-size:.7rem;color:var(--accent)}.node[aria-pressed="true"]{border:2px solid var(--accent)}.node.off-path{opacity:.5}.node.complete{background:rgba(var(--gray-light),.3)}.detail{border:1px solid rgb(var(--gray-light));border-radius:12px;padding:1.5rem;margin:1rem 0}.detail h2{font-size:1.4rem}.detail :global(li){margin:.7rem 0;font-size:.85em}.detail :global(input){margin-right:.8rem;accent-color:var(--accent)}.detail :global(ol){padding-left:1.4rem}.reading-list{margin:2rem 0}.reading-list summary{cursor:pointer;color:var(--accent)}.reading-list h2{font-size:1.2rem}.reading-list li{font-size:.85em;margin:.5rem 0}.clear-progress,.reset-note{font-size:.75em}[hidden]{display:none!important}button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:4px}@media(max-width:650px){.map{grid-template-columns:1fr;grid-template-rows:none;gap:.8rem;padding:0}.connections{display:none}.node{min-height:110px}.detail{padding:1rem}}
+</style>
