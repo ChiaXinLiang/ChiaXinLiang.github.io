@@ -1,10 +1,12 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { databaseMarkdown } from './lib/database-markdown';
+import { SERIES } from './consts';
 
 const blog = defineCollection({
 	// Long-form articles, organized by series/topic.
-	loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
+	loader: databaseMarkdown(),
 	schema: ({ image }) =>
 		z.object({
 			title: z.string(),
@@ -15,7 +17,7 @@ const blog = defineCollection({
 			// pubDate, which is the date the article was uploaded to the blog.
 			linkedinDate: z.coerce.date().optional(),
 			heroImage: z.optional(image()),
-			series: z.enum(["ai-performance", "ai-networking", "gpu-performance", "distributed-training", "llm-serving", "llm-basics", "llm-architectures", "comp-arch", "efficient-ai"]).optional(),
+			series: z.string().refine(id => SERIES.some(series => series.id === id), 'Unknown database series').optional(),
 			// article code in content.db (e.g. 'nn-1') — lets `tools/content sync` auto-track status
 			code: z.string().optional(),
 			level: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),

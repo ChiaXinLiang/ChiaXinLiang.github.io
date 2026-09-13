@@ -9,7 +9,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "metadata": "python3 tools/export-content.py",
+    "prebuild": "npm run metadata",
+    "predev": "npm run metadata"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",

@@ -1,6 +1,6 @@
 ---
 import { SERIES } from '../consts';
-import { LEVELS, TAGS } from '../data/curriculum';
+import { LEVELS } from '../data/curriculum';
 import type { CollectionEntry } from 'astro:content';
 interface Props { posts: CollectionEntry<'blog'>[]; }
 const { posts } = Astro.props;
@@ -10,6 +10,7 @@ const catalog = SERIES.filter(series => posts.some(p => p.data.series === series
     ...posts.filter(p => p.data.series === series.id).map(p => ({ title: p.data.title, topic: p.data.topic ?? '', code: p.data.code ?? '', tags: p.data.tags ?? [], level: p.data.level, published: true, href: `/blog/${p.id}/` })),
   ],
 }));
+const catalogTags = [...new Set(catalog.map(series => series.tag))];
 ---
 <section class="learning-hub" aria-label="Search and filter series">
   <div class="search-control">
@@ -19,7 +20,7 @@ const catalog = SERIES.filter(series => posts.some(p => p.data.series === series
   <div class="filters">
     <div class="tags" role="group" aria-label="Filter by tag">
       <button type="button" data-tag="" aria-pressed="true">All tags</button>
-      {TAGS.map(tag => <button type="button" data-tag={tag.name} aria-pressed="false">{tag.name}</button>)}
+      {catalogTags.map(tag => <button type="button" data-tag={tag} aria-pressed="false">{tag}</button>)}
     </div>
     <div class="select-filters">
       <label>Level <select id="series-level"><option value="">All levels</option>{LEVELS.map(l => <option value={l.id}>{l.name}</option>)}</select></label>
