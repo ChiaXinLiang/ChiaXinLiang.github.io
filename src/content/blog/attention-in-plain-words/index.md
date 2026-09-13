@@ -4,6 +4,7 @@ description: "The mechanism inside every modern LLM is a lookup that's softly bl
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'tf-1'
+order: 5
 series: 'llm-basics'
 topic: 'Transformer'
 tags: ['attention', 'transformer']

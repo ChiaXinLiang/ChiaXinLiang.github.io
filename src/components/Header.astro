@@ -13,6 +13,10 @@ import HeaderLink from './HeaderLink.astro';
 			<HeaderLink href="/posts">Posts</HeaderLink>
 			<HeaderLink href="/about">About</HeaderLink>
 		</div>
+		<div class="font-controls" aria-label="Text size">
+			<button id="font-dec" title="Smaller text">A−</button>
+			<button id="font-inc" title="Larger text">A+</button>
+		</div>
 		<div class="social-links">
 			<a href={GITHUB_URL} target="_blank">
 				<span class="sr-only">GitHub</span>
@@ -44,6 +48,20 @@ import HeaderLink from './HeaderLink.astro';
 		</div>
 	</nav>
 </header>
+<script is:inline>
+	(function () {
+		var min = 17, max = 25, def = 21;
+		function cur() { return parseInt(localStorage.getItem('baseFont') || def, 10); }
+		function apply(v) {
+			v = Math.min(max, Math.max(min, v));
+			document.documentElement.style.setProperty('--base-font', v + 'px');
+			localStorage.setItem('baseFont', v);
+		}
+		var d = document.getElementById('font-dec'), i = document.getElementById('font-inc');
+		if (d) d.addEventListener('click', function () { apply(cur() - 2); });
+		if (i) i.addEventListener('click', function () { apply(cur() + 2); });
+	})();
+</script>
 <style>
 	header {
 		margin: 0;
@@ -74,6 +92,26 @@ import HeaderLink from './HeaderLink.astro';
 	nav a.active {
 		text-decoration: none;
 		border-bottom-color: var(--accent);
+	}
+	.font-controls {
+		display: flex;
+		gap: 0.4em;
+		align-items: center;
+		margin-right: 0.8em;
+	}
+	.font-controls button {
+		font-size: 15px;
+		font-weight: 700;
+		padding: 0.25em 0.6em;
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 8px;
+		background: var(--bg);
+		color: rgb(var(--gray-dark));
+		cursor: pointer;
+	}
+	.font-controls button:hover {
+		border-color: var(--accent);
+		color: var(--accent);
 	}
 	.social-links,
 	.social-links a {

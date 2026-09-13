@@ -18,6 +18,8 @@ const blog = defineCollection({
 			series: z.enum(['llm-basics', 'ai-performance', 'efficient-ai', 'comp-arch']).optional(),
 			// article code in content.db (e.g. 'nn-1') — lets `tools/content sync` auto-track status
 			code: z.string().optional(),
+			// reading order within the series (drives series-page sorting)
+			order: z.number().optional(),
 			topic: z.string().optional(),
 			tags: z.array(z.string()).optional(),
 		}),

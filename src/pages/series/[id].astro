@@ -14,7 +14,7 @@ const { id } = Astro.params;
 const series = SERIES.find((s) => s.id === id)!;
 const posts = (await getCollection('blog'))
 	.filter((p) => p.data.series === id)
-	.sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+	.sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999) || a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
 
 // Group by topic, preserving first-seen (reading) order
 const topics = new Map<string, typeof posts>();

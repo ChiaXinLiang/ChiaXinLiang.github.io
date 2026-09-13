@@ -4,6 +4,7 @@ description: "Attention plus a feed-forward layer, wrapped in residual connectio
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'tf-2'
+order: 6
 series: 'llm-basics'
 topic: 'Transformer'
 tags: ['transformer', 'architecture']

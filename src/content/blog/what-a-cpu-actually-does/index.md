@@ -4,6 +4,7 @@ description: "Your laptop's CPU performs one conceptually simple loop billions o
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'arch-1'
+order: 1
 series: 'comp-arch'
 topic: 'CPU Fundamentals'
 tags: ['computer-architecture', 'cpu', 'pipeline']

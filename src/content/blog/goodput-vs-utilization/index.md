@@ -4,6 +4,7 @@ description: "Meta measured that 70–75% of a fully-utilized cluster's compute 
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'intro-2'
+order: 2
 series: 'ai-performance'
 topic: 'Foundations'
 tags: ['goodput', 'gpu', 'ml-performance']

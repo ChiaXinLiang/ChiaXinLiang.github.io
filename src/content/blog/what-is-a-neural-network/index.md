@@ -4,6 +4,7 @@ description: "Strip away the brain metaphors: a neural network is weighted sums 
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'nn-1'
+order: 1
 series: 'llm-basics'
 topic: 'Neural Networks'
 tags: ['neural-networks', 'fundamentals']

@@ -4,6 +4,7 @@ description: "Recurrent networks read text the way you do: one word at a time, c
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'arch-2'
+order: 4
 series: 'llm-basics'
 topic: 'Neural Networks'
 tags: ['rnn', 'lstm', 'sequences']

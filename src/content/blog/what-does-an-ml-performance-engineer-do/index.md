@@ -4,6 +4,7 @@ description: "Same model, same answers — delivered faster and cheaper. Inside 
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'intro-1'
+order: 1
 series: 'ai-performance'
 topic: 'Foundations'
 tags: ['ml-performance', 'career', 'gpu']

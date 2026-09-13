@@ -4,6 +4,7 @@ description: "NVIDIA's next GPU keeps the same 288GB of memory while bandwidth j
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'chip-1'
+order: 1
 series: 'efficient-ai'
 topic: 'AI Chips'
 tags: ['nvidia', 'hbm', 'accelerators']

@@ -34,6 +34,20 @@
 			0 16px 32px rgba(0, 0, 0, 33%);
 	}
 }
+body {
+	font-family: var(--font-atkinson);
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	background-color: var(--bg);
+	background: linear-gradient(var(--gray-gradient)) no-repeat var(--bg);
+	background-size: 100% 600px;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	color: rgb(var(--gray-dark));
+	font-size: var(--base-font, 21px);
+	line-height: 1.7;
+}
 main {
 	width: 720px;
 	max-width: calc(100% - 2em);

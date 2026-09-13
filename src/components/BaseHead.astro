@@ -50,3 +50,11 @@ const { title, description, image = FallbackImage } = Astro.props;
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
+
+<script is:inline>
+	// Apply reader-chosen font size before first paint
+	(function () {
+		var s = localStorage.getItem('baseFont');
+		if (s) document.documentElement.style.setProperty('--base-font', s + 'px');
+	})();
+</script>

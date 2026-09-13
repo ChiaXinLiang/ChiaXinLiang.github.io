@@ -4,6 +4,7 @@ description: "A convolutional network reads images the way you'd search a photo 
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'arch-1'
+order: 3
 series: 'llm-basics'
 topic: 'Neural Networks'
 tags: ['cnn', 'neural-networks', 'computer-vision']

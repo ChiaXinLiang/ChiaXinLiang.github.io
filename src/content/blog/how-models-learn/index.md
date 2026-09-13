@@ -4,6 +4,7 @@ description: "Training a neural network is finding the bottom of a valley you ca
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'nn-2'
+order: 2
 series: 'llm-basics'
 topic: 'Neural Networks'
 tags: ['neural-networks', 'training', 'backpropagation']
