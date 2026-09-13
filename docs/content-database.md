@@ -13,7 +13,7 @@ The master `articles` table includes:
 
 The `article_links` view exposes the public hyperlink for a published record. `tools/content show SERIES CODE`, run from the parent workspace, displays the metadata, content paths, and public URL.
 
-The master `series` table owns names, descriptions, subject tags, and whole-series Beginner/Intermediate/Advanced labels. These labels do not split the inside of a series into levels.
+The master `series` table owns names, descriptions, subject tags, 2–3 topic tags in `topic_tags_json`, and whole-series Beginner/Intermediate/Advanced labels. These labels do not split the inside of a series into levels.
 
 ## 2. Edit metadata
 
@@ -23,10 +23,10 @@ Run these commands from the blog directory. They modify the master database, not
 python3 tools/edit-content.py article ai-performance serve-1
 python3 tools/edit-content.py article ai-performance serve-1 --title "Profiling Basics: Finding Where the Time Actually Goes"
 python3 tools/edit-content.py article ai-performance serve-1 --description "Find the actual bottleneck before choosing an optimization."
-python3 tools/edit-content.py series ai-networking --tag "AI Infrastructure" --level Intermediate
+python3 tools/edit-content.py series ai-networking --tag "AI Infrastructure" --topic-tags "Networking,Distributed Training" --level Intermediate
 ```
 
-With no edit flags, the command displays the record. Article flags include `--title`, `--description`, `--topic`, `--content-path`, `--hero-image`, `--order`, and `--tags` (comma-separated). Series flags include `--name`, `--tagline`, `--tag`, and `--level`. An image path is relative to the linked Markdown file. A content path must identify a file under `src/content/blog`.
+With no edit flags, the command displays the record. Article flags include `--title`, `--description`, `--topic`, `--content-path`, `--hero-image`, `--order`, and `--tags` (comma-separated). Series flags include `--name`, `--tagline`, `--tag`, `--topic-tags` (comma-separated), and `--level`. An image path is relative to the linked Markdown file. A content path must identify a file under `src/content/blog`.
 
 Edit the linked Markdown file for content changes. Keep the slug stable to preserve existing URLs. Article status and publication dates remain explicit editorial fields in the master database; only `published` and `promoted` records are exported.
 
@@ -46,4 +46,6 @@ Commit the regenerated `data/content.db` and any edited Markdown/code, then depl
 
 ## 4. Verification
 
-An isolated test database was used to change an article title and description, a whole-series subject/level tag, and a publication status without editing Markdown. The resulting build reflected the metadata changes and excluded the draft. The real master database was unchanged, then the normal published snapshot was restored. All 94 long-form articles still have consecutive visible numbering and aligned Previous/Next links. Published database snapshots validate content paths, IDs, tags, URLs, and the 30-article series limit before replacing the previous snapshot.
+An isolated test database was used to change an article title and description, a whole-series subject/level tag, and a publication status without editing Markdown. The resulting build reflected the metadata changes and excluded the draft. The real master database was unchanged, then the normal published snapshot was restored. All 149 long-form articles still have consecutive visible numbering and aligned Previous/Next links. Published database snapshots validate content paths, IDs, tags, URLs, and the 30-article series limit before replacing the previous snapshot.
+
+The catalog keeps subject, topic, and difficulty filters separate. The topic dropdown and search use whole-series topic tags. Filter checks cover all 8 topics, combined filters, empty results, reset, and View more/Show less.
