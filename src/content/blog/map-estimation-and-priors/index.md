@@ -20,6 +20,11 @@ We will derive a small Beta–Bernoulli example, distinguish the posterior mode 
 
 ## Bayes' rule separates 3 ingredients
 
+![Section overview: map: how a prior changes the optimization. Choose the statistical model; Find the posterior mode; Work the Beta example; Distinguish the summaries](./section-overview.svg)
+
+*Read 1 to 4 to connect the method, its mechanism, and the assumptions behind the equations. The section below develops the details.*
+
+
 Let $$D$$ denote the recorded dataset and $$\theta$$ the parameter we want to estimate. Bayes' rule gives
 
 $$

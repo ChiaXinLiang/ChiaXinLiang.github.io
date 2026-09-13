@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="title desc">
+<title id="title">READ A MODEL STRUCTURE WITH AN EVIDENCE CHAIN</title><desc id="desc">Inspect the configuration Record layers, heads, dimensions, experts Distinguish active from total parameters A marketing name does not define execution. Trace the implementation Follow projections, routing, and state Match config fields to actual operators Check masks, shapes, normalization, and dtype. Derive a state budget Full KV: 2 × L × n × H KV × d × b Windowed and recurrent state differ Count each layer type; do not reuse 1 formula. Test a concrete consequence Predict memory, FLOPs, or communication Compare predictions with measured behavior Separate published facts from assumptions.</desc><rect width="1200" height="1040" rx="20" fill="#faf9f4"/>
+<text x="40" y="50" font-family="Arial, sans-serif" font-size="22" fill="#6845c0" font-weight="bold">SECTION OVERVIEW · METHOD + MECHANISM + EQUATIONS</text>
+<text x="40" y="105" font-family="Arial, sans-serif" font-size="35" fill="#23282d" font-weight="bold">READ A MODEL STRUCTURE WITH AN EVIDENCE</text>
+<text x="40" y="148" font-family="Arial, sans-serif" font-size="35" fill="#23282d" font-weight="bold">CHAIN</text>
+<rect x="30" y="210" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="252" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">1. Inspect the configuration</text>
+<text x="72" y="289" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Record layers, heads, dimensions, experts</text>
+<text x="72" y="320" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Distinguish active from total parameters</text>
+<text x="72" y="351" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">A marketing name does not define execution.</text>
+<rect x="30" y="395" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="437" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">2. Trace the implementation</text>
+<text x="72" y="474" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Follow projections, routing, and state</text>
+<text x="72" y="505" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Match config fields to actual operators</text>
+<text x="72" y="536" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Check masks, shapes, normalization, and dtype.</text>
+<rect x="30" y="580" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="622" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">3. Derive a state budget</text>
+<text x="72" y="659" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Full KV: 2 × L × n × H KV × d × b</text>
+<text x="72" y="690" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Windowed and recurrent state differ</text>
+<text x="72" y="721" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Count each layer type; do not reuse 1 formula.</text>
+<rect x="30" y="765" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="807" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">4. Test a concrete consequence</text>
+<text x="72" y="844" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Predict memory, FLOPs, or communication</text>
+<text x="72" y="875" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Compare predictions with measured behavior</text>
+<text x="72" y="906" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Separate published facts from assumptions.</text>
+<text x="40" y="1004" font-family="Arial, sans-serif" font-size="24" fill="#6845c0" font-weight="normal">Read 1 → 4, then use the section derivation to check the assumptions.</text>
+</svg>

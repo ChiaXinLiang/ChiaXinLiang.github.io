@@ -18,6 +18,10 @@ This is out-of-order execution, and it is the single most elaborate piece of mac
 
 ## Why in-order pipelines stall
 
+![Out-of-order execution overview](./section-overview.svg)
+
+
+
 In [the first article of this series](/blog/what-a-cpu-actually-does/) we built the pipeline: fetch, decode, execute, overlapped so a new instruction enters every cycle. The pipeline's promise is 1 instruction completed per cycle. Its weakness is that the promise only holds when every instruction is ready to run the moment its turn comes.
 
 Real code breaks that constantly, because instructions depend on each other. If instruction 2 adds the value that instruction 1 loads from memory, instruction 2 cannot start until the load finishes. That's called a **data dependency** (specifically a read-after-write dependency: 2 reads what 1 writes). An in-order pipeline, which must start instructions in exactly the order the program lists them, has no choice: it stalls. Instruction 2 waits, and so does everything behind it, even instructions 3 and 4 that have nothing to do with the load.

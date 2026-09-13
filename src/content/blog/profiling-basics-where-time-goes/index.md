@@ -20,6 +20,11 @@ Profiling is how you find out which situation you're in. This article covers the
 
 ## 3 tools, 3 questions, 1 order
 
+![Section overview: from symptom to verified bottleneck. Measure the request; Locate the critical path; Explain the expensive kernel; Test the proposed fix](./section-overview.svg)
+
+*Read 1 to 4 to connect the method, its mechanism, and the assumptions behind the equations. The section below develops the details.*
+
+
 Profiling an inference stack is a top-down exercise with 3 layers, and the order matters more than the tools.
 
 ![The 3-layer profiling stack: Nsight Systems for the end-to-end timeline, Nsight Compute for single-kernel analysis, torch.profiler for framework attribution](./profiling-stack.png)

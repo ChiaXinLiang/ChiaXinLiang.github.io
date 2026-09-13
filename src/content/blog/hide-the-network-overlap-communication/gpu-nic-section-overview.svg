@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1120" viewBox="0 0 1200 1120" role="img" aria-labelledby="title desc"><title id="title">From GPU memory to the AI fabric</title><desc id="desc">An annotated topology and overlap overview. Direct GPU-to-NIC transfers avoid host staging when supported. The slowest shared resource limits bandwidth; bucket readiness determines exposed communication.</desc><defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="#6845c0"/></marker></defs><rect width="1200" height="1120" rx="20" fill="#faf9f4"/>
+<text x="40" y="50" font-family="Arial, sans-serif" font-size="21" fill="#6845c0" font-weight="bold">NETWORKING FOR AI SYSTEMS</text>
+<text x="40" y="101" font-family="Arial, sans-serif" font-size="38" fill="#23282d" font-weight="bold">FROM GPU MEMORY TO THE AI FABRIC</text>
+<text x="40" y="139" font-family="Arial, sans-serif" font-size="24" fill="#23282d" font-weight="normal">Follow the bytes, identify the bottleneck, then schedule the transfer.</text>
+<rect x="28" y="170" width="1144" height="250" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="48" y="212" font-family="Arial, sans-serif" font-size="27" fill="#6845c0" font-weight="bold">1. THE DIRECT DATA PATH</text>
+<rect x="60" y="245" width="210" height="85" rx="12" fill="#eee9fa" stroke="#d6d1df"/>
+<text x="78" y="281" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">GPU + HBM</text>
+<text x="78" y="310" font-family="Arial, sans-serif" font-size="19" fill="#23282d" font-weight="normal">Gradients / KV cache</text>
+<rect x="365" y="245" width="230" height="85" rx="12" fill="#eee9fa" stroke="#d6d1df"/>
+<text x="383" y="281" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">PCIe fabric</text>
+<text x="383" y="310" font-family="Arial, sans-serif" font-size="19" fill="#23282d" font-weight="normal">Peer DMA path</text>
+<rect x="685" y="245" width="200" height="85" rx="12" fill="#eee9fa" stroke="#d6d1df"/>
+<text x="703" y="281" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">NIC</text>
+<text x="703" y="310" font-family="Arial, sans-serif" font-size="19" fill="#23282d" font-weight="normal">RDMA transport</text>
+<rect x="970" y="245" width="170" height="85" rx="12" fill="#eee9fa" stroke="#d6d1df"/>
+<text x="988" y="281" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">AI fabric</text>
+<text x="988" y="310" font-family="Arial, sans-serif" font-size="19" fill="#23282d" font-weight="normal">Leaf / spine</text>
+<path d="M274 285 L356 285" stroke="#6845c0" stroke-width="5" fill="none" marker-end="url(#arrow)"/>
+<path d="M600 285 L677 285" stroke="#6845c0" stroke-width="5" fill="none" marker-end="url(#arrow)"/>
+<path d="M890 285 L960 285" stroke="#6845c0" stroke-width="5" fill="none" marker-end="url(#arrow)"/>
+<text x="60" y="365" font-family="Arial, sans-serif" font-size="22" fill="#23282d" font-weight="normal">CPU: sets up buffers, mappings, and synchronization; payload can bypass host RAM.</text>
+<text x="60" y="397" font-family="Arial, sans-serif" font-size="21" fill="#23282d" font-weight="normal">Requires compatible devices, drivers, memory registration, and a supported PCIe topology.</text>
+<rect x="28" y="440" width="1144" height="190" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="48" y="482" font-family="Arial, sans-serif" font-size="27" fill="#6845c0" font-weight="bold">2. WHY HOST STAGING CAN COST MORE</text>
+<rect x="60" y="510" width="180" height="55" rx="12" fill="#fff0df" stroke="#d6d1df"/>
+<text x="75" y="545" font-family="Arial, sans-serif" font-size="23" fill="#23282d" font-weight="bold">GPU HBM</text>
+<rect x="330" y="510" width="280" height="55" rx="12" fill="#fff0df" stroke="#d6d1df"/>
+<text x="345" y="545" font-family="Arial, sans-serif" font-size="23" fill="#23282d" font-weight="bold">Host RAM staging</text>
+<rect x="720" y="510" width="160" height="55" rx="12" fill="#fff0df" stroke="#d6d1df"/>
+<text x="735" y="545" font-family="Arial, sans-serif" font-size="23" fill="#23282d" font-weight="bold">NIC</text>
+<rect x="990" y="510" width="150" height="55" rx="12" fill="#fff0df" stroke="#d6d1df"/>
+<text x="1005" y="545" font-family="Arial, sans-serif" font-size="23" fill="#23282d" font-weight="bold">Fabric</text>
+<path d="M246 538 L320 538" stroke="#6845c0" stroke-width="5" fill="none" marker-end="url(#arrow)"/>
+<path d="M618 538 L710 538" stroke="#6845c0" stroke-width="5" fill="none" marker-end="url(#arrow)"/>
+<path d="M890 538 L978 538" stroke="#6845c0" stroke-width="5" fill="none" marker-end="url(#arrow)"/>
+<text x="60" y="602" font-family="Arial, sans-serif" font-size="22" fill="#23282d" font-weight="normal">Extra copies consume memory bandwidth and add dependencies. Measure the actual route.</text>
+<rect x="28" y="650" width="1144" height="180" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="48" y="692" font-family="Arial, sans-serif" font-size="27" fill="#6845c0" font-weight="bold">3. CONNECT THE PATH TO THE COST MODEL</text>
+<text x="60" y="726" font-family="Arial, sans-serif" font-size="30" fill="#23282d" font-weight="bold">B effective ≤ min(B GPU→NIC, B NIC, B fabric share)</text>
+<text x="60" y="767" font-family="Arial, sans-serif" font-size="30" fill="#23282d" font-weight="bold">T ring ≈ 2(N − 1) × [α + S / (N × B effective)]</text>
+<text x="60" y="807" font-family="Arial, sans-serif" font-size="21" fill="#23282d" font-weight="normal">N: ranks   S: buffer bytes   α: startup time   B: bytes/s; account for contention.</text>
+<rect x="28" y="850" width="1144" height="195" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="48" y="892" font-family="Arial, sans-serif" font-size="27" fill="#6845c0" font-weight="bold">4. OVERLAP DEPENDS ON WHEN DATA BECOMES READY</text>
+<text x="60" y="925" font-family="Arial, sans-serif" font-size="26" fill="#23282d" font-weight="bold">Bucket ready → asynchronous transfer while other layers compute</text>
+<text x="60" y="966" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">C j = max(r j, C j−1) + t j     Exposed tail = max(0, C last − T backward)</text>
+<text x="60" y="1008" font-family="Arial, sans-serif" font-size="21" fill="#23282d" font-weight="normal">Late buckets still create a tail. Shared SMs and HBM can slow the overlapped compute.</text>
+<text x="40" y="1083" font-family="Arial, sans-serif" font-size="22" fill="#6845c0" font-weight="bold">MEASURE: topology + transfer bandwidth + bucket timestamps + end-to-end step time</text>
+</svg>

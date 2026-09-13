@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="title desc">
+<title id="title">WHY OUT-OF-ORDER EXECUTION PRESERVES PROGRAM ORDER</title><desc id="desc">Decode and rename Map architectural names to physical registers Remove false WAR/WAW dependencies True producer–consumer dependencies remain. Issue ready instructions Scheduler checks operands + resources Independent work may execute earlier A blocked instruction need not stop every unit. Hold speculative results Track instructions in a reorder buffer Recover from faults or wrong predictions Execution completion is not retirement. Retire in architectural order Commit only the oldest ready instructions Precise state follows the program sequence Gain depends on independent work and capacity.</desc><rect width="1200" height="1040" rx="20" fill="#faf9f4"/>
+<text x="40" y="50" font-family="Arial, sans-serif" font-size="22" fill="#6845c0" font-weight="bold">SECTION OVERVIEW · METHOD + MECHANISM + EQUATIONS</text>
+<text x="40" y="105" font-family="Arial, sans-serif" font-size="35" fill="#23282d" font-weight="bold">WHY OUT-OF-ORDER EXECUTION PRESERVES PROGRAM</text>
+<text x="40" y="148" font-family="Arial, sans-serif" font-size="35" fill="#23282d" font-weight="bold">ORDER</text>
+<rect x="30" y="210" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="252" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">1. Decode and rename</text>
+<text x="72" y="289" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Map architectural names to physical registers</text>
+<text x="72" y="320" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Remove false WAR/WAW dependencies</text>
+<text x="72" y="351" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">True producer–consumer dependencies remain.</text>
+<rect x="30" y="395" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="437" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">2. Issue ready instructions</text>
+<text x="72" y="474" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Scheduler checks operands + resources</text>
+<text x="72" y="505" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Independent work may execute earlier</text>
+<text x="72" y="536" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">A blocked instruction need not stop every unit.</text>
+<rect x="30" y="580" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="622" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">3. Hold speculative results</text>
+<text x="72" y="659" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Track instructions in a reorder buffer</text>
+<text x="72" y="690" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Recover from faults or wrong predictions</text>
+<text x="72" y="721" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Execution completion is not retirement.</text>
+<rect x="30" y="765" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="807" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">4. Retire in architectural order</text>
+<text x="72" y="844" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Commit only the oldest ready instructions</text>
+<text x="72" y="875" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Precise state follows the program sequence</text>
+<text x="72" y="906" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Gain depends on independent work and capacity.</text>
+<text x="40" y="1004" font-family="Arial, sans-serif" font-size="24" fill="#6845c0" font-weight="normal">Read 1 → 4, then use the section derivation to check the assumptions.</text>
+</svg>

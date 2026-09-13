@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="title desc">
+<title id="title">FROM SYMPTOM TO VERIFIED BOTTLENECK</title><desc id="desc">Measure the request Define workload + latency metric Trace queue, CPU, GPU, and transfers A slow request can include idle GPU time. Locate the critical path Use a system timeline first Find dependency gaps and long kernels Do not sum work that runs concurrently. Explain the expensive kernel Inspect bytes, FLOPs, and stalls P ≤ min(P peak, B × I) I = useful FLOPs / transferred bytes Test the proposed fix Change 1 suspected mechanism Speedup = T baseline / T changed Validate outputs; repeat the same workload.</desc><rect width="1200" height="1040" rx="20" fill="#faf9f4"/>
+<text x="40" y="50" font-family="Arial, sans-serif" font-size="22" fill="#6845c0" font-weight="bold">SECTION OVERVIEW · METHOD + MECHANISM + EQUATIONS</text>
+<text x="40" y="105" font-family="Arial, sans-serif" font-size="35" fill="#23282d" font-weight="bold">FROM SYMPTOM TO VERIFIED BOTTLENECK</text>
+<rect x="30" y="210" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="252" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">1. Measure the request</text>
+<text x="72" y="289" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Define workload + latency metric</text>
+<text x="72" y="320" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Trace queue, CPU, GPU, and transfers</text>
+<text x="72" y="351" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">A slow request can include idle GPU time.</text>
+<rect x="30" y="395" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="437" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">2. Locate the critical path</text>
+<text x="72" y="474" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Use a system timeline first</text>
+<text x="72" y="505" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Find dependency gaps and long kernels</text>
+<text x="72" y="536" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Do not sum work that runs concurrently.</text>
+<rect x="30" y="580" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="622" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">3. Explain the expensive kernel</text>
+<text x="72" y="659" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Inspect bytes, FLOPs, and stalls</text>
+<text x="72" y="690" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">P ≤ min(P peak, B × I)</text>
+<text x="72" y="721" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">I = useful FLOPs / transferred bytes</text>
+<rect x="30" y="765" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="807" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">4. Test the proposed fix</text>
+<text x="72" y="844" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Change 1 suspected mechanism</text>
+<text x="72" y="875" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Speedup = T baseline / T changed</text>
+<text x="72" y="906" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Validate outputs; repeat the same workload.</text>
+<text x="40" y="1004" font-family="Arial, sans-serif" font-size="24" fill="#6845c0" font-weight="normal">Read 1 → 4, then use the section derivation to check the assumptions.</text>
+</svg>

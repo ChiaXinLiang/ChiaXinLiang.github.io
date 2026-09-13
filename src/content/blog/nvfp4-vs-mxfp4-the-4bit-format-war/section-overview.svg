@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="title desc">
+<title id="title">BLOCK QUANTIZATION: VALUES, SCALES, AND ERROR</title><desc id="desc">Represent a compact value Both use a 4-bit E2M1 payload Only a small set of magnitudes is available A scale maps the grid to the original range. Compare scale granularity NVFP4: 16 values per E4M3 block scale MXFP4: 32 values per E8M0 block scale NVFP4 also uses a tensor-level FP32 scale. Reconstruct and compare NVFP4: x ≈ s tensor × s block × q MXFP4: x ≈ s block × q Outliers stretch the scale and coarsen resolution. Validate the complete method Check error, kernels, and scale overhead Effective bits exceed 4 after metadata Format support alone does not guarantee speed.</desc><rect width="1200" height="1040" rx="20" fill="#faf9f4"/>
+<text x="40" y="50" font-family="Arial, sans-serif" font-size="22" fill="#6845c0" font-weight="bold">SECTION OVERVIEW · METHOD + MECHANISM + EQUATIONS</text>
+<text x="40" y="105" font-family="Arial, sans-serif" font-size="35" fill="#23282d" font-weight="bold">BLOCK QUANTIZATION: VALUES, SCALES, AND</text>
+<text x="40" y="148" font-family="Arial, sans-serif" font-size="35" fill="#23282d" font-weight="bold">ERROR</text>
+<rect x="30" y="210" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="252" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">1. Represent a compact value</text>
+<text x="72" y="289" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Both use a 4-bit E2M1 payload</text>
+<text x="72" y="320" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Only a small set of magnitudes is available</text>
+<text x="72" y="351" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">A scale maps the grid to the original range.</text>
+<rect x="30" y="395" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="437" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">2. Compare scale granularity</text>
+<text x="72" y="474" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">NVFP4: 16 values per E4M3 block scale</text>
+<text x="72" y="505" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">MXFP4: 32 values per E8M0 block scale</text>
+<text x="72" y="536" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">NVFP4 also uses a tensor-level FP32 scale.</text>
+<rect x="30" y="580" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="622" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">3. Reconstruct and compare</text>
+<text x="72" y="659" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">NVFP4: x ≈ s tensor × s block × q</text>
+<text x="72" y="690" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">MXFP4: x ≈ s block × q</text>
+<text x="72" y="721" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Outliers stretch the scale and coarsen resolution.</text>
+<rect x="30" y="765" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="807" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">4. Validate the complete method</text>
+<text x="72" y="844" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Check error, kernels, and scale overhead</text>
+<text x="72" y="875" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Effective bits exceed 4 after metadata</text>
+<text x="72" y="906" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Format support alone does not guarantee speed.</text>
+<text x="40" y="1004" font-family="Arial, sans-serif" font-size="24" fill="#6845c0" font-weight="normal">Read 1 → 4, then use the section derivation to check the assumptions.</text>
+</svg>

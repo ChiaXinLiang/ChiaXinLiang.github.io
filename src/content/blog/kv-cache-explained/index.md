@@ -18,6 +18,11 @@ If you work on inference performance, this structure is your job. Weights are fi
 
 ## Why attention forces you to keep the past
 
+![Section overview: what the kv cache saves—and what it costs. Preserve prior state; Read state to attend; Count memory explicitly; Manage physical blocks](./section-overview.svg)
+
+*Read 1 to 4 to connect the method, its mechanism, and the assumptions behind the equations. The section below develops the details.*
+
+
 A transformer generates text autoregressively, 1 token per forward pass. (If prefill vs. decode is fuzzy, the [basics article on generation](/blog/how-an-llm-generates-text/) covers it; here we assume it.) Inside every attention layer, the new token's query vector is compared against the **key** vectors of all previous tokens, and the resulting weights blend their **value** vectors. That is the mechanism: to produce token *n+1*, attention needs K and V for tokens 1 through *n*, in every layer.
 
 Here is the crucial observation. The key and value vectors for token 17 are a function of token 17's layer input and the fixed projection matrices. They do not change when token 200 is generated. So you have 2 options:

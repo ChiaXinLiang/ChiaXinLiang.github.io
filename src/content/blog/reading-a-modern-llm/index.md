@@ -17,6 +17,11 @@ This article develops a practical reading method. We start with a deliberately s
 
 ## Separate structure, learned weights, and serving policy
 
+![Section overview: read a model structure with an evidence chain. Inspect the configuration; Trace the implementation; Derive a state budget; Test a concrete consequence](./section-overview.svg)
+
+*Read 1 to 4 to connect the method, its mechanism, and the assumptions behind the equations. The section below develops the details.*
+
+
 3 layers of description are easy to confuse. Architecture defines the operations and connections: layer types, widths, projections, routing, and state. A checkpoint supplies learned parameter values, often packaged with a particular numerical representation. Serving policy determines how requests are scheduled, batched, cached, or sampled. These layers interact, but changing a scheduler does not automatically change the underlying model architecture.
 
 A useful reading record therefore names the checkpoint and records the evidence used for each claim. A configuration can establish a layer count. An implementation can establish how a mask is applied. A model card can describe the intended design and training procedure. None of those alone proves that a particular deployment attains a stated latency. Separate documented structural facts from your own estimates and from measured performance.

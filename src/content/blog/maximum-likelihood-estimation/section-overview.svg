@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="title desc">
+<title id="title">MLE: FROM OBSERVATIONS TO A FITTED PARAMETER</title><desc id="desc">Fix the observations Data D stays fixed; vary candidate θ L(θ; D) = p(D | θ) Likelihood is not a probability over θ. Form a log objective For independent samples: log L = Σ log p(x i | θ) θ MLE = argmax θ log L(θ; D) Logs turn products into sums. Work the Bernoulli example k successes in n independent trials θ MLE = k / n; 7 / 10 = 0.7 Interior solution: derivative equals 0. Connect to language models Use conditional token probabilities Minimize −Σ log p(token t | prefix t) Optimization and generalization remain separate.</desc><rect width="1200" height="1040" rx="20" fill="#faf9f4"/>
+<text x="40" y="50" font-family="Arial, sans-serif" font-size="22" fill="#6845c0" font-weight="bold">SECTION OVERVIEW · METHOD + MECHANISM + EQUATIONS</text>
+<text x="40" y="105" font-family="Arial, sans-serif" font-size="35" fill="#23282d" font-weight="bold">MLE: FROM OBSERVATIONS TO A FITTED PARAMETER</text>
+<rect x="30" y="210" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="252" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">1. Fix the observations</text>
+<text x="72" y="289" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Data D stays fixed; vary candidate θ</text>
+<text x="72" y="320" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">L(θ; D) = p(D | θ)</text>
+<text x="72" y="351" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Likelihood is not a probability over θ.</text>
+<rect x="30" y="395" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="437" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">2. Form a log objective</text>
+<text x="72" y="474" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">For independent samples: log L = Σ log p(x i | θ)</text>
+<text x="72" y="505" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">θ MLE = argmax θ log L(θ; D)</text>
+<text x="72" y="536" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Logs turn products into sums.</text>
+<rect x="30" y="580" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="622" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">3. Work the Bernoulli example</text>
+<text x="72" y="659" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">k successes in n independent trials</text>
+<text x="72" y="690" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">θ MLE = k / n; 7 / 10 = 0.7</text>
+<text x="72" y="721" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Interior solution: derivative equals 0.</text>
+<rect x="30" y="765" width="1140" height="165" rx="12" fill="#ffffff" stroke="#d6d1df"/>
+<text x="52" y="807" font-family="Arial, sans-serif" font-size="28" fill="#6845c0" font-weight="bold">4. Connect to language models</text>
+<text x="72" y="844" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="bold">Use conditional token probabilities</text>
+<text x="72" y="875" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Minimize −Σ log p(token t | prefix t)</text>
+<text x="72" y="906" font-family="Arial, sans-serif" font-size="25" fill="#23282d" font-weight="normal">Optimization and generalization remain separate.</text>
+<text x="40" y="1004" font-family="Arial, sans-serif" font-size="24" fill="#6845c0" font-weight="normal">Read 1 → 4, then use the section derivation to check the assumptions.</text>
+</svg>

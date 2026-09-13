@@ -26,6 +26,16 @@ Cluster communication in ML splits into 2 families that behave nothing alike.
 
 The reason 2 separate libraries exist is that the overlap strategies differ. Collectives get hidden behind *the compute that produced their inputs*; point-to-point transfers get hidden behind *unrelated work the destination is already doing*. We will see both.
 
+## From GPU memory to the fabric: the complete path
+
+![Section overview showing the direct GPU HBM-to-PCIe-to-NIC-to-fabric path, host-staging alternative, effective-bandwidth limit, ring cost model, and bucket-readiness equation](./gpu-nic-section-overview.svg)
+
+*Read the figure from 1 to 4: establish the payload route, compare staging costs, model the bottleneck, then examine the exposed tail.*
+
+GPUDirect RDMA allows a supported NIC to access registered GPU memory without staging the payload in host RAM. The CPU still participates in setup and coordination. A direct path depends on device support, drivers, memory registration, and PCIe topology; an arrow labeled “RDMA” alone does not guarantee it. [NVIDIA’s GPUDirect RDMA documentation](https://docs.nvidia.com/cuda/gpudirect-rdma/) describes these requirements and ordering considerations.
+
+The diagram separates 2 optimizations: choosing a better route changes transfer cost, while overlapping that transfer changes how much cost reaches the critical path. The bandwidth bound is a diagnostic approximation: compare capacities in the same direction and units, and include shared-link contention. The ring equation assumes a bandwidth-limited logical ring with comparable participants. The bucket recurrence assumes 1 serialized communication stream; its readiness times explain why enough total backward compute does not automatically eliminate the final tail. The next sections derive these relationships and work through the numbers.
+
 ## The worked example: a 70B gradient sync, by hand
 
 The canonical collective algorithm is the **ring all-reduce**, and its cost model is worth committing to memory because it fits on an index card.
