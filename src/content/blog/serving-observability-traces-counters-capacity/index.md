@@ -14,7 +14,7 @@ tags: ["llm-serving", "ai-infrastructure"]
 
 A dashboard full of green GPU-utilization charts can coexist with an unusable inference service. Requests may wait in an admission queue, long prompts may delay short ones, and the engine may spend substantial work on responses that clients cancel. Observability needs to connect the user's waiting time to the system's execution rather than treating each layer as an unrelated collection of charts.
 
-The goal is a causal investigation path. A latency alert identifies a affected request population. Request traces locate the time interval that grew. Scheduler and resource measurements explain why that interval grew. A targeted profile then tests the suspected execution mechanism.
+The goal is a causal investigation path. A latency alert identifies an affected request population. Request traces locate the time interval that grew. Scheduler and resource measurements explain why that interval grew. A targeted profile then tests the suspected execution mechanism.
 
 We will define consistent timing boundaries, derive a few useful capacity relationships, and design measurements that survive batching and multiple replicas. Numerical examples are illustrative. Exact exported metric names and their availability depend on the installed serving-engine version and should be verified against its documentation.
 
@@ -129,7 +129,7 @@ After applying a fix, verify the original service objective and neighboring outc
 
 Maintain a compact set of linked views: service outcomes, offered and admitted demand, engine queues and cache state, replica health, and resource execution. Their filters should use compatible model and request-class labels so moving between views preserves the investigated population.
 
-Document metric boundaries and version-dependent definitions near the dashboards. Record deployments, configuration changes, and capacity changes on the same timeline. A unexplained change in replica count or sampling definition can otherwise look like a model-performance event.
+Document metric boundaries and version-dependent definitions near the dashboards. Record deployments, configuration changes, and capacity changes on the same timeline. An unexplained change in replica count or sampling definition can otherwise look like a model-performance event.
 
 Keep a small reproducible load case for each important incident pattern. It should capture the relevant workload shape and objective without requiring the entire original traffic stream. The case becomes useful evidence for future regressions and a practical test of whether an optimization survives realistic serving conditions.
 
