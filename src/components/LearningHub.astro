@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { SERIES } from '../consts';
 import { LEVELS } from '../data/curriculum';
 import type { CollectionEntry } from 'astro:content';
@@ -6,6 +7,7 @@ interface Props { posts: CollectionEntry<'blog'>[]; }
 const { posts } = Astro.props;
 const catalog = SERIES.filter(series => posts.some(p => p.data.series === series.id)).map(series => ({
   ...series,
+  cover: [...posts].filter(p => p.data.series === series.id && p.data.heroImage).sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0))[0]?.data.heroImage,
   entries: [
     ...posts.filter(p => p.data.series === series.id).map(p => ({ title: p.data.title, topic: p.data.topic ?? '', code: p.data.code ?? '', tags: p.data.tags ?? [], level: p.data.level, published: true, href: `/blog/${p.id}/` })),
   ],
@@ -28,16 +30,20 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
     </div>
   </div>
   <p class="result-count" aria-live="polite" aria-atomic="true">{catalog.length} series</p>
-  <div class="series-rows">
+  <div class="series-rows" id="series-results">
     {catalog.map(series => <article class="series-row" data-series={series.id}>
+      {series.cover && <a class="series-cover" href={`/series/${series.id}/`} tabindex="-1" aria-hidden="true"><Image src={series.cover} alt="" width={600} height={320} loading="lazy" /></a>}
+      <div class="card-content">
       <div class="row-heading"><a href={`/series/${series.id}/`}>{series.name}</a><span class="series-tags"><span class="tag">{series.tag}</span><span class="tag">{series.level}</span></span></div>
       <p class="description">{series.tagline}</p>
       <p class="counts">{series.entries.length} published article{series.entries.length === 1 ? '' : 's'}</p>
       <ul class="matching-articles" hidden></ul>
+      </div>
     </article>)}
   </div>
+  <button class="view-more" type="button" aria-expanded="false" aria-controls="series-results" hidden>View more</button>
   <p class="empty" hidden>No matching series. Try another search or reset the filters.</p>
-  <script type="application/json" class="catalog-data" set:html={JSON.stringify(catalog).replace(/</g, '\\u003c')} />
+  <script type="application/json" class="catalog-data" set:html={JSON.stringify(catalog.map(({ cover, ...series }) => series)).replace(/</g, '\\u003c')} />
 </section>
 <script>
   interface Entry { title: string; topic: string; code: string; tags: string[]; level: string; published: boolean; href: string; }
@@ -51,10 +57,14 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
       const level = hub.querySelector<HTMLSelectElement>('#series-level')!;
       const buttons = [...hub.querySelectorAll<HTMLButtonElement>('[data-tag]')];
       let tag = '';
+      let expanded = false;
+      const more = hub.querySelector<HTMLButtonElement>('.view-more')!;
+      const initialCount = 4;
       const normalize = (value: string) => value.toLocaleLowerCase().normalize('NFKC').replace(/maximum likelihood estimation/g, 'maximum likelihood estimation mle');
       const update = () => {
         const terms = normalize(search.value.trim()).split(/\s+/).filter(Boolean);
         let visible = 0;
+        const filtering = Boolean(terms.length || tag || level.value);
         for (const series of catalog) {
           const row = hub.querySelector<HTMLElement>(`[data-series="${series.id}"]`)!;
           const seriesText = normalize(`${series.name} ${series.tagline} ${series.tag} ${series.level}`);
@@ -63,7 +73,10 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
             return terms.every(term => text.includes(term));
           });
           row.hidden = Boolean((tag && tag !== series.tag) || (level.value && level.value !== series.level.toLowerCase()) || entries.length === 0);
-          if (!row.hidden) visible++;
+          if (!row.hidden) {
+            visible++;
+            if (!filtering && !expanded && visible > initialCount) row.hidden = true;
+          }
           const published = entries.filter(p => p.published).length;
           row.querySelector('.counts')!.textContent = `${published} published article${published === 1 ? '' : 's'}${terms.length || level.value ? ' matching' : ''}`;
           const list = row.querySelector<HTMLUListElement>('.matching-articles')!;
@@ -83,9 +96,14 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
             }
           }
         }
-        hub.querySelector('.result-count')!.textContent = `${visible} series${terms.length || tag || level.value ? (visible === 1 ? ' matches your filters' : ' match your filters') : ''}`;
+        const shown = !filtering && !expanded ? Math.min(initialCount, visible) : visible;
+        hub.querySelector('.result-count')!.textContent = shown < visible ? `Showing ${shown} of ${visible} series` : `${visible} series${filtering ? (visible === 1 ? ' matches your filters' : ' match your filters') : ''}`;
+        more.hidden = filtering || visible <= initialCount;
+        more.textContent = expanded ? 'Show less' : `View more (${visible - initialCount})`;
+        more.setAttribute('aria-expanded', String(expanded));
         hub.querySelector<HTMLElement>('.empty')!.hidden = visible > 0;
       };
+      more.addEventListener('click', () => { expanded = !expanded; update(); });
       search.addEventListener('input', update);
       level.addEventListener('change', update);
       buttons.forEach(button => button.addEventListener('click', () => {
@@ -93,9 +111,10 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
         buttons.forEach(b => b.setAttribute('aria-pressed', String(b === button))); update();
       }));
       hub.querySelector('.reset')!.addEventListener('click', () => {
-        search.value = ''; level.value = ''; tag = '';
+        search.value = ''; level.value = ''; tag = ''; expanded = false;
         buttons.forEach(b => b.setAttribute('aria-pressed', String(!b.dataset.tag))); update(); search.focus();
       });
+      update();
     });
   }
   initializeCatalog(); document.addEventListener('astro:page-load', initializeCatalog);
@@ -115,11 +134,17 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
   select { margin-left: .3rem; }
   .reset { margin-left: auto; }
   .result-count { font-size: .7em; color: rgb(var(--gray)); margin: 1.2rem 0 .5rem; }
-  .series-row { padding: 1rem 0; border-top: 1px solid rgb(var(--gray-light)); }
-  .row-heading { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; }
+  .series-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .series-row { border: 1px solid rgb(var(--gray-light)); border-radius: 12px; overflow: hidden; background: var(--bg); }
+  .series-cover { display: block; aspect-ratio: 15 / 8; overflow: hidden; background: rgba(var(--gray-light), .3); }
+  .series-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card-content { padding: 1rem; }
+  .view-more { display: block; margin: 1.25rem auto 0; font-size: .85rem; padding: .65rem 1.2rem; }
+
+  .row-heading { display: block; }
   .row-heading a { font-weight: 700; text-decoration: none; font-size: 1rem; }
   .tag { font-size: .65rem; border: 1px solid rgb(var(--gray-light)); border-radius: 20px; padding: .2rem .5rem; color: rgb(var(--gray)); white-space: nowrap; }
-  .series-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .series-tags { display: flex; flex-wrap: wrap; gap: .35rem; margin: .6rem 0; }
   .description { font-size: .75em; color: rgb(var(--gray)); margin: .35rem 0; }
   .counts { color: var(--accent); font-size: .65em; margin: .3rem 0 0; }
   .matching-articles { font-size: .75em; margin: .65rem 0 0; padding-left: 1.2rem; }
@@ -128,5 +153,5 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
   .empty { font-size: .85em; }
   [hidden] { display: none !important; }
   a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-  @media(max-width: 600px) { .row-heading { display: block; } .tag { display: inline-block; margin-top: .4rem; } .select-filters { gap: .5rem; } .reset { margin-left: 0; } }
+  @media(max-width: 600px) { .series-rows { grid-template-columns: 1fr; } .row-heading { display: block; } .tag { display: inline-block; margin-top: .4rem; } .select-filters { gap: .5rem; } .reset { margin-left: 0; } }
 </style>
