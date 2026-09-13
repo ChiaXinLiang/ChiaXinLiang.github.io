@@ -42,6 +42,46 @@ The real power is layering, and it's the "votes about votes" story again with a 
 
 The figure above is (a redrawn version of) LeNet-5, [Yann LeCun's 1998 digit reader](http://yann.lecun.com/exdb/publis/pdf/lecun-98.pdf) — the design that read bank checks in production when "neural network" was still a dirty word in grant applications. Fourteen years later, [AlexNet](https://proceedings.neurips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html) was recognizably the same recipe — convolution, pooling, stacking — with more layers, ReLU activations, GPUs to train on, and a million-image dataset. Same idea, more scale: 60 thousand weights to 60 million.
 
+## A worked example: nine weights detect an edge
+
+Let's actually run a filter, because the arithmetic makes the magic mundane. Take this 3×3 filter — nine weights arranged as a grid:
+
+```
+ +1   0  -1
+ +1   0  -1
+ +1   0  -1
+```
+
+To apply it at a position, lay it over a 3×3 patch of pixels, multiply each weight by the pixel under it, and sum. Now slide it over two different patches (pixel values: 0 = dark, 9 = bright):
+
+```
+patch A (uniform):     patch B (vertical edge):
+ 5 5 5                  9 9 0
+ 5 5 5                  9 9 0
+ 5 5 5                  9 9 0
+```
+
+- **Patch A**: (+1×5+0×5−1×5) × 3 rows = **0**. Nothing to see.
+- **Patch B**: each row gives +1×9 + 0×9 − 1×0 = 9, total **27**. Strong response.
+
+This filter fires precisely where brightness drops from left to right — it is a *vertical-edge detector*, built from nine numbers. Rotate the weights 90° and you detect horizontal edges. Nobody chose these values in a real CNN: [gradient descent](/blog/how-models-learn/) discovers edge detectors (and color-blob detectors, and texture detectors) in the first layer of essentially every vision network ever trained, because edges are the most reusable evidence about what's in an image. When AlexNet's authors visualized their trained first-layer filters, the grid looked like a catalog of oriented edges and color patches — learned, not designed.
+
+## Going deeper: pooling, stride, and the growing field of view
+
+Two supporting mechanics complete the picture. **Pooling** (typically "max pooling") slides a small window that keeps only the strongest response in each neighborhood — shrinking the map, discarding exact positions, keeping "this feature occurred around here." That builds in a useful indifference: a digit shifted two pixels still classifies the same.
+
+The subtler consequence is the **receptive field**. After one 3×3 convolution, each value "sees" 3×3 original pixels. Stack another 3×3 conv on the pooled map and each new value indirectly sees a much larger patch of the original image. Depth therefore buys *scope*: layer 1 sees strokes, layer 5 sees letterforms, layer 10 sees whole objects. That's the mechanical reason the edges→textures→objects hierarchy emerges — each layer literally looks at a bigger piece of the world, expressed in the previous layer's vocabulary.
+
+One number to anchor the efficiency claim: AlexNet's five convolutional layers, which do nearly all the visual understanding, hold only ~3.7M of its 60M weights — the old-style fully-connected layers bolted on the end hold the rest. The convolutional idea does the seeing at ~6% of the parameter budget.
+
+## Common misconceptions
+
+**"CNNs are obsolete now that Transformers exist."** Vision Transformers lead many benchmarks, but CNNs still run in enormous volume — phone cameras, medical imaging, industrial inspection, autonomous-vehicle stacks — because they're efficient at small scale and their built-in translation tolerance means they need far less training data. Architectures retire from the frontier long before they retire from production.
+
+**"The filters are hand-designed."** Pre-2012 computer vision really did hand-design features (SIFT, HOG — an entire field's worth of PhD theses). The deep learning revolution was precisely that [backprop](/blog/how-models-learn/) *learns* the features end-to-end, and learned features beat two decades of engineered ones by 11 points in one contest.
+
+**"Convolution is fundamentally different math from a normal network."** It's the same multiply-add-squash — with two constraints bolted on: each neuron connects only to a local patch, and all patches share one weight set. Constraints, not new machinery. That framing is worth keeping, because it recurs: most "new architectures" are the same core network with different constraints encoding different assumptions about data.
+
 ## The lesson that outlived the architecture
 
 CNNs dominated vision for a decade, and they still run in your phone's camera. But the deeper lesson is the one to carry forward:
