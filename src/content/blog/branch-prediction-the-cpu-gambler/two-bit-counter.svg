@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <defs>
+    <marker id="ag" markerWidth="12" markerHeight="12" refX="9" refY="5" orient="auto">
+      <path d="M1 1 L10 5 L1 9 Z" fill="#5b7c46"/>
+    </marker>
+    <marker id="at" markerWidth="12" markerHeight="12" refX="9" refY="5" orient="auto">
+      <path d="M1 1 L10 5 L1 9 Z" fill="#b06a4e"/>
+    </marker>
+  </defs>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">How a Predictor Learns</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">The 2-bit saturating counter, one per branch</text>
+
+  <!-- prediction brackets -->
+  <path d="M110 350 L110 325 L570 325 L570 350" fill="none" stroke="#b06a4e" stroke-width="2.5"/>
+  <text x="340" y="300" text-anchor="middle" font-size="28" font-weight="bold" fill="#b06a4e">predict NOT TAKEN</text>
+  <path d="M630 350 L630 325 L1090 325 L1090 350" fill="none" stroke="#5b7c46" stroke-width="2.5"/>
+  <text x="860" y="300" text-anchor="middle" font-size="28" font-weight="bold" fill="#5b7c46">predict TAKEN</text>
+
+  <!-- state circles -->
+  <circle cx="210" cy="560" r="100" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <circle cx="470" cy="560" r="100" fill="#fdfbf4" stroke="#b06a4e" stroke-width="3" stroke-dasharray="10 7"/>
+  <circle cx="730" cy="560" r="100" fill="#fdfbf4" stroke="#5b7c46" stroke-width="3" stroke-dasharray="10 7"/>
+  <circle cx="990" cy="560" r="100" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+
+  <g text-anchor="middle" fill="#33362a">
+    <text x="210" y="540" font-size="28" font-weight="bold">Strong</text>
+    <text x="210" y="575" font-size="28" font-weight="bold">Not-Taken</text>
+    <text x="210" y="615" font-size="26" fill="#75786a">00</text>
+    <text x="470" y="540" font-size="28" font-weight="bold">Weak</text>
+    <text x="470" y="575" font-size="28" font-weight="bold">Not-Taken</text>
+    <text x="470" y="615" font-size="26" fill="#75786a">01</text>
+    <text x="730" y="540" font-size="28" font-weight="bold">Weak</text>
+    <text x="730" y="575" font-size="28" font-weight="bold">Taken</text>
+    <text x="730" y="615" font-size="26" fill="#75786a">10</text>
+    <text x="990" y="540" font-size="28" font-weight="bold">Strong</text>
+    <text x="990" y="575" font-size="28" font-weight="bold">Taken</text>
+    <text x="990" y="615" font-size="26" fill="#75786a">11</text>
+  </g>
+
+  <!-- taken arcs (top, moving right, sage) -->
+  <g fill="none" stroke="#5b7c46" stroke-width="4">
+    <path d="M255 470 Q340 415 425 470" marker-end="url(#ag)"/>
+    <path d="M515 470 Q600 415 685 470" marker-end="url(#ag)"/>
+    <path d="M775 470 Q860 415 945 470" marker-end="url(#ag)"/>
+  </g>
+  <!-- taken self-loop on Strong Taken (right side) -->
+  <path d="M1035 475 C 1150 410, 1150 710, 1035 645" fill="none" stroke="#5b7c46" stroke-width="4" marker-end="url(#ag)"/>
+
+  <!-- not-taken arcs (bottom, moving left, terracotta) -->
+  <g fill="none" stroke="#b06a4e" stroke-width="4">
+    <path d="M945 650 Q860 705 775 650" marker-end="url(#at)"/>
+    <path d="M685 650 Q600 705 515 650" marker-end="url(#at)"/>
+    <path d="M425 650 Q340 705 255 650" marker-end="url(#at)"/>
+  </g>
+  <!-- not-taken self-loop on Strong Not-Taken (left side) -->
+  <path d="M165 645 C 50 710, 50 410, 165 475" fill="none" stroke="#b06a4e" stroke-width="4" marker-end="url(#at)"/>
+
+  <!-- legend -->
+  <g>
+    <line x1="280" y1="822" x2="360" y2="822" stroke="#5b7c46" stroke-width="4" marker-end="url(#ag)"/>
+    <text x="380" y="831" font-size="27" fill="#55584a">branch was taken</text>
+    <line x1="680" y1="822" x2="760" y2="822" stroke="#b06a4e" stroke-width="4" marker-end="url(#at)"/>
+    <text x="780" y="831" font-size="27" fill="#55584a">branch was not taken</text>
+  </g>
+
+  <text x="600" y="910" text-anchor="middle" font-size="27" fill="#75786a">One miss only weakens confidence &#8212;</text>
+  <text x="600" y="946" text-anchor="middle" font-size="27" fill="#75786a">it takes two misses in a row to flip the bet</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Redrawn from J. E. Smith (1981), ISCA</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; arch-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">two bits of memory</text>
+</svg>

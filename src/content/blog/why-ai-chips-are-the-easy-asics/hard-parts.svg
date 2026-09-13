@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">Where the difficulty lives</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">The visible part of an AI ASIC is the easy part</text>
+
+  <!-- iceberg tip (above waterline) -->
+  <polygon points="600,255 715,425 485,425" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="600" y="392" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" font-weight="bold" fill="#5b7c46">MAC array</text>
+
+  <!-- waterline -->
+  <line x1="120" y1="425" x2="1080" y2="425" stroke="#d8d4c4" stroke-width="4"/>
+  <text x="1080" y="410" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">waterline</text>
+  <text x="120" y="410" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">the datasheet stops here</text>
+
+  <!-- submerged body: three widening bands -->
+  <polygon points="485,425 715,425 790,590 410,590" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <polygon points="410,590 790,590 880,755 320,755" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <polygon points="320,755 880,755 960,950 240,950" fill="#f4f1e6" stroke="#75786a" stroke-width="3"/>
+
+  <text x="600" y="500" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#7a5a20">memory system</text>
+  <text x="600" y="545" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#7a5a20">HBM, packaging, on-chip buffers</text>
+
+  <text x="600" y="665" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#8a5138">numerics bets</text>
+  <text x="600" y="710" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#8a5138">bf16, FP8, FP4, frozen in silicon</text>
+
+  <text x="600" y="840" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#55584a">software</text>
+  <text x="600" y="885" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">compilers, kernels, the long tail of operators</text>
+
+  <!-- side annotations -->
+  <g font-family="Helvetica Neue, Arial, sans-serif" font-size="25" fill="#5b7c46">
+    <text x="810" y="310">simple control,</text>
+    <text x="810" y="345">repeated cells:</text>
+    <text x="810" y="380">15 months to ship</text>
+  </g>
+  <g font-family="Helvetica Neue, Arial, sans-serif" font-size="25" fill="#b04a3a">
+    <text x="95" y="840">this layer sank</text>
+    <text x="95" y="875">Nervana, Wave,</text>
+    <text x="95" y="910">Graphcore</text>
+  </g>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · asic-4</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">the die is half the product</text>
+</svg>

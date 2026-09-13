@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Paper to Silicon in ~24 Months</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">The fastest serving-idea-to-chip pipeline on record</text>
+
+  <line x1="270" y1="255" x2="270" y2="925" stroke="#d8d4c4" stroke-width="4"/>
+
+  <!-- Event 1 -->
+  <circle cx="270" cy="272" r="11" fill="#5b7c46"/>
+  <text x="240" y="281" text-anchor="end" font-size="28" font-weight="bold" fill="#55584a">Nov 2023</text>
+  <text x="310" y="281" font-size="27" fill="#33362a">Splitwise: split prefill and decode phases</text>
+
+  <!-- Event 2 -->
+  <circle cx="270" cy="402" r="11" fill="#5b7c46"/>
+  <text x="240" y="411" text-anchor="end" font-size="28" font-weight="bold" fill="#55584a">Jan 2024</text>
+  <text x="310" y="411" font-size="27" fill="#33362a">DistServe: 4.5x goodput via disaggregation</text>
+  <text x="310" y="447" font-size="25" fill="#75786a">first submission rejected by reviewers</text>
+
+  <!-- Event 3 -->
+  <circle cx="270" cy="532" r="11" fill="#c9973b"/>
+  <text x="240" y="541" text-anchor="end" font-size="28" font-weight="bold" fill="#55584a">2024–25</text>
+  <text x="310" y="541" font-size="27" fill="#33362a">Becomes the default: vLLM, SGLang,</text>
+  <text x="310" y="577" font-size="25" fill="#75786a">TensorRT-LLM, Dynamo, llm-d, in-house stacks</text>
+
+  <!-- Event 4 -->
+  <circle cx="270" cy="662" r="11" fill="#c9973b"/>
+  <text x="240" y="671" text-anchor="end" font-size="28" font-weight="bold" fill="#55584a">Feb 2025</text>
+  <text x="310" y="671" font-size="27" fill="#33362a">Mooncake KV tiering wins FAST '25 Best Paper</text>
+  <text x="310" y="707" font-size="25" fill="#75786a">the KV cache becomes a storage system</text>
+
+  <!-- Event 5 -->
+  <circle cx="270" cy="792" r="11" fill="#b06a4e"/>
+  <text x="240" y="801" text-anchor="end" font-size="28" font-weight="bold" fill="#55584a">Sep 2025</text>
+  <text x="310" y="801" font-size="27" fill="#33362a">MLPerf v5.1 scores disaggregation, ~1.5x;</text>
+  <text x="310" y="837" font-size="25" fill="#75786a">Rubin CPX announced: a prefill-only GPU</text>
+
+  <!-- Event 6 -->
+  <circle cx="270" cy="922" r="11" fill="#8a5138"/>
+  <text x="240" y="931" text-anchor="end" font-size="28" font-weight="bold" fill="#55584a">Late 2026</text>
+  <text x="310" y="931" font-size="27" fill="#33362a">Rubin CPX ships: GDDR7 memory, no HBM</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Dates from DistServe retrospective and NVIDIA announcements</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · cd-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">an idea becomes hardware</text>
+</svg>

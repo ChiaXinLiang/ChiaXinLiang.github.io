@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The LLM Lifecycle</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">From raw internet text to a helpful assistant, in three stages</text>
+
+  <!-- Stage 1: Pretraining -->
+  <rect x="90" y="240" width="1020" height="170" rx="16" fill="#e7edd9" stroke="#a8bf92" stroke-width="3"/>
+  <text x="120" y="298" font-size="34" font-weight="bold" fill="#5b7c46">1 · Pretraining</text>
+  <text x="120" y="342" font-size="26" fill="#55584a">Predict the next token, over and over</text>
+  <text x="120" y="380" font-size="24" fill="#75786a">~10¹¹–10¹³ tokens · months · ~98% of compute</text>
+  <text x="1080" y="298" text-anchor="end" font-size="30" font-weight="bold" fill="#33362a">Base model</text>
+  <text x="1080" y="340" text-anchor="end" font-size="24" fill="#75786a">completes text,</text>
+  <text x="1080" y="372" text-anchor="end" font-size="24" fill="#75786a">follows no one</text>
+
+  <!-- Arrow 1 -->
+  <line x1="600" y1="410" x2="600" y2="478" stroke="#75786a" stroke-width="4"/>
+  <path d="M 600 490 L 588 470 L 612 470 Z" fill="#75786a"/>
+  <text x="630" y="460" font-size="24" fill="#75786a">learns what it knows</text>
+
+  <!-- Stage 2: SFT -->
+  <rect x="90" y="490" width="1020" height="170" rx="16" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="120" y="548" font-size="34" font-weight="bold" fill="#7a5a20">2 · Supervised fine-tuning</text>
+  <text x="120" y="592" font-size="26" fill="#55584a">Imitate human-written demonstrations</text>
+  <text x="120" y="630" font-size="24" fill="#75786a">~13k prompts (InstructGPT) · days · same objective</text>
+  <text x="1080" y="548" text-anchor="end" font-size="30" font-weight="bold" fill="#33362a">SFT model</text>
+  <text x="1080" y="590" text-anchor="end" font-size="24" fill="#75786a">answers questions,</text>
+  <text x="1080" y="622" text-anchor="end" font-size="24" fill="#75786a">imitates labelers</text>
+
+  <!-- Arrow 2 -->
+  <line x1="600" y1="660" x2="600" y2="728" stroke="#75786a" stroke-width="4"/>
+  <path d="M 600 740 L 588 720 L 612 720 Z" fill="#75786a"/>
+  <text x="630" y="710" font-size="24" fill="#75786a">learns the format</text>
+
+  <!-- Stage 3: RLHF -->
+  <rect x="90" y="740" width="1020" height="170" rx="16" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="120" y="798" font-size="34" font-weight="bold" fill="#8a5138">3 · RLHF</text>
+  <text x="120" y="842" font-size="26" fill="#55584a">Optimize against a learned reward model</text>
+  <text x="120" y="880" font-size="24" fill="#75786a">~33k ranked prompts · &lt;2% of pretraining compute</text>
+  <text x="1080" y="798" text-anchor="end" font-size="30" font-weight="bold" fill="#33362a">Assistant</text>
+  <text x="1080" y="840" text-anchor="end" font-size="24" fill="#75786a">helpful, honest,</text>
+  <text x="1080" y="872" text-anchor="end" font-size="24" fill="#75786a">preferred by people</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics · llm-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Capability first, behavior last</text>
+</svg>

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Two Levers, One Compute Bill</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">How Qwen3-Next cuts training cost to 9.3%</text>
+
+  <!-- Left panel: sparse activation -->
+  <text x="330" y="272" text-anchor="middle" font-size="30" font-weight="bold" fill="#5b7c46">Lever 1 · Sparse activation</text>
+  <rect x="110" y="306" width="440" height="440" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <!-- 8x8 grid of experts, cell 44, gap 8, start 122,318 -->
+  <g fill="#e7edd9" stroke="#d8d4c4" stroke-width="1.5">
+    <rect x="122" y="318" width="44" height="44" rx="6"/><rect x="174" y="318" width="44" height="44" rx="6"/><rect x="226" y="318" width="44" height="44" rx="6"/><rect x="278" y="318" width="44" height="44" rx="6"/><rect x="330" y="318" width="44" height="44" rx="6"/><rect x="382" y="318" width="44" height="44" rx="6"/><rect x="434" y="318" width="44" height="44" rx="6"/><rect x="486" y="318" width="44" height="44" rx="6"/>
+    <rect x="122" y="370" width="44" height="44" rx="6"/><rect x="174" y="370" width="44" height="44" rx="6"/><rect x="226" y="370" width="44" height="44" rx="6"/><rect x="278" y="370" width="44" height="44" rx="6"/><rect x="330" y="370" width="44" height="44" rx="6"/><rect x="434" y="370" width="44" height="44" rx="6"/><rect x="486" y="370" width="44" height="44" rx="6"/>
+    <rect x="122" y="422" width="44" height="44" rx="6"/><rect x="174" y="422" width="44" height="44" rx="6"/><rect x="226" y="422" width="44" height="44" rx="6"/><rect x="278" y="422" width="44" height="44" rx="6"/><rect x="330" y="422" width="44" height="44" rx="6"/><rect x="382" y="422" width="44" height="44" rx="6"/><rect x="434" y="422" width="44" height="44" rx="6"/><rect x="486" y="422" width="44" height="44" rx="6"/>
+    <rect x="122" y="474" width="44" height="44" rx="6"/><rect x="226" y="474" width="44" height="44" rx="6"/><rect x="278" y="474" width="44" height="44" rx="6"/><rect x="330" y="474" width="44" height="44" rx="6"/><rect x="382" y="474" width="44" height="44" rx="6"/><rect x="434" y="474" width="44" height="44" rx="6"/><rect x="486" y="474" width="44" height="44" rx="6"/>
+    <rect x="122" y="526" width="44" height="44" rx="6"/><rect x="174" y="526" width="44" height="44" rx="6"/><rect x="226" y="526" width="44" height="44" rx="6"/><rect x="278" y="526" width="44" height="44" rx="6"/><rect x="330" y="526" width="44" height="44" rx="6"/><rect x="382" y="526" width="44" height="44" rx="6"/><rect x="434" y="526" width="44" height="44" rx="6"/><rect x="486" y="526" width="44" height="44" rx="6"/>
+    <rect x="122" y="578" width="44" height="44" rx="6"/><rect x="174" y="578" width="44" height="44" rx="6"/><rect x="226" y="578" width="44" height="44" rx="6"/><rect x="278" y="578" width="44" height="44" rx="6"/><rect x="330" y="578" width="44" height="44" rx="6"/><rect x="382" y="578" width="44" height="44" rx="6"/><rect x="486" y="578" width="44" height="44" rx="6"/>
+    <rect x="122" y="630" width="44" height="44" rx="6"/><rect x="174" y="630" width="44" height="44" rx="6"/><rect x="226" y="630" width="44" height="44" rx="6"/><rect x="278" y="630" width="44" height="44" rx="6"/><rect x="330" y="630" width="44" height="44" rx="6"/><rect x="382" y="630" width="44" height="44" rx="6"/><rect x="434" y="630" width="44" height="44" rx="6"/><rect x="486" y="630" width="44" height="44" rx="6"/>
+    <rect x="122" y="682" width="44" height="44" rx="6"/><rect x="174" y="682" width="44" height="44" rx="6"/><rect x="226" y="682" width="44" height="44" rx="6"/><rect x="278" y="682" width="44" height="44" rx="6"/><rect x="330" y="682" width="44" height="44" rx="6"/><rect x="382" y="682" width="44" height="44" rx="6"/><rect x="434" y="682" width="44" height="44" rx="6"/><rect x="486" y="682" width="44" height="44" rx="6"/>
+  </g>
+  <!-- active experts -->
+  <g fill="#5b7c46">
+    <rect x="382" y="370" width="44" height="44" rx="6"/>
+    <rect x="174" y="474" width="44" height="44" rx="6"/>
+    <rect x="434" y="578" width="44" height="44" rx="6"/>
+  </g>
+  <text x="330" y="790" text-anchor="middle" font-size="26" fill="#33362a">80B total · ~3B active per token</text>
+  <text x="330" y="828" text-anchor="middle" font-size="24" fill="#75786a">FLOPs are paid only for lit experts</text>
+
+  <!-- Right panel: hybrid attention -->
+  <text x="870" y="272" text-anchor="middle" font-size="30" font-weight="bold" fill="#b06a4e">Lever 2 · Hybrid attention</text>
+  <g>
+    <rect x="690" y="306" width="360" height="88" rx="10" fill="#e7edd9" stroke="#a8bf92" stroke-width="3"/>
+    <text x="870" y="360" text-anchor="middle" font-size="26" fill="#33362a">Gated DeltaNet · linear</text>
+    <rect x="690" y="410" width="360" height="88" rx="10" fill="#e7edd9" stroke="#a8bf92" stroke-width="3"/>
+    <text x="870" y="464" text-anchor="middle" font-size="26" fill="#33362a">Gated DeltaNet · linear</text>
+    <rect x="690" y="514" width="360" height="88" rx="10" fill="#e7edd9" stroke="#a8bf92" stroke-width="3"/>
+    <text x="870" y="568" text-anchor="middle" font-size="26" fill="#33362a">Gated DeltaNet · linear</text>
+    <rect x="690" y="618" width="360" height="88" rx="10" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+    <text x="870" y="672" text-anchor="middle" font-size="26" fill="#33362a">Gated attention · full</text>
+  </g>
+  <text x="870" y="748" text-anchor="middle" font-size="26" fill="#75786a">block repeated ×12 = 48 layers</text>
+  <text x="870" y="790" text-anchor="middle" font-size="24" fill="#33362a">3 of 4 layers: constant cost per token</text>
+  <text x="870" y="828" text-anchor="middle" font-size="24" fill="#75786a">KV cache lives in only 1 of 4 layers</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · cd-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">architecture over scale</text>
+</svg>

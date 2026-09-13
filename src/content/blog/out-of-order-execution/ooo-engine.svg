@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#75786a"/>
+    </marker>
+    <marker id="ahs" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#5b7c46"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Inside an Out-of-Order Core</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">In order at the edges, dataflow order in the middle</text>
+
+  <!-- Band 1: front end -->
+  <text x="90" y="262" font-size="26" font-weight="bold" fill="#75786a">IN ORDER</text>
+  <rect x="120" y="280" width="280" height="90" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="260" y="335" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">Fetch</text>
+  <rect x="460" y="280" width="280" height="90" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="600" y="335" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">Decode</text>
+  <rect x="800" y="280" width="280" height="90" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="940" y="335" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">Rename</text>
+  <line x1="402" y1="325" x2="450" y2="325" stroke="#75786a" stroke-width="3" marker-end="url(#ah)"/>
+  <line x1="742" y1="325" x2="790" y2="325" stroke="#75786a" stroke-width="3" marker-end="url(#ah)"/>
+
+  <!-- elbow from Rename down to issue queue -->
+  <path d="M 940 372 L 940 425 L 290 425 L 290 478" fill="none" stroke="#75786a" stroke-width="3" marker-end="url(#ah)"/>
+
+  <!-- Band 2: out-of-order middle -->
+  <text x="1110" y="470" text-anchor="end" font-size="26" font-weight="bold" fill="#5b7c46">ANY ORDER</text>
+  <rect x="120" y="490" width="340" height="250" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+  <text x="290" y="535" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">Issue queue</text>
+  <rect x="150" y="558" width="280" height="26" rx="5" fill="#fdfbf4" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="150" y="592" width="280" height="26" rx="5" fill="#fdfbf4" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="150" y="626" width="280" height="26" rx="5" fill="#fdfbf4" stroke="#a8bf92" stroke-width="2"/>
+  <text x="290" y="686" text-anchor="middle" font-size="22" fill="#55584a">instructions wait here</text>
+  <text x="290" y="714" text-anchor="middle" font-size="22" fill="#55584a">until operands arrive</text>
+
+  <rect x="780" y="490" width="300" height="70" rx="10" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="930" y="534" text-anchor="middle" font-size="28" font-weight="bold" fill="#8a5138">ALU</text>
+  <rect x="780" y="580" width="300" height="70" rx="10" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="930" y="624" text-anchor="middle" font-size="28" font-weight="bold" fill="#8a5138">MUL</text>
+  <rect x="780" y="670" width="300" height="70" rx="10" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="930" y="714" text-anchor="middle" font-size="28" font-weight="bold" fill="#8a5138">LOAD</text>
+
+  <line x1="465" y1="525" x2="770" y2="525" stroke="#75786a" stroke-width="3" marker-end="url(#ah)"/>
+  <line x1="465" y1="615" x2="770" y2="615" stroke="#75786a" stroke-width="3" marker-end="url(#ah)"/>
+  <line x1="465" y1="705" x2="770" y2="705" stroke="#75786a" stroke-width="3" marker-end="url(#ah)"/>
+
+  <!-- broadcast back -->
+  <path d="M 890 748 C 730 795, 460 795, 300 750" fill="none" stroke="#5b7c46" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#ahs)"/>
+  <text x="600" y="815" text-anchor="middle" font-size="22" fill="#5b7c46">results wake waiting instructions</text>
+
+  <!-- results down to ROB -->
+  <path d="M 1040 745 L 1040 850" fill="none" stroke="#75786a" stroke-width="3" marker-end="url(#ah)"/>
+  <text x="1025" y="805" text-anchor="end" font-size="20" fill="#75786a">finished results</text>
+
+  <!-- Band 3: retire -->
+  <text x="90" y="845" font-size="26" font-weight="bold" fill="#75786a">IN ORDER</text>
+  <rect x="120" y="860" width="620" height="90" rx="10" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="430" y="898" text-anchor="middle" font-size="28" font-weight="bold" fill="#7a5a20">Reorder buffer (ROB)</text>
+  <text x="430" y="930" text-anchor="middle" font-size="20" fill="#75786a">results hold until all older ones finish</text>
+  <line x1="742" y1="905" x2="820" y2="905" stroke="#75786a" stroke-width="3" marker-end="url(#ah)"/>
+  <rect x="830" y="860" width="250" height="90" rx="10" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+  <text x="955" y="898" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">Retire</text>
+  <text x="955" y="930" text-anchor="middle" font-size="20" fill="#75786a">program order</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · arch-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">the order is an illusion</text>
+</svg>

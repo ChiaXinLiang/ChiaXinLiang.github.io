@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Volume Is the Only Exit</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">$103M NRE + $50 marginal cost, per-unit (bars: log scale)</text>
+
+<text x="90" y="250" font-size="26" fill="#75786a">Units shipped</text>
+<text x="450" y="250" font-size="26" fill="#75786a">Cost per unit</text>
+
+<!-- bars start x=300, width = (log10(cost)-1)*190 -->
+<text x="280" y="342" text-anchor="end" font-size="27" fill="#55584a">10,000</text>
+<rect x="300" y="300" width="573" height="64" fill="#b06a4e"/>
+<text x="889" y="342" font-size="27" font-weight="bold" fill="#33362a">$10,350</text>
+
+<text x="280" y="452" text-anchor="end" font-size="27" fill="#55584a">100,000</text>
+<rect x="300" y="410" width="386" height="64" fill="#b06a4e"/>
+<text x="702" y="452" font-size="27" font-weight="bold" fill="#33362a">$1,080</text>
+
+<text x="280" y="562" text-anchor="end" font-size="27" fill="#55584a">1 million</text>
+<rect x="300" y="520" width="225" height="64" fill="#b06a4e"/>
+<text x="541" y="562" font-size="27" font-weight="bold" fill="#33362a">$153</text>
+
+<text x="280" y="672" text-anchor="end" font-size="27" fill="#55584a">10 million</text>
+<rect x="300" y="630" width="148" height="64" fill="#5b7c46"/>
+<text x="464" y="672" font-size="27" font-weight="bold" fill="#33362a">$60</text>
+
+<text x="280" y="782" text-anchor="end" font-size="27" fill="#55584a">50 million</text>
+<rect x="300" y="740" width="136" height="64" fill="#5b7c46"/>
+<text x="452" y="782" font-size="27" font-weight="bold" fill="#33362a">$52</text>
+
+<line x1="300" y1="290" x2="300" y2="814" stroke="#d8d4c4" stroke-width="3"/>
+
+<rect x="200" y="880" width="34" height="34" fill="#b06a4e"/>
+<text x="250" y="906" font-size="26" fill="#55584a">NRE dominates</text>
+<rect x="640" y="880" width="34" height="34" fill="#5b7c46"/>
+<text x="690" y="906" font-size="26" fill="#55584a">silicon dominates</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · asic-3</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">divide by volume</text>
+</svg>

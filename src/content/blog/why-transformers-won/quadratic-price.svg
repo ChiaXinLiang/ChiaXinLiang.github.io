@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The quadratic bill</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Every token attends to every token: n tokens, n&#178; pairs</text>
+
+  <!-- left grid: 6x6 -->
+  <text x="300" y="255" text-anchor="middle" font-size="28" fill="#55584a">6 tokens</text>
+  <rect x="180" y="280" width="240" height="240" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <g stroke="#d8d4c4" stroke-width="2">
+    <line x1="220" y1="280" x2="220" y2="520"/>
+    <line x1="260" y1="280" x2="260" y2="520"/>
+    <line x1="300" y1="280" x2="300" y2="520"/>
+    <line x1="340" y1="280" x2="340" y2="520"/>
+    <line x1="380" y1="280" x2="380" y2="520"/>
+    <line x1="180" y1="320" x2="420" y2="320"/>
+    <line x1="180" y1="360" x2="420" y2="360"/>
+    <line x1="180" y1="400" x2="420" y2="400"/>
+    <line x1="180" y1="440" x2="420" y2="440"/>
+    <line x1="180" y1="480" x2="420" y2="480"/>
+  </g>
+  <text x="300" y="570" text-anchor="middle" font-size="30" font-weight="bold" fill="#7a5a20">36 pairs</text>
+
+  <!-- legend for sub-region -->
+  <rect x="185" y="640" width="24" height="24" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+  <text x="222" y="660" font-size="24" fill="#75786a">the 36 pairs, shown inside</text>
+
+  <!-- arrow between grids -->
+  <text x="520" y="382" text-anchor="middle" font-size="26" fill="#55584a">2&#215; tokens</text>
+  <line x1="440" y1="405" x2="592" y2="405" stroke="#75786a" stroke-width="4"/>
+  <polygon points="592,397 606,405 592,413" fill="#75786a"/>
+  <text x="520" y="452" text-anchor="middle" font-size="30" font-weight="bold" fill="#b04a3a">4&#215; pairs</text>
+
+  <!-- right grid: 12x12 with 6x6 subregion -->
+  <text x="860" y="255" text-anchor="middle" font-size="28" fill="#55584a">12 tokens</text>
+  <rect x="620" y="280" width="480" height="480" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <rect x="620" y="280" width="240" height="240" fill="#e7edd9"/>
+  <g stroke="#d8d4c4" stroke-width="2">
+    <line x1="660" y1="280" x2="660" y2="760"/>
+    <line x1="700" y1="280" x2="700" y2="760"/>
+    <line x1="740" y1="280" x2="740" y2="760"/>
+    <line x1="780" y1="280" x2="780" y2="760"/>
+    <line x1="820" y1="280" x2="820" y2="760"/>
+    <line x1="860" y1="280" x2="860" y2="760"/>
+    <line x1="900" y1="280" x2="900" y2="760"/>
+    <line x1="940" y1="280" x2="940" y2="760"/>
+    <line x1="980" y1="280" x2="980" y2="760"/>
+    <line x1="1020" y1="280" x2="1020" y2="760"/>
+    <line x1="1060" y1="280" x2="1060" y2="760"/>
+    <line x1="620" y1="320" x2="1100" y2="320"/>
+    <line x1="620" y1="360" x2="1100" y2="360"/>
+    <line x1="620" y1="400" x2="1100" y2="400"/>
+    <line x1="620" y1="440" x2="1100" y2="440"/>
+    <line x1="620" y1="480" x2="1100" y2="480"/>
+    <line x1="620" y1="520" x2="1100" y2="520"/>
+    <line x1="620" y1="560" x2="1100" y2="560"/>
+    <line x1="620" y1="600" x2="1100" y2="600"/>
+    <line x1="620" y1="640" x2="1100" y2="640"/>
+    <line x1="620" y1="680" x2="1100" y2="680"/>
+    <line x1="620" y1="720" x2="1100" y2="720"/>
+  </g>
+  <text x="860" y="805" text-anchor="middle" font-size="30" font-weight="bold" fill="#7a5a20">144 pairs</text>
+
+  <!-- bottom takeaway -->
+  <text x="600" y="875" text-anchor="middle" font-size="28" font-weight="bold" fill="#b04a3a">4k &#8594; 128k context: 32&#215; the tokens,</text>
+  <text x="600" y="913" text-anchor="middle" font-size="28" font-weight="bold" fill="#b04a3a">about 1,024&#215; the attention pairs</text>
+  <text x="600" y="948" text-anchor="middle" font-size="24" fill="#55584a">feed-forward grows only linearly; attention takes over the bill at long context</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics &#183; tf-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Nothing is free</text>
+</svg>

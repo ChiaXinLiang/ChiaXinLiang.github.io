@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Why Matmul Loves the Array</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Memory traffic for a 256&#215;256 matrix multiply</text>
+
+<!-- bar 1 -->
+<text x="140" y="296" font-size="27" fill="#55584a">Scalar loop: two fetches per multiply-add</text>
+<rect x="140" y="316" width="880" height="58" rx="6" fill="#b06a4e"/>
+<text x="1000" y="354" text-anchor="end" font-size="28" font-weight="bold" fill="#f0ddd0">33,554,432 fetches</text>
+
+<!-- bar 2 -->
+<text x="140" y="466" font-size="27" fill="#55584a">Systolic array: each value loaded once</text>
+<rect x="140" y="486" width="18" height="58" rx="4" fill="#5b7c46"/>
+<text x="176" y="524" font-size="28" font-weight="bold" fill="#33362a">131,072 loads (0.4%)</text>
+
+<!-- reuse stat -->
+<text x="600" y="632" text-anchor="middle" font-size="36" font-weight="bold" fill="#5b7c46">every value is reused 256 times in the grid</text>
+
+<!-- TPU panel -->
+<rect x="140" y="686" width="920" height="228" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+<text x="180" y="736" font-size="28" font-weight="bold" fill="#33362a">TPU v1 (2015), built on this idea</text>
+<text x="180" y="782" font-size="26" fill="#55584a">65,536 MACs &#215; 700 MHz &#215; 2 ops = 92 TOPS peak</text>
+<text x="180" y="822" font-size="26" fill="#55584a">fetching every operand fresh would need ~92 TB/s</text>
+<text x="180" y="862" font-size="26" fill="#55584a">its DDR3 delivered 34 GB/s; reuse bridged the rest</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Data: Jouppi et al. (2017), ISCA</text>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · par-3</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">reuse beats bandwidth</text>
+</svg>

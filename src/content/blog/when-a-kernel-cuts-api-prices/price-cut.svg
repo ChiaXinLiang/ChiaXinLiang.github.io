@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The Same-Day Price Cut</text>
+    <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">DeepSeek API, USD per million tokens &#183; Sep 29, 2025</text>
+
+    <!-- legend -->
+    <rect x="330" y="248" width="34" height="34" fill="#f4f1e6" stroke="#a3a08f" stroke-width="2.5"/>
+    <text x="378" y="274" font-size="26" fill="#55584a">V3.1-Terminus</text>
+    <rect x="620" y="248" width="34" height="34" fill="#5b7c46"/>
+    <text x="668" y="274" font-size="26" fill="#55584a">V3.2-Exp (DSA)</text>
+
+    <!-- baseline -->
+    <line x1="140" y1="860" x2="1060" y2="860" stroke="#d8d4c4" stroke-width="3"/>
+
+    <!-- Group 1: input cache miss -->
+    <!-- before 0.56 -> h=167 ; after 0.28 -> h=83 -->
+    <rect x="235" y="693" width="130" height="167" fill="#f4f1e6" stroke="#a3a08f" stroke-width="2.5"/>
+    <text x="300" y="663" text-anchor="middle" font-size="28" font-weight="bold" fill="#55584a">$0.56</text>
+    <rect x="395" y="777" width="130" height="83" fill="#5b7c46"/>
+    <text x="460" y="747" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">$0.28</text>
+    <text x="460" y="703" text-anchor="middle" font-size="28" font-weight="bold" fill="#b04a3a">&#8722;50%</text>
+    <text x="380" y="908" text-anchor="middle" font-size="28" fill="#55584a">Input (cache miss)</text>
+
+    <!-- Group 2: output -->
+    <!-- before 1.68 -> h=500 ; after 0.42 -> h=125 -->
+    <rect x="655" y="360" width="130" height="500" fill="#f4f1e6" stroke="#a3a08f" stroke-width="2.5"/>
+    <text x="720" y="330" text-anchor="middle" font-size="28" font-weight="bold" fill="#55584a">$1.68</text>
+    <rect x="815" y="735" width="130" height="125" fill="#5b7c46"/>
+    <text x="880" y="705" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">$0.42</text>
+    <text x="880" y="661" text-anchor="middle" font-size="28" font-weight="bold" fill="#b04a3a">&#8722;75%</text>
+    <text x="800" y="908" text-anchor="middle" font-size="28" fill="#55584a">Output</text>
+
+    <text x="600" y="962" text-anchor="middle" font-size="25" fill="#75786a">Cached input fell too: $0.07 &#8594; $0.028 per million (&#8722;60%)</text>
+
+    <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+    <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Data: DeepSeek API announcement, Sep 2025</text>
+    <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; cd-2</text>
+    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">efficiency, passed through</text>
+  </g>
+</svg>

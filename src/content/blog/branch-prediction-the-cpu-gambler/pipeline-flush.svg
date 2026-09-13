@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The Price of a Wrong Guess</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">One flush throws away 15&#8211;20 cycles of work</text>
+
+  <!-- Panel A: correct prediction -->
+  <text x="90" y="270" font-size="30" font-weight="bold" fill="#5b7c46">Predicted correctly (~95% of branches)</text>
+  <!-- 12 instruction boxes -->
+  <g stroke="#5b7c46" stroke-width="2.5" fill="#e7edd9">
+    <rect x="110" y="300" width="70" height="90" rx="8"/>
+    <rect x="188" y="300" width="70" height="90" rx="8"/>
+    <rect x="266" y="300" width="70" height="90" rx="8"/>
+    <rect x="344" y="300" width="70" height="90" rx="8"/>
+    <rect x="422" y="300" width="70" height="90" rx="8" fill="#a8bf92"/>
+    <rect x="500" y="300" width="70" height="90" rx="8"/>
+    <rect x="578" y="300" width="70" height="90" rx="8"/>
+    <rect x="656" y="300" width="70" height="90" rx="8"/>
+    <rect x="734" y="300" width="70" height="90" rx="8"/>
+    <rect x="812" y="300" width="70" height="90" rx="8"/>
+    <rect x="890" y="300" width="70" height="90" rx="8"/>
+    <rect x="968" y="300" width="70" height="90" rx="8"/>
+  </g>
+  <g font-size="26" fill="#55584a" text-anchor="middle">
+    <text x="145" y="355">i1</text>
+    <text x="223" y="355">i2</text>
+    <text x="301" y="355">i3</text>
+    <text x="379" y="355">i4</text>
+    <text x="457" y="355" font-weight="bold" fill="#33362a">br</text>
+    <text x="535" y="355">i6</text>
+    <text x="613" y="355">i7</text>
+    <text x="691" y="355">i8</text>
+    <text x="769" y="355">i9</text>
+    <text x="847" y="355">i10</text>
+    <text x="925" y="355">i11</text>
+    <text x="1003" y="355">i12</text>
+  </g>
+  <text x="110" y="445" font-size="26" fill="#75786a">Pipeline stays full. The correct guess was free.</text>
+
+  <!-- Panel B: misprediction -->
+  <text x="90" y="560" font-size="30" font-weight="bold" fill="#b04a3a">Mispredicted (~5% of branches)</text>
+  <g stroke-width="2.5">
+    <rect x="110" y="590" width="70" height="90" rx="8" fill="#e7edd9" stroke="#5b7c46"/>
+    <rect x="188" y="590" width="70" height="90" rx="8" fill="#e7edd9" stroke="#5b7c46"/>
+    <rect x="266" y="590" width="70" height="90" rx="8" fill="#e7edd9" stroke="#5b7c46"/>
+    <rect x="344" y="590" width="70" height="90" rx="8" fill="#e7edd9" stroke="#5b7c46"/>
+    <rect x="422" y="590" width="70" height="90" rx="8" fill="#f0ddd0" stroke="#8a5138"/>
+    <rect x="500" y="590" width="70" height="90" rx="8" fill="#e5b3a6" stroke="#b04a3a"/>
+    <rect x="578" y="590" width="70" height="90" rx="8" fill="#e5b3a6" stroke="#b04a3a"/>
+    <rect x="656" y="590" width="70" height="90" rx="8" fill="#e5b3a6" stroke="#b04a3a"/>
+    <rect x="734" y="590" width="70" height="90" rx="8" fill="#e5b3a6" stroke="#b04a3a"/>
+    <rect x="812" y="590" width="70" height="90" rx="8" fill="#e5b3a6" stroke="#b04a3a"/>
+    <rect x="890" y="590" width="70" height="90" rx="8" fill="#e5b3a6" stroke="#b04a3a"/>
+    <rect x="968" y="590" width="70" height="90" rx="8" fill="#e5b3a6" stroke="#b04a3a"/>
+  </g>
+  <!-- X marks on wrong-path boxes -->
+  <g stroke="#b04a3a" stroke-width="4" stroke-linecap="round">
+    <path d="M515 640 L555 665"/><path d="M555 640 L515 665"/>
+    <path d="M593 640 L633 665"/><path d="M633 640 L593 665"/>
+    <path d="M671 640 L711 665"/><path d="M711 640 L671 665"/>
+    <path d="M749 640 L789 665"/><path d="M789 640 L749 665"/>
+    <path d="M827 640 L867 665"/><path d="M867 640 L827 665"/>
+    <path d="M905 640 L945 665"/><path d="M945 640 L905 665"/>
+    <path d="M983 640 L1023 665"/><path d="M1023 640 L983 665"/>
+  </g>
+  <g font-size="26" fill="#55584a" text-anchor="middle">
+    <text x="145" y="644">i1</text>
+    <text x="223" y="644">i2</text>
+    <text x="301" y="644">i3</text>
+    <text x="379" y="644">i4</text>
+    <text x="457" y="644" font-weight="bold" fill="#8a5138">br</text>
+  </g>
+  <!-- bracket under wrong-path -->
+  <path d="M500 700 L500 720 L1038 720 L1038 700" fill="none" stroke="#b04a3a" stroke-width="2.5"/>
+  <text x="769" y="758" text-anchor="middle" font-size="26" fill="#b04a3a">wrong path: fetched, decoded, even executed</text>
+  <text x="769" y="792" text-anchor="middle" font-size="26" fill="#b04a3a">&#8212; all discarded at resolve</text>
+
+  <!-- bubble row -->
+  <g stroke="#d8d4c4" stroke-width="2.5" stroke-dasharray="8 7" fill="#f4f1e6">
+    <rect x="110" y="830" width="70" height="80" rx="8"/>
+    <rect x="188" y="830" width="70" height="80" rx="8"/>
+    <rect x="266" y="830" width="70" height="80" rx="8"/>
+    <rect x="344" y="830" width="70" height="80" rx="8"/>
+  </g>
+  <text x="440" y="880" font-size="26" fill="#75786a">refill bubble: &#8776;15&#8211;20 cycles before useful work resumes</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; arch-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">guess, then verify</text>
+</svg>

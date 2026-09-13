@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Instruction, 16 Additions</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">A 512-bit register holds 16 single-precision floats</text>
+
+  <!-- scalar section -->
+  <text x="90" y="270" font-size="28" font-weight="bold" fill="#55584a">scalar:  addss xmm2, xmm0</text>
+  <rect x="350" y="300" width="110" height="70" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="405" y="345" text-anchor="middle" font-size="28" fill="#33362a">3.0</text>
+  <text x="502" y="347" text-anchor="middle" font-size="38" font-weight="bold" fill="#55584a">+</text>
+  <rect x="545" y="300" width="110" height="70" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="600" y="345" text-anchor="middle" font-size="28" fill="#33362a">7.0</text>
+  <text x="700" y="347" text-anchor="middle" font-size="38" font-weight="bold" fill="#55584a">=</text>
+  <rect x="742" y="300" width="130" height="70" rx="10" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="807" y="345" text-anchor="middle" font-size="28" fill="#8a5138">10.0</text>
+  <text x="920" y="345" font-size="25" fill="#75786a">one result</text>
+
+  <!-- vector section -->
+  <text x="90" y="480" font-size="28" font-weight="bold" fill="#55584a">vector:  vaddps zmm2, zmm0, zmm1</text>
+
+  <!-- zmm0 row -->
+  <text x="188" y="558" text-anchor="end" font-size="24" fill="#75786a">zmm0</text>
+  <g fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2">
+    <rect x="204" y="520" width="56" height="60"/><rect x="260" y="520" width="56" height="60"/><rect x="316" y="520" width="56" height="60"/><rect x="372" y="520" width="56" height="60"/><rect x="428" y="520" width="56" height="60"/><rect x="484" y="520" width="56" height="60"/><rect x="540" y="520" width="56" height="60"/><rect x="596" y="520" width="56" height="60"/><rect x="652" y="520" width="56" height="60"/><rect x="708" y="520" width="56" height="60"/><rect x="764" y="520" width="56" height="60"/><rect x="820" y="520" width="56" height="60"/><rect x="876" y="520" width="56" height="60"/><rect x="932" y="520" width="56" height="60"/><rect x="988" y="520" width="56" height="60"/><rect x="1044" y="520" width="56" height="60"/>
+  </g>
+  <g font-size="24" fill="#33362a" text-anchor="middle">
+    <text x="232" y="558">0</text><text x="288" y="558">1</text><text x="344" y="558">2</text><text x="400" y="558">3</text><text x="456" y="558">4</text><text x="512" y="558">5</text><text x="568" y="558">6</text><text x="624" y="558">7</text><text x="680" y="558">8</text><text x="736" y="558">9</text><text x="792" y="558">10</text><text x="848" y="558">11</text><text x="904" y="558">12</text><text x="960" y="558">13</text><text x="1016" y="558">14</text><text x="1072" y="558">15</text>
+  </g>
+
+  <text x="652" y="628" text-anchor="middle" font-size="40" font-weight="bold" fill="#55584a">+</text>
+
+  <!-- zmm1 row -->
+  <text x="188" y="698" text-anchor="end" font-size="24" fill="#75786a">zmm1</text>
+  <g fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2">
+    <rect x="204" y="660" width="56" height="60"/><rect x="260" y="660" width="56" height="60"/><rect x="316" y="660" width="56" height="60"/><rect x="372" y="660" width="56" height="60"/><rect x="428" y="660" width="56" height="60"/><rect x="484" y="660" width="56" height="60"/><rect x="540" y="660" width="56" height="60"/><rect x="596" y="660" width="56" height="60"/><rect x="652" y="660" width="56" height="60"/><rect x="708" y="660" width="56" height="60"/><rect x="764" y="660" width="56" height="60"/><rect x="820" y="660" width="56" height="60"/><rect x="876" y="660" width="56" height="60"/><rect x="932" y="660" width="56" height="60"/><rect x="988" y="660" width="56" height="60"/><rect x="1044" y="660" width="56" height="60"/>
+  </g>
+  <g font-size="24" fill="#33362a" text-anchor="middle">
+    <text x="232" y="698">10</text><text x="288" y="698">10</text><text x="344" y="698">10</text><text x="400" y="698">10</text><text x="456" y="698">10</text><text x="512" y="698">10</text><text x="568" y="698">10</text><text x="624" y="698">10</text><text x="680" y="698">10</text><text x="736" y="698">10</text><text x="792" y="698">10</text><text x="848" y="698">10</text><text x="904" y="698">10</text><text x="960" y="698">10</text><text x="1016" y="698">10</text><text x="1072" y="698">10</text>
+  </g>
+
+  <text x="652" y="768" text-anchor="middle" font-size="40" font-weight="bold" fill="#55584a">=</text>
+
+  <!-- zmm2 result row -->
+  <text x="188" y="838" text-anchor="end" font-size="24" fill="#5b7c46">zmm2</text>
+  <g fill="#e7edd9" stroke="#5b7c46" stroke-width="2">
+    <rect x="204" y="800" width="56" height="60"/><rect x="260" y="800" width="56" height="60"/><rect x="316" y="800" width="56" height="60"/><rect x="372" y="800" width="56" height="60"/><rect x="428" y="800" width="56" height="60"/><rect x="484" y="800" width="56" height="60"/><rect x="540" y="800" width="56" height="60"/><rect x="596" y="800" width="56" height="60"/><rect x="652" y="800" width="56" height="60"/><rect x="708" y="800" width="56" height="60"/><rect x="764" y="800" width="56" height="60"/><rect x="820" y="800" width="56" height="60"/><rect x="876" y="800" width="56" height="60"/><rect x="932" y="800" width="56" height="60"/><rect x="988" y="800" width="56" height="60"/><rect x="1044" y="800" width="56" height="60"/>
+  </g>
+  <g font-size="24" fill="#33362a" text-anchor="middle">
+    <text x="232" y="838">10</text><text x="288" y="838">11</text><text x="344" y="838">12</text><text x="400" y="838">13</text><text x="456" y="838">14</text><text x="512" y="838">15</text><text x="568" y="838">16</text><text x="624" y="838">17</text><text x="680" y="838">18</text><text x="736" y="838">19</text><text x="792" y="838">20</text><text x="848" y="838">21</text><text x="904" y="838">22</text><text x="960" y="838">23</text><text x="1016" y="838">24</text><text x="1072" y="838">25</text>
+  </g>
+
+  <text x="600" y="925" text-anchor="middle" font-size="26" fill="#55584a">16 sums · one fetch, one decode, one issue</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · par-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">pay control once</text>
+</svg>

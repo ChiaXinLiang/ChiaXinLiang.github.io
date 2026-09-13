@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <defs>
+    <marker id="ags" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#5b7c46"/>
+    </marker>
+    <marker id="agr" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#b04a3a"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Register Renaming</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">False dependencies are just naming accidents</text>
+
+  <line x1="600" y1="240" x2="600" y2="940" stroke="#e8e4d7" stroke-width="3"/>
+
+  <text x="330" y="262" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">Before</text>
+  <text x="870" y="262" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">After renaming</text>
+
+  <!-- Before code -->
+  <text x="110" y="340" font-size="28" fill="#33362a">I1: DIV R1 ← R2 ÷ R3</text>
+  <text x="110" y="440" font-size="28" fill="#33362a">I2: ADD R4 ← R1 + R5</text>
+  <text x="110" y="540" font-size="28" fill="#33362a">I3: SUB R5 ← R6 − R7</text>
+  <text x="110" y="640" font-size="28" fill="#33362a">I4: MUL R5 ← R8 × R9</text>
+
+  <path d="M 450 340 C 505 365, 505 405, 455 432" fill="none" stroke="#5b7c46" stroke-width="3" marker-end="url(#ags)"/>
+  <text x="512" y="393" font-size="24" font-weight="bold" fill="#5b7c46">RAW</text>
+  <path d="M 450 440 C 505 465, 505 505, 455 532" fill="none" stroke="#b04a3a" stroke-width="3" marker-end="url(#agr)"/>
+  <text x="512" y="493" font-size="24" font-weight="bold" fill="#b04a3a">WAR</text>
+  <path d="M 450 540 C 505 565, 505 605, 455 632" fill="none" stroke="#b04a3a" stroke-width="3" marker-end="url(#agr)"/>
+  <text x="512" y="593" font-size="24" font-weight="bold" fill="#b04a3a">WAW</text>
+
+  <!-- After code -->
+  <text x="640" y="340" font-size="28" fill="#33362a">I1: DIV P7 ← R2 ÷ R3</text>
+  <text x="640" y="440" font-size="28" fill="#33362a">I2: ADD P8 ← P7 + P2</text>
+  <text x="640" y="540" font-size="28" fill="#33362a">I3: SUB P9 ← R6 − R7</text>
+  <text x="640" y="640" font-size="28" fill="#33362a">I4: MUL P10 ← R8 × R9</text>
+
+  <path d="M 985 340 C 1040 365, 1040 405, 990 432" fill="none" stroke="#5b7c46" stroke-width="3" marker-end="url(#ags)"/>
+  <text x="1044" y="393" font-size="24" font-weight="bold" fill="#5b7c46">RAW</text>
+
+  <!-- verdicts -->
+  <text x="330" y="745" text-anchor="middle" font-size="26" font-weight="bold" fill="#b04a3a">I3 and I4 must wait</text>
+  <text x="330" y="780" text-anchor="middle" font-size="22" fill="#75786a">the name R5 is reused</text>
+  <text x="870" y="745" text-anchor="middle" font-size="26" font-weight="bold" fill="#5b7c46">I3 and I4 run at once</text>
+  <text x="870" y="780" text-anchor="middle" font-size="22" fill="#75786a">each write gets a fresh register</text>
+
+  <!-- legend -->
+  <line x1="200" y1="868" x2="260" y2="868" stroke="#5b7c46" stroke-width="4"/>
+  <text x="275" y="877" font-size="24" fill="#55584a">true dependency (data flows)</text>
+  <line x1="680" y1="868" x2="740" y2="868" stroke="#b04a3a" stroke-width="4"/>
+  <text x="755" y="877" font-size="24" fill="#55584a">false (name reuse)</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · arch-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">rename, then run</text>
+</svg>

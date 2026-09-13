@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The decode speed limit</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">70B dense model, single stream, 7.37 TB/s memory</text>
+
+  <!-- column headers -->
+  <text x="300" y="262" font-size="24" fill="#75786a">Bytes streamed per token</text>
+  <text x="1110" y="262" text-anchor="end" font-size="24" fill="#75786a">Ceiling</text>
+
+  <!-- baseline -->
+  <line x1="300" y1="284" x2="300" y2="746" stroke="#d8d4c4" stroke-width="2"/>
+
+  <!-- Row 1: FP16 -->
+  <text x="90" y="340" font-size="32" font-weight="bold" fill="#33362a">FP16</text>
+  <text x="90" y="374" font-size="24" fill="#75786a">2 B / weight</text>
+  <rect x="300" y="300" width="560" height="70" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="580" y="345" text-anchor="middle" font-size="26" fill="#55584a">140 GB / token</text>
+  <text x="1110" y="345" text-anchor="end" font-size="32" font-weight="bold" fill="#75786a">~53 tok/s</text>
+
+  <!-- Row 2: FP8 -->
+  <text x="90" y="520" font-size="32" font-weight="bold" fill="#33362a">FP8</text>
+  <text x="90" y="554" font-size="24" fill="#75786a">1 B / weight</text>
+  <rect x="300" y="480" width="280" height="70" fill="#a8bf92"/>
+  <text x="440" y="525" text-anchor="middle" font-size="26" fill="#33362a">70 GB / token</text>
+  <text x="1110" y="525" text-anchor="end" font-size="32" font-weight="bold" fill="#33362a">~105 tok/s</text>
+
+  <!-- Row 3: 4-bit weights -->
+  <text x="90" y="700" font-size="32" font-weight="bold" fill="#33362a">W4</text>
+  <text x="90" y="734" font-size="24" fill="#75786a">0.5 B / weight</text>
+  <rect x="300" y="660" width="140" height="70" fill="#5b7c46"/>
+  <text x="458" y="705" font-size="26" fill="#55584a">35 GB / token</text>
+  <text x="1110" y="705" text-anchor="end" font-size="32" font-weight="bold" fill="#5b7c46">~210 tok/s</text>
+
+  <!-- note -->
+  <text x="600" y="850" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">Ceiling = 7.37 TB/s ÷ bytes per token</text>
+  <text x="600" y="892" text-anchor="middle" font-size="26" fill="#55584a">KV-cache reads and imperfect bandwidth push real</text>
+  <text x="600" y="926" text-anchor="middle" font-size="26" fill="#55584a">numbers lower; extra compute cannot raise them</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · chip-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">bandwidth sets the pace</text>
+</svg>

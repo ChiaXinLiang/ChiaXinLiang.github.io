@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The 190-Gigawatt Mirage</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Announced AI datacenter capacity vs what the grid connects</text>
+
+  <!-- left panel: capacity bars -->
+  <text x="90" y="256" font-size="28" font-weight="bold" fill="#55584a">Capacity (GW)</text>
+
+  <rect x="140" y="320" width="140" height="520" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="210" y="302" font-size="40" font-weight="bold" fill="#b06a4e" text-anchor="middle">190</text>
+
+  <rect x="340" y="807" width="140" height="33" fill="#5b7c46"/>
+  <text x="410" y="789" font-size="40" font-weight="bold" fill="#5b7c46" text-anchor="middle">~12</text>
+
+  <line x1="120" y1="840" x2="510" y2="840" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="210" y="882" font-size="26" fill="#55584a" text-anchor="middle">Announced</text>
+  <text x="410" y="882" font-size="26" fill="#55584a" text-anchor="middle">Operational</text>
+  <text x="210" y="918" font-size="24" fill="#a3a08f" text-anchor="middle">777 projects</text>
+
+  <!-- separator -->
+  <line x1="560" y1="240" x2="560" y2="930" stroke="#e8e4d7" stroke-width="3"/>
+
+  <!-- right panel: timelines -->
+  <text x="600" y="256" font-size="28" font-weight="bold" fill="#55584a">Time to build (years)</text>
+
+  <text x="600" y="322" font-size="26" fill="#55584a">Datacenter construction</text>
+  <rect x="600" y="336" width="98" height="44" fill="#5b7c46"/>
+  <text x="713" y="367" font-size="26" font-weight="bold" fill="#33362a">12&#8211;18 mo</text>
+
+  <text x="600" y="462" font-size="26" fill="#55584a">Grid interconnection queue</text>
+  <rect x="600" y="476" width="394" height="44" fill="#b06a4e"/>
+  <text x="1009" y="507" font-size="26" font-weight="bold" fill="#33362a">5&#8211;7 yr</text>
+
+  <text x="600" y="602" font-size="26" fill="#55584a">Transformer lead time</text>
+  <rect x="600" y="616" width="329" height="44" fill="#c9973b"/>
+  <text x="944" y="647" font-size="26" font-weight="bold" fill="#33362a">~5 yr</text>
+
+  <text x="600" y="756" font-size="24" fill="#75786a">~50 GW of on-site gas generation announced</text>
+  <text x="600" y="790" font-size="24" fill="#75786a">in 2025 alone, just to skip the queue</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Data: Bessemer Venture Partners, AI datacenter roadmap</text>
+
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; econ-1</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">power is the product</text>
+</svg>

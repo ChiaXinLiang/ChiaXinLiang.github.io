@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Where $100M Goes Before Unit One</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Hypothetical 5nm accelerator, 80 engineers, two years</text>
+
+<!-- bars: scale 14 px per $M, bars start x=450 -->
+<text x="430" y="320" text-anchor="end" font-size="27" fill="#55584a">Engineering team</text>
+<rect x="450" y="280" width="560" height="60" fill="#5b7c46"/>
+<text x="1026" y="320" font-size="27" font-weight="bold" fill="#33362a">$40M</text>
+
+<text x="430" y="420" text-anchor="end" font-size="27" fill="#55584a">IP licensing</text>
+<rect x="450" y="380" width="252" height="60" fill="#b06a4e"/>
+<text x="718" y="420" font-size="27" font-weight="bold" fill="#33362a">$18M</text>
+
+<text x="430" y="520" text-anchor="end" font-size="27" fill="#55584a">Mask set</text>
+<rect x="450" y="480" width="210" height="60" fill="#c9973b"/>
+<text x="676" y="520" font-size="27" font-weight="bold" fill="#33362a">$15M</text>
+
+<text x="430" y="620" text-anchor="end" font-size="27" fill="#55584a">EDA + compute</text>
+<rect x="450" y="580" width="168" height="60" fill="#a8bf92"/>
+<text x="634" y="620" font-size="27" font-weight="bold" fill="#33362a">$12M</text>
+
+<text x="430" y="720" text-anchor="end" font-size="27" fill="#55584a">Respin reserve</text>
+<rect x="450" y="680" width="140" height="60" fill="#b04a3a"/>
+<text x="606" y="720" font-size="27" font-weight="bold" fill="#33362a">$10M</text>
+
+<text x="430" y="820" text-anchor="end" font-size="27" fill="#55584a">Bring-up + protos</text>
+<rect x="450" y="780" width="112" height="60" fill="#a3a08f"/>
+<text x="578" y="820" font-size="27" font-weight="bold" fill="#33362a">$8M</text>
+
+<line x1="450" y1="270" x2="450" y2="850" stroke="#d8d4c4" stroke-width="3"/>
+<text x="600" y="930" text-anchor="middle" font-size="32" font-weight="bold" fill="#8a5138">Total ≈ $103M — before the first sellable chip</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · asic-3</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">fixed costs, prepaid</text>
+</svg>

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">Two Phases, Two Bottlenecks</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">why an output token costs 5&#215; an input token</text>
+
+  <!-- Left panel: PREFILL -->
+  <rect x="90" y="240" width="470" height="590" rx="16" fill="#e7edd9"/>
+  <text x="325" y="302" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="36" font-weight="bold" fill="#5b7c46">PREFILL</text>
+  <text x="325" y="340" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">reads the prompt</text>
+
+  <!-- token row: 8 squares -->
+  <rect x="146" y="372" width="36" height="36" fill="#a8bf92"/>
+  <rect x="192" y="372" width="36" height="36" fill="#a8bf92"/>
+  <rect x="238" y="372" width="36" height="36" fill="#a8bf92"/>
+  <rect x="284" y="372" width="36" height="36" fill="#a8bf92"/>
+  <rect x="330" y="372" width="36" height="36" fill="#a8bf92"/>
+  <rect x="376" y="372" width="36" height="36" fill="#a8bf92"/>
+  <rect x="422" y="372" width="36" height="36" fill="#a8bf92"/>
+  <rect x="468" y="372" width="36" height="36" fill="#a8bf92"/>
+  <text x="325" y="448" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">8,000 tokens enter together</text>
+
+  <line x1="325" y1="466" x2="325" y2="504" stroke="#75786a" stroke-width="4"/>
+  <polygon points="325,518 314,500 336,500" fill="#75786a"/>
+
+  <rect x="145" y="528" width="360" height="50" rx="8" fill="#5b7c46"/>
+  <text x="325" y="561" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#fdfbf4">weights</text>
+  <text x="325" y="614" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">read once, amortized 8,000 ways</text>
+
+  <text x="325" y="686" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#33362a">~hundreds of FLOPs per byte</text>
+  <text x="325" y="722" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">tensor cores run near peak</text>
+
+  <text x="325" y="790" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="bold" fill="#5b7c46">Input: $4 / 1M tokens</text>
+
+  <!-- Right panel: DECODE -->
+  <rect x="615" y="240" width="470" height="590" rx="16" fill="#f0ddd0"/>
+  <text x="850" y="302" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="36" font-weight="bold" fill="#8a5138">DECODE</text>
+  <text x="850" y="340" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">writes the answer</text>
+
+  <!-- one solid token + two dashed future tokens -->
+  <rect x="781" y="372" width="36" height="36" fill="#b06a4e"/>
+  <rect x="827" y="372" width="36" height="36" fill="none" stroke="#b06a4e" stroke-width="2" stroke-dasharray="6,5"/>
+  <rect x="873" y="372" width="36" height="36" fill="none" stroke="#b06a4e" stroke-width="2" stroke-dasharray="6,5"/>
+  <text x="850" y="448" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">one token per step, per sequence</text>
+
+  <line x1="850" y1="466" x2="850" y2="504" stroke="#75786a" stroke-width="4"/>
+  <polygon points="850,518 839,500 861,500" fill="#75786a"/>
+
+  <rect x="670" y="528" width="360" height="50" rx="8" fill="#b06a4e"/>
+  <text x="850" y="561" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#fdfbf4">weights</text>
+  <text x="850" y="614" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">all 70 GB re-read every step</text>
+
+  <text x="850" y="686" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#33362a">~2 FLOPs per byte</text>
+  <text x="850" y="722" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">stalls on HBM bandwidth</text>
+
+  <text x="850" y="790" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="bold" fill="#8a5138">Output: $20 / 1M tokens</text>
+
+  <text x="600" y="912" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#33362a">$4 in, $20 out: the roofline as an invoice</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; econ-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">decode waits on memory</text>
+</svg>

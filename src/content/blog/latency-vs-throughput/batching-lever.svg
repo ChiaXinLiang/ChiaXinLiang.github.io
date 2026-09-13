@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The Batching Lever</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">The same 14 GB weight read can feed one token, or eight</text>
+
+  <!-- panel divider -->
+  <line x1="600" y1="250" x2="600" y2="930" stroke="#e8e4d7" stroke-width="3"/>
+
+  <!-- arrow marker -->
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#75786a"/>
+    </marker>
+  </defs>
+
+  <!-- LEFT PANEL: batch 1 -->
+  <text x="325" y="278" text-anchor="middle" font-size="34" font-weight="bold" fill="#33362a">Batch = 1</text>
+  <rect x="145" y="312" width="360" height="118" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="325" y="364" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">Model weights</text>
+  <text x="325" y="402" text-anchor="middle" font-size="26" fill="#55584a">14 GB in GPU memory</text>
+  <line x1="325" y1="434" x2="325" y2="512" stroke="#75786a" stroke-width="3" marker-end="url(#arr)"/>
+  <rect x="145" y="522" width="360" height="96" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="325" y="562" text-anchor="middle" font-size="26" fill="#33362a">one decode step</text>
+  <text x="325" y="598" text-anchor="middle" font-size="28" font-weight="bold" fill="#8a5138">14 ms</text>
+  <line x1="325" y1="622" x2="325" y2="682" stroke="#75786a" stroke-width="3" marker-end="url(#arr)"/>
+  <rect x="301" y="692" width="48" height="48" rx="9" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="325" y="726" text-anchor="middle" font-size="28" font-weight="bold" fill="#8a5138">T</text>
+  <text x="325" y="800" text-anchor="middle" font-size="28" fill="#33362a">1 token per step</text>
+  <text x="325" y="846" text-anchor="middle" font-size="28" fill="#55584a">User: 71 tok/s</text>
+  <text x="325" y="892" text-anchor="middle" font-size="28" fill="#55584a">System: 71 tok/s</text>
+
+  <!-- RIGHT PANEL: batch 8 -->
+  <text x="875" y="278" text-anchor="middle" font-size="34" font-weight="bold" fill="#33362a">Batch = 8</text>
+  <rect x="695" y="312" width="360" height="118" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="875" y="364" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">Model weights</text>
+  <text x="875" y="402" text-anchor="middle" font-size="26" fill="#55584a">still one 14 GB read</text>
+  <line x1="875" y1="434" x2="875" y2="512" stroke="#75786a" stroke-width="3" marker-end="url(#arr)"/>
+  <rect x="695" y="522" width="360" height="96" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="875" y="562" text-anchor="middle" font-size="26" fill="#33362a">one decode step</text>
+  <text x="875" y="598" text-anchor="middle" font-size="28" font-weight="bold" fill="#8a5138">16 ms</text>
+  <line x1="875" y1="622" x2="875" y2="682" stroke="#75786a" stroke-width="3" marker-end="url(#arr)"/>
+  <g fill="#e7edd9" stroke="#5b7c46" stroke-width="3">
+    <rect x="664" y="692" width="44" height="44" rx="9"/>
+    <rect x="718" y="692" width="44" height="44" rx="9"/>
+    <rect x="772" y="692" width="44" height="44" rx="9"/>
+    <rect x="826" y="692" width="44" height="44" rx="9"/>
+    <rect x="880" y="692" width="44" height="44" rx="9"/>
+    <rect x="934" y="692" width="44" height="44" rx="9"/>
+    <rect x="988" y="692" width="44" height="44" rx="9"/>
+    <rect x="1042" y="692" width="44" height="44" rx="9"/>
+  </g>
+  <g text-anchor="middle" font-size="26" font-weight="bold" fill="#5b7c46">
+    <text x="686" y="724">T</text><text x="740" y="724">T</text><text x="794" y="724">T</text><text x="848" y="724">T</text>
+    <text x="902" y="724">T</text><text x="956" y="724">T</text><text x="1010" y="724">T</text><text x="1064" y="724">T</text>
+  </g>
+  <text x="875" y="800" text-anchor="middle" font-size="28" fill="#33362a">8 tokens per step</text>
+  <text x="875" y="846" text-anchor="middle" font-size="28" fill="#55584a">User: 62 tok/s</text>
+  <text x="875" y="892" text-anchor="middle" font-size="30" font-weight="bold" fill="#5b7c46">System: 500 tok/s</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics &#183; llm-4</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Share the weight read</text>
+</svg>

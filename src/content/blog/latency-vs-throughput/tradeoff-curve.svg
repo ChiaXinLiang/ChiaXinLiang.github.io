@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Where the Free Lunch Ends</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Throughput and per-token latency as batch size grows (schematic)</text>
+
+  <!-- regions -->
+  <rect x="160" y="262" width="480" height="618" fill="#e7edd9" fill-opacity="0.45"/>
+  <rect x="640" y="262" width="440" height="618" fill="#f0ddd0" fill-opacity="0.4"/>
+
+  <!-- crossover -->
+  <line x1="640" y1="262" x2="640" y2="880" stroke="#a3a08f" stroke-width="3" stroke-dasharray="10 10"/>
+  <text x="640" y="250" text-anchor="middle" font-size="24" fill="#a3a08f">roofline crossover</text>
+
+  <!-- axes -->
+  <line x1="160" y1="880" x2="1080" y2="880" stroke="#75786a" stroke-width="3"/>
+  <line x1="160" y1="262" x2="160" y2="880" stroke="#75786a" stroke-width="3"/>
+  <text x="170" y="928" font-size="26" fill="#75786a">1</text>
+  <text x="430" y="928" font-size="26" fill="#75786a">8</text>
+  <text x="700" y="928" font-size="26" fill="#75786a">64</text>
+  <text x="1000" y="928" font-size="26" fill="#75786a">512</text>
+  <text x="620" y="972" text-anchor="middle" font-size="28" fill="#55584a">batch size (concurrent requests)</text>
+
+  <!-- region labels -->
+  <text x="390" y="316" text-anchor="middle" font-size="30" font-weight="bold" fill="#55584a">Memory-bound</text>
+  <text x="390" y="354" text-anchor="middle" font-size="26" fill="#75786a">batching is nearly free</text>
+  <text x="930" y="762" text-anchor="middle" font-size="30" font-weight="bold" fill="#55584a">Compute-bound</text>
+  <text x="930" y="800" text-anchor="middle" font-size="26" fill="#75786a">you pay in latency</text>
+
+  <!-- throughput curve -->
+  <path d="M 160 850 C 350 800 450 480 640 380 C 780 310 950 292 1080 288" fill="none" stroke="#5b7c46" stroke-width="7" stroke-linecap="round"/>
+  <text x="1070" y="260" text-anchor="end" font-size="28" font-weight="bold" fill="#5b7c46">System throughput</text>
+
+  <!-- latency curve -->
+  <path d="M 160 830 L 560 820 C 700 810 850 650 1080 430" fill="none" stroke="#b06a4e" stroke-width="7" stroke-linecap="round"/>
+  <text x="1070" y="392" text-anchor="end" font-size="28" font-weight="bold" fill="#b06a4e">Per-user latency (TPOT)</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics &#183; llm-4</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Pick your point</text>
+</svg>

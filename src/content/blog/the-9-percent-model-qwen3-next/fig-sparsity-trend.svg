@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">How Sparse Is Frontier MoE?</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Active parameters as a share of total, open models 2025–26</text>
+
+  <!-- scale: 1% = 150px, origin x=110 -->
+  <!-- DeepSeek-V3: 5.5% -> 825 -->
+  <text x="110" y="288" font-size="28" font-weight="bold" fill="#33362a">DeepSeek-V3</text>
+  <text x="1090" y="288" text-anchor="end" font-size="24" fill="#75786a">671B total / 37B active</text>
+  <rect x="110" y="304" width="825" height="56" rx="8" fill="#f7ecd2" stroke="#7a5a20" stroke-width="2.5"/>
+  <text x="951" y="342" font-size="26" font-weight="bold" fill="#7a5a20">5.5%</text>
+
+  <!-- gpt-oss-120b: 4.4% -> 654 -->
+  <text x="110" y="438" font-size="28" font-weight="bold" fill="#33362a">gpt-oss-120b</text>
+  <text x="1090" y="438" text-anchor="end" font-size="24" fill="#75786a">117B total / 5.1B active</text>
+  <rect x="110" y="454" width="654" height="56" rx="8" fill="#f7ecd2" stroke="#7a5a20" stroke-width="2.5"/>
+  <text x="780" y="492" font-size="26" font-weight="bold" fill="#7a5a20">4.4%</text>
+
+  <!-- Qwen3-Next: 3.75% -> 563 -->
+  <text x="110" y="588" font-size="28" font-weight="bold" fill="#5b7c46">Qwen3-Next</text>
+  <text x="1090" y="588" text-anchor="end" font-size="24" fill="#75786a">80B total / ~3B active</text>
+  <rect x="110" y="604" width="563" height="56" rx="8" fill="#a8bf92" stroke="#5b7c46" stroke-width="2.5"/>
+  <text x="689" y="642" font-size="26" font-weight="bold" fill="#5b7c46">3.8%</text>
+
+  <!-- Kimi K2: 3.2% -> 480 -->
+  <text x="110" y="738" font-size="28" font-weight="bold" fill="#33362a">Kimi K2</text>
+  <text x="1090" y="738" text-anchor="end" font-size="24" fill="#75786a">1T total / 32B active</text>
+  <rect x="110" y="754" width="480" height="56" rx="8" fill="#f7ecd2" stroke="#7a5a20" stroke-width="2.5"/>
+  <text x="606" y="792" font-size="26" font-weight="bold" fill="#7a5a20">3.2%</text>
+
+  <text x="600" y="908" text-anchor="middle" font-size="24" fill="#75786a">Lower share = fewer FLOPs per token at a fixed total capacity</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Data: vendor-reported model specs, 2025–26</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · cd-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">light up less, know more</text>
+</svg>

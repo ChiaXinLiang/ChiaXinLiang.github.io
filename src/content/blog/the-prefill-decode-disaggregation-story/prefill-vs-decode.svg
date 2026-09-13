@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Engine, Two Opposite Workloads</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">70B model on H100: 990 TFLOPS, 3.35 TB/s, ridge at ~295 FLOPs/byte</text>
+
+  <!-- Prefill card -->
+  <rect x="90" y="230" width="490" height="430" rx="16" fill="#e7edd9" stroke="#a8bf92" stroke-width="3"/>
+  <text x="335" y="295" text-anchor="middle" font-size="34" font-weight="bold" fill="#5b7c46">PREFILL — the prompt</text>
+  <text x="130" y="355" font-size="27" fill="#33362a">2,048 tokens per pass</text>
+  <text x="130" y="405" font-size="27" fill="#33362a">Work: ~287 TFLOPs</text>
+  <text x="130" y="455" font-size="27" fill="#33362a">Weights read once: 70 GB</text>
+  <text x="130" y="505" font-size="27" fill="#33362a">~4,100 FLOPs per byte</text>
+  <rect x="130" y="535" width="280" height="52" rx="26" fill="#5b7c46"/>
+  <text x="270" y="570" text-anchor="middle" font-size="27" font-weight="bold" fill="#fdfbf4">COMPUTE-BOUND</text>
+  <text x="130" y="632" font-size="25" fill="#55584a">290 ms compute vs 21 ms memory</text>
+
+  <!-- Decode card -->
+  <rect x="620" y="230" width="490" height="430" rx="16" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="865" y="295" text-anchor="middle" font-size="34" font-weight="bold" fill="#8a5138">DECODE — the response</text>
+  <text x="660" y="355" font-size="27" fill="#33362a">8 tokens per pass (batch 8)</text>
+  <text x="660" y="405" font-size="27" fill="#33362a">Work: ~1.1 TFLOPs</text>
+  <text x="660" y="455" font-size="27" fill="#33362a">Weights read every pass: 70 GB</text>
+  <text x="660" y="505" font-size="27" fill="#33362a">~16 FLOPs per byte</text>
+  <rect x="660" y="535" width="280" height="52" rx="26" fill="#b06a4e"/>
+  <text x="800" y="570" text-anchor="middle" font-size="27" font-weight="bold" fill="#fdfbf4">MEMORY-BOUND</text>
+  <text x="660" y="632" font-size="25" fill="#55584a">21 ms floor, ~5% compute used</text>
+
+  <!-- Intensity axis -->
+  <text x="600" y="722" text-anchor="middle" font-size="27" fill="#55584a">Arithmetic intensity (FLOPs per byte, log scale)</text>
+  <rect x="140" y="800" width="451" height="60" fill="#f0ddd0" opacity="0.6"/>
+  <rect x="591" y="800" width="469" height="60" fill="#e7edd9" opacity="0.8"/>
+  <line x1="140" y1="830" x2="1060" y2="830" stroke="#75786a" stroke-width="3"/>
+  <line x1="591" y1="770" x2="591" y2="885" stroke="#7a5a20" stroke-width="3" stroke-dasharray="8 7"/>
+  <text x="591" y="758" text-anchor="middle" font-size="26" font-weight="bold" fill="#7a5a20">ridge ≈ 295 FLOPs/byte</text>
+  <circle cx="202" cy="830" r="13" fill="#b06a4e"/>
+  <text x="202" y="792" text-anchor="middle" font-size="27" font-weight="bold" fill="#8a5138">decode ~16</text>
+  <circle cx="940" cy="830" r="13" fill="#5b7c46"/>
+  <text x="940" y="792" text-anchor="middle" font-size="27" font-weight="bold" fill="#5b7c46">prefill ~4,100</text>
+  <text x="365" y="912" text-anchor="middle" font-size="25" fill="#8a5138">memory-bound side</text>
+  <text x="825" y="912" text-anchor="middle" font-size="25" fill="#5b7c46">compute-bound side</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · cd-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">opposite sides of the ridge</text>
+</svg>

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Flynn's Taxonomy (1966)</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Two questions, four kinds of machine</text>
+
+  <!-- column headers -->
+  <text x="470" y="278" text-anchor="middle" font-size="27" font-weight="bold" fill="#55584a">one data stream</text>
+  <text x="910" y="278" text-anchor="middle" font-size="27" font-weight="bold" fill="#55584a">many data streams</text>
+
+  <!-- row labels (rotated) -->
+  <text x="160" y="450" text-anchor="middle" font-size="26" font-weight="bold" fill="#55584a" transform="rotate(-90 160 450)">one instruction stream</text>
+  <text x="160" y="770" text-anchor="middle" font-size="26" font-weight="bold" fill="#55584a" transform="rotate(-90 160 770)">many instruction streams</text>
+
+  <!-- SISD -->
+  <rect x="270" y="310" width="400" height="280" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="470" y="390" text-anchor="middle" font-size="46" font-weight="bold" fill="#33362a">SISD</text>
+  <text x="470" y="445" text-anchor="middle" font-size="26" fill="#55584a">one core running</text>
+  <text x="470" y="482" text-anchor="middle" font-size="26" fill="#55584a">scalar code</text>
+  <text x="470" y="545" text-anchor="middle" font-size="24" fill="#75786a">a simple CPU loop</text>
+
+  <!-- SIMD -->
+  <rect x="710" y="310" width="400" height="280" rx="14" fill="#e7edd9" stroke="#5b7c46" stroke-width="4"/>
+  <text x="910" y="390" text-anchor="middle" font-size="46" font-weight="bold" fill="#5b7c46">SIMD</text>
+  <text x="910" y="445" text-anchor="middle" font-size="26" fill="#55584a">one instruction,</text>
+  <text x="910" y="482" text-anchor="middle" font-size="26" fill="#55584a">many data lanes</text>
+  <text x="910" y="545" text-anchor="middle" font-size="24" fill="#5b7c46">AVX-512 · NEON · this article</text>
+
+  <!-- MISD -->
+  <rect x="270" y="630" width="400" height="280" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="470" y="710" text-anchor="middle" font-size="46" font-weight="bold" fill="#33362a">MISD</text>
+  <text x="470" y="765" text-anchor="middle" font-size="26" fill="#55584a">many instructions,</text>
+  <text x="470" y="802" text-anchor="middle" font-size="26" fill="#55584a">one data item</text>
+  <text x="470" y="865" text-anchor="middle" font-size="24" fill="#75786a">rare: redundant flight computers</text>
+
+  <!-- MIMD -->
+  <rect x="710" y="630" width="400" height="280" rx="14" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="910" y="710" text-anchor="middle" font-size="46" font-weight="bold" fill="#7a5a20">MIMD</text>
+  <text x="910" y="765" text-anchor="middle" font-size="26" fill="#55584a">independent cores,</text>
+  <text x="910" y="802" text-anchor="middle" font-size="26" fill="#55584a">independent code</text>
+  <text x="910" y="865" text-anchor="middle" font-size="24" fill="#75786a">multicore CPUs · clusters</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · par-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">four boxes, one map</text>
+</svg>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Same die family, opposite diets</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Where the memory money goes on each Rubin SKU</text>
+
+  <!-- CPX card -->
+  <rect x="110" y="240" width="440" height="560" rx="16" fill="#fdfbf4" stroke="#d8d4c4" stroke-width="3"/>
+  <rect x="110" y="240" width="440" height="70" rx="16" fill="#f0ddd0"/>
+  <rect x="110" y="280" width="440" height="30" fill="#f0ddd0"/>
+  <text x="330" y="287" text-anchor="middle" font-size="32" font-weight="bold" fill="#8a5138">RUBIN CPX</text>
+
+  <text x="330" y="360" text-anchor="middle" font-size="24" fill="#75786a">memory type</text>
+  <text x="330" y="396" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">GDDR7</text>
+  <text x="330" y="450" text-anchor="middle" font-size="24" fill="#75786a">capacity</text>
+  <text x="330" y="486" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">128 GB</text>
+  <text x="330" y="540" text-anchor="middle" font-size="24" fill="#75786a">bandwidth</text>
+  <text x="330" y="576" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">~2.1 TB/s</text>
+  <text x="330" y="630" text-anchor="middle" font-size="24" fill="#75786a">NVFP4 compute</text>
+  <text x="330" y="666" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">30 PF dense</text>
+  <text x="330" y="720" text-anchor="middle" font-size="24" fill="#75786a">built for</text>
+  <text x="330" y="758" text-anchor="middle" font-size="32" font-weight="bold" fill="#b06a4e">PREFILL</text>
+
+  <!-- R200 card -->
+  <rect x="650" y="240" width="440" height="560" rx="16" fill="#fdfbf4" stroke="#d8d4c4" stroke-width="3"/>
+  <rect x="650" y="240" width="440" height="70" rx="16" fill="#e7edd9"/>
+  <rect x="650" y="280" width="440" height="30" fill="#e7edd9"/>
+  <text x="870" y="287" text-anchor="middle" font-size="32" font-weight="bold" fill="#5b7c46">RUBIN R200</text>
+
+  <text x="870" y="360" text-anchor="middle" font-size="24" fill="#75786a">memory type</text>
+  <text x="870" y="396" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">HBM4</text>
+  <text x="870" y="450" text-anchor="middle" font-size="24" fill="#75786a">capacity</text>
+  <text x="870" y="486" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">288 GB</text>
+  <text x="870" y="540" text-anchor="middle" font-size="24" fill="#75786a">bandwidth</text>
+  <text x="870" y="576" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">~22 TB/s</text>
+  <text x="870" y="630" text-anchor="middle" font-size="24" fill="#75786a">NVFP4 compute</text>
+  <text x="870" y="666" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">50 PF sparse</text>
+  <text x="870" y="720" text-anchor="middle" font-size="24" fill="#75786a">built for</text>
+  <text x="870" y="758" text-anchor="middle" font-size="32" font-weight="bold" fill="#5b7c46">DECODE</text>
+
+  <text x="600" y="860" text-anchor="middle" font-size="24" fill="#75786a">R200 figures are community-tracked, not yet official</text>
+  <text x="600" y="900" text-anchor="middle" font-size="24" fill="#75786a">HBM is among the priciest components on the board</text>
+
+  <!-- divider + credit + footer -->
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Data: NVIDIA (2025); NextPlatform; Lockwood</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; chip-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">delete what idles</text>
+</svg>

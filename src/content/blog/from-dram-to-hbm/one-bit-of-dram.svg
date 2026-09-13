@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">One Bit of DRAM</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">A transistor, a capacitor, and 40,000 electrons</text>
+
+  <!-- wordline (horizontal) -->
+  <line x1="150" y1="330" x2="650" y2="330" stroke="#b06a4e" stroke-width="5"/>
+  <text x="645" y="298" font-size="26" fill="#8a5138" text-anchor="end">wordline (row select)</text>
+
+  <!-- bitline (vertical) -->
+  <line x1="300" y1="270" x2="300" y2="600" stroke="#5b7c46" stroke-width="5"/>
+  <text x="285" y="280" font-size="26" fill="#5b7c46" text-anchor="end">bitline</text>
+
+  <!-- gate connection from wordline down to gate bar -->
+  <line x1="470" y1="330" x2="470" y2="415" stroke="#b06a4e" stroke-width="5"/>
+  <line x1="420" y1="415" x2="520" y2="415" stroke="#33362a" stroke-width="6"/>
+
+  <!-- channel: source wire from bitline, drain wire to capacitor -->
+  <line x1="300" y1="455" x2="440" y2="455" stroke="#33362a" stroke-width="5"/>
+  <line x1="440" y1="435" x2="440" y2="475" stroke="#33362a" stroke-width="6"/>
+  <line x1="500" y1="435" x2="500" y2="475" stroke="#33362a" stroke-width="6"/>
+  <line x1="500" y1="455" x2="660" y2="455" stroke="#33362a" stroke-width="5"/>
+  <text x="470" y="525" font-size="26" fill="#55584a" text-anchor="middle">access transistor</text>
+
+  <!-- capacitor plates -->
+  <line x1="680" y1="410" x2="680" y2="500" stroke="#33362a" stroke-width="7"/>
+  <line x1="712" y1="410" x2="712" y2="500" stroke="#33362a" stroke-width="7"/>
+  <line x1="660" y1="455" x2="680" y2="455" stroke="#33362a" stroke-width="5"/>
+  <line x1="712" y1="455" x2="780" y2="455" stroke="#33362a" stroke-width="5"/>
+  <text x="750" y="380" font-size="26" fill="#55584a">storage capacitor</text>
+
+  <!-- ground symbol -->
+  <line x1="780" y1="455" x2="780" y2="510" stroke="#33362a" stroke-width="5"/>
+  <line x1="748" y1="510" x2="812" y2="510" stroke="#33362a" stroke-width="5"/>
+  <line x1="760" y1="526" x2="800" y2="526" stroke="#33362a" stroke-width="5"/>
+  <line x1="771" y1="542" x2="789" y2="542" stroke="#33362a" stroke-width="5"/>
+
+  <!-- charge note -->
+  <text x="840" y="463" font-size="24" fill="#75786a">charged = 1, empty = 0</text>
+
+  <!-- sense amplifier triangle at bottom of bitline -->
+  <polygon points="266,600 334,600 300,668" fill="#f0ddd0" stroke="#b06a4e" stroke-width="4"/>
+  <line x1="300" y1="668" x2="300" y2="695" stroke="#5b7c46" stroke-width="5"/>
+  <text x="355" y="642" font-size="26" fill="#55584a">sense amplifier &#8212; detects a few tens of mV</text>
+
+  <!-- annotations -->
+  <circle cx="140" cy="762" r="9" fill="#c9973b"/>
+  <text x="170" y="772" font-size="28" fill="#33362a">The capacitor is ~20 fF: one bit is about 40,000 electrons</text>
+  <circle cx="140" cy="832" r="9" fill="#b06a4e"/>
+  <text x="170" y="842" font-size="28" fill="#33362a">It leaks &#8212; every cell is refreshed at least every 64 ms</text>
+  <circle cx="140" cy="902" r="9" fill="#5b7c46"/>
+  <text x="170" y="912" font-size="28" fill="#33362a">Reading drains the charge, so each read ends in a write-back</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; mem-3</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">one bit, one leaky bucket</text>
+</svg>

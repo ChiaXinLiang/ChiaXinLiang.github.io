@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The critical path</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Same document, wildly different dependency chains</text>
+
+  <!-- Panel A: RNN -->
+  <text x="90" y="268" font-size="34" font-weight="bold" fill="#8a5138">RNN training: one step at a time</text>
+
+  <!-- chain boxes -->
+  <g stroke="#b06a4e" stroke-width="3" fill="#f0ddd0">
+    <rect x="95" y="300" width="100" height="90" rx="10"/>
+    <rect x="225" y="300" width="100" height="90" rx="10"/>
+    <rect x="355" y="300" width="100" height="90" rx="10"/>
+    <rect x="485" y="300" width="100" height="90" rx="10"/>
+    <rect x="615" y="300" width="100" height="90" rx="10"/>
+    <rect x="745" y="300" width="100" height="90" rx="10"/>
+    <rect x="875" y="300" width="100" height="90" rx="10"/>
+    <rect x="1005" y="300" width="100" height="90" rx="10"/>
+  </g>
+  <g font-size="28" fill="#8a5138" text-anchor="middle">
+    <text x="145" y="355">t=1</text>
+    <text x="275" y="355">t=2</text>
+    <text x="405" y="355">t=3</text>
+    <text x="535" y="355">t=4</text>
+    <text x="665" y="355">t=5</text>
+    <text x="795" y="355">t=6</text>
+    <text x="925" y="355">t=7</text>
+    <text x="1055" y="355">t=8</text>
+  </g>
+  <!-- chain arrows -->
+  <g stroke="#b06a4e" stroke-width="4">
+    <line x1="197" y1="345" x2="213" y2="345"/>
+    <line x1="327" y1="345" x2="343" y2="345"/>
+    <line x1="457" y1="345" x2="473" y2="345"/>
+    <line x1="587" y1="345" x2="603" y2="345"/>
+    <line x1="717" y1="345" x2="733" y2="345"/>
+    <line x1="847" y1="345" x2="863" y2="345"/>
+    <line x1="977" y1="345" x2="993" y2="345"/>
+  </g>
+  <g fill="#b06a4e">
+    <polygon points="213,338 224,345 213,352"/>
+    <polygon points="343,338 354,345 343,352"/>
+    <polygon points="473,338 484,345 473,352"/>
+    <polygon points="603,338 614,345 603,352"/>
+    <polygon points="733,338 744,345 733,352"/>
+    <polygon points="863,338 874,345 863,352"/>
+    <polygon points="993,338 1004,345 993,352"/>
+  </g>
+
+  <text x="600" y="445" text-anchor="middle" font-size="26" fill="#55584a">each step needs the hidden state from the step before</text>
+  <text x="600" y="490" text-anchor="middle" font-size="27" font-weight="bold" fill="#b04a3a">critical path = 2,048 dependent steps per document</text>
+
+  <!-- Panel B: Transformer -->
+  <text x="90" y="595" font-size="34" font-weight="bold" fill="#5b7c46">Transformer training: all tokens at once</text>
+
+  <g stroke="#5b7c46" stroke-width="3" fill="#e7edd9">
+    <rect x="95" y="625" width="100" height="66" rx="10"/>
+    <rect x="225" y="625" width="100" height="66" rx="10"/>
+    <rect x="355" y="625" width="100" height="66" rx="10"/>
+    <rect x="485" y="625" width="100" height="66" rx="10"/>
+    <rect x="615" y="625" width="100" height="66" rx="10"/>
+    <rect x="745" y="625" width="100" height="66" rx="10"/>
+    <rect x="875" y="625" width="100" height="66" rx="10"/>
+    <rect x="1005" y="625" width="100" height="66" rx="10"/>
+  </g>
+  <g font-size="28" fill="#5b7c46" text-anchor="middle">
+    <text x="145" y="668">t=1</text>
+    <text x="275" y="668">t=2</text>
+    <text x="405" y="668">t=3</text>
+    <text x="535" y="668">t=4</text>
+    <text x="665" y="668">t=5</text>
+    <text x="795" y="668">t=6</text>
+    <text x="925" y="668">t=7</text>
+    <text x="1055" y="668">t=8</text>
+  </g>
+  <!-- down arrows -->
+  <g stroke="#5b7c46" stroke-width="4">
+    <line x1="145" y1="695" x2="145" y2="722"/>
+    <line x1="275" y1="695" x2="275" y2="722"/>
+    <line x1="405" y1="695" x2="405" y2="722"/>
+    <line x1="535" y1="695" x2="535" y2="722"/>
+    <line x1="665" y1="695" x2="665" y2="722"/>
+    <line x1="795" y1="695" x2="795" y2="722"/>
+    <line x1="925" y1="695" x2="925" y2="722"/>
+    <line x1="1055" y1="695" x2="1055" y2="722"/>
+  </g>
+  <g fill="#5b7c46">
+    <polygon points="138,722 145,733 152,722"/>
+    <polygon points="268,722 275,733 282,722"/>
+    <polygon points="398,722 405,733 412,722"/>
+    <polygon points="528,722 535,733 542,722"/>
+    <polygon points="658,722 665,733 672,722"/>
+    <polygon points="788,722 795,733 802,722"/>
+    <polygon points="918,722 925,733 932,722"/>
+    <polygon points="1048,722 1055,733 1062,722"/>
+  </g>
+
+  <rect x="95" y="740" width="1010" height="86" rx="10" fill="#a8bf92" stroke="#5b7c46" stroke-width="3"/>
+  <text x="600" y="776" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">one layer = a few big matrix multiplies</text>
+  <text x="600" y="810" text-anchor="middle" font-size="24" fill="#55584a">every token processed simultaneously</text>
+  <text x="600" y="872" text-anchor="middle" font-size="28" fill="#55584a">&#215; 24 layers</text>
+  <text x="600" y="925" text-anchor="middle" font-size="27" font-weight="bold" fill="#5b7c46">critical path = ~150 big ops, each one fills the GPU</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics &#183; tf-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Short chains scale</text>
+</svg>

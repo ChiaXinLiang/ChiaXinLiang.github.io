@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Inside DeepSeek Sparse Attention</text>
+    <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Score everything cheaply, attend to 2,048 for real</text>
+
+    <!-- Step 1: cached context row -->
+    <text x="120" y="262" font-size="26" font-weight="bold" fill="#55584a">1 &#183; Cached context: 131,072 tokens</text>
+    <g>
+      <rect x="120" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="168" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="216" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="264" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="312" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="360" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="408" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="456" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <text x="540" y="314" font-size="30" fill="#75786a">&#8230;</text>
+      <rect x="592" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="640" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="688" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="736" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="784" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="832" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="880" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+      <rect x="928" y="284" width="40" height="40" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+    </g>
+    <!-- query token -->
+    <rect x="1020" y="284" width="40" height="40" fill="#c9973b" stroke="#7a5a20" stroke-width="2"/>
+    <text x="1040" y="352" text-anchor="middle" font-size="24" fill="#7a5a20">query</text>
+
+    <!-- arrow down -->
+    <line x1="600" y1="336" x2="600" y2="398" stroke="#a3a08f" stroke-width="3"/>
+    <path d="M 600 410 L 591 394 L 609 394 Z" fill="#a3a08f"/>
+
+    <!-- Step 2: lightning indexer box -->
+    <rect x="150" y="418" width="900" height="128" rx="10" fill="#e7edd9" stroke="#a8bf92" stroke-width="2.5"/>
+    <text x="600" y="466" text-anchor="middle" font-size="30" font-weight="bold" fill="#5b7c46">2 &#183; Lightning indexer scores every token</text>
+    <text x="600" y="510" text-anchor="middle" font-size="25" fill="#55584a">a few narrow FP8 heads, ReLU instead of softmax</text>
+
+    <line x1="600" y1="546" x2="600" y2="600" stroke="#a3a08f" stroke-width="3"/>
+    <path d="M 600 612 L 591 596 L 609 596 Z" fill="#a3a08f"/>
+
+    <!-- Step 3: selected row -->
+    <text x="120" y="650" font-size="26" font-weight="bold" fill="#55584a">3 &#183; Top-2,048 tokens selected for this query</text>
+    <g>
+      <rect x="120" y="672" width="40" height="40" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+      <rect x="168" y="672" width="40" height="40" fill="#b06a4e" stroke="#8a5138" stroke-width="2"/>
+      <rect x="216" y="672" width="40" height="40" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+      <rect x="264" y="672" width="40" height="40" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+      <rect x="312" y="672" width="40" height="40" fill="#b06a4e" stroke="#8a5138" stroke-width="2"/>
+      <rect x="360" y="672" width="40" height="40" fill="#b06a4e" stroke="#8a5138" stroke-width="2"/>
+      <rect x="408" y="672" width="40" height="40" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+      <rect x="456" y="672" width="40" height="40" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+      <text x="540" y="702" font-size="30" fill="#75786a">&#8230;</text>
+      <rect x="592" y="672" width="40" height="40" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+      <rect x="640" y="672" width="40" height="40" fill="#b06a4e" stroke="#8a5138" stroke-width="2"/>
+      <rect x="688" y="672" width="40" height="40" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+      <rect x="736" y="672" width="40" height="40" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+      <rect x="784" y="672" width="40" height="40" fill="#b06a4e" stroke="#8a5138" stroke-width="2"/>
+      <rect x="832" y="672" width="40" height="40" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+      <rect x="880" y="672" width="40" height="40" fill="#b06a4e" stroke="#8a5138" stroke-width="2"/>
+      <rect x="928" y="672" width="40" height="40" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+    </g>
+
+    <line x1="600" y1="724" x2="600" y2="778" stroke="#a3a08f" stroke-width="3"/>
+    <path d="M 600 790 L 591 774 L 609 774 Z" fill="#a3a08f"/>
+
+    <!-- Step 4: full attention box -->
+    <rect x="150" y="796" width="900" height="128" rx="10" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2.5"/>
+    <text x="600" y="844" text-anchor="middle" font-size="30" font-weight="bold" fill="#8a5138">4 &#183; Full MLA attention over 2,048 tokens only</text>
+    <text x="600" y="888" text-anchor="middle" font-size="25" fill="#55584a">64&#215; fewer KV reads per decode step at 128K context</text>
+
+    <text x="600" y="962" text-anchor="middle" font-size="26" fill="#75786a">Main attention: O(L&#183;k) instead of O(L&#178;), with k = 2,048</text>
+
+    <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+    <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Mechanism from DeepSeek-V3.2-Exp report (2025)</text>
+    <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; cd-2</text>
+    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">scan cheap, attend rarely</text>
+  </g>
+</svg>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Disaggregation reaches silicon</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">One serving pipeline, two purpose-built memory systems</text>
+
+  <!-- input pill -->
+  <rect x="330" y="240" width="540" height="64" rx="32" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="600" y="281" text-anchor="middle" font-size="26" fill="#55584a">Long prompt: up to ~1M tokens</text>
+
+  <line x1="600" y1="304" x2="600" y2="336" stroke="#75786a" stroke-width="3"/>
+  <polygon points="600,350 590,332 610,332" fill="#75786a"/>
+
+  <!-- CPX box -->
+  <rect x="150" y="360" width="900" height="160" rx="16" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="600" y="405" text-anchor="middle" font-size="30" font-weight="bold" fill="#8a5138">RUBIN CPX &#8212; PREFILL (compute-bound)</text>
+  <text x="600" y="448" text-anchor="middle" font-size="26" fill="#33362a">30 PF NVFP4 &#183; 128 GB GDDR7 &#183; ~2.1 TB/s</text>
+  <text x="600" y="492" text-anchor="middle" font-size="24" fill="#75786a">reads each weight once, uses it thousands of times</text>
+
+  <!-- handoff arrow -->
+  <line x1="600" y1="520" x2="600" y2="586" stroke="#75786a" stroke-width="3"/>
+  <polygon points="600,600 590,582 610,582" fill="#75786a"/>
+  <text x="630" y="566" font-size="26" fill="#55584a">KV cache handoff (Dynamo / NIXL)</text>
+
+  <!-- Rubin box -->
+  <rect x="150" y="610" width="900" height="160" rx="16" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="600" y="655" text-anchor="middle" font-size="30" font-weight="bold" fill="#5b7c46">RUBIN R200 &#8212; DECODE (bandwidth-bound)</text>
+  <text x="600" y="698" text-anchor="middle" font-size="26" fill="#33362a">288 GB HBM4 &#183; ~22 TB/s &#183; one token at a time</text>
+  <text x="600" y="742" text-anchor="middle" font-size="24" fill="#75786a">streams every weight for every generated token</text>
+
+  <line x1="600" y1="770" x2="600" y2="800" stroke="#75786a" stroke-width="3"/>
+  <polygon points="600,814 590,796 610,796" fill="#75786a"/>
+
+  <!-- output pill -->
+  <rect x="330" y="824" width="540" height="64" rx="32" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="600" y="865" text-anchor="middle" font-size="26" fill="#55584a">Tokens stream out to the user</text>
+
+  <text x="600" y="940" text-anchor="middle" font-size="24" fill="#a3a08f">Vendor claim: NVL144 CPX rack = 8 EF NVFP4, 7.5x GB300 NVL72</text>
+
+  <!-- divider + footer -->
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; chip-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">split the trench coat</text>
+</svg>

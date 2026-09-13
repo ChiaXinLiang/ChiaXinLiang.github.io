@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The End of the Free Ride</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Single-program performance: 52%/yr collapsed to 3.5%/yr</text>
+
+  <!-- gridlines -->
+  <line x1="230" y1="280" x2="1060" y2="280" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="230" y1="400" x2="1060" y2="400" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="230" y1="520" x2="1060" y2="520" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="230" y1="640" x2="1060" y2="640" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="230" y1="760" x2="1060" y2="760" stroke="#e8e4d7" stroke-width="2"/>
+  <!-- axes -->
+  <line x1="230" y1="880" x2="1060" y2="880" stroke="#d8d4c4" stroke-width="3"/>
+  <line x1="230" y1="280" x2="230" y2="880" stroke="#d8d4c4" stroke-width="3"/>
+
+  <!-- y labels -->
+  <text x="215" y="888" font-size="24" fill="#75786a" text-anchor="end">1&#215;</text>
+  <text x="215" y="768" font-size="24" fill="#75786a" text-anchor="end">10&#215;</text>
+  <text x="215" y="648" font-size="24" fill="#75786a" text-anchor="end">100&#215;</text>
+  <text x="215" y="528" font-size="24" fill="#75786a" text-anchor="end">1,000&#215;</text>
+  <text x="215" y="408" font-size="24" fill="#75786a" text-anchor="end">10,000&#215;</text>
+  <text x="215" y="288" font-size="24" fill="#75786a" text-anchor="end">100,000&#215;</text>
+
+  <!-- x labels -->
+  <text x="230" y="922" font-size="24" fill="#75786a" text-anchor="middle">1978</text>
+  <text x="396" y="922" font-size="24" fill="#75786a" text-anchor="middle">1986</text>
+  <text x="749" y="922" font-size="24" fill="#75786a" text-anchor="middle">2003</text>
+  <text x="915" y="922" font-size="24" fill="#75786a" text-anchor="middle">2011</text>
+  <text x="1060" y="922" font-size="24" fill="#75786a" text-anchor="middle">2018</text>
+
+  <!-- Dennard marker -->
+  <line x1="770" y1="340" x2="770" y2="880" stroke="#b06a4e" stroke-width="2.5" stroke-dasharray="9 9"/>
+  <text x="748" y="320" font-size="26" fill="#b06a4e" text-anchor="end">Dennard scaling ends ~2004</text>
+
+  <!-- curve -->
+  <polyline points="230,880 396,787 749,416 915,330 998,307 1060,301" fill="none" stroke="#5b7c46" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="230" cy="880" r="7" fill="#5b7c46"/>
+  <circle cx="396" cy="787" r="7" fill="#5b7c46"/>
+  <circle cx="749" cy="416" r="7" fill="#5b7c46"/>
+  <circle cx="915" cy="330" r="7" fill="#5b7c46"/>
+  <circle cx="998" cy="307" r="7" fill="#5b7c46"/>
+  <circle cx="1060" cy="301" r="7" fill="#5b7c46"/>
+
+  <!-- segment labels -->
+  <text x="310" y="790" font-size="26" fill="#55584a" text-anchor="middle">25%/yr</text>
+  <text x="620" y="720" font-size="26" fill="#55584a" text-anchor="middle">RISC era &#183; 52%/yr</text>
+  <text x="790" y="470" font-size="26" fill="#55584a">multicore &#183; 23%/yr</text>
+  <text x="940" y="270" font-size="24" fill="#55584a" text-anchor="middle">12%/yr</text>
+  <text x="1085" y="355" font-size="24" fill="#b06a4e" text-anchor="end" font-weight="bold">3.5%/yr</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Redrawn from Hennessy &amp; Patterson, CACM (2019)</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; par-4</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">when scaling stops, specialize</text>
+</svg>

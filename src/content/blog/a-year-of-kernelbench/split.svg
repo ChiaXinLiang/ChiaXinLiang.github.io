@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Assistant, not engineer</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">What LLM kernel generators do well, and where they fail</text>
+
+  <!-- Left panel -->
+  <rect x="90" y="250" width="490" height="660" fill="#fdfbf4" stroke="#e8e4d7" stroke-width="3"/>
+  <rect x="90" y="250" width="490" height="76" fill="#e7edd9"/>
+  <text x="335" y="300" text-anchor="middle" font-size="30" font-weight="bold" fill="#5b7c46">Already strong</text>
+
+  <circle cx="130" cy="390" r="7" fill="#5b7c46"/>
+  <text x="160" y="400" font-size="26" fill="#33362a">Boilerplate, wrappers,</text>
+  <text x="160" y="436" font-size="26" fill="#33362a">glue code</text>
+
+  <circle cx="130" cy="496" r="7" fill="#5b7c46"/>
+  <text x="160" y="506" font-size="26" fill="#33362a">Porting known patterns</text>
+  <text x="160" y="542" font-size="26" fill="#33362a">to new DSLs and chips</text>
+
+  <circle cx="130" cy="602" r="7" fill="#5b7c46"/>
+  <text x="160" y="612" font-size="26" fill="#33362a">Parallel search at scale,</text>
+  <text x="160" y="648" font-size="26" fill="#33362a">given a verifier</text>
+
+  <circle cx="130" cy="708" r="7" fill="#5b7c46"/>
+  <text x="160" y="718" font-size="26" fill="#33362a">Fusing elementwise</text>
+  <text x="160" y="754" font-size="26" fill="#33362a">operator chains</text>
+
+  <circle cx="130" cy="814" r="7" fill="#5b7c46"/>
+  <text x="160" y="824" font-size="26" fill="#33362a">Tireless profiler-driven</text>
+  <text x="160" y="860" font-size="26" fill="#33362a">iteration</text>
+
+  <!-- Right panel -->
+  <rect x="620" y="250" width="490" height="660" fill="#fdfbf4" stroke="#e8e4d7" stroke-width="3"/>
+  <rect x="620" y="250" width="490" height="76" fill="#f0ddd0"/>
+  <text x="865" y="300" text-anchor="middle" font-size="30" font-weight="bold" fill="#8a5138">Still failing</text>
+
+  <circle cx="660" cy="390" r="7" fill="#b06a4e"/>
+  <text x="690" y="400" font-size="26" fill="#33362a">Tensor-core intrinsics</text>
+  <text x="690" y="436" font-size="26" fill="#33362a">(where the FLOPs live)</text>
+
+  <circle cx="660" cy="496" r="7" fill="#b06a4e"/>
+  <text x="690" y="506" font-size="26" fill="#33362a">Swizzled shared-memory</text>
+  <text x="690" y="542" font-size="26" fill="#33362a">layouts</text>
+
+  <circle cx="660" cy="602" r="7" fill="#b06a4e"/>
+  <text x="690" y="612" font-size="26" fill="#33362a">Async copy pipelines,</text>
+  <text x="690" y="648" font-size="26" fill="#33362a">warp specialization</text>
+
+  <circle cx="660" cy="708" r="7" fill="#b06a4e"/>
+  <text x="690" y="718" font-size="26" fill="#33362a">Distrusting suspiciously</text>
+  <text x="690" y="754" font-size="26" fill="#33362a">good results</text>
+
+  <circle cx="660" cy="814" r="7" fill="#b06a4e"/>
+  <text x="690" y="824" font-size="26" fill="#33362a">FlashAttention-class</text>
+  <text x="690" y="860" font-size="26" fill="#33362a">invention</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Findings from Guo &amp; Zhang (2025) and KernelBench paper</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · cd-4</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">search is not insight</text>
+</svg>

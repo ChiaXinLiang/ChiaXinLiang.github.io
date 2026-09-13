@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Inside a Systolic Array</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Weights sit still; data pulses through the grid</text>
+
+<!-- legend -->
+<rect x="140" y="228" width="34" height="34" rx="6" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+<text x="188" y="253" font-size="24" fill="#55584a">weights (stay put)</text>
+<line x1="470" y1="245" x2="520" y2="245" stroke="#5b7c46" stroke-width="5"/>
+<polygon points="520,237 536,245 520,253" fill="#5b7c46"/>
+<text x="550" y="253" font-size="24" fill="#55584a">inputs (flow right)</text>
+<line x1="850" y1="245" x2="900" y2="245" stroke="#b06a4e" stroke-width="5"/>
+<polygon points="900,237 916,245 900,253" fill="#b06a4e"/>
+<text x="930" y="253" font-size="24" fill="#55584a">sums (flow down)</text>
+
+<!-- input chips row 1 (center y 360) -->
+<rect x="164" y="332" width="56" height="56" rx="6" fill="none" stroke="#a8bf92" stroke-width="2" stroke-dasharray="6,6"/>
+<rect x="234" y="332" width="56" height="56" rx="6" fill="none" stroke="#a8bf92" stroke-width="2" stroke-dasharray="6,6"/>
+<rect x="302" y="332" width="56" height="56" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+<text x="330" y="370" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">x1</text>
+<!-- input chips row 2 (center y 510) -->
+<rect x="104" y="482" width="56" height="56" rx="6" fill="none" stroke="#a8bf92" stroke-width="2" stroke-dasharray="6,6"/>
+<rect x="174" y="482" width="56" height="56" rx="6" fill="none" stroke="#a8bf92" stroke-width="2" stroke-dasharray="6,6"/>
+<rect x="242" y="482" width="56" height="56" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+<text x="270" y="520" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">x2</text>
+<!-- input chips row 3 (center y 660) -->
+<rect x="114" y="632" width="56" height="56" rx="6" fill="none" stroke="#a8bf92" stroke-width="2" stroke-dasharray="6,6"/>
+<rect x="182" y="632" width="56" height="56" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+<text x="210" y="670" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">x3</text>
+
+<!-- horizontal arrows into and between cells, rows at y=360,510,660 -->
+<line x1="362" y1="360" x2="414" y2="360" stroke="#5b7c46" stroke-width="5"/>
+<polygon points="414,352 428,360 414,368" fill="#5b7c46"/>
+<line x1="582" y1="360" x2="606" y2="360" stroke="#5b7c46" stroke-width="5"/>
+<polygon points="606,352 618,360 606,368" fill="#5b7c46"/>
+<line x1="772" y1="360" x2="796" y2="360" stroke="#5b7c46" stroke-width="5"/>
+<polygon points="796,352 808,360 796,368" fill="#5b7c46"/>
+<line x1="302" y1="510" x2="414" y2="510" stroke="#5b7c46" stroke-width="5"/>
+<polygon points="414,502 428,510 414,518" fill="#5b7c46"/>
+<line x1="582" y1="510" x2="606" y2="510" stroke="#5b7c46" stroke-width="5"/>
+<polygon points="606,502 618,510 606,518" fill="#5b7c46"/>
+<line x1="772" y1="510" x2="796" y2="510" stroke="#5b7c46" stroke-width="5"/>
+<polygon points="796,502 808,510 796,518" fill="#5b7c46"/>
+<line x1="242" y1="660" x2="414" y2="660" stroke="#5b7c46" stroke-width="5"/>
+<polygon points="414,652 428,660 414,668" fill="#5b7c46"/>
+<line x1="582" y1="660" x2="606" y2="660" stroke="#5b7c46" stroke-width="5"/>
+<polygon points="606,652 618,660 606,668" fill="#5b7c46"/>
+<line x1="772" y1="660" x2="796" y2="660" stroke="#5b7c46" stroke-width="5"/>
+<polygon points="796,652 808,660 796,668" fill="#5b7c46"/>
+
+<!-- PE cells: cols x=430,620,810 w=150; rows y=310,460,610 h=100 -->
+<rect x="430" y="310" width="150" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+<rect x="620" y="310" width="150" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+<rect x="810" y="310" width="150" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+<rect x="430" y="460" width="150" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+<rect x="620" y="460" width="150" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+<rect x="810" y="460" width="150" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+<rect x="430" y="610" width="150" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+<rect x="620" y="610" width="150" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+<rect x="810" y="610" width="150" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+<text x="505" y="371" text-anchor="middle" font-size="32" font-weight="bold" fill="#7a5a20">w11</text>
+<text x="695" y="371" text-anchor="middle" font-size="32" font-weight="bold" fill="#7a5a20">w12</text>
+<text x="885" y="371" text-anchor="middle" font-size="32" font-weight="bold" fill="#7a5a20">w13</text>
+<text x="505" y="521" text-anchor="middle" font-size="32" font-weight="bold" fill="#7a5a20">w21</text>
+<text x="695" y="521" text-anchor="middle" font-size="32" font-weight="bold" fill="#7a5a20">w22</text>
+<text x="885" y="521" text-anchor="middle" font-size="32" font-weight="bold" fill="#7a5a20">w23</text>
+<text x="505" y="671" text-anchor="middle" font-size="32" font-weight="bold" fill="#7a5a20">w31</text>
+<text x="695" y="671" text-anchor="middle" font-size="32" font-weight="bold" fill="#7a5a20">w32</text>
+<text x="885" y="671" text-anchor="middle" font-size="32" font-weight="bold" fill="#7a5a20">w33</text>
+
+<!-- vertical arrows down, col centers x=505,695,885 -->
+<line x1="505" y1="412" x2="505" y2="446" stroke="#b06a4e" stroke-width="5"/>
+<polygon points="497,446 505,458 513,446" fill="#b06a4e"/>
+<line x1="695" y1="412" x2="695" y2="446" stroke="#b06a4e" stroke-width="5"/>
+<polygon points="687,446 695,458 703,446" fill="#b06a4e"/>
+<line x1="885" y1="412" x2="885" y2="446" stroke="#b06a4e" stroke-width="5"/>
+<polygon points="877,446 885,458 893,446" fill="#b06a4e"/>
+<line x1="505" y1="562" x2="505" y2="596" stroke="#b06a4e" stroke-width="5"/>
+<polygon points="497,596 505,608 513,596" fill="#b06a4e"/>
+<line x1="695" y1="562" x2="695" y2="596" stroke="#b06a4e" stroke-width="5"/>
+<polygon points="687,596 695,608 703,596" fill="#b06a4e"/>
+<line x1="885" y1="562" x2="885" y2="596" stroke="#b06a4e" stroke-width="5"/>
+<polygon points="877,596 885,608 893,596" fill="#b06a4e"/>
+<line x1="505" y1="712" x2="505" y2="748" stroke="#b06a4e" stroke-width="5"/>
+<polygon points="497,748 505,760 513,748" fill="#b06a4e"/>
+<line x1="695" y1="712" x2="695" y2="748" stroke="#b06a4e" stroke-width="5"/>
+<polygon points="687,748 695,760 703,748" fill="#b06a4e"/>
+<line x1="885" y1="712" x2="885" y2="748" stroke="#b06a4e" stroke-width="5"/>
+<polygon points="877,748 885,760 893,748" fill="#b06a4e"/>
+
+<!-- accumulator bar -->
+<rect x="430" y="764" width="530" height="60" rx="8" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2.5"/>
+<text x="695" y="802" text-anchor="middle" font-size="26" fill="#8a5138">accumulators: finished sums exit here</text>
+
+<!-- annotations -->
+<text x="600" y="884" text-anchor="middle" font-size="26" fill="#55584a">each cell multiplies, adds, and passes both values on;</text>
+<text x="600" y="922" text-anchor="middle" font-size="26" fill="#55584a">rows start one cycle apart, so operands meet in step</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Redrawn from Jouppi et al. (2017), Fig. 4</text>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · par-3</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">compute to a heartbeat</text>
+</svg>

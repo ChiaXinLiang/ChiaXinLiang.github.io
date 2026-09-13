@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The $50M Break-Even</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">10x perf/watt ASIC vs $25k GPUs, three-year total cost</text>
+
+<text x="90" y="252" font-size="26" fill="#55584a">3-year total cost</text>
+
+<!-- gridlines -->
+<g stroke="#e8e4d7" stroke-width="2">
+<line x1="200" y1="759" x2="1050" y2="759"/>
+<line x1="200" y1="618" x2="1050" y2="618"/>
+<line x1="200" y1="477" x2="1050" y2="477"/>
+<line x1="200" y1="336" x2="1050" y2="336"/>
+</g>
+<!-- axes -->
+<line x1="200" y1="280" x2="200" y2="900" stroke="#75786a" stroke-width="2"/>
+<line x1="200" y1="900" x2="1050" y2="900" stroke="#75786a" stroke-width="2"/>
+
+<!-- y tick labels -->
+<g font-size="24" fill="#75786a" text-anchor="end">
+<text x="185" y="908">$0</text>
+<text x="185" y="767">$25M</text>
+<text x="185" y="626">$50M</text>
+<text x="185" y="485">$75M</text>
+<text x="185" y="344">$100M</text>
+</g>
+<!-- x tick labels -->
+<g font-size="24" fill="#75786a" text-anchor="middle">
+<text x="200" y="936">0</text>
+<text x="413" y="936">1,000</text>
+<text x="625" y="936">2,000</text>
+<text x="838" y="936">3,000</text>
+<text x="1050" y="936">4,000</text>
+</g>
+<text x="625" y="978" text-anchor="middle" font-size="26" fill="#55584a">GPU-equivalents of sustained work</text>
+
+<!-- ASIC line -->
+<line x1="200" y1="618" x2="1050" y2="596" stroke="#5b7c46" stroke-width="5"/>
+<!-- GPU line -->
+<line x1="200" y1="900" x2="1050" y2="295" stroke="#c9973b" stroke-width="5"/>
+
+<!-- crossover -->
+<line x1="610" y1="608" x2="610" y2="900" stroke="#b04a3a" stroke-width="2" stroke-dasharray="8 8"/>
+<circle cx="610" cy="608" r="12" fill="#b04a3a"/>
+<text x="560" y="546" text-anchor="end" font-size="26" font-weight="bold" fill="#b04a3a">break-even</text>
+<text x="560" y="580" text-anchor="end" font-size="26" font-weight="bold" fill="#b04a3a">at ~1,930</text>
+
+<!-- line labels -->
+<text x="845" y="448" font-size="26" font-weight="bold" fill="#7a5a20">GPU fleet</text>
+<text x="845" y="482" font-size="26" fill="#7a5a20">$26,840 per unit</text>
+<text x="250" y="680" font-size="26" font-weight="bold" fill="#5b7c46">ASIC: $50M NRE</text>
+<text x="250" y="714" font-size="26" fill="#5b7c46">+ $984 per unit</text>
+
+<!-- region hints -->
+<text x="340" y="856" font-size="26" fill="#75786a">buy GPUs</text>
+<text x="800" y="856" font-size="26" fill="#75786a">build the ASIC</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Illustrative worked example, not market prices</text>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; asic-1</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">volume times stability</text>
+</svg>

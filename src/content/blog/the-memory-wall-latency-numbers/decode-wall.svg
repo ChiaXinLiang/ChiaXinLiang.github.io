@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Token, 140 Gigabytes</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Why LLM decode lives behind the memory wall</text>
+
+  <!-- Box 1 -->
+  <rect x="200" y="250" width="800" height="130" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="600" y="305" text-anchor="middle" font-size="32" font-weight="bold" fill="#33362a">70B parameters @ FP16</text>
+  <text x="600" y="350" text-anchor="middle" font-size="28" fill="#55584a">140 GB of weights sitting in HBM</text>
+
+  <!-- Arrow 1 -->
+  <line x1="600" y1="388" x2="600" y2="458" stroke="#75786a" stroke-width="4"/>
+  <path d="M 600 474 L 590 454 L 610 454 Z" fill="#75786a"/>
+  <text x="630" y="438" font-size="26" fill="#75786a">each new token reads all of it</text>
+
+  <!-- Box 2 -->
+  <rect x="200" y="480" width="800" height="130" rx="12" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="600" y="535" text-anchor="middle" font-size="32" font-weight="bold" fill="#33362a">HBM bandwidth: 3.35 TB/s (H100)</text>
+  <text x="600" y="580" text-anchor="middle" font-size="28" fill="#55584a">140 GB ÷ 3.35 TB/s ≈ 42 ms per token</text>
+
+  <!-- Arrow 2 -->
+  <line x1="600" y1="618" x2="600" y2="688" stroke="#75786a" stroke-width="4"/>
+  <path d="M 600 704 L 590 684 L 610 684 Z" fill="#75786a"/>
+  <text x="630" y="668" font-size="26" fill="#75786a">a latency floor, whatever the FLOPs</text>
+
+  <!-- Box 3 -->
+  <rect x="200" y="710" width="800" height="130" rx="12" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="600" y="765" text-anchor="middle" font-size="32" font-weight="bold" fill="#33362a">Ceiling: ~24 tokens per second</text>
+  <text x="600" y="810" text-anchor="middle" font-size="28" fill="#55584a">tensor cores under 1% busy at batch 1</text>
+
+  <text x="600" y="912" text-anchor="middle" font-size="26" fill="#75786a">Batching N requests shares one weight read: intensity × N</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Bandwidth is NVIDIA's reported peak spec</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · mem-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">bandwidth sets the pace</text>
+</svg>

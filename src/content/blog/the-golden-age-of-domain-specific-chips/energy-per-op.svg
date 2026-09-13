@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">What an Operation Really Costs</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Energy per operation at 45 nm, picojoules (log scale)</text>
+
+  <!-- vertical gridlines at decades -->
+  <line x1="450" y1="270" x2="450" y2="866" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="545" y1="270" x2="545" y2="866" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="640" y1="270" x2="640" y2="866" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="735" y1="270" x2="735" y2="866" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="830" y1="270" x2="830" y2="866" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="925" y1="270" x2="925" y2="866" stroke="#e8e4d7" stroke-width="2"/>
+  <text x="450" y="252" font-size="24" fill="#a3a08f" text-anchor="middle">0.01</text>
+  <text x="545" y="252" font-size="24" fill="#a3a08f" text-anchor="middle">0.1</text>
+  <text x="640" y="252" font-size="24" fill="#a3a08f" text-anchor="middle">1</text>
+  <text x="735" y="252" font-size="24" fill="#a3a08f" text-anchor="middle">10</text>
+  <text x="830" y="252" font-size="24" fill="#a3a08f" text-anchor="middle">100</text>
+  <text x="925" y="252" font-size="24" fill="#a3a08f" text-anchor="middle">1,000</text>
+
+  <!-- rows -->
+  <text x="430" y="329" font-size="26" fill="#33362a" text-anchor="end">8-bit add</text>
+  <rect x="450" y="294" width="45" height="52" fill="#5b7c46"/>
+  <text x="509" y="329" font-size="26" font-weight="bold" fill="#5b7c46">0.03 pJ</text>
+
+  <text x="430" y="429" font-size="26" fill="#33362a" text-anchor="end">32-bit add</text>
+  <rect x="450" y="394" width="95" height="52" fill="#5b7c46"/>
+  <text x="559" y="429" font-size="26" font-weight="bold" fill="#5b7c46">0.1 pJ</text>
+
+  <text x="430" y="529" font-size="26" fill="#33362a" text-anchor="end">fp32 multiply</text>
+  <rect x="450" y="494" width="244" height="52" fill="#a8bf92"/>
+  <text x="708" y="529" font-size="26" font-weight="bold" fill="#5b7c46">3.7 pJ</text>
+
+  <text x="430" y="629" font-size="26" fill="#33362a" text-anchor="end">8 KB SRAM read</text>
+  <rect x="450" y="594" width="285" height="52" fill="#c9973b"/>
+  <text x="749" y="629" font-size="26" font-weight="bold" fill="#7a5a20">10 pJ</text>
+
+  <text x="430" y="729" font-size="26" fill="#33362a" text-anchor="end">CPU instruction overhead</text>
+  <rect x="450" y="694" width="365" height="52" fill="#b06a4e"/>
+  <text x="829" y="729" font-size="26" font-weight="bold" fill="#8a5138">~70 pJ</text>
+
+  <text x="430" y="829" font-size="26" fill="#33362a" text-anchor="end">DRAM access</text>
+  <rect x="450" y="794" width="503" height="52" fill="#b04a3a"/>
+  <text x="967" y="829" font-size="26" font-weight="bold" fill="#b04a3a">~2,000 pJ</text>
+
+  <text x="600" y="930" font-size="26" fill="#55584a" text-anchor="middle">The 8-bit add is 0.04% of the instruction that carries it</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Data: Horowitz, ISSCC 2014</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; par-4</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">arithmetic is almost free</text>
+</svg>

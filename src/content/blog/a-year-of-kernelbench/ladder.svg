@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">One year of climbing KernelBench</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">fast_1 on Level 2: correct and faster than PyTorch eager</text>
+
+  <!-- Row 1: frontier one-shot -->
+  <text x="90" y="262" font-size="26" fill="#55584a">Frontier models, one-shot (late 2024)</text>
+  <rect x="90" y="278" width="180" height="46" fill="#a3a08f"/>
+  <text x="284" y="310" font-size="28" font-weight="bold" fill="#33362a">&lt;20%</text>
+
+  <!-- Row 2: V3 one-shot -->
+  <text x="90" y="372" font-size="26" fill="#55584a">DeepSeek-V3, one-shot</text>
+  <rect x="90" y="388" width="36" height="46" fill="#a3a08f"/>
+  <text x="140" y="420" font-size="28" font-weight="bold" fill="#33362a">4%</text>
+
+  <!-- Row 3: V3 best of 100 -->
+  <text x="90" y="482" font-size="26" fill="#55584a">DeepSeek-V3, best-of-100 sampling</text>
+  <rect x="90" y="498" width="333" height="46" fill="#c9973b"/>
+  <text x="437" y="530" font-size="28" font-weight="bold" fill="#7a5a20">37%</text>
+
+  <!-- Row 4: R1 one-shot -->
+  <text x="90" y="592" font-size="26" fill="#55584a">DeepSeek-R1, one-shot</text>
+  <rect x="90" y="608" width="324" height="46" fill="#a3a08f"/>
+  <text x="428" y="640" font-size="28" font-weight="bold" fill="#33362a">36%</text>
+
+  <!-- Row 5: R1 + profiler loop -->
+  <text x="90" y="702" font-size="26" fill="#55584a">DeepSeek-R1 + profiler feedback loop</text>
+  <rect x="90" y="718" width="648" height="46" fill="#b06a4e"/>
+  <text x="752" y="750" font-size="28" font-weight="bold" fill="#8a5138">72%</text>
+
+  <!-- Row 6: Kevin -->
+  <text x="90" y="812" font-size="26" fill="#55584a">Kevin-32B, multi-turn RL*</text>
+  <rect x="90" y="828" width="738" height="46" fill="#5b7c46"/>
+  <text x="842" y="860" font-size="28" font-weight="bold" fill="#5b7c46">82%</text>
+
+  <text x="90" y="936" font-size="24" fill="#75786a">*Kevin scores correctness; its mean speedup is 1.10x over eager</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Data: Guo &amp; Zhang, KernelBench retrospective (2025)</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · cd-4</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">search beats one-shot</text>
+</svg>

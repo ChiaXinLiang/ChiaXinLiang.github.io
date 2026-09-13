@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Temperature Reshapes the Dice</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Same four logits (5, 4, 3, 1), three temperatures</text>
+
+  <!-- Panel titles -->
+  <text x="252" y="300" font-size="28" font-weight="bold" fill="#33362a" text-anchor="middle">T = 0.5 · sharper</text>
+  <text x="600" y="300" font-size="28" font-weight="bold" fill="#33362a" text-anchor="middle">T = 1.0 · raw</text>
+  <text x="948" y="300" font-size="28" font-weight="bold" fill="#33362a" text-anchor="middle">T = 2.0 · flatter</text>
+
+  <!-- Panel 1: T=0.5 probs .87 .12 .02 .0003 ; scale 420px per 1.0 ; baseline 780 -->
+  <g>
+    <rect x="120" y="416" width="55" height="364" fill="#5b7c46"/>
+    <rect x="193" y="731" width="55" height="49" fill="#a3a08f"/>
+    <rect x="266" y="773" width="55" height="7" fill="#a8bf92"/>
+    <rect x="339" y="777" width="55" height="3" fill="#e5b3a6"/>
+    <text x="147" y="400" font-size="24" fill="#55584a" text-anchor="middle">87%</text>
+    <text x="220" y="715" font-size="24" fill="#55584a" text-anchor="middle">12%</text>
+    <text x="293" y="757" font-size="24" fill="#55584a" text-anchor="middle">2%</text>
+    <text x="366" y="761" font-size="24" fill="#55584a" text-anchor="middle">0%</text>
+  </g>
+
+  <!-- Panel 2: T=1.0 probs .66 .24 .09 .01 -->
+  <g>
+    <rect x="468" y="504" width="55" height="276" fill="#5b7c46"/>
+    <rect x="541" y="678" width="55" height="102" fill="#a3a08f"/>
+    <rect x="614" y="743" width="55" height="37" fill="#a8bf92"/>
+    <rect x="687" y="775" width="55" height="5" fill="#e5b3a6"/>
+    <text x="495" y="488" font-size="24" fill="#55584a" text-anchor="middle">66%</text>
+    <text x="568" y="662" font-size="24" fill="#55584a" text-anchor="middle">24%</text>
+    <text x="641" y="727" font-size="24" fill="#55584a" text-anchor="middle">9%</text>
+    <text x="714" y="759" font-size="24" fill="#55584a" text-anchor="middle">1%</text>
+  </g>
+
+  <!-- Panel 3: T=2.0 probs .47 .29 .17 .06 -->
+  <g>
+    <rect x="816" y="581" width="55" height="199" fill="#5b7c46"/>
+    <rect x="889" y="659" width="55" height="121" fill="#a3a08f"/>
+    <rect x="962" y="707" width="55" height="73" fill="#a8bf92"/>
+    <rect x="1035" y="753" width="55" height="27" fill="#e5b3a6"/>
+    <text x="843" y="565" font-size="24" fill="#55584a" text-anchor="middle">47%</text>
+    <text x="916" y="643" font-size="24" fill="#55584a" text-anchor="middle">29%</text>
+    <text x="989" y="691" font-size="24" fill="#55584a" text-anchor="middle">17%</text>
+    <text x="1062" y="737" font-size="24" fill="#55584a" text-anchor="middle">6%</text>
+  </g>
+
+  <!-- baselines -->
+  <line x1="110" y1="780" x2="404" y2="780" stroke="#d8d4c4" stroke-width="3"/>
+  <line x1="458" y1="780" x2="752" y2="780" stroke="#d8d4c4" stroke-width="3"/>
+  <line x1="806" y1="780" x2="1100" y2="780" stroke="#d8d4c4" stroke-width="3"/>
+
+  <!-- token labels -->
+  <g font-size="24" fill="#75786a" text-anchor="middle">
+    <text x="147" y="814">blue</text><text x="220" y="814">grey</text><text x="293" y="814">green</text><text x="366" y="814">pink</text>
+    <text x="495" y="814">blue</text><text x="568" y="814">grey</text><text x="641" y="814">green</text><text x="714" y="814">pink</text>
+    <text x="843" y="814">blue</text><text x="916" y="814">grey</text><text x="989" y="814">green</text><text x="1062" y="814">pink</text>
+  </g>
+
+  <text x="600" y="890" font-size="26" fill="#55584a" text-anchor="middle">Dividing logits by T before the softmax sharpens the</text>
+  <text x="600" y="926" font-size="26" fill="#55584a" text-anchor="middle">favorite at low T and hands the tail real odds at high T.</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics · llm-3</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">randomness is a dial</text>
+</svg>

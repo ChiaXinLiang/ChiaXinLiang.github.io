@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">The systolic array</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">Weights sit still; activations flow right, partial sums flow down</text>
+
+  <defs>
+    <marker id="arrT" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#b06a4e"/>
+    </marker>
+    <marker id="arrS" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#5b7c46"/>
+    </marker>
+  </defs>
+
+  <!-- column labels: activations in -->
+  <text x="240" y="300" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="bold" fill="#b06a4e">activations in</text>
+
+  <!-- 4x4 grid of MAC cells: cell size 110, gap 40, start x=430, y=330 -->
+  <!-- activation arrows into each row -->
+  <g stroke="#b06a4e" stroke-width="4" fill="none">
+    <line x1="330" y1="385" x2="418" y2="385" marker-end="url(#arrT)"/>
+    <line x1="330" y1="535" x2="418" y2="535" marker-end="url(#arrT)"/>
+    <line x1="330" y1="685" x2="418" y2="685" marker-end="url(#arrT)"/>
+    <line x1="330" y1="835" x2="418" y2="835" marker-end="url(#arrT)"/>
+  </g>
+  <g font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#b06a4e">
+    <text x="288" y="394">a1</text>
+    <text x="288" y="544">a2</text>
+    <text x="288" y="694">a3</text>
+    <text x="288" y="844">a4</text>
+  </g>
+
+  <!-- horizontal pass-along arrows between cells -->
+  <g stroke="#e5b3a6" stroke-width="4" fill="none">
+    <line x1="540" y1="385" x2="568" y2="385"/>
+    <line x1="690" y1="385" x2="718" y2="385"/>
+    <line x1="840" y1="385" x2="868" y2="385"/>
+    <line x1="540" y1="535" x2="568" y2="535"/>
+    <line x1="690" y1="535" x2="718" y2="535"/>
+    <line x1="840" y1="535" x2="868" y2="535"/>
+    <line x1="540" y1="685" x2="568" y2="685"/>
+    <line x1="690" y1="685" x2="718" y2="685"/>
+    <line x1="840" y1="685" x2="868" y2="685"/>
+    <line x1="540" y1="835" x2="568" y2="835"/>
+    <line x1="690" y1="835" x2="718" y2="835"/>
+    <line x1="840" y1="835" x2="868" y2="835"/>
+  </g>
+
+  <!-- vertical partial-sum arrows between cells -->
+  <g stroke="#a8bf92" stroke-width="4" fill="none">
+    <line x1="485" y1="440" x2="485" y2="468"/>
+    <line x1="635" y1="440" x2="635" y2="468"/>
+    <line x1="785" y1="440" x2="785" y2="468"/>
+    <line x1="935" y1="440" x2="935" y2="468"/>
+    <line x1="485" y1="590" x2="485" y2="618"/>
+    <line x1="635" y1="590" x2="635" y2="618"/>
+    <line x1="785" y1="590" x2="785" y2="618"/>
+    <line x1="935" y1="590" x2="935" y2="618"/>
+    <line x1="485" y1="740" x2="485" y2="768"/>
+    <line x1="635" y1="740" x2="635" y2="768"/>
+    <line x1="785" y1="740" x2="785" y2="768"/>
+    <line x1="935" y1="740" x2="935" y2="768"/>
+  </g>
+  <!-- partial sums out bottom -->
+  <g stroke="#5b7c46" stroke-width="4" fill="none">
+    <line x1="485" y1="890" x2="485" y2="940" marker-end="url(#arrS)"/>
+    <line x1="635" y1="890" x2="635" y2="940" marker-end="url(#arrS)"/>
+    <line x1="785" y1="890" x2="785" y2="940" marker-end="url(#arrS)"/>
+    <line x1="935" y1="890" x2="935" y2="940" marker-end="url(#arrS)"/>
+  </g>
+
+  <!-- cells -->
+  <g>
+    <!-- row 1, y=330 -->
+    <g font-family="Helvetica Neue, Arial, sans-serif">
+      <!-- generate 16 cells -->
+    </g>
+  </g>
+  <g fill="#e7edd9" stroke="#5b7c46" stroke-width="3">
+    <rect x="430" y="330" width="110" height="110" rx="10"/>
+    <rect x="580" y="330" width="110" height="110" rx="10"/>
+    <rect x="730" y="330" width="110" height="110" rx="10"/>
+    <rect x="880" y="330" width="110" height="110" rx="10"/>
+    <rect x="430" y="480" width="110" height="110" rx="10"/>
+    <rect x="580" y="480" width="110" height="110" rx="10"/>
+    <rect x="730" y="480" width="110" height="110" rx="10"/>
+    <rect x="880" y="480" width="110" height="110" rx="10"/>
+    <rect x="430" y="630" width="110" height="110" rx="10"/>
+    <rect x="580" y="630" width="110" height="110" rx="10"/>
+    <rect x="730" y="630" width="110" height="110" rx="10"/>
+    <rect x="880" y="630" width="110" height="110" rx="10"/>
+    <rect x="430" y="780" width="110" height="110" rx="10"/>
+    <rect x="580" y="780" width="110" height="110" rx="10"/>
+    <rect x="730" y="780" width="110" height="110" rx="10"/>
+    <rect x="880" y="780" width="110" height="110" rx="10"/>
+  </g>
+  <g font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#33362a" text-anchor="middle">
+    <text x="485" y="395">w11</text><text x="635" y="395">w12</text><text x="785" y="395">w13</text><text x="935" y="395">w14</text>
+    <text x="485" y="545">w21</text><text x="635" y="545">w22</text><text x="785" y="545">w23</text><text x="935" y="545">w24</text>
+    <text x="485" y="695">w31</text><text x="635" y="695">w32</text><text x="785" y="695">w33</text><text x="935" y="695">w34</text>
+    <text x="485" y="845">w41</text><text x="635" y="845">w42</text><text x="785" y="845">w43</text><text x="935" y="845">w44</text>
+  </g>
+  <g font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a" text-anchor="middle">
+    <text x="485" y="427">MAC</text><text x="635" y="427">MAC</text><text x="785" y="427">MAC</text><text x="935" y="427">MAC</text>
+    <text x="485" y="577">MAC</text><text x="635" y="577">MAC</text><text x="785" y="577">MAC</text><text x="935" y="577">MAC</text>
+    <text x="485" y="727">MAC</text><text x="635" y="727">MAC</text><text x="785" y="727">MAC</text><text x="935" y="727">MAC</text>
+    <text x="485" y="877">MAC</text><text x="635" y="877">MAC</text><text x="785" y="877">MAC</text><text x="935" y="877">MAC</text>
+  </g>
+
+  <!-- bottom label -->
+  <text x="710" y="985" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="bold" fill="#5b7c46">partial sums out</text>
+
+  <!-- side annotation -->
+  <g font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">
+    <text x="1010" y="500">each cell,</text>
+    <text x="1010" y="533">every cycle:</text>
+    <text x="1010" y="573">multiply,</text>
+    <text x="1010" y="606">add, pass on.</text>
+    <text x="1010" y="662">One tiny state</text>
+    <text x="1010" y="695">machine runs</text>
+    <text x="1010" y="728">the whole grid</text>
+  </g>
+  <text x="90" y="480" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">TPU v1:</text>
+  <text x="90" y="513" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">256 x 256</text>
+  <text x="90" y="546" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">= 65,536</text>
+  <text x="90" y="579" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">cells</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Redrawn after Jouppi et al. (2017)</text>
+  <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · asic-4</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">data pulses like a heartbeat</text>
+</svg>

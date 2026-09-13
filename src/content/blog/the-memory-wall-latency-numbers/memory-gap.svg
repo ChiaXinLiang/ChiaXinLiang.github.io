@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The Gap That Built the Wall</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Relative performance, 1980 = 1 (log scale)</text>
+
+  <!-- gridlines -->
+  <line x1="170" y1="260" x2="1080" y2="260" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="170" y1="392" x2="1080" y2="392" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="170" y1="524" x2="1080" y2="524" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="170" y1="656" x2="1080" y2="656" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="170" y1="788" x2="1080" y2="788" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="170" y1="920" x2="1080" y2="920" stroke="#d8d4c4" stroke-width="3"/>
+
+  <!-- y labels -->
+  <text x="150" y="269" text-anchor="end" font-size="24" fill="#75786a">100k</text>
+  <text x="150" y="401" text-anchor="end" font-size="24" fill="#75786a">10k</text>
+  <text x="150" y="533" text-anchor="end" font-size="24" fill="#75786a">1,000</text>
+  <text x="150" y="665" text-anchor="end" font-size="24" fill="#75786a">100</text>
+  <text x="150" y="797" text-anchor="end" font-size="24" fill="#75786a">10</text>
+  <text x="150" y="929" text-anchor="end" font-size="24" fill="#75786a">1</text>
+
+  <!-- x labels -->
+  <text x="170" y="962" text-anchor="middle" font-size="24" fill="#75786a">1980</text>
+  <text x="430" y="962" text-anchor="middle" font-size="24" fill="#75786a">1990</text>
+  <text x="690" y="962" text-anchor="middle" font-size="24" fill="#75786a">2000</text>
+  <text x="950" y="962" text-anchor="middle" font-size="24" fill="#75786a">2010</text>
+
+  <!-- DRAM line -->
+  <polyline points="170,920 1080,784" fill="none" stroke="#5b7c46" stroke-width="5"/>
+  <circle cx="1080" cy="784" r="8" fill="#5b7c46"/>
+  <text x="560" y="884" font-size="28" font-weight="bold" fill="#5b7c46">DRAM · +7%/yr</text>
+
+  <!-- Processor line -->
+  <polyline points="170,920 326,843 768,435 976,352 1080,344" fill="none" stroke="#b06a4e" stroke-width="5"/>
+  <circle cx="1080" cy="344" r="8" fill="#b06a4e"/>
+  <text x="400" y="540" font-size="28" font-weight="bold" fill="#b06a4e">Processor · +52%/yr</text>
+
+  <!-- gap annotation -->
+  <line x1="1040" y1="360" x2="1040" y2="772" stroke="#75786a" stroke-width="3" stroke-dasharray="8 7"/>
+  <path d="M 1040 348 L 1032 366 L 1048 366 Z" fill="#75786a"/>
+  <path d="M 1040 780 L 1032 762 L 1048 762 Z" fill="#75786a"/>
+  <text x="1020" y="560" text-anchor="end" font-size="30" font-weight="bold" fill="#33362a">≈1,000×</text>
+  <text x="1020" y="596" text-anchor="end" font-size="26" fill="#55584a">gap</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Redrawn from Hennessy &amp; Patterson, CAQA 5th ed., Fig. 2.2</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · mem-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">compute sprinted, memory walked</text>
+</svg>

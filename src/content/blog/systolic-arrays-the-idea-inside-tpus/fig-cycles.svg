@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">A 2&#215;2 Matmul, Cycle by Cycle</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Weights stay put; inputs (1,2) then (3,4) flow</text>
+
+<!-- Panel 1: Cycle 1 -->
+<rect x="140" y="250" width="440" height="330" rx="10" fill="none" stroke="#d8d4c4" stroke-width="2"/>
+<text x="164" y="294" font-size="30" font-weight="bold" fill="#33362a">Cycle 1</text>
+<rect x="174" y="316" width="180" height="86" rx="8" fill="#e7edd9" stroke="#5b7c46" stroke-width="2.5"/>
+<text x="188" y="348" font-size="22" fill="#75786a">w = 5</text>
+<text x="188" y="384" font-size="27" font-weight="bold" fill="#33362a">1&#215;5 = 5</text>
+<rect x="366" y="316" width="180" height="86" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<text x="380" y="348" font-size="22" fill="#75786a">w = 6</text>
+<text x="380" y="384" font-size="24" fill="#a3a08f">idle</text>
+<rect x="174" y="414" width="180" height="86" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<text x="188" y="446" font-size="22" fill="#75786a">w = 7</text>
+<text x="188" y="482" font-size="24" fill="#a3a08f">idle</text>
+<rect x="366" y="414" width="180" height="86" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<text x="380" y="446" font-size="22" fill="#75786a">w = 8</text>
+<text x="380" y="482" font-size="24" fill="#a3a08f">idle</text>
+<text x="164" y="548" font-size="24" fill="#55584a">1&#215;5 = 5 starts down column 1</text>
+
+<!-- Panel 2: Cycle 2 -->
+<rect x="620" y="250" width="440" height="330" rx="10" fill="none" stroke="#d8d4c4" stroke-width="2"/>
+<text x="644" y="294" font-size="30" font-weight="bold" fill="#33362a">Cycle 2</text>
+<rect x="654" y="316" width="180" height="86" rx="8" fill="#e7edd9" stroke="#5b7c46" stroke-width="2.5"/>
+<text x="668" y="348" font-size="22" fill="#75786a">w = 5</text>
+<text x="668" y="384" font-size="27" font-weight="bold" fill="#33362a">3&#215;5 = 15</text>
+<rect x="846" y="316" width="180" height="86" rx="8" fill="#e7edd9" stroke="#5b7c46" stroke-width="2.5"/>
+<text x="860" y="348" font-size="22" fill="#75786a">w = 6</text>
+<text x="860" y="384" font-size="27" font-weight="bold" fill="#33362a">1&#215;6 = 6</text>
+<rect x="654" y="414" width="180" height="86" rx="8" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2.5"/>
+<text x="668" y="446" font-size="22" fill="#75786a">w = 7</text>
+<text x="668" y="482" font-size="27" font-weight="bold" fill="#8a5138">5+2&#215;7 = 19</text>
+<rect x="846" y="414" width="180" height="86" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<text x="860" y="446" font-size="22" fill="#75786a">w = 8</text>
+<text x="860" y="482" font-size="24" fill="#a3a08f">idle</text>
+<text x="644" y="548" font-size="24" fill="#55584a">C11 = 19 exits column 1</text>
+
+<!-- Panel 3: Cycle 3 -->
+<rect x="140" y="616" width="440" height="330" rx="10" fill="none" stroke="#d8d4c4" stroke-width="2"/>
+<text x="164" y="660" font-size="30" font-weight="bold" fill="#33362a">Cycle 3</text>
+<rect x="174" y="682" width="180" height="86" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<text x="188" y="714" font-size="22" fill="#75786a">w = 5</text>
+<text x="188" y="750" font-size="24" fill="#a3a08f">idle</text>
+<rect x="366" y="682" width="180" height="86" rx="8" fill="#e7edd9" stroke="#5b7c46" stroke-width="2.5"/>
+<text x="380" y="714" font-size="22" fill="#75786a">w = 6</text>
+<text x="380" y="750" font-size="27" font-weight="bold" fill="#33362a">3&#215;6 = 18</text>
+<rect x="174" y="780" width="180" height="86" rx="8" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2.5"/>
+<text x="188" y="812" font-size="22" fill="#75786a">w = 7</text>
+<text x="188" y="848" font-size="27" font-weight="bold" fill="#8a5138">15+4&#215;7 = 43</text>
+<rect x="366" y="780" width="180" height="86" rx="8" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2.5"/>
+<text x="380" y="812" font-size="22" fill="#75786a">w = 8</text>
+<text x="380" y="848" font-size="27" font-weight="bold" fill="#8a5138">6+2&#215;8 = 22</text>
+<text x="164" y="914" font-size="24" fill="#55584a">C21 = 43 and C12 = 22 exit</text>
+
+<!-- Panel 4: Cycle 4 -->
+<rect x="620" y="616" width="440" height="330" rx="10" fill="none" stroke="#d8d4c4" stroke-width="2"/>
+<text x="644" y="660" font-size="30" font-weight="bold" fill="#33362a">Cycle 4</text>
+<rect x="654" y="682" width="180" height="86" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<text x="668" y="714" font-size="22" fill="#75786a">w = 5</text>
+<text x="668" y="750" font-size="24" fill="#a3a08f">idle</text>
+<rect x="846" y="682" width="180" height="86" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<text x="860" y="714" font-size="22" fill="#75786a">w = 6</text>
+<text x="860" y="750" font-size="24" fill="#a3a08f">idle</text>
+<rect x="654" y="780" width="180" height="86" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<text x="668" y="812" font-size="22" fill="#75786a">w = 7</text>
+<text x="668" y="848" font-size="24" fill="#a3a08f">idle</text>
+<rect x="846" y="780" width="180" height="86" rx="8" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2.5"/>
+<text x="860" y="812" font-size="22" fill="#75786a">w = 8</text>
+<text x="860" y="848" font-size="27" font-weight="bold" fill="#8a5138">18+4&#215;8 = 50</text>
+<text x="644" y="914" font-size="24" fill="#55584a">C22 = 50; C = [[19,22],[43,50]]</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · par-3</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">follow the pulse</text>
+</svg>

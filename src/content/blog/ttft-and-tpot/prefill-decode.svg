@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Request, Two Phases</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">One pass for the prompt; one per reply token</text>
+
+  <!-- phase headers -->
+  <text x="270" y="272" text-anchor="middle" font-size="34" font-weight="bold" fill="#5b7c46">PREFILL</text>
+  <text x="270" y="308" text-anchor="middle" font-size="24" fill="#75786a">compute-bound (FLOPs)</text>
+  <text x="790" y="272" text-anchor="middle" font-size="34" font-weight="bold" fill="#b06a4e">DECODE</text>
+  <text x="790" y="308" text-anchor="middle" font-size="24" fill="#75786a">bandwidth-bound (GB/s)</text>
+
+  <!-- prefill block -->
+  <rect x="120" y="360" width="300" height="160" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="270" y="430" text-anchor="middle" font-size="24" fill="#33362a">2,000 prompt tokens</text>
+  <text x="270" y="466" text-anchor="middle" font-size="24" fill="#33362a">computed in parallel</text>
+
+  <!-- arrow prefill -> decode -->
+  <line x1="424" y1="440" x2="458" y2="440" stroke="#75786a" stroke-width="3"/>
+  <polygon points="458,432 458,448 470,440" fill="#75786a"/>
+
+  <!-- decode tokens -->
+  <g stroke="#b06a4e" stroke-width="2.5" fill="#f0ddd0">
+    <rect x="470" y="395" width="64" height="90" rx="8"/>
+    <rect x="554" y="395" width="64" height="90" rx="8"/>
+    <rect x="638" y="395" width="64" height="90" rx="8"/>
+    <rect x="722" y="395" width="64" height="90" rx="8"/>
+    <rect x="806" y="395" width="64" height="90" rx="8"/>
+    <rect x="890" y="395" width="64" height="90" rx="8"/>
+    <rect x="974" y="395" width="64" height="90" rx="8"/>
+  </g>
+  <g text-anchor="middle" font-size="24" fill="#8a5138">
+    <text x="502" y="448">t1</text>
+    <text x="586" y="448">t2</text>
+    <text x="670" y="448">t3</text>
+    <text x="754" y="448">t4</text>
+    <text x="838" y="448">t5</text>
+    <text x="922" y="448">t6</text>
+    <text x="1006" y="448">t7</text>
+  </g>
+  <text x="1066" y="450" font-size="34" fill="#75786a">&#8230;</text>
+
+  <!-- TTFT bracket -->
+  <line x1="120" y1="585" x2="534" y2="585" stroke="#55584a" stroke-width="3"/>
+  <line x1="120" y1="585" x2="120" y2="568" stroke="#55584a" stroke-width="3"/>
+  <line x1="534" y1="585" x2="534" y2="568" stroke="#55584a" stroke-width="3"/>
+  <text x="327" y="632" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">TTFT &#8776; 200 ms</text>
+  <text x="327" y="666" text-anchor="middle" font-size="24" fill="#75786a">prompt in &#8594; first token out</text>
+
+  <!-- TPOT bracket -->
+  <line x1="722" y1="585" x2="806" y2="585" stroke="#55584a" stroke-width="3"/>
+  <line x1="722" y1="585" x2="722" y2="568" stroke="#55584a" stroke-width="3"/>
+  <line x1="806" y1="585" x2="806" y2="568" stroke="#55584a" stroke-width="3"/>
+  <text x="764" y="632" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">TPOT &#8776; 7.6 ms</text>
+  <text x="764" y="666" text-anchor="middle" font-size="24" fill="#75786a">gap between tokens</text>
+
+  <!-- dependency boxes -->
+  <rect x="120" y="720" width="460" height="190" rx="12" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+  <text x="350" y="768" text-anchor="middle" font-size="26" font-weight="bold" fill="#5b7c46">TTFT scales with</text>
+  <text x="350" y="810" text-anchor="middle" font-size="24" fill="#55584a">prompt tokens &#215; 2 &#215; params</text>
+  <text x="350" y="844" text-anchor="middle" font-size="24" fill="#55584a">&#247; sustained FLOPS</text>
+  <text x="350" y="878" text-anchor="middle" font-size="24" fill="#55584a">+ time spent in queue</text>
+
+  <rect x="620" y="720" width="460" height="190" rx="12" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
+  <text x="850" y="768" text-anchor="middle" font-size="26" font-weight="bold" fill="#b06a4e">TPOT scales with</text>
+  <text x="850" y="810" text-anchor="middle" font-size="24" fill="#55584a">weight bytes + KV-cache bytes</text>
+  <text x="850" y="844" text-anchor="middle" font-size="24" fill="#55584a">&#247; memory bandwidth</text>
+  <text x="850" y="878" text-anchor="middle" font-size="24" fill="#55584a">grows as context grows</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics &#183; llm-5</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">two clocks, one request</text>
+</svg>

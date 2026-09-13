@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#75786a"/>
+    </marker>
+  </defs>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The verifier loop</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">The engine behind every gain: measure, feed back, retry</text>
+
+  <!-- best-of-N shadow stack behind box 1 -->
+  <rect x="106" y="356" width="220" height="160" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="98" y="368" width="220" height="160" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+
+  <!-- Box 1 -->
+  <rect x="90" y="380" width="220" height="160" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="200" y="440" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">LLM proposes</text>
+  <text x="200" y="478" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">a kernel</text>
+  <text x="200" y="335" text-anchor="middle" font-size="24" fill="#75786a">best-of-N samples</text>
+
+  <!-- Arrow 1 -->
+  <line x1="313" y1="460" x2="343" y2="460" stroke="#75786a" stroke-width="4" marker-end="url(#arr)"/>
+
+  <!-- Box 2 -->
+  <rect x="350" y="380" width="220" height="160" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="460" y="440" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">Compile</text>
+  <text x="460" y="478" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">and run</text>
+
+  <!-- Arrow 2 -->
+  <line x1="573" y1="460" x2="603" y2="460" stroke="#75786a" stroke-width="4" marker-end="url(#arr)"/>
+
+  <!-- Box 3 -->
+  <rect x="610" y="380" width="220" height="160" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="720" y="440" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">Fuzz vs PyTorch</text>
+  <text x="720" y="478" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">reference</text>
+
+  <!-- Arrow 3 -->
+  <line x1="833" y1="460" x2="863" y2="460" stroke="#75786a" stroke-width="4" marker-end="url(#arr)"/>
+
+  <!-- Box 4 -->
+  <rect x="870" y="380" width="220" height="160" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="980" y="440" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">Profile</text>
+  <text x="980" y="478" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">and time</text>
+
+  <!-- Feedback path -->
+  <path d="M 980 540 L 980 650 L 200 650 L 200 546" fill="none" stroke="#75786a" stroke-width="4" marker-end="url(#arr)"/>
+  <text x="590" y="700" text-anchor="middle" font-size="26" fill="#55584a">compiler errors · wrong outputs · runtimes · hotspots</text>
+  <text x="1035" y="610" font-size="24" fill="#75786a">turn t+1</text>
+
+  <!-- Bottom notes -->
+  <line x1="330" y1="775" x2="870" y2="775" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="600" y="850" text-anchor="middle" font-size="27" fill="#55584a">Iterating this loop lifted DeepSeek-R1 from 36% to 72%</text>
+  <text x="600" y="900" text-anchor="middle" font-size="27" fill="#55584a">Kevin trains on the loop itself with RL:</text>
+  <text x="600" y="940" text-anchor="middle" font-size="27" fill="#55584a">82% correct, 1.10x mean speedup</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · cd-4</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">measure, then retry</text>
+</svg>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">From MLA to DSA</text>
+    <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Two attacks on the same quadratic attention bill</text>
+
+    <!-- Box 1: MLA -->
+    <rect x="140" y="248" width="920" height="156" rx="10" fill="#e7edd9" stroke="#a8bf92" stroke-width="2.5"/>
+    <text x="180" y="300" font-size="31" font-weight="bold" fill="#5b7c46">MLA &#183; Multi-head Latent Attention</text>
+    <text x="180" y="342" font-size="25" fill="#55584a">Compresses each token&#8217;s KV into a 576-value latent</text>
+    <text x="180" y="380" font-size="24" fill="#75786a">DeepSeek-V2, May 2024 &#183; KV cache shrinks ~93%</text>
+    <text x="1020" y="300" text-anchor="end" font-size="25" font-weight="bold" fill="#5b7c46">memory side</text>
+
+    <line x1="600" y1="404" x2="600" y2="456" stroke="#a3a08f" stroke-width="3"/>
+    <path d="M 600 468 L 591 452 L 609 452 Z" fill="#a3a08f"/>
+
+    <!-- Box 2: NSA -->
+    <rect x="140" y="474" width="920" height="156" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2.5"/>
+    <text x="180" y="526" font-size="31" font-weight="bold" fill="#55584a">NSA &#183; Native Sparse Attention</text>
+    <text x="180" y="568" font-size="25" fill="#55584a">Trainable block sparsity, aligned to GPU access patterns</text>
+    <text x="180" y="606" font-size="24" fill="#75786a">Research paper, Feb 2025 &#183; wall-clock wins, not just FLOPs</text>
+    <text x="1020" y="526" text-anchor="end" font-size="25" font-weight="bold" fill="#7a5a20">trainability</text>
+
+    <line x1="600" y1="630" x2="600" y2="682" stroke="#a3a08f" stroke-width="3"/>
+    <path d="M 600 694 L 591 678 L 609 678 Z" fill="#a3a08f"/>
+
+    <!-- Box 3: DSA -->
+    <rect x="140" y="700" width="920" height="156" rx="10" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2.5"/>
+    <text x="180" y="752" font-size="31" font-weight="bold" fill="#8a5138">DSA &#183; DeepSeek Sparse Attention</text>
+    <text x="180" y="794" font-size="25" fill="#55584a">Per-token top-2,048 selection on top of MLA&#8217;s latents</text>
+    <text x="180" y="832" font-size="24" fill="#75786a">V3.2-Exp, Sep 2025 &#183; API prices cut 50&#8211;75% same day</text>
+    <text x="1020" y="752" text-anchor="end" font-size="25" font-weight="bold" fill="#8a5138">compute side</text>
+
+    <text x="600" y="938" text-anchor="middle" font-size="26" fill="#75786a">Shrink the cache first, then prune the compute that reads it</text>
+
+    <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+    <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; cd-2</text>
+    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">shrink memory, then compute</text>
+  </g>
+</svg>

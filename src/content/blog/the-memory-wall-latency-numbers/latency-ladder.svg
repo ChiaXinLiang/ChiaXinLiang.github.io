@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">If One Nanosecond Were One Second</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">The memory hierarchy, rescaled for human intuition</text>
+
+  <!-- Row 1: Register -->
+  <text x="90" y="268" font-size="28" font-weight="bold" fill="#33362a">Register <tspan font-weight="normal" fill="#75786a">· 0.3 ns</tspan></text>
+  <text x="1110" y="268" text-anchor="end" font-size="27" font-weight="bold" fill="#55584a">0.3 s (a blink)</text>
+  <rect x="90" y="286" width="108" height="30" rx="4" fill="#5b7c46"/>
+
+  <!-- Row 2: L1 -->
+  <text x="90" y="368" font-size="28" font-weight="bold" fill="#33362a">L1 cache <tspan font-weight="normal" fill="#75786a">· 1 ns</tspan></text>
+  <text x="1110" y="368" text-anchor="end" font-size="27" font-weight="bold" fill="#55584a">1 second</text>
+  <rect x="90" y="386" width="160" height="30" rx="4" fill="#5b7c46"/>
+
+  <!-- Row 3: L2 -->
+  <text x="90" y="468" font-size="28" font-weight="bold" fill="#33362a">L2 cache <tspan font-weight="normal" fill="#75786a">· 4 ns</tspan></text>
+  <text x="1110" y="468" text-anchor="end" font-size="27" font-weight="bold" fill="#55584a">4 seconds</text>
+  <rect x="90" y="486" width="220" height="30" rx="4" fill="#a8bf92"/>
+
+  <!-- Row 4: DRAM -->
+  <text x="90" y="568" font-size="28" font-weight="bold" fill="#33362a">Main memory (DRAM) <tspan font-weight="normal" fill="#75786a">· 100 ns</tspan></text>
+  <text x="1110" y="568" text-anchor="end" font-size="27" font-weight="bold" fill="#55584a">2 minutes</text>
+  <rect x="90" y="586" width="360" height="30" rx="4" fill="#c9973b"/>
+
+  <!-- Row 5: SSD -->
+  <text x="90" y="668" font-size="28" font-weight="bold" fill="#33362a">NVMe SSD read <tspan font-weight="normal" fill="#75786a">· 100 µs</tspan></text>
+  <text x="1110" y="668" text-anchor="end" font-size="27" font-weight="bold" fill="#55584a">28 hours</text>
+  <rect x="90" y="686" width="660" height="30" rx="4" fill="#b06a4e"/>
+
+  <!-- Row 6: Disk -->
+  <text x="90" y="768" font-size="28" font-weight="bold" fill="#33362a">Disk seek (HDD) <tspan font-weight="normal" fill="#75786a">· 10 ms</tspan></text>
+  <text x="1110" y="768" text-anchor="end" font-size="27" font-weight="bold" fill="#55584a">4 months</text>
+  <rect x="90" y="786" width="860" height="30" rx="4" fill="#8a5138"/>
+
+  <!-- Row 7: Network -->
+  <text x="90" y="868" font-size="28" font-weight="bold" fill="#33362a">Network round trip <tspan font-weight="normal" fill="#75786a">· 150 ms</tspan></text>
+  <text x="1110" y="868" text-anchor="end" font-size="27" font-weight="bold" fill="#55584a">5 years</text>
+  <rect x="90" y="886" width="978" height="30" rx="4" fill="#b04a3a"/>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Bar length: log scale. Numbers after J. Dean / C. Scott</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · mem-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">one nanosecond, one second</text>
+</svg>

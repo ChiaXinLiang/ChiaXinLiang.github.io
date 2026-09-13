@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <defs>
+    <marker id="aw" markerWidth="12" markerHeight="12" refX="9" refY="5" orient="auto">
+      <path d="M1 1 L10 5 L1 9 Z" fill="#a3a08f"/>
+    </marker>
+  </defs>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Why GPUs Skip the Gamble</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">A divergent warp runs both paths, half masked</text>
+
+  <!-- column headers -->
+  <text x="652" y="252" text-anchor="middle" font-size="26" fill="#75786a">one warp = 32 lanes (8 drawn)</text>
+  <text x="1052" y="252" text-anchor="middle" font-size="26" fill="#75786a">useful</text>
+
+  <!-- time arrow -->
+  <line x1="120" y1="300" x2="120" y2="810" stroke="#a3a08f" stroke-width="3" marker-end="url(#aw)"/>
+  <text x="120" y="850" text-anchor="middle" font-size="26" fill="#a3a08f">time</text>
+
+  <!-- Row 1: branch, all active -->
+  <g stroke="#5b7c46" stroke-width="2.5" fill="#a8bf92">
+    <rect x="330" y="280" width="70" height="80" rx="8"/><rect x="412" y="280" width="70" height="80" rx="8"/>
+    <rect x="494" y="280" width="70" height="80" rx="8"/><rect x="576" y="280" width="70" height="80" rx="8"/>
+    <rect x="658" y="280" width="70" height="80" rx="8"/><rect x="740" y="280" width="70" height="80" rx="8"/>
+    <rect x="822" y="280" width="70" height="80" rx="8"/><rect x="904" y="280" width="70" height="80" rx="8"/>
+  </g>
+  <text x="180" y="312" font-size="28" font-weight="bold" fill="#33362a">if (x&gt;0)</text>
+  <text x="180" y="346" font-size="24" fill="#75786a">all run</text>
+  <text x="1052" y="330" text-anchor="middle" font-size="28" font-weight="bold" fill="#5b7c46">100%</text>
+
+  <!-- Row 2: then-path, right half masked -->
+  <g stroke-width="2.5">
+    <rect x="330" y="430" width="70" height="80" rx="8" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="412" y="430" width="70" height="80" rx="8" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="494" y="430" width="70" height="80" rx="8" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="576" y="430" width="70" height="80" rx="8" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="658" y="430" width="70" height="80" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-dasharray="8 6"/>
+    <rect x="740" y="430" width="70" height="80" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-dasharray="8 6"/>
+    <rect x="822" y="430" width="70" height="80" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-dasharray="8 6"/>
+    <rect x="904" y="430" width="70" height="80" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-dasharray="8 6"/>
+  </g>
+  <text x="180" y="462" font-size="28" font-weight="bold" fill="#33362a">then</text>
+  <text x="180" y="496" font-size="24" fill="#75786a">half masked</text>
+  <text x="1052" y="480" text-anchor="middle" font-size="28" font-weight="bold" fill="#b04a3a">50%</text>
+
+  <!-- Row 3: else-path, left half masked -->
+  <g stroke-width="2.5">
+    <rect x="330" y="580" width="70" height="80" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-dasharray="8 6"/>
+    <rect x="412" y="580" width="70" height="80" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-dasharray="8 6"/>
+    <rect x="494" y="580" width="70" height="80" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-dasharray="8 6"/>
+    <rect x="576" y="580" width="70" height="80" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-dasharray="8 6"/>
+    <rect x="658" y="580" width="70" height="80" rx="8" fill="#f0ddd0" stroke="#b06a4e"/>
+    <rect x="740" y="580" width="70" height="80" rx="8" fill="#f0ddd0" stroke="#b06a4e"/>
+    <rect x="822" y="580" width="70" height="80" rx="8" fill="#f0ddd0" stroke="#b06a4e"/>
+    <rect x="904" y="580" width="70" height="80" rx="8" fill="#f0ddd0" stroke="#b06a4e"/>
+  </g>
+  <text x="180" y="612" font-size="28" font-weight="bold" fill="#33362a">else</text>
+  <text x="180" y="646" font-size="24" fill="#75786a">half masked</text>
+  <text x="1052" y="630" text-anchor="middle" font-size="28" font-weight="bold" fill="#b04a3a">50%</text>
+
+  <!-- Row 4: reconverge -->
+  <g stroke="#5b7c46" stroke-width="2.5" fill="#a8bf92">
+    <rect x="330" y="730" width="70" height="80" rx="8"/><rect x="412" y="730" width="70" height="80" rx="8"/>
+    <rect x="494" y="730" width="70" height="80" rx="8"/><rect x="576" y="730" width="70" height="80" rx="8"/>
+    <rect x="658" y="730" width="70" height="80" rx="8"/><rect x="740" y="730" width="70" height="80" rx="8"/>
+    <rect x="822" y="730" width="70" height="80" rx="8"/><rect x="904" y="730" width="70" height="80" rx="8"/>
+  </g>
+  <text x="180" y="762" font-size="28" font-weight="bold" fill="#33362a">rejoin</text>
+  <text x="180" y="796" font-size="24" fill="#75786a">all run</text>
+  <text x="1052" y="780" text-anchor="middle" font-size="28" font-weight="bold" fill="#5b7c46">100%</text>
+
+  <!-- legend -->
+  <rect x="330" y="880" width="44" height="36" rx="6" fill="#a8bf92" stroke="#5b7c46" stroke-width="2.5"/>
+  <text x="392" y="906" font-size="26" fill="#55584a">lane executing</text>
+  <rect x="660" y="880" width="44" height="36" rx="6" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text x="722" y="906" font-size="26" fill="#55584a">lane masked (idle)</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; arch-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">predicate, not predict</text>
+</svg>

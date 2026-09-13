@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Three clouds, three chips</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">All numbers vendor-reported · early 2026</text>
+
+  <!-- Card 1: Google Ironwood -->
+  <rect x="90" y="250" width="320" height="680" rx="14" fill="#fdfbf4" stroke="#d8d4c4" stroke-width="2"/>
+  <rect x="90" y="250" width="320" height="96" rx="14" fill="#e7edd9"/>
+  <rect x="90" y="322" width="320" height="24" fill="#e7edd9"/>
+  <text x="250" y="288" text-anchor="middle" font-size="24" fill="#75786a">GOOGLE CLOUD · TPU v7</text>
+  <text x="250" y="330" text-anchor="middle" font-size="38" font-weight="bold" fill="#5b7c46">Ironwood</text>
+
+  <text x="250" y="396" text-anchor="middle" font-size="24" fill="#75786a">Compute</text>
+  <text x="250" y="432" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">4,614 TFLOPS FP8</text>
+  <line x1="120" y1="496" x2="380" y2="496" stroke="#e8e4d7" stroke-width="2"/>
+
+  <text x="250" y="531" text-anchor="middle" font-size="24" fill="#75786a">Memory</text>
+  <text x="250" y="567" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">192 GB HBM</text>
+  <text x="250" y="599" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">7.37 TB/s</text>
+  <line x1="120" y1="631" x2="380" y2="631" stroke="#e8e4d7" stroke-width="2"/>
+
+  <text x="250" y="666" text-anchor="middle" font-size="24" fill="#75786a">Fabric</text>
+  <text x="250" y="702" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">Optical circuit</text>
+  <text x="250" y="734" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">switching (OCS)</text>
+  <line x1="120" y1="766" x2="380" y2="766" stroke="#e8e4d7" stroke-width="2"/>
+
+  <text x="250" y="801" text-anchor="middle" font-size="24" fill="#75786a">Scale-up domain</text>
+  <text x="250" y="837" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">9,216 chips</text>
+  <text x="250" y="869" text-anchor="middle" font-size="27" font-weight="bold" fill="#5b7c46">42.5 EF FP8 pod</text>
+
+  <!-- Card 2: AWS Trainium3 -->
+  <rect x="440" y="250" width="320" height="680" rx="14" fill="#fdfbf4" stroke="#d8d4c4" stroke-width="2"/>
+  <rect x="440" y="250" width="320" height="96" rx="14" fill="#f0ddd0"/>
+  <rect x="440" y="322" width="320" height="24" fill="#f0ddd0"/>
+  <text x="600" y="288" text-anchor="middle" font-size="24" fill="#75786a">AWS · ANNAPURNA</text>
+  <text x="600" y="330" text-anchor="middle" font-size="38" font-weight="bold" fill="#8a5138">Trainium3</text>
+
+  <text x="600" y="396" text-anchor="middle" font-size="24" fill="#75786a">Signature feature</text>
+  <text x="600" y="432" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">W4A8 in hardware</text>
+  <line x1="470" y1="496" x2="730" y2="496" stroke="#e8e4d7" stroke-width="2"/>
+
+  <text x="600" y="531" text-anchor="middle" font-size="24" fill="#75786a">Why it matters</text>
+  <text x="600" y="567" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">2x effective</text>
+  <text x="600" y="599" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">weight bandwidth</text>
+  <line x1="470" y1="631" x2="730" y2="631" stroke="#e8e4d7" stroke-width="2"/>
+
+  <text x="600" y="666" text-anchor="middle" font-size="24" fill="#75786a">Fabric</text>
+  <text x="600" y="702" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">NeuronLink</text>
+  <text x="600" y="734" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">+ EFA scale-out</text>
+  <line x1="470" y1="766" x2="730" y2="766" stroke="#e8e4d7" stroke-width="2"/>
+
+  <text x="600" y="801" text-anchor="middle" font-size="24" fill="#75786a">Scale-up domain</text>
+  <text x="600" y="837" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">144 chips</text>
+  <text x="600" y="869" text-anchor="middle" font-size="27" font-weight="bold" fill="#8a5138">362 PF MXFP8</text>
+
+  <!-- Card 3: Microsoft Maia 200 -->
+  <rect x="790" y="250" width="320" height="680" rx="14" fill="#fdfbf4" stroke="#d8d4c4" stroke-width="2"/>
+  <rect x="790" y="250" width="320" height="96" rx="14" fill="#f7ecd2"/>
+  <rect x="790" y="322" width="320" height="24" fill="#f7ecd2"/>
+  <text x="950" y="288" text-anchor="middle" font-size="24" fill="#75786a">MICROSOFT AZURE</text>
+  <text x="950" y="330" text-anchor="middle" font-size="38" font-weight="bold" fill="#7a5a20">Maia 200</text>
+
+  <text x="950" y="396" text-anchor="middle" font-size="24" fill="#75786a">Compute</text>
+  <text x="950" y="432" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">&gt;10 PFLOPS FP4</text>
+  <line x1="820" y1="496" x2="1080" y2="496" stroke="#e8e4d7" stroke-width="2"/>
+
+  <text x="950" y="531" text-anchor="middle" font-size="24" fill="#75786a">Memory · power</text>
+  <text x="950" y="567" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">216 GB HBM3e</text>
+  <text x="950" y="599" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">750 W package</text>
+  <line x1="820" y1="631" x2="1080" y2="631" stroke="#e8e4d7" stroke-width="2"/>
+
+  <text x="950" y="666" text-anchor="middle" font-size="24" fill="#75786a">Fabric</text>
+  <text x="950" y="702" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">Standard Ethernet</text>
+  <text x="950" y="734" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">custom transport</text>
+  <line x1="820" y1="766" x2="1080" y2="766" stroke="#e8e4d7" stroke-width="2"/>
+
+  <text x="950" y="801" text-anchor="middle" font-size="24" fill="#75786a">Scale-up domain</text>
+  <text x="950" y="837" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">6,144 chips</text>
+  <text x="950" y="869" text-anchor="middle" font-size="27" font-weight="bold" fill="#7a5a20">two-tier network</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · chip-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">one cloud, one chip</text>
+</svg>

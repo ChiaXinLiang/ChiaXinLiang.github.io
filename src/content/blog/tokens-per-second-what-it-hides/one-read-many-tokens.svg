@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Weight Read, Many Tokens</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Llama-3-8B (FP16) on an H100: why batching multiplies throughput</text>
+
+  <!-- panel headers -->
+  <text x="340" y="270" text-anchor="middle" font-size="32" font-weight="bold" fill="#33362a">batch = 1</text>
+  <text x="860" y="270" text-anchor="middle" font-size="32" font-weight="bold" fill="#33362a">batch = 32</text>
+
+  <!-- divider between panels -->
+  <line x1="600" y1="240" x2="600" y2="950" stroke="#e8e4d7" stroke-width="3"/>
+
+  <!-- left weights box -->
+  <rect x="180" y="300" width="320" height="110" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="340" y="348" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">16 GB weights</text>
+  <text x="340" y="386" text-anchor="middle" font-size="24" fill="#75786a">read fully every step</text>
+
+  <!-- right weights box -->
+  <rect x="700" y="300" width="320" height="110" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="860" y="348" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">16 GB weights</text>
+  <text x="860" y="386" text-anchor="middle" font-size="24" fill="#75786a">read fully every step</text>
+
+  <!-- arrows -->
+  <line x1="340" y1="410" x2="340" y2="520" stroke="#b06a4e" stroke-width="4"/>
+  <path d="M 340 535 L 329 514 L 351 514 Z" fill="#b06a4e"/>
+  <text x="365" y="470" text-anchor="start" font-size="24" fill="#b06a4e">3,350 GB/s</text>
+
+  <line x1="860" y1="410" x2="860" y2="520" stroke="#b06a4e" stroke-width="4"/>
+  <path d="M 860 535 L 849 514 L 871 514 Z" fill="#b06a4e"/>
+  <text x="885" y="470" text-anchor="start" font-size="24" fill="#b06a4e">3,350 GB/s</text>
+
+  <!-- left output: one token -->
+  <rect x="315" y="560" width="50" height="50" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="340" y="660" text-anchor="middle" font-size="26" fill="#55584a">1 token per step</text>
+
+  <!-- right output: 32 tokens, 8 x 4 grid, 36px cells, 10px gap -->
+  <g fill="#a8bf92" stroke="#5b7c46" stroke-width="2">
+    <rect x="681" y="560" width="36" height="36"/><rect x="727" y="560" width="36" height="36"/><rect x="773" y="560" width="36" height="36"/><rect x="819" y="560" width="36" height="36"/><rect x="865" y="560" width="36" height="36"/><rect x="911" y="560" width="36" height="36"/><rect x="957" y="560" width="36" height="36"/><rect x="1003" y="560" width="36" height="36"/>
+    <rect x="681" y="606" width="36" height="36"/><rect x="727" y="606" width="36" height="36"/><rect x="773" y="606" width="36" height="36"/><rect x="819" y="606" width="36" height="36"/><rect x="865" y="606" width="36" height="36"/><rect x="911" y="606" width="36" height="36"/><rect x="957" y="606" width="36" height="36"/><rect x="1003" y="606" width="36" height="36"/>
+    <rect x="681" y="652" width="36" height="36"/><rect x="727" y="652" width="36" height="36"/><rect x="773" y="652" width="36" height="36"/><rect x="819" y="652" width="36" height="36"/><rect x="865" y="652" width="36" height="36"/><rect x="911" y="652" width="36" height="36"/><rect x="957" y="652" width="36" height="36"/><rect x="1003" y="652" width="36" height="36"/>
+    <rect x="681" y="698" width="36" height="36"/><rect x="727" y="698" width="36" height="36"/><rect x="773" y="698" width="36" height="36"/><rect x="819" y="698" width="36" height="36"/><rect x="865" y="698" width="36" height="36"/><rect x="911" y="698" width="36" height="36"/><rect x="957" y="698" width="36" height="36"/><rect x="1003" y="698" width="36" height="36"/>
+  </g>
+  <text x="860" y="780" text-anchor="middle" font-size="26" fill="#55584a">32 tokens per step, one per user</text>
+
+  <!-- results -->
+  <rect x="140" y="830" width="400" height="80" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <text x="340" y="880" text-anchor="middle" font-size="30" font-weight="bold" fill="#5b7c46">~ 209 tok/s per user</text>
+
+  <rect x="660" y="830" width="400" height="80" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="860" y="880" text-anchor="middle" font-size="30" font-weight="bold" fill="#7a5a20">~ 6,700 tok/s aggregate</text>
+  <text x="860" y="945" text-anchor="middle" font-size="24" fill="#75786a">each user still capped near 209</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics · llm-6</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">same read, more tokens</text>
+</svg>
