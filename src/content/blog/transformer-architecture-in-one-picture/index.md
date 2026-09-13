@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'tf-2'
-order: 6
-series: 'llm-basics'
-topic: 'Transformer'
+order: 9
+series: "llm-basics"
+level: intermediate
+topic: "Transformer"
 tags: ['transformer', 'architecture']
 ---
 
@@ -137,6 +138,6 @@ Configuration files provide a useful bridge between this diagram and a real chec
 
 ---
 
-*Part of the **Fundamental of LLM** series. Previous: [Attention in plain words](/blog/attention-in-plain-words/). Next: why Transformers won — the parallelism story.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
 
 - [Xiong et al., On Layer Normalization in the Transformer Architecture](https://arxiv.org/abs/2002.04745): pre-norm versus post-norm placement.

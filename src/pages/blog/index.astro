@@ -5,11 +5,11 @@ import Header from '../../components/Header.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SERIES } from '../../consts';
 import { getCollection } from 'astro:content';
+import LearningHub from '../../components/LearningHub.astro';
 
 const all = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
-const countBySeries = (id: string) => all.filter((p) => p.data.series === id).length;
 const unclassified = all.filter((p) => !p.data.series);
 ---
 
@@ -18,52 +18,7 @@ const unclassified = all.filter((p) => !p.data.series);
 	<head>
 		<BaseHead title="Blog" description={SITE_DESCRIPTION} />
 		<style>
-			.series-grid {
-				display: grid;
-				grid-template-columns: 1fr 1fr;
-				gap: 1.5rem;
-				margin: 2rem 0 3rem;
-			}
-			@media (max-width: 720px) {
-				.series-grid {
-					grid-template-columns: 1fr;
-				}
-			}
-			.series-card {
-				border: 1px solid rgb(var(--gray-light));
-				border-radius: 12px;
-				padding: 1.5rem 1.75rem;
-				text-decoration: none;
-				display: block;
-				transition: box-shadow 0.2s ease, transform 0.2s ease;
-			}
-			.series-card:hover {
-				box-shadow: var(--box-shadow);
-				transform: translateY(-2px);
-			}
-			.series-card h2 {
-				margin: 0 0 0.4rem;
-				font-size: 1.4em;
-				color: rgb(var(--black));
-			}
-			.level {
-				display: inline-block;
-				font-size: 0.75em;
-				font-weight: 700;
-				letter-spacing: 0.02em;
-				color: var(--accent);
-				margin-bottom: 0.5rem;
-			}
-			.series-card p {
-				margin: 0;
-				font-size: 0.95em;
-				color: rgb(var(--gray));
-			}
-			.count {
-				margin-top: 0.75rem !important;
-				font-weight: 600;
-				color: rgb(var(--gray-dark)) !important;
-			}
+
 			.notes ul {
 				list-style: none;
 				padding: 0;
@@ -82,21 +37,8 @@ const unclassified = all.filter((p) => !p.data.series);
 		<Header />
 		<main>
 			<h1>Blog</h1>
-			<p>Pick a series — each one is a sequenced set of articles you can read in order.</p>
-			<div class="series-grid">
-				{
-					SERIES.map((s) => (
-						<a class="series-card" href={`/series/${s.id}/`}>
-							<span class="level">{s.level}</span>
-							<h2>{s.name}</h2>
-							<p>{s.tagline}</p>
-							<p class="count">
-								{countBySeries(s.id)} article{countBySeries(s.id) === 1 ? '' : 's'} →
-							</p>
-						</a>
-					))
-				}
-			</div>
+			<p>Choose an area, then a series. Each path has Beginner, Intermediate, and Advanced levels, with a maximum of 30 articles including plans.</p>
+			<LearningHub posts={all} />
 			{
 				unclassified.length > 0 && (
 					<section class="notes">

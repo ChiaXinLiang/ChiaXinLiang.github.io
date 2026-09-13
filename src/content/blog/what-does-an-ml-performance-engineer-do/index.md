@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'intro-1'
 order: 1
-series: 'ai-performance'
-topic: 'Foundations'
+series: "ai-performance"
+level: beginner
+topic: "Performance Methodology"
 tags: ['ml-performance', 'career', 'gpu']
 ---
 
@@ -142,4 +143,4 @@ A useful experiment also documents the rejected alternatives. If higher batching
 
 ---
 
-*Part of the **AI Performance Engineering** series. Next: Goodput — why your "100% utilized" cluster is mostly wasted.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

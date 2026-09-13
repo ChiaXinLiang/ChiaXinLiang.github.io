@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'opt-2'
-order: 20
-series: 'ai-performance'
-topic: 'Inference'
+order: 2
+series: "llm-serving"
+level: beginner
+topic: "Inference Methods"
 tags: [inference, kv-cache, memory]
 ---
 
@@ -112,4 +113,4 @@ The formula is the tool to keep. 6 numbers multiplied together tell you, before 
 - Grattafiori et al., *The Llama 3 Herd of Models*, 2024 — [arxiv.org/abs/2407.21783](https://arxiv.org/abs/2407.21783)
 - vLLM documentation, automatic prefix caching and paged KV memory — [docs.vllm.ai](https://docs.vllm.ai)
 
-*Part of the **AI Performance Engineering** series. Previous: [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/). Related basics: [How an LLM Generates Text](/blog/how-an-llm-generates-text/).*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

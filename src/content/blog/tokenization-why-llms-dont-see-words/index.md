@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'llm-2'
-order: 9
-series: 'llm-basics'
-topic: 'LLM Lifecycle'
+order: 4
+series: "llm-basics"
+level: beginner
+topic: "LLM Lifecycle"
 tags: ['tokenization', 'bpe', 'llm']
 ---
 
@@ -135,4 +136,4 @@ It's also the part of the stack that is pure classical software (no learning at 
 
 ---
 
-*Part of the **Fundamental of LLM** series. Previous: [Pretraining, Fine-Tuning, RLHF](/blog/pretraining-finetuning-rlhf/). Next: how an LLM actually generates text, 1 token at a time.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'arch-1'
 order: 1
-series: 'comp-arch'
-topic: 'CPU Fundamentals'
+series: "comp-arch"
+level: beginner
+topic: "CPU Fundamentals"
 tags: ['computer-architecture', 'cpu', 'pipeline']
 ---
 
@@ -156,4 +157,4 @@ For now, use the loop to understand what an instruction requires, the pipeline t
 
 ---
 
-*Part of the **Computer Architecture & ASIC** series — a ground-up course. Next: branch prediction, and the cost of speculation.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

@@ -5,9 +5,10 @@ pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'arch-2'
-order: 6
-series: 'comp-arch'
-topic: 'CPU Fundamentals'
+order: 10
+series: "comp-arch"
+level: intermediate
+topic: "CPU Fundamentals"
 tags: [cpu, branch-prediction, hardware]
 ---
 
@@ -119,4 +120,4 @@ Meanwhile the CPU's predictor keeps growing. Apple's and AMD's recent cores spen
 - D. A. Jiménez and C. Lin, "Dynamic Branch Prediction with Perceptrons," HPCA 2001; A. Seznec and P. Michaud, "A case for (partially) TAgged GEometric history length branch prediction," JILP 2006.
 - NVIDIA CUDA C++ Programming Guide (SIMT execution and warp divergence): https://docs.nvidia.com/cuda/cuda-c-programming-guide/
 
-*Part of the **Computer Architecture & ASIC** series. Previous: [What a CPU Actually Does](/blog/what-a-cpu-actually-does/), where the pipeline this article keeps flushing was built. Next: out-of-order execution, the machinery that decides what to run while the gambler places its bets.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

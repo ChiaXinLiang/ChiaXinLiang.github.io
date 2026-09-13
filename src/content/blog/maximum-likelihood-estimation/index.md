@@ -4,10 +4,11 @@ description: 'Derive Bernoulli MLE, connect Gaussian noise to squared error, and
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
-series: 'llm-basics'
+series: "llm-basics"
+level: advanced
 code: 'stat-2'
 order: 15
-topic: 'Statistical Learning'
+topic: "Statistical Learning"
 tags: ['statistics', 'likelihood', 'training']
 ---
 

@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'scale-4'
-order: 30
-series: 'ai-performance'
-topic: 'Inference'
+order: 8
+series: "llm-serving"
+level: intermediate
+topic: "Production Serving"
 tags: [inference, throughput, cost]
 ---
 
@@ -120,4 +121,4 @@ The stack also keeps going above the single node. Prefill and decode want differ
 - Qin et al., "Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving" — https://arxiv.org/abs/2407.00079
 - vLLM documentation (automatic prefix caching, chunked prefill) — https://docs.vllm.ai/
 
-*Part of the **AI Performance Engineering** series. Previous: [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/). Next: pushing the same denominator math down into the kernel layer.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

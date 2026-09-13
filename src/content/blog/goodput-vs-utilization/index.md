@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'intro-2'
 order: 2
-series: 'ai-performance'
-topic: 'Foundations'
+series: "ai-performance"
+level: beginner
+topic: "Performance Methodology"
 tags: ['goodput', 'gpu', 'ml-performance']
 ---
 
@@ -143,4 +144,4 @@ A goodput dashboard should expose the denominator as clearly as the numerator. S
 
 ---
 
-*Part of the **AI Performance Engineering** series. Previous: [What does an ML Performance Engineer actually do?](/blog/what-does-an-ml-performance-engineer-do/) Next: what a modern AI rack really is.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

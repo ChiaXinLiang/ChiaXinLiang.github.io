@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'case-4'
-order: 36
-series: 'ai-performance'
-topic: 'Troubleshooting'
+order: 20
+series: "llm-serving"
+level: advanced
+topic: "Inference Methods"
 tags: [troubleshooting, bandwidth, inference]
 ---
 
@@ -131,4 +132,4 @@ Napkin first, dashboard second. The napkin knew before the migration did.
 - NVIDIA Developer Blog, "Mastering LLM Techniques: Inference Optimization": https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/
 - Williams, Waterman, and Patterson, "Roofline: An Insightful Visual Performance Model for Multicore Architectures," Communications of the ACM, 2009.
 
-*Part of the **AI Performance Engineering** series — previously: [Compute-Bound vs. Memory-Bound](/blog/compute-bound-vs-memory-bound/), the reflex this case file puts to work; next in the case files: quantized kernels that refuse to exist for your GPU.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

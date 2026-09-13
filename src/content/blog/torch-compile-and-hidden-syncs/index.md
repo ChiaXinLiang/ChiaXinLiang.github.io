@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'pt-1'
-order: 17
-series: 'ai-performance'
-topic: 'PyTorch'
+order: 11
+series: "gpu-performance"
+level: intermediate
+topic: "PyTorch and Compilers"
 tags: ['pytorch', 'torch-compile', 'cuda']
 ---
 
@@ -129,4 +130,4 @@ The dependency also runs forward: stream discipline and sync-free inner loops ar
 - Tillet et al., "Triton: An Intermediate Language and Compiler for Tiled Neural Network Computations," MAPL 2019. https://dl.acm.org/doi/10.1145/3315508.3329973
 - PyTorch Performance Tuning Guide (pinned memory, CUDA event timing). https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html
 
-*Part of the **AI Performance Engineering** series. Previous: [CUDA Graphs: Record Once, Replay Forever](/blog/cuda-graphs-record-once-replay-forever/). Next: profiling PyTorch with Kineto and the trace viewer.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

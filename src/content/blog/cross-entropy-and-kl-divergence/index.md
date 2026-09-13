@@ -4,10 +4,11 @@ description: "Derive cross-entropy from likelihood, decompose it into entropy pl
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
-series: 'llm-basics'
+series: "llm-basics"
+level: advanced
 code: 'stat-4'
 order: 17
-topic: 'Statistical Learning'
+topic: "Statistical Learning"
 tags: [statistics, theory, learning]
 ---
 

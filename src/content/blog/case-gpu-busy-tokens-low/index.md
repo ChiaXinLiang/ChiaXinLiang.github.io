@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'case-3'
-order: 35
-series: 'ai-performance'
-topic: 'Troubleshooting'
+order: 19
+series: "llm-serving"
+level: advanced
+topic: "Inference Methods"
 tags: [troubleshooting, inference, performance]
 ---
 100% GPU utilization can coexist with disappointing token throughput. NVIDIA defines that utilization field as the fraction of a sampling interval during which at least 1 kernel executes. It does not mean that every compute unit is occupied, that tensor cores run at peak speed, or that useful tokens meet their latency target. A kernel waiting on memory can keep the utilization gauge high.

@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'llm-5'
-order: 12
-series: 'llm-basics'
-topic: 'Inference Basics'
+order: 13
+series: "llm-basics"
+level: intermediate
+topic: "Inference Basics"
 tags: ['inference', 'latency', 'llm']
 ---
 
@@ -147,4 +148,4 @@ When a vendor quotes "tokens per second," now you know to ask 3 questions. Per u
 
 ---
 
-*Part of the **Fundamental of LLM** series. Previous: [The Transformer Architecture](/blog/transformer-architecture-in-one-picture/). Next: batching — how servers trade a little TPOT for a lot of throughput.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

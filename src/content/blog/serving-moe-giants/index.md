@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'scale-3'
-order: 29
-series: 'ai-performance'
-topic: 'Inference'
+order: 14
+series: "llm-serving"
+level: advanced
+topic: "Production Serving"
 tags: [moe, parallelism, inference]
 ---
 
@@ -104,4 +105,4 @@ Serving MoE giants is where the themes of this series converge. The memory arith
 - DeepEP: an efficient expert-parallel communication library (self-reported benchmarks) — <https://github.com/deepseek-ai/DeepEP>
 - EPLB: Expert Parallelism Load Balancer — <https://github.com/deepseek-ai/EPLB>
 
-*Part of the **AI Performance Engineering** series. Previous in this thread: [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/), which explains why prefill and decode want different deployments; next we look at how schedulers adapt these layouts to live traffic.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

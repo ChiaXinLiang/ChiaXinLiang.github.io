@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'gpumem-1'
-order: 4
-series: 'ai-performance'
-topic: 'Hardware'
+order: 3
+series: "ai-performance"
+level: beginner
+topic: "Hardware and Capacity"
 tags: [gpu, memory, inference]
 ---
 
@@ -152,4 +153,4 @@ Capacity planning should include a small experiment that checks the estimate und
 - EleutherAI, "Transformer Math 101." https://blog.eleuther.ai/transformer-math/
 - NVIDIA H100 Tensor Core GPU specifications. https://www.nvidia.com/en-us/data-center/h100/
 
-*Part of the **AI Performance Engineering** series. Previous: [From DRAM to HBM](/blog/from-dram-to-hbm/). Next up: the napkin math of serving cost per token.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

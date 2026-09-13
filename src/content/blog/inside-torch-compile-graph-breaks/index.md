@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'pt-2'
-order: 18
-series: 'ai-performance'
-topic: 'PyTorch'
+order: 20
+series: "gpu-performance"
+level: advanced
+topic: "PyTorch and Compilers"
 tags: [pytorch, compilers, triton]
 ---
 
@@ -137,4 +138,4 @@ That lens also explains why this matters more every hardware generation. Compute
 - Tillet, Kung, Cox, "Triton: an intermediate language and compiler for tiled neural network computations," MAPL 2019. https://dl.acm.org/doi/10.1145/3315508.3329973
 - OpenAI, "Introducing Triton: Open-source GPU programming for neural networks". https://openai.com/index/triton/
 
-*Part of the **AI Performance Engineering** series. Previous: [A Year of KernelBench](/blog/a-year-of-kernelbench/) put compiler-versus-human kernel quality in context; next we point the PyTorch profiler at the syncs this article taught you to fear.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

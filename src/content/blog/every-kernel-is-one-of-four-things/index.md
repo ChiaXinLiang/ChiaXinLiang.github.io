@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'ktune-1'
-order: 12
-series: 'ai-performance'
-topic: 'CUDA & Kernels'
+order: 8
+series: "gpu-performance"
+level: intermediate
+topic: "GPU Execution and Memory"
 tags: [cuda, profiling, kernels]
 ---
 
@@ -128,4 +129,4 @@ The taxonomy is also a communication tool. "The kernel is slow" starts a debate;
 - Vasily Volkov, "Better Performance at Lower Occupancy," GTC 2010; and *Understanding Latency Hiding on GPUs*, PhD thesis, UC Berkeley, 2016.
 - Tri Dao et al., "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness" — https://arxiv.org/abs/2205.14135
 
-*Part of the **AI Performance Engineering** series. Previously: [A Year of KernelBench](/blog/a-year-of-kernelbench/). Next: what warp stall reasons actually mean, 1 stall at a time.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

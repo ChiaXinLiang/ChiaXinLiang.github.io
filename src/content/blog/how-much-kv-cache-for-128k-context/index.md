@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'math-3'
-order: 43
-series: 'ai-performance'
-topic: 'Practice'
+order: 9
+series: "llm-serving"
+level: intermediate
+topic: "Inference Methods"
 tags: ['gpu', 'inference', 'math']
 ---
 

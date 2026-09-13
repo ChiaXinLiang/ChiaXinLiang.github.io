@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'exec-1'
-order: 8
-series: 'ai-performance'
-topic: 'CUDA & Kernels'
+order: 1
+series: "gpu-performance"
+level: beginner
+topic: "GPU Execution and Memory"
 tags: [gpu, cuda, roofline]
 ---
 
@@ -120,4 +121,4 @@ For a kernel engineer, the practical takeaway is a triage discipline. Before opt
 - V. Volkov, "Better Performance at Lower Occupancy," GTC 2010 (instruction-level parallelism vs. occupancy)
 - NVIDIA Developer Blog, "NVIDIA Hopper Architecture In-Depth" — https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/
 
-*Part of the **AI Performance Engineering** series. Previous: [Every Hyperscaler Ships Inference Silicon Now](/blog/hyperscaler-inference-silicon/). Next up: occupancy, registers, and what actually limits how many warps an SM can hold.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

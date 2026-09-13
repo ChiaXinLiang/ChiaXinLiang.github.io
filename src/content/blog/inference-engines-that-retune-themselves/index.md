@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'scale-5'
-order: 31
-series: 'ai-performance'
-topic: 'Inference'
+order: 15
+series: "llm-serving"
+level: advanced
+topic: "Production Serving"
 tags: [inference, serving, adaptive]
 ---
 
@@ -110,4 +111,4 @@ The caveat: most teams should not build any of this yet. If you have not exhaust
 - SGLang (radix cache, hierarchical KV caching) — https://github.com/sgl-project/sglang
 - CUDA C++ Programming Guide, unified memory and `cudaMemAdvise` — https://docs.nvidia.com/cuda/cuda-c-programming-guide/
 
-*Part of the **AI Performance Engineering** series. Previously: [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/). Next up: what it takes to run these control loops across an entire fleet.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

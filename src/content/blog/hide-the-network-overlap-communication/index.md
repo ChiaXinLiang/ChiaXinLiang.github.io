@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'net-1'
-order: 6
-series: 'ai-performance'
-topic: 'Cluster Infrastructure'
+order: 8
+series: "ai-networking"
+level: intermediate
+topic: "Collectives, Transport, and Overlap"
 tags: [networking, nccl, training]
 ---
 
@@ -113,4 +114,4 @@ Exposed communication is 1 of the biggest gaps between "GPUs busy" and "useful t
 - NIXL, NVIDIA Inference Xfer Library (part of Dynamo): https://github.com/ai-dynamo/nixl
 - NVIDIA, Scalable Hierarchical Aggregation and Reduction Protocol (SHARP) documentation, NVIDIA Networking (speedup figures are vendor-reported)
 
-*Part of the **AI Performance Engineering** series. Previous: [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/). Related: [Goodput vs. Utilization](/blog/goodput-vs-utilization/).*
+*Part of the [Networking for AI Systems](/series/ai-networking/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

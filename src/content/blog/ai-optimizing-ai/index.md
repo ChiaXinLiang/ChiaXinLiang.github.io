@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'future-1'
-order: 32
-series: 'ai-performance'
-topic: 'AI for Systems'
+order: 16
+series: "llm-serving"
+level: advanced
+topic: "AI for Infrastructure"
 tags: [kernels, automation, future]
 ---
 
@@ -107,4 +108,4 @@ The systems in this article are the first ones that can turn those levers withou
 - Kimi Team, "Kimi K2: Open Agentic Intelligence," arXiv (2025). https://arxiv.org/abs/2507.20534
 - NVIDIA, GB200 NVL72 specifications. https://www.nvidia.com/en-us/data-center/gb200-nvl72/
 
-*Part of the **AI Performance Engineering** series. Previous: [A Year of KernelBench](/blog/a-year-of-kernelbench/). The [opening article](/blog/what-does-an-ml-performance-engineer-do/) is where the loop began.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

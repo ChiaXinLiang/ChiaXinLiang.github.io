@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'rack-1'
-order: 3
-series: 'ai-performance'
-topic: 'Hardware'
+order: 7
+series: "ai-performance"
+level: intermediate
+topic: "Hardware and Capacity"
 tags: ['nvidia', 'nvlink', 'hardware']
 ---
 
@@ -118,4 +119,4 @@ The direction of travel is clear from the roadmap: bigger NVLink domains (Rubin'
 - MLCommons, MLPerf Inference: Datacenter v5.0 results (March 2025) — https://mlcommons.org/benchmarks/inference-datacenter/
 - NVIDIA Developer Technical Blog, "NVIDIA Blackwell Delivers Massive Performance Leaps in MLPerf Inference v5.0" (2025), vendor analysis of the GB200 NVL72 submissions.
 
-*Part of the **AI Performance Engineering** series. Previous: [Goodput: Your "100% Utilized" Cluster Is Mostly Wasted](/blog/goodput-vs-utilization/). Next up: inside the Blackwell superchip itself.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'serve-3'
-order: 25
-series: 'ai-performance'
-topic: 'Inference'
+order: 10
+series: "ai-performance"
+level: intermediate
+topic: "Performance Methodology"
 tags: [benchmarking, inference, slo]
 ---
 
@@ -103,4 +104,4 @@ So the discipline, in 1 sentence: *write the SLO down before you run anything, g
 - NVIDIA H100 Tensor Core GPU specifications — [nvidia.com/en-us/data-center/h100](https://www.nvidia.com/en-us/data-center/h100/)
 - Gil Tene, "How NOT to Measure Latency," talk on coordinated omission (Strange Loop / QCon)
 
-*Part of the **AI Performance Engineering** series. Previous: [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/). Related basics: [Tokens per Second: What It Hides](/blog/tokens-per-second-what-it-hides/).*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

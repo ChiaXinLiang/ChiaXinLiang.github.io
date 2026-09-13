@@ -4,10 +4,11 @@ description: 'Derive Beta–Bernoulli MAP, distinguish posterior mode from predi
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
-series: 'llm-basics'
+series: "llm-basics"
+level: advanced
 code: 'stat-3'
 order: 16
-topic: 'Statistical Learning'
+topic: "Statistical Learning"
 tags: ['statistics', 'bayesian', 'regularization']
 ---
 

@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'opt-4'
-order: 22
-series: 'ai-performance'
-topic: 'Inference'
+order: 13
+series: "llm-serving"
+level: advanced
+topic: "Inference Methods"
 tags: [inference, speculative-decoding, latency]
 ---
 
@@ -128,4 +129,4 @@ Speculative decoding is the third member of a family of tricks that all answer t
 - Li et al. *EAGLE-2: Faster Inference of Language Models with Dynamic Draft Trees.* EMNLP 2024. https://arxiv.org/abs/2406.16858
 - vLLM project, speculative decoding implementation. https://github.com/vllm-project/vllm
 
-*Part of the **AI Performance Engineering** series. Previously: [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/). Next: how continuous batching finds the same spare parallelism across requests instead of within one.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

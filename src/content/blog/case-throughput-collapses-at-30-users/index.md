@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'case-2'
-order: 34
-series: 'ai-performance'
-topic: 'Troubleshooting'
+order: 18
+series: "llm-serving"
+level: advanced
+topic: "Production Serving"
 tags: [kv-cache, inference, troubleshooting]
 ---
 
@@ -134,4 +135,4 @@ The meta-lesson for troubleshooting: a performance *cliff* is a fingerprint. Pla
 - vLLM documentation and source (preemption, swap vs. recompute, `kv_cache_dtype`, metrics) — https://docs.vllm.ai and https://github.com/vllm-project/vllm
 - NVIDIA TensorRT-LLM (FP8 KV cache support) — https://github.com/NVIDIA/TensorRT-LLM
 
-*Part of the **AI Performance Engineering** series. Previous: [Tuning Inference at Scale](/blog/tuning-inference-at-scale/). Related reading: [Goodput vs. Utilization](/blog/goodput-vs-utilization/).*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

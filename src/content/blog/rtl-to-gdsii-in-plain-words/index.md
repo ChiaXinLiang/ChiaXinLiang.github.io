@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'asic-2'
 order: 16
-series: 'comp-arch'
-topic: 'ASIC Design'
+series: "comp-arch"
+level: advanced
+topic: "ASIC Design"
 tags: ['asic', 'eda', 'chip-design']
 ---
 
@@ -139,4 +140,4 @@ This flow is the machinery beneath everything else in this series. The pipelines
 - Wilson Research Group / Siemens EDA, biennial Functional Verification Study (verification effort and first-silicon success statistics).
 - International Business Strategies (IBS), per-node chip design cost estimates as reported in industry press; analyst figures, not audited costs.
 
-*Part of the **Computer Architecture & ASIC** series. Previously: [What a CPU Actually Does](/blog/what-a-cpu-actually-does/) covered what the RTL in this flow actually describes; next up, the economics of tapeout, or why the mask set is only the beginning of the bill.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

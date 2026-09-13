@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'case-1'
-order: 33
-series: 'ai-performance'
-topic: 'Troubleshooting'
+order: 17
+series: "llm-serving"
+level: advanced
+topic: "Production Serving"
 tags: [troubleshooting, prefill, latency]
 ---
 
@@ -127,4 +128,4 @@ Next case in the series: the OOM that only happens on Tuesdays, or, why your KV 
 - vLLM documentation: chunked prefill and automatic prefix caching — [docs.vllm.ai](https://docs.vllm.ai/)
 - NVIDIA H100 Tensor Core GPU specifications (989 TFLOPS dense BF16 is NVIDIA's self-reported peak) — [nvidia.com/en-us/data-center/h100/](https://www.nvidia.com/en-us/data-center/h100/)
 
-*Part of the **AI Performance Engineering** series. Previous: [Every Hyperscaler Ships Inference Silicon Now](/blog/hyperscaler-inference-silicon/). Next up: more case files from the troubleshooting drawer.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

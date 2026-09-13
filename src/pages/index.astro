@@ -5,12 +5,12 @@ import Header from '../components/Header.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE, SERIES } from '../consts';
 import { getCollection } from 'astro:content';
+import LearningHub from '../components/LearningHub.astro';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 const latest = posts.slice(0, 5);
-const countBySeries = (id: string) => posts.filter((p) => p.data.series === id).length;
 ---
 
 <!doctype html>
@@ -32,45 +32,7 @@ const countBySeries = (id: string) => posts.filter((p) => p.data.series === id).
 			.hero .identity {
 				font-weight: 600;
 			}
-			.series-grid {
-				display: grid;
-				grid-template-columns: 1fr 1fr;
-				gap: 1.5rem;
-				margin: 2rem 0 3rem;
-			}
-			@media (max-width: 720px) {
-				.series-grid {
-					grid-template-columns: 1fr;
-				}
-			}
-			.series-card {
-				border: 1px solid rgb(var(--gray-light));
-				border-radius: 12px;
-				padding: 1.25rem 1.5rem;
-				text-decoration: none;
-				display: block;
-				transition: box-shadow 0.2s ease;
-			}
-			.series-card:hover {
-				box-shadow: var(--box-shadow);
-			}
-			.series-card h3 {
-				margin: 0 0 0.4rem;
-				color: rgb(var(--black));
-			}
-			.series-card .level {
-				display: inline-block;
-				font-size: 0.75em;
-				font-weight: 700;
-				letter-spacing: 0.02em;
-				color: var(--accent);
-				margin-bottom: 0.5rem;
-			}
-			.series-card p {
-				margin: 0;
-				font-size: 0.95em;
-				color: rgb(var(--gray));
-			}
+
 			.latest li {
 				margin-bottom: 0.6rem;
 			}
@@ -92,28 +54,15 @@ const countBySeries = (id: string) => posts.filter((p) => p.data.series === id).
 					diagrams.
 				</p>
 				<p>
-					Two tracks: how LLMs work from first principles, and how to squeeze real
-					performance out of GPUs, CUDA, and serving stacks. Primary sources always
+					Learning paths through AI infrastructure, model mathematics, and hardware
+					co-design. Each series progresses from Beginner to Intermediate to Advanced. Primary sources always
 					cited. Follow along via <a href="/rss.xml">RSS</a>.
 				</p>
 			</section>
 
 			<section>
 				<h2>Series</h2>
-				<div class="series-grid">
-					{
-						SERIES.map((s) => (
-							<a class="series-card" href={`/series/${s.id}/`}>
-								<span class="level">{s.level}</span>
-								<h3>{s.name}</h3>
-								<p>{s.tagline}</p>
-								<p style="margin-top:.6rem">
-									{countBySeries(s.id)} article{countBySeries(s.id) === 1 ? '' : 's'} →
-								</p>
-							</a>
-						))
-					}
-				</div>
+				<LearningHub posts={posts} />
 			</section>
 
 			<section class="latest">

@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'chip-2'
-order: 2
-series: 'efficient-ai'
-topic: 'AI Chips'
+order: 4
+series: "efficient-ai"
+level: intermediate
+topic: "AI Chips"
 tags: [gpu, inference, roofline]
 ---
 
@@ -108,4 +109,4 @@ Expect the split to deepen. Once prefill and decode are separate line items, eac
 - Glenn Lockwood — community-tracked Rubin R200 specifications (unofficial): https://www.glennklockwood.com/garden/processors/r200
 - Williams, Waterman, and Patterson — "Roofline: An Insightful Visual Performance Model for Multicore Architectures," Communications of the ACM, 2009.
 
-*Part of the **Efficient AI & Co-Design** series. Previous: [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/) — why bandwidth, not capacity, defines the generation. Next up: the NVFP4 vs MXFP4 format war.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

@@ -6,8 +6,9 @@ pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'econ-2'
 order: 8
-series: 'efficient-ai'
-topic: 'Economics'
+series: "efficient-ai"
+level: intermediate
+topic: "Economics"
 tags: [economics, inference, pricing]
 ---
 
@@ -130,4 +131,4 @@ This is also, quietly, a recruiting pitch. Several tiers on that page correspond
 - NVIDIA, "NVIDIA Unveils Rubin CPX," a GPU class dedicated to long-context prefill: https://nvidianews.nvidia.com/news/nvidia-unveils-rubin-cpx-a-new-class-of-gpu-designed-for-massive-context-inference
 - Mooncake: KV-cache-centric disaggregated serving (Qin et al., FAST '25 best paper), cited without link.
 
-*Part of the **Efficient AI & Co-Design** series. The previous entry, [Goodput vs Utilization](/blog/goodput-vs-utilization/), explains the latency contracts behind the batch and fast-mode tiers; next we follow the money 1 level down, from the price sheet to the power bill.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

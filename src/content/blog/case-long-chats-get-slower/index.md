@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'case-7'
-order: 39
-series: 'ai-performance'
-topic: 'Troubleshooting'
+order: 23
+series: "llm-serving"
+level: advanced
+topic: "Inference Methods"
 tags: [troubleshooting, inference, performance]
 ---
 

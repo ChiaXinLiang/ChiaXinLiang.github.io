@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'llm-4'
-order: 11
-series: 'llm-basics'
-topic: 'Inference Basics'
+order: 12
+series: "llm-basics"
+level: intermediate
+topic: "Inference Basics"
 tags: [inference, latency, throughput]
 ---
 
@@ -124,4 +125,4 @@ Once you internalize the curve, provider behavior stops looking arbitrary. Specu
 - NVIDIA Technical Blog, "Mastering LLM Techniques: Inference Optimization" — [developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization](https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/)
 - Anyscale Engineering, "How Continuous Batching Enables 23x Throughput in LLM Inference" (vendor benchmark)
 
-*Part of the **Fundamental of LLM** series. Previously: [The Transformer Architecture](/blog/transformer-architecture-in-one-picture/) showed where every one of these tokens comes from; next we'll look at the KV cache up close, the memory that makes decode possible and expensive.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

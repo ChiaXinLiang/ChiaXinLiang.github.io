@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'os-1'
-order: 5
-series: 'ai-performance'
-topic: 'Cluster Infrastructure'
+order: 8
+series: "ai-performance"
+level: intermediate
+topic: "Cluster Infrastructure"
 tags: [numa, linux, gpu]
 ---
 
@@ -128,4 +129,4 @@ It is also the purest example of what [an ML performance engineer actually does]
 - PyTorch, `torch.utils.data` documentation (pin_memory, prefetch_factor, num_workers): https://pytorch.org/docs/stable/data.html
 - Kubernetes, Topology Manager documentation: https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/
 
-*Part of the **AI Performance Engineering** series. Previous: [Every Hyperscaler Ships Inference Silicon Now](/blog/hyperscaler-inference-silicon/). Next up: the cluster networking layer, where the same data-movement battle moves from PCIe to the fabric.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

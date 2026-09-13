@@ -3,10 +3,11 @@ title: 'Reading a Modern LLM: From Model Configuration to Computational Structur
 description: 'A method for reading modern model blocks, attention state, sparse experts, and public architecture disclosures, with checked parameter and memory equations.'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
-series: 'llm-architectures'
+series: "llm-architectures"
+level: beginner
 code: 'model-1'
 order: 1
-topic: 'Building Blocks'
+topic: "Building Blocks"
 tags: ['architecture', 'transformer', 'moe', 'attention']
 ---
 

@@ -6,8 +6,9 @@ pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'cd-3'
 order: 11
-series: 'efficient-ai'
-topic: 'Co-Design Cases'
+series: "efficient-ai"
+level: advanced
+topic: "Co-Design Cases"
 tags: [inference, serving, co-design]
 ---
 
@@ -112,4 +113,4 @@ And if you want a picture of what [ML performance engineers](/blog/what-does-an-
 - Qin et al., *Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving*, FAST 2025 Best Paper — https://arxiv.org/abs/2407.00079
 - NVIDIA, *Rubin CPX announcement* — https://nvidianews.nvidia.com/news/nvidia-unveils-rubin-cpx-a-new-class-of-gpu-designed-for-massive-context-inference
 
-*Part of the **Efficient AI & Co-Design** series. Previous: the DeepSeek sparse-attention price cut (cd-2). Next: KernelBench and the state of AI-written GPU kernels (cd-4).*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'par-4'
 order: 14
-series: 'comp-arch'
-topic: 'Parallel Architectures'
+series: "comp-arch"
+level: advanced
+topic: "Parallel Architectures"
 tags: ['asic', 'accelerators', 'hardware']
 ---
 
@@ -120,4 +121,4 @@ Hennessy and Patterson call this a *golden age* without irony. Architecture stag
 - Dennard, R. et al., "Design of Ion-Implanted MOSFETs with Very Small Physical Dimensions," IEEE Journal of Solid-State Circuits, 1974.
 - Ranganathan, P. et al., "Warehouse-Scale Video Acceleration: Co-design and Deployment in the Wild," ASPLOS 2021.
 
-*Part of the **Computer Architecture & ASIC** series. Previously: SIMD, CPU vs GPU, and systolic arrays each showed one way to amortize control over parallel math. Next: how an ASIC actually gets designed, verified, and shipped.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'math-1'
-order: 41
-series: 'ai-performance'
-topic: 'Practice'
+order: 5
+series: "ai-performance"
+level: beginner
+topic: "Hardware and Capacity"
 tags: ['gpu', 'inference', 'math']
 ---
 

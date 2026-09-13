@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'scale-2'
-order: 28
-series: 'ai-performance'
-topic: 'Inference'
+order: 7
+series: "llm-serving"
+level: intermediate
+topic: "Production Serving"
 tags: [inference, kv-cache, serving]
 ---
 
@@ -108,4 +109,4 @@ The professional consequence is worth stating plainly. "KV cache management" use
 - OpenAI API pricing (model-specific cached-input prices). https://developers.openai.com/api/docs/pricing
 - Hazy Research (Stanford), "ThunderMLA" blog post, 2025 (megakernel decode scheduling).
 
-*Part of the **AI Performance Engineering** series. Previous: [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/). Next: serving Mixture-of-Experts at scale.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

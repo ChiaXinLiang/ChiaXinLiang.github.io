@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'opt-1'
-order: 19
-series: 'ai-performance'
-topic: 'Inference'
+order: 1
+series: "llm-serving"
+level: beginner
+topic: "Inference Methods"
 tags: [batching, inference, throughput]
 ---
 
@@ -113,4 +114,4 @@ It also explains the shape of the whole optimization stack that follows in this 
 - SGLang project repository — https://github.com/sgl-project/sglang
 - Anyscale engineering blog, "How continuous batching enables 23x throughput in LLM inference" (vendor-reported benchmark)
 
-*Part of the **AI Performance Engineering** series. Previous: [CUDA Graphs: Record Once, Replay Forever](/blog/cuda-graphs-record-once-replay-forever/). Next: the KV cache, the memory bill that batching runs up.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

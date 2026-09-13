@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'llm-3'
-order: 10
-series: 'llm-basics'
-topic: 'Inference Basics'
+order: 5
+series: "llm-basics"
+level: beginner
+topic: "Inference Basics"
 tags: [llm, inference, sampling]
 ---
 
@@ -119,4 +120,4 @@ Next in this series, the KV cache gets a full treatment: how it's laid out, why 
 - vLLM documentation (serving metrics: TTFT, TPOT/ITL). https://docs.vllm.ai/
 - NVIDIA A100 Tensor Core GPU datasheet (peak FLOP/s and memory bandwidth; vendor-reported figures), NVIDIA Corporation, 2020.
 
-*Part of the **Fundamental of LLM** series. Previously: [The Transformer Architecture](/blog/transformer-architecture-in-one-picture/) covered the network this loop runs through. Next up: the KV cache in depth.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

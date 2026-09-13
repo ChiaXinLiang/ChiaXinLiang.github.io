@@ -5,9 +5,10 @@ pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'mem-2'
-order: 9
-series: 'comp-arch'
-topic: 'Memory Hierarchy'
+order: 4
+series: "comp-arch"
+level: beginner
+topic: "Memory Hierarchy"
 tags: ['computer-architecture', 'caches', 'memory']
 ---
 
@@ -146,4 +147,4 @@ This is also why memory bandwidth, not FLOPS, headlines modern accelerator spec 
 - NVIDIA, *CUDA C++ Programming Guide* (shared memory) — [docs.nvidia.com/cuda/cuda-c-programming-guide/](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)
 - Onur Mutlu, lecture materials on memory systems, ETH Zürich SAFARI group — [safari.ethz.ch](https://safari.ethz.ch/)
 
-*Part of the **Computer Architecture & ASIC** series. Previous: the memory wall — why DRAM latency stopped improving. Next: inside the DRAM cell, and the road from DDR to HBM.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

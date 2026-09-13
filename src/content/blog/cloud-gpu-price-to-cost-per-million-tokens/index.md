@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'math-4'
-order: 44
-series: 'ai-performance'
-topic: 'Practice'
+order: 25
+series: "llm-serving"
+level: advanced
+topic: "Cost and Energy"
 tags: ['gpu', 'inference', 'math']
 ---
 

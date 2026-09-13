@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'orch-1'
-order: 15
-series: 'ai-performance'
-topic: 'CUDA & Kernels'
+order: 10
+series: "gpu-performance"
+level: intermediate
+topic: "Kernel Pipelines and Orchestration"
 tags: [cuda, streams, overlap]
 ---
 
@@ -138,4 +139,4 @@ Streams and events are also the vocabulary for everything that comes next in thi
 - Mark Harris, "GPU Pro Tip: CUDA 7 Streams Simplify Concurrency", NVIDIA Developer Blog: https://developer.nvidia.com/blog/gpu-pro-tip-cuda-7-streams-simplify-concurrency/
 - NVIDIA, *CUDA Runtime API* reference (streams, events, `cudaMallocAsync`): https://docs.nvidia.com/cuda/cuda-runtime-api/
 
-*Part of the **AI Performance Engineering** series. Previously: [Every Hyperscaler Ships Inference Silicon Now](/blog/hyperscaler-inference-silicon/). Next: [CUDA Graphs: Record Once, Replay Forever](/blog/cuda-graphs-record-once-replay-forever/).*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'mem-1'
-order: 11
-series: 'ai-performance'
-topic: 'CUDA & Kernels'
+order: 3
+series: "gpu-performance"
+level: beginner
+topic: "GPU Execution and Memory"
 tags: [cuda, gpu, memory]
 ---
 
@@ -112,4 +113,4 @@ Keep array shape, dtype, and work identical between versions. For a transpose, v
 - NVIDIA, "NVIDIA Hopper Architecture In-Depth" (TMA introduction) — https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/
 - NVIDIA, *Nsight Compute Documentation* (memory workload analysis, sectors/request) — https://docs.nvidia.com/nsight-compute/
 
-*Part of the **AI Performance Engineering** series. Previously: [Goodput: Your "100% Utilized" Cluster Is Mostly Wasted](/blog/goodput-vs-utilization/). Next: occupancy, and why more threads is not always faster.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

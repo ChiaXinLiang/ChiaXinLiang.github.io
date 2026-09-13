@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'opt-3'
-order: 21
-series: 'ai-performance'
-topic: 'Inference'
+order: 3
+series: "llm-serving"
+level: intermediate
+topic: "Inference Methods"
 tags: [quantization, inference, gpu]
 ---
 
@@ -110,4 +111,4 @@ The frontier is below 4 bits and beyond weights: FP4 KV caches, quantization-awa
 - Micikevicius et al. — *FP8 Formats for Deep Learning* (2022): https://arxiv.org/abs/2209.05433
 - NVIDIA H100 Tensor Core GPU specifications: https://www.nvidia.com/en-us/data-center/h100/
 
-*Part of the **AI Performance Engineering** series. Previous: KV cache management. Next: speculative decoding.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

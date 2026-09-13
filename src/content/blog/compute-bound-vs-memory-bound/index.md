@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'exec-2'
-order: 9
-series: 'ai-performance'
-topic: 'CUDA & Kernels'
+order: 2
+series: "gpu-performance"
+level: beginner
+topic: "GPU Execution and Memory"
 tags: [roofline, kernels, gpu]
 ---
 
@@ -118,4 +119,4 @@ At system level, the balance point explains serving architecture. Prefill's comp
 - T. Dao, D. Fu, S. Ermon, A. Rudra, C. Ré, "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness," 2022. https://arxiv.org/abs/2205.14135
 - NVIDIA Nsight Compute documentation, roofline analysis section. https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html
 
-*Part of the **AI Performance Engineering** series. Previous: [A Year of KernelBench](/blog/a-year-of-kernelbench/) closed out the co-design cases; next we go inside the SM to see how warps, occupancy, and latency hiding decide whether a kernel ever reaches its roof.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'asic-3'
 order: 17
-series: 'comp-arch'
-topic: 'ASIC Design'
+series: "comp-arch"
+level: advanced
+topic: "ASIC Design"
 tags: [asic, economics, silicon]
 ---
 
@@ -155,4 +156,4 @@ Next in this thread: why AI workloads, with their regular, dense, predictable co
 - Tiny Tapeout, pricing and shuttle model: https://tinytapeout.com/
 - The OpenROAD Project (open-source RTL-to-GDSII flow): https://theopenroadproject.org/
 
-*Part of the **Computer Architecture & ASIC** series — the previous article walked the RTL-to-GDSII design flow that spends this budget; next up, why AI accelerators are the perfect ASIC and every hyperscaler decided to pay the NRE.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

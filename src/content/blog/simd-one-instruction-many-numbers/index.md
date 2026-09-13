@@ -5,9 +5,10 @@ pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'par-1'
-order: 11
-series: 'comp-arch'
-topic: 'Parallel Architectures'
+order: 5
+series: "comp-arch"
+level: beginner
+topic: "Parallel Architectures"
 tags: ['simd', 'vectorization', 'parallelism']
 ---
 
@@ -129,4 +130,4 @@ The price of the wide, simple machine is everything the CPU's control logic used
 
 ---
 
-*Part of the **Computer Architecture & ASIC** series. Previous: from DRAM to HBM, how memory went 3D. Next: CPU vs GPU — latency machines and throughput machines.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

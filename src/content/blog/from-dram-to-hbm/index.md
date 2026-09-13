@@ -5,9 +5,10 @@ pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'mem-3'
-order: 10
-series: 'comp-arch'
-topic: 'Memory Hierarchy'
+order: 12
+series: "comp-arch"
+level: intermediate
+topic: "Memory Hierarchy"
 tags: ['dram', 'hbm', 'memory']
 ---
 
@@ -132,4 +133,4 @@ For a performance engineer, this article is the floor under 2 earlier ones. When
 - R. H. Dennard, "Field-Effect Transistor Memory," U.S. Patent 3,387,286 (filed 1967, granted 1968)
 - Colin Scott, *Interactive Latency Numbers Every Programmer Should Know* — [colin-scott.github.io](https://colin-scott.github.io/personal_website/research/interactive_latency.html)
 
-*Part of the **Computer Architecture & ASIC** series. Previous: the cache hierarchy that hides this page's latency, and [What a CPU Actually Does](/blog/what-a-cpu-actually-does/) for the pipeline that stalls on it. Next: what all this memory feeds — custom silicon.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

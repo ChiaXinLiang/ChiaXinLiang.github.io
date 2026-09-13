@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'par-3'
 order: 13
-series: 'comp-arch'
-topic: 'Parallel Architectures'
+series: "comp-arch"
+level: advanced
+topic: "Parallel Architectures"
 tags: [tpu, hardware, matmul]
 ---
 
@@ -120,4 +121,4 @@ Kung and Leiserson designed for a world of 29,000-transistor chips and got the f
 - S. Hooker, "The Hardware Lottery," 2020 — [arxiv.org/abs/2009.06489](https://arxiv.org/abs/2009.06489)
 - Y.-H. Chen, J. Emer, and V. Sze, "Eyeriss: A Spatial Architecture for Energy-Efficient Dataflow for Convolutional Neural Networks," ISCA 2016.
 
-*Part of the **Computer Architecture & ASIC** series. Previous: CPU vs GPU, latency machines vs throughput machines. Next: domain-specific architectures, or what happens when you design silicon for exactly one job.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

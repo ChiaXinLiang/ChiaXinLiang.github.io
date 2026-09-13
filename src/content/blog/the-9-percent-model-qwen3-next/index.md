@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'cd-1'
 order: 9
-series: 'efficient-ai'
-topic: 'Co-Design Cases'
+series: "efficient-ai"
+level: advanced
+topic: "Co-Design Cases"
 tags: [moe, attention, efficiency]
 ---
 
@@ -125,4 +126,4 @@ The 9.3% model is not the end state. It is 1 clean, public data point on a curve
 - Kaplan et al., "Scaling Laws for Neural Language Models" — [arXiv:2001.08361](https://arxiv.org/abs/2001.08361)
 - Yang, Kautz, Hatamizadeh, "Gated Delta Networks: Improving Mamba2 with Delta Rule" (ICLR 2025)
 
-*Part of the **Efficient AI & Co-Design** series. Previous: [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/). Next up in Co-Design Cases: how DeepSeek's sparse attention turned an architecture change into a same-day price cut.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

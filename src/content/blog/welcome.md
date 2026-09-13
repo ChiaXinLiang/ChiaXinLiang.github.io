@@ -1,18 +1,22 @@
 ---
-title: 'Two series, one goal: understand what makes AI fast'
-description: 'What this blog covers — LLM fundamentals for newcomers, and AI systems performance engineering for the people running the GPUs.'
+title: 'Learning paths through AI infrastructure, models, and hardware'
+description: 'Focused learning paths through AI infrastructure, model mathematics, and hardware co-design, from Beginner to Advanced.'
 pubDate: 'Sep 12 2026'
 tags: ['meta']
 ---
 
 A modern GPU cluster reporting 100% utilization can be wasting most of its compute. A "bigger" GPU can run the same model slower. And the difference between a profitable AI product and a money pit often comes down to engineering decisions nobody sees.
 
-This blog documents what I'm learning about that invisible layer, in two parallel series:
+This blog documents what I'm learning through focused learning paths in 3 areas:
 
-**Fundamental of LLM** — for engineers getting into AI: how neural networks actually learn, why the Transformer won, and how an LLM turns your prompt into tokens. No prior ML background assumed.
+**AI Infrastructure** — performance measurement, hardware capacity, networking, CUDA and Triton kernels, distributed training, and production LLM serving.
 
-**AI Performance Engineering** — for people who run models on real hardware: GPU memory math, CUDA kernels, the KV cache, batching and quantization, serving at scale, and the cluster infrastructure that keeps thousands of GPUs fed.
+**Models & Mathematics** — neural networks, probability, MLE and MAP, Transformers, and the structure of publicly documented language models.
 
-Every article is a standalone read: one concept, concrete numbers, original diagrams, primary sources cited.
+**Hardware & Co-Design** — processor architecture, Arm and RISC-V, ASIC design, accelerators, numerical formats, and model–hardware tradeoffs.
 
-New articles land twice a week. The short versions show up on [my LinkedIn](https://www.linkedin.com/) — the full write-ups live here.
+Each series has Beginner, Intermediate, and Advanced sections, with a maximum of 30 articles including plans. Published articles and planned deep dives have separate counts. Start with the [series catalog](/blog/) and expand the area that interests you.
+
+Every long-form article develops a focused question with concrete numbers, explained equations, original diagrams, and cited primary sources. New topics can become separate paths without turning the catalog into a wall of cards.
+
+Full write-ups live here; shorter introductions may appear on [my LinkedIn](https://www.linkedin.com/). Follow new articles through [RSS](/rss.xml).

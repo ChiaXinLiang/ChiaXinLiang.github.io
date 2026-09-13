@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'fmt-2'
-order: 6
-series: 'efficient-ai'
-topic: 'Precision'
+order: 7
+series: "efficient-ai"
+level: intermediate
+topic: "Precision"
 tags: ['precision', 'training', 'quantization']
 ---
 
@@ -139,4 +140,4 @@ How much lower can it go? The honest answer: below 4 bits, the 16-value grid sto
 
 ---
 
-*Part of the **Efficient AI & Co-Design** series. Previous: NVFP4 vs MXFP4 — inside the 4-bit format war. Next: tokens per megawatt, where the efficiency story hits the power grid.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

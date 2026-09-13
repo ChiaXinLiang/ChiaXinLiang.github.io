@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'storage-1'
-order: 7
-series: 'ai-performance'
-topic: 'Cluster Infrastructure'
+order: 9
+series: "ai-performance"
+level: intermediate
+topic: "Cluster Infrastructure"
 tags: [storage, checkpointing, goodput]
 ---
 
@@ -135,4 +136,4 @@ It's also a pure goodput story. A cluster stalled on a checkpoint shows near-0 G
 - J. W. Young, "A First Order Approximation to the Optimum Checkpoint Interval," *Communications of the ACM*, 17(9), 1974.
 - J. T. Daly, "A Higher Order Estimate of the Optimum Checkpoint Interval for Restart Dumps," *Future Generation Computer Systems*, 22(3), 2006.
 
-*Part of the **AI Performance Engineering** series. Previous: [Every Hyperscaler Ships Inference Silicon Now](/blog/hyperscaler-inference-silicon/). Related: [Goodput: Your "100% Utilized" Cluster Is Mostly Wasted](/blog/goodput-vs-utilization/).*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

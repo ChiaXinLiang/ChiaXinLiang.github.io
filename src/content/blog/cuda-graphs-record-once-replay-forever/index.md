@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'orch-2'
-order: 16
-series: 'ai-performance'
-topic: 'CUDA & Kernels'
+order: 19
+series: "gpu-performance"
+level: advanced
+topic: "Kernel Pipelines and Orchestration"
 tags: [cuda, kernels, latency]
 ---
 
@@ -119,4 +120,4 @@ If you run inference in production, the checklist is short. Trace 1 decode step 
 - PyTorch documentation, CUDA Graphs (`torch.cuda.CUDAGraph`): https://pytorch.org/docs/stable/notes/cuda.html
 - vLLM project (CUDA graph capture for decode): https://github.com/vllm-project/vllm
 
-*Part of the **AI Performance Engineering** series. Previous: [When a Kernel Cuts API Prices 50%](/blog/when-a-kernel-cuts-api-prices/). Related: [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/).*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

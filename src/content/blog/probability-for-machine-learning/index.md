@@ -4,10 +4,11 @@ description: "Build the probability foundation for MLE, MAP, and language-model 
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
-series: 'llm-basics'
+series: "llm-basics"
+level: beginner
 code: 'stat-1'
-order: 14
-topic: 'Statistical Learning'
+order: 6
+topic: "Statistical Learning"
 tags: [statistics, theory, learning]
 ---
 A model that assigns a 70% probability to an event has not observed 70 percent of that event. It has assigned a number to an uncertain outcome under a model. That distinction sits beneath classification, regression, and next-token prediction. Before deriving a training objective, we need to know what those numbers mean, what must sum to 1, and which assumptions connect 1 observation to another.

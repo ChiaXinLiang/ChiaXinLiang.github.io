@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'ktune-3'
-order: 14
-series: 'ai-performance'
-topic: 'CUDA & Kernels'
+order: 18
+series: "gpu-performance"
+level: advanced
+topic: "Kernel Pipelines and Orchestration"
 tags: [cuda, kernels, gpu]
 ---
 
@@ -112,4 +113,4 @@ For a performance engineer the practical takeaway is diagnostic. When Nsight Com
 - CUDA C++ Programming Guide (asynchronous barriers, TMA/`cp.async.bulk.tensor`, cluster APIs) — https://docs.nvidia.com/cuda/cuda-c-programming-guide/
 - DeepSeek DeepGEMM (warp-specialized FP8 GEMMs in practice) — https://github.com/deepseek-ai/DeepGEMM
 
-*Part of the **AI Performance Engineering** series — previous: [A Year of KernelBench](/blog/a-year-of-kernelbench/); next in CUDA & Kernels: reading warp stalls in Nsight Compute.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

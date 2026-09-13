@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'tf-1'
-order: 5
-series: 'llm-basics'
-topic: 'Transformer'
+order: 8
+series: "llm-basics"
+level: intermediate
+topic: "Transformer"
 tags: ['attention', 'transformer']
 ---
 
@@ -157,4 +158,4 @@ Attention visualizations require careful interpretation. A large weight shows th
 
 ---
 
-*Part of the **Fundamental of LLM** series. Previous: [RNN and LSTM](/blog/rnn-lstm-and-the-wall/). Next: the full Transformer architecture in one picture.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

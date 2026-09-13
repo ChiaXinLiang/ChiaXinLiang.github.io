@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'isa-1'
 order: 2
-series: 'comp-arch'
-topic: 'CPU Fundamentals'
+series: "comp-arch"
+level: beginner
+topic: "CPU Fundamentals"
 tags: ['computer-architecture', 'isa', 'cpu']
 ---
 

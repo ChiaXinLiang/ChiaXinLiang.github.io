@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'ktune-2'
-order: 13
-series: 'ai-performance'
-topic: 'CUDA & Kernels'
+order: 9
+series: "gpu-performance"
+level: intermediate
+topic: "Kernel Pipelines and Orchestration"
 tags: [cuda, kernels, roofline]
 ---
 
@@ -110,4 +111,4 @@ When calculating intensity, write down which memory boundary you are measuring. 
 - DeepSeek DeepGEMM, FP8 GEMM library with the `ld.global.nc.L1::no_allocate.L2::256B` load path. https://github.com/deepseek-ai/DeepGEMM
 - Dao et al., "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness," 2022. https://arxiv.org/abs/2205.14135
 
-*Part of the **AI Performance Engineering** series. Previously: [A Year of KernelBench](/blog/a-year-of-kernelbench/) on whether LLMs can write these kernels themselves; next: reading warp stalls in Nsight Compute to find out which roof you're actually under.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

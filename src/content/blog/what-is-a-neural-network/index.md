@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'nn-1'
 order: 1
-series: 'llm-basics'
-topic: 'Neural Networks'
+series: "llm-basics"
+level: beginner
+topic: "Neural Networks"
 tags: ['neural-networks', 'fundamentals']
 ---
 
@@ -148,4 +149,4 @@ You can inspect a small network without treating it as a mysterious black box. C
 
 ---
 
-*Part of the **Fundamental of LLM** series. Next: how the knobs get set — gradient descent and backprop in plain words.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

@@ -6,8 +6,9 @@ pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'cd-2'
 order: 10
-series: 'efficient-ai'
-topic: 'Co-Design Cases'
+series: "efficient-ai"
+level: advanced
+topic: "Co-Design Cases"
 tags: ['sparse-attention', 'co-design', 'inference']
 ---
 
@@ -133,4 +134,4 @@ It also says something about what an efficiency team is worth. The engineers who
 
 ---
 
-*Part of the **Efficient AI & Co-Design** series. Previous: [The 9% Model: Qwen3-Next](/blog/the-9-percent-model-qwen3-next/). Next: [how prefill/decode disaggregation went from rejected paper to default architecture](/blog/the-prefill-decode-disaggregation-story/).*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

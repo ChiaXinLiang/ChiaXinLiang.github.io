@@ -5,9 +5,10 @@ pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'par-2'
-order: 12
-series: 'comp-arch'
-topic: 'Parallel Architectures'
+order: 6
+series: "comp-arch"
+level: beginner
+topic: "Parallel Architectures"
 tags: [gpu, cpu, parallelism]
 ---
 
@@ -125,4 +126,4 @@ The next stop in this series pushes specialization 1 step further: if lockstep l
 - M. J. Flynn, "Some Computer Organizations and Their Effectiveness," IEEE Transactions on Computers, 1972.
 - S. Hooker, "The Hardware Lottery," 2020. https://arxiv.org/abs/2009.06489
 
-*Part of the **Computer Architecture & ASIC** series. Previous: SIMD, one instruction and many lanes. Next: systolic arrays and the TPU.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

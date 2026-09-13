@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'nn-2'
 order: 2
-series: 'llm-basics'
-topic: 'Neural Networks'
+series: "llm-basics"
+level: beginner
+topic: "Neural Networks"
 tags: ['neural-networks', 'training', 'backpropagation']
 ---
 
@@ -161,4 +162,4 @@ For a useful debugging exercise, freeze a tiny batch and run repeated optimizati
 
 ---
 
-*Part of the **Fundamental of LLM** series. Previous: [What is a neural network, really?](/blog/what-is-a-neural-network/) Next: CNNs — how machines learned to see.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

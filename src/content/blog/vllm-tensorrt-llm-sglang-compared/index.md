@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'serve-2'
-order: 24
-series: 'ai-performance'
-topic: 'Inference'
+order: 4
+series: "llm-serving"
+level: intermediate
+topic: "Production Serving"
 tags: [inference, serving, vllm]
 ---
 
@@ -98,4 +99,4 @@ Practical guidance, then. Shortlist by constraints first: hardware fleet, model 
 - SGLang project — https://github.com/sgl-project/sglang
 - NVIDIA TensorRT-LLM — https://github.com/NVIDIA/TensorRT-LLM
 
-*Part of the **AI Performance Engineering** series. Previous: [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/). Related: [Goodput vs. Utilization](/blog/goodput-vs-utilization/).*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

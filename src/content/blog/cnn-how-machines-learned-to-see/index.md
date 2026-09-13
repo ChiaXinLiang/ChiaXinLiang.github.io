@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'arch-1'
 order: 3
-series: 'llm-basics'
-topic: 'Neural Networks'
+series: "llm-basics"
+level: beginner
+topic: "Neural Networks"
 tags: ['cnn', 'neural-networks', 'computer-vision']
 ---
 
@@ -151,4 +152,4 @@ A deployment benchmark should preserve the actual image pipeline. Decoding, resi
 
 ---
 
-*Part of the **Fundamental of LLM** series. Previous: [How models learn](/blog/how-models-learn/). Next: RNNs and LSTMs — how machines learned sequences, and why they hit a wall.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

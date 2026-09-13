@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'llm-6'
-order: 13
-series: 'llm-basics'
-topic: 'Inference Basics'
+order: 14
+series: "llm-basics"
+level: intermediate
+topic: "Inference Basics"
 tags: ['inference', 'llm', 'benchmarks']
 ---
 
@@ -131,4 +132,4 @@ It's also the doorway to a different discipline. Squeezing more goodput out of t
 - NVIDIA H100 Tensor Core GPU datasheet (memory bandwidth and FLOPS figures), NVIDIA Corporation
 - Databricks engineering blog, "LLM Inference Performance Engineering: Best Practices" (Mosaic AI team)
 
-*Part of the **Fundamental of LLM** series. Previous: [The Transformer Architecture](/blog/transformer-architecture-in-one-picture/). This closes the basics series — continue with the AI Performance Engineering series, starting at [What Does an ML Performance Engineer Do?](/blog/what-does-an-ml-performance-engineer-do/)*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

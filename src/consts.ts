@@ -7,38 +7,69 @@ export const SITE_DESCRIPTION =
 export const GITHUB_URL = 'https://github.com/ChiaXinLiang';
 export const LINKEDIN_URL = 'https://www.linkedin.com/';
 
-// One entry per content series. Post frontmatter references `series` by id.
 export const SERIES = [
-	{
-		id: 'llm-basics',
-		name: 'Fundamental of LLM',
-		tagline: 'How modern AI actually works — neural networks, Transformers, and how LLMs generate text. No ML background assumed.',
-		level: 'Beginner friendly',
-	},
-	{
-		id: 'ai-performance',
-		name: 'AI Performance Engineering',
-		tagline: 'GPU memory math, CUDA kernels, KV caches, and serving LLMs at scale — for people who run models on real hardware.',
-		level: 'Advanced',
-	},
-	{
-		id: 'efficient-ai',
-		name: 'Efficient AI & Co-Design',
-		tagline: 'Why chips and algorithms evolve together — accelerators, number formats, and the economics of every token.',
-		level: 'Intermediate',
-	},
-	{
-		id: 'comp-arch',
-		name: 'Computer Architecture & ASIC',
-		tagline: 'From transistors to TPUs — how chips actually work, and how AI silicon gets designed. A ground-up course.',
-		level: 'From first principles',
-	},
-	{
-		id: 'llm-architectures',
-		name: 'Modern LLM Architectures',
-		tagline: 'Inside publicly documented models — sparse experts, attention designs, hybrid state, multimodal structure, and reasoning.',
-		level: 'Intermediate to advanced',
-	},
+  {
+    "id": "ai-performance",
+    "name": "AI Infrastructure Foundations",
+    "tagline": "Measure performance, plan capacity, and understand the host, storage, and cluster beneath a model.",
+    "area": "AI Infrastructure",
+    "level": "Beginner → Intermediate → Advanced"
+  },
+  {
+    "id": "ai-networking",
+    "name": "Networking for AI Systems",
+    "tagline": "From bandwidth and latency to RDMA, NCCL, topology, congestion, and communication overlap.",
+    "area": "AI Infrastructure",
+    "level": "Beginner → Intermediate → Advanced"
+  },
+  {
+    "id": "gpu-performance",
+    "name": "GPU Programming & Performance",
+    "tagline": "Build correct CUDA and Triton kernels, reason about memory traffic, and measure compiler and orchestration tradeoffs.",
+    "area": "AI Infrastructure",
+    "level": "Beginner → Intermediate → Advanced"
+  },
+  {
+    "id": "distributed-training",
+    "name": "Distributed Training",
+    "tagline": "Understand training state, gradient synchronization, sharding, parallelism, and recovery.",
+    "area": "AI Infrastructure",
+    "level": "Beginner → Intermediate → Advanced"
+  },
+  {
+    "id": "llm-serving",
+    "name": "LLM Inference & Serving",
+    "tagline": "Connect attention and KV caches to batching, scheduling, production reliability, and useful tokens per dollar.",
+    "area": "AI Infrastructure",
+    "level": "Beginner → Intermediate → Advanced"
+  },
+  {
+    "id": "llm-basics",
+    "name": "LLM Foundations & Mathematics",
+    "tagline": "Neural networks, probability, Transformers, likelihood, priors, and how language models learn.",
+    "area": "Models & Mathematics",
+    "level": "Beginner → Intermediate → Advanced"
+  },
+  {
+    "id": "llm-architectures",
+    "name": "Modern LLM Architectures",
+    "tagline": "Read publicly documented model structures: sparse experts, attention state, hybrid blocks, and multimodal computation.",
+    "area": "Models & Mathematics",
+    "level": "Beginner → Intermediate → Advanced"
+  },
+  {
+    "id": "comp-arch",
+    "name": "Computer Architecture & ASIC",
+    "tagline": "Processors, memory, Arm, RISC-V, parallel execution, and the design of custom silicon.",
+    "area": "Hardware & Co-Design",
+    "level": "Beginner → Intermediate → Advanced"
+  },
+  {
+    "id": "efficient-ai",
+    "name": "Efficient AI & Co-Design",
+    "tagline": "Number formats, accelerators, power, and the joint evolution of model algorithms and hardware.",
+    "area": "Hardware & Co-Design",
+    "level": "Beginner → Intermediate → Advanced"
+  }
 ] as const;
-
-export type SeriesId = (typeof SERIES)[number]['id'];
+export type SeriesId = (typeof SERIES)[number]["id"];

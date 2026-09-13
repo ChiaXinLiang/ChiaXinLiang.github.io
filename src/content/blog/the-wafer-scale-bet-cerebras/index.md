@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'chip-4'
-order: 4
-series: 'efficient-ai'
-topic: 'AI Chips'
+order: 6
+series: "efficient-ai"
+level: intermediate
+topic: "AI Chips"
 tags: ['cerebras', 'sram', 'accelerators']
 ---
 
@@ -114,4 +115,4 @@ What makes the WSE-3 worth studying is not that it wins; it is that it is *legib
 
 ---
 
-*Part of the **Efficient AI & Co-Design** series. Previous: the hyperscalers' in-house inference silicon (chip-3). Next: from the chips themselves to the systems that feed them; the memory math of chip-1 frames it all.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

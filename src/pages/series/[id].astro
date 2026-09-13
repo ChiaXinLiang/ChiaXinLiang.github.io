@@ -2,103 +2,72 @@
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
 import { SERIES } from '../../consts';
+import { LEVELS, PLANNED } from '../../data/curriculum';
 import { getCollection } from 'astro:content';
-
-export async function getStaticPaths() {
-	return SERIES.map((s) => ({ params: { id: s.id } }));
-}
-
+export async function getStaticPaths() { return SERIES.map(s => ({ params: { id: s.id } })); }
 const { id } = Astro.params;
-const series = SERIES.find((s) => s.id === id)!;
-const posts = (await getCollection('blog'))
-	.filter((p) => p.data.series === id)
-	.sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999) || a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
-
-// Group by topic, preserving first-seen (reading) order
-const topics = new Map<string, typeof posts>();
-for (const p of posts) {
-	const t = p.data.topic ?? 'Other';
-	if (!topics.has(t)) topics.set(t, []);
-	topics.get(t)!.push(p);
-}
+const series = SERIES.find(s => s.id === id)!;
+const posts = (await getCollection('blog')).filter(p => p.data.series === id);
+const plans = PLANNED.filter(p => p.series === id);
+const total = posts.length + plans.length;
+if (total > 30) throw new Error(`${id} exceeds the 30-article curriculum limit (${total}).`);
+const entries = [
+  ...posts.map(p => ({ title: p.data.title, level: p.data.level, topic: p.data.topic ?? 'Other', order: p.data.order ?? 999, href: `/blog/${p.id}/`, planned: false })),
+  ...plans.map(p => ({ ...p, href: '', planned: true })),
+].sort((a,b) => a.order-b.order);
 ---
-
 <!doctype html>
 <html lang="en">
-	<head>
-		<BaseHead title={series.name} description={series.tagline} />
-		<style>
-			.crumb {
-				font-size: 0.9em;
-			}
-			.level {
-				display: inline-block;
-				font-size: 0.8em;
-				font-weight: 700;
-				color: var(--accent);
-			}
-			h1 {
-				margin: 0.2em 0 0.3em;
-			}
-			.tagline {
-				color: rgb(var(--gray));
-				margin-bottom: 2rem;
-			}
-			.topic {
-				margin-bottom: 1.75rem;
-			}
-			.topic h3 {
-				font-size: 1.1em;
-				margin-bottom: 0.5rem;
-				border-bottom: 1px solid rgb(var(--gray-light));
-				padding-bottom: 0.3rem;
-			}
-			.topic ol {
-				padding-left: 1.4rem;
-				margin: 0;
-			}
-			.topic li {
-				margin-bottom: 0.45rem;
-			}
-			.date {
-				color: rgb(var(--gray));
-				font-size: 0.85em;
-				margin-left: 0.5rem;
-			}
-			.empty {
-				color: rgb(var(--gray));
-				font-style: italic;
-			}
-		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<p class="crumb"><a href="/blog/">← All series</a></p>
-			<span class="level">{series.level}</span>
-			<h1>{series.name}</h1>
-			<p class="tagline">{series.tagline}</p>
-			{posts.length === 0 && <p class="empty">First articles landing soon — this series is in production.</p>}
-			{
-				[...topics.entries()].map(([topic, list]) => (
-					<section class="topic">
-						<h3>{topic}</h3>
-						<ol>
-							{list.map((post) => (
-								<li>
-									<a href={`/blog/${post.id}/`}>{post.data.title}</a>
-									<span class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</span>
-								</li>
-							))}
-						</ol>
-					</section>
-				))
-			}
-		</main>
-		<Footer />
-	</body>
+  <head><BaseHead title={series.name} description={series.tagline} /></head>
+  <body>
+    <Header />
+    <main>
+      <p class="crumb"><a href="/blog/">← All series</a> · {series.area}</p>
+      <h1>{series.name}</h1>
+      <p class="tagline">{series.tagline}</p>
+      <p class="counts">{posts.length} published · {plans.length} planned · {total} articles in this path</p>
+      <nav class="level-links" aria-label="Learning levels">{LEVELS.map(l => <a href={`#${l.id}`}>{l.name}</a>)}</nav>
+      {posts.length === 0 && <p class="roadmap">This is a planned learning path. The topics below are not published articles yet.</p>}
+      {LEVELS.map(level => {
+        const list = entries.filter(p => p.level === level.id);
+        const topics = [...new Set(list.map(p => p.topic))];
+        return <details class="learning-level" id={level.id} open={level.id === 'beginner'}>
+          <summary><span>{level.name}</span><small>{list.filter(p => !p.planned).length} published · {list.filter(p => p.planned).length} planned</small></summary>
+          <div class="level-body">
+            <p class="level-description">{level.description}</p>
+            {topics.map(topic => <section><h3>{topic.replace(/^\d+[ -]+/, '')}</h3><ol>
+              {list.filter(p => p.topic === topic).map(p => <li value={p.order}>{p.planned ? <span class="planned">{p.title}<small>Planned</small></span> : <a href={p.href}>{p.title}</a>}</li>)}
+            </ol></section>)}
+          </div>
+        </details>;
+      })}
+    </main>
+    <Footer />
+    <script>
+      const reveal = () => {
+        const target = document.getElementById(location.hash.slice(1));
+        if (target instanceof HTMLDetailsElement) target.open = true;
+      };
+      window.addEventListener('hashchange', reveal); reveal();
+    </script>
+  </body>
 </html>
+<style>
+  .crumb, .counts { font-size: .8em; color: rgb(var(--gray)); }
+  h1 { margin: .3em 0; }
+  .tagline { color: rgb(var(--gray-dark)); }
+  .level-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.5rem 0; }
+  .level-links a { font-size: .8em; border: 1px solid rgb(var(--gray-light)); border-radius: 20px; padding: .4rem .8rem; text-decoration: none; }
+  .learning-level { border: 1px solid rgb(var(--gray-light)); border-radius: 12px; margin: 1rem 0; scroll-margin-top: 1rem; }
+  summary { padding: 1rem 1.2rem; cursor: pointer; font-weight: 700; }
+  summary small { display: block; font-weight: 400; color: rgb(var(--gray)); margin-top: .2rem; font-size: .7em; }
+  .level-body { padding: 0 1.2rem 1.2rem; }
+  .level-description, .roadmap { font-size: .85em; color: rgb(var(--gray)); }
+  h3 { font-size: 1em; margin: 1.3rem 0 .5rem; }
+  ol { padding-left: 1.6rem; }
+  li { margin: .7rem 0; font-size: .9em; }
+  .planned { color: rgb(var(--gray)); }
+  .planned small { display: block; font-size: .75em; }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+</style>

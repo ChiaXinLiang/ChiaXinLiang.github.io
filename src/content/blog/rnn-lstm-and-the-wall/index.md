@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'arch-2'
-order: 4
-series: 'llm-basics'
-topic: 'Neural Networks'
+order: 7
+series: "llm-basics"
+level: intermediate
+topic: "Neural Networks"
 tags: ['rnn', 'lstm', 'sequences']
 ---
 
@@ -140,4 +141,4 @@ A practical comparison should measure the complete task rather than only the rec
 
 ---
 
-*Part of the **Fundamental of LLM** series. Previous: [CNN: how machines learned to see](/blog/cnn-how-machines-learned-to-see/). Next: attention in plain words.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

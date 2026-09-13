@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'asic-1'
 order: 15
-series: 'comp-arch'
-topic: 'ASIC Design'
+series: "comp-arch"
+level: advanced
+topic: "ASIC Design"
 tags: [asic, fpga, gpu]
 ---
 
@@ -134,4 +135,4 @@ Next in this series: what "designing a chip" actually involves, the RTL-to-GDSII
 - The OpenROAD Project (open-source RTL-to-GDSII flow) — https://theopenroadproject.org/
 - Tiny Tapeout (low-cost shared shuttle tapeouts) — https://tinytapeout.com/
 
-*Part of the **Computer Architecture & ASIC** series. Previous: [CPU vs GPU: Latency Machines and Throughput Machines](/blog/cpu-vs-gpu-latency-vs-throughput-machines/). Next: the ASIC design flow — how Verilog becomes a photomask.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

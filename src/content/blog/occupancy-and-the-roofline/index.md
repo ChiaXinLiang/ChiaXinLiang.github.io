@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'exec-3'
-order: 10
-series: 'ai-performance'
-topic: 'CUDA & Kernels'
+order: 7
+series: "gpu-performance"
+level: intermediate
+topic: "GPU Execution and Memory"
 tags: [cuda, gpu, kernels]
 ---
 
@@ -129,4 +130,4 @@ Occupancy and the roofline are the 2 mental models that turn kernel profiling fr
 - NVIDIA Nsight Compute Profiling Guide (theoretical vs. achieved occupancy, roofline analysis). https://docs.nvidia.com/nsight-compute/ProfilingGuide/
 - NVIDIA H100 datasheet figures (bandwidth and dense tensor throughput; vendor self-reported). https://www.nvidia.com/en-us/data-center/h100/
 
-*Part of the **AI Performance Engineering** series. Previously in CUDA & Kernels: how the SIMT execution model maps warps to hardware. Next: reading an Nsight Compute profile end to end.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

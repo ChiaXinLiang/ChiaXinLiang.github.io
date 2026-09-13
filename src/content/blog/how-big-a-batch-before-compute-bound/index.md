@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'math-5'
-order: 45
-series: 'ai-performance'
-topic: 'Practice'
+order: 21
+series: "gpu-performance"
+level: advanced
+topic: "GPU Execution and Memory"
 tags: ['gpu', 'inference', 'math']
 ---
 

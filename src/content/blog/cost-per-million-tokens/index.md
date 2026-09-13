@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'serve-4'
-order: 26
-series: 'ai-performance'
-topic: 'Inference'
+order: 5
+series: "llm-serving"
+level: intermediate
+topic: "Cost and Energy"
 tags: [inference, economics, serving]
 ---
 
@@ -120,4 +121,4 @@ That is the quiet dignity of performance engineering. It rarely ships a feature 
 - DeepSeek-AI, "DeepSeek-V3 Technical Report": https://arxiv.org/abs/2412.19437
 - Together AI pricing page (vendor list prices): https://www.together.ai/pricing
 
-*Part of the **AI Performance Engineering** series. Previously: [Goodput: Your "100% Utilized" Cluster Is Mostly Wasted](/blog/goodput-vs-utilization/). Next stop on the money trail: [Tokens per Megawatt](/blog/tokens-per-megawatt/).*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

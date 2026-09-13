@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'tf-3'
-order: 7
-series: 'llm-basics'
-topic: 'Transformer'
+order: 10
+series: "llm-basics"
+level: intermediate
+topic: "Transformer"
 tags: ['transformer', 'parallelism', 'hardware']
 ---
 
@@ -116,4 +117,4 @@ It also sets up everything that follows. Given an architecture that can absorb a
 
 ---
 
-*Part of the **Fundamental of LLM** series. Previous: [The Transformer architecture in 1 picture](/blog/transformer-architecture-in-one-picture/). Next: the LLM lifecycle — how a raw architecture becomes a trained model, starting with pretraining.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

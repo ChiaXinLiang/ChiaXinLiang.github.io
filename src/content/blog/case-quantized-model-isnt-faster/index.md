@@ -5,9 +5,10 @@ pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'case-6'
-order: 38
-series: 'ai-performance'
-topic: 'Troubleshooting'
+order: 22
+series: "llm-serving"
+level: advanced
+topic: "Inference Methods"
 tags: [quantization, troubleshooting, gpu]
 ---
 
@@ -110,4 +111,4 @@ The diagnostic sequence that closes this case file works for most of the series:
 - NVIDIA TensorRT-LLM repository (weight-only quantization support matrix). https://github.com/NVIDIA/TensorRT-LLM
 - NVIDIA H100 Tensor Core GPU specifications. https://www.nvidia.com/en-us/data-center/h100/
 
-*Part of the **AI Performance Engineering** series. Previous: [Case File: 1 GPU is slower than the other seven](/blog/goodput-vs-utilization/) territory — and if you want the underlying quantization theory first, start with [Quantization: What You Gain, What You Lose](/blog/quantization-what-you-gain-what-you-lose/).*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

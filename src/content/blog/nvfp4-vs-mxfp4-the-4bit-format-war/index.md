@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'fmt-1'
-order: 5
-series: 'efficient-ai'
-topic: 'Precision'
+order: 2
+series: "efficient-ai"
+level: beginner
+topic: "Precision"
 tags: ['quantization', 'fp4', 'numerics']
 ---
 
@@ -132,4 +133,4 @@ My prediction, for what it is worth: both formats live. NVFP4 wins where NVIDIA'
 - Open Compute Project, "OCP Microscaling Formats (MX) Specification v1.0" — E8M0 scaling rule and block definitions (consortium specification document).
 - AWS, Trainium3 hardware W4A8 path: https://aws.amazon.com/ai/machine-learning/trainium/
 
-*Part of the **Efficient AI & Co-Design** series. Previously: [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/) on why bandwidth, not capacity, is the axis that moves. Next: what it takes to pretrain, not just serve, in 4-bit.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

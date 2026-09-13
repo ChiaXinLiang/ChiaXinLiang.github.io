@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'asic-4'
 order: 18
-series: 'comp-arch'
-topic: 'ASIC Design'
+series: "comp-arch"
+level: advanced
+topic: "ASIC Design"
 tags: ['asic', 'tpu', 'accelerators']
 ---
 
@@ -127,4 +128,4 @@ The product side of this story, what today's accelerators actually ship and how 
 - S. Hooker, "The Hardware Lottery," 2020 — [arxiv.org/abs/2009.06489](https://arxiv.org/abs/2009.06489)
 - P. Micikevicius et al., "FP8 Formats for Deep Learning," 2022 — [arxiv.org/abs/2209.05433](https://arxiv.org/abs/2209.05433)
 
-*Part of the **Computer Architecture & ASIC** series, and its final article. Previous: the economics of a tapeout. The story continues in the **Efficient-AI** series, starting with [Blackwell to Rubin: memory math](/blog/blackwell-to-rubin-memory-math/).*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

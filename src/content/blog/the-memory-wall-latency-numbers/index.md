@@ -5,9 +5,10 @@ pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'mem-1'
-order: 8
-series: 'comp-arch'
-topic: 'Memory Hierarchy'
+order: 3
+series: "comp-arch"
+level: beginner
+topic: "Memory Hierarchy"
 tags: [memory, latency, hardware]
 ---
 
@@ -135,4 +136,4 @@ The entire modern inference stack is a response to this. Batching lets N concurr
 - D. A. Patterson, "Latency Lags Bandwidth," *Communications of the ACM* 47(10), 2004.
 - M. Horowitz, "Computing's Energy Problem (and what we can do about it)," ISSCC 2014 keynote (operation energy table).
 
-*Part of the **Computer Architecture & ASIC** series. Previous: [What a CPU Actually Does](/blog/what-a-cpu-actually-does/). Next up: caches — how a few megabytes of SRAM hide a hundred-nanosecond problem.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

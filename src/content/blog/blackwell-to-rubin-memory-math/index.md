@@ -6,8 +6,9 @@ updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'chip-1'
 order: 1
-series: 'efficient-ai'
-topic: 'AI Chips'
+series: "efficient-ai"
+level: beginner
+topic: "AI Chips"
 tags: ['nvidia', 'hbm', 'accelerators']
 ---
 
@@ -146,4 +147,4 @@ If 1 configuration cannot meet the memory budget, determine whether quantization
 
 ---
 
-*Part of the **Efficient AI & Co-Design** series. Next in series: NVFP4 vs MXFP4 — inside the 4-bit format war.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

@@ -5,9 +5,10 @@ updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'serve-1'
-order: 23
-series: 'ai-performance'
-topic: 'Inference'
+order: 4
+series: "ai-performance"
+level: beginner
+topic: "Performance Methodology"
 tags: [profiling, inference, gpu]
 ---
 
@@ -106,4 +107,4 @@ The deeper point is cultural. The illustrative trace gives a 25% reduction from 
 - NVIDIA, *CUDA C++ Programming Guide* (asynchronous execution model) — https://docs.nvidia.com/cuda/cuda-c-programming-guide/
 - vLLM documentation (profiling and performance) — https://docs.vllm.ai/
 
-*Part of the **AI Performance Engineering** series. Previous: [A Year of KernelBench](/blog/a-year-of-kernelbench/). Next: benchmarking inference frameworks without fooling yourself.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*

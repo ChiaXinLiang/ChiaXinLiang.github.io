@@ -1,0 +1,48 @@
+---
+import { SERIES } from '../consts';
+import { AREAS, PLANNED } from '../data/curriculum';
+import type { CollectionEntry } from 'astro:content';
+interface Props { posts: CollectionEntry<'blog'>[]; }
+const { posts } = Astro.props;
+---
+<div class="learning-hub">
+  {AREAS.map((area) => (
+    <details class="area">
+      <summary><span><strong>{area.name}</strong><small>{area.description}</small></span><span class="area-count">{SERIES.filter(s => s.area === area.name).length} series</span></summary>
+      <div class="series-rows">
+        {SERIES.filter(s => s.area === area.name).map(series => {
+          const published = posts.filter(p => p.data.series === series.id).length;
+          const planned = PLANNED.filter(p => p.series === series.id).length;
+          return <a class="series-row" href={`/series/${series.id}/`}>
+            <span><strong>{series.name}</strong><small>{series.tagline}</small></span>
+            <span class="counts">{published} published · {planned} planned<small>Beginner → Intermediate → Advanced</small></span>
+          </a>;
+        })}
+      </div>
+    </details>
+  ))}
+</div>
+<style>
+  .learning-hub { margin: 1.5rem 0 2.5rem; }
+  .area { border: 1px solid rgb(var(--gray-light)); border-radius: 12px; margin-bottom: .85rem; overflow: hidden; }
+  summary { display: flex; align-items: center; gap: 1rem; padding: 1.2rem; cursor: pointer; }
+  summary::before { content: '+'; color: var(--accent); font-size: 1.3em; flex-shrink: 0; }
+  details[open] > summary::before { content: '−'; }
+  summary > span:first-of-type { flex: 1; min-width: 0; }
+  strong { display: block; color: rgb(var(--black)); }
+  small { display: block; font-size: .8em; color: rgb(var(--gray)); line-height: 1.5; margin-top: .25rem; }
+  .area-count { font-size: .8em; white-space: nowrap; color: var(--accent); }
+  .series-rows { padding: 0 1.2rem .3rem; }
+  .series-row { display: flex; align-items: center; gap: 1.5rem; padding: 1rem 0; border-top: 1px solid rgb(var(--gray-light)); text-decoration: none; }
+  .series-row > span:first-child { flex: 1; min-width: 0; }
+  .series-row:hover strong { color: var(--accent); }
+  .counts { flex: 0 0 12rem; font-size: .7em; color: var(--accent); text-align: right; }
+  .counts small { font-size: 1em; }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+  @media(max-width: 650px) {
+    .series-row { display: block; }
+    .counts { display: block; text-align: left; margin-top: .55rem; }
+    summary { padding: 1rem; gap: .6rem; }
+    summary small { font-size: .75em; }
+  }
+</style>
