@@ -133,5 +133,5 @@ Choose intervals using measured effective save cost and job-level interruption b
 
 - [PyTorch Distributed Checkpoint](https://docs.pytorch.org/docs/stable/distributed.checkpoint.html): parallel save/load, planners, and resharding.
 - [PyTorch asynchronous checkpoint recipe](https://docs.pytorch.org/tutorials/recipes/distributed_async_checkpoint_recipe.html): staging, asynchronous writes, and memory considerations.
-- [Young, A First Order Approximation to the Optimum Checkpoint Interval](https://doi.org/10.1145/361179.361183): checkpoint interval model.
+- [Young, A First Order Approximation to the Optimum Checkpoint Interval](https://doi.org/10.1145/361147.361115): checkpoint interval model.
 - [Daly, A Higher Order Estimate of the Optimum Checkpoint Interval for Restart Dumps](https://doi.org/10.1016/j.future.2004.11.016): refined restart interval analysis.

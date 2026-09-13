@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="840" viewBox="0 0 1200 840" role="img">
+<title>MLA: retain a latent, move compatible linear maps</title>
+<rect width="1200" height="840" fill="#faf8f1"/>
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="#7545c8"/></marker></defs>
+<text x="40" y="58" font-family="Arial" font-size="32" font-weight="700" fill="#252a20">MLA: retain a latent, move compatible linear maps</text>
+<rect x="40" y="100" width="335" height="145" rx="15" fill="white" stroke="#bfa9de" stroke-width="2"/>
+<text x="207.5" y="134" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="#7545c8">1. Hidden representation</text>
+<text x="207.5" y="172" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">ht → WDKV → ct</text>
+<text x="207.5" y="200" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">A learned low-rank content basis</text>
+<rect x="430" y="100" width="730" height="145" rx="15" fill="white" stroke="#bfa9de" stroke-width="2"/>
+<text x="795.0" y="134" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="#7545c8">2. Retained history</text>
+<text x="795.0" y="172" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">Cache each ci plus required positional side state</text>
+<text x="795.0" y="200" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">Latent content replaces expanded key-value history</text>
+<path d="M375 174L426 174" fill="none" stroke="#7545c8" stroke-width="3" marker-end="url(#a)"/>
+<rect x="40" y="325" width="530" height="150" rx="15" fill="white" stroke="#bfa9de" stroke-width="2"/>
+<text x="305.0" y="359" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="#7545c8">3. Address latent content</text>
+<text x="305.0" y="397" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">qᵀ WUK ci = (WUKᵀ q)ᵀ ci</text>
+<text x="305.0" y="425" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">Transform the query instead of every old key</text>
+<rect x="630" y="325" width="530" height="150" rx="15" fill="white" stroke="#bfa9de" stroke-width="2"/>
+<text x="895.0" y="359" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="#7545c8">4. Accumulate before expansion</text>
+<text x="895.0" y="397" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">Σ ai WUV ci = WUV (Σ ai ci)</text>
+<text x="895.0" y="425" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">A linear value map moves outside the sum</text>
+<path d="M790 245L790 285L305 285L305 321" fill="none" stroke="#7545c8" stroke-width="3" marker-end="url(#a)"/>
+<path d="M790 245L790 285L895 285L895 321" fill="none" stroke="#7545c8" stroke-width="3" marker-end="url(#a)"/>
+<path d="M570 400L626 400" fill="none" stroke="#7545c8" stroke-width="3" marker-end="url(#a)"/>
+<rect x="40" y="550" width="1120" height="210" rx="15" fill="white" stroke="#bfa9de" stroke-width="2"/>
+<text x="600.0" y="584" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="#7545c8">Preserve the assumptions</text>
+<text x="600.0" y="622" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">Position-dependent rotary terms need their own compatible path</text>
+<text x="600.0" y="650" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">Nonlinear operations cannot be moved using the same linear identity</text>
+<text x="600.0" y="678" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">Simple retained bytes = batch × layers × tokens × (latent width + rotary width) × bytes</text>
+<text x="600.0" y="706" text-anchor="middle" font-family="Arial" font-size="20" fill="#252a20">Compact retained state does not automatically make dense history search sparse</text>
+<path d="M895 475L895 546" fill="none" stroke="#7545c8" stroke-width="3" marker-end="url(#a)"/>
+</svg>

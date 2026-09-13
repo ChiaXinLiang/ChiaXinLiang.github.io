@@ -175,4 +175,4 @@ Tiled GEMM is a reuse algorithm constrained by ownership and on-chip state. Prov
 
 - [CUDA SIMT kernel programming](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html).
 - [CUDA advanced kernel programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html).
-- [NVIDIA CUTLASS GEMM documentation](https://docs.nvidia.com/cutlass/media/docs/cpp/gemm_api.html).
+- [NVIDIA CUTLASS GEMM documentation](https://github.com/NVIDIA/cutlass/blob/main/media/docs/cpp/gemm_api.md).

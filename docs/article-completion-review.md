@@ -1,6 +1,6 @@
 # Article completion review
 
-41 previously unfinished articles completed on September 13, 2026. 14 editorial records remain unfinished.
+55 previously unfinished articles completed on September 13, 2026. 0 editorial records remain unfinished.
 
 Each addition has an original section overview, defined mathematical quantities, worked examples, and primary-source links. Numerical performance examples are identified as illustrative.
 
@@ -42,6 +42,20 @@ Each addition has an original section overview, defined mathematical quantities,
 | gpu-performance | [Dynamic Shapes: Guards, Buckets, Padding, and Compilation Cost](../src/content/blog/dynamic-shapes-guards-buckets-compilation/index.md) | 1806 |
 | gpu-performance | [Triton Kernel Foundations: Programs, Masks, Layouts, and Correctness](../src/content/blog/triton-programs-masks-layout-correctness/index.md) | 1803 |
 | gpu-performance | [Triton Fusion: A Reduction or Normalization Kernel From First Principles](../src/content/blog/triton-fused-normalization-reduction-first-principles/index.md) | 1808 |
+| llm-architectures | [Attention State 2: MLA and Latent Cache Reconstruction](../src/content/blog/attention-state-mla-latent-cache-reconstruction/index.md) | 1808 |
+| llm-architectures | [Comparing LLM Architectures: Evidence, Tradeoffs, and Missing Disclosures](../src/content/blog/comparing-llm-architectures-evidence-tradeoffs/index.md) | 1845 |
+| llm-architectures | [DeepSeek-V4.1-Flash 1: Causal Encoder-Decoder and Phase-Specific Work](../src/content/blog/deepseek-v41-flash-causal-encoder-decoder/index.md) | 1809 |
+| llm-architectures | [DeepSeek-V4.1-Flash 2: CSA2 Sharing and Hierarchical Sparse Indexing](../src/content/blog/deepseek-v41-flash-csa2-hierarchical-indexing/index.md) | 1813 |
+| llm-architectures | [DeepSeek-V4.1-Flash 3: FP4 Cache and Bounded Replay](../src/content/blog/deepseek-v41-flash-fp4-cache-bounded-replay/index.md) | 1828 |
+| llm-architectures | [Mixture of Experts 1: Routing and Selected Computation](../src/content/blog/mixture-of-experts-routing-selected-computation/index.md) | 1802 |
+| llm-architectures | [Attention State 1: MHA, MQA, and GQA](../src/content/blog/attention-state-mha-mqa-gqa/index.md) | 1834 |
+| llm-architectures | [Hybrid Attention: Combining Recurrent State with Token Attention](../src/content/blog/hybrid-attention-recurrent-state-token-history/index.md) | 1827 |
+| llm-architectures | [Mixture of Experts 2: Load Balance, Capacity, and Dispatch](../src/content/blog/mixture-of-experts-capacity-load-balance-dispatch/index.md) | 1814 |
+| llm-architectures | [Multimodal LLMs: How Image and Audio Representations Meet Language](../src/content/blog/multimodal-llms-image-audio-language-representations/index.md) | 1809 |
+| llm-architectures | [gpt-oss 1: Residual Structure and Sparse Expert Computation](../src/content/blog/gpt-oss-residual-structure-sparse-experts/index.md) | 1817 |
+| llm-architectures | [gpt-oss 2: Attention Patterns, Sinks, and Numerical Representation](../src/content/blog/gpt-oss-attention-patterns-sinks-representation/index.md) | 1832 |
+| llm-architectures | [Qwen3.6: Reading a Hybrid Multimodal Model Configuration](../src/content/blog/qwen36-hybrid-multimodal-configuration/index.md) | 1805 |
+| llm-architectures | [Reasoning Models: Architecture, Post-Training, and Inference-Time Compute](../src/content/blog/reasoning-models-post-training-inference-compute/index.md) | 1812 |
 | llm-serving | [FlashAttention: Online Softmax, Exact Tiling, and the I/O Model](../src/content/blog/flashattention-online-softmax-io-model/index.md) | 1855 |
 | llm-serving | [Energy per Useful Token: Power Caps, Clocks, Thermals, and SLOs](../src/content/blog/energy-useful-token-power-clocks-slos/index.md) | 1808 |
 | llm-serving | [Structured Output: Grammar Masks and Constrained Decoding Throughput](../src/content/blog/structured-output-grammar-masks-throughput/index.md) | 1825 |
@@ -50,11 +64,13 @@ Each addition has an original section overview, defined mathematical quantities,
 
 ## Verification
 
-- Static build succeeds with 136 published database records, including the welcome page.
-- All 135 long-form articles have 1,800–2,500 prose words, rendered equations, existing image assets, and valid internal routes.
+- Static build succeeds with 150 published database records, including the welcome page.
+- All 149 long-form articles have 1,800–2,500 prose words, rendered equations, existing image assets, and valid internal routes.
 - All 9 series have consecutive displayed article numbers and matching Previous/Next links.
 - Roadmap paths, selection, reading progress, persistence, and reset/cancel pass the command-line interaction checks.
-- Browser inspection is unavailable because the computer-use service returned an administrator policy verification error. Original figures were rendered locally and a representative figure was visually inspected.
-- Moved Megatron source URLs were replaced with working current context-parallel, token-dispatcher, and pipeline-schedule documentation.
+- Browser inspection is unavailable because the computer-use service returned an administrator policy verification error. Original figures were rendered locally; representative overview figures and the custom Q/K/V and MLA diagrams were visually inspected.
+- Moved Megatron and CUTLASS source URLs were corrected. The Young checkpoint-interval citation now uses the verified primary-publication DOI.
 
 The compact roadmap includes Distributed Training. Its connection paths are derived from background relationships rather than a fixed list of SVG coordinates.
+
+All 55 originally unfinished records are now published. No series exceeds 30 articles. GPU examples and model equations are explanatory; target-device benchmarks and model-weight execution were not performed in this editing environment.

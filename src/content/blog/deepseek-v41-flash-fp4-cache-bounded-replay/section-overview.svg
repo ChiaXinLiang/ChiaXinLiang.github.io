@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="840" viewBox="0 0 1200 840" role="img">
+<title>DeepSeek-V4.1-Flash 3: FP4 Cache and Bounded Replay</title>
+<rect width="1200" height="840" fill="#faf8f1"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="#7545c8"/></marker></defs>
+<text x="44" y="58" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#252a20">DeepSeek-V4.1-Flash 3</text>
+<text x="44" y="92" font-family="Arial,sans-serif" font-size="20" fill="#555b4b">Method, execution, and verification</text>
+<rect x="44" y="125" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="78" cy="162" r="20" fill="#7545c8"/>
+<text x="78" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">1</text>
+<text x="112" y="168" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Store low-precision content</text>
+<text x="68" y="238" font-family="Arial,sans-serif" font-size="21" fill="#252a20">FP4 E2M1 main cache uses grouped scales</text>
+<text x="68" y="344" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">The card specifies an E4M3 scale per 16</text>
+<text x="68" y="371" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">channels</text>
+<rect x="624" y="125" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="658" cy="162" r="20" fill="#7545c8"/>
+<text x="658" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">2</text>
+<text x="692" y="168" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Include all stored bytes</text>
+<text x="648" y="238" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Packed values, scales, and other state</text>
+<text x="648" y="267" font-family="Arial,sans-serif" font-size="21" fill="#252a20">contribute</text>
+<text x="648" y="344" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">890 bytes per token is a reported global-cache</text>
+<text x="648" y="371" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">figure</text>
+<rect x="624" y="465" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="658" cy="502" r="20" fill="#7545c8"/>
+<text x="658" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">3</text>
+<text x="692" y="508" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Persist selected state</text>
+<text x="648" y="578" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Recent sliding-window KV can be omitted</text>
+<text x="648" y="607" font-family="Arial,sans-serif" font-size="21" fill="#252a20">from SSD</text>
+<text x="648" y="684" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Persistent state differs from active device</text>
+<text x="648" y="711" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">state</text>
+<rect x="44" y="465" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="78" cy="502" r="20" fill="#7545c8"/>
+<text x="78" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">4</text>
+<text x="112" y="508" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Replay before resuming</text>
+<text x="68" y="578" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Reconstruct the required recent local state</text>
+<text x="68" y="684" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Restoration trades retained bytes for</text>
+<text x="68" y="711" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">additional work</text>
+<path d="M598 272L619 272" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M876 429L876 462" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M620 612L599 612" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="44" y="812" font-family="Arial,sans-serif" font-size="18" fill="#555b4b">Read the article for derivations, assumptions, and worked examples.</text>
+</svg>
