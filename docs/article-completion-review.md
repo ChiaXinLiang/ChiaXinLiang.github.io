@@ -1,6 +1,6 @@
 # Article completion review
 
-23 previously unfinished articles completed on September 13, 2026. 32 editorial records remain unfinished.
+29 previously unfinished articles completed on September 13, 2026. 26 editorial records remain unfinished.
 
 Each addition has an original section overview, defined mathematical quantities, worked examples, and primary-source links. Numerical performance examples are identified as illustrative.
 
@@ -16,6 +16,12 @@ Each addition has an original section overview, defined mathematical quantities,
 | ai-networking | [All-to-All for MoE: Expert Dispatch, Imbalance, and Communication Cost](../src/content/blog/moe-all-to-all-dispatch-imbalance-cost/index.md) | 1805 |
 | ai-networking | [Network Benchmarking: Latency, Bus Bandwidth, and Multi-Node Scaling](../src/content/blog/network-benchmarking-latency-bus-bandwidth-scaling/index.md) | 1817 |
 | ai-networking | [Network Failures and Stragglers: Diagnosing Distributed Job Stalls](../src/content/blog/network-failures-stragglers-distributed-stalls/index.md) | 1813 |
+| ai-performance | [Performance Experiments: Baselines, Warmup, Variance, and Reproduction](../src/content/blog/performance-experiments-warmup-variance-reproduction/index.md) | 1804 |
+| ai-performance | [Performance Regression CI: Keeping a Speedup After the Next Commit](../src/content/blog/performance-regression-ci-reproducible-speedups/index.md) | 1800 |
+| ai-performance | [The Training Input Pipeline: Workers, Prefetch, Pinned Memory, and GDS](../src/content/blog/training-input-pipeline-workers-pinned-memory-gds/index.md) | 1805 |
+| ai-performance | [NUMA Tuning: CPU Affinity, Memory Placement, and IRQ Locality](../src/content/blog/numa-cpu-memory-irq-locality/index.md) | 1803 |
+| ai-performance | [GPU Containers: Driver Compatibility, Runtime Libraries, and I/O Paths](../src/content/blog/gpu-containers-compatibility-libraries-io-paths/index.md) | 1803 |
+| ai-performance | [Kubernetes and Slurm: Topology-Aware Placement and Resource Guarantees](../src/content/blog/kubernetes-slurm-topology-resource-guarantees/index.md) | 1816 |
 | distributed-training | [Training Memory and Step Time: Account for Every State](../src/content/blog/training-memory-and-step-time/index.md) | 1827 |
 | distributed-training | [DDP: Gradient Buckets and the Backward Communication Timeline](../src/content/blog/ddp-gradient-buckets-backward-timeline/index.md) | 1902 |
 | distributed-training | [FSDP and ZeRO: What Gets Sharded and What Must Be Materialized](../src/content/blog/fsdp-zero-sharding-materialization/index.md) | 1905 |
@@ -32,8 +38,8 @@ Each addition has an original section overview, defined mathematical quantities,
 
 ## Verification
 
-- Static build succeeds with 118 published database records, including the welcome page.
-- All 117 long-form articles have 1,800–2,500 prose words, rendered equations, existing image assets, and valid internal routes.
+- Static build succeeds with 124 published database records, including the welcome page.
+- All 123 long-form articles have 1,800–2,500 prose words, rendered equations, existing image assets, and valid internal routes.
 - All 9 series have consecutive displayed article numbers and matching Previous/Next links.
 - Roadmap paths, selection, reading progress, persistence, and reset/cancel pass the command-line interaction checks.
 - Browser inspection is unavailable because the computer-use service returned an administrator policy verification error. Original figures were rendered locally and a representative figure was visually inspected.

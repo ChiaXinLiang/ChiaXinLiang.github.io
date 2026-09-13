@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="840" viewBox="0 0 1200 840" role="img">
+<title>Performance Experiments: Baselines, Warmup, Variance, and Reproduction</title>
+<rect width="1200" height="840" fill="#faf8f1"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="#7545c8"/></marker></defs>
+<text x="44" y="58" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#252a20">Performance Experiments</text>
+<text x="44" y="92" font-family="Arial,sans-serif" font-size="20" fill="#555b4b">Method, execution, and verification</text>
+<rect x="44" y="125" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="78" cy="162" r="20" fill="#7545c8"/>
+<text x="78" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">1</text>
+<text x="112" y="168" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Define the estimand</text>
+<text x="68" y="238" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Same useful work, numerical behavior, and</text>
+<text x="68" y="267" font-family="Arial,sans-serif" font-size="21" fill="#252a20">timing boundary</text>
+<text x="68" y="344" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">A faster number can come from doing less work</text>
+<rect x="624" y="125" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="658" cy="162" r="20" fill="#7545c8"/>
+<text x="658" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">2</text>
+<text x="692" y="168" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Control execution state</text>
+<text x="648" y="238" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Warmup, synchronization, placement, and</text>
+<text x="648" y="267" font-family="Arial,sans-serif" font-size="21" fill="#252a20">thermal behavior</text>
+<text x="648" y="344" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Cold-start and steady-state are separate</text>
+<text x="648" y="371" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">populations</text>
+<rect x="624" y="465" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="658" cy="502" r="20" fill="#7545c8"/>
+<text x="658" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">3</text>
+<text x="692" y="508" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Estimate uncertainty</text>
+<text x="648" y="578" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Repeated runs, pairing, distributions, and</text>
+<text x="648" y="607" font-family="Arial,sans-serif" font-size="21" fill="#252a20">intervals</text>
+<text x="648" y="684" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Many correlated iterations are not many</text>
+<text x="648" y="711" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">independent experiments</text>
+<rect x="44" y="465" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="78" cy="502" r="20" fill="#7545c8"/>
+<text x="78" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">4</text>
+<text x="112" y="508" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Reproduce the result</text>
+<text x="68" y="578" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Exact configuration plus raw observations</text>
+<text x="68" y="607" font-family="Arial,sans-serif" font-size="21" fill="#252a20">and correctness</text>
+<text x="68" y="684" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Accept changes based on useful workload</text>
+<text x="68" y="711" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">outcomes</text>
+<path d="M598 272L619 272" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M876 429L876 462" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M620 612L599 612" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="44" y="812" font-family="Arial,sans-serif" font-size="18" fill="#555b4b">Read the article for derivations, assumptions, and worked examples.</text>
+</svg>
