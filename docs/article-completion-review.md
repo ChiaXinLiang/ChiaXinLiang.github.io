@@ -1,6 +1,6 @@
 # Article completion review
 
-14 previously unfinished articles completed on September 13, 2026. 41 editorial records remain unfinished.
+15 previously unfinished articles completed on September 13, 2026. 40 editorial records remain unfinished.
 
 Each addition has an original section overview, defined mathematical quantities, worked examples, and primary-source links. Numerical performance examples are identified as illustrative.
 
@@ -21,10 +21,12 @@ Each addition has an original section overview, defined mathematical quantities,
 | llm-serving | [Admission Control and QoS: Deadlines, Fairness, and Overload](../src/content/blog/admission-control-qos-deadlines-fairness/index.md) | 1828 |
 | llm-serving | [Serving Observability: Request Traces, GPU Counters, and Capacity Alerts](../src/content/blog/serving-observability-traces-counters-capacity/index.md) | 1830 |
 
+| ai-networking | [AI Cluster Topology: PCIe, NVLink, NVSwitch, and Scale-Out Fabrics](../src/content/blog/ai-cluster-topology-local-and-scale-out/index.md) | 1803 |
+
 ## Verification
 
-- Static build succeeds with 109 published database records, including the welcome page.
-- All 108 long-form articles have 1,800–2,500 prose words, rendered equations, existing image assets, and valid internal routes.
+- Static build succeeds with 110 published database records, including the welcome page.
+- All 109 long-form articles have 1,800–2,500 prose words, rendered equations, existing image assets, and valid internal routes.
 - All 9 series have consecutive displayed article numbers and matching Previous/Next links.
 - Roadmap paths, selection, reading progress, persistence, and reset/cancel pass the command-line interaction checks.
 - Browser inspection is unavailable because the computer-use service returned an administrator policy verification error. Original figures were rendered locally and a representative figure was visually inspected.
