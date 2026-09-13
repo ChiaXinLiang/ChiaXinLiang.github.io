@@ -1,12 +1,21 @@
 # Article completion review
 
-15 previously unfinished articles completed on September 13, 2026. 40 editorial records remain unfinished.
+23 previously unfinished articles completed on September 13, 2026. 32 editorial records remain unfinished.
 
 Each addition has an original section overview, defined mathematical quantities, worked examples, and primary-source links. Numerical performance examples are identified as illustrative.
 
 | Series | Article | Prose words before publication |
 | --- | --- | --- |
+| ai-networking | [Collective Communication: Ring, Tree, Reduce-Scatter, and All-Gather](../src/content/blog/collectives-ring-tree-reduce-scatter-all-gather/index.md) | 1808 |
+| ai-networking | [Debugging NCCL and RDMA: Verify the Path Before Tuning the Knobs](../src/content/blog/debugging-nccl-rdma-verify-path-before-tuning/index.md) | 1804 |
 | ai-networking | [Bandwidth, Latency, and the Communication Cost Model](../src/content/blog/bandwidth-latency-communication-cost-model/index.md) | 1810 |
+| ai-networking | [AI Cluster Topology: PCIe, NVLink, NVSwitch, and Scale-Out Fabrics](../src/content/blog/ai-cluster-topology-local-and-scale-out/index.md) | 1803 |
+| ai-networking | [Ethernet, InfiniBand, and RDMA: The Data Path and Its Guarantees](../src/content/blog/ethernet-infiniband-rdma-data-path-guarantees/index.md) | 1810 |
+| ai-networking | [GPUDirect RDMA: GPU–NIC Locality and Transport Verification](../src/content/blog/gpudirect-rdma-locality-transport-verification/index.md) | 1807 |
+| ai-networking | [Congestion and RoCE: ECN, PFC, and Tail Latency](../src/content/blog/roce-congestion-ecn-pfc-tail-latency/index.md) | 1810 |
+| ai-networking | [All-to-All for MoE: Expert Dispatch, Imbalance, and Communication Cost](../src/content/blog/moe-all-to-all-dispatch-imbalance-cost/index.md) | 1805 |
+| ai-networking | [Network Benchmarking: Latency, Bus Bandwidth, and Multi-Node Scaling](../src/content/blog/network-benchmarking-latency-bus-bandwidth-scaling/index.md) | 1817 |
+| ai-networking | [Network Failures and Stragglers: Diagnosing Distributed Job Stalls](../src/content/blog/network-failures-stragglers-distributed-stalls/index.md) | 1813 |
 | distributed-training | [Training Memory and Step Time: Account for Every State](../src/content/blog/training-memory-and-step-time/index.md) | 1827 |
 | distributed-training | [DDP: Gradient Buckets and the Backward Communication Timeline](../src/content/blog/ddp-gradient-buckets-backward-timeline/index.md) | 1902 |
 | distributed-training | [FSDP and ZeRO: What Gets Sharded and What Must Be Materialized](../src/content/blog/fsdp-zero-sharding-materialization/index.md) | 1905 |
@@ -21,14 +30,13 @@ Each addition has an original section overview, defined mathematical quantities,
 | llm-serving | [Admission Control and QoS: Deadlines, Fairness, and Overload](../src/content/blog/admission-control-qos-deadlines-fairness/index.md) | 1828 |
 | llm-serving | [Serving Observability: Request Traces, GPU Counters, and Capacity Alerts](../src/content/blog/serving-observability-traces-counters-capacity/index.md) | 1830 |
 
-| ai-networking | [AI Cluster Topology: PCIe, NVLink, NVSwitch, and Scale-Out Fabrics](../src/content/blog/ai-cluster-topology-local-and-scale-out/index.md) | 1803 |
-
 ## Verification
 
-- Static build succeeds with 110 published database records, including the welcome page.
-- All 109 long-form articles have 1,800–2,500 prose words, rendered equations, existing image assets, and valid internal routes.
+- Static build succeeds with 118 published database records, including the welcome page.
+- All 117 long-form articles have 1,800–2,500 prose words, rendered equations, existing image assets, and valid internal routes.
 - All 9 series have consecutive displayed article numbers and matching Previous/Next links.
 - Roadmap paths, selection, reading progress, persistence, and reset/cancel pass the command-line interaction checks.
 - Browser inspection is unavailable because the computer-use service returned an administrator policy verification error. Original figures were rendered locally and a representative figure was visually inspected.
+- Moved Megatron source URLs were replaced with working current context-parallel, token-dispatcher, and pipeline-schedule documentation.
 
-The compact roadmap now includes Distributed Training. Its connection paths are derived from background relationships rather than a fixed list of SVG coordinates.
+The compact roadmap includes Distributed Training. Its connection paths are derived from background relationships rather than a fixed list of SVG coordinates.

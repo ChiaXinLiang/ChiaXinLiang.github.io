@@ -145,7 +145,7 @@ Write the partitions and dependencies explicitly, derive the important bytes and
 
 ## Sources
 
-- [Megatron Core pipeline parallel API](https://docs.nvidia.com/megatron-core/developer-guide/latest/api-guide/pipeline_parallel.html): scheduling implementations and interleaved/non-interleaved execution.
+- [Megatron Core pipeline parallel API](https://docs.nvidia.com/megatron-core/developer-guide/latest/apidocs/core/core.pipeline_parallel.schedules.html): scheduling implementations and interleaved/non-interleaved execution.
 - [Shoeybi et al., Megatron-LM](https://arxiv.org/abs/1909.08053): tensor partitioning for large language-model training.
 - [Huang et al., GPipe](https://arxiv.org/abs/1811.06965): microbatch pipelines and fill/drain analysis.
 - [Narayanan et al., Efficient Large-Scale Language Model Training on GPU Clusters](https://arxiv.org/abs/2104.04473): combined parallelism and pipeline scheduling.

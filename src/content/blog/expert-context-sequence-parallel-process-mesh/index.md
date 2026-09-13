@@ -137,7 +137,7 @@ Define ownership, layout conversions, and process groups before counting memory 
 
 ## Sources
 
-- [Megatron Core context parallelism](https://docs.nvidia.com/megatron-core/developer-guide/latest/api-guide/context_parallel.html): long-sequence partitioning and communication.
-- [Megatron Core MoE documentation](https://docs.nvidia.com/megatron-core/developer-guide/latest/api-guide/moe.html): expert groups, dispatch, and supported parallel configurations.
+- [Megatron Core context parallelism](https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/features/context_parallel.html): long-sequence partitioning and communication.
+- [Megatron Core MoE documentation](https://docs.nvidia.com/megatron-core/developer-guide/latest/apidocs/core/core.transformer.moe.token_dispatcher.html): expert groups, dispatch, and supported parallel configurations.
 - [Korthikanti et al., Reducing Activation Recomputation in Large Transformer Models](https://arxiv.org/abs/2205.05198): sequence-parallel activation partitioning.
 - [Dao et al., FlashAttention](https://arxiv.org/abs/2205.14135): online normalization for exact tiled attention.
