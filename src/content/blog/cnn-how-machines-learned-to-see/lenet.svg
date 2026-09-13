@@ -25,7 +25,7 @@
     <rect x="535" y="430" width="80" height="80" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
     <rect x="548" y="443" width="80" height="80" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
     <text x="588" y="620" font-size="24" font-weight="700" fill="#b06a4e">pooling</text>
-    <text x="588" y="650" font-size="22" fill="#55584a">shrink · 14×14</text>
+    <text x="580" y="650" font-size="21" fill="#55584a">→ 14×14</text>
 
     <line x1="640" y1="495" x2="685" y2="495" stroke="#55584a" stroke-width="5" marker-end="url(#a)"/>
 
@@ -34,14 +34,14 @@
     <rect x="712" y="452" width="62" height="62" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
     <rect x="724" y="464" width="62" height="62" fill="#a8bf92" stroke="#5b7c46" stroke-width="3"/>
     <text x="737" y="620" font-size="24" font-weight="700" fill="#5b7c46">convolution</text>
-    <text x="737" y="650" font-size="22" fill="#55584a">16 maps · 10×10</text>
+    <text x="737" y="650" font-size="21" fill="#55584a">16 maps · 10×10</text>
 
     <line x1="800" y1="495" x2="845" y2="495" stroke="#55584a" stroke-width="5" marker-end="url(#a)"/>
 
     <!-- classifier -->
     <rect x="860" y="380" width="110" height="230" rx="14" fill="#f7ecd2" stroke="#c9973b" stroke-width="4"/>
     <circle cx="915" cy="430" r="14" fill="#c9973b"/><circle cx="915" cy="480" r="14" fill="#c9973b"/><circle cx="915" cy="530" r="14" fill="#c9973b"/><circle cx="915" cy="575" r="8" fill="#c9973b"/>
-    <text x="915" y="650" font-size="24" font-weight="700" fill="#7a5a20">small classifier</text>
+    <text x="915" y="688" font-size="24" font-weight="700" fill="#7a5a20">small classifier</text>
 
     <line x1="975" y1="495" x2="1020" y2="495" stroke="#55584a" stroke-width="5" marker-end="url(#a)"/>
     <rect x="1030" y="450" width="110" height="90" rx="12" fill="#5b7c46"/>
@@ -52,7 +52,7 @@
   </g>
 
   <line x1="80" y1="1030" x2="1120" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
-  <text x="600" y="1078" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Redrawn simplified from LeCun, Bottou, Bengio &amp; Haffner (1998), "Gradient-Based Learning Applied to Document Recognition", Fig. 2</text>
+  <text x="600" y="1078" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Redrawn simplified from LeCun et al. (1998), Fig. 2</text>
   <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">LLM Basics · arch-1</text>
   <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">1998 → 2012: same recipe, more scale</text>
 </svg>

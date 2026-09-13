@@ -6,9 +6,9 @@
 
   <g font-family="Helvetica Neue, Arial, sans-serif">
     <!-- query -->
-    <rect x="100" y="300" width="240" height="110" rx="14" fill="#f0ddd0" stroke="#b06a4e" stroke-width="5"/>
-    <text x="220" y="348" text-anchor="middle" font-size="28" font-weight="700" fill="#b06a4e">query of "it"</text>
-    <text x="220" y="386" text-anchor="middle" font-size="23" fill="#8a5138">"looking for: a tired thing"</text>
+    <rect x="80" y="300" width="290" height="110" rx="14" fill="#f0ddd0" stroke="#b06a4e" stroke-width="5"/>
+    <text x="225" y="348" text-anchor="middle" font-size="28" font-weight="700" fill="#b06a4e">query of "it"</text>
+    <text x="225" y="386" text-anchor="middle" font-size="22" fill="#8a5138">"seeking: a tired thing"</text>
 
     <!-- keys column -->
     <g font-size="26" text-anchor="middle">
