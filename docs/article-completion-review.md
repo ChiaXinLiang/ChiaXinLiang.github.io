@@ -1,6 +1,6 @@
 # Article completion review
 
-29 previously unfinished articles completed on September 13, 2026. 26 editorial records remain unfinished.
+41 previously unfinished articles completed on September 13, 2026. 14 editorial records remain unfinished.
 
 Each addition has an original section overview, defined mathematical quantities, worked examples, and primary-source links. Numerical performance examples are identified as illustrative.
 
@@ -30,6 +30,18 @@ Each addition has an original section overview, defined mathematical quantities,
 | distributed-training | [Expert, Context, and Sequence Parallelism: Choosing a Process Mesh](../src/content/blog/expert-context-sequence-parallel-process-mesh/index.md) | 1873 |
 | distributed-training | [Training Offload: CPU, NVMe, Bandwidth, and the Critical Path](../src/content/blog/training-offload-cpu-nvme-critical-path/index.md) | 1849 |
 | distributed-training | [Distributed Checkpoints and Recovery: Goodput Under Failure](../src/content/blog/distributed-checkpoints-recovery-goodput/index.md) | 1809 |
+| gpu-performance | [CUDA Kernel Foundations: Indexing, Launch Geometry, and Boundary Masks](../src/content/blog/cuda-kernel-indexing-launch-boundaries/index.md) | 1808 |
+| gpu-performance | [CUDA Correctness: Memory Errors, Races, Barriers, and Compute Sanitizer](../src/content/blog/cuda-correctness-memory-races-barriers-sanitizer/index.md) | 1811 |
+| gpu-performance | [Instruction-Level Parallelism: Dependency Chains, Registers, and Spills](../src/content/blog/instruction-level-parallelism-registers-spills/index.md) | 1882 |
+| gpu-performance | [Tiled GEMM: From a Correct Kernel to a Measured Memory Model](../src/content/blog/tiled-gemm-correctness-measured-memory-model/index.md) | 1805 |
+| gpu-performance | [Shared-Memory Bank Conflicts: Padding, Swizzling, and Broadcast](../src/content/blog/shared-memory-banks-padding-swizzling-broadcast/index.md) | 1819 |
+| gpu-performance | [Asynchronous Tile Loading: TMA, Barriers, and Buffer Ownership](../src/content/blog/asynchronous-tile-loading-tma-buffer-ownership/index.md) | 1860 |
+| gpu-performance | [Stream-Ordered Allocation: Memory Pools, Events, and Safe Reuse](../src/content/blog/stream-ordered-allocation-pools-events-reuse/index.md) | 1806 |
+| gpu-performance | [Persistent Kernels and Atomic Queues: Scheduling Irregular Work](../src/content/blog/persistent-kernels-atomic-queues-irregular-work/index.md) | 1854 |
+| gpu-performance | [Compiled Training: AOTAutograd, Saved Tensors, and Fusion Boundaries](../src/content/blog/compiled-training-aotautograd-saved-tensors-fusion/index.md) | 1854 |
+| gpu-performance | [Dynamic Shapes: Guards, Buckets, Padding, and Compilation Cost](../src/content/blog/dynamic-shapes-guards-buckets-compilation/index.md) | 1806 |
+| gpu-performance | [Triton Kernel Foundations: Programs, Masks, Layouts, and Correctness](../src/content/blog/triton-programs-masks-layout-correctness/index.md) | 1803 |
+| gpu-performance | [Triton Fusion: A Reduction or Normalization Kernel From First Principles](../src/content/blog/triton-fused-normalization-reduction-first-principles/index.md) | 1808 |
 | llm-serving | [FlashAttention: Online Softmax, Exact Tiling, and the I/O Model](../src/content/blog/flashattention-online-softmax-io-model/index.md) | 1855 |
 | llm-serving | [Energy per Useful Token: Power Caps, Clocks, Thermals, and SLOs](../src/content/blog/energy-useful-token-power-clocks-slos/index.md) | 1808 |
 | llm-serving | [Structured Output: Grammar Masks and Constrained Decoding Throughput](../src/content/blog/structured-output-grammar-masks-throughput/index.md) | 1825 |
@@ -38,8 +50,8 @@ Each addition has an original section overview, defined mathematical quantities,
 
 ## Verification
 
-- Static build succeeds with 124 published database records, including the welcome page.
-- All 123 long-form articles have 1,800–2,500 prose words, rendered equations, existing image assets, and valid internal routes.
+- Static build succeeds with 136 published database records, including the welcome page.
+- All 135 long-form articles have 1,800–2,500 prose words, rendered equations, existing image assets, and valid internal routes.
 - All 9 series have consecutive displayed article numbers and matching Previous/Next links.
 - Roadmap paths, selection, reading progress, persistence, and reset/cancel pass the command-line interaction checks.
 - Browser inspection is unavailable because the computer-use service returned an administrator policy verification error. Original figures were rendered locally and a representative figure was visually inspected.
