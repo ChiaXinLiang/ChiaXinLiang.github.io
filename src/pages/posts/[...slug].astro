@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 type Props = CollectionEntry<'posts'>;
 
 const post = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 const all = (await getCollection('posts')).sort(
 	(a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf(),
 );
@@ -25,6 +25,7 @@ const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : undefined;
 	title={post.data.title}
 	description={post.data.description ?? post.data.title}
 	pubDate={post.data.pubDate}
+	headings={headings}
 	prev={prev && { href: `/posts/${prev.id}/`, title: prev.data.title }}
 	next={next && { href: `/posts/${next.id}/`, title: next.data.title }}
 >

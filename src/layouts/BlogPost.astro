@@ -7,14 +7,18 @@ import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 
 type NavLink = { href: string; title: string };
+type Heading = { depth: number; slug: string; text: string };
 type Props = CollectionEntry<'blog'>['data'] & {
 	readingMinutes?: number;
 	prev?: NavLink;
 	next?: NavLink;
+	headings?: Heading[];
 };
 
-const { title, description, pubDate, updatedDate, linkedinDate, heroImage, readingMinutes, prev, next } =
+const { title, description, pubDate, updatedDate, linkedinDate, heroImage, readingMinutes, prev, next, headings } =
 	Astro.props;
+const toc = (headings ?? []).filter((h) => h.depth === 2);
+const showToc = toc.length >= 3;
 ---
 
 <html lang="en">
@@ -55,7 +59,35 @@ const { title, description, pubDate, updatedDate, linkedinDate, heroImage, readi
 				margin-bottom: 0.5em;
 				color: rgb(var(--gray));
 			}
-			.linkedin-date {
+			.toc {
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 12px;
+		padding: 1em 1.4em;
+		margin: 0 0 2.5em;
+		background: rgba(var(--gray-light), 0.25);
+		font-size: 0.9em;
+	}
+	.toc-title {
+		font-weight: 700;
+		color: rgb(var(--black));
+		margin-bottom: 0.5em;
+	}
+	.toc ol {
+		margin: 0;
+		padding-left: 1.4em;
+	}
+	.toc li {
+		margin-bottom: 0.3em;
+	}
+	.toc a {
+		color: rgb(var(--gray-dark));
+		text-decoration: none;
+	}
+	.toc a:hover {
+		color: var(--accent);
+		text-decoration: underline;
+	}
+	.linkedin-date {
 		font-size: 0.8em;
 		color: rgb(var(--gray));
 		margin-top: 0.3em;
@@ -89,6 +121,20 @@ const { title, description, pubDate, updatedDate, linkedinDate, heroImage, readi
 						<h1>{title}</h1>
 						<hr />
 					</div>
+					{
+						showToc && (
+							<nav class="toc">
+								<div class="toc-title">In this article</div>
+								<ol>
+									{toc.map((h) => (
+										<li>
+											<a href={`#${h.slug}`}>{h.text}</a>
+										</li>
+									))}
+								</ol>
+							</nav>
+						)
+					}
 					<slot />
 					{
 						(prev || next) && (

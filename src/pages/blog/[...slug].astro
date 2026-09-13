@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 type Props = CollectionEntry<'blog'>;
 
 const post = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 const readingMinutes = Math.max(1, Math.round((post.body ?? '').split(/\s+/).length / 200));
 
 // Prev/next within the same series (reading order); non-series posts navigate
@@ -28,6 +28,7 @@ const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : undefined;
 <BlogPost
 	{...post.data}
 	readingMinutes={readingMinutes}
+	headings={headings}
 	prev={prev && { href: `/blog/${prev.id}/`, title: prev.data.title }}
 	next={next && { href: `/blog/${next.id}/`, title: next.data.title }}
 >
