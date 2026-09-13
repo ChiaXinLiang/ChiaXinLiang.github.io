@@ -4,6 +4,9 @@ import sqlite3,json,os,argparse,tempfile
 
 def validate(db,blog):
     series={r[0] for r in db.execute('select id from series')}; ids=set(); paths=set()
+    for sid,raw in db.execute('select id,topic_tags_json from series'):
+        tags=json.loads(raw)
+        assert isinstance(tags,list) and 2<=len(tags)<=3 and len(tags)==len(set(tags)) and all(isinstance(t,str) and t.strip() for t in tags),f'Invalid series topic tags: {sid}'
     for r in db.execute('select id,series,content_path,tags_json,public_url from articles'):
         article_id,sid,path,tags,url=r
         assert article_id not in ids and path not in paths,'Duplicate article id or content path'
@@ -32,10 +35,10 @@ def export(source,target,blog):
     try:
         dst=sqlite3.connect(temp)
         dst.execute('pragma foreign_keys=ON')
-        dst.execute('create table series(id TEXT PRIMARY KEY,name TEXT NOT NULL,tagline TEXT NOT NULL,tag TEXT NOT NULL,level TEXT NOT NULL,reading_order INTEGER NOT NULL)')
+        dst.execute('create table series(id TEXT PRIMARY KEY,name TEXT NOT NULL,tagline TEXT NOT NULL,tag TEXT NOT NULL,level TEXT NOT NULL,reading_order INTEGER NOT NULL,topic_tags_json TEXT NOT NULL)')
         dst.execute('create table articles(id TEXT PRIMARY KEY,series TEXT REFERENCES series(id),code TEXT NOT NULL,title TEXT NOT NULL,description TEXT NOT NULL,pub_date TEXT NOT NULL,updated_date TEXT,linkedin_date TEXT,topic TEXT,level TEXT NOT NULL,reading_order INTEGER NOT NULL,hero_image TEXT,tags_json TEXT NOT NULL,content_path TEXT NOT NULL UNIQUE,public_url TEXT NOT NULL UNIQUE)')
         for s in series:
-            if s['id'] in active: dst.execute('insert into series values(?,?,?,?,?,?)',(s['id'],s['name'],s['tagline'],s['subject_tag'],s['level'],s['reading_order']))
+            if s['id'] in active: dst.execute('insert into series values(?,?,?,?,?,?,?)',(s['id'],s['name'],s['tagline'],s['subject_tag'],s['level'],s['reading_order'],s['topic_tags_json']))
         for r in rows:
             dst.execute('insert into articles values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',(r['slug'],r['series'] if r['public_listing'] else None,r['code'],r['title'],r['description'],r['pub_date'],r['updated_date'],r['linkedin_date'],r['topic'],r['level'] or 'beginner',r['reading_order'],r['hero_image'],r['tags_json'] or '[]',r['content_path'],'https://chiaxinliang.github.io/blog/'+r['slug']+'/'))
         dst.commit(); count=validate(dst,blog); dst.close(); src.close()

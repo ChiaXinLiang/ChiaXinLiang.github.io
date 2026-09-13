@@ -1,7 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { resolve } from 'node:path';
 
-export interface PublishedSeries { id: string; name: string; tagline: string; tag: string; level: string; }
+export interface PublishedSeries { id: string; name: string; tagline: string; tag: string; level: string; topicTags: string[]; }
 interface ArticleRow {
   id: string; series: string | null; code: string; title: string; description: string;
   pub_date: string; updated_date: string | null; linkedin_date: string | null;
@@ -15,7 +15,10 @@ export const publishedDatabasePath = resolve(process.cwd(), 'data/content.db');
 export function readPublishedCatalog() {
   const db = new DatabaseSync(publishedDatabasePath, { readOnly: true });
   try {
-    const series = db.prepare('SELECT id,name,tagline,tag,level FROM series ORDER BY reading_order').all() as unknown as PublishedSeries[];
+    const series = db.prepare('SELECT id,name,tagline,tag,level,topic_tags_json FROM series ORDER BY reading_order').all().map(row => {
+      const { topic_tags_json, ...metadata } = row;
+      return { ...metadata, topicTags: JSON.parse(topic_tags_json as string) };
+    }) as unknown as PublishedSeries[];
     const rows = db.prepare('SELECT * FROM articles ORDER BY id').all() as unknown as ArticleRow[];
     const articles = rows.map(row => ({
       id: row.id, contentPath: row.content_path, url: row.public_url,

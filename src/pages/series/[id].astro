@@ -24,7 +24,7 @@ const topics = [...new Set(entries.map(p => p.topic))];
     <main>
       <p class="crumb"><a href="/blog/">← All series</a></p>
       <h1>{series.name}</h1>
-      <div class="tags"><span>{series.tag}</span><span>{series.level}</span></div>
+      <div class="tags"><span>{series.tag}</span>{series.topicTags.map(tag => <span>{tag}</span>)}<span>{series.level}</span></div>
       <p class="tagline">{series.tagline}</p>
       <p class="counts">{posts.length} published article{posts.length === 1 ? '' : 's'}</p>
       {topics.map(topic => <section class="topic"><h2>{topic.replace(/^\d+[ -]+/, '')}</h2><ol>

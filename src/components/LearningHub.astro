@@ -13,19 +13,26 @@ const catalog = SERIES.filter(series => posts.some(p => p.data.series === series
   ],
 }));
 const catalogTags = [...new Set(catalog.map(series => series.tag))];
+const topicTags = [...new Set(catalog.flatMap(series => series.topicTags))].sort();
 ---
 <section class="learning-hub" aria-label="Search and filter series">
+  <div class="search-controls">
   <div class="search-control">
     <label for="series-search">Search series and topics</label>
     <input id="series-search" type="search" placeholder="Search networking, CUDA, MLE…" autocomplete="off" />
   </div>
+  <div class="topic-control">
+    <label for="series-topic">Topic</label>
+    <select id="series-topic"><option value="">All topics</option>{topicTags.map(tag => <option value={tag}>{tag}</option>)}</select>
+  </div>
+  </div>
   <div class="filters">
-    <div class="tags" role="group" aria-label="Filter by tag">
-      <button type="button" data-tag="" aria-pressed="true">All tags</button>
+    <div class="tags" role="group" aria-label="Filter by subject">
+      <button type="button" data-tag="" aria-pressed="true">All subjects</button>
       {catalogTags.map(tag => <button type="button" data-tag={tag} aria-pressed="false">{tag}</button>)}
     </div>
     <div class="select-filters">
-      <label>Level <select id="series-level"><option value="">All levels</option>{LEVELS.map(l => <option value={l.id}>{l.name}</option>)}</select></label>
+      <label>Difficulty <select id="series-level"><option value="">All levels</option>{LEVELS.map(l => <option value={l.id}>{l.name}</option>)}</select></label>
       <button class="reset" type="button">Reset</button>
     </div>
   </div>
@@ -34,7 +41,7 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
     {catalog.map(series => <article class="series-row" data-series={series.id}>
       {series.cover && <a class="series-cover" href={`/series/${series.id}/`} tabindex="-1" aria-hidden="true"><Image src={series.cover} alt="" width={600} height={320} loading="lazy" /></a>}
       <div class="card-content">
-      <div class="row-heading"><a href={`/series/${series.id}/`}>{series.name}</a><span class="series-tags"><span class="tag">{series.tag}</span><span class="tag">{series.level}</span></span></div>
+      <div class="row-heading"><a href={`/series/${series.id}/`}>{series.name}</a><span class="series-tags"><span class="tag">{series.tag}</span>{series.topicTags.map(tag => <span class="tag">{tag}</span>)}<span class="tag">{series.level}</span></span></div>
       <p class="description">{series.tagline}</p>
       <p class="counts">{series.entries.length} published article{series.entries.length === 1 ? '' : 's'}</p>
       <ul class="matching-articles" hidden></ul>
@@ -47,7 +54,7 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
 </section>
 <script>
   interface Entry { title: string; topic: string; code: string; tags: string[]; level: string; published: boolean; href: string; }
-  interface Series { id: string; name: string; tagline: string; tag: string; level: string; entries: Entry[]; }
+  interface Series { id: string; name: string; tagline: string; tag: string; topicTags: string[]; level: string; entries: Entry[]; }
   function initializeCatalog() {
     document.querySelectorAll<HTMLElement>('.learning-hub').forEach(hub => {
       if (hub.dataset.initialized) return;
@@ -55,6 +62,7 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
       const catalog: Series[] = JSON.parse(hub.querySelector('.catalog-data')!.textContent!);
       const search = hub.querySelector<HTMLInputElement>('#series-search')!;
       const level = hub.querySelector<HTMLSelectElement>('#series-level')!;
+      const topic = hub.querySelector<HTMLSelectElement>('#series-topic')!;
       const buttons = [...hub.querySelectorAll<HTMLButtonElement>('[data-tag]')];
       let tag = '';
       let expanded = false;
@@ -64,15 +72,15 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
       const update = () => {
         const terms = normalize(search.value.trim()).split(/\s+/).filter(Boolean);
         let visible = 0;
-        const filtering = Boolean(terms.length || tag || level.value);
+        const filtering = Boolean(terms.length || tag || topic.value || level.value);
         for (const series of catalog) {
           const row = hub.querySelector<HTMLElement>(`[data-series="${series.id}"]`)!;
-          const seriesText = normalize(`${series.name} ${series.tagline} ${series.tag} ${series.level}`);
+          const seriesText = normalize(`${series.name} ${series.tagline} ${series.tag} ${series.topicTags.join(' ')} ${series.level}`);
           const entries = series.entries.filter(entry => {
             const text = `${seriesText} ${normalize(`${entry.title} ${entry.topic} ${entry.code} ${entry.tags.join(' ')}`)}`;
             return terms.every(term => text.includes(term));
           });
-          row.hidden = Boolean((tag && tag !== series.tag) || (level.value && level.value !== series.level.toLowerCase()) || entries.length === 0);
+          row.hidden = Boolean((tag && tag !== series.tag) || (topic.value && !series.topicTags.includes(topic.value)) || (level.value && level.value !== series.level.toLowerCase()) || entries.length === 0);
           if (!row.hidden) {
             visible++;
             if (!filtering && !expanded && visible > initialCount) row.hidden = true;
@@ -106,12 +114,13 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
       more.addEventListener('click', () => { expanded = !expanded; update(); });
       search.addEventListener('input', update);
       level.addEventListener('change', update);
+      topic.addEventListener('change', update);
       buttons.forEach(button => button.addEventListener('click', () => {
         tag = button.dataset.tag!;
         buttons.forEach(b => b.setAttribute('aria-pressed', String(b === button))); update();
       }));
       hub.querySelector('.reset')!.addEventListener('click', () => {
-        search.value = ''; level.value = ''; tag = ''; expanded = false;
+        search.value = ''; level.value = ''; topic.value = ''; tag = ''; expanded = false;
         buttons.forEach(b => b.setAttribute('aria-pressed', String(!b.dataset.tag))); update(); search.focus();
       });
       update();
@@ -121,7 +130,9 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
 </script>
 <style>
   .learning-hub { margin: 1.5rem 0 2.5rem; }
-  .search-control label { display: block; font-size: .8em; margin-bottom: .4rem; color: rgb(var(--gray-dark)); }
+  .search-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(190px, 260px); align-items: end; gap: .75rem; }
+  .topic-control select { width: 100%; margin: 0; padding: .9rem .65rem; font-size: .85rem; }
+  .search-control label, .topic-control label { display: block; font-size: .8em; margin-bottom: .4rem; color: rgb(var(--gray-dark)); }
   input { width: 100%; box-sizing: border-box; border: 1px solid rgb(var(--gray-light)); border-radius: 8px; padding: .9rem 1rem; font: inherit; background: var(--bg); color: rgb(var(--black)); }
   .filters { margin-top: .85rem; }
   .tags { display: flex; flex-wrap: wrap; gap: .4rem; }
@@ -153,5 +164,5 @@ const catalogTags = [...new Set(catalog.map(series => series.tag))];
   .empty { font-size: .85em; }
   [hidden] { display: none !important; }
   a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-  @media(max-width: 600px) { .series-rows { grid-template-columns: 1fr; } .row-heading { display: block; } .tag { display: inline-block; margin-top: .4rem; } .select-filters { gap: .5rem; } .reset { margin-left: 0; } }
+  @media(max-width: 600px) { .search-controls { grid-template-columns: 1fr; } .series-rows { grid-template-columns: 1fr; } .row-heading { display: block; } .tag { display: inline-block; margin-top: .4rem; } .select-filters { gap: .5rem; } .reset { margin-left: 0; } }
 </style>
