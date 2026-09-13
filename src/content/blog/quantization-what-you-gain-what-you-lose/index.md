@@ -32,6 +32,9 @@ The more important taxonomy is *what* you quantize, because there are 3 separate
 
 ![The three quantization targets: weights, activations, and KV cache, with methods and failure modes for each](./quant-targets.png)
 
+![Deep dive: The formats, and what a "bit" buys](./deep-dive-component-01.png)
+
+
 ## Calibration: why GPTQ and AWQ are not just rounding
 
 Naive round-to-nearest works fine at 8-bit. At 4-bit it visibly hurts, and the interesting engineering is in the calibration step: a few 100 sample sequences run through the model, 1 layer at a time, to decide *how* to round.
@@ -81,6 +84,9 @@ $$
 $$
 
 W is the original layer matrix, Q the permitted quantized matrices, and H the curvature approximation used for error compensation, commonly with damping for stability. AWQ instead chooses activation-informed channel scales: replacing W with W times diag(a) and X with diag(a) inverse times X preserves their unquantized product before rounding. The methods improve the proposal for which errors to tolerate; neither guarantees quality outside the calibration distribution. Evaluate rare formats, long contexts, and task decisions, then verify the fused kernel path on the deployment hardware.
+
+![Deep dive: Going deeper: where the quality actually goes](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

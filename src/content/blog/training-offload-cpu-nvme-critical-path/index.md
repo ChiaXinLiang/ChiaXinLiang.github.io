@@ -85,6 +85,9 @@ For chunk j, define readiness r_j, outgoing transfer duration a_j, CPU update du
 
 A useful steady-state bound for balanced chunks is the largest stage service time, plus pipeline fill and drain. The last updated chunk can remain exposed after backward ends. Measure chunk readiness and completion timestamps to identify which stage limits the pipeline and how much of the tail reaches the next forward pass.
 
+![Deep dive: 5. Work the sequential critical path](./deep-dive-component-02.png)
+
+
 ## 6. Parameter offload moves the dependency into layers
 
 When parameters are not retained on the GPU, each layer or sharding unit needs a fetch before compute. Prefetch can overlap the next unit’s transfer with the current unit’s arithmetic. Too little lookahead exposes transfer latency. Too much lookahead materializes several units and consumes the capacity offload was intended to save.

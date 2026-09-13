@@ -68,6 +68,8 @@ For the stated 275 GFLOP GEMM, $$F/C$$ is approximately 278 microseconds using 9
 
 Fusion improves the baseline by retaining an intermediate until its consumers finish, not by guaranteeing every remaining arithmetic instruction runs at peak. A heavier epilogue may increase register pressure, reduce resident blocks, or add non-tensor-core work. Quantization likewise lowers storage traffic while introducing scale reads and conversion work. Measure the complete fused or quantized pipeline at equal accuracy rather than multiplying ideal byte ratios. A compulsory-byte estimate assumes favorable reuse; profiler traffic tests whether the cache and launch schedule actually achieve it. Low intensity identifies a bandwidth ceiling, but a kernel can still run below that ceiling because of dependencies, small grids, or inefficient accesses.
 
+![Deep dive: A worked example: fusing bias + GELU into a GEMM](./deep-dive-component-01.png)
+
 
 ## Going deeper: tiling, CUTLASS, and a PTX trick
 
@@ -80,6 +82,9 @@ Notice, though, that even 85 is below the 295 ridge. Grid-level traffic tells yo
 You don't hand-write this machinery anymore. NVIDIA's CUTLASS templates expose tile shapes, epilogues, and scheduling as compile-time parameters and routinely land within a few percent of cuBLAS. But the frontier still has room for hand tuning: DeepSeek's DeepGEMM, the FP8 GEMM library behind their V3/R1 serving stack, uses an inline-PTX load — `ld.global.nc.L1::no_allocate.L2::256B` — that reads through the non-coherent path *without allocating in L1*. Streamed GEMM operands are used once per pass and would only pollute L1, whose capacity is shared with the shared-memory budget the tiles depend on; skipping the allocation buys measurable extra sustained bandwidth. (The repo flags the instruction as behaving correctly on tested Hopper parts but not architecturally guaranteed, which tells you something about how far serious teams will go for bytes.) That 1 trick, plus careful tiling, is part of how a [kernel-level effort ended up cutting API prices](/blog/when-a-kernel-cuts-api-prices/).
 
 The precision lever compounds with all of this. Moving weights from BF16 to FP8 doubles the intensity of every weight-bound kernel before you touch a line of scheduling code, which is the systems argument underneath the [4-bit format war](/blog/nvfp4-vs-mxfp4-the-4bit-format-war/): FP4 isn't primarily about faster multipliers, it's about a 4× denominator cut on kernels that live left of the ridge.
+
+![Deep dive: Going deeper: tiling, CUTLASS, and a PTX trick](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

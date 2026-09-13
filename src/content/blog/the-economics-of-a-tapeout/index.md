@@ -70,6 +70,9 @@ Total: **$103 million**, and not 1 sellable chip yet. The number is deliberately
 
 Notice what the chart says: the mask set, famous as it is, is only about 15% of the bill. The dominant cost is people, and the second biggest is licensed IP. Chip design is a payroll problem with a photolithography deposit attached.
 
+![Deep dive: A worked example: budgeting a 5nm accelerator](./deep-dive-component-01.png)
+
+
 ## The escalation curve
 
 The scary part is not the level, it is the slope. IBS's per-node estimates, quoted everywhere in the industry (and worth flagging: they are 1 firm's model, published at different times, and other analysts such as Gartner have produced figures roughly half as large for the same nodes), run like this: about $51M to design a 28nm chip, $106M at 16nm, $298M at 7nm, $542M at 5nm, and $725M at 2nm.
@@ -108,6 +111,8 @@ $$
 Here subscripts $$a$$ and $$m$$ mean advanced and mature alternatives. The crossover requires $$c_m>c_a$$ and assumes equal usable functionality, delivery dates, and quality. Suppose the advanced design costs $103 million plus $50 per unit, while a hypothetical mature alternative costs $25 million plus $90 per unit. Their costs meet at 1,950,000 units: each costs approximately $102.82 per unit. Below that volume the cheaper design program wins; above it the lower recurring cost wins.
 
 This is a decision method, not a foundry price quotation. Reuse existing IP and derivative verification to lower the fixed term, then estimate realistic lifetime shipments rather than peak annual demand. If the mature part needs more power or chips per workload, replace unit cost with cost per delivered function. Packaging and yield can make recurring cost large, particularly for big accelerators, so “almost nothing to copy” is an inadequate production budget. Delay risk changes the denominator: a respin that misses a market window may reduce shipments as well as add cash expense. Compare scenarios rather than assuming all cost uncertainty lives in the mask invoice.
+
+![Deep dive: Volume: the only exit](./deep-dive-component-02.png)
 
 
 ## Going deeper: why a respin hurts more than its invoice

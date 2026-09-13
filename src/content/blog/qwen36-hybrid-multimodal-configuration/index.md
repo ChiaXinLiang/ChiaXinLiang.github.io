@@ -158,6 +158,9 @@ An informative experiment sweeps concurrency at several context buckets and reco
 
 Finally preserve a margin for resumption, compilation, and temporary buffers under the deployment's documented behavior. The margin should come from measured variability rather than an unexplained percentage copied from another system. Architecture-aware accounting narrows the uncertainty; actual allocation and scheduling tests establish the practical operating region.
 
+![Deep dive: 14. Estimate concurrency from separate state terms](./deep-dive-component-02.png)
+
+
 ## 15. Keep component foundations separate from checkpoint claims
 
 The configuration describes this checkpoint's components, while general theory explains the interfaces those components can use. For vision, [patch embeddings and position](/blog/vision-transformer-patches-position-cost/) provide a foundation for counting representations. For recurrence, [state-space execution](/blog/state-space-execution-scans-recurrence-hybrids/) explains why state size and full-sequence algorithms are separate questions.

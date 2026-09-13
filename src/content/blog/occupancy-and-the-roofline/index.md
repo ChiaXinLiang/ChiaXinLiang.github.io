@@ -34,6 +34,9 @@ Residency is limited by whichever on-chip resource runs out first:
 
 The compiler decides register usage when it compiles the kernel, so occupancy is largely determined at build time. Nsight Compute reports this as *theoretical occupancy*, and separately measures *achieved occupancy*, the average number of warps actually resident while the kernel ran. A big gap between the 2 usually means too few blocks in the grid or a load imbalance in the tail, not a resource limit.
 
+![Deep dive: What occupancy actually measures](./deep-dive-component-01.png)
+
+
 ## Why occupancy exists: latency hiding
 
 GPUs tolerate latency instead of avoiding it. A CPU core spends enormous silicon on caches and out-of-order machinery so that 1 thread rarely waits; a GPU spends that silicon on registers so that *many* threads can wait cheaply. When a warp issues a global memory load, the load takes on the order of hundreds of cycles to return. The warp scheduler doesn't stall, it just issues instructions from a different resident warp on the next cycle. Switching costs nothing because every warp's state is already in the register file, which is exactly why that file is 256 KB.
@@ -102,6 +105,9 @@ $$
 B_hardware and T_hardware are the block and thread residency limits, and W_max the maximum resident warps. O is theoretical occupancy; achieved occupancy also reflects incomplete waves and runtime behavior. Register allocation granularity and launch restrictions can lower the bound, so check the occupancy calculator for the actual architecture.
 
 With 65536 registers, 256 threads, and 128 registers per thread, the register term allows 2 blocks. They contain 16 warps, giving 25% against a 64-warp limit. Cutting to 60-4 registers could allow 4 blocks, but only if shared memory and other limits permit it. Unrolling to improve independent work may raise r instead. Benchmark both versions and inspect spills: higher occupancy that adds local-memory traffic can lose to a lower-occupancy pipeline with better reuse.
+
+![Deep dive: Going deeper: Little's law puts a number on "enough"](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

@@ -37,6 +37,9 @@ Profiling an inference stack is a top-down exercise with 3 layers, and the order
 
 The order is the discipline. Timeline first, to find out whether the time is even on the GPU. Kernel counters second, only for kernels the timeline convicted. Framework attribution whenever you need to map either view back to code.
 
+![Deep dive: 3 tools, 3 questions, 1 order](./deep-dive-component-01.png)
+
+
 ## A worked example: the 40% idle GPU
 
 Here is a mock trace, simplified from a pattern that appears in real serving stacks constantly. The setup: an 8B-parameter model in BF16, batch of 32 decode requests, 1 H100. You measure 100 decode iterations and get 2.0 seconds of wall clock, so 20 ms per step, which is your observed TPOT. Then you open the `nsys` trace and sum the GPU busy time: 1.2 seconds. The GPU worked for 12 ms of every 20 ms step and sat idle for 8. 40 percent of your latency is not computation.
@@ -52,6 +55,9 @@ Zoom into 1 step and the 8 ms of idle time resolves into 3 distinct gaps, each w
 **Gap 3: 2.5 ms of synchronization at the end of the step.** After the final logits, the framework copies data to the CPU to sample the next token, and somewhere in that path sits a `.item()` or a blocking `.cpu()` call. That call forces the CPU to stop and wait for the GPU, then the GPU waits for the CPU to finish sampling and launch the next step. Signature: a `cudaStreamSynchronize` or `cudaMemcpyAsync`-then-sync in the CUDA API row, GPU empty behind it. Fix: sample on the GPU, keep the token on the device, and only ship tokens to the CPU asynchronously for detokenization.
 
 Now the arithmetic that makes profiling worth it. The 12 ms of GPU busy time is itself worth checking against a roofline floor: 16 GB of weights over the H100's ~3.35 TB/s of HBM bandwidth is about 4.8 ms per step just to read the weights once, plus KV-cache reads on top, so 12 ms is plausibly within a factor of 3 of the memory-bound floor. Meanwhile the 3 gaps are worth 8 ms and none of them require touching a kernel. Fix the sync and the launch gaps and the step drops toward 15 ms, a 25% TPOT reduction, before you have written a line of CUDA. Had you started at layer 2 with the biggest matmul, a 30% reduction in kernel duration on a kernel that is 40% of GPU time would have saved 1.4 ms of the 20: a 7% win, less than the 5 ms available from the identified gaps.
+
+![Deep dive: A worked example: the 40% idle GPU](./deep-dive-component-02.png)
+
 
 ## Amdahl applies to critical-path fractions
 

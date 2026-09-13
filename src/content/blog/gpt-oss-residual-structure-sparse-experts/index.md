@@ -165,6 +165,9 @@ The activation function also contains its own coefficients and offset behavior. 
 
 Finally inspect bias placement around distributed reductions. Adding a full output bias on every partition before summation can multiply its contribution by the process count. The reference's ordering provides the semantic baseline. A parallel implementation can reorganize operations, but it must preserve the intended total bias as well as the matrix products. These small terms are easy to overlook in a parameter-count discussion and important in a correctness review.
 
+![Deep dive: 14. Preserve clipping and channel order](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Official gpt-oss repository](https://github.com/openai/gpt-oss).

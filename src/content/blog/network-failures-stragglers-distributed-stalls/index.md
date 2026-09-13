@@ -141,6 +141,9 @@ Include slow-but-healthy cases to evaluate false positives. Delay input or intro
 
 A deterministic delayed-rank test can hold one rank before a known collective, record the others' wait, then release it. The expected result should still be correct after completion. A mismatched-operation test has different semantics and should be expected to fail under the supported detector rather than be released as though it were ordinary latency. Keeping these cases distinct verifies that diagnostics classify the blocked dependency instead of labeling every wait as a broken network.
 
+![Deep dive: 9. Test failure behavior with controlled scope](./deep-dive-component-02.png)
+
+
 ## 10. Convert incidents into regression cases
 
 Keep a compact incident record containing the workload, last common progress, rank divergence, first supported causal evidence, failing layer, recovery action, and verification result. Preserve the minimal reproducer and relevant topology mapping.

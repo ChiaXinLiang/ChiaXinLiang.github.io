@@ -89,6 +89,9 @@ The stream policy enables this schedule but does not guarantee it. A legacy-defa
 
 Compared with relying on implicit defaults, explicit stream ownership and events express the dependencies the buffers actually need. Pinned memory makes asynchronous host transfers practical, but API behavior also depends on direction and memory type. Check device copy-engine capabilities and the actual timeline. Avoid replacing a required data dependency with a race merely to make the trace overlap.
 
+![Deep dive: Derive the pipeline rather than promising overlap](./deep-dive-component-01.png)
+
+
 ## Going deeper: events, and the modern escape hatches
 
 Suppose stream B genuinely needs a result produced in stream A. The lazy fix is `cudaDeviceSynchronize()`, which stalls the host and every stream. The surgical fix is a **CUDA event**:
@@ -108,6 +111,9 @@ cudaStreamWaitEvent(streamB, ev, 0);     // only B waits, only for ev
 **Stream-ordered allocation.** The barrier isn't only in launches and copies: `cudaMalloc` and especially `cudaFree` can synchronize the device, because the driver must ensure no in-flight work touches memory being remapped. `cudaMallocAsync`/`cudaFreeAsync` (CUDA 11.2+) make allocation a stream-ordered operation against a memory pool, removing one of the most common accidental syncs in inference servers that allocate per request.
 
 A note on frameworks: PyTorch issues work to its "current stream," which by default *is* the legacy default stream. That is a deliberately safe choice, and it is why naive PyTorch code shows no copy/compute overlap; `torch.cuda.Stream`, `non_blocking=True` copies, and pinned tensors exist precisely to buy back the pipeline described above.
+
+![Deep dive: Going deeper: events, and the modern escape hatches](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

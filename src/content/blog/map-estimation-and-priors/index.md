@@ -77,6 +77,9 @@ $$
 
 This is called conjugacy: the posterior stays in the same distribution family as the prior. It makes this example analytically simple. Neural-network posteriors generally have no such convenient closed form, so the example teaches the structure of Bayesian updating rather than promising an equally easy calculation for every model.
 
+![Deep dive: A Beta prior for a Bernoulli probability](./deep-dive-component-01.png)
+
+
 ## Deriving the posterior mode
 
 For an interior mode, differentiate the log posterior. Constants independent of theta can be omitted:
@@ -96,6 +99,9 @@ This formula applies when both posterior shape parameters exceed 1, so the densi
 With 7 successes, 3 failures, and a Beta(2,2) prior, the posterior is Beta(9,5). Its mode is 8 divided by 12, or approximately 0.6667. The prior moves the estimate toward 1 half compared with the MLE value 0.7.
 
 The amount of movement depends on sample size. With 70 successes out of 1 hundred trials and the same prior, MAP is 71 divided by 1 hundred 2, approximately 0.6961. The likelihood provides more information, so this fixed prior has less influence. That intuition requires reasonable model assumptions; more observations from a misspecified process do not automatically produce reliable conclusions.
+
+![Deep dive: Deriving the posterior mode](./deep-dive-component-02.png)
+
 
 ## Posterior mean and predictive probability are different
 

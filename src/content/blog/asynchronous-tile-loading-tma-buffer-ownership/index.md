@@ -131,6 +131,9 @@ When the consumer advances to B, it waits on B's generation and reads buffer one
 
 At the drain, the producer has no fourth tile to issue. The consumer still must finish C and release its stage if the surrounding abstraction requires it. The control flow must avoid waiting for a nonexistent future copy. This trace can be encoded in a small host-side state-machine test without claiming it exercises GPU memory ordering; the device tests remain responsible for validating the concrete synchronization implementation.
 
+![Deep dive: 11. Work through a three-tile ownership trace](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [CUDA asynchronous copies, including LDGSTS and TMA](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html).

@@ -174,6 +174,9 @@ A complete system can combine separate components to provide another output moda
 
 These distinctions keep the multimodal explanation grounded in interfaces. Count the features that really enter language computation, evaluate what compression preserves, and identify the output mechanism separately. This provides a practical basis for both article diagrams and deployment estimates.
 
+![Deep dive: 14. Examine compression before language insertion](./deep-dive-component-02.png)
+
+
 ## 15. Follow efficient vision through its spatial interface
 
 Vision compression can act before language tokens are formed. [Patch size and position](/blog/vision-transformer-patches-position-cost/) defines the initial spatial granularity, while [token reduction](/blog/efficient-vision-token-reduction-resolution/) distinguishes discarding regions from combining representations with size metadata.

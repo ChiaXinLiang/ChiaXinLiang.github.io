@@ -48,6 +48,9 @@ That ceiling assumes the offline benchmark scenario: perfectly batched work, no 
 
 2 cautions on numbers like these. MLPerf figures are audited, but the marketing composites built on top of them are not: NVIDIA's "5x TPS per megawatt versus Hopper" and the "50x AI factory output" headline are vendor-constructed multiplications, not benchmark results. And any tokens-per-MW claim is model-dependent; a sparser or smaller model shifts every step of the calculation. The method is the durable part.
 
+![Deep dive: A worked example: 1 megawatt, by hand](./deep-dive-component-01.png)
+
+
 ## Keep the power boundary in the equation
 
 For a fleet-average estimate, let grid power be $$P_g$$ watts, facility overhead be $$\mathrm{PUE}$$, IT rack draw be $$P_r$$ watts, devices per rack be $$n$$, and measured compliant output per device be $$r$$ tokens per second. Then
@@ -73,6 +76,9 @@ If the megawatt is fixed, every watt spent on anything other than computation is
 **Silicon itself.** Google's Ironwood TPU pods illustrate the scale: 9,216 chips per pod at roughly 10 MW, more power than many small towns. Google's headline metric for the part is not peak FLOPS but perf/watt, self-reported at 2x per generation and about 30x since 2018. Read vendor efficiency claims with appropriate salt, but notice what they choose to advertise. Peak FLOPS sells chips to buyers with unlimited power. Perf/watt sells chips to buyers who have run out.
 
 The same pressure propagates upward into software and model design. 4-bit number formats, mixture-of-experts models that activate 3% of their weights per token, sparse attention, disaggregated serving: each is usually described as a cost or latency optimization, but under a fixed power envelope they are all the same move, more tokens through the same megawatts.
+
+![Deep dive: Going deeper: where the watts actually go](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

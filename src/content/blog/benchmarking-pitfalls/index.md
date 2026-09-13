@@ -50,6 +50,9 @@ Same silicon, same weights, same software. 160 vs 3,000 vs 12,000. The spread be
 
 ![Three honest benchmark configurations on one H100 producing a 75x spread](./three-configs.png)
 
+![Deep dive: A worked example: 3 honest numbers from 1 GPU](./deep-dive-component-01.png)
+
+
 ## Going deeper: closed loops, open loops, and coordinated omission
 
 The concurrency model deserves the extra level of mechanism, because it corrupts the *tail* statistics that the SLO-first method depends on.
@@ -72,6 +75,9 @@ $$
 The limits a and b and quality criterion q_0 belong to the product contract. Specify whether TPOT means a request mean, its maximum gap, or another statistic; those acceptance rules count different work. A window completing 1 million output tokens but accepting only 850000 under the rule has 850 tokens/s of goodput over 1000 seconds, rather than the raw 1000.
 
 Replay the same arrival trace, cache state, and token lengths for each engine. Randomize run order and repeat enough windows to expose thermal or traffic effects. Compare matched request cohorts and use block-based uncertainty estimates when requests share bursts. The improvement should survive those controls; a larger accepted fraction caused by easier prompts is not evidence of a better scheduler.
+
+![Deep dive: Going deeper: closed loops, open loops, and coordinated omission](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

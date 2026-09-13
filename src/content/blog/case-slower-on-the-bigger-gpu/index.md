@@ -34,6 +34,9 @@ Bytes touched per token is model weights plus KV cache read. Effective bandwidth
 
 That is the whole trap, and the spec sheets are built to spring it.
 
+![Deep dive: Decode is a memory race, not a math race](./deep-dive-component-01.png)
+
+
 ## The spec-sheet trap
 
 Put the 2 cards side by side and read the lines in the order a procurement doc reads them:
@@ -101,6 +104,9 @@ $$
 The bound assumes 1 weight and cache sweep and excludes other overhead. For the illustrative 13-billion-parameter MHA model, m is 819200 bytes and C equal to 4096 adds 3.355 GB. BF16 weights contribute 26 GB. At 75% of 2039 GB/s, the memory term is 19.2 milliseconds; at 65% of 864 GB/s, it is 52.3 milliseconds. The ratio is approximately 2.72, before any implementation differences.
 
 Those efficiencies are assumptions to test, not generic properties of HBM and GDDR. Run matched precision and matched context first, then separately test quantization. Native FP8 weights plus FP8 cache would stream about 14.68 GB, not 9; weight-only 4-bit payload plus FP8 cache is about 8.18 GB before metadata. Verify that the relevant kernels exist and that quality meets the same task criterion. 2 replicas can improve aggregate capacity while leaving every individual stream's latency unchanged.
+
+![Deep dive: Going deeper: why the second GPU doesn't rescue you](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

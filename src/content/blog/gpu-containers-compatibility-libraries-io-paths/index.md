@@ -143,6 +143,9 @@ Record the baseline and candidate tuples, effective resource masks, image digest
 
 A compact manifest can include the immutable image digest, package lock or environment export, custom-extension build configuration, driver identity, visible devices, effective CPU masks, dataset mounts, and communication diagnostics. Store it with the measured observations rather than only in an operator's terminal history. If a rebuilt image uses a newer dependency despite the same human-readable tag, the manifest reveals that change. This makes the comparison an execution experiment with identifiable components instead of an unexplained contrast between inside and outside a container.
 
+![Deep dive: 9. Build a controlled comparison matrix](./deep-dive-component-02.png)
+
+
 ## 10. Keep packaging as part of the execution record
 
 A container's value is a reproducible application environment integrated with supported host resources. It does not eliminate the host boundary, and it does not guarantee identical performance across differently configured machines.

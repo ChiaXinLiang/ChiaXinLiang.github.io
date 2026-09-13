@@ -93,6 +93,8 @@ All terms are elapsed-time contributions on the measured critical path, not the 
 
 This explains the method choice: `where` trades host control for device selection when both expressions are cheap and valid to evaluate. It may be inappropriate for expensive branches or expressions with side effects and invalid intermediate values. Structured conditional control can preserve branch selection, subject to supported operators and version constraints. Verify outputs and gradients as well as graph capture. A graph break alone does not imply synchronization; the expensive synchronization in this example comes from a Python decision requiring a device value. Warmup and recompilation are separate costs and should be measured separately from steady-state boundary overhead.
 
+![Deep dive: Worked example: 1 if-statement](./deep-dive-component-01.png)
+
 
 ## Going deeper: guards, recompiles, and caches
 
@@ -107,6 +109,9 @@ The operating rules that follow:
 - **Warm up on representative shapes** before taking traffic, deliberately covering the shape buckets you serve.
 
 1 more depth level on the capture itself: Dynamo is a *symbolic bytecode interpreter*. It executes your function's bytecode against fake tensors that carry shape and dtype but no data, which is how it can trace through arbitrary Python (loops, dict tricks, closures) that `torch.jit.trace` never could, and why anything requiring real *values* (a bool, an `.item()`) is precisely where symbolic execution must stop. The graph break is not a bug or a missing feature; it is the boundary of what can be known without running your data.
+
+![Deep dive: Going deeper: guards, recompiles, and caches](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

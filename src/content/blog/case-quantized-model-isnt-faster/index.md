@@ -69,6 +69,9 @@ The crossover B_star excludes cache traffic and assumes constant delivered rates
 
 A group scale alone does not explain a 3.9-GB checkpoint: 4-bit payload plus 1 FP16 scale per 128 weights is approximately 3.609 GB for 7 billion weights. Extra 0 points, unquantized tensors, alignment, and the actual parameter count can increase it. Read the checkpoint layout instead of inferring metadata from its filename. Profile fused and fallback paths at matched batch and context, measure HBM bytes, and then test quality. A lower weight footprint can improve capacity even when conversion, compute, or cache traffic prevents a latency gain.
 
+![Deep dive: Worked example: finding the crossover batch](./deep-dive-component-01.png)
+
+
 ## Going deeper: what Marlin actually does
 
 It's worth seeing why a fused W4A16 kernel is hard enough that fallbacks exist at all. Marlin (Frantar et al., 2024) is the reference design, and it earns its near-ideal 3.87x speedup at batch 1 through a stack of mechanisms:
@@ -81,6 +84,9 @@ It's worth seeing why a fused W4A16 kernel is hard enough that fallbacks exist a
 The kernel sustains close to full memory bandwidth while the tensor cores run the FP16 math, which is the definition of winning in a memory-bound regime. The practical consequence for a troubleshooter: this machinery only engages when shapes, GPU architecture, group size, and activation ordering all match what the kernel supports. Miss 1 and the runtime silently picks the slow path.
 
 Which is why the single highest-value diagnostic step in this case is reading kernel names in a profile. Run the server under Nsight Systems and look at what actually executes per decode step. Names containing `marlin` or `gptq_marlin_gemm` mean the fused path is live. A pair per layer, some `dequantize`-flavored kernel followed by a generic `s16816gemm` from cuBLAS, means you are on the fallback and your HBM traffic went up, not down. 5 minutes of profiling replaces a week of speculating, a habit I've argued for since [the ML performance engineer job description](/blog/what-does-an-ml-performance-engineer-do/).
+
+![Deep dive: Going deeper: what Marlin actually does](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

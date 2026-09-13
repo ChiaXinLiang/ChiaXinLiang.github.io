@@ -44,6 +44,9 @@ The second fix respected how humans actually work. Kernel optimization is iterat
 
 The third fix moved that loop into training. Kevin, a collaboration with Cognition, applied multi-turn reinforcement learning so the model is rewarded for the trajectory, not the single shot. Trained this way, a 32B model (QwQ-32B as the base) went from 56% to 82% correctness on the benchmark's tasks, and mean speedup went from 0.53x to 1.10x over PyTorch eager, beating o4-mini's 0.78x. The mean crossing 1.0x matters: below it, the "optimizer" makes your code slower on average. If you have read [how models learn](/blog/how-models-learn/), the mechanism is familiar gradient machinery; the novelty is that the reward signal comes from a compiler and a wall clock rather than from human preference.
 
+![Deep dive: A worked example: monkey math](./deep-dive-component-01.png)
+
+
 ## Sampling changes success only under a specified model
 
 For a particular task with independent attempts and constant probability $$p_i$$ of producing a correct sufficiently fast kernel, success within $$n$$ attempts has probability
@@ -85,6 +88,9 @@ For this series, the interesting question is where automated kernel generation s
 So, the verdict in the title. Today's systems are superhuman search assistants: they explore thousands of variants without fatigue, integrate profiler feedback instantly, and never get bored fusing elementwise chains. They are not engineers. An engineer owns the definition of correct, distrusts a suspiciously good number, and occasionally invents a memory choreography nobody has seen. Reading the [job description of an ML performance engineer](/blog/what-does-an-ml-performance-engineer-do/) next to these results, roughly the bottom third of the role is automatable now, and it is the third practitioners least enjoy.
 
 What would change the answer? 4 things, all in motion. Data: tens of thousands of verified human kernels plus scaled synthetic corpora, so the prior stops being starved. Verifiers: benchmark harnesses hard enough that reward hacking stops paying, which BackendBench-style correctness suites are pushing toward. Hardware awareness: agents that read architecture documents and profiles well enough to target tensor cores by design rather than by accident. And world models: systems that predict a kernel's latency without running it, collapsing the cost of each search step. If all 4 land, the answer to the title flips for everything short of FlashAttention-class invention, and the humans move up a level, to deciding what is worth making fast. Which, if you squint, was always the actual job.
+
+![Deep dive: The lineage, and what this means for the flywheel](./deep-dive-component-02.png)
+
 
 ## Takeaway
 

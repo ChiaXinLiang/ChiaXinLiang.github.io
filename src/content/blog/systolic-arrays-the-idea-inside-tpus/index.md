@@ -26,6 +26,9 @@ Their proposal: lay out a grid of small, identical processing elements, each doi
 2. **No long wires.** Every connection is to a physical neighbor, millimeters away at most. Short wires switch fast and burn little energy. Reading a value from a neighboring cell costs far less energy than reading it from SRAM, and orders of magnitude less than DRAM.
 3. **Massive reuse.** A value entering the grid is used by every cell it passes through. Fetch once, compute many times, which is exactly Kung's prescription.
 
+![Deep dive: A heartbeat, drawn on paper](./deep-dive-component-01.png)
+
+
 ## The machine in 1 picture
 
 The variant inside the TPU is called *weight-stationary*, and it is the easiest to hold in your head. Picture an N×N grid. Before computation starts, 1 weight of the matrix W is loaded into each cell, where it sits unmoving. Then the input matrix streams in from the left edge, 1 row of cells per vector element, and partial sums flow downward through the columns.
@@ -89,6 +92,9 @@ A few mechanisms hide inside the clean picture.
 **Other dataflows.** Weight-stationary is 1 member of a family. *Output-stationary* arrays pin each accumulating result to a cell and stream both inputs past it. *Row-stationary*, used by MIT's Eyeriss chip, splits the difference to minimize total data movement for convolutions. The taxonomy matters because each choice fixes which operand gets maximum reuse; TPU v1 pinned weights because in 2015-era inference the same weights served millions of requests.
 
 **Where the bottleneck moved.** Kung's logic is recursive: kill 1 bottleneck and the next appears. TPU v1's array was so effective that its 34 GB/s DDR3 became the limiting factor for memory-bound layers, and the paper's own roofline analysis shows several production workloads stuck against the bandwidth ceiling, not the compute 1. Successors moved to HBM largely for this reason, the same bandwidth arms race traced in [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/).
+
+![Deep dive: Going deeper: skew, fill, and flavors of stationary](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

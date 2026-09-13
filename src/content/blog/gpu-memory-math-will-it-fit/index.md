@@ -98,6 +98,8 @@ Here $$L$$ is layer count, $$h_{kv}$$ KV-head count, $$d$$ head dimension, and $
 
 Paging changes allocation granularity and avoids reserving unused future tokens; it cannot violate this inequality. Admit by projected live-token growth, include generation allowances, and validate measured high-water memory. Sharding also needs per-device accounting: 141.2 GB of FP16 70B weights split across 2 GPUs leaves 70.6 GB of weights on each, not 35.3 GB. Under a 72 GB budget with a 5 GB reserve, that illustrative configuration has no positive cache budget. More devices, lower precision, or a different measured reserve are required.
 
+![Deep dive: Worked example: Llama-3-8B on 1 H100](./deep-dive-component-01.png)
+
 
 ## Going deeper: training, and where the formulas come from
 
@@ -118,6 +120,9 @@ Back on the inference side, 2 mechanisms deserve 1 more level of detail.
 **GQA changes attention architecture to reduce cache storage and traffic.** Multi-head attention in the 8B model would carry 32 KV heads: 524 KB per token, 4.3 GB per 8k sequence, and our 47-sequence H100 becomes an 11-sequence H100. The 70B with its 64 query heads would pay 2.6 MB per token under MHA; GQA's 8 KV heads cut that by 8x. Ainslie et al. (2023) showed the quality cost of this sharing is small, which is why many dense transformer families use it, while other architectures employ different cache designs. When you evaluate a new checkpoint, `n_kv_heads` in the config file tells you more about its serving economics than the parameter count does.
 
 **PagedAttention is why the "floor" isn't the ceiling.** Naive serving pre-allocates each request's KV cache at maximum context length, so a 200-token chat inside an 8k reservation wastes 97 percent of its gigabyte. vLLM's PagedAttention (Kwon et al., 2023) allocates KV memory in fixed-size blocks (16 tokens by default) on demand, exactly like OS virtual memory pages, reporting under 4 percent waste versus 60 to 80 percent for contiguous pre-allocation. The napkin math gives you the worst-case bound; paging is what lets real systems live near the average case instead.
+
+![Deep dive: Going deeper: training, and where the formulas come from](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

@@ -75,6 +75,9 @@ With n equal to 8, l equal to 0.5 microseconds, and c equal to 0.56 microseconds
 
 Ring depth addresses latency as well as throughput. A stage must not be overwritten until every consumer has finished reading it. Use transaction-counted full barriers and consumer-completion empty barriers, including phase changes when the ring wraps. Measure stalls before increasing the stage count: each 48-KiB buffer consumes shared memory, potentially reducing block residency. Multicast improves duplicate-transfer cost where blocks genuinely share operands, while specialization improves instruction ownership and overlap. Compare those mechanisms separately to a buffered generalist baseline, since asynchronous copies were already possible before Hopper.
 
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
+
+
 ## Going deeper: persistence, clusters, and ping-pong
 
 Warp specialization solves overlap *within* a tile. 3 more mechanisms extend the assembly line across tiles and across SMs.
@@ -88,6 +91,9 @@ Warp specialization solves overlap *within* a tile. 3 more mechanisms extend the
 **Ping-pong scheduling.** Specialization also overlaps *compute with compute*. In FlashAttention-3, attention needs both matrix multiplies (tensor cores) and softmax exponentials (the multi-function units, a much slower resource that is otherwise idle during GEMMs). FA3 runs 2 consumer warpgroups and uses barriers to stagger them: while warpgroup A runs its GEMMs, warpgroup B runs its softmax on the previous block, then they swap. The paper credits this overlap, on top of the producer-consumer TMA pipeline, for pushing FP16 forward from ~570 to ~620-740 TFLOPS depending on shape. Those figures are the authors' own benchmarks, though they line up with independent reproductions in vLLM and SGLang deployments.
 
 On Blackwell the trend goes further, not back. The fifth-generation tensor core (`tcgen05`) takes its accumulators out of the register file into dedicated tensor memory (TMEM), and an MMA is launched by a *single thread*, with completion again signaled through barriers. Kernels grow more roles: an MMA-issue warp, TMA load warps, epilogue warps moving TMEM to registers to global. The assembly line is winning so decisively that the hardware is being reshaped around it.
+
+![Deep dive: Going deeper: persistence, clusters, and ping-pong](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

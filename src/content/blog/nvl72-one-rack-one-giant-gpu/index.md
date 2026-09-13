@@ -81,6 +81,9 @@ L, H_kv, d, and b_kv are layer count, KV heads, head width, and cache bytes per 
 
 This does not prove that ordinary 72-way tensor parallelism realizes the bound. 8 KV heads cannot be divided evenly among 72 ranks; an engine may replicate heads, pad tensors, or use a different parallel decomposition. Each changes physical storage and traffic. NVLink provides fast communication rather than a physically unified allocation space. A collective still pays startup latency plus transferred bytes divided by effective link bandwidth, and simultaneous collectives contend. Verify per-rank allocations and collective spans before presenting the rack sum as achievable per-request bandwidth.
 
+![Deep dive: Worked example: a 1T-parameter model on 1 rack](./deep-dive-component-01.png)
+
+
 ## Going deeper: why copper, and why 72
 
 2 mechanism-level details explain the rack's shape.
@@ -90,6 +93,9 @@ This does not prove that ordinary 72-way tensor parallelism realizes the bound. 
 **The switch fabric is flat, not a tree.** Each of the 9 switch trays carries 2 NVLink Switch ASICs; each GPU's 18 NVLink ports are spread across all 9 trays. The result is a non-blocking crossbar: 72 GPUs, any-to-any, 1 switch hop, full 1.8 TB/s. There is no oversubscription and no "near" versus "far" GPU inside the rack, which is why frameworks can shard tensors 72 ways without topology-aware placement logic. Contrast this with a fat-tree InfiniBand cluster, where bisection bandwidth and hop count degrade as you scale, and collective performance depends on careful rail-aware scheduling.
 
 And what did the benchmark record show when this fabric met real workloads? In MLPerf Inference v5.0 (March 2025), the first round with GB200 NVL72 submissions, Blackwell delivered on the order of 2 to 2.5x per-GPU throughput over Hopper on comparable benchmarks, with NVIDIA reporting up to about 3x per GPU on the new Llama 3.1 405B test. NVIDIA's headline "30x" rack-level claim on large-model inference, along with the "25x energy efficiency" figure from the Blackwell launch, compounds per-GPU gains with FP4 quantization and the larger NVLink domain against a smaller Hopper system. Treat those 2 as vendor-framed comparisons; the per-GPU MLPerf deltas are the peer-reviewed part.
+
+![Deep dive: Going deeper: why copper, and why 72](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

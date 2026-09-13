@@ -42,6 +42,9 @@ Take a 70B-parameter model with weights quantized to 8 bits, so the weights occu
 
 The punchline of the arithmetic: prefill wants FLOPs and barely touches bandwidth; decode wants bandwidth and barely touches FLOPs. Serving both from 1 SKU means buying the most expensive resource in the datacenter, HBM, and letting 1 phase waste it while the other phase starves the tensor cores.
 
+![Deep dive: A worked example you can do by hand](./deep-dive-component-01.png)
+
+
 ## The 24 months
 
 What makes this a co-design story rather than just a good idea is the speed and completeness of the pipeline that followed.
@@ -55,6 +58,9 @@ What makes this a co-design story rather than just a good idea is the speed and 
 **September 2025: the benchmark.** MLPerf Inference v5.1 included, for the first time, official submissions using disaggregated serving. NVIDIA's GB300 NVL72 results on DeepSeek-R1 credited disaggregation via Dynamo with roughly **1.5x per-GPU throughput** over aggregated serving on interactive workloads. Those are vendor-run submissions under MLCommons rules, so treat the exact multiplier as NVIDIA's framing, but the significance is structural: the industry's canonical benchmark now scores a scheduling architecture, not just a chip.
 
 **September 2025 to 2026: the silicon.** The same month, NVIDIA announced Rubin CPX, slated for late 2026: a GPU built *only* for the prefill side. It pairs high NVFP4 throughput with 128 GB of GDDR7 at roughly 2.1 TB/s, versus the standard Rubin's 288 GB of HBM4 at roughly 10 TB/s. That is the worked example above, cast in silicon. Prefill runs at 4,100 FLOPs per byte, so why solder 5-figure HBM stacks onto a chip whose workload will never be bandwidth-limited? NVIDIA claims about 6x long-context throughput for 2.25x added compute in mixed racks (again, vendor numbers), and the NVL144 CPX rack pairs CPX prefill chips with HBM-rich Rubin decode chips, with the KV cache handed off between them. A scheduling observation from a rejected paper had rewritten the SKU list.
+
+![Deep dive: The 24 months](./deep-dive-component-02.png)
+
 
 ## Going deeper: the KV cache handoff
 

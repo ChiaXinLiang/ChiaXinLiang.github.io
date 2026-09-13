@@ -90,6 +90,9 @@ The 4096-square BF16 matrix-vector example has approximately 33.6 million operat
 
 The useful innovation in batching is reuse of a weight read across more outputs. It changes D per produced token while increasing F per iteration. Validate the predicted regime change by sweeping batch size at fixed context and observing memory throughput, tensor-pipe throughput, and iteration duration. If both resources remain lightly used, look for insufficient independent work, dependencies, or launch gaps. Intensity identifies a candidate ceiling, but only the trace establishes which mechanism currently prevents reaching it.
 
+![Deep dive: Going deeper: what it takes to even saturate the bandwidth](./deep-dive-component-01.png)
+
+
 ## Common misconceptions
 
 **"nvidia-smi shows 100% GPU utilization, so the GPU is fully used."** The `nvidia-smi` utilization figure only reports the fraction of time *at least 1 kernel was resident* on the device. Our GEMV above would show 100% utilization while delivering 0.3% of peak FLOPS. The gap between "a kernel is running" and "the silicon is producing useful math" is the entire subject of [goodput measurement](/blog/goodput-vs-utilization/), and it's routinely a factor of 10 to 300.
@@ -105,6 +108,9 @@ Almost everything in this series so far converges on this one ratio. The FLOPs-p
 It also explains why the industry is physically splitting inference in 2. Prefill sits above the ridge point and wants FLOPs; decode sits at intensity ≈ 1 and wants bandwidth. 1 chip cannot be provisioned optimally for both, which is the entire thesis behind [prefill/decode disaggregation](/blog/the-prefill-decode-disaggregation-story/) and prefill-specialized silicon like [Rubin CPX](/blog/prefill-gets-its-own-chip-rubin-cpx/). And it explains the appeal of 4-bit weight formats: halving bytes per parameter doubles decode's arithmetic intensity and its token-rate ceiling in 1 move, no faster memory required.
 
 For a kernel engineer, the practical takeaway is a triage discipline. Before optimizing anything, compute the kernel's arithmetic intensity by hand, the way we just did. If it's far below ~295 (on Hopper; compute your own ridge for your chip and datatype), the tensor cores are spectators, and the only optimizations that matter are the ones that move fewer bytes or move them at full width: quantization, fusion to avoid round trips through HBM, coalescing, and batching. Shaving instructions from a kernel that's 99.7% memory-stalled optimizes the 0.3%.
+
+![Deep dive: The bigger picture](./deep-dive-component-02.png)
+
 
 ## Takeaway
 

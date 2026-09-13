@@ -91,6 +91,9 @@ The intercept t_0 collects exposed work not represented by the traffic estimate.
 
 Fit that trend using several context lengths while holding batch, dtype, and kernel path fixed. A smooth measured slope supports the history-traffic explanation; a sudden jump accompanied by preemptions supports a separate capacity mechanism. A changed attention kernel can also change the slope or intercept. Prefix reuse reduces new prefill work but not this full-attention context term. Shortening history changes the information supplied to the model, so accept that method only with task-quality checks as well as a faster latency curve.
 
+![Deep dive: Going deeper: why a generation gets more expensive](./deep-dive-component-01.png)
+
+
 ## Distinguish growth from memory-pressure amplification
 
 Plot inter-token latency against retained context at fixed batch size. A gradual increase without preemptions supports the attention-growth explanation. Abrupt jumps near a cache threshold suggest capacity effects layered on top. Correlate those jumps with available cache blocks, active requests, and preemption or recomputation events.
@@ -118,6 +121,9 @@ Prefix caching helps repeated prompt processing; paged allocation helps cache ma
 *Original diagnostic summary; investigate the listed mechanisms with controlled measurements.*
 
 Resource-aware admission also needs to reserve growth, not just the cache that exists at the instant a request arrives. A request beginning with a short prompt can generate a long answer or continue for many turns. If admission consumes every currently free cache block, several accepted requests can grow into a capacity crisis together. Use an output limit, an explicit context limit, or a conservative growth allowance when estimating the request commitment. Measure how often that allowance is too small and how much unused capacity it leaves, then tune it against the service target rather than guessing once.
+
+![Deep dive: Remedies and what each one changes](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

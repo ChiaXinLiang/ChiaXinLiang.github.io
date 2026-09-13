@@ -165,6 +165,9 @@ Sweep representative matrix shapes, not only one large square. Skinny matrices, 
 
 Cache reuse across output groups is another reason to keep the memory level explicit. Neighboring output tiles can need overlapping A or B regions, and a cache may serve some repeated loads without another HBM transaction. The group-level logical model counts each group's requests, while device traffic measures what reaches the observed memory level. Neither count is wrong, but they answer different questions. Preserve working-set size and launch ordering when comparing candidates, because a changed temporal reuse pattern can affect cache behavior even with identical tile arithmetic. A reported intensity should name whether it uses logical requests, cache traffic, or HBM traffic.
 
+![Deep dive: 9. Measure arithmetic, traffic, and execution together](./deep-dive-component-02.png)
+
+
 ## 10. Diagnose the bottleneck before adding another optimization
 
 If traffic is high because operands are repeatedly loaded, reuse or cache organization is a strong hypothesis. If resource usage causes spills, a smaller tile can improve performance despite lower theoretical intensity. If synchronization dominates, staging and work partitioning deserve attention.

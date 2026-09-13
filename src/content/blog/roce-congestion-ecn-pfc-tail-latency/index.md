@@ -135,6 +135,9 @@ Maintain a supported configuration record with assumptions about speeds, paths, 
 
 Congestion control connects offered demand to finite forwarding capacity through delayed feedback and buffering. ECN, endpoint response, and PFC contribute different mechanisms. Their success should be judged by stable useful progress and bounded tails, with counters that explain how the fabric handled the workload rather than merely whether packets were eventually delivered.
 
+![Deep dive: 9. Evaluate the deployment under realistic contention](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [NVIDIA Cumulus Linux RoCE guidance](https://docs.nvidia.com/networking-ethernet-software/cumulus-linux-518/Layer-1-and-Switch-Ports/Quality-of-Service/RDMA-over-Converged-Ethernet-RoCE/).

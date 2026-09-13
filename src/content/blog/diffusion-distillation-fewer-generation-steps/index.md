@@ -148,6 +148,9 @@ The units should be consistent and include discarded or failed work when it mate
 
 A widely reused generator can amortize this preparation over many outputs. A one-off deployment may prefer a verified training-free solver. Compare the phases explicitly instead of presenting reduced inference evaluations as a complete lifecycle cost calculation.
 
+![Deep dive: 12. Account for preparation cost](./deep-dive-component-02.png)
+
+
 ## 13. Compare with strong sampler baselines
 
 Evaluate the original model with a supported efficient solver at several network-evaluation budgets. Compare the step-distilled student under its intended scheduler, not only against an unnecessarily long or weak teacher baseline.

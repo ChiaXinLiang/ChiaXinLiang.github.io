@@ -89,6 +89,9 @@ A nonlinear activation between those layers prevents that collapse. The network 
 
 The common statement that 1 neuron draws 1 straight boundary also needs context. A sigmoid classifier on raw features has a linear decision boundary at a fixed threshold. If its inputs are already nonlinear features produced by earlier layers, that same last neuron can participate in a nonlinear boundary in the original input space. Always say which representation a geometric claim refers to.
 
+![Deep dive: Activation means more than squashing](./deep-dive-component-01.png)
+
+
 ## Count a small network before counting a frontier model
 
 Suppose a fully connected network has 3 input features, a hidden layer of 4 neurons, and 2 output scores. Every hidden neuron receives 3 weights and 1 bias, so the first layer contains 16 parameters. Every output receives 4 weights and 1 bias, so the second layer contains 10. Total parameter count is 26.
@@ -109,6 +112,9 @@ $$
 U maps the hidden representation to the next layer and c is its bias. If both activations are the identity, the composition becomes U W x plus U b plus c, a single affine map. A nonlinear hidden activation prevents that collapse. This is the substantive change from stacking linear regressions: different input regions can activate different combinations of learned features.
 
 For a concrete ReLU example, choose x equal to (2,-1), W with rows (0.5,-0.25) and (-1,1), and b equal to (-0.2,0). The pre-activations are (1.05,-3), so h is (1.05,0). With U equal to (2,-1) and c equal to 0.1, an identity output is 2.2. Change the input enough to cross a ReLU boundary and the active linear rule changes. Capacity grows, but fitting that capacity still requires data, an objective, and validation; the equation alone does not guarantee learning or useful abstractions.
+
+![Deep dive: Count a small network before counting a frontier model](./deep-dive-component-02.png)
+
 
 ## What a representation actually is
 

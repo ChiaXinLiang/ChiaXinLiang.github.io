@@ -184,6 +184,9 @@ Independence and constant cost are assumptions; retries can change prompts or bu
 
 Report filtering, retries, and the selection criterion when they form part of deployment. Include verification work in the service boundary where required. This connects condition fidelity and artifact quality to effective throughput without pretending that every generated image is equally useful. A fair comparison uses the same acceptance requirement for baseline and candidates.
 
+![Deep dive: 17. Count usable outputs rather than only attempts](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Token Merging](https://arxiv.org/abs/2210.09461).

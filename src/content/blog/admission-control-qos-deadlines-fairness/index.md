@@ -69,6 +69,9 @@ Reserving each request's maximum output can protect against growth but waste cap
 
 Shared-prefix blocks complicate attribution. Several requests can reference common physical state while maintaining separate future-growth obligations. Count physical occupancy and logical reservation separately so sharing benefits do not silently erase the budget needed for new tokens.
 
+![Deep dive: 3. Reserve cache capacity without pretending all tokens exist yet](./deep-dive-component-02.png)
+
+
 ## 4. Use deadlines to bound waiting promises
 
 For a request arriving at time a_i with deadline d_i, let t be the current time and R_hat_i the estimated remaining execution and delivery time. Its estimated slack is

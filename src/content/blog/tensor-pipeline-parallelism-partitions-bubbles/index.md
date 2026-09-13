@@ -71,6 +71,9 @@ Small tensor-parallel messages can be latency-sensitive because the schedule syn
 
 Place frequently communicating tensor groups within the fastest feasible local interconnect domain when the model and resource constraints allow it. That is a reasoned starting point, not a guarantee that every optimal layout follows one rule. Memory capacity, expert placement, and total group dimensions can force tradeoffs that need complete measurements.
 
+![Deep dive: 3. Account for tensor-parallel communication frequency](./deep-dive-component-02.png)
+
+
 ## 4. Pipeline stages process a stream of microbatches
 
 A pipeline assigns consecutive or otherwise scheduled layer ranges to p stages. Forward activations move toward later stages; gradients flow backward. One microbatch by itself leaves most stages waiting while it progresses. Several microbatches allow different stages to work concurrently.

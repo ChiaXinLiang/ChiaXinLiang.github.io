@@ -181,6 +181,9 @@ Finally preserve the conclusion's scope. A measured advantage on one device and 
 
 This audit turns a headline into a testable chain: disclosed mechanism, predicted resource effect, observed execution, and validated task behavior. Each link can be examined independently. The chain is a useful standard for the entire series because it makes architectural innovation concrete while keeping uncertainty and workload dependence visible.
 
+![Deep dive: 16. Audit an apparently simple comparison](./deep-dive-component-02.png)
+
+
 ## 17. Separate compressed preparation from architecture
 
 Distillation, low-rank adaptation, and quantization can change the prepared artifact without defining the original architecture. A fair comparison records those changes alongside the disclosed structure and numerical backend. In particular, a low trainable-parameter count does not establish low inference cost, and a small payload does not establish a smaller context state.

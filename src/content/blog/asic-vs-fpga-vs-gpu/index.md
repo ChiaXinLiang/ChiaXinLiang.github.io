@@ -89,6 +89,8 @@ Using the hypothetical values above gives $$N_*\approx50{,}000{,}000/25{,}856\ap
 
 What changes relative to buying GPUs is both the marginal work cost and who owns workload risk. The assumed 10-to-1 replacement must be established on complete supported models, including memory stalls and software overhead—not inferred from peak MAC density. Test a workload portfolio against a GPU baseline and include the cost of bridging the development interval. A programmable ASIC can retain operator and scheduling flexibility, while fixing arithmetic formats and memory interfaces. The right design freezes stable expensive mechanisms and keeps likely-changing decisions programmable; it does not need to freeze 1 entire model forever.
 
+![Deep dive: A worked example: when 10x efficiency justifies $50M](./deep-dive-component-01.png)
+
 
 ## Going deeper: what specialization actually deletes
 
@@ -103,6 +105,9 @@ What changes relative to buying GPUs is both the marginal work cost and who owns
 **Memory becomes bespoke.** Caches with tags, coherence, and replacement policies get replaced by software-managed scratchpads sized exactly to the tiles of the 1 algorithm the chip runs. No tag lookups, no misses on behalf of generality.
 
 A GPU, note, has been sprinting along this same path: tensor cores, FP8 and FP4 datapaths, and transformer-specific units are specialization *inside* a programmable envelope. The line between "GPU" and "AI ASIC" is blurrier every generation, which is precisely why the decision framework is economic rather than religious.
+
+![Deep dive: Going deeper: what specialization actually deletes](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

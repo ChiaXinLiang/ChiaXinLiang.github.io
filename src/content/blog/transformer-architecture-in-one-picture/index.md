@@ -50,6 +50,9 @@ Let's trace the sentence "The keys to the cabinet ___" through a decoder-only mo
 
 2 structural facts fall out of this walk. First, **width and depth dominate a simplified dense-stack estimate**: GPT-3 is 96 blocks of width 12,288, and that's where the 175B weights live. Second, the largest arithmetic terms in many of those steps are matrix multiplications — which is why [the entire AI hardware industry](/blog/blackwell-to-rubin-memory-math/) is an arms race in exactly 1 operation.
 
+![Deep dive: Walking 1 token through the stack](./deep-dive-component-01.png)
+
+
 ## Where the compute goes (a preview of the economics)
 
 A rough but honest accounting for a GPT-3-class block: the feed-forward layer holds ~2-thirds of the weights and, at short sequence lengths, ~2-thirds of the compute. Attention's weight share is smaller, but its cost **grows with the square of sequence length** while feed-forward grows linearly — so at long contexts, attention takes over the bill. That crossover explains a decade of engineering you'll meet in the other series: FlashAttention restructures the computation to dodge memory traffic, [DeepSeek's sparse attention](/blog/blackwell-to-rubin-memory-math/) prunes the all-pairs comparison, and the KV cache trades memory for recomputation. The architecture you're looking at *is* the cost model of modern AI.
@@ -84,6 +87,9 @@ The original blueprint dates to 2017, 9 years before this revision. Many dense m
 - **The biggest fork — Mixture of Experts**: replace each block's feed-forward with many parallel "experts" and route each token to a couple of them. A 1T-parameter MoE might activate only ~32B weights per token — capability of the full library, compute bill of a branch visit
 
 Every one of these is an *efficiency* edit — same blueprint, lower cost per unit of capability. That's worth noticing: post-2017 architecture research has largely been performance engineering wearing a research hat, which is exactly why this blog runs [a whole series on the co-design between models and silicon](/blog/blackwell-to-rubin-memory-math/).
+
+![Deep dive: What's changed since 2017 (and what hasn't)](./deep-dive-component-02.png)
+
 
 ## Count a simplified dense block
 

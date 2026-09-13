@@ -79,6 +79,9 @@ The rule of thumb collapses outside English. BPE vocabularies are learned from a
 
 Vendors have been closing the gap: OpenAI's o200k vocabulary and Llama 3's 128K-token vocabulary both improved non-English efficiency, and Meta reported (their own benchmark) that the new tokenizer uses up to 15% fewer tokens than Llama 2's on the same text. The asymmetry shrinks; it hasn't disappeared.
 
+![Deep dive: Tokens are the meter on the wall](./deep-dive-component-01.png)
+
+
 ## Going deeper: bytes, regex, and the vocabulary dial
 
 3 mechanisms below the surface are worth knowing.
@@ -90,6 +93,9 @@ Vendors have been closing the gap: OpenAI's o200k vocabulary and Llama 3's 128K-
 **The vocabulary-size dial.** Why did GPT-2 pick ~50K tokens, GPT-4 ~100K, GPT-4o and Llama 3 ~128-200K? It's a genuine trade-off. A bigger vocabulary compresses text into fewer tokens: cheaper attention, more effective context, faster generation per unit of text. But every token needs an embedding row, and (in the output layer) a score computed at every generation step. At Llama 3's scale (128,256 tokens × 4,096 embedding dimensions) the input table alone is about 525 million parameters, and with an untied output projection the pair costs over 1 billion, a meaningful slice of an 8-billion-parameter model. Push the vocabulary too far and you also mint tokens so rare they're barely seen in training, which is how GPT-2/3 ended up with "glitch tokens" like ` SolidGoldMagikarp` — vocabulary entries (that 1 traced back to a Reddit username) whose embeddings were nearly untrained and triggered bizarre outputs. Vocabulary size, like everything in this series, is an engineering compromise, not a law.
 
 ![The vocabulary-size dial: small vocabularies give long sequences and tiny embedding tables, large vocabularies give short sequences and huge embedding tables, with real model vocabularies plotted between the extremes](./vocab-tradeoff.png)
+
+![Deep dive: Going deeper: bytes, regex, and the vocabulary dial](./deep-dive-component-02.png)
+
 
 ## Vocabulary size changes both compression and model cost
 

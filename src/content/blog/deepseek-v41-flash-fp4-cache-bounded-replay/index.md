@@ -163,6 +163,9 @@ Replay also uses resources shared with active requests. Its direct duration is o
 
 Finally keep failure behavior visible. If insufficient memory prevents restoration, the system needs a defined retry, eviction, or recomputation policy. A persistence optimization becomes useful infrastructure only when the request lifecycle remains correct and its latency consequences are understood.
 
+![Deep dive: 14. Estimate when replay pays for itself](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Official DeepSeek-V4.1-Flash model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash).

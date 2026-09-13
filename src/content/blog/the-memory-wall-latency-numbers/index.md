@@ -78,6 +78,8 @@ For a dependent list reading 4 useful bytes per node with $$Q=1$$ and $$\ell=100
 
 The innovation behind prefetching and memory-level parallelism is moving from “discover the next address after the previous load” to having multiple requests ready together. Array layout enables that transformation; a dependent pointer chain often does not. A request may transfer a whole cache line while only 4 bytes are used, so physical bus traffic exceeds useful payload. Measure both dependencies and bytes transferred. The 2-millisecond array estimate above is a bandwidth floor under its assumed 20-GB/s service rate, not a universal measured 500× application speedup.
 
+![Deep dive: A worked example you can do on paper](./deep-dive-component-01.png)
+
 
 ## Why the wall exists: compute sprinted, memory walked
 
@@ -96,6 +98,9 @@ Follow 1 load instruction that misses everywhere. The core computes a virtual ad
 The core does not simply stand still for those 100 ns. Out-of-order execution keeps a window of a few 100 in-flight instructions and executes whatever is independent of the missing load. That reliably hides an L2 miss. It may not hide a long dependent DRAM miss: at 3 GHz, 100 ns is ~300 cycles, and with several instructions per cycle the miss punches a hole of over a 1000 issue slots, far more than any realistic window can fill with independent work. So the machine layers on more tricks: prefetchers that recognize stride patterns, memory-level parallelism (a core can keep a dozen or more misses in flight at once, which is why *independent* random accesses hurt far less than a *dependent* pointer chase), and simultaneous multithreading, which fills stall holes with another thread's instructions. Every one of these is a workaround for the same underlying number. When people say modern CPU architecture is mostly about the memory system, this is what they mean.
 
 There is an energy version of the wall too, and it decides chip architecture as much as the time version. In Mark Horowitz's much-cited ISSCC 2014 numbers, a 32-bit add costs about 0.1 picojoules while fetching 64 bits from DRAM costs on the order of a nanojoule, a ratio of several 1000. Moving data costs vastly more than computing on it, in joules as well as nanoseconds.
+
+![Deep dive: Going deeper: anatomy of 1 miss, and how CPUs fight back](./deep-dive-component-02.png)
+
 
 ## The memory wall, at datacenter scale: LLM decode
 

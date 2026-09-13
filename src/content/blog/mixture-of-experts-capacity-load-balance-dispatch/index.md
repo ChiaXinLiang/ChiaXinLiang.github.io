@@ -173,6 +173,9 @@ Also examine correlation across layers and requests. Repeatedly selecting expert
 
 Finally compare quality before and after a routing adjustment. A locality or balancing policy can reduce system cost while changing which functions a token executes. Unless the model was trained for that policy or equivalence is established, the change needs behavioral evaluation. The runtime's efficiency objective must remain connected to the intended sparse model rather than silently replacing it.
 
+![Deep dive: 14. Relate skew to the completion tail](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Switch Transformers](https://arxiv.org/abs/2101.03961).

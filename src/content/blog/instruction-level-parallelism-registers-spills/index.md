@@ -159,6 +159,9 @@ The compiled loop may also contain shared address calculations. Several accumula
 
 Finally compare end-to-end work. If the reduction is a small part of a larger application, an improved arithmetic loop can produce a modest application gain. Record the fraction of time attributable to the changed region before translating local results into a system claim. This prevents a sound kernel optimization from receiving an unsupported application speedup.
 
+![Deep dive: 11. Distinguish latency from reciprocal throughput](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [CUDA advanced kernel programming and hardware execution](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html).

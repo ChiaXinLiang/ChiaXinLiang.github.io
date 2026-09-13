@@ -49,6 +49,9 @@ Now capture the step into a CUDA graph. Replay costs 1 launch (~5 µs) plus a sm
 
 At 2.5 ms per token you were generating 400 tokens/s per sequence; at 2.05 ms you generate 488. Same GPU, same kernels, same model. The only thing that changed is who does the orchestration.
 
+![Deep dive: A worked example: 1 decode step, 40 layers](./deep-dive-component-01.png)
+
+
 ## What a graph actually is
 
 A CUDA graph is a DAG: nodes are kernels (or memcpys, memsets, even child graphs), edges are dependencies. The lifecycle has 3 phases, and keeping them straight explains almost every practical constraint.
@@ -89,6 +92,9 @@ Graphs move orchestration from host software to device hardware, and once you se
 **Persistent kernels and work queues.** The endpoint of this spectrum is to stop launching kernels at all: launch 1 long-lived "persistent" kernel per SM and have thread blocks pull work items from a queue managed with atomics. Because the queue head is hammered by every SM, it stays resident in the L2 cache, and an L2 atomic costs a few 100 nanoseconds instead of microseconds. For irregular workloads where uniform grids leave some SMs idle (ragged batches, mixture-of-experts routing, graph algorithms), this dynamic load balancing is worth another 10-30% on top of eliminating launches. The megakernel designs in modern inference engines are this idea taken to its conclusion: the whole model becomes 1 kernel that never exits, and "orchestration" is just atomic counters in cache.
 
 Each step down this list trades flexibility for latency. Eager launches can do anything; graphs need static structure; persistent kernels need you to hand-roll scheduling. Decode's structure is blessedly repetitive, the same 500 kernels in the same order forever, which is why it is the perfect customer for the rigid end of the spectrum.
+
+![Deep dive: Going deeper: shrinking the CPU's job to 0](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

@@ -69,6 +69,9 @@ Qwen reports 9.3% of training cost in GPU-hours. The equal-token FLOP estimate h
 
 Now the second lever, which the 6ND formula hides. At 32K context and beyond, standard attention's quadratic term stops being a rounding error. For inference the pain shows up as the KV cache: a standard attention layer must keep keys and values for every past token. Try illustrative numbers: a 48-layer model storing 2 KB of KV per token per layer (in FP16) needs 96 KB per token across a fully standard stack, which at a 128K context is about 12.6 GB per sequence, before you serve a second user. Cut standard attention to 12 of 48 layers and the cache drops to about 3.1 GB; the 36 DeltaNet layers hold small fixed-size states whose memory does not grow with context at all. That is where the reported >10x long-context prefill and decode throughput comes from, and it compounds with the MoE savings: fewer FLOPs per token, and each token drags far less memory traffic behind it. If you want the mechanical intuition for why the KV cache exists in the first place, [Attention in Plain Words](/blog/attention-in-plain-words/) builds it from scratch.
 
+![Deep dive: The worked example: an equal-token FLOP comparison](./deep-dive-component-01.png)
+
+
 ## Going deeper: why keep any full attention at all?
 
 If linear attention is so cheap, why not use it everywhere? Because the fixed-size state is a lossy summary. Standard attention retains an explicit route to token 17 from token 50,000, though successful verbatim recall is learned rather than guaranteed, which is what you need for copying a serial number out of a document, matching a bracket 40K tokens back, or needle-in-a-haystack recall. Linear attention compresses history into a state matrix of constant size, and information theory is unforgiving about what a constant-size state can hold from an unbounded stream. Pure linear-attention models score well on perplexity and fall over on exact-recall tasks.
@@ -94,6 +97,9 @@ $$
 Here S maps keys to values, k, v, and q are current vectors, alpha is a decay gate, and beta a write-strength gate. Normalization and implementation ordering vary, so this illustrates the delta-rule mechanism rather than reproducing every Qwen kernel detail. With scalar state 2, alpha equal to 0.5, beta equal to 0.25, key 1, and value 3, the decayed state is 1 and the corrected state is 1.5. The update moves the stored prediction toward the new value without retaining a separate entry for every previous token.
 
 This bounded state changes historical storage compared with full KV attention, but it can lose distinctions that explicit retained keys preserve. Periodic full-attention layers add another retrieval path. Test exact recall and long-context quality as well as throughput. The 3/32 parameter ratio predicts 9.375% only under equal token budgets and the simplified 6ND accounting; matching Qwen's reported 9.3% closely does not constitute an independent derivation of the real training bill.
+
+![Deep dive: Going deeper: why keep any full attention at all?](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

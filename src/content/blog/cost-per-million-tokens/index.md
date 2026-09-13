@@ -34,6 +34,9 @@ Second, tokens per second here means *aggregate delivered throughput per GPU*, a
 
 Third, the formula is deliberately symmetric: halve the hourly cost or double the throughput and you get the same result. That symmetry is why performance work and procurement work are the same job viewed from different chairs.
 
+![Deep dive: The 1-line formula](./deep-dive-component-01.png)
+
+
 ## Worked example: 1 H100, 3 software stacks
 
 Take Llama-70B-class weights served in FP8, so roughly 70 GB of parameters sitting on an 80 GB H100. (A tight fit once KV cache needs its share; real deployments often shard across 2 GPUs, which doubles both the hourly cost and the throughput and cancels out in the division, so the single-GPU math is a fair proxy.) The GPU rents at $2.50/hr.
@@ -91,6 +94,9 @@ $$
 The approximation assumes the busy throughput represents the actual request mix. It excludes staff, storage, networking, and other costs unless those are included in h. At h equal to 2.50, Q equal to 3000, u equal to 0.5, and a equal to 0.85, effective goodput is 1275 tokens/s and cost is approximately 0.545 dollars per million output tokens. Dividing only by peak Q would report 0.231 dollars, less than half as much.
 
 The 3 throughput points above are illustrative scenarios, not validated 70B deployments. A 70-GB FP8 checkpoint leaves only 10 nominal gigabytes on an 80-GB GPU before workspace and cache, so high-concurrency feasibility requires an explicit context budget or more devices. Measure utilization across the billed period and acceptance across all offered work. Provider list prices are customer charges; they cannot by themselves reveal the provider's production cost or explain its pricing decisions.
+
+![Deep dive: Going deeper: why API prices fell 10 to 100x in 2 years](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

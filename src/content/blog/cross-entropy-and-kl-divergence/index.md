@@ -118,6 +118,9 @@ For logits (1000,1001,999) and observed class 2, subtracting m equal to 1001 giv
 
 Check an implementation using both the loss and its gradients on a small reference case before enabling lower precision. Preserve masks and reduction conventions when comparing optimized paths. Label smoothing intentionally changes p, so a different loss after smoothing cannot be credited solely to a faster or more stable kernel. Separate objective changes from implementation changes in the experiment.
 
+![Deep dive: Going deeper: logits and stable gradients](./deep-dive-component-01.png)
+
+
 ## Apply the objective to next-token prediction
 
 Let x_1 through x_T be a token sequence. The chain rule factorizes its probability into conditional next-token probabilities. Taking negative logarithms converts the sequence product into a sum of per-token log losses:
@@ -160,6 +163,9 @@ For example, a short sequence with 10 evaluated tokens and a long sequence with 
 ![4 input features connect to 3 output logits before softmax normalization.](figure-03.png)
 
 *Redrawn from [Dive into Deep Learning, Fig. 4.1.1](https://d2l.ai/chapter_linear-classification/softmax-regression.html#fig-softmaxreg). The diagram shows the source's fully connected structure; softmax normalization follows the logits.*
+
+![Deep dive: Interpret changes in loss carefully](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

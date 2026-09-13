@@ -162,6 +162,9 @@ Document failed candidates and their limiting resources. If a sparse artifact is
 
 For a reproducible report, retain the original checkpoint, logical mask, converted artifact, and backend configuration as separate objects. That separation lets a later reviewer determine whether a discrepancy arose in structure selection, recovery, packing, or execution. It also prevents an old packed file from being mistaken for the latest recovered weights when several experiments share a directory.
 
+![Deep dive: 14. Choose the pattern from the operating point](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [NVIDIA structured sparsity in Ampere and search applications](https://developer.nvidia.com/blog/structured-sparsity-in-the-nvidia-ampere-architecture-and-applications-in-search-engines/).

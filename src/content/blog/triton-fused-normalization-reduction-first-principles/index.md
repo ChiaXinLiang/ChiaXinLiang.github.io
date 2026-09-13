@@ -101,6 +101,9 @@ Use this row and constant rows as deterministic checks. Add nonuniform affine pa
 
 Test widths smaller than and not equal to the tile size. A width exactly matching BLOCK never exercises the centered-padding rule. Include output-stride cases if the interface claims they are supported.
 
+![Deep dive: 5. Work a small row by hand](./deep-dive-component-02.png)
+
+
 ## 6. Compare reduction methods and numerical conditioning
 
 Computing variance as mean of squares minus square of mean can be concise, but large common offsets can cause cancellation in finite precision. Centered accumulation or a suitable stable reduction can behave differently. The numerical method is part of the implementation contract.

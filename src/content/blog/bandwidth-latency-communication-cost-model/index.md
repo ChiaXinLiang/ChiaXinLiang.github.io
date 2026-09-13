@@ -139,6 +139,9 @@ Overlap still consumes resources. Communication can compete with computation for
 
 A compact diagnostic record can contain the expected path, observed large-message slope, small-message intercept, participating rank count, and application communication tail. For example, a healthy slope with a much larger intercept suggests a different investigation from a healthy intercept with reduced sustained bandwidth. Add rank-by-rank observations when only one placement degrades. Preserve the same timing boundaries during comparisons, because adding a synchronization or allocation to one measurement can imitate a transport regression. This record turns the model into a repeatable troubleshooting method rather than a collection of disconnected benchmark numbers.
 
+![Deep dive: 8. Communication delays the job only when dependencies expose it](./deep-dive-component-02.png)
+
+
 ## 9. Use the model to choose the next experiment
 
 If small messages dominate, investigate startup count, batching, and readiness rather than expecting a link-rate upgrade to solve the problem. If large-message slope is poor, verify the physical path, protocol, placement, and contention. If isolated bandwidth is healthy but job time is poor, inspect collective timing and the slowest participants.

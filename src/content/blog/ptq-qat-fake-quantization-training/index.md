@@ -162,6 +162,9 @@ This separation also improves diagnosis. If simulation quality is good but conve
 
 A useful artifact therefore includes training settings, calibration policy, converted representation, independent evaluation, and measured execution. Together they establish the complete preparation-to-deployment path. The STE is one part of that path, not a substitute for evidence that the final model meets the application requirements.
 
+![Deep dive: 14. Separate adaptation from evaluation leakage](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference](https://arxiv.org/abs/1712.05877).

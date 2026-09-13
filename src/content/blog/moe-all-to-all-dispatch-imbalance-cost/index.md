@@ -151,6 +151,9 @@ For instance, a scalar input 10 routed to experts 1 and 3 with weights 0.25 and 
 
 Exercise repeated buffer reuse and varying assignment counts. A dispatcher can pass one fixed-size test while failing when a destination grows or becomes empty. Preserve counts and offsets around the first failure to distinguish indexing errors from transport or visibility problems.
 
+![Deep dive: 9. Test and diagnose the inverse path](./deep-dive-component-02.png)
+
+
 ## 10. Report useful sparse execution rather than one exchange rate
 
 A useful report contains model routing semantics, token population, representation width, expert ownership, assignment matrix summaries, capacity policy, actual traffic, stage timing, and end-to-end useful throughput. Label illustrative estimates separately from measured results.

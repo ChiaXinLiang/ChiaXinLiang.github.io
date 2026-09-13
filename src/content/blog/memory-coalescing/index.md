@@ -50,6 +50,9 @@ Now put bandwidth numbers on it. An H100 SXM delivers about 3.35 TB/s of HBM3 ba
 
 1 more paper exercise worth doing: shift the coalesced access by a single float, so the warp reads `base+4` through `base+128`. The span now straddles a line boundary and touches 5 sectors instead of 4. That misalignment penalty is real but mild (25% extra traffic), which is why alignment is a second-order concern next to stride, the thing that can cost you 8x.
 
+![Deep dive: A worked example you can do on paper](./deep-dive-component-01.png)
+
+
 ## Measure useful bytes per sector at the chosen level
 
 For a warp loading 32 4-byte values, useful payload is 128 bytes. If the access generates $$n_s$$ 32-byte sectors at the measured interface, sector efficiency is
@@ -77,6 +80,9 @@ Knowing the failure mode, the classic fixes all become 1 idea: *reshape the acce
 ![Shared-memory tiling for transpose: coalesced global reads and writes, with a 33-wide tile to eliminate bank conflicts](./fig-tile-padding.png)
 
 **TMA: hardware takes over the copy.** On Hopper and Blackwell, the Tensor Memory Accelerator is a dedicated copy engine per SM that moves multidimensional tiles between global and shared memory from a single descriptor: base address, tensor shape, tile size. 1 thread issues the copy; the TMA hardware computes all the addresses, handles out-of-bounds edges, and streams the tile asynchronously while the warps compute on the previous 1. The register and instruction cost of address arithmetic, a real tax in older pipelined-copy code, drops to nearly nothing. This is coalescing as a hardware service: the descriptor tells the engine the layout, and the engine generates optimal transactions. CUTLASS and Triton lean on it heavily for Hopper-class GEMM and attention kernels.
+
+![Deep dive: Going deeper: the toolbox that restores coalescing](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

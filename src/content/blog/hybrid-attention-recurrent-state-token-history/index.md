@@ -159,6 +159,9 @@ Floating-point operations do not have perfect real-number associativity. Combini
 
 This distinction also helps debugging. Large or structured differences can indicate wrong gate order, missing reset, or incorrect chunk boundaries. Small differences that grow gradually can instead reflect accumulation order. Establish the reference and tolerance before declaring either pattern harmless.
 
+![Deep dive: 14. Distinguish associativity from an identical floating-point schedule](./deep-dive-component-02.png)
+
+
 ## 15. Connect dynamics to scan execution
 
 The affine composition perspective helps explain how a content-dependent recurrence can expose whole-sequence parallelism while retaining a state for incremental generation. It also makes the assumptions visible: the transition representation must support affordable composition, temporal order must be preserved, and chunk boundaries must carry the correct initial state.

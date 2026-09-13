@@ -166,6 +166,9 @@ This explains why percentile clipping is a policy rather than a proof. It assume
 
 For an experiment, sweep supported clipping thresholds and record central error, saturation error, layer-output error, and final task quality. Keep the held-out population independent of threshold selection. The resulting curves reveal which surrogate tracks the task and where it stops doing so. This makes calibration reviewable and provides a principled bridge from the quantization grid to the deployed model's behavior.
 
+![Deep dive: 14. Decompose the clipping tradeoff](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference](https://arxiv.org/abs/1712.05877).

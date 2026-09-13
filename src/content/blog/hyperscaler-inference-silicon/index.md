@@ -28,6 +28,9 @@ The 3 designs, in 1 breath. **Ironwood** (Google, TPU v7): 4,614 TFLOPS of FP8 p
 
 ![3 inference accelerators side by side: Google Ironwood, AWS Trainium3, and Microsoft Maia 200, with vendor-reported compute, memory, and scale-up domain figures](./three-chips.png)
 
+![Deep dive: What "inference silicon" means](./deep-dive-component-01.png)
+
+
 ## Why buy-vs-build flipped
 
 The economics of custom silicon are brutal. A modern accelerator costs several hundred million dollars to design, the software stack costs as much again, and if you guess the workload wrong the chip is a very expensive space heater. That calculus kept everyone but Google out for years. 3 things changed it.
@@ -37,6 +40,9 @@ The economics of custom silicon are brutal. A modern accelerator costs several h
 **The workload froze.** Custom silicon's great fear is that the target moves. But since roughly 2020, serving has meant 1 thing: transformer decode. The kernel mix — matrix multiplies, attention, collective communication — is stable enough to design against, and I sketched that architecture in [the transformer in 1 picture](/blog/transformer-architecture-in-one-picture/). Better still, a hyperscaler serving its *own* models controls both sides of the contract. Google compiles a handful of internal model families for Ironwood; it does not need to run arbitrary CUDA code from the internet. That collapses the hardest part of the problem, the software surface, by orders of magnitude.
 
 **The margin arbitrage got too large to ignore.** NVIDIA's data-center gross margins are famously in the 70%+ range. At hyperscaler volume — hundreds of thousands of accelerators a year — even a custom chip that is merely *competitive* on performance per watt wins on cost, because you are paying foundry prices instead of foundry prices plus NVIDIA's markup. And with datacenter power now the binding constraint industry-wide, performance per watt is the metric that decides how many tokens a fixed megawatt budget can sell. Ironwood's pitch is not "fastest chip"; it is 2× perf/watt per generation, aimed at exactly that constraint.
+
+![Deep dive: Why buy-vs-build flipped](./deep-dive-component-02.png)
+
 
 ## A worked example: the decode speed limit
 

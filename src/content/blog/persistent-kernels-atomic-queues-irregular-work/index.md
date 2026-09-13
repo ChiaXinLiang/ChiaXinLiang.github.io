@@ -144,6 +144,9 @@ Now group the first two jobs into a single chunk. That chunk again contains sixt
 
 Changing the order can change the tail of greedy scheduling. Sorting jobs by a cost estimate may improve balance, but sorting costs time and the estimate can be wrong. It can also alter memory locality. Include the preprocessing cost in the comparison and evaluate whether the ordering remains helpful on representative inputs rather than only on this constructed example.
 
+![Deep dive: 11. Work through an uneven assignment](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [CUDA advanced kernel programming and synchronization](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html).

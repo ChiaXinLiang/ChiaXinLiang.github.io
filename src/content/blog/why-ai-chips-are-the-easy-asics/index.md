@@ -67,6 +67,8 @@ Using the rounded historical TPU v1 figures, $$C=92\times10^{12}$$ operations pe
 
 The innovation is to co-design reuse, storage, and arithmetic instead of multiplying the number of MAC cells alone. A larger local buffer or better tile schedule can reduce external bytes per result; HBM increases the byte service rate. Those are distinct interventions. Check the compiler's transferred bytes and achieved throughput for representative matrix shapes, then compare with the same workload on the baseline. Larger arrays can lose utilization on narrow matrices, and more buffering consumes area that could hold arithmetic. The design problem is a balanced operating envelope, not “the multiplier array is never the problem.”
 
+![Deep dive: A worked example: the TPU v1 by hand](./deep-dive-component-01.png)
+
 
 ## Hard part 1: the memory system
 
@@ -99,6 +101,9 @@ A startup has neither advantage, and the record shows what happens next. Nervana
 ![Where the difficulty actually lives in an AI ASIC: the visible MAC array is the easy tip; memory system, numerics bets, and the compiler and kernel ecosystem sit beneath the waterline](./hard-parts.png)
 
 The honest budgeting rule that follows: if you are planning an AI chip and your software team is not at least as large as your hardware team, you are planning half a product.
+
+![Deep dive: Going deeper: the software cliff](./deep-dive-component-02.png)
+
 
 ## The bigger picture, and closing the series
 

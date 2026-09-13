@@ -135,6 +135,9 @@ Report useful tokens or completed steps under stable numerical behavior. Transfe
 
 A useful counter comparison uses the same payload population and duration for both alternatives. If the staged case produces additional host-device copy events and host-memory traffic while the direct case does not, that supports the avoided-staging explanation. Adapter bytes alone cannot make this distinction because both paths still transmit the network payload. Check physical interface demand as well as logical payload, and account for background traffic before attributing all observed bytes to the test. Repeat at representative concurrency: an isolated direct path can look healthy while several ranks share an upstream link. Keep the per-rank message count and total payload fixed during this comparison so a different communication schedule does not accidentally explain the traffic reduction.
 
+![Deep dive: 8. Measure the benefit at the application's dependency boundary](./deep-dive-component-02.png)
+
+
 ## 9. Maintain a repeatable verification record
 
 Preserve platform support, versions, allocation type, topology, pair measurements, adapter mapping, diagnostics, and application results. Label theoretical bounds, illustrative calculations, and observed measurements separately. This record makes it possible to revisit a regression after a driver or library change.

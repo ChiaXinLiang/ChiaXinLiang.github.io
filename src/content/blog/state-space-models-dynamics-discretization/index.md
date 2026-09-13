@@ -196,6 +196,9 @@ This provides a useful architecture intuition without replacing learned-model ev
 
 Inspect the complete architecture rather than reporting state dimension alone as a quality measure. A larger state can add storage and computation while failing to preserve the distinctions a task needs. The useful comparison connects the write, evolution, and read interfaces to held-out sequence behavior.
 
+![Deep dive: 17. Distinguish stored state from accessible information](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Efficiently Modeling Long Sequences with Structured State Spaces](https://arxiv.org/abs/2111.00396).

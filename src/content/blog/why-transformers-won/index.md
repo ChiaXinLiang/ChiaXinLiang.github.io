@@ -26,6 +26,9 @@ Why would you want it to go? An LSTM has a structural property that no clevernes
 
 A GPU is precisely the wrong machine for long dependency chains. It's a throughput device: tens of thousands of small arithmetic units that are only fast when you hand them 1 enormous, internally independent job, ideally a big matrix multiplication. Hand a GPU a chain of 2,048 tiny dependent steps and it idles between links, using a sliver of its silicon. This mismatch is old news, and it has a name worth knowing: Sara Hooker calls it the **hardware lottery** — research ideas win or lose partly on how well they fit the machines of their era. [CNNs won the 2012 lottery](/blog/cnn-how-machines-learned-to-see/) because convolutions map beautifully onto GPUs; AlexNet was 2 gaming cards exploiting that fit. In 2017 the Transformer bought a ticket for the same draw.
 
+![Deep dive: The 2017 context: recurrence ruled, and it crawled](./deep-dive-component-01.png)
+
+
 ## What "parallelizable" actually means here
 
 The Transformer processes a sequence [as 1 batch of matrix multiplications](/blog/transformer-architecture-in-one-picture/): every token's query-key comparisons happen simultaneously, every token's feed-forward pass happens simultaneously. Positions can be processed together within each sublayer, but projections, attention scores, softmax, and value aggregation still have dependencies. Layers also depend on prior layers — a chain as long as the network is deep, not as long as the document.
@@ -49,6 +52,9 @@ Concrete numbers, small enough to check by hand. Take 1 training document of 2,0
 **The Transformer's chain.** Per layer, the work is a handful of big matmuls (the attention projections, the score matrix, the feed-forward), each shaped like [2,048 × 1,024] times [1,024 × 1,024], about 4.3 GFLOPs apiece. Call it 6 dependent matmuls per layer, 24 layers: a critical path of ~150 links instead of 2,048. And each link is now a *billions-of-operations* job that saturates the machine, instead of a 2-million-operation job that can't. Total arithmetic per pass is actually *higher* than the LSTM's (roughly 600 GFLOPs versus 34 GFLOPs for this document), and it finishes sooner anyway — with an ideal arithmetic floor near 0.6 ms; real latency requires measurement. The Transformer wins not by doing less work but by doing work in the shape the hardware wants.
 
 1 more check you can do by hand: the paper says base-model training took 12 hours on 8 P100 GPUs and cost ~3.3×10¹⁸ FLOPs. A P100 peaks near 10¹³ FLOPs/second, so 8 × 43,200 s × 10¹³ ≈ 3.5×10¹⁸. The proximity of these rounded values is not a utilization measurement: the applicable precision peak, counted operations, and training accounting must be established. An RNN could burn the same 12 hours without ever coming close to that FLOP count, because it can't keep the machines fed.
+
+![Deep dive: A worked example: counting the chain](./deep-dive-component-02.png)
+
 
 ## Distinguish total work from dependent work
 

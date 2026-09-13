@@ -28,6 +28,9 @@ The observation behind every sparse-attention scheme is that most of those 8.6 b
 
 DSA's answer: add a tiny, fast module whose only job is knowing which ones matter.
 
+![Deep dive: The quadratic bill](./deep-dive-component-01.png)
+
+
 ## What DSA actually does
 
 DeepSeek Sparse Attention splits attention into 2 stages, described in the [V3.2-Exp technical report](https://github.com/deepseek-ai/DeepSeek-V3.2-Exp).
@@ -100,6 +103,9 @@ DeepSeek's recipe, from the technical report: continue pretraining from V3.1-Ter
 The kernel side is just as deliberate. Sparse attention has historically died in the gap between algorithm and silicon: GPUs want big, regular, coalesced memory reads, and "gather 2,048 arbitrary positions" is the opposite. DeepSeek shipped its answer in public — the kernels are open-sourced in [TileLang](https://github.com/tile-ai/tilelang), a Python-embedded DSL they recommend for readable prototyping, and as production CUDA in [FlashMLA](https://github.com/deepseek-ai/FlashMLA) and DeepGEMM (indexer logits, paged variants, the FP8 paths). The release notes read like a co-design manifesto in miniature: here is the architecture, here is exactly how we made it fast, here is the price that fell out.
 
 1 honest caveat belongs in any account of this story: "benchmark parity" is DeepSeek's own evaluation, on DeepSeek's chosen suite, for a model explicitly labeled experimental. The company itself kept V3.1-Terminus available through a comparison API for 2 weeks so users could check for regressions on their workloads. That is better epistemics than most launches, but parity on a published table is a vendor claim until third parties have hammered the edge cases, and long-context retrieval oddities are precisely where sparse attention would fail quietly.
+
+![Deep dive: Going deeper: training a module whose output is a hard cutoff](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

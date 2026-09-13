@@ -60,6 +60,9 @@ The effective storage becomes $$0.53125$$ bytes per weight, or $$4.25$$ bits, be
 
 At 8 bits, the rounded 70 GB payload leaves only 10 GB under our conservative capacity convention. Even if the weights load, that is a small pool for cache and peak workspace. At 4 bits, the illustrative 37.1875 GB payload-plus-metadata leaves much more room. Memory feasibility improves, but quality and kernel performance still require validation.
 
+![Deep dive: Weight precision gives a lower bound](./deep-dive-component-01.png)
+
+
 ## Derive KV bytes per token
 
 For each decoder layer, a cached token stores a key vector and a value vector for every KV head. If $$L$$ is the layer count, $$H_{kv}$$ the KV-head count, $$d$$ the head dimension, and $$b_{kv}$$ the bytes per cached element,
@@ -129,6 +132,9 @@ $$
 The equation assumes all allowed output tokens remain in full attention and does not subtract speculative prefix reuse. With q equal to 16, a request beginning at 8192 prompt tokens and permitted 1024 output tokens commits 9216 slots, or 2.8125 GiB at 320 KiB per slot. 12 such requests require 33.75 GiB, approximately 36.24 GB, exceeding the earlier 34.8125-GB cache pool even though 12 prompt-only histories fit.
 
 A static output allowance protects accepted requests but can leave unused cache capacity when outputs finish early. Dynamic admission can improve packing, at the cost of handling growth and preemption explicitly. Document that policy alongside the precision and context envelope. The innovation in paging is allocating state incrementally and predictably; the remaining responsibility is ensuring simultaneously accepted requests do not grow into an impossible budget.
+
+![Deep dive: Going deeper: peak memory differs from steady memory](./deep-dive-component-02.png)
+
 
 ## What multiple GPUs change
 

@@ -28,6 +28,9 @@ A serving framework does 3 jobs: schedule requests into batches, manage the KV c
 
 ![3 columns summarizing the core design bet of vLLM, TensorRT-LLM, and SGLang, with a convergence note at the bottom](./three-designs.png)
 
+![Deep dive: 3 design bets](./deep-dive-component-01.png)
+
+
 ## A worked example: where the KV memory goes
 
 Numbers make the bets concrete. Take Llama-3-8B with FP16 KV cache: 32 layers, 8 KV heads (grouped-query attention), head dimension 128.
@@ -69,6 +72,9 @@ $$
 This counts payload before metadata and excludes shared blocks. A 700-token request with b equal to 16 needs 704 slots. At 131072 bytes per token, it uses exactly 88 MiB, compared with 87.5 MiB of logical state. Reserving 8192 slots instead takes 1 GiB. The allocator improves packing; it does not compress a retained token.
 
 Sharing requires identical tokenized prefixes under the same model, positions, adapters, and relevant execution contract. A 2-thousand-token prefix is 250 MiB in this example. 64 independent copies use 15.625 GiB; 1 shared copy uses about 0.244 GiB, saving 15.381 GiB when all blocks remain reusable. These binary-unit values clarify the rounded GB labels in the illustration. Include cold-cache runs, partially overlapping prefixes, and eviction in an engine comparison. Cache isolation and admission determine whether a repeated prompt actually becomes a hit; a theoretical shared-byte count is not a measured hit rate.
+
+![Deep dive: Going deeper: compile time versus run time](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

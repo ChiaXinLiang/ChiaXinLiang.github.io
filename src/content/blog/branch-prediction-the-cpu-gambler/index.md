@@ -46,6 +46,9 @@ Modern predictors push much further. **TAGE** (Seznec and Michaud, 2006), an inf
 
 On real workloads these predictors hit **95 to 99% accuracy**. Which sounds like the problem is solved. Let's check that with actual numbers.
 
+![Deep dive: How the predictor learns](./deep-dive-component-01.png)
+
+
 ## A worked example: what 95% really costs
 
 Take a program of 1 billion instructions on a 4 GHz core that can otherwise sustain 4 instructions per cycle (IPC = 4). Say 20% of instructions are branches, and a misprediction costs 17 cycles, the middle of our 15-20 range.
@@ -69,6 +72,8 @@ $$
 Our example uses $$c_0=0.25$$, $$f_b=0.20$$, $$m_b=0.05$$, and $$P_b=17$$. CPI becomes 0.42 and MPKI becomes 10; effective IPC is $$1/0.42\approx2.38$$. At 1-percent misses, CPI becomes 0.284 and IPC about 3.52. This checks the table while exposing its additive-penalty assumption.
 
 The important innovation from a per-branch counter to a history-based predictor is separating contexts that need different answers. A branch alternating outcomes defeats a single stable counter but becomes predictable when the previous outcome selects a different table entry. Shared tables introduce aliasing: unrelated branch/history pairs can update the same counter. Tags, multiple history lengths, and allocation policies try to preserve useful distinctions under a finite storage budget. Longer histories are not uniformly better: they add state, training requirements, and lookup work. Measure misses by branch location and context, not only 1 program-wide accuracy percentage.
+
+![Deep dive: A worked example: what 95% really costs](./deep-dive-component-02.png)
 
 
 ## Going deeper: what a "prediction" actually contains

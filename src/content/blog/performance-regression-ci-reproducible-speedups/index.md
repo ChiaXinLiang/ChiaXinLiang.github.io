@@ -151,6 +151,9 @@ Maintain the cases after workload and architecture changes. A once-representativ
 
 Performance regression CI preserves useful improvements by making comparisons reproducible and decisions explicit. Correctness comes first, practical budgets define significance, uncertainty defines what the observations support, and artifacts identify the mechanism. A durable speedup is one that survives the next change under the same useful-work contract.
 
+![Deep dive: 10. Verify that the gate detects the intended mechanism](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [PyTorch benchmark utilities](https://docs.pytorch.org/docs/stable/benchmark_utils.html).

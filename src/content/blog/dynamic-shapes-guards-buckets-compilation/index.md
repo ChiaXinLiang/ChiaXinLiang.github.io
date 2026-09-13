@@ -121,6 +121,9 @@ Verify outputs for several actual lengths within each bucket, including the boun
 
 Causal attention has about L times L plus 1 divided by 2 allowed pairs, and an optimized kernel may avoid some masked tiles. Padding therefore does not necessarily execute the full dense square implied by a simple tensor shape. Decode has a different query population again. Keep the pair-count estimate as a logical bound or approximation and identify the actual backend work. Cache reservations should also distinguish true logical sequence positions from unused physical capacity, so a bucketed allocation does not accidentally make invalid positions visible to attention.
 
+![Deep dive: 7. Preserve masks, positions, and statistics](./deep-dive-component-02.png)
+
+
 ## 8. Budget memory and graph lifetime
 
 Padding expands activations, temporary buffers, and sometimes cache reservations. Graph or variant-specific buffers can also retain capacity. A policy that minimizes compile time can increase memory enough to reduce feasible batch or concurrency.

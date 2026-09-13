@@ -86,6 +86,9 @@ Keep aliases and helper-library uses in the consumer inventory. A temporary pass
 
 A concrete timeline makes the final-consumer rule visible. Suppose allocation and initialization complete at 3 milliseconds, consumer B finishes at 5 milliseconds, and consumer C finishes at 12 milliseconds. Release must follow the supported completion of C as well as B; ordering it after the producer at 3 milliseconds is insufficient. The host may have posted all operations earlier, so wall-clock call order cannot substitute for these device dependencies. Record both consumed events and make the freeing stream wait for them. If C becomes slower in a later iteration, the event graph remains correct without assuming a fixed duration.
 
+![Deep dive: 4. Release must follow the final consumer](./deep-dive-component-02.png)
+
+
 ## 5. Derive a logical peak-memory budget
 
 Let L(t) be the set of logically live allocations under the chosen dependency schedule, and b_i their sizes. A first-order live-memory peak is

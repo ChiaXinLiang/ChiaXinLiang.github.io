@@ -170,6 +170,9 @@ A useful diagnostic compares hard-label training, teacher argmax targets, and fu
 
 Maintain reproducible target generation and report the chosen mixture, temperature, and teacher checkpoint. Those concrete settings connect the theoretical gradient to the student artifact that will eventually be evaluated and deployed.
 
+![Deep dive: 15. Diagnose an overly confident teacher](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531).

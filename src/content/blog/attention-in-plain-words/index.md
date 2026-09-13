@@ -49,6 +49,9 @@ That's it. Attention is a lookup table where, instead of retrieving 1 entry, you
 - **It runs several times in parallel** ("multi-head" attention): 1 head might track pronoun reference, another syntax, another nearby words. Each head is the same mechanism with its own learned weights.
 - **Direct connectivity replaces a relay.** Allowed distant tokens can exchange information without passing through every intervening hidden state; positional encoding and training still affect long-range behavior.
 
+![Deep dive: The mechanism: a soft lookup](./deep-dive-component-01.png)
+
+
 ## A worked example you can follow by hand
 
 Abstract mechanisms stick better with numbers, so let's run a miniature attention step. Take the 3-word input "cat sat down" and pretend each word's query and key are just 2-number vectors:
@@ -130,6 +133,9 @@ s_j=\frac{q^\top k_j}{\sqrt{d_k}},\qquad o=\sum_{j\in\mathcal A}a_jv_j.
 $$
 
 A is the permitted-key set, q the query, k_j and v_j the key and value, and o the head output. Compared with recurrent relaying, this method exposes parallel all-pairs work during training. Its tradeoff is growing pair work and historical state. Tiled exact attention changes memory traffic without changing these weights; sparse attention changes A and therefore the model computation. Keep that distinction when interpreting a faster attention implementation.
+
+![Deep dive: The equation fixes the normalization](./deep-dive-component-02.png)
+
 
 ## Training parallelism is not generation parallelism
 

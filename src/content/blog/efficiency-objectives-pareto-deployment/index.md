@@ -148,6 +148,9 @@ The same issue arises with quality proxies. Calibration reconstruction error can
 
 A useful review records where each proxy is used and how it was validated. If the deployment changes device, compiler, precision, or workload, revisit that relationship. The saved artifact should include both proxy predictions and actual outcomes. This allows a future reader to distinguish a failed model of cost from a failed optimization method and prevents an outdated proxy from silently becoming the application objective.
 
+![Deep dive: 12. Avoid optimizing a proxy after it stops predicting the goal](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Roofline: An Insightful Visual Performance Model for Multicore Architectures](https://doi.org/10.1145/1498765.1498785).

@@ -67,6 +67,9 @@ This transformation preserves the maximizing parameter values. It also turns a p
 
 Most optimization software minimizes objectives. We therefore minimize negative log-likelihood, abbreviated NLL. Dividing by the number of examples gives mean NLL. Summed and averaged NLL have the same unregularized minimizer for a fixed dataset, although their gradients differ by a scale factor. That matters when choosing learning rates or combining the data term with regularization.
 
+![Deep dive: Why training uses logarithms](./deep-dive-component-01.png)
+
+
 ## Deriving the Bernoulli estimate
 
 Let $$k$$ be the number of successes among $$n$$ trials. The log-likelihood is
@@ -144,6 +147,9 @@ $$
 where $$q_i$$ is the model's predicted success probability for example i. With 1-hot multiclass targets, categorical cross-entropy similarly reduces to negative log probability of the observed class. Soft labels require an expectation over the target distribution rather than selecting only 1 label.
 
 A neural network often emits logits, which are unrestricted scores. Softmax converts those scores into class probabilities. Stable training computes log-softmax directly using the log-sum-exp identity; it avoids explicitly forming tiny probabilities and then taking their logarithms. The theory and the numerical implementation need to agree.
+
+![Deep dive: Classification connects likelihood to cross-entropy](./deep-dive-component-02.png)
+
 
 ## Language models apply the chain rule of probability
 

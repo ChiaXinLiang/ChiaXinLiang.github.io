@@ -24,6 +24,9 @@ Do the byte accounting for DeepSeek-V3 and you see where the mass lives. Hidden 
 
 That is the promise: train and store a 671B model, pay 37B worth of FLOPs per token. The fine print is that the promise only survives deployment if you can (a) fit the weights, (b) keep every expert's load roughly equal, and (c) move tokens to experts fast enough that the network doesn't eat the FLOPs you saved.
 
+![Deep dive: What an MoE actually stores](./deep-dive-component-01.png)
+
+
 ## 4 axes, 1 layout
 
 Each parallelism axis answers a different question, and each fails alone.
@@ -63,6 +66,9 @@ Composing the axes buys you fitting and fat GEMMs. It also creates the 2 failure
 **Load balance decides your latency.** The router is trained, not designed, and real traffic is skewed: a burst of coding requests will hammer whichever experts specialized in code. Under EP, an overloaded expert is an overloaded *GPU*, and a decode step finishes only when the slowest GPU finishes. 1 expert receiving 3× average traffic means every token in the batch waits, on every layer where that expert is hot. Training-time tricks (auxiliary balance losses, or V3's auxiliary-loss-free bias adjustment) keep routing statistically reasonable, and capacity limits with token dropping protect training throughput, but in serving you cannot drop a user's token. The deployment-time answer is replication: measure per-expert load, then place *redundant copies* of hot experts on underloaded GPUs and split their traffic. DeepSeek's EPLB (Expert Parallelism Load Balancer) does exactly this, with a hierarchical mode that first balances expert groups across nodes (so group-limited routing keeps most dispatch traffic inside a node) and a global mode for larger EP degrees. Those 64 extra GPUs in the decode unit are load-balancing insurance.
 
 ![All-to-all dispatch with a hot expert, and EPLB replicating it onto a spare GPU](./fig-alltoall-eplb.png)
+
+![Deep dive: Going deeper: all-to-all and the hot-expert problem](./deep-dive-component-02.png)
+
 
 ## Routing diversity and routing balance are different
 

@@ -148,6 +148,9 @@ A stable implementation subtracts the maximum eligible score before exponentiati
 
 These details belong in correctness tests as well as explanations. Construct scores with large magnitudes, verify the intended mask, and compare shared-head mappings without relying on random inputs to expose every failure. A numerically stable implementation and a correctly grouped implementation satisfy different obligations, so test both.
 
+![Deep dive: 13. Explain what the weights normalize](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints](https://arxiv.org/abs/2305.13245).

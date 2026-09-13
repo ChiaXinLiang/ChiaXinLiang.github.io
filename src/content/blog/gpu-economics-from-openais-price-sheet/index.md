@@ -72,6 +72,9 @@ Abstract ratios stick better with a concrete bill. Take a coding agent with a 50
 
 The bill dropped 5x, and its composition flipped: output went from a rounding error (4% of spend) to nearly a fifth of it. This is the general pattern for agentic workloads, which is why every serious agent framework became obsessed with prompt-cache hygiene. It also explains a breakeven rule you can derive from the sheet: the write premium is $1 per million tokens (the extra 0.25 x $4), and each later hit saves $3.60 per million ($4.00 minus $0.40). Caching pays for itself if a prefix has even a ~28% chance of being reused once. Almost any multi-turn conversation clears that bar on turn 2.
 
+![Deep dive: A worked example: 1 agent session, by hand](./deep-dive-component-01.png)
+
+
 ## Derive a cache decision without guessing provider costs
 
 Let fresh input price be $$p_f$$, cache-write price $$p_w$$, and cache-hit price $$p_h$$, all in dollars per million tokens. If a written prefix receives an expected $$q$$ later billed hits, its incremental saving over fresh processing is positive when
@@ -101,6 +104,9 @@ Providers claw back efficiency by batching many users' decode steps together, so
 ![2 vertical bars representing 288 GB of GPU memory: at 8K context around 160 sequences fit above the fixed 70 GB weight block, at 128K context only about 10 fit, so weight reads are shared fewer ways and cost per token climbs](./long-context.png)
 
 **Why batch is half price and fast mode is double.** These 2 tiers price the same thing in opposite directions: scheduling freedom. Batch jobs (results within 24 hours) let the provider fill idle capacity and run at maximum utilization, so they cost 50% of standard. Fast mode sells a different latency policy; reserved capacity and scheduling can contribute, but the public price does not disclose occupancy or guarantee 0 queueing, and it costs 2x. Same silicon, different goodput contract.
+
+![Deep dive: Going deeper: the ratios, derived from the chip](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

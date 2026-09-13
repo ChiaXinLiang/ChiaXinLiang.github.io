@@ -67,6 +67,9 @@ For serving, 1 possible definition is the rate of requests that satisfy a specif
 
 Token goodput is another legitimate definition, but length weighting changes the result. A long response contributes more tokens than a short response, and an aggregate token objective can conceal poor treatment of short interactive requests. Publish both the weighting and the acceptance rule so the team understands which behavior the metric rewards.
 
+![Deep dive: There is more than 1 goodput denominator](./deep-dive-component-01.png)
+
+
 ## A consistent illustrative calculation
 
 Consider a hypothetical training job with a validated clean-run baseline of 10,000 retained tokens per second. During an hour of allocated time, 600 seconds are lost to startup, checkpointing, or recovery. During the remaining 3,000 seconds, exposed communication and input stalls reduce the average processing rate to 8,000 tokens per second. The job retains 24 million tokens:
@@ -110,6 +113,9 @@ $$
 If a stable service accepts 50 requests per second and each spends an average of 2 seconds in the system, it holds about 100 requests on average. The equation is not a tail-latency prediction, and it does not establish that a system overloaded by arbitrary arrivals is stable. It is a consistency check connecting concurrency, rate, and waiting time.
 
 Admission control can protect latency by rejecting or deferring work before it overloads the service. That policy should expose both accepted goodput and the rejection rate. Otherwise a configuration can appear excellent by accepting only an easy subset of requests. An honest report includes offered load, completed load, accepted goodput, and the latency distribution.
+
+![Deep dive: Why tails change the answer in serving](./deep-dive-component-02.png)
+
 
 ## Measure progress across the whole lifecycle
 

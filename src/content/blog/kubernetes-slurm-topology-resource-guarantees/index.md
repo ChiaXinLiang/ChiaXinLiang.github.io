@@ -135,6 +135,9 @@ A controlled placement experiment can keep the model and group dimensions fixed 
 
 CPU demand should be calibrated from the complete job rather than only the main process. Data workers, communication progress, compilation, logging, and storage handling can consume different amounts over time. Preserve startup and steady-state observations separately, and include burst behavior when it affects launch or request latency. An allocation that covers average use but repeatedly throttles a critical progress thread can still be unsuitable. Conversely, reserving excessive CPU capacity can reduce cluster packing efficiency without improving the tested application. The appropriate declaration follows measured useful behavior and the policy's resource semantics.
 
+![Deep dive: 9. Verify placement with a workload-sensitive test](./deep-dive-component-02.png)
+
+
 ## 10. Connect scheduling policy to capacity planning
 
 Track offered job demand, admitted allocations, queue time, startup time, useful execution, and termination outcomes. A policy can keep admitted jobs fast by leaving more demand queued, so both populations should remain visible.

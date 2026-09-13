@@ -68,6 +68,8 @@ The table uses rounded decimal budgets $$W=16$$ GB and $$K=0.5$$ GB. Exact Llama
 
 The scheduling innovation keeps useful requests occupying those amortization opportunities, while admission protects the separate capacity bound. Larger batches can increase aggregate output while slowing each stream. At long context, private cache reads dominate and the bandwidth-model rate approaches $$\beta/K$$ instead of growing without limit. An engine may reuse cache data differently or pay additional collective and launch costs, so validate actual bytes and latency. Continuous batching removes empty cohort slots; it does not guarantee that every incoming request can join immediately when prefill or KV capacity is unavailable.
 
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
+
 
 ## Going deeper: the scheduling problem Orca solved
 
@@ -84,6 +86,9 @@ This is **continuous batching** (Orca called it iteration-level scheduling), and
 Note what continuous batching does not do: it does not change the per-step arithmetic at all. A step with 32 active requests costs the same 9.55 ms whether the scheduler is static or continuous. What it changes is how often you actually have 32 requests in flight instead of 9 live ones plus 23 zombies. It is a scheduling fix, and it is worth more than most kernel fixes.
 
 The remaining tension is prefill. A joining request's prompt must be processed, and a 4,000-token prefill injected into a decode step makes that step compute-heavy and slow, which every other user feels as a latency spike in their [TPOT](/blog/ttft-and-tpot/). Engines mitigate this with chunked prefill (split the prompt across several steps) or by moving prefill to separate hardware entirely, the disaggregation story covered in [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/).
+
+![Deep dive: Going deeper: the scheduling problem Orca solved](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

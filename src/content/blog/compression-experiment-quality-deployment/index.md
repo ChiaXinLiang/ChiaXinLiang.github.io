@@ -174,6 +174,9 @@ This connects the whole series: theory proposes a useful change, preparation cre
 
 Keep the decision record alongside the artifact rather than only in a temporary notebook. A later backend change, new workload, or revised quality requirement can invalidate the previous operating point without changing the compressed weights. Repeating the relevant measurements under those new conditions is then a targeted verification task, supported by the existing configuration and evidence.
 
+![Deep dive: 16. Conclude with a concrete operating envelope](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Amdahl's original paper](https://doi.org/10.1145/1465482.1465560).

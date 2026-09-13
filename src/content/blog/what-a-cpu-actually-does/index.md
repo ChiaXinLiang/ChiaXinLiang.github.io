@@ -112,6 +112,8 @@ For $$n=20$$ and $$k=5$$, speedup is $$100/24\approx4.1667$$. If the pipelined m
 
 The method improves the baseline by assigning successive instructions to different active stages. It preserves each instruction's dependency requirements while overlapping independent work. Splitting a stage buys frequency only if the resulting slowest stage plus register overhead is shorter. More stages increase fill cost and can increase branch-recovery cost, so useful retired work per second matters more than stage count. Start with this simple model, add only the stalls observed in a trace or performance counters, and avoid summing overlapping penalties twice. The distinction between elapsed instruction latency and steady-state completion rate remains essential when comparing CPU pipelines with much larger GPU and server pipelines.
 
+![Deep dive: Put numbers on the laundry example](./deep-dive-component-01.png)
+
 
 ## 3 kinds of hazards
 
@@ -132,6 +134,9 @@ RISC-V is useful for teaching because its specification presents a base integer 
 The labels “RISC” and “CISC” do not directly predict a modern chip's speed or energy use. A high-performance implementation may decode architectural instructions into internal operations, execute several independent operations at once, and use sophisticated speculation. A simple RISC-V core and a large out-of-order RISC-V core can have dramatically different performance while implementing compatible instructions.
 
 This opening article only needs the ISA-versus-implementation distinction. A later article can compare a short load-add-branch sequence across families, then discuss extensions, privilege, memory ordering, and the cost of implementation. Keeping that comparison connected to 1 program makes it a lesson in architecture rather than a catalog of product names.
+
+![Deep dive: ARM, RISC-V, and x86 belong in this foundation](./deep-dive-component-02.png)
+
 
 ## Completion is not always commitment
 

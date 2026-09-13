@@ -32,6 +32,9 @@ An adaptive serving stack has, broadly, 4 families of actuators. They differ eno
 
 ![Serving as a feedback controller: SENSE — Queue depth; KV occupancy — Goodput under TTFT/TPOT SLOs; DECIDE — Thresholds, forecast, hysteresis — Account for transition costs; ACTUATE — Batch/chunk: ms; KV moves: seconds — Parallel reshape: tens of seconds+. Original controller schematic · Dynamo; DistServe (2024)](./control-loop.png)
 
+![Deep dive: The 4 knob families](./deep-dive-component-01.png)
+
+
 ## A worked example: 1 day, 1 node
 
 Numbers make this concrete. Take a dense 70B model on 1 8×H100 node, TP8. The relevant hardware constants: 8 × 80 GB = 640 GB of HBM, and 8 × 3.35 TB/s = 26.8 TB/s of aggregate bandwidth. FP8 weights are 70 GB; NVFP4 weights are 35 GB. With 80 layers, 8 KV heads, and head dimension 128, the KV cache costs 80 × 8 × 128 × 2 × 2 bytes = 320 KB per token at FP16, or 160 KB at FP8.
@@ -53,6 +56,9 @@ This is a roofline-style bound; real engines land within about 1.3–2x of it on
 **20:00, the agents.** Volume is moderate but contexts are long and bursty. A single agent session with a 30k-token history holds 30,000 × 320 KB ≈ 9.6 GB of FP16 KV, and it spends much of its wall-clock time idle, waiting on tool calls. 60 such sessions would be 576 GB, nearly the whole node's HBM, mostly cold. The engine offloads idle-session KV to CPU DRAM over PCIe Gen5 (~64 GB/s per direction): about 0.15 s out and 0.15 s back for that 9.6 GB, invisible next to a multi-second tool call, and it frees HBM for streams that are actually decoding. Hot shared prefixes stay pinned; see [the KV cache article](/blog/kv-cache-explained/) for why prefix reuse is worth protecting.
 
 ![4 traffic phases, different actuators: 03:00 / 09:00 — Trough: backfill useful batch work — Ramp: retune chunked prefill; 13:00 PEAK — Use prevalidated precision variants — Raise admission within quality limits; 20:00 AGENTS — Long contexts, idle tool-call intervals — Offload cold KV; pin hot prefixes. Hypothetical day · an architectural proposal, not live data](./traffic-day.png)
+
+![Deep dive: A worked example: 1 day, 1 node](./deep-dive-component-02.png)
+
 
 ## Going deeper: it really is a control system
 

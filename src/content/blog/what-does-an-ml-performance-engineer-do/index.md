@@ -79,6 +79,9 @@ The quality promise matters too. Some changes, such as removing redundant copies
 
 A useful experiment specification includes the model revision, precision, hardware, engine version, request distribution, concurrency, and service objectives. Without those details, “twice as fast” is difficult to reproduce and may describe a different problem. Keeping the specification small enough to repeat is more valuable than collecting a dashboard full of unexplained numbers.
 
+![Deep dive: Define the promise before optimizing](./deep-dive-component-01.png)
+
+
 ## 2 equations that guide the investigation
 
 The first equation is a lower bound on an operation's execution time. If it performs F floating-point operations and transfers D bytes through the limiting memory level, while sustainable compute and bandwidth are C and B, then:
@@ -100,6 +103,9 @@ $$
 If a kernel accounts for 10 percent of request time, making it 2 times as fast improves the request by about 5.3 percent. Even eliminating that kernel entirely cannot improve the original request by more than about 11 percent. A profiler identifies p; the optimization determines s. The equation stops attractive local improvements from being mistaken for large product wins.
 
 The assumptions deserve attention. Once 1 bottleneck is removed, another can become dominant, and batching or scheduling changes may alter several runtime fractions at once. Use Amdahl's law to estimate a first experiment, then measure the new system rather than repeatedly applying an old profile.
+
+![Deep dive: 2 equations that guide the investigation](./deep-dive-component-02.png)
+
 
 ## Follow 1 request through the stack
 

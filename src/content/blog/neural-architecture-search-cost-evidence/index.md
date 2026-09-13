@@ -170,6 +170,9 @@ The same principle applies to supernet weights. Shared exposure is not uniform u
 
 These limitations do not make automated search unhelpful. They identify the assumptions that connect a cheap evaluator to a costly deployment decision. A rigorous method keeps those assumptions visible and tests the shortlisted artifacts where an incorrect ranking would matter most.
 
+![Deep dive: 15. Examine selection bias in shared evaluators](./deep-dive-component-02.png)
+
+
 ## 16. Preserve the final discrete configuration
 
 Architecture parameters from a relaxed search are not a complete deployment artifact. Export the selected operators, widths, depth, resolution, numerical policy, and trained weights explicitly. Verify branch dimensions and preprocessing after discretization, because the final graph can differ from the mixed graph used during search.

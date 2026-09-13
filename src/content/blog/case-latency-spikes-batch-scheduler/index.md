@@ -69,6 +69,9 @@ S is the uncached prompt length and K the minimum chunk count. The bound is mean
 
 Chunking changes the longest admitted execution segment compared with monolithic prefill; it does not remove prompt computation. Fit the mixed-batch duration curve from controlled injections, including cache misses and long attention contexts. Then check both streaming gaps and prompt completion. If the smaller budget makes new arrivals queue indefinitely, its latency benefit is not sustainable. This adds a stability check to the token accounting rather than treating the scheduler flag itself as evidence of a resolved incident.
 
+![Deep dive: Work a token-budget example](./deep-dive-component-01.png)
+
+
 ## Chunk size is a multi-objective decision
 
 A smaller chunk often protects streaming latency by limiting prompt work admitted at once. It can also delay time to first token for newly arriving requests and add scheduling or launch overhead. A larger chunk improves prompt processing opportunities but may lengthen iterations shared with decoding. The optimum depends on the model, accelerator, context lengths, and mix of incoming requests.
@@ -106,6 +109,9 @@ Finally repeat with realistic arrival variability. A setting that works for 1 in
 Write down the expected event sequence before the controlled test. A scheduler explanation predicts a long prompt arrival, followed by a large prompt execution span, followed by a shared streaming gap, followed by recovery when decoding can advance again. A delivery explanation predicts that token-completion events continue during the visible pause and several tokens arrive together after a flush. These predictions tell the engineer which timestamps to collect and what would contradict the preferred diagnosis.
 
 Then compare more than 1 recurrence. A single coincidence can be misleading because a busy server contains many overlapping events. If a periodic logging task occurs near each pause, move that task off the request path for 1 test while preserving the long-prompt injections. If the pauses remain and still follow prompt execution, the logging hypothesis loses support. If they disappear without changing GPU work, the host task deserves a focused investigation. This intervention is inexpensive and prevents a scheduler flag from becoming a permanent workaround for a separate host problem.
+
+![Deep dive: A controlled diagnosis sequence](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

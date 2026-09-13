@@ -85,6 +85,9 @@ Here x_t denotes a token at position t and T the sequence length. The chain rule
 
 A useful distinction is independence versus conditional independence. Independent events do not change one another's probabilities. Conditionally independent observations may become independent only after specifying a shared parameter or context. Many statistical models use conditional independence to simplify likelihoods; that is an assumption to inspect, not an automatic property of a dataset.
 
+![Deep dive: Conditional probability introduces information](./deep-dive-component-01.png)
+
+
 ## Bayes' rule reverses the conditioning direction
 
 Bayes' rule connects 2 conditional probabilities:
@@ -129,6 +132,8 @@ $$
 For a false alarm cost of 1 and missed-failure cost of 9, the threshold is 0.1. The Bayes-rule example's posterior of approximately 0.154 therefore supports alarming under those costs, even though an incident is not the most probable outcome. At equal costs the threshold becomes 0.5. Equality requires an explicitly chosen tie policy.
 
 This method improves a majority-label baseline by minimizing modeled expected consequences rather than maximizing the frequency of correct labels. It assumes binary actions, the stated loss table, and probabilities calibrated for the deployment population. If prevalence changes, the earlier posterior calculation may change even when an alarm's detection behavior stays constant. Estimate probabilities on held-out representative data and assess decision losses separately from classification accuracy. A threshold tuned after repeatedly inspecting the test set can overstate performance. Uncertainty in costs and rates is reason to compare sensitivity scenarios, not to treat an uncalibrated softmax score as a guaranteed posterior.
+
+![Deep dive: Continuous variables use densities, not point probabilities](./deep-dive-component-02.png)
 
 
 ## Going deeper: uncertainty about outcomes and parameters

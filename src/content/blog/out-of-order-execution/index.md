@@ -85,6 +85,8 @@ For our 4-instruction example, $$N=4$$, $$w=1$$, and the load-to-add chain takes
 
 The innovation over in-order issue is readiness-based scheduling, not elimination of dependencies. Renaming removes name conflicts; it cannot shorten the actual load-to-add chain. To evaluate a larger window, measure whether it exposes independent instructions or additional simultaneous cache misses. Extra bookkeeping buys little if every useful operation still waits on the same pointer chain, while scheduler ports and comparisons consume area and energy.
 
+![Deep dive: A worked example you can trace by hand](./deep-dive-component-01.png)
+
 
 ## Register renaming, in plain words
 
@@ -143,6 +145,9 @@ But the workloads that matter for AI, the matrix multiplies at the heart of [eve
 So GPUs and TPUs made the opposite trade. A GPU streaming multiprocessor is, at its core, an in-order machine; when a load stalls 1 group of threads, the hardware switches to another of the thousands it keeps resident, hiding latency with threads instead of a reorder buffer. A TPU goes further: its systolic array is a grid of multiply-accumulate units through which data marches in a fixed choreography, scheduled entirely by the compiler, with no per-instruction scheduling hardware at all. The transistors a CPU spends on renamers, schedulers, and ROBs, the accelerator spends on more math units and on-chip memory. That single reallocation is *the* design divergence between latency machines and throughput machines. It's why [an ML performance engineer's job](/blog/what-does-an-ml-performance-engineer-do/) is largely about keeping tens of thousands of dumb-but-numerous units fed, and why [utilization numbers need careful reading](/blog/goodput-vs-utilization/) on both kinds of chip.
 
 The CPU's bet: the code is sequential and unpredictable, so build a machine that finds parallelism at runtime. The accelerator's bet: the code is parallel and predictable, so build a machine that doesn't have to look. Both bets are correct, for their own workloads. The rest of this series lives in the space between them.
+
+![Deep dive: The fork in the road: why AI chips said no](./deep-dive-component-02.png)
+
 
 ## Takeaway
 

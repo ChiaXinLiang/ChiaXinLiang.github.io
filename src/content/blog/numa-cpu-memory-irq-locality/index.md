@@ -43,6 +43,9 @@ First-touch behavior is a useful concept under common default allocation conditi
 
 Changing affinity after allocation can therefore leave remote pages in place. A meaningful experiment controls initialization and allocation as well as execution, or uses an explicitly supported migration method when that is part of the design. Verify the resulting placement rather than assuming the requested policy relocated existing state.
 
+![Deep dive: 2. Separate thread affinity from page placement](./deep-dive-component-02.png)
+
+
 ## 3. Derive a simple remote-latency model
 
 Suppose a fraction r of relevant accesses use a remote path with latency ell_remote, while the remainder use local latency ell_local. A simplified average-access model is

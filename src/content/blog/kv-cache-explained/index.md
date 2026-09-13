@@ -77,6 +77,9 @@ For 80 layers, 8 KV heads, width 128, and 2-byte elements, m_token is 327680 byt
 
 Paged allocation rounds each unshared length up to a block boundary. Prefix sharing can subtract duplicate physical blocks, while quantization changes bytes per element and adds scales. MLA changes what representation is stored at all. These are distinct methods: improved allocation is not compression, and learned compression requires an architecture trained to use it. Validate per-rank physical cache allocation, particularly when tensor-parallel degree exceeds KV-head count and heads may be replicated. Then measure attention traffic and quality separately; a fitting cache is not necessarily a fast or accurate cache.
 
+![Deep dive: Worked example: Llama-3-70B at 8k context](./deep-dive-component-01.png)
+
+
 ## Going deeper: fragmentation, sharing, and compression
 
 **PagedAttention.** Knowing the size is not enough; you also have to allocate it. Before vLLM, serving systems reserved 1 contiguous buffer per request, sized for the maximum possible output length, because attention kernels wanted contiguous tensors. Requests rarely hit their maximum, so most of the reservation sat idle, and differing request lengths left unusable holes between buffers. The vLLM paper (Kwon et al., SOSP 2023) measured that existing systems held only 20-38% actual token state in their KV memory; the rest was internal fragmentation, external fragmentation, and over-reservation. Their fix is a direct transplant of OS virtual memory: chop the cache into fixed-size blocks (16 tokens each by default), let a per-sequence block table map logical positions to physical blocks scattered anywhere in HBM, and allocate blocks on demand as sequences grow. Waste drops to under 4%, batch sizes rise accordingly, and the paper reports 2-4x throughput over the systems of the day. Every major engine (vLLM, TensorRT-LLM, SGLang) now serves out of paged KV memory.
@@ -88,6 +91,9 @@ Paged allocation rounds each unshared length up to a block boundary. Prefix shar
 **Cache quantization** stacks on all of the above. FP8 KV is supported in many engines, with quality depending on model, scales, and workload; INT4 KV cache with per-channel scaling is common at the aggressive end. Note that this is a separate decision from weight quantization; engines expose them as independent knobs because they trade off differently.
 
 ![PagedAttention maps each sequence's logical blocks through a block table to scattered physical blocks, so 2 sequences can share their common prefix and free memory has no holes](./paged-attention.png)
+
+![Deep dive: Going deeper: fragmentation, sharing, and compression](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

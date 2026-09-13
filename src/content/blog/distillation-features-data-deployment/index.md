@@ -178,6 +178,9 @@ For a diagnostic, construct a small batch with known distances, verify the norma
 
 Avoid interpreting a low relational loss as an assurance that the student preserves every teacher behavior. The loss only constrains selected relations under selected inputs. Independent task evaluation remains necessary, especially when the deployed distribution differs from the data used to create teacher features.
 
+![Deep dive: 15. Examine batch effects in relational learning](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [FitNets: Hints for Thin Deep Nets](https://arxiv.org/abs/1412.6550).

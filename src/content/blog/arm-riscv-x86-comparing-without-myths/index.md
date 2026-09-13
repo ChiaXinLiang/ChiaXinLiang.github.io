@@ -57,6 +57,9 @@ done:
 
 Writing `ecx` produces a zero-extended value in `rcx` in 64-bit mode. This is why the unsigned 32-bit array element can be added correctly to the 64-bit accumulator. `xor eax, eax` clears the accumulator using the corresponding 32-bit-write behavior.
 
+![Deep dive: A shared computation gives us common ground](./deep-dive-component-01.png)
+
+
 ## Trace the same 3 values
 
 For elements 3, 5, and 7, entry state has `rdi = 0x1000` and `rsi = 3`. The accumulator begins at 0. Successive iterations produce sums 3, 8, and 15 while advancing the pointer through `0x1004`, `0x1008`, and `0x100c`.
@@ -135,6 +138,8 @@ $$
 For 1 completed task, a hypothetical 20 W system taking 0.5 seconds uses 10 joules. Another drawing 12 W for 1 second uses 12 joules. Lower instantaneous power is therefore not necessarily lower energy per result. Include the same components in both power measurements: package-only readings cannot directly be compared with whole-server wall readings. Variable power requires integrating over the interval rather than multiplying unrelated peak and timing numbers.
 
 This improves the ISA-label baseline by evaluating a complete implementation running equivalent useful work. Hold compiler options, numerical semantics, working set, and output correctness constant before attributing a result to an instruction-set difference. Where a system finishes earlier and enters a lower-power state, include idle energy over an equal service interval if that is the operational question. If a larger batch improves energy per task while worsening response time, report both metrics under the latency objective. An ISA constrains visible behavior; energy depends on circuit design, memory, software, operating point, and what work was actually completed.
+
+![Deep dive: RISC and CISC describe design traditions](./deep-dive-component-02.png)
 
 
 ## Energy efficiency needs a system boundary

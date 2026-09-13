@@ -174,6 +174,9 @@ A robust allocation can retain extra precision for uncertain components when the
 
 Finally, distinguish uncertainty in the quality surrogate from variability in runtime measurement. More timing repetitions will not repair a biased calibration population, and more calibration examples will not remove device scheduling noise. Report each limitation with the evidence it affects. No GPU benchmark was executed for this article; all numerical accounting examples are illustrative.
 
+![Deep dive: 15. Examine uncertainty in sensitivity rankings](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [HAWQ: Hessian Aware Quantization of Neural Networks](https://arxiv.org/abs/1905.03696).

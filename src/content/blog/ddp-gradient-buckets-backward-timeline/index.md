@@ -121,6 +121,9 @@ Then inspect bucket readiness and exposed tails. A long final bucket suggests a 
 
 Finally, validate useful work and numerical behavior. Count distinct valid training tokens, confirm sample distribution, and compare the resulting update convention. A job that runs without hanging can still train on the wrong effective objective or repeated data. Distributed correctness and performance require evidence about both the communication program and the learning program.
 
+![Deep dive: 8. Diagnose a slow DDP step in layers](./deep-dive-component-02.png)
+
+
 ## 9. Know when replication is the wrong baseline
 
 DDP is attractive when the complete model, gradients, optimizer state, and activation peak fit on each rank. It provides a comparatively simple ownership model and can achieve strong scaling when local computation is large enough to amortize synchronization.

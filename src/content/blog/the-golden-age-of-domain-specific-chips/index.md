@@ -65,6 +65,8 @@ At an illustrative 40 watts and 92 trillion useful operations per second, the ra
 
 The DSA method changes several terms together: instruction granularity amortizes control, smaller formats reduce arithmetic and traffic, and local storage reduces expensive movement. To identify an architectural improvement, compare the same workload and numerical requirements on the baseline, measuring total joules to completion. Operation-energy estimates from 1 process cannot be divided into whole-chip measurements from another as if all conditions matched. Precision changes also require an accuracy check. Specialization buys an efficient supported operating envelope; poor tile utilization or unsupported operators can erase the apparent arithmetic advantage.
 
+![Deep dive: A worked example: the TPU's arithmetic, by hand](./deep-dive-component-01.png)
+
 
 ## Going deeper: the 5 moves every DSA makes
 
@@ -105,6 +107,9 @@ That last point deserves its own paragraph, because Sara Hooker gave it a name: 
 For this series, the DSA is where all the parallel-architecture threads meet. SIMD amortized 1 instruction over a vector; GPUs amortized control over thousands of threads; the systolic array amortized memory access over a grid of MACs. The DSA is the general principle behind all 3: know your dataflow, then delete everything that does not serve it. It also reframes the performance engineer's job. When speedups come from fitting workloads onto opinionated silicon rather than from waiting for faster cores, the person who understands both sides of the boundary becomes the bottleneck resource, which is a large part of [what an ML performance engineer does](/blog/what-does-an-ml-performance-engineer-do/) all day.
 
 Hennessy and Patterson call this a *golden age* without irony. Architecture stagnated for years because the general-purpose CPU was unbeatable; now that it grows 3% a year, wild ideas get funded again. Next in this series we follow the logic to its endpoint: what it actually takes to design and ship an ASIC.
+
+![Deep dive: The lottery, and the bigger picture](./deep-dive-component-02.png)
+
 
 ## Takeaway
 

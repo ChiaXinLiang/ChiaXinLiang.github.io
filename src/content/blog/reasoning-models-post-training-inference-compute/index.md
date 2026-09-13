@@ -170,6 +170,9 @@ For a useful report, give the task count, success definition, budget, uncertaint
 
 For regression tracking, retain exact prompts, answer checks, and policy settings where publication permits. A changed verifier or token budget can alter results even when the checkpoint is unchanged. Versioning those components makes later comparisons reproducible.
 
+![Deep dive: 14. Estimate uncertainty rather than reporting one score](./deep-dive-component-02.png)
+
+
 ## 15. Distinguish adaptation and imitation objectives
 
 Supervised post-training can use original labels or teacher-produced targets, but those target populations carry different information. [Probability distillation](/blog/distillation-temperature-teacher-student/) derives the temperature-scaled KL objective, while [feature and sequence distillation](/blog/distillation-features-data-deployment/) explains alignment and target-selection bias.

@@ -69,6 +69,8 @@ Here $$f_t$$ is the forget gate, $$i_t$$ the input gate, $$\widetilde c_t$$ prop
 
 This is the mechanism improved over a simple recurrent hidden-state update. It does not guarantee that optimization learns the right gate values, nor that the compressed state retains every detail. Independent sequences, batched matrix products, and work inside each transition still exploit GPU parallelism; the dependency is between successive states of the same ordinary recurrence. Evaluate state size, quality, and streaming latency alongside training throughput. Truncated backpropagation reduces the number of direct gradient transitions, trading training cost against long-range optimization signals even when hidden state continues across segments.
 
+![Deep dive: Going deeper: what the LSTM's gates actually do](./deep-dive-component-01.png)
+
 
 ## Common misconceptions
 
@@ -113,6 +115,9 @@ For a scalar illustrative recurrence with input 1, recurrent weight 0.5, input w
 During training, gradients connecting distant positions contain products of local derivatives. Repeated small factors can shrink a signal; larger factors can amplify it. LSTM introduces an additive cell-state path controlled by gates, which can preserve gradients more effectively. It improves a mechanism rather than guaranteeing perfect memory for any sequence length.
 
 Recurrent models did not disappear. They remain useful for streaming workloads and appear in newer state-space and hybrid designs. The relevant comparison is which dependencies and state representations fit a task and hardware budget, rather than declaring 1 architecture permanently dead.
+
+![Deep dive: Write the recurrence and see the dependency](./deep-dive-component-02.png)
+
 
 ## Match state to the streaming task
 

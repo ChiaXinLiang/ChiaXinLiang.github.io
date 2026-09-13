@@ -64,6 +64,9 @@ Read that pair of numbers again, because it is the entire economics of LLM infer
 
 So why not batch 64? Or 512? Because the lunch stops being free.
 
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
+
+
 ## Concurrency is not the same unit as token rate
 
 For a stable service, Little's law relates time-average requests in the system $$L$$, completed request rate $$\lambda$$, and mean request residence time $$\mathbb E[T]$$:
@@ -95,6 +98,9 @@ Second, real traffic is ragged. Requests arrive at random times with different p
 Even with continuous batching, though, the fundamental dial remains. Admit more concurrent requests and aggregate throughput climbs while each user's TTFT and TPOT drift upward; admit fewer and users get crisp responses from a mostly idle, mostly wasted GPU. Every serving team picks a point on that curve, usually stated as a service-level objective like "p95 TTFT under 500 ms and p95 TPOT under 40 ms," then tunes the scheduler to squeeze maximum throughput inside those limits.
 
 You can see providers' chosen points from the outside. Interactive chat endpoints sit on the low-batch, latency-protected end. Batch APIs — the ones offering roughly half price for results within 24 hours — are the same hardware run at the throughput end of the curve, soaking up off-peak capacity where per-request wait is irrelevant. The discount isn't generosity. It's the curve, priced.
+
+![Deep dive: Going deeper: where the free lunch ends](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

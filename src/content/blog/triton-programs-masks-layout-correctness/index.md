@@ -76,6 +76,9 @@ Zero is harmless for this masked elementwise addition because invalid results ar
 
 A masked sum and a masked mean illustrate why replacement values and statistics must be considered together. If a tile has 235 valid values equal to 1 and 21 masked values replaced by zero, its sum is 235. Dividing by the physical tile size 256 produces about 0.918, while the mean of the valid population is 1. The denominator must describe the intended valid count. A maximum similarly needs a replacement that cannot dominate valid values. This reasoning becomes part of the normalization contract, even though the same zero replacement was harmless in the elementwise addition example.
 
+![Deep dive: 3. Apply the mask to loads and stores](./deep-dive-component-02.png)
+
+
 ## 4. Separate logical shape from physical strides
 
 The contiguous example addresses element i by pointer plus i. A strided vector instead requires pointer plus i times its element stride. A matrix requires row and column strides, which can differ from its logical dimensions.

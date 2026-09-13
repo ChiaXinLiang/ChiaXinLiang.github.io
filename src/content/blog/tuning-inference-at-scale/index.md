@@ -79,6 +79,8 @@ The product is an identity when each ratio is measured sequentially on the alrea
 
 The improvement method is a controlled sequence of bottleneck changes. Replay equivalent requests after each change and record accepted throughput, tail latency, quality, and memory high-water marks. A setting that improves raw output but breaches latency is excluded from this denominator. Run interaction experiments when 2 changes target the same work, particularly prefix caching and chunked prefill. At low arrival rates, a faster server may mostly gain idle time rather than additional sold tokens; realized savings require consolidation, fewer replicas, or a lower ownership cost. These examples are scenario arithmetic, not promised benchmark gains or rental quotes.
 
+![Deep dive: A worked example: the stack, multiplied out](./deep-dive-component-01.png)
+
 
 ## Going deeper: why they multiply, and when they don't
 
@@ -91,6 +93,9 @@ First, some pairs are super-multiplicative. FP8 halves both the weight footprint
 Second, some pairs overlap. Chunked prefill and prefix caching both attack the prefill side. If 80% of prompt tokens are cache hits, there is far less prefill left for chunking to smooth, and the chunking gain measured on cold traffic won't reappear on warm traffic. Same for prompt compression: shorter prompts shrink the very prefill work the other 2 levers optimize. The rule that follows is operational, not theoretical: benchmark the stack jointly, on traffic replayed from production, because the product of individually measured speedups is only an estimate of the jointly measured 1.
 
 There is also a genuine cost inside chunked prefill worth naming. Each chunk's attention must read the KV cache of all previous chunks from HBM again, so total prefill FLOPs and bytes go *up* slightly as chunks shrink. Sarathi-Serve picks the token budget to balance this against TPOT: too large and decode stalls return, too small and prefill overhead grows. Engines expose this as a tunable (vLLM's `max_num_batched_tokens`), and it is one of the few single parameters that visibly moves both your p99 TPOT and your $/Mtok.
+
+![Deep dive: Going deeper: why they multiply, and when they don't](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

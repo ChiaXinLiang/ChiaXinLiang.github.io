@@ -115,6 +115,9 @@ For a gathered unit containing U logical parameters in b-byte transport represen
 
 Inspect tensor dtypes and communication traces after initialization. Some precision conversions introduce temporary buffers, and those buffers can matter at a memory peak. Evaluate training stability and held-out behavior when changing precision, rather than treating smaller transport objects as a purely mechanical performance improvement.
 
+![Deep dive: 7. Mixed precision changes both storage and transport](./deep-dive-component-02.png)
+
+
 ## 8. Checkpointing must preserve logical ownership
 
 Saving a training job needs more than dumping whatever tensor objects happen to be visible on rank 0. The checkpoint should represent model and optimizer state in a form that can be reconstructed with the intended distributed layout. Gathering a complete state dictionary on one GPU can reintroduce the capacity problem sharding was designed to solve.

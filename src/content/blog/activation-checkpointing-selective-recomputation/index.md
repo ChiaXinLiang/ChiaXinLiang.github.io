@@ -82,6 +82,9 @@ Selective activation checkpointing can preserve expensive intermediate results w
 
 Measure actual avoided live bytes and actual replayed kernels. A theoretical list of tensor sizes is insufficient when the allocator reuses storage or a fused kernel changes the saved state. The goal is to reduce the largest concurrent allocation while introducing the least harmful additional work.
 
+![Deep dive: 4. Select operations by saved bytes and replay cost](./deep-dive-component-02.png)
+
+
 ## 5. Randomness must be part of the replay contract
 
 A checkpointed region containing dropout uses random numbers during forward. Recomputing with unrelated random values changes the function whose gradient is being evaluated. Framework checkpointing mechanisms commonly preserve and restore random-number state to match the original forward behavior within their supported device scope.

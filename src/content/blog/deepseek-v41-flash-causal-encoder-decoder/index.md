@@ -160,6 +160,9 @@ Define whether the scheduler reserves maximum continuation space, uses increment
 
 A workload review should connect architectural byte estimates to the actual scheduler: what state is retained, when it is evicted, and what work is needed to resume. That connection makes a memory-efficiency claim relevant to concurrency rather than leaving it as an isolated per-token ratio.
 
+![Deep dive: 14. Separate a capacity claim from an admission policy](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Official DeepSeek-V4.1-Flash model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash).

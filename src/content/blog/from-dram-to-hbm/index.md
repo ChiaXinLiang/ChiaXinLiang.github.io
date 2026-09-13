@@ -77,6 +77,8 @@ For 1 1,024-bit interface at 9.6 billion transfers per second, the result is 1.2
 
 The method behind HBM is making many short parallel connections manufacturable through stacking and dense package wiring. Relative to adding board-level DDR channels, it trades socket routing pressure for package complexity, stack yield, and thermal constraints. Attainable bandwidth is $$\beta_{\mathrm{effective}}=u\beta_{\mathrm{peak}}$$, where $$u$$ is workload-dependent service efficiency. Random bank-conflicting accesses or insufficient outstanding requests can lower it. Measure transferred useful bytes and elapsed time, not just pin count. Stacking increases aggregate byte throughput; it does not remove row activation, sensing, or refresh work inside DRAM.
 
+![Deep dive: The worked example: run the numbers yourself](./deep-dive-component-01.png)
+
 
 ## Going 3D: TSVs and the interposer
 
@@ -101,6 +103,9 @@ The per-pin speeds are modest *by design*. Early HBM ran 1 Gb/s per pin when DDR
 Stacking also concentrates the technology's oldest enemy: heat. DRAM retention worsens as temperature rises — above 85 °C the standard refresh interval halves — and an HBM stack sits millimetres from a die dissipating upward of a kilowatt. This is 1 reason the memory sits *beside* the processor rather than on top of it, and why cooling design and refresh management are quietly part of every HBM deployment.
 
 The width lever keeps moving. HBM4 doubles the interface to **2,048 wires per stack**; SK hynix announced completed development in 2025 with mass production readiness, claiming over 40% better power efficiency than its predecessor (a vendor figure, not yet independently verified). Doubled width at similar pin speeds is how next-generation GPUs are slated to jump from 8 toward 20+ TB/s.
+
+![Deep dive: Going deeper: what the 1,024 wires actually are](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

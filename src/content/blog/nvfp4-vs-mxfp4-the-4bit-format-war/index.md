@@ -79,6 +79,9 @@ Value by value the comparison is messy — MXFP4 actually wins on 5 of the 8, be
 
 That is the entire numerical case for NVFP4, compressed into 1 block: finer outlier containment from block-16, and a scale that fits the data instead of rounding to the nearest power of 2.
 
+![Deep dive: A worked example you can follow with a pencil](./deep-dive-component-01.png)
+
+
 ## Count scale bytes before counting bandwidth savings
 
 With 4 payload bits and 1 8-bit scale per group of $$g$$ values, the effective storage is
@@ -106,6 +109,9 @@ If power-of-2 scales lose accuracy, why did an industry consortium standardize t
 Meanwhile, making 4-bit work for **training**, not just inference, took a recipe built around NVFP4's specific weaknesses. The NVFP4 pretraining paper (a 12B-parameter hybrid Mamba-Transformer trained on 10 trillion tokens, tracking the FP8 loss curve) leans on Hadamard transforms to spread outliers into a more Gaussian shape before quantization, 2D block scaling so weights quantize consistently in both the forward and backward pass, and stochastic rounding so gradient noise stays unbiased. Each trick compensates for a failure mode the worked example above makes visible: outliers, scale mismatch between passes, and systematic rounding bias. If you want the refresher on why unbiased gradients matter in the first place, [How Models Learn](/blog/how-models-learn/) covers the machinery this recipe is protecting.
 
 And the deployment scoreboard? OpenAI shipped gpt-oss with its MoE weights, roughly 90% of all parameters, natively in **MXFP4**, which is what lets the 117B-parameter gpt-oss-120b fit on a single 80GB GPU. Crucially, the models were trained with quantization in the loop, so the format's numerical handicap was absorbed during training rather than bolted on afterward. AMD backs the OCP MX formats in its MI355X generation. Blackwell's tensor cores accelerate both formats; Hopper accelerates neither, so gpt-oss runs there through a Triton software path. AWS went a third way entirely, putting a W4A8 weight-decompression path directly into Trainium3 hardware. Everyone agrees on 4-bit weights; nobody agrees on the wrapper.
+
+![Deep dive: Going deeper: why E8M0 exists at all](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

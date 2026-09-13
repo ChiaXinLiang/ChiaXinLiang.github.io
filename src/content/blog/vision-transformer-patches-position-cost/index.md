@@ -182,6 +182,9 @@ Fine structures provide useful diagnostic cases: small objects, thin boundaries,
 
 This connects architecture to the information budget. Patch size determines the initial spatial interface, token processing changes how features communicate, and the head determines what must be reconstructed. Efficiency choices should preserve the information required by that complete task path while reducing a measured execution cost.
 
+![Deep dive: 16. Preserve task-specific spatial information](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [An Image is Worth 16x16 Words](https://arxiv.org/abs/2010.11929).

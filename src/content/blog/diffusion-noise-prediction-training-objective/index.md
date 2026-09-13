@@ -204,6 +204,9 @@ For a diagnostic, differentiate a simple one-dimensional Gaussian log density an
 
 The score interpretation does not make every integration rule safe or accurate. The solver must use the correct drift, noise scale, and time convention. These interfaces connect the statistical training objective to the numerical sampling method discussed next.
 
+![Deep dive: 16. Relate noise prediction to the score](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239).

@@ -79,6 +79,8 @@ Assume the location is valid, the access width is 64 bits, and no other agent mo
 
 The method is to describe architectural effects independently of the internal schedule. Register renaming, forwarding, and speculative execution may change when operations run, but a correct implementation preserves the specified visible result. The concurrency assumption matters: ordinary separate load and store instructions do not make an increment atomic. If 2 threads both load 7 before either stores, both may store 12 and lose an intended increment. An ISA's atomic operation or a correctly implemented synchronization protocol is needed for that different contract. Memory ordering and atomicity are related but distinct; a barrier can constrain ordering without converting this entire sequence into an indivisible update. Architectural reasoning starts by stating which shared-memory guarantee the program requires.
 
+![Deep dive: A worked load-add-store example](./deep-dive-component-01.png)
+
 
 ## Why width and signedness matter
 
@@ -117,6 +119,9 @@ A plain load-add-store sequence is not an atomic increment. 2 threads can both l
 Memory ordering and atomicity are related but distinct. An operation can be atomic while offering weak ordering for unrelated accesses. Acquire/release semantics describe synchronization relationships, and barriers can constrain ordering under specific rules. Learn the language-level atomic model together with the architecture's implementation.
 
 This subject becomes especially important when a CPU communicates with an accelerator or memory-mapped device. Normal cached memory and device memory may have different access rules. A convenient integer pointer is not a substitute for the platform's required device-access API.
+
+![Deep dive: Going deeper: memory ordering](./deep-dive-component-02.png)
+
 
 ## Privilege and the system boundary
 

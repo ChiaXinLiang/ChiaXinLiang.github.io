@@ -107,6 +107,9 @@ For a small ownership example, launch 8 thread positions for 20 elements. The th
 
 Choose enough work to occupy the device while avoiding unsupported launch dimensions. Measure candidate grids on representative sizes. A small input and a huge input expose different overhead and scheduling behavior.
 
+![Deep dive: 4. Extend ownership with a grid-stride loop](./deep-dive-component-02.png)
+
+
 ## 5. Connect contiguous ownership to memory access
 
 Adjacent threads reading adjacent elements can support efficient memory transactions under the hardware's access rules. The vector mapping therefore makes a useful baseline for examining memory throughput. Alignment and representation still matter.

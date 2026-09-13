@@ -105,6 +105,9 @@ A 30 GiB pool cannot support that full combination without releasing other state
 
 Not every server reserves each request's maximum future output immediately. Some allocate incrementally and rely on scheduler policies such as preemption. That can improve utilization but changes the meaning of “admitted safely.” Document whether the service guarantees completion or may later pause, recompute, or reject work under pressure.
 
+![Deep dive: A mixed-length worked example](./deep-dive-component-01.png)
+
+
 ## Going deeper: physical allocation
 
 Paged cache systems divide state into blocks and map logical token positions to physical storage. For block size $$q$$ and independent histories,
@@ -146,6 +149,8 @@ $$
 Here $$B$$ is the number of requests. The strict upper bound follows because each nonempty request wastes fewer than 1 complete block through rounding. With $$k=327680$$ bytes, $$q=16$$, and a 17-token request, allocation is 32 token slots, or 10,485,760 bytes. Useful state is 5,570,560 bytes, leaving 4,915,200 bytes of rounded capacity. A 16-token request has no rounding waste.
 
 Paging improves a full-window-reservation baseline by allocating only blocks currently needed, while this small-request example shows that percentage waste can still be large for an individual short sequence. Paper-level average waste figures describe a workload, not every request. Prefix sharing changes physical ownership and requires reference tracking; allocation is then not simply the sum over independently stored requests. Check actual block counts, growth during generation, and eviction under load. Cache compression or quantization changes $$k$$ and can add metadata, so substitute the engine's layout rather than reusing an uncompressed formula. Capacity savings matter only if the resulting execution preserves the required model quality and latency.
+
+![Deep dive: Prefix sharing as a controlled example](./deep-dive-component-02.png)
 
 
 ## Long context turns capacity into traffic

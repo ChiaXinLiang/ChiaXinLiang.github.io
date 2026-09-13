@@ -82,6 +82,8 @@ Assume no shared prefixes and a uniform uncompressed cache layout. For $$k=32768
 
 This improves the baseline policy by anticipating cache growth before admission instead of discarding completed prefill after exhausting capacity. The reservation can be intentionally conservative; smaller allowances improve occupancy but require explicit queuing or preemption policy when requests exceed them. Shared prefixes can reduce physical allocations, but must be counted through actual ownership and reference tracking. The 24-request arithmetic bound and a stipulated 30-user collapse are not an exact match: variable lengths and scheduler behavior can explain a range, but require measurements. Treat this case as an illustrative reconstruction. Recomputed values should preserve model semantics within expected numerical tolerance; bit-identical results are not guaranteed across kernel schedules.
 
+![Deep dive: The worked example: finding the cliff by hand](./deep-dive-component-01.png)
+
 
 ## Going deeper: why a cliff and not a slope
 
@@ -92,6 +94,9 @@ Trace 1 cycle of the loop. The pool is full and a running sequence gets preempte
 This is also why p99 diverges while p50 barely moves. Preemption victims are not chosen uniformly; the scheduler evicts from the back of its priority order, so the same unlucky requests get recomputed repeatedly while fresh short requests sail through. A request preempted 3 times pays 4 prefills. Your p99 *is* that request. Median-only dashboards hide the entire incident, the same trap covered in [Tokens per Second: What It Hides](/blog/tokens-per-second-what-it-hides/).
 
 The observability fix is knowing which counters tell the truth. `nvidia-smi` memory usage is useless here (it reads ~78 GB at every load level, because the pool is pre-allocated). The counters that matter in vLLM: `vllm:num_preemptions_total` (any sustained nonzero rate is this incident), `vllm:gpu_cache_usage_perc` (pinned at ~100% during the cliff), and the scheduler's running-vs-waiting queue depths. The engine even logs a warning the first time it preempts, citing reduced performance. In my experience that log line is the single highest-value grep in LLM serving.
+
+![Deep dive: Going deeper: why a cliff and not a slope](./deep-dive-component-02.png)
+
 
 ## The fixes, in the order I'd try them
 

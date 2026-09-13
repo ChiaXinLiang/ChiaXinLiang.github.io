@@ -81,6 +81,8 @@ With the example's assumed $$L=4$$ and $$r=2$$, 8 accumulators can cover the ari
 
 The improvement over a single vector accumulator is software-created instruction-level parallelism. Its cost is additional live registers and a final reduction. Excessive unrolling can spill registers or enlarge instruction footprint, and reassociation changes floating-point rounding. LLVM documents that some targets can generate ordered reductions preserving the original order; it is therefore too broad to say every floating-point reduction requires fast-math. Inspect the actual vectorization report and numerical requirements, then measure both cache-resident and streaming inputs. A dependency-bound speedup is not a prediction for DRAM-bound arrays.
 
+![Deep dive: Going deeper: feeding 2 pipes with 8 chains](./deep-dive-component-01.png)
+
 
 ## Auto-vectorization and where it gives up
 
@@ -94,6 +96,9 @@ You rarely write `vaddps` by hand. Modern compilers auto-vectorize loops at `-O2
 2 more real-world cautions. Early AVX-512 chips (Skylake-SP, 2017) dropped their clock frequency under sustained 512-bit work, occasionally making vectorized code slower in mixed workloads; later generations largely fixed this, but it left a lasting folk memory. And the caveat pinned earlier: stream a 1 GB array from DRAM instead of 4 KB from L1 and a single core becomes memory-bandwidth-bound, at which point the sum runs at the speed of DRAM and the register width barely matters. Wide arithmetic only pays when the data can arrive fast enough, which is why [memory bandwidth, not FLOPs, is the number that decides modern accelerator designs](/blog/blackwell-to-rubin-memory-math/).
 
 The pragmatic workflow: ask the compiler for its vectorization report (`-Rpass=loop-vectorize` in Clang, `-fopt-info-vec` in GCC), read what it refused and why, then either fix the loop or drop to intrinsics, the C functions in Intel's Intrinsics Guide that map 1-to-1 onto vector instructions. And always measure.
+
+![Deep dive: Auto-vectorization and where it gives up](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

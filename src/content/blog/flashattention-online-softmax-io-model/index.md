@@ -94,6 +94,9 @@ Floating-point reduction order changes with tiling. Test outputs using suitable 
 
 If dropout is part of training attention, recomputation must preserve the appropriate random decisions. Grouped-query attention also requires the correct mapping from query heads to shared key and value heads. These are semantic requirements around the kernel, not optional details that disappear because the central online-softmax equation is correct.
 
+![Deep dive: 5. Keep masks, precision, and empty rows in the correctness contract](./deep-dive-component-02.png)
+
+
 ## 6. Distinguish prefill from decode before predicting speed
 
 Prefill processes many query positions at once. It can expose large matrix products and substantial score-matrix traffic. Decode often processes one new query position per sequence against an existing key-value cache. Its arithmetic shape and opportunities for reuse are different, even when the underlying attention equation is unchanged.

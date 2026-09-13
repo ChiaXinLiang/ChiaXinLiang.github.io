@@ -85,6 +85,8 @@ With $$h=4$$ and $$p=200$$, reducing $$m$$ from 0.05 to 0.01 changes the modeled
 
 The method that improves locality is to change the reuse distance: how much distinct data is accessed before revisiting a line. Blocking a matrix traversal keeps a smaller tile active, so useful lines survive until reuse instead of being displaced by an entire matrix sweep. Check tile footprint against the relevant cache, including all inputs and outputs. Larger tiles improve reuse only until capacity or associativity pressure introduces new misses. Prefetching addresses predictable latency, while tiling reduces traffic; they solve related but different constraints.
 
+![Deep dive: The arithmetic of a hit rate](./deep-dive-component-01.png)
+
 
 ## A worked example you can feel: traversal order
 
@@ -131,6 +133,9 @@ Each streaming multiprocessor on an NVIDIA GPU has a chunk of on-chip SRAM, up t
 FlashAttention is the most famous recent example of this as an algorithmic idea. Standard [attention](/blog/attention-in-plain-words/) materializes an N × N score matrix in HBM, and for long sequences the reads and writes of that matrix, not the arithmetic, dominate runtime. Dao and colleagues restructured the computation to process attention in tiles that live entirely in on-chip SRAM, never writing the full matrix to HBM, and reported 2–4x wall-clock speedups (vendor-independent, but self-reported in the paper) with exact, not approximate, results. No new math, in the numerical sense. Pure locality engineering.
 
 This is also why memory bandwidth, not FLOPS, headlines modern accelerator spec sheets; the [Blackwell-to-Rubin memory math article](/blog/blackwell-to-rubin-memory-math/) works through those numbers, and [goodput versus utilization](/blog/goodput-vs-utilization/) shows what happens at the cluster level when data isn't where the compute needs it. The 100x gap never went away. From the L1 in your laptop to the SRAM tiles inside an H100 kernel, the entire stack is 1 long answer to the same question: how do we keep the fast thing from waiting on the slow thing? Locality is the answer, every time.
+
+![Deep dive: Why this decides how fast your LLM runs](./deep-dive-component-02.png)
+
 
 ## Takeaway
 

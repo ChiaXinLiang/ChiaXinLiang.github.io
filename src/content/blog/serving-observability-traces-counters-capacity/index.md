@@ -57,6 +57,9 @@ Distinguish averaging per-response gaps from pooling every observed token gap. P
 
 Track successful termination, client cancellation, timeout, and engine failure as separate outcomes. A cancelled request's generated tokens can consume compute without becoming useful client output. Completion throughput and engine-generated token throughput answer different questions and both belong in a production investigation.
 
+![Deep dive: 2. Measure token delivery without hiding gaps](./deep-dive-component-02.png)
+
+
 ## 3. Connect request traces to shared engine work
 
 Continuous batching breaks the simple assumption that one request owns one GPU launch. A single attention kernel can process tokens from many requests, and one request can move through multiple changing batch compositions. Tracing every launch as a child of a single request would misrepresent this shared execution.

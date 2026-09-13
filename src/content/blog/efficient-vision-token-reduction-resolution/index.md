@@ -178,6 +178,9 @@ Measure several representative batch sizes under the deployment backend. Record 
 
 If a method changes only token identities while keeping counts fixed, shape predictability can help execution even though the representation remains content dependent. That distinction is useful when interpreting dynamic methods. It also explains why a fixed-count schedule can be an engineering advantage without claiming that every image needs exactly the same information budget.
 
+![Deep dive: 16. Check whether savings persist across batches](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Token Merging: Your ViT But Faster](https://arxiv.org/abs/2210.09461).

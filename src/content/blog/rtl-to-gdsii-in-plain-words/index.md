@@ -51,6 +51,9 @@ Nothing here says *how* to multiply. There is no adder topology, no gate, no wir
 
 **Timing closure** is the loop that eats the schedule, and it deserves its own numbers.
 
+![Deep dive: Stage by stage](./deep-dive-component-01.png)
+
+
 ## A worked example: closing 1 path at 500 MHz
 
 Take a target clock of 500 MHz. That gives every register-to-register path a budget of 2,000 picoseconds, and the arithmetic is simple enough to do on paper.
@@ -85,6 +88,8 @@ $$
 All terms must use compatible units and the intended analysis corner. The earlier routed example assumes 0 skew and uncertainty. With $$T=2000$$ ps, $$\Delta=30$$ ps, and $$u=50$$ ps, its 2060 ps path has $$S=-80$$ ps rather than minus 60 ps. The frequency-only estimate is correspondingly optimistic unless those additional constraints are included.
 
 Physical closure innovates over a purely logical synthesis result by incorporating placement, parasitics, clock arrival, and variation into the optimization loop. After changing a driver or route, re-extract and re-analyze; a faster cell can present more capacitance to its predecessor. Pipelining can divide a long combinational path across cycles, but changes latency and may require corresponding control and state changes. A local setup improvement is therefore accepted only after checking functional equivalence, hold constraints, power, and neighboring paths. A negative setup slack means the timing requirement is not guaranteed at that corner, not that every manufactured chip necessarily fails every computation at the target frequency.
+
+![Deep dive: A worked example: closing 1 path at 500 MHz](./deep-dive-component-02.png)
 
 
 ## Going deeper: why closure is a loop, not a step

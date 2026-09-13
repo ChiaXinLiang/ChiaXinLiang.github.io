@@ -105,6 +105,8 @@ The signed value is encoded in a 64-bit register by sign extension. For `0xfffff
 
 This illustrates the small-base method: make data width and extension behavior explicit, then build the algorithm from those guarantees. It improves predictability over assuming every load has the same numeric interpretation. Extensions can introduce vectorized versions that process multiple elements, but a correct vector rewrite still needs matching element signedness, accumulator width, remainder handling, and overflow semantics. A compiler and ABI determine how the source program maps onto those features. An open ISA makes these rules inspectable; it does not make a vendor core's throughput or power consumption follow from this algebra. Keep correctness proofs and benchmark claims separate when evaluating an extension.
 
+![Deep dive: Trace the result and test signedness](./deep-dive-component-01.png)
+
 
 ## Instruction size and compressed forms
 
@@ -125,6 +127,9 @@ Those capabilities are architectural contracts, not performance promises. 2 proc
 Extension names and versions matter. Do not treat a short string copied from a product page as a complete compatibility specification without checking the architecture documentation and software target. Some features depend on others, and standardized profiles help describe coherent sets of requirements.
 
 A custom instruction can provide specialized functionality, but a binary using it requires the matching implementation or software support. Customization does not eliminate the need for a stable compiler, assembler, debugger, and library path.
+
+![Deep dive: Extensions provide capabilities beyond the base](./deep-dive-component-02.png)
+
 
 ## Going deeper: ISA, ABI, and profile
 

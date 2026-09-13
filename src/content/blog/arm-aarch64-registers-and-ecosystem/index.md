@@ -117,6 +117,8 @@ Assume valid readable memory for all elements, no concurrent modifications, and 
 
 The method is to verify initialization, preservation across the load/add/pointer/count sequence, and termination at 0. Post-indexed addressing can combine memory access and pointer update in another encoding, reducing architectural instruction count, but that does not establish a cycle saving on every implementation. The core may decompose that instruction into internal operations, and the accumulated sum retains a true dependency. This separates an ISA-level correctness improvement in expression from a microarchitecture-dependent performance claim. Benchmark both versions with equal alignment, memory residency, and calling convention before choosing 1.
 
+![Deep dive: Trace 3 elements by hand](./deep-dive-component-01.png)
+
 
 ## Count instructions without confusing count and speed
 
@@ -137,6 +139,9 @@ Our function can overwrite `x0` through `x3` because those roles do not require 
 The stack must satisfy the required alignment rules when used. A function calling another function generally needs to protect its own return path because a new call updates the link register. Leaf functions can often be simpler, but optimization and platform requirements influence generated frames.
 
 Operating systems can impose additional conventions, and the platform register role of `x18` deserves attention in portable handwritten assembly. Avoid treating every general-purpose register as universally free merely because arithmetic instructions accept it.
+
+![Deep dive: Going deeper: the calling convention](./deep-dive-component-02.png)
+
 
 ## SIMD and scalable features are additional capabilities
 

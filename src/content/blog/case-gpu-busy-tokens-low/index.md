@@ -42,6 +42,9 @@ For 13 billion parameters stored in BF16, the raw weights occupy approximately 2
 
 A measured 25-millisecond iteration gives 320 aggregate tokens per second and 40 tokens per second per sequence. That is plausible relative to the simplified memory bound. It is evidence against the idea that low tensor-core utilization alone reveals a broken server. The remaining 3.3 milliseconds may include attention traffic, launch overhead, synchronization, and inefficient matrix shapes; a trace must determine their contributions.
 
+![Deep dive: Build a lower-bound model for one step](./deep-dive-component-01.png)
+
+
 ## Arithmetic intensity explains why FLOPS can mislead
 
 A linear layer with a B-row input approximately performs 2BP floating-point operations across the dense parameter stream. Dividing by P s_w bytes gives a weight-only arithmetic intensity of roughly 2B/s_w. For BF16, that simplifies to B FLOPs per byte. Batch 8 gives about 8 FLOPs per byte, before counting activations and the KV cache.
@@ -95,6 +98,9 @@ Do not apply all remedies simultaneously. Keep a before/after record for one cha
 A useful production experiment also holds the arrival pattern constant. If 1 configuration receives a fixed stream of requests and another uses a client that waits for each completion before sending the next request, their batch sizes will evolve differently. The second server may appear to have lower latency because the driver offers less work when responses slow down. Record offered requests, admitted requests, active sequences, and output tokens over the same interval. That makes a throughput improvement interpretable as a resource improvement instead of an accidental change in load.
 
 For example, suppose the baseline completes 3 hundred requests within the target during a measurement interval and a larger batch completes 3 hundred and 50, but only 2 hundred and 80 satisfy the token-latency target. Raw completion throughput improved while goodput fell. The larger batch should not be accepted for an interactive pool on those observations alone. It may still be useful for an offline pool with a different latency contract. State that contract before deciding whether the extra aggregate tokens are useful.
+
+![Deep dive: Choose the fix that matches the evidence](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

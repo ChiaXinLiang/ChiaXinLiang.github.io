@@ -125,6 +125,9 @@ During investigation, change one layer at a time. Comparing host buffers with GP
 
 A useful repeated-transfer test writes a sequence number and a deterministic payload pattern, waits through the supported completion and consumer path, and verifies both before reusing the region. Alternating buffers can distinguish reuse timing from basic addressing mistakes. Introduce enough repetitions and concurrency to exercise outstanding operations rather than only an empty queue. Record the first failing sequence, operation order, and ownership transitions. This evidence is more diagnostic than a final checksum alone, because it identifies which logical transfer the consumer believed was ready when corruption appeared.
 
+![Deep dive: 8. Verify the path through a layered test sequence](./deep-dive-component-02.png)
+
+
 ## 9. Connect guarantees to a reproducible application contract
 
 Document the memory type, registration lifetime, selected operation, transport service, completion scope, notification mechanism, and consumer synchronization. This record is as important as the adapter rate because it defines what makes the delivered data safe to use.

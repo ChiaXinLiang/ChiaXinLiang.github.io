@@ -57,6 +57,9 @@ Take a 7B-parameter model in 16-bit precision on a single NVIDIA A100. 3 publish
 
 Same model, same GPU, same request. 1 phase saturates the multipliers; the other saturates the memory bus. Hold onto the 7 ms number — it is also why serving systems batch many users' decode steps together, sharing 1 14 GB weight read across dozens of requests.
 
+![Deep dive: A worked example you can do by hand](./deep-dive-component-01.png)
+
+
 ## From scores to words: sampling and temperature
 
 Each pass ends with 1 raw score per vocabulary entry, called **logits**. A softmax turns them into probabilities: exponentiate every logit, then divide by the sum so they total 1. Then the system must pick one token. Always taking the highest-probability token is **greedy decoding**; it's deterministic but often flat and repetitive, so most systems **sample**, drawing randomly according to the probabilities.
@@ -90,6 +93,9 @@ There's a problem hiding in the loop as described. At step 500, the input is the
 The fix rests on a property of the Transformer: the attention **key** and **value** vectors computed for a token depend only on that token and its predecessors. Once computed, they never change. So the system saves them. During prefill, the keys and values for every prompt token are computed and stored in GPU memory; each decode step computes the query, key, and value for just the 1 new token, attends against the stored keys and values, and appends its own pair to the store. This store is the **KV cache**: generation's memory of work already done.
 
 It isn't free. For a Llama-2-7B-shaped model (32 layers, hidden size 4,096, 16-bit values), each token's keys and values occupy 2 × 32 × 4,096 × 2 bytes = **512 KB**. A 4,000-token conversation holds about 2 GB of cache per request, alongside the 14 GB of weights, and the decode pass must read the cache too, so long contexts slow decoding down. Managing this memory well is its own engineering discipline — the vLLM project's PagedAttention showed that simply allocating cache in small pages instead of 1 contiguous slab can multiply serving throughput. The cache deserves (and will get) its own article.
+
+![Deep dive: Going deeper: the KV cache, or the work you never redo](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

@@ -89,6 +89,9 @@ The formula assumes block statistics are computed over the allowed keys with the
 
 This normalization story is an excellent correctness test. Compare a small partitioned attention example against a full reference with the same mask and representation. Include causal boundaries, unequal sequence lengths, and queries whose allowed key sets span several owners.
 
+![Deep dive: 5. Preserve attention normalization across blocks](./deep-dive-component-02.png)
+
+
 ## 6. Sequence parallelism targets selected replicated operations
 
 In tensor-parallel training, some operations naturally partition feature dimensions while other operations such as normalization or dropout can retain replicated activation work. Sequence parallelism can partition those token-axis operations and connect layouts with collectives such as reduce-scatter and all-gather.

@@ -43,6 +43,9 @@ The storage path includes metadata operations, local serialization or staging, s
 
 Count both logical checkpoint bytes and actual physical bytes written. Replicated tensors, duplicated metadata, format overhead, and compression can change the relationship. A filesystem reporting a large directory size and a network reporting transferred bytes may use different conventions, so compare measurements under defined units.
 
+![Deep dive: 2. Sharded state should not require an impossible gather](./deep-dive-component-02.png)
+
+
 ## 3. Derive a simple checkpoint interval
 
 Let I be useful compute time between checkpoints, C the blocking checkpoint cost, tau the mean time between job-level interruptions, and R the average recovery cost. Under a simplified independent, stationary failure model, expected waste can be approximated by

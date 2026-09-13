@@ -59,6 +59,9 @@ Second, **quantization moves the ceiling**. Compress the weights to 4-bit intege
 
 And prefill? A 2,000-token prompt needs roughly 2 × 8B × 2,000 ≈ 32 trillion operations. At half of the H100's compute rate, that's ~65 milliseconds of TTFT. This is why long prompts feel like a pause before the streaming starts, and why prefill, unlike decode, actually does use all those FLOPS.
 
+![Deep dive: A worked example you can do on a napkin](./deep-dive-component-01.png)
+
+
 ## Give the 2 rates distinct denominators
 
 Over a wall-clock interval $$\Delta t$$, aggregate delivered output rate is
@@ -86,6 +89,9 @@ The clean batch-of-32 picture above assumes 32 requests that arrive together and
 The consequence for benchmark reading is that a real server's per-user speed *degrades gradually with load*. Each newly admitted request adds its KV cache to the memory traffic of every step and occasionally steals whole steps for its prefill, so everyone's TPOT stretches. Aggregate throughput climbs toward its ceiling while individual streams slow down. There is no single tokens-per-second figure for such a system, only a curve of per-user latency versus system load, and an honest benchmark shows the curve, not 1 flattering point on it.
 
 This is also why serious evaluations report **percentiles** rather than averages. A p50 TPOT of 20 ms with a p99 of 200 ms means the median user sees smooth streaming while 1 user in 1 hundred watches the response stutter. Averages bury exactly the users who will tweet about you. The most useful summary metric to emerge from recent serving research (the DistServe paper is a good entry point) is **goodput**: the number of requests per second that *meet a stated latency target*, such as "TTFT under 200 ms and TPOT under 50 ms." Raw tokens per second counts a token that arrived after the user gave up and closed the tab. Goodput doesn't.
+
+![Deep dive: Going deeper: what a loaded server actually does](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

@@ -158,6 +158,9 @@ For a small diagnostic, calculate the ordinary token-only exponential sum and th
 
 The diagnostic also separates semantic and numerical mistakes. Omitting the sink changes the denominator systematically. Mishandling rescaling can instead create errors only when a later score block contains a much larger maximum. Both tests are valuable, and neither requires claiming that the educational reference establishes production throughput. The intended equation is the baseline; the fused implementation must demonstrate that it preserves it within the supported precision.
 
+![Deep dive: 14. Relate the sink to online softmax statistics](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Official gpt-oss PyTorch model reference](https://github.com/openai/gpt-oss/blob/main/gpt_oss/torch/model.py).

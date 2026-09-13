@@ -73,6 +73,9 @@ Align the energy interval with the output-count interval. If energy includes war
 
 Repeat measurements and inspect variation. Preserve raw timestamps and samples so another reviewer can reconstruct the integral and confirm the selected measurement window. Power sampling, thermal conditions, batch composition, and background activity can change results. An apparent improvement smaller than the measurement variation should not be presented as a reliable ranking.
 
+![Deep dive: 3. Integrate telemetry rather than averaging mismatched counters](./deep-dive-component-02.png)
+
+
 ## 4. Derive why a lower power cap can lose efficiency
 
 For approximately constant average power P and useful throughput G over a steady interval, the energy per useful token simplifies to

@@ -152,6 +152,9 @@ For a tiny example, retain the original activations and explicitly calculate the
 
 This connection explains why second-order one-shot methods can be computationally practical while still needing behavioral evidence. Their innovation lies partly in choosing a tractable local problem and solving it efficiently. The deployment review must preserve both the mathematical approximation and its measured consequences.
 
+![Deep dive: 13. Relate layer reconstruction to task loss](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Learning both Weights and Connections for Efficient Neural Networks](https://arxiv.org/abs/1506.02626).

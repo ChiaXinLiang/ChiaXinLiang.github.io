@@ -115,6 +115,9 @@ For an illustrative mean of 9.8 milliseconds from 25 observations, noise standar
 
 Do not present a MAP point estimate as if it were a complete uncertainty analysis. The posterior distribution and model assumptions matter. For regression decisions, the practical minimum effect and false-alarm policy should remain explicit regardless of whether the analysis is frequentist or Bayesian.
 
+![Deep dive: 6. Understand MAP shrinkage before using historical priors](./deep-dive-component-02.png)
+
+
 ## 7. Pair comparisons when the environment permits it
 
 For paired baseline and candidate times B_i and C_i under comparable conditions, define a log-speedup observation

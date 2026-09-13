@@ -80,6 +80,8 @@ The first term covers dense projections and MLPs; the second covers score and va
 
 The method saves computation already represented by resident KV, while suffix queries still attend to the cached prefix. A correct cache key must account for tokens and model/configuration identity; similarity of documents is insufficient. Cache hits also consume capacity and may require transfer time. Report warm-hit, cold-miss, and eviction behavior separately. This case is an illustrative reconstruction with stipulated trace and latency numbers, not a published incident measurement. Agreement with a FLOP budget supports a plausible diagnosis; it cannot prove that an unmeasured deployment has no remaining configuration problem.
 
+![Deep dive: The arithmetic: 128k tokens through a 70B model](./deep-dive-component-01.png)
+
 
 ## Going deeper: why FlashAttention didn't save us
 
@@ -98,6 +100,9 @@ The second deep point: tensor parallelism is already helping, and it has a ceili
 **Fix 3: a disaggregated prefill pool, for the architecture.** Prefill and decode want opposite machines: prefill wants maximum FLOPs, decode wants maximum memory bandwidth per concurrent stream. Running both phases on 1 pool means each interferes with the other's goal, which is the whole argument of [the prefill/decode disaggregation article](/blog/stop-serving-prefill-and-decode-together/). Systems like DistServe and Mooncake prefill on a dedicated pool, ship the KV cache to decode nodes, and scale the 2 pools independently. For this case it means cache-miss 128k prefills can fan out across a wider prefill pool without ever blocking a decode GPU, and the prefill fleet can be sized to the document tier's arrival rate rather than to peak chat traffic.
 
 **Fix 4: prefill-specialized silicon, the horizon option.** Once you accept that prefill is compute-bound and decode is bandwidth-bound, building different chips for them is the logical endpoint. NVIDIA's Rubin CPX is exactly that bet: a prefill-oriented part with high dense-compute throughput on cheaper GDDR7 memory, because prefill does not need HBM's bandwidth. That story gets its own article: [Prefill Gets Its Own Chip](/blog/prefill-gets-its-own-chip-rubin-cpx/). You cannot buy 1 today to close this ticket, but it tells you which way the industry believes this cost curve bends.
+
+![Deep dive: The fixes, ranked](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

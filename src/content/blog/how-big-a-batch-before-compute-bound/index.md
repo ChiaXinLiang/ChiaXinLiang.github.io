@@ -97,6 +97,9 @@ $$
 
 This is the origin of the opening number. It assumes ideal dense BF16 execution and weight-dominated traffic. The rounded 70B model's BF16 weights exceed 1 H100's capacity, so do not report this as a feasible 1-GPU 70B benchmark.
 
+![Deep dive: Derive the weight-only batch crossing](./deep-dive-component-01.png)
+
+
 ## A smaller model makes the timing example feasible
 
 Use a hypothetical dense 8B model with BF16 weights and ignore history for the moment. Its weight payload is 16 GB. At peak bandwidth, 1 weight read takes at least 4.78 ms.
@@ -175,6 +178,9 @@ At $$S=1{,}024$$, each request's logical cache reads are about 0.336 GB and the 
 But batch 269 at 1,024 cached tokens needs about 90.3 GB of BF16 cache payload, before weights and runtime. It does not fit 1 80 GB H100. The resource crossing exists algebraically but is outside the one-GPU capacity envelope.
 
 This is why a batch recommendation must include [the memory budget](../does-llama-70b-fit-on-one-h100/) and [the cache geometry](../how-much-kv-cache-for-128k-context/). Roofline math alone cannot identify a deployable operating point.
+
+![Deep dive: A worked long-history comparison](./deep-dive-component-02.png)
+
 
 ## Attention adds arithmetic too
 

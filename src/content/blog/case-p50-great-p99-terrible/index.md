@@ -53,6 +53,9 @@ This is the stationary time-in-system distribution for that queue, requiring lam
 
 These are valid theoretical percentiles under an exponential single-server model, not percentiles for continuous-batched inference. The benefit is methodological: reducing utilization changes the queue tail even when isolated service time remains fixed. Compare predicted direction with a load sweep, then use the actual engine's observed distribution for the decision. A measured p99 improvement should include acceptance and recovery after bursts, since rejecting the slowest arrivals can improve the accepted sample while reducing delivered service.
 
+![Deep dive: Start with utilization in the simplest queue](./deep-dive-component-01.png)
+
+
 ## Work a long-tail service-time example
 
 Now use an M/G/1 queue: Poisson arrivals remain, but service times may have a general distribution. For a first-come, first-served single server with independent service times and finite second moment, the Pollaczek–Khinchine formula gives mean waiting time:
@@ -88,6 +91,9 @@ $$
 $$
 
 If 10000 requests have a 1-percent violation rate, that standard error is about 0.001, or 0.1 percentage points. Bursty or correlated arrivals reduce the validity of the independence approximation. Use longer runs or block-based uncertainty estimates when requests share incident periods. This small equation is more honest than presenting a tail number with unexplained decimal precision.
+
+![Deep dive: Going deeper: estimate the distribution honestly](./deep-dive-component-02.png)
+
 
 ## The load generator can hide the problem
 

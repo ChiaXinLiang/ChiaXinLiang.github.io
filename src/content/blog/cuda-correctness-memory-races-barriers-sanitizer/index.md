@@ -98,6 +98,9 @@ A conditional barrier is valid only under the operation's documented control-flo
 
 A loop reusing the same shared tile can require another dependency after consumption. The first barrier establishes that filling is complete before readers begin. It does not necessarily establish that every reader has finished before a fast thread starts filling the next tile. The algorithm therefore needs a supported consume-to-reuse boundary as well as a fill-to-consume boundary. A single successful iteration never exercises this transition, which is why repeated-tile tests are important. Place synchronization according to the actual readers and writers instead of inserting one barrier mechanically.
 
+![Deep dive: 5. Match block-barrier participation](./deep-dive-component-02.png)
+
+
 ## 6. Track asynchronous buffer ownership
 
 Asynchronous copies and device instructions can separate issuing work from completing it. A consumer must wait through the supported completion mechanism before reading a produced tile. A producer must not overwrite the buffer while a consumer still uses it.

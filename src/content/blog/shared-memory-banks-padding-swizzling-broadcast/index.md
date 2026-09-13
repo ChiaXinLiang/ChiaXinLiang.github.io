@@ -57,6 +57,9 @@ The conflict factor is not automatically the whole-kernel slowdown. Other instru
 
 The stride result follows from the first repeat in the bank sequence. Two lanes separated by t use the same bank when t times s is divisible by 32. The smallest positive such t is 32 divided by the greatest common divisor. That is the sequence period, so a full 32-lane access repeats each used bank the corresponding number of times. This derivation also identifies the assumptions: distinct words, the stated bank width, and the stated active population. It is more reliable than memorizing that odd strides happen to work in one example.
 
+![Deep dive: 2. Derive the stride conflict pattern](./deep-dive-component-02.png)
+
+
 ## 3. Work the unpadded matrix transpose
 
 Consider a shared FP32 tile with 32 rows and 32 columns stored row-major. The word index for row r and column c is

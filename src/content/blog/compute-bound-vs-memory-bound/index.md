@@ -72,6 +72,9 @@ Here is why this pair of toy problems matters: they are literally the 2 phases o
 
 Batching moves decode rightward. Serving B sequences turns each GEMV into a B-row skinny GEMM: the weights are read once but used B times, so intensity is roughly B FLOP/byte while weight traffic dominates. On the H100's BF16 balance you need on the order of B ≈ 300 concurrent sequences before decode's linear layers cross the ridge, which is exactly why decode throughput scales almost free with batch size until it suddenly doesn't. (KV-cache reads, which grow with context length and don't batch across sequences, drag the effective intensity back down; that story deserves its own article.)
 
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
+
+
 ## Going deeper: intensity is a property of the implementation
 
 The clean numbers above quietly assumed the *minimum* traffic: each matrix crosses the HBM boundary exactly once. Real kernels have to earn that.
@@ -90,6 +93,9 @@ $$
 For the 4096-square GEMM, minimum traffic is 100663296 bytes and work is 137438953472 FLOPs, giving intensity 1365.33. The ideal compute and memory terms are 139 and 30 microseconds. The corresponding GEMV has intensity approximately 1, making memory the tighter ideal constraint. Actual performance may sit below either roof because of insufficient parallelism, dependencies, instruction issue, or extra traffic.
 
 Measure intensity at each relevant memory boundary before choosing a method. Tiling changes reuse; fusion removes intermediate traffic; wider precision can change both bytes and the applicable compute roof. An optimization can therefore move both coordinates and ceilings. Run a matched-shape comparison and inspect delivered bandwidth and compute-pipe activity. Faster memory can directly improve a memory-limited kernel even when the newer GPU's compute-to-bandwidth ratio grows; the ratio alone is not a statement that an upgrade cannot help.
+
+![Deep dive: Going deeper: intensity is a property of the implementation](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

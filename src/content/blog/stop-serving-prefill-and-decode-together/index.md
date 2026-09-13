@@ -48,6 +48,9 @@ Use a 70B-parameter dense model in BF16 and 1 H100's resource budget as a hypoth
 
 Chunked prefill — splitting the prompt into slices and co-scheduling 1 slice per decode iteration — is the standard colocated mitigation, and it genuinely caps the worst-case gap. But look at what the knob trades. A 512-token chunk costs ≈ 2 × 70e9 × 512 ≈ 72 TFLOP ≈ 180 ms per iteration at our 400 TFLOPS effective rate: TPOT for everyone degrades ~4x for the whole duration of the prefill. Shrink the chunk to 128 tokens and the per-iteration tax drops near the 42 ms floor, but now the 8,192-token prompt needs 64 iterations interleaved with decode, and its TTFT stretches past 3 seconds. Chunked prefill does not remove the interference; it lets you choose which SLO absorbs it, smeared instead of spiked.
 
+![Deep dive: The head-of-line blocking math](./deep-dive-component-01.png)
+
+
 ## Disaggregation: separate pools, explicit handoff
 
 The disaggregated answer is blunt: run prefill and decode on **different GPUs**. A prefill pool runs prompts to their first token, then ships the KV cache to a decode pool that carries the stream to completion. Each pool gets its own right-sized configuration — the prefill pool tunes tensor parallelism for TTFT and runs near the compute roofline; the decode pool packs large batches, tunes for bandwidth, and its iteration time never sees a prompt. The p99 TPOT collapses back to the median because the mechanism that created the tail is physically gone.
@@ -78,6 +81,9 @@ $$
 These are necessary average-capacity conditions, not sufficient tail-latency guarantees. Transfer, routing imbalance, batching, and burst arrivals need headroom. At 2 requests per second with mean demands 0.4 and 1.2 GPU-seconds, 2 prefill GPUs and 4 decode GPUs have idealized utilizations 0.4 and 0.6. Splitting the same 6 GPUs evenly gives approximately 0.267 and 0.8 instead, leaving decode closer to saturation.
 
 The innovation changes which phase can interrupt another; it does not reduce every phase's intrinsic work. Sweep pool ratios using the same mixed arrival trace, include KV handoff time in first-token latency, and count duplicated weight residency in capacity. If the decode queue grows despite smooth iterations, further shrinking prefill chunks cannot fix insufficient decode capacity. Use the phase demands to select candidates, then accept only configurations that satisfy both streaming and first-token targets.
+
+![Deep dive: Going deeper: what the operator actually tunes](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

@@ -168,6 +168,9 @@ Too little regularization can encourage large updates along poorly observed dire
 
 For a tiny diagnostic, compare a fully independent activation set with one containing duplicated feature rows. Inspect reconstruction and solver stability under the supported damping policy. Then evaluate held-out activations outside the observed correlation. This separates numerical stability from generalization and makes the method's approximation visible without claiming that a local objective proves final model quality.
 
+![Deep dive: 15. Interpret damping as a changed local problem](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [GPTQ](https://arxiv.org/abs/2210.17323).

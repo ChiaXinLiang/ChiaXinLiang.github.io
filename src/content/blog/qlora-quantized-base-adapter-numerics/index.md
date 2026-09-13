@@ -174,6 +174,9 @@ Numerical agreement establishes implementation correctness within the chosen tol
 
 Maintain the packed base identity, codebook convention, group sizes, compute precision, adapter settings, and export policy together. This metadata is what turns a compact parameter file into a reproducible adaptation artifact.
 
+![Deep dive: 15. Verify the layered reconstruction contract](./deep-dive-component-02.png)
+
+
 ## 16. Separate persistent and transient allocations
 
 Persistent packed weights and adapter optimizer state remain allocated across many training steps. Temporary reconstructed tiles, attention workspace, and intermediate activations can have shorter lifetimes. Their overlap determines the peak, so adding every individual maximum can overestimate memory while ignoring overlap can underestimate it.

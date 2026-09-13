@@ -70,6 +70,9 @@ Walk the decision procedure. Both throughputs low? No, memory is at 87%. So this
 
 ![Annotated mock Nsight Compute summary showing which metrics drive the memory-bound classification](./fig-nsight-report.png)
 
+![Deep dive: Worked example: classify this kernel](./deep-dive-component-01.png)
+
+
 ## Going deeper: Little's law, and why unrolling can halve the warps you need
 
 The latency-bound bucket deserves one more level of mechanism, because the standard reflex ("raise occupancy") is only half the toolbox.
@@ -98,6 +101,9 @@ $$
 D is HBM bytes, t elapsed kernel time, F executed floating-point work, q bytes delivered by an independent load, and ell the assumed memory-return latency. The last relation is a concurrency estimate from Little's law, not a guarantee of saturation. In the RMSNorm example, 537 million bytes divided by 182 microseconds gives 2.95 trillion bytes per second. Fusion reduces the pair's traffic from 1342 to 805 MB, a theoretical reduction of 40.0% before new instruction or resource costs.
 
 At 25 GB/s per SM and 340 nanoseconds latency, approximately 8500 bytes must be outstanding. Loads delivering 128 bytes per warp need roughly 67 independent warp loads; 512-byte loads need 17. Vectorization changes the payload per issued load, while unrolling changes the number of independent loads. Check alignment, register growth, and spills after either change. If measured HBM traffic rises through spilling, the apparent latency-hiding improvement can defeat itself.
+
+![Deep dive: Going deeper: Little's law, and why unrolling can halve the warps you need](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

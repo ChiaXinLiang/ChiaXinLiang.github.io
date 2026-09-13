@@ -69,6 +69,9 @@ patch A (uniform):     patch B (vertical edge):
 
 This filter fires precisely where brightness drops from left to right — it is a *vertical-edge detector*, built from 9 numbers. Rotate the weights 90° and you detect horizontal edges. Nobody chose these values in a real CNN: [gradient descent](/blog/how-models-learn/) discovers edge detectors (and color-blob detectors, and texture detectors) in the first layers of many image-trained convolutional networks, because edges are the most reusable evidence about what's in an image. When AlexNet's authors visualized their trained first-layer filters, the grid looked like a catalog of oriented edges and color patches — learned, not designed.
 
+![Deep dive: A worked example: 9 weights detect an edge](./deep-dive-component-01.png)
+
+
 ## Going deeper: pooling, stride, and the growing field of view
 
 2 supporting mechanics complete the picture. **Pooling** (typically "max pooling") slides a small window that keeps only the strongest response in each neighborhood — shrinking the map, discarding exact positions, keeping "this feature occurred around here." That builds in a useful indifference: a digit shifted 2 pixels still classifies the same.
@@ -125,6 +128,8 @@ $$
 Initialize $$r_0=j_0=1$$. A stride-1, dilation-1, width-3 convolution gives $$r_1=3$$ and $$j_1=1$$. A width-2, stride-2 pooling operation gives $$r_2=4$$ and $$j_2=2$$. Another width-3 convolution then gives $$r_3=8$$: each output can depend on an 8-pixel-wide original region. Apply the calculation separately to height and width for square layers.
 
 This improves the magnifying-glass explanation by tracing the actual geometry through downsampling rather than assigning “objects” to an arbitrary layer number. The theoretical receptive field describes possible dependency; learned weights can make the effective influence smaller or uneven. Stride removes spatial positions and can lose fine detail, while dilation expands coverage without the same downsampling but changes sampling patterns. Choose them around the task's required resolution and test small features and boundary cases. Parameter sharing creates useful structure, but translation-invariant classifications still depend on padding, pooling, augmentation, and the final prediction head.
+
+![Deep dive: Count channels, outputs, and parameters](./deep-dive-component-02.png)
 
 
 ## Separate arithmetic cost from parameter efficiency

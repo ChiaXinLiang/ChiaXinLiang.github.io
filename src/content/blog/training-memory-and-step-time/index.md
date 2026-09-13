@@ -113,6 +113,9 @@ Inspect several iterations rather than only the first successful one. Variable-l
 
 For performance, report valid training tokens per second alongside step time. A configuration that performs less useful training work can appear faster while making less progress. Where objective or optimizer changes affect convergence, also examine training quality at a comparable token or compute budget. Hardware throughput is necessary evidence, but it is not the complete learning result.
 
+![Deep dive: 7. Measure one complete steady-state step](./deep-dive-component-02.png)
+
+
 ## 8. Use failures to refine the model
 
 An out-of-memory failure near the optimizer update suggests a different missing object than a failure during attention forward. A failure at a parameter all-gather may identify concurrent materialization rather than persistent state. These observations help locate the omitted term, but they do not prove it without allocation evidence and controlled changes.

@@ -168,6 +168,9 @@ Finally, preserve the measured backend and artifact revision. Compiler changes c
 
 A final comparison should keep the candidate's quality-resource point attached to its evidence. Store the architecture configuration, exported graph, numerical policy, workload, and measurement summary together. That package allows another engineer to test whether the same tradeoff holds after a device or compiler change. It also prevents a favorable operation count from being reused as if it were an independently measured latency result.
 
+![Deep dive: 15. Interpret measurement uncertainty at the boundary](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Roofline: An Insightful Visual Performance Model](https://doi.org/10.1145/1498765.1498785).

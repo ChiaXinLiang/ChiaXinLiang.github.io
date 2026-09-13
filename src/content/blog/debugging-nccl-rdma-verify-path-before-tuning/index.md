@@ -145,6 +145,9 @@ Consider an illustrative case where a GPU-buffer benchmark regresses after an al
 
 NCCL and RDMA debugging is most effective when communication is treated as a layered protocol with distributed participation and memory ownership. Establish agreement and readiness, verify the selected path, isolate the failing boundary, and then test the application. Tuning becomes a focused experiment once the mechanism is visible.
 
+![Deep dive: 9. Verify the repair and preserve the reproducer](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [NCCL official troubleshooting guide](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/troubleshooting.html).

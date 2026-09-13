@@ -176,6 +176,9 @@ The exporter must preserve the selected modules, factor orientation, scale, and 
 
 For deployment, compare merged and separate outputs under the intended numerical policy and inspect that training-only operations are disabled. Then measure the complete inference path rather than relying on the adapter's operation count. These checks connect the elegant low-rank equation to a usable artifact without confusing algebraic equivalence with implementation correctness or measured speed.
 
+![Deep dive: 15. Verify the numerical and export contract](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685).

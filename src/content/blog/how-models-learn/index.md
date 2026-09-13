@@ -68,6 +68,9 @@ For classification, cross-entropy penalizes low probability assigned to the obse
 
 This connection is developed in [maximum likelihood estimation](/blog/maximum-likelihood-estimation/). Optimization searches for parameters; the statistical objective defines which fitted behavior we are searching for. Backpropagation works with the chosen differentiable objective and does not decide whether the objective matches the task.
 
+![Deep dive: Different losses encode different questions](./deep-dive-component-01.png)
+
+
 ## A complete gradient update by hand
 
 Take the smallest useful regression model: a prediction $$\hat y=wx$$ with 1 weight w, input x, and no bias. Let the target be y, and choose half squared error
@@ -115,6 +118,8 @@ $$
 Thus repeated updates converge for this single quadratic when $$0<\eta<2/x^2$$. With $$x=2$$, the range is $$0<\eta<0.5$$. At $$\eta=0.1$$, error contracts by 0.6 each step; the initial error minus 2 becomes minus 1.2, matching the weight update from 1 to 1.8. At $$\eta=0.6$$, the factor is minus 1.4: errors alternate sign and grow in magnitude.
 
 This turns “overshooting a valley” into a checked mechanism rather than assuming a downhill direction guarantees a better finite step. Neural-network objectives have multiple directions with different curvature, and minibatch estimates introduce noise, so this scalar bound is not a universal learning-rate recommendation. Input scaling changes curvature even in this tiny model; normalization and adaptive methods can change update conditioning. Monitor a fixed diagnostic batch to test optimization behavior, then verify held-out performance independently. Backprop computes a local derivative accurately for the specified graph; choosing a useful finite update remains the optimizer's responsibility.
+
+![Deep dive: Backpropagation is the chain rule, not blame allocation](./deep-dive-component-02.png)
 
 
 ## Minibatches trade exactness for useful computation

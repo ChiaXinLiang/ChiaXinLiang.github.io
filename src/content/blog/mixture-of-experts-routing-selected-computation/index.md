@@ -148,6 +148,9 @@ The derivations here are illustrative and no GPU benchmark was performed in this
 
 For reproducible analysis, retain the configuration and source revision alongside the counts. A later model release can change expert widths, routing normalization, or shared branches while retaining a similar family name. Recomputing the formulas from the actual weight shapes provides a stronger check than copying a headline. Also state whether embedding tables and conditional-memory modules belong to the reported total; silently adding differently defined component figures creates misleading comparisons.
 
+![Deep dive: 13. Choose the right next question](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity](https://arxiv.org/abs/2101.03961).

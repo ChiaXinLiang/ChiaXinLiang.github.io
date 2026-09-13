@@ -74,6 +74,9 @@ As batching increases, the matrix multiplication becomes more compute-intensive.
 
 Capacity directly enters this story. More memory can accommodate more active requests and longer KV caches, enabling a different operating point. A comparison that says memory capacity never improves throughput overlooks that coupling. Separate the single-stream idealization from a production server's throughput under latency constraints.
 
+![Deep dive: Why batching changes the interpretation](./deep-dive-component-01.png)
+
+
 ## Budget memory beyond the weights
 
 Suppose a model has 70 billion stored parameters. At 1 byte per parameter, parameter data alone occupy 70 GB in decimal units. At 2 bytes, they occupy 140 GB. Packed lower-precision representations need scale metadata and supported kernels; “4-bit weights” does not mean every allocation is exactly half a byte per parameter.
@@ -100,6 +103,8 @@ $$
 For hypothetical $$W=70$$ GB, $$K=2$$ GB, and $$b=8$$, total traffic is 86 GB. At 8 TB/s the bandwidth floor is 10.75 ms and the aggregate ceiling approximately 744.2 tokens/s. At 22 TB/s it becomes 3.909 ms and approximately 2046.5 tokens/s, if achieved efficiency and all other constraints remain equal. The earlier weight-only batch ceiling of approximately 914 tokens/s is therefore optimistic when this private traffic is included.
 
 The engineering method is to identify which traffic is shared and which grows with requests before interpreting a hardware ratio. More capacity can permit a larger batch or fewer communication-heavy shards; more bandwidth accelerates a fixed traffic pattern. Neither automatically scales useful service output in proportion to a specification. When compute or communication becomes limiting, use its measured time alongside this traffic floor. Treat the roadmap as an interface budget, then compare equal model quality, concurrency, and tail-latency constraints. Strategic intent remains an inference from specifications rather than something established by this numerical example.
+
+![Deep dive: Budget memory beyond the weights](./deep-dive-component-02.png)
 
 
 ## HBM bandwidth is a physical interface budget

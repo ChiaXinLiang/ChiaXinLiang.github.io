@@ -147,6 +147,9 @@ Recomputation has a similar subtlety. Recomputing a ten-megabyte tensor avoids i
 
 For a concrete review, draw each important value's lifetime from creation to last use on a forward-backward timeline. Mark the tensors crossing the partition boundary and the temporaries introduced by backward. Then compare the timeline with measured peak allocation. An unexplained discrepancy identifies missing state, aliasing, allocator behavior, or an incorrect assumption about generated execution. This exercise makes a memory claim reviewable without pretending the source-level graph determines every runtime allocation.
 
+![Deep dive: 12. Distinguish live intervals from tensor totals](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Official AOTAutograd optimization tutorial](https://docs.pytorch.org/functorch/stable/notebooks/aot_autograd_optimizations.html).

@@ -139,6 +139,9 @@ Test correctness before ranking performance. Fill inputs with patterns that reve
 
 When comparing a forced algorithm with the library default, preserve the diagnostic output showing what was selected and whether fallback occurred. A configuration request is not evidence that every tested size used that path. Some combinations are unsupported, and protocols can change independently of the algorithm. Report those transitions alongside the size sweep. If a setting improves one large-message point but regresses the many smaller messages used by the job, its peak bandwidth result is insufficient justification for adopting it.
 
+![Deep dive: 8. Interpret benchmark bandwidth using its definition](./deep-dive-component-02.png)
+
+
 ## 9. Choose the operation and schedule from the consumer's needs
 
 Begin with the result and ownership required by the next computation. Use reduce-scatter when consumers need distinct reduced shards, all-gather when they need the distributed contributions reconstructed, and all-reduce when every participant needs the complete reduced tensor.

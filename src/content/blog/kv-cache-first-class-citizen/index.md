@@ -30,6 +30,9 @@ Circa 2022, every serving engine treated KV state the same way: allocate a conti
 
 **A transfer layer.** Once KV blocks live on other machines, moving them must be cheap, and for years every stack hand-rolled its own transport. NIXL, the transfer library underneath NVIDIA's Dynamo, gives 1 API across NVLink, InfiniBand and RoCE with GPUDirect RDMA, PCIe, and local SSD, and picks the fastest available path per transfer ([NIXL](https://github.com/ai-dynamo/nixl)). With GPUDirect RDMA, KV moves NIC-to-HBM without staging through host memory; a 400 Gb/s NIC sustains roughly 50 GB/s, so gigabyte-scale cache entries move in tens of milliseconds while the GPU keeps decoding other requests. This is the same plumbing that carries prefill-to-decode handoffs in disaggregated serving, which is no accident: a cache with a wire format is what made [disaggregation](/blog/the-prefill-decode-disaggregation-story/) practical at all.
 
+![Deep dive: From scratch buffer to storage system](./deep-dive-component-01.png)
+
+
 ## Worked example: 1 system prompt, 10 1000 requests
 
 Numbers make the case better than architecture diagrams. Take a 70B-parameter GQA model with Llama-3.1-70B's shape: 80 layers, 8 KV heads, head dimension 128, FP16 cache. KV bytes per token:
@@ -70,6 +73,9 @@ $$
 The break-even exists only when cS exceeds startup a. Ignoring startup, m equal to 327680 bytes and c equal to 0.00028 seconds imply 1.17 GB/s. For 2000 tokens at 64 GB/s, payload transfer takes 10.24 milliseconds, compared with 560 milliseconds of recomputation. These are assumed delivered rates; peak link speed and realized storage throughput differ.
 
 Reuse also requires matching weights, adapters, tokenizer, positional treatment, and prefix content. Paged allocation alone does not create content-addressed identity; the engine's hashing or radix index adds that layer. Admission and eviction should consider expected future hits against retained-byte cost. A large cold entry can displace many smaller hot prefixes, so hit count alone is an incomplete objective. Measure avoided GPU work, transfer traffic, tier occupancy, and actual first-token latency together before choosing a cache policy.
+
+![Deep dive: Worked example: 1 system prompt, 10 1000 requests](./deep-dive-component-02.png)
+
 
 ## Going deeper: kernels shaped by the cache
 

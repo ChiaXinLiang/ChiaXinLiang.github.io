@@ -115,6 +115,9 @@ Record rank-to-device and rank-to-NIC mappings as part of the experiment. Keep t
 
 Consider a simplified 16-GPU job split across 2 servers with 8 GPUs each. A tensor-parallel group of 4 can remain within one server, while a data-parallel group can connect corresponding local groups across servers. An alternative interleaving places every tensor-parallel group across both servers and makes its frequent layer exchanges use the scale-out path. This example does not prove the first layout optimal, but it identifies a specific traffic difference to measure. Compare layer communication, synchronization tails, and memory feasibility before selecting the mapping.
 
+![Deep dive: 7. Map parallelism dimensions onto locality deliberately](./deep-dive-component-02.png)
+
+
 ## 8. Verify with a hierarchy of experiments
 
 Begin with topology discovery and capability checks. Then measure representative device pairs and GPU-NIC paths. Next run the relevant collective across the intended rank group. Finally measure the application timeline, because good isolated paths do not establish effective overlap or balanced readiness.

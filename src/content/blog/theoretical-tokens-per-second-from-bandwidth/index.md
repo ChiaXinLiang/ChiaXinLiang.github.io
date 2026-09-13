@@ -81,6 +81,9 @@ $$
 
 If an illustrative execution achieved 65% of peak, the weight-only ceiling would fall to about 58.6 tokens per second. That is a scenario calculation, not an empirical claim that H100 decode always achieves 65%. Measure the factor for the actual kernels and workload.
 
+![Deep dive: A feasible quantized illustration](./deep-dive-component-01.png)
+
+
 ## Batching shares weight reads
 
 For a batched linear layer, several token activations multiply the same weight matrix. A suitable GEMM can reuse weights across those rows. If weight traffic remains near 1 model read per step, increasing $$B$$ increases the number of emitted tokens without multiplying that weight traffic by $$B$$.
@@ -120,6 +123,9 @@ $$
 The bandwidth-only step time becomes about 23.92 ms. Aggregate throughput is at most about 669 tokens per second, and per-request streaming at most about 41.8 tokens per second. Those are already less than half the ideal weight-only batch result.
 
 This particular batch also needs approximately 42.95 GB merely to store its BF16 cache, so it exceeds the worked 1-GPU memory budget in the preceding article once headroom is included. Traffic calculations do not establish capacity feasibility. A smaller batch, shorter histories, or different cache representation is required.
+
+![Deep dive: Add attention history](./deep-dive-component-02.png)
+
 
 ## A capacity-compatible example
 

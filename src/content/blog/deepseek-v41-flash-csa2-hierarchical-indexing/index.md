@@ -162,6 +162,9 @@ For a reproducible review, identify the owner and last consumer of each selectio
 
 Finally, test duplicate indices and unused entries under the supported contract. Duplicates can change the weighted sum if treated as separate positions, while an unused entry can accidentally point to valid content. The selection representation is therefore part of correctness, not merely a bookkeeping detail beside the attention equation.
 
+![Deep dive: 14. Account for selection storage](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Official DeepSeek-V4.1-Flash model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash).

@@ -103,6 +103,9 @@ For a new independent target, mean squared prediction error adds squared bias, e
 
 If the true mean were much farther from 0, the same penalty could hurt. That is the method's preference and its cost in explicit form. Use validation to choose lambda under the intended population rather than assuming the illustrative prior is appropriate. This derivation applies to a constant estimator with squared loss; it is not a universal quantitative model of neural-network generalization.
 
+![Deep dive: Going deeper: bias and variance under squared error](./deep-dive-component-01.png)
+
+
 ## Validation chooses; testing estimates after choosing
 
 Split data into training, validation, and test roles. Training fits parameters. Validation selects hyperparameters, checkpoints, preprocessing, and other modeling choices. A test set estimates performance after those choices are fixed. Repeatedly consulting test results to choose a model turns that set into another validation source.
@@ -122,6 +125,9 @@ Data augmentation modifies training examples while intending to preserve their t
 Dropout injects randomness into selected activations during training and changes how the network distributes predictive work. Its evaluation behavior differs from its training behavior. Explain the configuration and do not equate a stochastic training loss directly with deterministic inference loss.
 
 Weight decay and L2 penalties deserve careful naming. With ordinary gradient descent on a simple parameter vector, adding an L2 gradient produces multiplicative shrinkage alongside the data-gradient update. With adaptive optimizers, decoupled weight decay and adding an L2 term are generally different operations. Check the optimizer documentation and algorithm rather than treating their hyperparameters as interchangeable.
+
+![Deep dive: Early stopping, augmentation, and explicit penalties](./deep-dive-component-02.png)
+
 
 ## Generalization is limited by distribution change
 

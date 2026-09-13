@@ -184,6 +184,9 @@ Branching generation can require copying or otherwise managing state for several
 
 Test a small interleaved pair of sequences against independent execution. Then test continuation after a pause and branching from one shared prefix. These checks verify service state management without confusing it with the mathematical scan's numerical correctness or the model's held-out quality.
 
+![Deep dive: 17. Preserve state ownership in serving](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752).

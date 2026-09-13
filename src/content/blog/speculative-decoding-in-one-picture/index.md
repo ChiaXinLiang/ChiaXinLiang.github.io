@@ -82,6 +82,9 @@ $$
 
 L includes a target-produced correction or bonus token. At alpha equal to 0.7 and k equal to 4, E[L] is 2.7731. With 30-millisecond target verification and 2 milliseconds per draft token, predicted speedup is 2.19. Measure acceptance by position and verification duration under real batching; context-dependent acceptance and saturated compute invalidate a single constant-alpha forecast.
 
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
+
+
 ## Going deeper: drafts that live inside the target
 
 The classic setup needs a separate small model that behaves like the big 1, which is an annoying artifact to train, deploy, and keep in sync. The strongest recent methods dissolve the draft into the target itself.
@@ -91,6 +94,9 @@ The classic setup needs a separate small model that behaves like the big 1, whic
 **EAGLE** (Li et al.) drafts at the feature level instead of the token level: a single lightweight transformer layer autoregressively extends the target's last hidden state, then reuses the target's own LM head to produce token candidates. The target's hidden features are much more predictable than sampled tokens, so acceptance rates jump. **EAGLE-2** goes further by making the draft tree dynamic: it uses the draft model's confidence scores to grow the tree where acceptance is likely and prune where it isn't, reporting speedups of roughly 3x to 4x (best on code generation, where text is most predictable). All these numbers are the authors' own benchmarks, single-request latency on their hardware, so treat them as upper bounds rather than what your cluster will see.
 
 The trend line matters more than any single number: draft quality keeps improving because the draft gets to peek at richer signals from the target, while verification cost stays 1 parallel pass.
+
+![Deep dive: Going deeper: drafts that live inside the target](./deep-dive-component-02.png)
+
 
 ## The batch-size catch
 

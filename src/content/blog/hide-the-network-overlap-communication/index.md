@@ -70,6 +70,9 @@ The bucket size is a real tuning knob. Too small and you pay per-collective laun
 
 The arithmetic condition for full hiding is blunt: communication time ≤ the compute you overlap it with. In our example, 5.5 s < 8.8 s, so we win. Shrink the per-GPU batch by 2× and backward drops to 4.4 s while the all-reduce stays 5.5 s; now 1.1 s is structurally exposed no matter how clever the scheduler is. At that point your options are a fatter network, gradient compression, or accepting the tax. This ratio, not raw bandwidth, is the number that decides whether scaling out will hurt.
 
+![Deep dive: How the hiding actually works](./deep-dive-component-01.png)
+
+
 ## Going deeper: topology, in-network reduction, and the SM tax
 
 **The flat ring was a lie, and topology is why.** Real clusters are hierarchical: 8 GPUs per node joined by NVLink at ~900 GB/s, nodes joined by InfiniBand at 50 GB/s per NIC. NCCL exploits this by reducing within each node over NVLink first, then running the inter-node phase with all 8 NICs per node moving disjoint shards in parallel. Redo our example that way: each NIC now carries 140/8 = 17.5 GB around an 8-node ring, so T = 2 × 7/8 × 17.5/50 ≈ **0.6 s**, 9 times faster than the flat ring, on identical hardware. This is also why topology *mismatch* is such a silent killer. If NCCL misdetects the PCIe layout, if rank placement makes rings hop across rails through spine switches, or if a missing GPUDirect RDMA path forces staging through host memory, nothing crashes. The job runs. It just runs at flat-ring speed or worse, and the only symptom is a step time that is mysteriously 30% high until someone reads the NCCL topology dump.
@@ -96,6 +99,9 @@ E_{\mathrm{exposed}}=\max(0,C_{\mathrm{last}}-t_{\mathrm{backward}}).
 $$
 
 A late final bucket remains exposed even when earlier transfers overlap perfectly. Tune bucket size against readiness timestamps and message startup, then measure compute slowdown from shared SM, memory, and network resources. Hierarchical collectives change the bytes crossing expensive links; overlap changes when those bytes travel. Evaluate both mechanisms independently rather than attributing the whole gain to asynchronous execution.
+
+![Deep dive: Going deeper: topology, in-network reduction, and the SM tax](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

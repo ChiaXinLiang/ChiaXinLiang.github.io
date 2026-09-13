@@ -80,6 +80,8 @@ For $$T_1=100$$ seconds, $$s=0.01$$, and $$N=99$$, the predicted time is 2 secon
 
 This identifies the method behind the CPU/GPU division: accelerate the parallel region and shorten or overlap its surrounding serial path. Compare full-job time before and after offload, including transfers, rather than comparing isolated arithmetic peaks. A faster kernel can lose overall when its launch and data movement exceed the saved compute time. Conversely, keeping data resident across several kernels amortizes those costs. The relevant threshold is useful parallel work per offload, not a universal lane-count ratio.
 
+![Deep dive: Worked example: the 1% that eats your speedup](./deep-dive-component-01.png)
+
 
 ## Going deeper: how a GPU hides 500 cycles
 
@@ -94,6 +96,9 @@ This is why GPU register files are enormous. Each H100 SM carries 256 KB of regi
 The scheme has a knob and a failure mode. The knob is **occupancy**: how many warps are actually resident, limited by how many registers and how much shared memory each thread demands. A kernel whose threads each need 200 registers can keep far fewer warps resident, leaving the scheduler with too few candidates to cover memory latency. The failure mode is **divergence**: threads in a warp share 1 instruction stream, so if half a warp takes the `if` branch and half takes the `else`, the hardware runs both paths serially with lanes masked off, and your 32 lanes deliver the throughput of 16 or worse. Branchy, pointer-chasing, dependency-heavy code is exactly where the latency machine's branch predictor and OoO window earn their area back.
 
 So when does each win? The CPU wins when the working set fits in cache, when control flow is irregular, when the dependency chain is long, or when there simply isn't enough parallel work to fill 16,896 lanes (kernel launch can cost microseconds, which is material for very small tasks). The GPU wins when you have tens of thousands of independent work items and arithmetic or bandwidth is the bottleneck: dense linear algebra, image pipelines, transformer training. Real systems use both, in the roles Amdahl assigned: CPU for the serial 1%, GPU for the parallel 99%.
+
+![Deep dive: Going deeper: how a GPU hides 500 cycles](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

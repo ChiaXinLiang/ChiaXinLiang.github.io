@@ -32,6 +32,9 @@ The mirror image is not a styling choice. It falls straight out of 2 memory tech
 
 The trade is symmetric and unforgiving. HBM's density buys the GPU 192 GB but throttles it at the package boundary. SRAM's proximity buys Cerebras 3 orders of magnitude more bandwidth, but at 6 transistors per bit, even a dinner-plate-sized chip holds only 44 GB. Neither side gets to cheat physics; they just picked opposite ends of the same lever.
 
+![Deep dive: Why SRAM flips the ratio](./deep-dive-component-01.png)
+
+
 ## A worked example you can do on paper
 
 Why does bandwidth dominate this discussion at all? Because of how [transformers generate text](/blog/transformer-architecture-in-one-picture/): producing 1 token requires streaming essentially every active model weight through the compute units, and tokens are produced 1 after another. For a single user, decode is a memory-reading exercise with some math attached.
@@ -97,6 +100,9 @@ Zoom out and the WSE-3 stops looking like an oddity and starts looking like a da
 The bet's weak flank is the part specs never show: ecosystem. GPUs come with CUDA, PyTorch-native everything, a decade of kernels, and [a job market of people who tune them](/blog/what-does-an-ml-performance-engineer-do/). A wafer needs its own compiler stack, and every new model architecture needs porting before it runs well. Cerebras's countermove is to sell tokens instead of silicon — an API where the exotic hardware hides behind an OpenAI-compatible endpoint — which is a tacit admission that the hardest part of a novel chip is everything around the chip.
 
 What makes the WSE-3 worth studying is not that it wins; it is that it is *legible*. 1 decision — never cut the wafer — mechanically produces everything else: the PB/s bandwidth, the 44 GB ceiling, the yield trick, the 20 kW cold plate, the multi-system pipelines, the single-stream speed records, and the capacity economics. Few chips let you trace cause to effect that cleanly.
+
+![Deep dive: 1 axis, pushed to the end](./deep-dive-component-02.png)
+
 
 ## Takeaway
 

@@ -52,6 +52,9 @@ Let's put real numbers on it. Rubin CPX: 30 PFLOPS of dense NVFP4 compute and ro
 
 So the design writes itself. Keep the compute (in fact, The Next Platform reports the CPX die is a single Rubin compute chiplet clocked about 20% higher). Replace the memory with something cheap, dense, and merely adequate: 128 GB of GDDR7 holds the weights and the in-flight KV cache with room to spare, and 2.1 TB/s is plenty when your intensity is 131,000.
 
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
+
+
 ## Correct the roofline for scale metadata
 
 For $$P$$ weights, $$T$$ prompt rows, effective weight storage $$s$$ bytes per parameter, and additional activation/cache traffic $$D_a$$, a weight-reuse model gives
@@ -93,6 +96,9 @@ The deepest thing about Rubin CPX is the direction of causality. For decades, ha
 It also completes a picture from earlier in this series. In [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/) we saw that HBM bandwidth, not capacity, is the scarce resource that defines each GPU generation, with capacity flat at 288 GB while bandwidth roughly triples. CPX is the corollary: if bandwidth is the precious thing, stop spending it on workloads that cannot use it. The interference numbers that motivated disaggregation in the first place are a [goodput story](/blog/goodput-vs-utilization/): a colocated GPU can show beautiful utilization while prefill bursts wreck the per-token latency that users actually experience. The reason prefill and decode diverge at all traces back to the [attention mechanism](/blog/attention-in-plain-words/) and the [transformer's structure](/blog/transformer-architecture-in-one-picture/): 1 weight matrix, many tokens in parallel during prefill, 1 token at a time during decode. And turning a roofline sketch into a purchasing decision for heterogeneous racks is exactly the kind of judgment that [ML performance engineers](/blog/what-does-an-ml-performance-engineer-do/) get paid for.
 
 Expect the split to deepen. Once prefill and decode are separate line items, each can evolve at its own pace: prefill parts chasing FLOPs per dollar on cheap memory, decode parts chasing bytes per second per dollar on whatever HBM5 becomes. The trench coat is off.
+
+![Deep dive: The bigger picture: the schedule rewrote the SKU list](./deep-dive-component-02.png)
+
 
 ## Takeaway
 

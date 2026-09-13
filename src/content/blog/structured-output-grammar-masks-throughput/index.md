@@ -75,6 +75,9 @@ Unicode and byte-oriented token representations require careful handling. A toke
 
 The tokenizer vocabulary can be organized to share work across common token prefixes. Compiled structures and cached classifications avoid parsing every token from scratch at every decoding step. These optimizations explain why grammar processing can become practical for large vocabularies, but their effectiveness depends on the grammar and generated states.
 
+![Deep dive: 4. Tokenization is the bridge between characters and logits](./deep-dive-component-02.png)
+
+
 ## 5. Separate compilation cost from request-time cost
 
 A service may compile a schema once and reuse its immutable representation for many requests. It still initializes and advances a matcher for each request. Cold compilation, cache lookup, matcher construction, mask generation, device transfer, and logit masking are different costs and should be measured separately.

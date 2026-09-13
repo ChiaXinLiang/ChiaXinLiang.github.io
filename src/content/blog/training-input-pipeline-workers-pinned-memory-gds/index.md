@@ -35,6 +35,9 @@ Record cache state. A dataset that fits in the page cache can behave differently
 
 Storage layout also affects the program. Many small files can expose metadata and request overhead, while larger record containers can support more efficient sequential reads. Random sample access may require additional indexing or read amplification within a container. Measure useful decoded samples per second alongside physical bytes read so a format that reads more data to produce the same batch is visible. Caching or offline preprocessing can reduce repeated work, but their preparation cost and storage footprint belong in the deployment record. Preserve the intended sampling distribution when reorganizing records; improved locality should not silently replace the training data policy.
 
+![Deep dive: 1. Draw the complete path from a sample to computation](./deep-dive-component-02.png)
+
+
 ## 2. Derive the steady-state bottleneck approximation
 
 For stages with effective batch service times t_j and sufficient overlap, an ideal pipeline's steady-state interval is bounded by its slowest stage:

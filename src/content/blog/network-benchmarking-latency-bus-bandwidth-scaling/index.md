@@ -97,6 +97,9 @@ Specify decimal or binary units and whether a rate is directional. A nominal lin
 
 One useful unit check starts from the payload itself. A 64 MiB tensor contains 67108864 bytes. Dividing by an illustrative 2-millisecond duration yields 33.55 GB/s or 31.25 GiB/s. Multiplying the decimal byte rate by 8 gives 268.44 Gb/s. These are different expressions of the same logical throughput, before applying any collective traffic factor. If a report switches between them without labels, the apparent difference is arithmetic rather than hardware behavior. Keep the original bytes and elapsed seconds in the saved data so every derived rate can be checked.
 
+![Deep dive: 5. Interpret algorithm and bus bandwidth by operation](./deep-dive-component-02.png)
+
+
 ## 6. Sweep topology as well as message size
 
 Start with relevant device pairs, then the local accelerator group, then cross-node groups. Compare placements within and across network boundaries such as leaf domains or rails. This hierarchy helps identify where a degradation first appears.

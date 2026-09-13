@@ -192,6 +192,9 @@ This explains a practical plateau: increasing evaluations can eventually produce
 
 Inspect quality across several evaluation budgets and compare supported solvers. The shape of that curve helps identify whether more numerical work is useful. It is not a formal guarantee for a neural image generator, but it gives a mechanistic explanation for why solver accuracy and learned-model quality should be reported as distinct sources of approximation.
 
+![Deep dive: 17. Separate predictor error from integration error](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [Score-Based Generative Modeling through Stochastic Differential Equations](https://arxiv.org/abs/2011.13456).

@@ -89,6 +89,9 @@ That last point deserves emphasis: even in a "4-bit training" run, the skeleton 
 
 With all 3 fixes in place, the paper's headline result: a 12B hybrid Mamba-Transformer pretrained on 10T tokens in NVFP4 matches the FP8 baseline's loss curve throughout, with downstream task accuracy comparable at the end (MMLU-pro within about a point). This is the first public demonstration of 4-bit pretraining at that token scale, and it turns "can it be done" into a settled question.
 
+![Deep dive: Going deeper: the 3 fixes](./deep-dive-component-01.png)
+
+
 ## What stochastic rounding actually guarantees
 
 Suppose a normalized scalar $$x$$ lies between adjacent representable values $$a$$ and $$b$$. Stochastic rounding chooses the upper value with probability
@@ -122,6 +125,9 @@ Follow the hardware. Blackwell tensor cores execute FP4 at 2 times the rate of F
 The silicon is committing in both directions. AWS's Trainium3 builds a hardware W4A8 path (4-bit weights, 8-bit activations) that the company says doubles effective weight-load rate with no software overhead — a vendor claim, but one that tells you where the roadmap points. When formats show up as dedicated datapaths in training chips from 2 vendors, the bet has left the research phase. It's the co-design loop this series keeps returning to: the numerics recipe was designed for Blackwell's block-scaled tensor cores, and the next chips are being designed around the recipe. Whether your organization catches that win in practice is a different question, one of keeping real work flowing through those tensor cores, which is the [goodput problem](/blog/goodput-vs-utilization/) in a new costume, and squarely the kind of thing [ML performance engineers](/blog/what-does-an-ml-performance-engineer-do/) get paid to chase.
 
 How much lower can it go? The honest answer: below 4 bits, the 16-value grid stops looking like arithmetic and starts looking like coding theory, and today's fixes lean hard on high-precision scales and accumulators that don't shrink with the payload. 4 bits may be near the floor for this style of quantization. But "FP8 pretraining is conservative" is now a sentence you can say with a straight face, and it wasn't in 2024.
+
+![Deep dive: Why this moves the cluster economics](./deep-dive-component-02.png)
+
 
 ## Takeaway
 

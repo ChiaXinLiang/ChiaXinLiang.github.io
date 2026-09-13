@@ -82,6 +82,9 @@ Here c_sync is a measured logging synchronization cost and K the number of steps
 
 Compilation changes dispatch and generated kernels. Removing a synchronization changes dependency placement. Test them independently with the same numerical algorithm, then together. Inspect graph breaks and recompilation counters as well as GPU gaps. Keep the eager reference for output and gradient comparisons. Data-dependent control flow, changing shapes, and alternative compiler backends can prevent the expected fusion; compilation is not evidence that every operation joined 1 graph.
 
+![Deep dive: Worked example: 3 syncs, found and fixed](./deep-dive-component-01.png)
+
+
 ## Going deeper: the same line breaks the graph 2 times
 
 Here is the cruel symmetry: `loss.item()` doesn't just stall the pipeline at runtime. At *compile* time, it's also a *graph break*. TorchDynamo cannot trace a value flowing from a CUDA tensor into Python-land, so it splits your program into 2 smaller graphs with an eager-mode hop between them. Each fragment is fused separately; cross-fragment fusion opportunities are gone. 1 line, 2 penalties.
@@ -100,6 +103,9 @@ While you're auditing the loop, 2 more checks pay for themselves:
 ![Bit layout of FP16 versus BF16 showing exponent and mantissa fields and the resulting dynamic range](./fig-bf16-fp16.png)
 
 **Verify Tensor Cores actually engage.** Half-precision alone doesn't guarantee it. NVIDIA's matmul performance guide recommends matrix dimensions that are multiples of 8 for FP16/BF16 (16 for INT8) so tiles align cleanly; misaligned shapes fall into tail-effect territory or slower kernels. This is why practitioners pad a 50,257-entry vocabulary to 50,304 (a multiple of 64) and see the output projection speed up. Confirm in the profiler: Tensor Core GEMMs carry kernel names with `hmma`/`s16816`-style fragments, and the profiler's "Tensor Cores Used" column should say yes for your big matmuls.
+
+![Deep dive: Going deeper: the same line breaks the graph 2 times](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

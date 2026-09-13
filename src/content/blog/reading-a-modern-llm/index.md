@@ -82,6 +82,9 @@ This excludes allocator overhead, metadata, padding, and other model state. Mult
 
 Consequently, applying this full-cache equation indiscriminately to every layer of a modern model can badly overestimate memory. The equation remains useful because its terms reveal what to inspect: which layers cache historical positions, what dimensions are stored, and whether sharing or quantization changes the byte count.
 
+![Deep dive: Translate cache structure into a memory equation](./deep-dive-component-01.png)
+
+
 ## Sparse experts separate total capacity from active computation
 
 An expert layer has a collection of parameterized transformations and a router selecting a subset for each token. A simplified token output is
@@ -95,6 +98,9 @@ where S is the selected expert set and g is the routing weight. This form does n
 For a hypothetical bank of 128 equal-sized experts selecting 4 per token, only 1/32 of the expert bank participates in that token’s selected transformations. This does not imply a 32-fold end-to-end speedup. Attention, routing, shared computation, and communication remain. A batch may activate many different experts, and all resident expert weights still contribute to storage requirements.
 
 The methodological question is therefore precise: does an innovation increase stored capacity without proportionally increasing selected arithmetic, and how does the implementation distribute that work? A headline parameter count cannot answer it. Report total parameters, the authors’ active-parameter convention, and the actual execution assumptions separately.
+
+![Deep dive: Sparse experts separate total capacity from active computation](./deep-dive-component-02.png)
+
 
 ## A public sparse model makes the distinction concrete
 

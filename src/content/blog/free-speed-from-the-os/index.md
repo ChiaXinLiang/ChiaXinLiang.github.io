@@ -75,6 +75,9 @@ DataLoader(dataset, batch_size=256, num_workers=8,
 
 2 more free knobs while you are logged in. `nvidia-smi -pm 1` enables persistence mode, which keeps the driver loaded when no client is connected; without it, the first CUDA call after an idle period eats seconds of driver re-initialization, which shows up as mysterious cold-start latency in inference services. And if multiple small processes share 1 GPU, MPS (Multi-Process Service) lets their kernels run concurrently instead of time-slicing, while MIG partitions an A100/H100/B200 into up to 7 isolated instances with dedicated memory and SM slices. Sharing policy is host configuration too.
 
+![Deep dive: A worked example: 1 batch, 4 speeds](./deep-dive-component-01.png)
+
+
 ## Going deeper: the container trap
 
 Here is where modern deployment makes things worse. Teams assume containerization abstracts the host away. It does the opposite: a container inherits every property of an untuned host while adding its own throttles on top.
@@ -99,6 +102,9 @@ $$
 This assumes independent copy and compute engines, different batches, suitable streams, and correct readiness events. With 154 MB at 26 GB/s, the copy takes about 5.92 milliseconds. Against 180 milliseconds of compute, ideal overlap hides that time; it does not remove the transferred bytes or memory-controller pressure. Pageable transfers can sometimes make asynchronous progress through staging, so treat overlap as a measured outcome rather than a universal prohibition.
 
 Prefetching buys the next batch's readiness with host memory. A rough queue budget is worker count times prefetch depth times batch payload: 8 workers and depth 2 with 154 MB batches suggest 2.46 GB of queued data before active batches and processing copies. Not every queued object is necessarily pinned. Measure resident and pinned memory separately, and test NUMA affinity against observed device topology rather than assuming the operating system automatically places GPU-facing buffers correctly.
+
+![Deep dive: Going deeper: the container trap](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

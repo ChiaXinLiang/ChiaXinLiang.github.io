@@ -39,6 +39,9 @@ total latency ≈ TTFT + TPOT × (output tokens − 1)
 
 That formula is worth memorizing, because it tells you which knob matters for which product. A classification endpoint returning 3 tokens lives and dies by TTFT. A chatbot writing 500-token answers is mostly a TPOT story.
 
+![Deep dive: Every request lives 2 lives](./deep-dive-component-01.png)
+
+
 ## Why streaming exists
 
 Suppose a reply takes 2.4 seconds to finish. If the server waits for the whole thing before responding, the user stares at a blank box for 2.4 seconds, which feels broken. If the server **streams** — sends each token the moment decode produces it — the user sees text starting at TTFT, a couple hundred milliseconds in, and then watches it flow at 1/TPOT.
@@ -86,6 +89,9 @@ total ≈ 0.2 s + 299 × 7.6 ms ≈ 2.4 s
 Without streaming: a 2.4-second blank stare. With streaming: text appears at 0.2 s and flows at 130 tokens/s, several times faster than anyone reads. Same computation, transformed experience.
 
 1 more number ties the 2 phases together: **arithmetic intensity**, the FLOPs performed per byte moved. Our GPU needs about 150 FLOPs per byte (300 TFLOPS ÷ 2 TB/s) to keep its compute units fed. Prefill delivered ~1,900 FLOPs per byte of weights — comfortably compute-bound. Decode delivered ~1. Same weights, same model, opposite sides of the roofline.
+
+![Deep dive: A worked example you can do on a napkin](./deep-dive-component-02.png)
+
 
 ## Use an exact timestamp identity
 

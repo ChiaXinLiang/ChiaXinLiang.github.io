@@ -54,6 +54,9 @@ An exhaustive manual sweep is impractical. Constraint pruning, cost models, clas
 
 ![A hypothetical 100T model: WEIGHTS — 100T × 4.5 bits ≈ 56 TB — 13.5 TB/rack → at least 5 racks; COARSE GRID — 5 × 6 × 6 × 8 × 3 × 12 × 6 — 311,040 configuration trials; SWEEP COST — 15 minutes per configuration — 77,760 hours ≈ 8.9 pod-years. Illustrative arithmetic · NVIDIA GB200 NVL72 specifications](./hundred-t.png)
 
+![Deep dive: A worked example: why 100T parameters forces the issue](./deep-dive-component-01.png)
+
+
 ## Going deeper: the verifier is the product
 
 If the pattern is prior-verifier-search, where does the leverage concentrate? Not where you might expect.
@@ -74,6 +77,9 @@ $$
 k is a candidate kernel, t measured runtime, and the tolerances define the numerical contract in the selected norm. Invalid candidates must be rejected rather than ranked as equally useful 0-reward outputs. A valid kernel taking 80 microseconds against a 100-microsecond reference earns log(1.25), approximately 0.223. A fast kernel that fails shape or numerical tests receives no deployment eligibility.
 
 Random fuzzing is evidence within a test distribution, not proof of functional equality. Include edge shapes, strides, aliasing, cancellation-sensitive values, and repeated nondeterministic runs where relevant. Keep hidden tests outside the proposal loop to reduce harness exploitation. Separate search-set speed from held-out shapes and devices, and measure compilation plus search cost when judging net benefit. AlphaTensor's 47-multiplication result concerns arithmetic over the finite field F2; it does not supply an interchangeable 47-multiply floating-point GPU kernel. The practical innovation is learned proposals over broader algorithms, constrained by a verifier humans still have to specify.
+
+![Deep dive: Going deeper: the verifier is the product](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

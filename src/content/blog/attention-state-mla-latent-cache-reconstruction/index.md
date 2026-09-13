@@ -169,6 +169,9 @@ The value path has its own interface. The weighted latent accumulation has laten
 
 Tracking each interface width makes the derivation testable against actual exported tensors.
 
+![Deep dive: 14. Check the dimensional interfaces](./deep-dive-component-02.png)
+
+
 ## Sources
 
 - [DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model](https://arxiv.org/abs/2405.04434).

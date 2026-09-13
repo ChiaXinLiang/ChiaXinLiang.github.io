@@ -30,6 +30,9 @@ When people say "storage for AI," they usually picture capacity: petabytes of to
 
 Inference adds a fourth pattern — model weights loaded at cold start, and increasingly KV-cache tiers spilled to SSD — but training is where the goodput math bites hardest, so let's stay there.
 
+![Deep dive: 3 jobs storage does for a training cluster](./deep-dive-component-01.png)
+
+
 ## Anatomy of a checkpoint write storm
 
 Start with the size. A 70B-parameter model trained in mixed precision with Adam carries, per parameter: 2 bytes of bf16 weights, 4 bytes of fp32 master weights, and 4 + 4 bytes of fp32 Adam momentum and variance. That's 14 bytes per parameter:
@@ -106,6 +109,9 @@ GPUDirect Storage (GDS) removes the detour. Through the cuFile API, the DMA engi
 In early 2025 DeepSeek open-sourced the Fire-Flyer File System ([github.com/deepseek-ai/3FS](https://github.com/deepseek-ai/3FS)), the storage layer behind their training clusters, and it's a clean example of designing for exactly the patterns above. 3FS disaggregates storage across nodes stuffed with NVMe SSDs and reaches them over RDMA, so any client can hit the aggregate bandwidth of the whole cluster rather than 1 server's. Consistency uses CRAQ (chain replication with apportioned queries), which keeps reads cheap under strong consistency. DeepSeek reports **6.6 TiB/s aggregate read throughput** from a 180-node cluster — self-reported, but the design is inspectable in the repo. Notably, 3FS also serves as an SSD tier for inference KV cache, the fourth demand pattern from earlier.
 
 The third lever is **asynchronous checkpointing**: snapshot GPU state into host DRAM in seconds, resume training, and let a background thread drain the snapshot to persistent storage. ByteDance's MegaScale ([arXiv:2402.15627](https://arxiv.org/abs/2402.15627)) and PyTorch's distributed checkpointing both do this. It shrinks the *stall* δ dramatically, though the drain time still bounds how often you can checkpoint, and a node that dies holding an undrained snapshot loses that checkpoint. The Young/Daly framework still applies; you just plug in different constants.
+
+![Deep dive: Going deeper: shortening δ at the systems level](./deep-dive-component-02.png)
+
 
 ## Common misconceptions
 

@@ -28,6 +28,9 @@ The numbers are worth staring at. GPT-3 was trained on roughly 300 billion token
 
 What you get at the end is a **base model**, and here is the part people miss: a base model is not an assistant. It is a text-completion engine. Its entire worldview is "what token plausibly comes next in a document like this?" Ask it a question and it may answer, or it may continue with more questions, because on the internet a list of questions is often followed by more questions. It is a mirror of its training distribution, nothing more.
 
+![Deep dive: Stage 1: pretraining, the expensive part](./deep-dive-component-01.png)
+
+
 ## The Chinchilla recipe: a worked example
 
 Before moving on to fine-tuning, it is worth asking how you should spend a pretraining budget. For years the answer was "buy more parameters." Kaplan et al.'s 2020 scaling-law paper showed loss falls predictably as you scale compute, and the field read it as a license to grow models faster than datasets.
@@ -102,6 +105,9 @@ The PPO objective then maximizes, per response y to prompt x:
 The β coefficient sets the leash length. Small β lets the model chase reward aggressively (and hack it); large β keeps it pinned to SFT behavior (and wastes the reward signal). Tuning that trade-off is a large part of the practical craft.
 
 A 2023 development worth knowing: direct preference optimization (DPO) showed you can skip the explicit reward model and the RL loop entirely. Some algebra on the Bradley-Terry and KL-constrained objectives turns the whole thing into a single classification-style loss on preference pairs. Many current open-weight models use DPO or its descendants instead of PPO. The pipeline picture stays the same; the third stage just got simpler to run.
+
+![Deep dive: Going deeper: the math inside the reward model](./deep-dive-component-02.png)
+
 
 ## A preference objective makes the tradeoff explicit
 

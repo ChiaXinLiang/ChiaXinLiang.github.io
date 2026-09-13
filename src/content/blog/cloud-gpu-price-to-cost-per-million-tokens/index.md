@@ -115,6 +115,9 @@ A peak-throughput comparison would have selected the wrong configuration. Define
 
 If the 2 configurations have different occupancies, compare paid-interval cost rather than active cost. A faster replica may finish demand sooner, but if it remains rented and idle, that theoretical capacity has not necessarily become a billing saving. Autoscaling delay and minimum replica count affect the result.
 
+![Deep dive: A worked latency-constrained comparison](./deep-dive-component-01.png)
+
+
 ## Going deeper: prompt and output work
 
 A request includes prefill and decode. Long prompts consume GPU time even when the service bills or reports only generated tokens. Holding output length fixed while increasing prompt length can raise cost per output token.
@@ -130,6 +133,9 @@ This does not directly predict a batched server because requests overlap and sha
 Compare a request with 100 output tokens after 0.2 seconds of prefill and 2.5 seconds of decode to one with the same output after 4 seconds of prefill and 2.5 seconds of decode. Their isolated output rates are about 37.0 and 15.4 tokens per second. The output counter is identical; the resource time is not.
 
 Prefix caching can save repeated prefill, but the hit rate and shared-prefix lengths must come from the workload. Do not assume a popular system prompt guarantees a large benefit if most input comes from unique documents. Measure both useful output and cache behavior.
+
+![Deep dive: Going deeper: prompt and output work](./deep-dive-component-02.png)
+
 
 ## Theoretical ceilings are optimistic denominators
 
