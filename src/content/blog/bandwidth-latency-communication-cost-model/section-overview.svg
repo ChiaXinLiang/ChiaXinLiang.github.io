@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="840" viewBox="0 0 1200 840" role="img">
+<title>Bandwidth, Latency, and the Communication Cost Model</title>
+<rect width="1200" height="840" fill="#faf8f1"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="#7545c8"/></marker></defs>
+<text x="44" y="58" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#252a20">Bandwidth, Latency, and the Communication Cost Model</text>
+<text x="44" y="92" font-family="Arial,sans-serif" font-size="20" fill="#555b4b">Method, execution, and verification</text>
+<rect x="44" y="125" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="78" cy="162" r="20" fill="#7545c8"/>
+<text x="78" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">1</text>
+<text x="112" y="168" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Define the message</text>
+<text x="68" y="238" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Payload bytes and actual participating</text>
+<text x="68" y="267" font-family="Arial,sans-serif" font-size="21" fill="#252a20">ranks</text>
+<text x="68" y="344" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Link rate, payload bandwidth, and collective</text>
+<text x="68" y="371" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">bandwidth differ</text>
+<rect x="624" y="125" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="658" cy="162" r="20" fill="#7545c8"/>
+<text x="658" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">2</text>
+<text x="692" y="168" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Model one transfer</text>
+<text x="648" y="238" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Time ≈ startup + payload / effective</text>
+<text x="648" y="267" font-family="Arial,sans-serif" font-size="21" fill="#252a20">bandwidth</text>
+<text x="648" y="344" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Small messages expose latency; large messages</text>
+<text x="648" y="371" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">expose transfer cost</text>
+<rect x="624" y="465" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="658" cy="502" r="20" fill="#7545c8"/>
+<text x="658" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">3</text>
+<text x="692" y="508" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Add the communication schedule</text>
+<text x="648" y="578" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Rounds, paths, bottleneck cuts, and</text>
+<text x="648" y="607" font-family="Arial,sans-serif" font-size="21" fill="#252a20">contention</text>
+<text x="648" y="684" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">A collective is not one isolated point-to-</text>
+<text x="648" y="711" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">point transfer</text>
+<rect x="44" y="465" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="78" cy="502" r="20" fill="#7545c8"/>
+<text x="78" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">4</text>
+<text x="112" y="508" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Locate exposed time</text>
+<text x="68" y="578" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Readiness → communication → consumer</text>
+<text x="68" y="607" font-family="Arial,sans-serif" font-size="21" fill="#252a20">dependency</text>
+<text x="68" y="684" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Only the unhidden critical-path portion delays</text>
+<text x="68" y="711" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">the job</text>
+<path d="M598 272L619 272" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M876 429L876 462" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M620 612L599 612" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="44" y="812" font-family="Arial,sans-serif" font-size="18" fill="#555b4b">Read the article for derivations, assumptions, and worked examples.</text>
+</svg>

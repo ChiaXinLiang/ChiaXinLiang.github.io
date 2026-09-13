@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="840" viewBox="0 0 1200 840" role="img">
+<title>Energy per Useful Token: Power Caps, Clocks, Thermals, and SLOs</title>
+<rect width="1200" height="840" fill="#faf8f1"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="#7545c8"/></marker></defs>
+<text x="44" y="58" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#252a20">Energy per Useful Token</text>
+<text x="44" y="92" font-family="Arial,sans-serif" font-size="20" fill="#555b4b">Method, execution, and verification</text>
+<rect x="44" y="125" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="78" cy="162" r="20" fill="#7545c8"/>
+<text x="78" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">1</text>
+<text x="112" y="168" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Define useful output</text>
+<text x="68" y="238" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Completed accepted tokens within the</text>
+<text x="68" y="267" font-family="Arial,sans-serif" font-size="21" fill="#252a20">service objective</text>
+<text x="68" y="344" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Cancelled and rejected work still consumes</text>
+<text x="68" y="371" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">energy</text>
+<rect x="624" y="125" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="658" cy="162" r="20" fill="#7545c8"/>
+<text x="658" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">2</text>
+<text x="692" y="168" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Measure one boundary</text>
+<text x="648" y="238" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Integrate device or system power over the</text>
+<text x="648" y="267" font-family="Arial,sans-serif" font-size="21" fill="#252a20">same interval</text>
+<text x="648" y="344" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Watts are a rate; joules are accumulated</text>
+<text x="648" y="371" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">energy</text>
+<rect x="624" y="465" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="658" cy="502" r="20" fill="#7545c8"/>
+<text x="658" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">3</text>
+<text x="692" y="508" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Sweep the operating point</text>
+<text x="648" y="578" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Power cap, concurrency, workload, and</text>
+<text x="648" y="607" font-family="Arial,sans-serif" font-size="21" fill="#252a20">thermal steady state</text>
+<text x="648" y="684" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">A lower power rate can increase total energy</text>
+<rect x="44" y="465" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="78" cy="502" r="20" fill="#7545c8"/>
+<text x="78" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">4</text>
+<text x="112" y="508" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Choose under constraints</text>
+<text x="68" y="578" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Latency, useful capacity, and energy</text>
+<text x="68" y="607" font-family="Arial,sans-serif" font-size="21" fill="#252a20">together</text>
+<text x="68" y="684" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Compare a feasible frontier rather than one</text>
+<text x="68" y="711" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">isolated number</text>
+<path d="M598 272L619 272" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M876 429L876 462" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M620 612L599 612" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="44" y="812" font-family="Arial,sans-serif" font-size="18" fill="#555b4b">Read the article for derivations, assumptions, and worked examples.</text>
+</svg>

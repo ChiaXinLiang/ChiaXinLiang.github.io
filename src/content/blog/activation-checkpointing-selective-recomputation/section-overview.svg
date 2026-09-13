@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="840" viewBox="0 0 1200 840" role="img">
+<title>Activation Checkpointing: Selective Recomputation and the Memory–Time Tradeoff</title>
+<rect width="1200" height="840" fill="#faf8f1"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="#7545c8"/></marker></defs>
+<text x="44" y="58" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#252a20">Activation Checkpointing</text>
+<text x="44" y="92" font-family="Arial,sans-serif" font-size="20" fill="#555b4b">Method, execution, and verification</text>
+<rect x="44" y="125" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="78" cy="162" r="20" fill="#7545c8"/>
+<text x="78" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">1</text>
+<text x="112" y="168" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Save boundaries</text>
+<text x="68" y="238" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Retain selected forward inputs</text>
+<text x="68" y="344" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Omitted intermediates are rebuilt during</text>
+<text x="68" y="371" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">backward</text>
+<rect x="624" y="125" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="658" cy="162" r="20" fill="#7545c8"/>
+<text x="658" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">2</text>
+<text x="692" y="168" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Recompute</text>
+<text x="648" y="238" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Replay the required operations</text>
+<text x="648" y="344" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Randomness and stateful behavior must remain</text>
+<text x="648" y="371" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">consistent</text>
+<rect x="624" y="465" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="658" cy="502" r="20" fill="#7545c8"/>
+<text x="658" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">3</text>
+<text x="692" y="508" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Choose regions</text>
+<text x="648" y="578" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Target large saved tensors with affordable</text>
+<text x="648" y="607" font-family="Arial,sans-serif" font-size="21" fill="#252a20">replay</text>
+<text x="648" y="684" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">Do not checkpoint every operation</text>
+<text x="648" y="711" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">indiscriminately</text>
+<rect x="44" y="465" width="552" height="300" rx="16" fill="white" stroke="#c6b5df" stroke-width="2"/>
+<circle cx="78" cy="502" r="20" fill="#7545c8"/>
+<text x="78" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="white">4</text>
+<text x="112" y="508" font-family="Arial,sans-serif" font-weight="700" font-size="23" fill="#252a20">Measure</text>
+<text x="68" y="578" font-family="Arial,sans-serif" font-size="21" fill="#252a20">Compare activation peak and useful step</text>
+<text x="68" y="607" font-family="Arial,sans-serif" font-size="21" fill="#252a20">time</text>
+<text x="68" y="684" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">A memory reduction can enable a more efficient</text>
+<text x="68" y="711" font-family="Arial,sans-serif" font-size="19" fill="#555b4b">batch</text>
+<path d="M598 272L619 272" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M876 429L876 462" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M620 612L599 612" stroke="#7545c8" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="44" y="812" font-family="Arial,sans-serif" font-size="18" fill="#555b4b">Read the article for derivations, assumptions, and worked examples.</text>
+</svg>
