@@ -99,4 +99,4 @@ Practical guidance, then. Shortlist by constraints first: hardware fleet, model 
 - SGLang project — https://github.com/sgl-project/sglang
 - NVIDIA TensorRT-LLM — https://github.com/NVIDIA/TensorRT-LLM
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

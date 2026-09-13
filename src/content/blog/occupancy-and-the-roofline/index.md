@@ -130,4 +130,4 @@ Occupancy and the roofline are the 2 mental models that turn kernel profiling fr
 - NVIDIA Nsight Compute Profiling Guide (theoretical vs. achieved occupancy, roofline analysis). https://docs.nvidia.com/nsight-compute/ProfilingGuide/
 - NVIDIA H100 datasheet figures (bandwidth and dense tensor throughput; vendor self-reported). https://www.nvidia.com/en-us/data-center/h100/
 
-*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its published articles by topic.*

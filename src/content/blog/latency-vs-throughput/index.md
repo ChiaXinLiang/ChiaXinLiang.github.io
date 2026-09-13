@@ -125,4 +125,4 @@ Once you internalize the curve, provider behavior stops looking arbitrary. Specu
 - NVIDIA Technical Blog, "Mastering LLM Techniques: Inference Optimization" — [developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization](https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/)
 - Anyscale Engineering, "How Continuous Batching Enables 23x Throughput in LLM Inference" (vendor benchmark)
 
-*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its published articles by topic.*

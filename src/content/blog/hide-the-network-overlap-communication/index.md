@@ -114,4 +114,4 @@ Exposed communication is 1 of the biggest gaps between "GPUs busy" and "useful t
 - NIXL, NVIDIA Inference Xfer Library (part of Dynamo): https://github.com/ai-dynamo/nixl
 - NVIDIA, Scalable Hierarchical Aggregation and Reduction Protocol (SHARP) documentation, NVIDIA Networking (speedup figures are vendor-reported)
 
-*Part of the [Networking for AI Systems](/series/ai-networking/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Networking for AI Systems](/series/ai-networking/) learning path. Browse its published articles by topic.*

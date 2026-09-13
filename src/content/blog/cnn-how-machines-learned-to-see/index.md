@@ -152,4 +152,4 @@ A deployment benchmark should preserve the actual image pipeline. Decoding, resi
 
 ---
 
-*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its published articles by topic.*

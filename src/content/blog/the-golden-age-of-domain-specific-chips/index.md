@@ -121,4 +121,4 @@ Hennessy and Patterson call this a *golden age* without irony. Architecture stag
 - Dennard, R. et al., "Design of Ion-Implanted MOSFETs with Very Small Physical Dimensions," IEEE Journal of Solid-State Circuits, 1974.
 - Ranganathan, P. et al., "Warehouse-Scale Video Acceleration: Co-design and Deployment in the Wild," ASPLOS 2021.
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*

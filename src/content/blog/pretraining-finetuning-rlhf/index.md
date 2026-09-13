@@ -148,4 +148,4 @@ The lifecycle framing also explains the industry's structure. Only a handful of 
 - Rafailov et al., "Direct Preference Optimization: Your Language Model is Secretly a Reward Model," 2023. https://arxiv.org/abs/2305.18290
 - Andrej Karpathy, "State of GPT," talk at Microsoft Build 2023.
 
-*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its published articles by topic.*

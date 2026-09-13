@@ -121,4 +121,4 @@ For a kernel engineer, the practical takeaway is a triage discipline. Before opt
 - V. Volkov, "Better Performance at Lower Occupancy," GTC 2010 (instruction-level parallelism vs. occupancy)
 - NVIDIA Developer Blog, "NVIDIA Hopper Architecture In-Depth" — https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/
 
-*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its published articles by topic.*

@@ -133,4 +133,4 @@ My prediction, for what it is worth: both formats live. NVFP4 wins where NVIDIA'
 - Open Compute Project, "OCP Microscaling Formats (MX) Specification v1.0" — E8M0 scaling rule and block definitions (consortium specification document).
 - AWS, Trainium3 hardware W4A8 path: https://aws.amazon.com/ai/machine-learning/trainium/
 
-*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its published articles by topic.*

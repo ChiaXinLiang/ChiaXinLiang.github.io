@@ -136,4 +136,4 @@ The entire modern inference stack is a response to this. Batching lets N concurr
 - D. A. Patterson, "Latency Lags Bandwidth," *Communications of the ACM* 47(10), 2004.
 - M. Horowitz, "Computing's Energy Problem (and what we can do about it)," ISSCC 2014 keynote (operation energy table).
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*

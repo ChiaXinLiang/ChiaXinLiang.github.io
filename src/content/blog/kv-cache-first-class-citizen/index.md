@@ -109,4 +109,4 @@ The professional consequence is worth stating plainly. "KV cache management" use
 - OpenAI API pricing (model-specific cached-input prices). https://developers.openai.com/api/docs/pricing
 - Hazy Research (Stanford), "ThunderMLA" blog post, 2025 (megakernel decode scheduling).
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

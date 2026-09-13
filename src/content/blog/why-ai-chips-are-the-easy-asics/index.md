@@ -128,4 +128,4 @@ The product side of this story, what today's accelerators actually ship and how 
 - S. Hooker, "The Hardware Lottery," 2020 — [arxiv.org/abs/2009.06489](https://arxiv.org/abs/2009.06489)
 - P. Micikevicius et al., "FP8 Formats for Deep Learning," 2022 — [arxiv.org/abs/2209.05433](https://arxiv.org/abs/2209.05433)
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*

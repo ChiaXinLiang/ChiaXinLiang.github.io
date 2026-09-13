@@ -140,4 +140,4 @@ This flow is the machinery beneath everything else in this series. The pipelines
 - Wilson Research Group / Siemens EDA, biennial Functional Verification Study (verification effort and first-silicon success statistics).
 - International Business Strategies (IBS), per-node chip design cost estimates as reported in industry press; analyst figures, not audited costs.
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*

@@ -120,4 +120,4 @@ Next in this series, the KV cache gets a full treatment: how it's laid out, why 
 - vLLM documentation (serving metrics: TTFT, TPOT/ITL). https://docs.vllm.ai/
 - NVIDIA A100 Tensor Core GPU datasheet (peak FLOP/s and memory bandwidth; vendor-reported figures), NVIDIA Corporation, 2020.
 
-*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its published articles by topic.*

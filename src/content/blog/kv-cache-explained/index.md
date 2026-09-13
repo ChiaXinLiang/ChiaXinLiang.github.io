@@ -113,4 +113,4 @@ The formula is the tool to keep. 6 numbers multiplied together tell you, before 
 - Grattafiori et al., *The Llama 3 Herd of Models*, 2024 — [arxiv.org/abs/2407.21783](https://arxiv.org/abs/2407.21783)
 - vLLM documentation, automatic prefix caching and paged KV memory — [docs.vllm.ai](https://docs.vllm.ai)
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

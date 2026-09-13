@@ -144,4 +144,4 @@ A goodput dashboard should expose the denominator as clearly as the numerator. S
 
 ---
 
-*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its published articles by topic.*

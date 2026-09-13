@@ -1,13 +1,18 @@
 ---
 import { getCollection } from 'astro:content';
 import { SERIES } from '../consts';
-import { LEVELS } from '../data/curriculum';
 interface Props { seriesId: string; currentId: string; }
 const { seriesId, currentId } = Astro.props;
 const series = SERIES.find((item) => item.id === seriesId);
 const posts = (await getCollection('blog'))
   .filter((post) => post.data.series === seriesId)
   .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999) || a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+const topics = new Map<string, typeof posts>();
+for (const post of posts) {
+  const topic = post.data.topic ?? 'Other';
+  if (!topics.has(topic)) topics.set(topic, []);
+  topics.get(topic)!.push(post);
+}
 ---
 {series && (
   <aside class="series-sidebar" aria-label="Series navigation">
@@ -15,20 +20,22 @@ const posts = (await getCollection('blog'))
       <summary class="mobile-toggle">Browse this series <span aria-hidden="true">⌄</span></summary>
       <nav aria-label={series.name} class="sidebar-content">
         <a class="series-title" href={`/series/${series.id}/`}>{series.name}</a>
-        <p class="series-count">{posts.length} published · by level</p><a class="roadmap-link" href={`/series/${series.id}/`}>Topics and planned articles →</a>
-        {LEVELS.map(level => {
-          const list = posts.filter(post => post.data.level === level.id);
-          return <details class="topic-group" open={list.some(post => post.id === currentId)}>
-            <summary>{level.name} <span class="level-count">({list.length})</span></summary>
-            {list.length === 0 && <p class="series-count">No published articles at this level yet.</p>}
-            {[...new Set(list.map(post => post.data.topic ?? 'Other'))].map(topic => <section><h4>{topic.replace(/^\d+[ -]+/, '')}</h4><ol>{list.filter(post => (post.data.topic ?? 'Other') === topic).map(post => <li>
-              <a href={`/blog/${post.id}/`} aria-current={post.id === currentId ? 'page' : undefined}>
-                <span class="article-number" aria-hidden="true">{post.data.order}.</span>
-                <span>{post.data.title}</span>
-              </a>
-            </li>)}</ol></section>)}
-          </details>;
-        })}
+        <p class="series-count">{series.tag} · {series.level}</p><p class="series-count">{posts.length} published · by topic</p>
+        {[...topics].map(([topic, list]) => (
+          <details class="topic-group" open={list.some((post) => post.id === currentId)}>
+            <summary>{topic}</summary>
+            <ol>
+              {list.map((post) => (
+                <li>
+                  <a href={`/blog/${post.id}/`} aria-current={post.id === currentId ? 'page' : undefined}>
+                    <span class="article-number" aria-hidden="true">{post.data.order ?? posts.indexOf(post) + 1}.</span>
+                    <span>{post.data.title}</span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </details>
+        ))}
         <a class="all-series" href="/blog/">← All series</a>
       </nav>
     </details>
@@ -49,9 +56,6 @@ const posts = (await getCollection('blog'))
   .sidebar-content { padding: 1.2rem; }
   .series-title { display: block; font-size: 1.1rem; font-weight: 700; text-decoration: none; line-height: 1.3; }
   .series-count { margin: .5rem 0 1rem; color: rgb(var(--gray)); font-size: .85rem; }
-  .roadmap-link { display: block; font-size: .8rem; margin: 0 0 1rem; }
-  h4 { font-size: .8rem; margin: 1rem 0 .2rem; color: rgb(var(--gray)); font-weight: 400; }
-  .level-count { font-weight: 400; color: rgb(var(--gray)); }
   .topic-group { border-top: 1px solid rgb(var(--gray-light)); padding: .65rem 0; }
   .topic-group summary { cursor: pointer; font-weight: 700; color: rgb(var(--black)); }
   ol { list-style: none; margin: .5rem 0 0; padding: 0; }

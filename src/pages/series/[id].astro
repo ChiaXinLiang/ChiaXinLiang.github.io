@@ -3,19 +3,17 @@ import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import { SERIES } from '../../consts';
-import { LEVELS, PLANNED } from '../../data/curriculum';
 import { getCollection } from 'astro:content';
-export async function getStaticPaths() { return SERIES.map(s => ({ params: { id: s.id } })); }
+export async function getStaticPaths() { const posts = await getCollection('blog'); return SERIES.filter(s => posts.some(p => p.data.series === s.id)).map(s => ({ params: { id: s.id } })); }
 const { id } = Astro.params;
 const series = SERIES.find(s => s.id === id)!;
 const posts = (await getCollection('blog')).filter(p => p.data.series === id);
-const plans = PLANNED.filter(p => p.series === id);
-const total = posts.length + plans.length;
+const total = posts.length;
 if (total > 30) throw new Error(`${id} exceeds the 30-article curriculum limit (${total}).`);
 const entries = [
-  ...posts.map(p => ({ title: p.data.title, level: p.data.level, topic: p.data.topic ?? 'Other', order: p.data.order ?? 999, href: `/blog/${p.id}/`, planned: false })),
-  ...plans.map(p => ({ ...p, href: '', planned: true })),
+  ...posts.map(p => ({ title: p.data.title, topic: p.data.topic ?? 'Other', order: p.data.order ?? 999, href: `/blog/${p.id}/` })),
 ].sort((a,b) => a.order-b.order);
+const topics = [...new Set(entries.map(p => p.topic))];
 ---
 <!doctype html>
 <html lang="en">
@@ -23,51 +21,28 @@ const entries = [
   <body>
     <Header />
     <main>
-      <p class="crumb"><a href="/blog/">← All series</a> · {series.area}</p>
+      <p class="crumb"><a href="/blog/">← All series</a></p>
       <h1>{series.name}</h1>
+      <div class="tags"><span>{series.tag}</span><span>{series.level}</span></div>
       <p class="tagline">{series.tagline}</p>
-      <p class="counts">{posts.length} published · {plans.length} planned · {total} articles in this path</p>
-      <nav class="level-links" aria-label="Learning levels">{LEVELS.map(l => <a href={`#${l.id}`}>{l.name}</a>)}</nav>
-      {posts.length === 0 && <p class="roadmap">This is a planned learning path. The topics below are not published articles yet.</p>}
-      {LEVELS.map(level => {
-        const list = entries.filter(p => p.level === level.id);
-        const topics = [...new Set(list.map(p => p.topic))];
-        return <details class="learning-level" id={level.id} open={level.id === 'beginner'}>
-          <summary><span>{level.name}</span><small>{list.filter(p => !p.planned).length} published · {list.filter(p => p.planned).length} planned</small></summary>
-          <div class="level-body">
-            <p class="level-description">{level.description}</p>
-            {topics.map(topic => <section><h3>{topic.replace(/^\d+[ -]+/, '')}</h3><ol>
-              {list.filter(p => p.topic === topic).map(p => <li value={p.order}>{p.planned ? <span class="planned">{p.title}<small>Planned</small></span> : <a href={p.href}>{p.title}</a>}</li>)}
-            </ol></section>)}
-          </div>
-        </details>;
-      })}
+      <p class="counts">{posts.length} published article{posts.length === 1 ? '' : 's'}</p>
+      {topics.map(topic => <section class="topic"><h2>{topic.replace(/^\d+[ -]+/, '')}</h2><ol>
+        {entries.filter(p => p.topic === topic).map(p => <li value={p.order}><a href={p.href}>{p.title}</a></li>)}
+      </ol></section>)}
     </main>
     <Footer />
-    <script>
-      const reveal = () => {
-        const target = document.getElementById(location.hash.slice(1));
-        if (target instanceof HTMLDetailsElement) target.open = true;
-      };
-      window.addEventListener('hashchange', reveal); reveal();
-    </script>
   </body>
 </html>
 <style>
   .crumb, .counts { font-size: .8em; color: rgb(var(--gray)); }
   h1 { margin: .3em 0; }
+  .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+  .tags span { font-size: .7em; border: 1px solid rgb(var(--gray-light)); border-radius: 20px; color: var(--accent); padding: .25rem .65rem; }
   .tagline { color: rgb(var(--gray-dark)); }
-  .level-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.5rem 0; }
-  .level-links a { font-size: .8em; border: 1px solid rgb(var(--gray-light)); border-radius: 20px; padding: .4rem .8rem; text-decoration: none; }
-  .learning-level { border: 1px solid rgb(var(--gray-light)); border-radius: 12px; margin: 1rem 0; scroll-margin-top: 1rem; }
-  summary { padding: 1rem 1.2rem; cursor: pointer; font-weight: 700; }
-  summary small { display: block; font-weight: 400; color: rgb(var(--gray)); margin-top: .2rem; font-size: .7em; }
-  .level-body { padding: 0 1.2rem 1.2rem; }
-  .level-description, .roadmap { font-size: .85em; color: rgb(var(--gray)); }
-  h3 { font-size: 1em; margin: 1.3rem 0 .5rem; }
+  .roadmap { font-size: .85em; color: rgb(var(--gray)); }
+  .topic { margin: 2rem 0; }
+  h2 { font-size: 1.1em; margin: 1.3rem 0 .5rem; }
   ol { padding-left: 1.6rem; }
   li { margin: .7rem 0; font-size: .9em; }
-  .planned { color: rgb(var(--gray)); }
-  .planned small { display: block; font-size: .75em; }
-  a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 </style>

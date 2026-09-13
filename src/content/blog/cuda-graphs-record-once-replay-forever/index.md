@@ -120,4 +120,4 @@ If you run inference in production, the checklist is short. Trace 1 decode step 
 - PyTorch documentation, CUDA Graphs (`torch.cuda.CUDAGraph`): https://pytorch.org/docs/stable/notes/cuda.html
 - vLLM project (CUDA graph capture for decode): https://github.com/vllm-project/vllm
 
-*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its published articles by topic.*

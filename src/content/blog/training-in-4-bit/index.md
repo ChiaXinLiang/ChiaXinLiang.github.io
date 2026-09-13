@@ -140,4 +140,4 @@ How much lower can it go? The honest answer: below 4 bits, the 16-value grid sto
 
 ---
 
-*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its published articles by topic.*

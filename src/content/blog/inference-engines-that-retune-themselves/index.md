@@ -111,4 +111,4 @@ The caveat: most teams should not build any of this yet. If you have not exhaust
 - SGLang (radix cache, hierarchical KV caching) — https://github.com/sgl-project/sglang
 - CUDA C++ Programming Guide, unified memory and `cudaMemAdvise` — https://docs.nvidia.com/cuda/cuda-c-programming-guide/
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

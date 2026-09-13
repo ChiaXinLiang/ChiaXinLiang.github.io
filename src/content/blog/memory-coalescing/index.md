@@ -113,4 +113,4 @@ Keep array shape, dtype, and work identical between versions. For a transpose, v
 - NVIDIA, "NVIDIA Hopper Architecture In-Depth" (TMA introduction) — https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/
 - NVIDIA, *Nsight Compute Documentation* (memory workload analysis, sectors/request) — https://docs.nvidia.com/nsight-compute/
 
-*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its published articles by topic.*

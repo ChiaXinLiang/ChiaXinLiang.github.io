@@ -121,4 +121,4 @@ Kung and Leiserson designed for a world of 29,000-transistor chips and got the f
 - S. Hooker, "The Hardware Lottery," 2020 — [arxiv.org/abs/2009.06489](https://arxiv.org/abs/2009.06489)
 - Y.-H. Chen, J. Emer, and V. Sze, "Eyeriss: A Spatial Architecture for Energy-Efficient Dataflow for Convolutional Neural Networks," ISCA 2016.
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*

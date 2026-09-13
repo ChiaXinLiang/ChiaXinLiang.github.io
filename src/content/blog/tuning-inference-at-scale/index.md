@@ -121,4 +121,4 @@ The stack also keeps going above the single node. Prefill and decode want differ
 - Qin et al., "Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving" — https://arxiv.org/abs/2407.00079
 - vLLM documentation (automatic prefix caching, chunked prefill) — https://docs.vllm.ai/
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

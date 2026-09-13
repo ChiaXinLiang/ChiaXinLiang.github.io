@@ -126,4 +126,4 @@ The 9.3% model is not the end state. It is 1 clean, public data point on a curve
 - Kaplan et al., "Scaling Laws for Neural Language Models" — [arXiv:2001.08361](https://arxiv.org/abs/2001.08361)
 - Yang, Kautz, Hatamizadeh, "Gated Delta Networks: Improving Mamba2 with Delta Rule" (ICLR 2025)
 
-*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its published articles by topic.*

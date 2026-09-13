@@ -119,4 +119,4 @@ The direction of travel is clear from the roadmap: bigger NVLink domains (Rubin'
 - MLCommons, MLPerf Inference: Datacenter v5.0 results (March 2025) — https://mlcommons.org/benchmarks/inference-datacenter/
 - NVIDIA Developer Technical Blog, "NVIDIA Blackwell Delivers Massive Performance Leaps in MLPerf Inference v5.0" (2025), vendor analysis of the GB200 NVL72 submissions.
 
-*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its published articles by topic.*

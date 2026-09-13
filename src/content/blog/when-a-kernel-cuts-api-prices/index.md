@@ -134,4 +134,4 @@ It also says something about what an efficiency team is worth. The engineers who
 
 ---
 
-*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its published articles by topic.*

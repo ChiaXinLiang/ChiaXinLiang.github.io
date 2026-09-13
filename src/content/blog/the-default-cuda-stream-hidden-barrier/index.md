@@ -139,4 +139,4 @@ Streams and events are also the vocabulary for everything that comes next in thi
 - Mark Harris, "GPU Pro Tip: CUDA 7 Streams Simplify Concurrency", NVIDIA Developer Blog: https://developer.nvidia.com/blog/gpu-pro-tip-cuda-7-streams-simplify-concurrency/
 - NVIDIA, *CUDA Runtime API* reference (streams, events, `cudaMallocAsync`): https://docs.nvidia.com/cuda/cuda-runtime-api/
 
-*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its published articles by topic.*

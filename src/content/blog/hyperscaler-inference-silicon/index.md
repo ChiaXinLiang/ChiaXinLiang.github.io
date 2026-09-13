@@ -113,4 +113,4 @@ For engineers, it is a reminder that the scarce skill is seeing through the numb
 - Jouppi et al., "TPU v4: An Optically Reconfigurable Supercomputer for Machine Learning" — [arXiv:2304.01433](https://arxiv.org/abs/2304.01433)
 - Microsoft Azure — [First large-scale GB300 NVL72 cluster for OpenAI workloads](https://azure.microsoft.com/en-us/blog/microsoft-azure-delivers-the-first-large-scale-cluster-with-nvidia-gb300-nvl72-for-openai-workloads/)
 
-*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its published articles by topic.*

@@ -147,4 +147,4 @@ This is also why memory bandwidth, not FLOPS, headlines modern accelerator spec 
 - NVIDIA, *CUDA C++ Programming Guide* (shared memory) — [docs.nvidia.com/cuda/cuda-c-programming-guide/](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)
 - Onur Mutlu, lecture materials on memory systems, ETH Zürich SAFARI group — [safari.ethz.ch](https://safari.ethz.ch/)
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*

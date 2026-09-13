@@ -148,4 +148,4 @@ When a vendor quotes "tokens per second," now you know to ask 3 questions. Per u
 
 ---
 
-*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its published articles by topic.*

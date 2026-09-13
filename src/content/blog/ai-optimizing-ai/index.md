@@ -108,4 +108,4 @@ The systems in this article are the first ones that can turn those levers withou
 - Kimi Team, "Kimi K2: Open Agentic Intelligence," arXiv (2025). https://arxiv.org/abs/2507.20534
 - NVIDIA, GB200 NVL72 specifications. https://www.nvidia.com/en-us/data-center/gb200-nvl72/
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

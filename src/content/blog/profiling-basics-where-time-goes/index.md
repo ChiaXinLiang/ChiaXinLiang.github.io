@@ -107,4 +107,4 @@ The deeper point is cultural. The illustrative trace gives a 25% reduction from 
 - NVIDIA, *CUDA C++ Programming Guide* (asynchronous execution model) — https://docs.nvidia.com/cuda/cuda-c-programming-guide/
 - vLLM documentation (profiling and performance) — https://docs.vllm.ai/
 
-*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its published articles by topic.*

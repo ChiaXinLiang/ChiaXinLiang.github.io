@@ -132,4 +132,4 @@ Napkin first, dashboard second. The napkin knew before the migration did.
 - NVIDIA Developer Blog, "Mastering LLM Techniques: Inference Optimization": https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/
 - Williams, Waterman, and Patterson, "Roofline: An Insightful Visual Performance Model for Multicore Architectures," Communications of the ACM, 2009.
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

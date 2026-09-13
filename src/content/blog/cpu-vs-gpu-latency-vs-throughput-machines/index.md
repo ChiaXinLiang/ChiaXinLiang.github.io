@@ -126,4 +126,4 @@ The next stop in this series pushes specialization 1 step further: if lockstep l
 - M. J. Flynn, "Some Computer Organizations and Their Effectiveness," IEEE Transactions on Computers, 1972.
 - S. Hooker, "The Hardware Lottery," 2020. https://arxiv.org/abs/2009.06489
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*

@@ -113,4 +113,4 @@ For a performance engineer the practical takeaway is diagnostic. When Nsight Com
 - CUDA C++ Programming Guide (asynchronous barriers, TMA/`cp.async.bulk.tensor`, cluster APIs) — https://docs.nvidia.com/cuda/cuda-c-programming-guide/
 - DeepSeek DeepGEMM (warp-specialized FP8 GEMMs in practice) — https://github.com/deepseek-ai/DeepGEMM
 
-*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its published articles by topic.*

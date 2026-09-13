@@ -131,4 +131,4 @@ This is also, quietly, a recruiting pitch. Several tiers on that page correspond
 - NVIDIA, "NVIDIA Unveils Rubin CPX," a GPU class dedicated to long-context prefill: https://nvidianews.nvidia.com/news/nvidia-unveils-rubin-cpx-a-new-class-of-gpu-designed-for-massive-context-inference
 - Mooncake: KV-cache-centric disaggregated serving (Qin et al., FAST '25 best paper), cited without link.
 
-*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its published articles by topic.*

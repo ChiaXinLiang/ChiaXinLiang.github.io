@@ -130,4 +130,4 @@ The dependency also runs forward: stream discipline and sync-free inner loops ar
 - Tillet et al., "Triton: An Intermediate Language and Compiler for Tiled Neural Network Computations," MAPL 2019. https://dl.acm.org/doi/10.1145/3315508.3329973
 - PyTorch Performance Tuning Guide (pinned memory, CUDA event timing). https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html
 
-*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its published articles by topic.*

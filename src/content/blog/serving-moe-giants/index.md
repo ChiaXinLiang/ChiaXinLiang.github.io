@@ -105,4 +105,4 @@ Serving MoE giants is where the themes of this series converge. The memory arith
 - DeepEP: an efficient expert-parallel communication library (self-reported benchmarks) — <https://github.com/deepseek-ai/DeepEP>
 - EPLB: Expert Parallelism Load Balancer — <https://github.com/deepseek-ai/EPLB>
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

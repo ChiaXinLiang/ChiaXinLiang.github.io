@@ -119,4 +119,4 @@ At system level, the balance point explains serving architecture. Prefill's comp
 - T. Dao, D. Fu, S. Ermon, A. Rudra, C. Ré, "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness," 2022. https://arxiv.org/abs/2205.14135
 - NVIDIA Nsight Compute documentation, roofline analysis section. https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html
 
-*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its published articles by topic.*

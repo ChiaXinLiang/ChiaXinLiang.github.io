@@ -1,5 +1,5 @@
 export const LEVELS = [{"id": "beginner", "name": "Beginner", "description": "Build the vocabulary and intuition with explicit assumptions, small examples, and explained equations."}, {"id": "intermediate", "name": "Intermediate", "description": "Connect methods to implementation, measurement, and practical engineering choices."}, {"id": "advanced", "name": "Advanced", "description": "Analyze interacting optimizations, derive tradeoffs, and investigate scaling and failure modes."}] as const;
-export const AREAS = [{"name": "AI Infrastructure", "description": "Hardware capacity, networks, kernels, training, and production serving."}, {"name": "Models & Mathematics", "description": "The theory and computational structure behind language models."}, {"name": "Hardware & Co-Design", "description": "Processors, instruction sets, accelerators, and algorithm\u2013hardware tradeoffs."}] as const;
+export const TAGS = [{"name": "AI Infrastructure", "description": "Hardware capacity, networks, kernels, training, and production serving."}, {"name": "Models & Mathematics", "description": "The theory and computational structure behind language models."}, {"name": "Hardware & Co-Design", "description": "Processors, instruction sets, accelerators, and algorithm\u2013hardware tradeoffs."}] as const;
 export const PLANNED = [
   {
     "series": "ai-performance",

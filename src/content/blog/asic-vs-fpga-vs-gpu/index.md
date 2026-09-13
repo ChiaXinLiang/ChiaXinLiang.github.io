@@ -135,4 +135,4 @@ Next in this series: what "designing a chip" actually involves, the RTL-to-GDSII
 - The OpenROAD Project (open-source RTL-to-GDSII flow) — https://theopenroadproject.org/
 - Tiny Tapeout (low-cost shared shuttle tapeouts) — https://tinytapeout.com/
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*

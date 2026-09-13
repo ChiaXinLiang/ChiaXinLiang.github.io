@@ -153,4 +153,4 @@ Capacity planning should include a small experiment that checks the estimate und
 - EleutherAI, "Transformer Math 101." https://blog.eleuther.ai/transformer-math/
 - NVIDIA H100 Tensor Core GPU specifications. https://www.nvidia.com/en-us/data-center/h100/
 
-*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its published articles by topic.*

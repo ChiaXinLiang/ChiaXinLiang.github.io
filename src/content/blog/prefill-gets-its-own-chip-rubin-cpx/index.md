@@ -109,4 +109,4 @@ Expect the split to deepen. Once prefill and decode are separate line items, eac
 - Glenn Lockwood — community-tracked Rubin R200 specifications (unofficial): https://www.glennklockwood.com/garden/processors/r200
 - Williams, Waterman, and Patterson — "Roofline: An Insightful Visual Performance Model for Multicore Architectures," Communications of the ACM, 2009.
 
-*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its published articles by topic.*

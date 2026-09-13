@@ -121,4 +121,4 @@ That is the quiet dignity of performance engineering. It rarely ships a feature 
 - DeepSeek-AI, "DeepSeek-V3 Technical Report": https://arxiv.org/abs/2412.19437
 - Together AI pricing page (vendor list prices): https://www.together.ai/pricing
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

@@ -129,4 +129,4 @@ It is also the purest example of what [an ML performance engineer actually does]
 - PyTorch, `torch.utils.data` documentation (pin_memory, prefetch_factor, num_workers): https://pytorch.org/docs/stable/data.html
 - Kubernetes, Topology Manager documentation: https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/
 
-*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its published articles by topic.*

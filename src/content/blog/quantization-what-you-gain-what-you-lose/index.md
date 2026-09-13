@@ -111,4 +111,4 @@ The frontier is below 4 bits and beyond weights: FP4 KV caches, quantization-awa
 - Micikevicius et al. — *FP8 Formats for Deep Learning* (2022): https://arxiv.org/abs/2209.05433
 - NVIDIA H100 Tensor Core GPU specifications: https://www.nvidia.com/en-us/data-center/h100/
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

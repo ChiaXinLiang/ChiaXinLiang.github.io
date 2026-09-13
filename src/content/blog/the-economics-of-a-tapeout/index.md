@@ -156,4 +156,4 @@ Next in this thread: why AI workloads, with their regular, dense, predictable co
 - Tiny Tapeout, pricing and shuttle model: https://tinytapeout.com/
 - The OpenROAD Project (open-source RTL-to-GDSII flow): https://theopenroadproject.org/
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*

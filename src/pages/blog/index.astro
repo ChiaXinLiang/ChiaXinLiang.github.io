@@ -37,7 +37,7 @@ const unclassified = all.filter((p) => !p.data.series);
 		<Header />
 		<main>
 			<h1>Blog</h1>
-			<p>Choose an area, then a series. Each path has Beginner, Intermediate, and Advanced levels, with a maximum of 30 articles including plans.</p>
+			<p>Find a series by searching its title or topics, then filter by subject and level tags.</p>
 			<LearningHub posts={all} />
 			{
 				unclassified.length > 0 && (

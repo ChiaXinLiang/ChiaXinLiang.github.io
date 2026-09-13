@@ -101,4 +101,4 @@ What would change the answer? 4 things, all in motion. Data: tens of thousands o
 - Fawzi et al., "Discovering faster matrix multiplication algorithms with reinforcement learning" (AlphaTensor), Nature — https://www.nature.com/articles/s41586-022-05172-4
 - KernelBench repository — https://github.com/ScalingIntelligence/KernelBench
 
-*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its published articles by topic.*

@@ -111,4 +111,4 @@ The diagnostic sequence that closes this case file works for most of the series:
 - NVIDIA TensorRT-LLM repository (weight-only quantization support matrix). https://github.com/NVIDIA/TensorRT-LLM
 - NVIDIA H100 Tensor Core GPU specifications. https://www.nvidia.com/en-us/data-center/h100/
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

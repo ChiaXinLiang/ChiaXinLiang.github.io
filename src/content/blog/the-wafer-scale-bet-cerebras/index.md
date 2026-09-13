@@ -115,4 +115,4 @@ What makes the WSE-3 worth studying is not that it wins; it is that it is *legib
 
 ---
 
-*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its published articles by topic.*

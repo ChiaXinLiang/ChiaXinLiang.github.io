@@ -133,4 +133,4 @@ For a performance engineer, this article is the floor under 2 earlier ones. When
 - R. H. Dennard, "Field-Effect Transistor Memory," U.S. Patent 3,387,286 (filed 1967, granted 1968)
 - Colin Scott, *Interactive Latency Numbers Every Programmer Should Know* — [colin-scott.github.io](https://colin-scott.github.io/personal_website/research/interactive_latency.html)
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*

@@ -129,4 +129,4 @@ Speculative decoding is the third member of a family of tricks that all answer t
 - Li et al. *EAGLE-2: Faster Inference of Language Models with Dynamic Draft Trees.* EMNLP 2024. https://arxiv.org/abs/2406.16858
 - vLLM project, speculative decoding implementation. https://github.com/vllm-project/vllm
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

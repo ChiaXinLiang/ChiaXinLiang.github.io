@@ -129,4 +129,4 @@ The taxonomy is also a communication tool. "The kernel is slow" starts a debate;
 - Vasily Volkov, "Better Performance at Lower Occupancy," GTC 2010; and *Understanding Latency Hiding on GPUs*, PhD thesis, UC Berkeley, 2016.
 - Tri Dao et al., "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness" — https://arxiv.org/abs/2205.14135
 
-*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its published articles by topic.*

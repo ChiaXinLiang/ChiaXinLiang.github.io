@@ -138,6 +138,6 @@ Configuration files provide a useful bridge between this diagram and a real chec
 
 ---
 
-*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its published articles by topic.*
 
 - [Xiong et al., On Layer Normalization in the Transformer Architecture](https://arxiv.org/abs/2002.04745): pre-norm versus post-norm placement.

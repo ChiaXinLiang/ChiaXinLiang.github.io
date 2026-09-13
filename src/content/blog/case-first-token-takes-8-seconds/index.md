@@ -128,4 +128,4 @@ Next case in the series: the OOM that only happens on Tuesdays, or, why your KV 
 - vLLM documentation: chunked prefill and automatic prefix caching — [docs.vllm.ai](https://docs.vllm.ai/)
 - NVIDIA H100 Tensor Core GPU specifications (989 TFLOPS dense BF16 is NVIDIA's self-reported peak) — [nvidia.com/en-us/data-center/h100/](https://www.nvidia.com/en-us/data-center/h100/)
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

@@ -105,4 +105,4 @@ The deeper shift is cultural. An industry that grew up maximizing peak performan
 - Microsoft Azure, "Microsoft Azure delivers the first large-scale cluster with NVIDIA GB300 NVL72" — https://azure.microsoft.com/en-us/blog/microsoft-azure-delivers-the-first-large-scale-cluster-with-nvidia-gb300-nvl72-for-openai-workloads/
 - NVIDIA, "Scaling AI Factories with Co-Packaged Optics for Better Power Efficiency" — https://developer.nvidia.com/blog/scaling-ai-factories-with-co-packaged-optics-for-better-power-efficiency/
 
-*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Efficient AI & Co-Design](/series/efficient-ai/) learning path. Browse its published articles by topic.*

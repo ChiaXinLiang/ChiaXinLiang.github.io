@@ -114,4 +114,4 @@ It also explains the shape of the whole optimization stack that follows in this 
 - SGLang project repository — https://github.com/sgl-project/sglang
 - Anyscale engineering blog, "How continuous batching enables 23x throughput in LLM inference" (vendor-reported benchmark)
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

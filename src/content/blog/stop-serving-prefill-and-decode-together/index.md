@@ -106,4 +106,4 @@ Disaggregation is the first of several moves that turn "a model server" into "an
 - NVIDIA, *Blackwell Ultra sets new inference records in MLPerf debut* (disaggregated Dynamo submission, vendor-reported under MLPerf rules) — [developer.nvidia.com](https://developer.nvidia.com/blog/nvidia-blackwell-ultra-sets-new-inference-records-in-mlperf-debut/)
 - LMSYS, *SGLang on GB200 NVL72, part 2* (disaggregated DeepSeek-V3/R1 numbers) — [lmsys.org](https://lmsys.org/blog/2025-09-25-gb200-part-2/)
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

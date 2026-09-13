@@ -132,4 +132,4 @@ It's also the doorway to a different discipline. Squeezing more goodput out of t
 - NVIDIA H100 Tensor Core GPU datasheet (memory bandwidth and FLOPS figures), NVIDIA Corporation
 - Databricks engineering blog, "LLM Inference Performance Engineering: Best Practices" (Mosaic AI team)
 
-*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Foundations & Mathematics](/series/llm-basics/) learning path. Browse its published articles by topic.*

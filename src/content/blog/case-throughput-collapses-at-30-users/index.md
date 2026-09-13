@@ -135,4 +135,4 @@ The meta-lesson for troubleshooting: a performance *cliff* is a fingerprint. Pla
 - vLLM documentation and source (preemption, swap vs. recompute, `kv_cache_dtype`, metrics) — https://docs.vllm.ai and https://github.com/vllm-project/vllm
 - NVIDIA TensorRT-LLM (FP8 KV cache support) — https://github.com/NVIDIA/TensorRT-LLM
 
-*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

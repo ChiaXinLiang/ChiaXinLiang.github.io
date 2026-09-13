@@ -138,4 +138,4 @@ That lens also explains why this matters more every hardware generation. Compute
 - Tillet, Kung, Cox, "Triton: an intermediate language and compiler for tiled neural network computations," MAPL 2019. https://dl.acm.org/doi/10.1145/3315508.3329973
 - OpenAI, "Introducing Triton: Open-source GPU programming for neural networks". https://openai.com/index/triton/
 
-*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [GPU Programming & Performance](/series/gpu-performance/) learning path. Browse its published articles by topic.*

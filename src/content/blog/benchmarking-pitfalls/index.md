@@ -104,4 +104,4 @@ So the discipline, in 1 sentence: *write the SLO down before you run anything, g
 - NVIDIA H100 Tensor Core GPU specifications — [nvidia.com/en-us/data-center/h100](https://www.nvidia.com/en-us/data-center/h100/)
 - Gil Tene, "How NOT to Measure Latency," talk on coordinated omission (Strange Loop / QCon)
 
-*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [AI Infrastructure Foundations](/series/ai-performance/) learning path. Browse its published articles by topic.*

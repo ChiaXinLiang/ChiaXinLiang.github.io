@@ -155,4 +155,4 @@ The CPU's bet: the code is sequential and unpredictable, so build a machine that
 - Agner Fog, Software Optimization Resources: https://www.agner.org/optimize/ — measured microarchitecture details (buffer sizes, latencies) for real x86 cores.
 - Chips and Cheese, microarchitecture analyses: https://chipsandcheese.com/ — source for Golden Cove's 512-entry ROB and 280-entry integer register file; Firestorm figures are from independent third-party measurements, not Apple disclosures.
 
-*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its Beginner, Intermediate, and Advanced topics and planned articles.*
+*Part of the [Computer Architecture & ASIC](/series/comp-arch/) learning path. Browse its published articles by topic.*
