@@ -20,9 +20,9 @@ We will derive the dispatch budget and follow the complete execution program. Th
 
 ## 1. Begin with the routed mathematical result
 
-![Section overview: All-to-All for MoE: Expert Dispatch, Imbalance, and Communication Cost. Route and preserve identity; Pack destination buffers; Exchange and compute; Return and combine](./section-overview.svg)
+![Concept overview: All-to-All for MoE: Expert Dispatch, Imbalance, and Communication Cost. Multiple GPU servers each contain expert blocks.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Let x_i be token i's hidden representation. The router selects a set E_i of k experts and supplies combining weights w_i,e. With expert function f_e, the routed contribution is
@@ -36,6 +36,10 @@ Some models also include shared experts or additional residual structure. Their 
 The router can make nonuniform choices across tokens, layers, and batches. Top-k identifies the number of selected experts, not a guarantee that every expert receives equal load. A destination owner's demand is the sum of assignments to the experts it holds.
 
 Keep token identity and expert identity explicit. Preserve the same identities through every intermediate layout conversion. One token selected for 2 experts creates 2 assignments, and those outputs later combine into one token result. Treating assignments as unique original tokens can break output counts, routing weights, or inverse ordering.
+
+
+
+![Deep-dive illustration: Begin with the routed mathematical result](./deep-dive.png)
 
 ## 2. Construct the source-to-destination traffic matrix
 

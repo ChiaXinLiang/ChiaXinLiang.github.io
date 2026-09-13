@@ -40,6 +40,10 @@ For a variance-preserving schedule, the amplitudes satisfy a_t squared plus s_t 
 
 The ordering of t depends on the corruption convention. In this article, u denotes a less noisy level reached from t during generation. Record actual scheduler coefficients instead of inferring them from labels such as early or late, which can be reversed between implementations.
 
+
+
+![Deep-dive illustration: Define the noise-level notation](./deep-dive.png)
+
 ## 3. Express one deterministic update
 
 Suppose the model predicts a clean sample x_hat at state x_t. Rearranging the corruption relationship gives a corresponding noise estimate. A deterministic DDIM-style update reuses that pair at the next selected level.

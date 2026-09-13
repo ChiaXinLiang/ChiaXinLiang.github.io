@@ -18,9 +18,9 @@ This article uses the disclosed gpt-oss, Qwen3.6-35B-A3B, and DeepSeek-V4.1-Flas
 
 ## 1. Define the object of comparison
 
-![Section overview: Comparing LLM Architectures: Evidence, Tradeoffs, and Missing Disclosures. Define the comparison boundary; Read disclosed mechanisms; Calculate comparable quantities; Evaluate controlled workloads](./section-overview.svg)
+![Concept overview: Comparing LLM Architectures: Evidence, Tradeoffs, and Missing Disclosures. Several model silhouettes show dense attention cache, compact recurrent state plus attention, and routed experts.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Architecture is the structured computation: layer families, projections, state updates, expert routing, and residual paths. A checkpoint supplies trained weights. A backend chooses an execution schedule and numerical representation. An inference policy chooses sampling, search, and other request behavior.
@@ -50,6 +50,10 @@ $$
 Latent cache, cross-layer sharing, or mixed local-global layers require another expression. Applying this formula to every model because they all use attention can create large errors.
 
 Compare retained representation, eligible history, query work, and actual kernel traffic separately. Theoretical bytes establish capacity implications; measured traffic and time establish execution behavior.
+
+
+
+![Deep-dive illustration: Compare attention representations](./deep-dive.png)
 
 ## 4. Compare hybrid state correctly
 

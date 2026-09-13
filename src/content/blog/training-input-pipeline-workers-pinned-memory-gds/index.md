@@ -20,9 +20,9 @@ We will derive a steady-state pipeline model, budget buffered batches, and exami
 
 ## 1. Draw the complete path from a sample to computation
 
-![Section overview: The Training Input Pipeline: Workers, Prefetch, Pinned Memory, and GDS. Identify every stage; Find the limiting rate; Budget buffered data; Verify useful training](./section-overview.svg)
+![Concept overview: The Training Input Pipeline: Workers, Prefetch, Pinned Memory, and GDS. Storage files feed several CPU data-loader workers, a prefetch queue, pinned host buffers, and a GPU training engine.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Start with storage access, then identify decoding, transforms, sample grouping, collation, host buffering, transfer, and GPU consumption. Some stages may be fused, cached, or moved to the device. The diagram should describe the actual workload rather than an idealized generic loader.
@@ -48,6 +48,10 @@ Startup can include the sum of stages before the first batch reaches computation
 For illustrative times of 40 milliseconds reading, 20 decoding, 15 transforming, 10 transferring, and 50 computing, serial execution takes 135 milliseconds. An adequately provisioned independent pipeline could approach a 50-millisecond interval after startup. The calculation explains the opportunity, not a promised measured speedup.
 
 Measure queue occupancy and starvation to test the model. If ready batches disappear before each GPU step, upstream supply is insufficient or too variable. If queues remain full and GPU timing is unchanged, increasing loader concurrency may add resource cost without improving training.
+
+
+
+![Deep-dive illustration: Derive the steady-state bottleneck approximation](./deep-dive.png)
 
 ## 3. Workers increase capacity only under the right conditions
 

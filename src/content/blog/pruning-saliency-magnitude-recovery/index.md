@@ -33,6 +33,10 @@ The zero-norm notation counts retained entries rather than defining an ordinary 
 
 A mask can remain applied to a dense tensor during experimentation. That establishes sparse semantics but not compressed storage or skipped arithmetic. Deployment requires a compatible representation and kernel. Keep the mathematical intervention separate from its execution.
 
+
+
+![Deep-dive illustration: Represent the intervention with a mask](./deep-dive.png)
+
 ## 2. Explain magnitude pruning
 
 Magnitude pruning retains parameters with larger absolute values under a chosen population. A threshold creates the mask; alternatively, a top-K rule retains a specified number. The original learning-connections paper uses training, low-weight pruning, and retraining as a complete procedure.

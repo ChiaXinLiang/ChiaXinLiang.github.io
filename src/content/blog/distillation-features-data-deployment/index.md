@@ -32,6 +32,10 @@ FitNets introduced intermediate hints and a mapping to support thinner students.
 
 Choose the layer correspondence deliberately. Equal layer indices do not imply equal semantic depth when teacher and student architectures differ. A mapping is part of the method and needs documented shapes, initialization, and training status.
 
+
+
+![Deep-dive illustration: Define an intermediate interface](./deep-dive.png)
+
 ## 2. Write a feature reconstruction objective
 
 A simple aligned feature loss uses squared distance, normalized here by teacher feature width. Its gradient teaches both the student representation and any trainable projector.

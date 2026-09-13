@@ -20,9 +20,9 @@ This separation introduces new computation, state, and scheduling concerns. We w
 
 ## 1. Define the contract before selecting the implementation
 
-![Section overview: Structured Output: Grammar Masks and Constrained Decoding Throughput. Compile the output contract; Mask the next token; Sample and advance; Measure complete results](./section-overview.svg)
+![Concept overview: Structured Output: Grammar Masks and Constrained Decoding Throughput. A parser state and grammar tree constrain a token probability bar chart, with invalid next tokens visibly masked and valid tokens retained.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 A structural contract can describe JSON syntax, a JSON Schema subset, a regular language, or a more general grammar. These choices express different requirements. Valid JSON allows many objects that a particular application cannot use. A schema may constrain keys, types, and some value properties, but support for individual schema features depends on the implementation.
@@ -46,6 +46,10 @@ The state can include multiple possible parser configurations, not merely a sing
 An admissible prefix is also different from a completed output. After emitting an opening brace, the prefix can still be valid, but there is no object to deliver yet. End-of-sequence should become permitted only when the implementation's completion rules allow termination. Stopping at a token limit can leave a perfectly admissible prefix incomplete.
 
 The per-request matcher must follow exactly the tokens accepted into that request's output. Sharing mutable matcher state across requests would connect their grammars accidentally. Compiled grammar information may be reusable; the current prefix and transition history belong to the individual generation.
+
+
+
+![Deep-dive illustration: Treat decoding as a state transition system](./deep-dive.png)
 
 ## 3. Derive the masked sampling distribution
 

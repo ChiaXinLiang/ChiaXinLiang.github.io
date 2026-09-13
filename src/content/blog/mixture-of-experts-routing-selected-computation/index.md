@@ -18,9 +18,9 @@ Sparse expert models can retain far more weights than they use in 1 token's arit
 
 ## 1. Locate the expert layer
 
-![Section overview: Mixture of Experts 1: Routing and Selected Computation. Score the experts; Select a sparse subset; Run selected functions; Combine the results](./section-overview.svg)
+![Concept overview: Mixture of Experts 1: Routing and Selected Computation. A router receives a token embedding and selects a small subset from a bank of experts.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 In a common Transformer design, an MoE layer replaces an ordinary feed-forward sublayer. Attention still mixes information across positions according to its own rules. The expert functions typically operate independently on each token representation once routing is known.
@@ -41,6 +41,10 @@ $$
 The router is trainable. Its scores can learn relationships between token representations and useful expert functions. It does not necessarily assign interpretable labels such as “mathematics expert” or “networking expert.” Apparent specialization requires evidence from activations and behavior, not an attractive name.
 
 Softmax probabilities before selection and combine weights after selection are not automatically the same object. Some implementations renormalize selected weights and others use their original values. Inspect the actual forward computation before reproducing it.
+
+
+
+![Deep-dive illustration: Derive router scores](./deep-dive.png)
 
 ## 3. Select and combine experts
 

@@ -18,9 +18,9 @@ If you work on inference performance, this structure is your job. Weights are fi
 
 ## Why attention forces you to keep the past
 
-![Section overview: what the kv cache saves—and what it costs. Preserve prior state; Read state to attend; Count memory explicitly; Manage physical blocks](./section-overview.svg)
+![Concept overview: The KV Cache, Explained for Engineers. An illustrated decoder token sequence where prior tokens have retained key/value tiles in GPU HBM, the new token creates its own Q/K/V, its query reads historical K tiles to produce attention weights, and these weights combine V tiles.](./section-overview.png)
 
-*Read 1 to 4 to connect the method, its mechanism, and the assumptions behind the equations. The section below develops the details.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 A transformer generates text autoregressively, 1 token per forward pass. (If prefill vs. decode is fuzzy, the [basics article on generation](/blog/how-an-llm-generates-text/) covers it; here we assume it.) Inside every attention layer, the new token's query vector is compared against the **key** vectors of all previous tokens, and the resulting weights blend their **value** vectors. That is the mechanism: to produce token *n+1*, attention needs K and V for tokens 1 through *n*, in every layer.

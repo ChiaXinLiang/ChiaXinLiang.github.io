@@ -20,9 +20,9 @@ We will derive the average-gradient objective, model bucket completion times, an
 
 ## 1. Replication defines what must remain consistent
 
-![Section overview: DDP: Gradient Buckets and the Backward Communication Timeline. Replicate; Bucket; Overlap; Update](./section-overview.svg)
+![Concept overview: DDP: Gradient Buckets and the Backward Communication Timeline. Multiple GPU ranks compute backward layers.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 A DDP rank normally keeps a full model replica and its optimizer state. Each rank runs forward and backward on a local batch. If every rank starts with the same parameter values, receives the same synchronized gradient, and applies the same optimizer update, the replicas remain consistent. Synchronization does not require broadcasting every updated parameter on every step in this basic model.
@@ -46,6 +46,10 @@ The all-reduce combines local gradients, and the framework’s reduction convent
 Unequal numbers of valid tokens require more care. Suppose rank d has n_d valid loss tokens and computes a local mean gradient g_d. The desired token-weighted global mean is the sum of n_d g_d divided by the sum of n_d, rather than an unweighted average of rank means. Padding masks and variable-length batches can make those 2 expressions different even when each rank has the same number of examples.
 
 Loss weighting can correct the difference if counts and reduction factors are handled consistently. State whether the objective averages examples, valid tokens, sequences, or ranks. A faster distributed configuration is not an equivalent baseline when it silently changes these weights. Numerical equality should be assessed with sensible floating-point tolerances rather than requiring identical accumulation order.
+
+
+
+![Deep-dive illustration: Derive the synchronized gradient](./deep-dive.png)
 
 ## 3. Why gradients travel in buckets
 

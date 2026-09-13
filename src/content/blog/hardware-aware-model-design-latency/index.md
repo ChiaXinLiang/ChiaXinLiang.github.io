@@ -40,6 +40,10 @@ This count describes mathematical work, not elapsed time. It does not include da
 
 Models with the same product MKN can present different tile utilization and parallelism. A thin dimension can limit available work per tile, while a small overall problem can leave much of a large device idle. Preserve shapes alongside operation counts in architecture comparisons.
 
+
+
+![Deep-dive illustration: Count matrix work precisely](./deep-dive.png)
+
 ## 3. Estimate arithmetic intensity
 
 Arithmetic intensity divides operations by bytes transferred at a chosen memory boundary. A simple idealized estimate reads each input matrix once and writes the output once, using p bytes per element.

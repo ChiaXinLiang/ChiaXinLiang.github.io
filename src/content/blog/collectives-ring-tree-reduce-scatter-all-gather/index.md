@@ -20,9 +20,9 @@ This article connects the mathematical result to those schedules and explains ho
 
 ## 1. Write the collective result before counting bytes
 
-![Section overview: Collective Communication: Ring, Tree, Reduce-Scatter, and All-Gather. Define the result; Separate the phases; Compare schedules; Measure the application](./section-overview.svg)
+![Concept overview: Collective Communication: Ring, Tree, Reduce-Scatter, and All-Gather. A ring of GPU ranks moves colored chunks for reduce-scatter then all-gather, with a separate tree connecting ranks for reduction.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Suppose p ranks each hold a vector x_r of n elements. For a sum all-reduce, every rank receives y with
@@ -36,6 +36,10 @@ A mean reduction adds division by the appropriate population or weight. Do not a
 All-gather instead produces a concatenation or equivalent layout of the original contributions. It does not sum corresponding elements. Reduce-scatter performs the reduction and partitions the resulting vector among ranks according to the operation's defined layout.
 
 The participants must agree on group membership, data types, counts, and operation ordering. A rank entering a different collective can stall the group or violate the protocol. A collective's semantic contract therefore includes distributed participation, not only the output tensor formula.
+
+
+
+![Deep-dive illustration: Write the collective result before counting bytes](./deep-dive.png)
 
 ## 2. Decompose all-reduce into ownership-changing phases
 

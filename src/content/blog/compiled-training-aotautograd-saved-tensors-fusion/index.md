@@ -18,9 +18,9 @@ AOTAutograd provides a way to trace differentiable computation and expose forwar
 
 ## 1. Write the differentiation contract
 
-![Section overview: Compiled Training: AOTAutograd, Saved Tensors, and Fusion Boundaries. Capture differentiable work; Partition the graph; Compile each region; Validate complete steps](./section-overview.svg)
+![Concept overview: Compiled Training: AOTAutograd, Saved Tensors, and Fusion Boundaries. A forward computation graph and backward graph share saved activation tensors.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Consider a function producing a scalar loss from parameters and input data. The training step needs both the loss and its derivatives with respect to the intended parameter population. Frozen parameters, detached tensors, and nondifferentiable operations alter that population. The compiler must preserve those semantics rather than differentiating every available tensor.
@@ -33,6 +33,10 @@ $$
 The update function also depends on optimizer state s. Momentum, adaptive moments, gradient accumulation, and mixed-precision scaling make this state meaningful. A forward-only comparison does not test the complete update function.
 
 Establish which operations belong to the compiled region. The loss can be compiled while the optimizer remains outside it, or a larger step can be captured under supported conditions. State the actual boundary in the benchmark. “Compiled training” is otherwise too broad to interpret.
+
+
+
+![Deep-dive illustration: Write the differentiation contract](./deep-dive.png)
 
 ## 2. Trace the joint computation
 

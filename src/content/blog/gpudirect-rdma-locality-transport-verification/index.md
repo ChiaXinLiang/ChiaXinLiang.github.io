@@ -20,9 +20,9 @@ We will build this evidence in layers and use simple traffic and placement model
 
 ## 1. Draw both the direct and staged alternatives
 
-![Section overview: GPUDirect RDMA: GPU–NIC Locality and Transport Verification. Establish a supported pair; Keep registration reusable; Compare data paths; Verify in the real job](./section-overview.svg)
+![Concept overview: GPUDirect RDMA: GPU–NIC Locality and Transport Verification. Cutaway server shows GPU memory and a nearby NIC connected through a local PCIe fabric.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 A traditional staged send can copy data from GPU memory to host memory, transmit it through the adapter, and copy received data from host memory to the remote GPU. A direct supported path allows the adapter to access the relevant GPU-memory mapping without those explicit staging copies.
@@ -36,6 +36,10 @@ T_s\approx\alpha_s+n/B_{\mathrm{D2H}}+n/B_{\mathrm{net}}+n/B_{\mathrm{H2D}},\qqu
 $$
 
 The parameters include the selected measurement boundary. Real staged implementations can pipeline chunks, and direct transfers can have additional setup or signaling. Use the equations to identify avoided work, then compare the actual timelines instead of treating their ratio as a promised speedup.
+
+
+
+![Deep-dive illustration: Draw both the direct and staged alternatives](./deep-dive.png)
 
 ## 2. Check platform support before tuning performance
 

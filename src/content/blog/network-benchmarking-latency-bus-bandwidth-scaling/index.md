@@ -20,9 +20,9 @@ This article develops that experiment from pair tests through multi-node collect
 
 ## 1. State the question before selecting a benchmark
 
-![Section overview: Network Benchmarking: Latency, Bus Bandwidth, and Multi-Node Scaling. Fix the experiment; Sweep representative sizes; Report the population; Check application scaling](./section-overview.svg)
+![Concept overview: Network Benchmarking: Latency, Bus Bandwidth, and Multi-Node Scaling. Several GPU nodes and a switch execute small-message and large-message transfers.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Different questions require different tests. A pair-transfer test asks whether a particular source and destination path can move supported buffers efficiently. A collective test asks how a group executes a distributed operation. An application trace asks how that operation interacts with readiness and computation.
@@ -48,6 +48,10 @@ where n is bytes, alpha is startup time, and beta is effective payload bandwidth
 For illustrative alpha=8 microseconds and beta=40 GB/s, a 4 KiB payload has about 0.102 microseconds of serialization, whereas 64 MiB has about 1.678 milliseconds. These points emphasize very different resources. A configuration improving one region can regress the other.
 
 Preserve the raw size-time observations and diagnostic output. A bandwidth curve alone can hide a latency intercept, and a single fitted slope can hide a protocol cliff. Later comparisons should be able to reconstruct what changed without assuming the same model remains valid.
+
+
+
+![Deep-dive illustration: Build a size sweep around the application's messages](./deep-dive.png)
 
 ## 3. Separate initialization, warmup, and steady state
 

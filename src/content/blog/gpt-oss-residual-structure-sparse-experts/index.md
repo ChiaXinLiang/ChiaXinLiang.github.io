@@ -18,9 +18,9 @@ This article follows that official implementation and the gpt-oss-120b model car
 
 ## 1. Follow the residual stream
 
-![Section overview: gpt-oss 1: Residual Structure and Sparse Expert Computation. Normalize the residual input; Apply causal attention; Select expert logits; Return to the residual stream](./section-overview.svg)
+![Concept overview: gpt-oss 1: Residual Structure and Sparse Expert Computation. Illustrated residual token stream branches into attention and router-selected expert computation then rejoins.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Each Transformer block applies an attention branch and then an expert MLP branch. Both return their contribution through a residual addition. A representative notation writes the two transitions separately so normalization placement remains visible.
@@ -33,6 +33,10 @@ $$
 The expert branch therefore receives the state after attention's residual update. It is not evaluated on an unrelated copy of the original layer input. This ordering affects both the mathematical graph and live-value dependencies in an implementation.
 
 The residual path preserves an additive route for information and gradients. It does not make a branch optional or establish that removing it leaves behavior unchanged. Trained branch outputs remain part of the computation.
+
+
+
+![Deep-dive illustration: Follow the residual stream](./deep-dive.png)
 
 ## 2. Derive RMS normalization
 

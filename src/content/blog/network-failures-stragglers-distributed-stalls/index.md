@@ -20,9 +20,9 @@ This article develops a diagnosis and recovery method for distributed stalls. Th
 
 ## 1. Define useful progress at a group-wide boundary
 
-![Section overview: Network Failures and Stragglers: Diagnosing Distributed Job Stalls. Locate the last common progress; Classify the blocked dependency; Collect correlated evidence; Recover safely](./section-overview.svg)
+![Concept overview: Network Failures and Stragglers: Diagnosing Distributed Job Stalls. Several ranks approach a collective synchronization point.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Choose progress events that have clear semantics: completed optimizer updates, completed logical phases, or durable checkpoints. A rank emitting logs or responding to a health query does not establish that the entire group has completed another update.
@@ -38,6 +38,10 @@ $$
 This bookkeeping assumes the step counters describe the same protocol boundary. Independently incremented counters with different meanings cannot be combined safely. The minimum can help identify a lagging participant, but it does not certify a recoverable checkpoint.
 
 Distinguish absence of progress from expected long work. A very large prefill, checkpoint save, compilation, or input operation may legitimately take longer than ordinary iterations. The detector needs phase context rather than treating every interval without a step update as a network failure.
+
+
+
+![Deep-dive illustration: Define useful progress at a group-wide boundary](./deep-dive.png)
 
 ## 2. Group tails amplify individual variability
 

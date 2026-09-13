@@ -20,9 +20,9 @@ We will derive a matrix-partition example, a balanced pipeline bubble model, and
 
 ## 1. Distinguish the computation being divided
 
-![Section overview: Tensor and Pipeline Parallelism: Partitions, Bubbles, and the Network. Tensor partition; Pipeline partition; Account for idle time; Place groups](./section-overview.svg)
+![Concept overview: Tensor and Pipeline Parallelism: Partitions, Bubbles, and the Network. A neural model is split into pipeline stages across GPU servers; within a stage a weight matrix is partitioned across tensor-parallel ranks.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Data parallelism assigns different training examples to replicas. Tensor parallelism assigns different parts of one layer’s arithmetic to cooperating ranks. Pipeline parallelism assigns different layer ranges to stages that process a stream of microbatches. These dimensions can coexist in a process mesh.
@@ -50,6 +50,10 @@ Each rank needs X and its own parameter slice. If the next operation can consume
 For a row-partitioned matrix product, splitting the reduction dimension yields partial outputs whose sum forms the final result. That sum introduces a synchronization dependency, often expressed with all-reduce or a reduce-scatter followed by later distribution. The exact collective depends on the activation layout maintained between operations.
 
 For an H by F weight matrix, ideal parameter storage falls to approximately HF divided by t elements per rank. Arithmetic also partitions ideally, but startup and communication do not necessarily fall with t. Increasing tensor degree eventually makes small local operations and frequent synchronization dominate. The best degree is a workload and topology decision.
+
+
+
+![Deep-dive illustration: Work a column-partitioned linear layer](./deep-dive.png)
 
 ## 3. Account for tensor-parallel communication frequency
 

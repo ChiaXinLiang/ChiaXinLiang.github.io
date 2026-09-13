@@ -18,9 +18,9 @@ Encoder-projector designs provide one common route. A modality encoder produces 
 
 ## 1. Separate signals and representations
 
-![Section overview: Multimodal LLMs: How Image and Audio Representations Meet Language. Encode the input signal; Project compatible features; Serialize and mix; Measure the full pipeline](./section-overview.svg)
+![Concept overview: Multimodal LLMs: How Image and Audio Representations Meet Language. An image becomes spatial patch features, an audio waveform becomes time frames, and text becomes tokens.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 An image begins as a spatial array of pixels. Audio begins as sampled waveforms or another signal representation. An encoder converts those signals into learned features. A language model consumes the resulting features through the architecture's designated interface.
@@ -32,6 +32,10 @@ $$
 Here m identifies a modality, E its encoder, and P a connector or projector. This equation describes a family of designs, not every multimodal model. The feature count and width can change through downsampling, pooling, or learned resampling.
 
 The connector must learn a useful relationship between encoder features and language computation. Matching widths is necessary for some interfaces but insufficient for meaningful alignment. Training data and objectives establish how those representations influence outputs.
+
+
+
+![Deep-dive illustration: Separate signals and representations](./deep-dive.png)
 
 ## 2. Derive image patch counts
 

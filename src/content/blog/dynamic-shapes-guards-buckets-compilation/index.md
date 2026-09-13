@@ -20,9 +20,9 @@ We will derive these costs and explain guard behavior, bucketing, and measuremen
 
 ## 1. Describe the whole specialization population
 
-![Section overview: Dynamic Shapes: Guards, Buckets, Padding, and Compilation Cost. Describe the shape population; Understand compiled validity; Budget shape policies; Measure total useful cost](./section-overview.svg)
+![Concept overview: Dynamic Shapes: Guards, Buckets, Padding, and Compilation Cost. Incoming sequences of different lengths enter shape buckets with padding visible.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Record changing batch sizes, sequence lengths, feature widths, layouts, dtypes, and relevant branch behavior. A workload that varies only sequence length differs from one that also changes tensor strides and Python control state.
@@ -58,6 +58,10 @@ The expression assumes compilation costs are included once per relevant cache li
 For an illustrative variant costing 2 seconds to compile and saving 1 millisecond per use, 2000 comparable uses are needed to recover the setup cost under a simple fixed-cost model. A rarely used shape may never reach that point.
 
 A steady-state benchmark excludes this tradeoff unless compilation is measured separately. Keep cold-start, first-use, and reused-execution populations distinct. The deployment's lifetime and cache behavior determine which result matters.
+
+
+
+![Deep-dive illustration: Model total compilation and execution cost](./deep-dive.png)
 
 ## 4. Symbolic shapes widen reuse but do not promise identical kernels
 

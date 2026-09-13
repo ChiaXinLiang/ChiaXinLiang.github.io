@@ -20,9 +20,9 @@ We will define consistent timing boundaries, derive a few useful capacity relati
 
 ## 1. Begin with the timeline the client experiences
 
-![Section overview: Serving Observability: Request Traces, GPU Counters, and Capacity Alerts. Define the request timeline; Connect the layers; Use consistent populations; Alert on useful capacity](./section-overview.svg)
+![Concept overview: Serving Observability: Request Traces, GPU Counters, and Capacity Alerts. A request enters a serving scheduler, waits in a visible queue, runs a GPU kernel, and streams tokens.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 For a streaming request, record arrival at the service boundary, admission to engine work, start of prompt processing, delivery of the first generated token, subsequent token deliveries, and termination. These events describe different waits. A client-side timestamp also includes network and application buffering that an engine-local timestamp cannot observe.
@@ -36,6 +36,10 @@ T_{\mathrm{first}}=T_{\mathrm{front}}+T_{\mathrm{queue}}+T_{\mathrm{prefill}}+T_
 $$
 
 Some engines produce the first output token at the end of prefill rather than in a separately identified decode interval. Use a decomposition matching the actual implementation and avoid double-counting it. The equation is a bookkeeping model, not a requirement that every engine expose those exact phase labels.
+
+
+
+![Deep-dive illustration: Begin with the timeline the client experiences](./deep-dive.png)
 
 ## 2. Measure token delivery without hiding gaps
 

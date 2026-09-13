@@ -17,9 +17,9 @@ This article develops a practical reading method. We start with a deliberately s
 
 ## Separate structure, learned weights, and serving policy
 
-![Section overview: read a model structure with an evidence chain. Inspect the configuration; Trace the implementation; Derive a state budget; Test a concrete consequence](./section-overview.svg)
+![Concept overview: Reading a Modern LLM: From Model Configuration to Computational Structure. An architectural model cutaway of token embeddings, repeated decoder layers, attention/recurrent state blocks and optional routed expert bank.](./section-overview.png)
 
-*Read 1 to 4 to connect the method, its mechanism, and the assumptions behind the equations. The section below develops the details.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 3 layers of description are easy to confuse. Architecture defines the operations and connections: layer types, widths, projections, routing, and state. A checkpoint supplies learned parameter values, often packaged with a particular numerical representation. Serving policy determines how requests are scheduled, batched, cached, or sampled. These layers interact, but changing a scheduler does not automatically change the underlying model architecture.

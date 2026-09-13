@@ -20,9 +20,9 @@ We will trace the host-buffer data path, connect it to GPU memory, and define th
 
 ## 1. Distinguish a fabric from a programming operation
 
-![Section overview: Ethernet, InfiniBand, and RDMA: The Data Path and Its Guarantees. Identify the layers; Prepare memory and ownership; Move and complete; Order the consumer](./section-overview.svg)
+![Concept overview: Ethernet, InfiniBand, and RDMA: The Data Path and Its Guarantees. Two illustrated servers with application buffers, registered memory, queue pairs, NICs, and a network switch.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 An Ethernet fabric supplies packet forwarding and link connectivity. IP and transport layers add addressing and communication behavior above it. RoCE provides an RDMA-capable path on supported Ethernet infrastructure; the deployment also needs the appropriate adapter and network configuration.
@@ -48,6 +48,10 @@ $$
 The expression assumes one registration reused for N transfers and no overlap among the listed costs. Real implementations can cache registration and pipeline operations. The model identifies which fixed work can be amortized, not an exact schedule for every adapter.
 
 For an illustrative registration cost of 100 microseconds and 1000 transfers, the amortized setup is 0.1 microseconds per transfer. Registering separately for each transfer would instead add 100 microseconds each time. These values are assumptions, but the distinction explains why allocator and buffer-reuse behavior can matter in network benchmarks.
+
+
+
+![Deep-dive illustration: Registration makes a memory region accessible under a contract](./deep-dive.png)
 
 ## 3. Sends and one-sided operations have different participation rules
 

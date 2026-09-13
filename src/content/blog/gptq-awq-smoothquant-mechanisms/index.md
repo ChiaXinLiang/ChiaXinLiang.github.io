@@ -32,6 +32,10 @@ This convention makes feature scaling and reconstruction explicit. Papers or imp
 
 Calibration activations are data, not arbitrary noise. Their feature magnitudes and correlations influence reconstruction sensitivity. Preserve tokenization, preprocessing, sampling, and layer input provenance when comparing methods. A convenient synthetic activation distribution can test algebra but does not establish model quality.
 
+
+
+![Deep-dive illustration: Establish the linear layer convention](./deep-dive.png)
+
 ## 2. Derive the reconstruction objective
 
 Quantized weights produce error through both their perturbation and the input distribution. A squared output-reconstruction objective is:

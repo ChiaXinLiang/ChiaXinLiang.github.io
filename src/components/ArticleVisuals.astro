@@ -1,0 +1,49 @@
+<section class="article-visuals" data-article-visuals hidden aria-label="Article visual walkthrough" aria-roledescription="carousel" tabindex="0">
+  <div class="visual-heading"><strong>Visual walkthrough</strong><span data-slide-count aria-live="polite" aria-atomic="true"></span></div>
+  <button class="visual-preview" data-open-image aria-label="Open image in larger view"><img data-slide-image alt="" /></button>
+  <p class="visual-caption" data-slide-caption></p>
+  <div class="visual-controls"><button data-slide-prev aria-label="Previous image">←</button><div class="visual-pages" data-slide-pages aria-label="Choose an image"></div><button data-slide-next aria-label="Next image">→</button></div>
+  <p class="visual-hint">Use arrows or swipe to explore. Click an image to enlarge it.</p>
+</section>
+<dialog class="image-lightbox" data-image-lightbox aria-label="Article image viewer">
+  <div class="lightbox-panel">
+    <div class="lightbox-toolbar"><button data-image-prev aria-label="Previous image">←</button><span data-image-count aria-live="polite" aria-atomic="true"></span><button data-image-next aria-label="Next image">→</button><button data-image-zoom aria-label="Zoom in">Zoom in</button><button data-image-copy>Copy image</button><button data-image-download>Download</button><button data-image-close aria-label="Close image viewer">Close ×</button></div>
+    <div class="lightbox-viewport" data-image-viewport tabindex="0" aria-label="Image, scroll to inspect when zoomed"><img data-lightbox-image alt="" /></div>
+    <p class="lightbox-caption" data-image-caption></p>
+    <p class="lightbox-status" data-image-status role="status"></p>
+  </div>
+</dialog>
+<script>
+  import { initArticleVisuals } from '../scripts/article-visuals';
+  initArticleVisuals();
+  document.addEventListener('astro:page-load', () => initArticleVisuals());
+</script>
+<style is:global>
+  .article-visuals[hidden] { display: none; }
+  .article-visuals { border: 1px solid rgb(var(--gray-light)); border-radius: 14px; padding: 1rem; margin: 0 0 2rem; background: rgba(var(--gray-light), .12); }
+  .visual-heading, .visual-controls { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+  .visual-heading { margin-bottom: .8rem; font-size: .9rem; }
+  .article-visuals button, .image-lightbox button { font: inherit; cursor: pointer; color: rgb(var(--gray-dark)); background: var(--bg); border: 1px solid rgb(var(--gray-light)); border-radius: 8px; padding: .45rem .7rem; }
+  .article-visuals button:disabled, .image-lightbox button:disabled { opacity: .4; cursor: default; }
+  .article-visuals :focus-visible, .image-lightbox :focus-visible, .article-image-trigger:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .article-visuals .visual-preview { display: block; width: 100%; padding: 0; overflow: hidden; background: #fff; touch-action: pan-y; }
+  .visual-preview img { display: block; width: 100%; height: clamp(200px, 40vw, 420px); object-fit: contain; margin: 0; border-radius: 0; }
+  .visual-caption { margin: .8rem 0; font-size: .9rem; line-height: 1.5; }
+  .visual-pages { display: flex; gap: .35rem; overflow-x: auto; padding: .3rem; }
+  .visual-pages button[aria-current="true"] { color: var(--bg); background: var(--accent); }
+  .visual-hint { margin: .7rem 0 0; font-size: .75rem; color: rgb(var(--gray)); }
+  .article-image-trigger { cursor: zoom-in; }
+  body.has-visual-walkthrough article > .hero-image { display: none; }
+  .image-lightbox { box-sizing: border-box; max-width: none; max-height: none; width: min(1400px, 96vw); height: 94dvh; border: 1px solid rgb(var(--gray-light)); border-radius: 12px; padding: 1rem; color: rgb(var(--gray-dark)); background: var(--bg); }
+  .image-lightbox::backdrop { background: rgba(0, 0, 0, .82); }
+  .lightbox-panel { height: 100%; display: flex; flex-direction: column; min-width: 0; }
+  .lightbox-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .8rem; font-size: .85rem; }
+  .lightbox-toolbar [data-image-close] { margin-left: auto; }
+  .lightbox-viewport { flex: 1; min-height: 0; overflow: auto; background: #fff; display: flex; align-items: center; justify-content: center; touch-action: pan-x pan-y; }
+  .lightbox-viewport img { display: block; width: 100%; height: 100%; object-fit: contain; max-width: none; border-radius: 0; }
+  .lightbox-viewport.is-zoomed { display: block; }
+  .lightbox-viewport.is-zoomed img { width: 200%; height: auto; object-fit: initial; }
+  .lightbox-caption { margin: .8rem 0 0; font-size: .85rem; line-height: 1.4; }
+  .lightbox-status { min-height: 1.5em; margin: .4rem 0 0; font-size: .8rem; }
+  @media (max-width: 600px) { .article-visuals { padding: .65rem; } .image-lightbox { padding: .65rem; width: 98vw; height: 96dvh; } .lightbox-toolbar { gap: .3rem; } .image-lightbox button { padding: .4rem .5rem; } }
+</style>

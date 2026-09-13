@@ -20,9 +20,9 @@ We will derive a simple chain model, connect it to warp concurrency, and examine
 
 ## 1. Draw a dependency graph rather than counting source lines
 
-![Section overview: Instruction-Level Parallelism: Dependency Chains, Registers, and Spills. Draw the dependency chain; Expose independent work; Budget live state; Measure the balance](./section-overview.svg)
+![Concept overview: Instruction-Level Parallelism: Dependency Chains, Registers, and Spills. Illustrated GPU execution lanes compare a chain of dependent arithmetic operations with independent operations that overlap.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Consider a dot-product loop updating one accumulator. Each update needs the previous accumulator value, creating a chain. Input loads may have independent addresses, but the accumulation itself retains a dependency through every iteration.
@@ -52,6 +52,10 @@ m\gtrsim\lceil L/\tau\rceil.
 $$
 
 For illustrative latency 4 cycles and interval 1 cycle, 4 independent chains can provide enough ready work in the idealized schedule. This calculation explains the mechanism; it does not prescribe 4 accumulators for every kernel or instruction.
+
+
+
+![Deep-dive illustration: Derive the single-chain latency bound](./deep-dive.png)
 
 ## 3. Split a reduction into independent accumulators
 

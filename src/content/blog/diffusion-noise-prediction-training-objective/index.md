@@ -32,6 +32,10 @@ The schedule determines how quickly signal is attenuated. Valid variance choices
 
 The forward process is specified rather than learned in the basic formulation considered here. It gives a known statistical relationship between clean and corrupted samples, which makes it possible to construct training examples and derive useful posterior distributions.
 
+
+
+![Deep-dive illustration: Define the forward corruption process](./deep-dive.png)
+
 ## 2. Derive direct sampling at a timestep
 
 Define cumulative alpha_bar_t as the product of alpha values through step t. Composing Gaussian transitions gives a closed-form marginal conditioned on the clean sample.

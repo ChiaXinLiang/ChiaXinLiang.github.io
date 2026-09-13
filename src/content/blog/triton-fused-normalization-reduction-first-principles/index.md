@@ -20,9 +20,9 @@ We will derive a fused layer-normalization path, work its masked statistics, and
 
 ## 1. State the normalization precisely
 
-![Section overview: Triton Fusion: A Reduction or Normalization Kernel From First Principles. Define valid statistics; Keep the row on chip; Mask the centered values; Measure the full tradeoff](./section-overview.svg)
+![Concept overview: Triton Fusion: A Reduction or Normalization Kernel From First Principles. A row of tensor values is processed inside one GPU program: reductions compute mean and variance, then the same resident row is normalized and scaled before output.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 For one row with N valid elements, layer normalization uses
@@ -38,6 +38,10 @@ RMS normalization is a different operation: it uses the root mean square without
 Gamma and beta must cover the valid columns in the expected order. A value-preserving input permutation still needs the corresponding affine-parameter association, otherwise the normalized row receives a different transform.
 
 Define supported row widths and layout. The example assumes contiguous columns with a supplied row stride. A transposed or column-strided view needs different addressing or an explicit conversion whose cost belongs in the comparison.
+
+
+
+![Deep-dive illustration: State the normalization precisely](./deep-dive.png)
 
 ## 2. Assign one program a row
 

@@ -20,9 +20,9 @@ The examples below are arithmetic illustrations rather than measured results. Ef
 
 ## 1. Convert the units before doing any performance arithmetic
 
-![Section overview: Bandwidth, Latency, and the Communication Cost Model. Define the message; Model one transfer; Add the communication schedule; Locate exposed time](./section-overview.png)
+![Concept overview: Bandwidth, Latency, and the Communication Cost Model. GPU/NIC servers, packets, matching startup intervals, payload-transfer timelines, and narrow versus wide links explain the cost equation.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Networking commonly states rates in bits per second, while tensors and buffers are sized in bytes. Divide by 8 to convert a bit rate to a byte rate. A nominal 400 Gb/s link corresponds to 50 GB/s before protocol overhead and implementation limits, using decimal units.
@@ -52,6 +52,10 @@ $$
 For illustrative alpha=10 microseconds and beta=25 GB/s, the crossover is 250000 bytes, about 244 KiB. A 4 KiB payload has approximately 0.164 microseconds of transfer time, so startup dominates. A 64 MiB payload has about 2.684 milliseconds of transfer time, making the fixed 10 microseconds comparatively small.
 
 This simple calculation prevents a common mistaken expectation: doubling link bandwidth barely improves a tiny message when its dominant cost is startup. Conversely, reducing launch overhead does little for a transfer whose sustained byte movement already lasts several milliseconds.
+
+
+
+![Deep-dive illustration: Derive the startup-plus-transfer approximation](./deep-dive.png)
 
 ## 3. Calibrate the parameters with a message-size sweep
 

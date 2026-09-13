@@ -1,0 +1,618 @@
+[
+  {
+    "slug": "activation-checkpointing-selective-recomputation",
+    "title": "Activation Checkpointing: Selective Recomputation and the Memory–Time Tradeoff",
+    "section": "2. Derive a simple chain model",
+    "asset": "src/content/blog/activation-checkpointing-selective-recomputation/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-8e6ada77-93b1-428f-ab58-b337b239c60f.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "admission-control-qos-deadlines-fairness",
+    "title": "Admission Control and QoS: Deadlines, Fairness, and Overload",
+    "section": "2. Request count is a poor proxy for resource demand",
+    "asset": "src/content/blog/admission-control-qos-deadlines-fairness/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-da552fbd-ab43-4d9f-8a36-3a2dd22756ec.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "ai-cluster-topology-local-and-scale-out",
+    "title": "AI Cluster Topology: PCIe, NVLink, NVSwitch, and Scale-Out Fabrics",
+    "section": "4. Trace the GPU-to-NIC path before the leaf switch",
+    "asset": "src/content/blog/ai-cluster-topology-local-and-scale-out/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-d5c002ae-11cf-4467-9c91-c422d26cb097.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "asynchronous-tile-loading-tma-buffer-ownership",
+    "title": "Asynchronous Tile Loading: TMA, Barriers, and Buffer Ownership",
+    "section": "2. Derive the pipeline's ideal schedule",
+    "asset": "src/content/blog/asynchronous-tile-loading-tma-buffer-ownership/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-950fab69-4101-4354-b6c3-75f9fcd77922.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "attention-state-mha-mqa-gqa",
+    "title": "Attention State 1: MHA, MQA, and GQA",
+    "section": "1. Assign roles to Q, K, and V",
+    "asset": "src/content/blog/attention-state-mha-mqa-gqa/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-3b7b33c4-f426-4c2a-8305-ffa7661c1b1a.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "attention-state-mla-latent-cache-reconstruction",
+    "title": "Attention State 2: MLA and Latent Cache Reconstruction",
+    "section": "1. Start with a low-rank factorization",
+    "asset": "src/content/blog/attention-state-mla-latent-cache-reconstruction/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-f9ad5911-2ae7-430d-bd5b-1d76b46a08af.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "bandwidth-latency-communication-cost-model",
+    "title": "Bandwidth, Latency, and the Communication Cost Model",
+    "section": "2. Derive the startup-plus-transfer approximation",
+    "asset": "src/content/blog/bandwidth-latency-communication-cost-model/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-7a48451e-2918-4614-97c6-34691a5773ca.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "collectives-ring-tree-reduce-scatter-all-gather",
+    "title": "Collective Communication: Ring, Tree, Reduce-Scatter, and All-Gather",
+    "section": "1. Write the collective result before counting bytes",
+    "asset": "src/content/blog/collectives-ring-tree-reduce-scatter-all-gather/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-fd9b7e46-9743-4aba-9c77-d2ecb483722f.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "comparing-llm-architectures-evidence-tradeoffs",
+    "title": "Comparing LLM Architectures: Evidence, Tradeoffs, and Missing Disclosures",
+    "section": "3. Compare attention representations",
+    "asset": "src/content/blog/comparing-llm-architectures-evidence-tradeoffs/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-784715f2-2724-4270-acd9-9106eef93c3d.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "compiled-training-aotautograd-saved-tensors-fusion",
+    "title": "Compiled Training: AOTAutograd, Saved Tensors, and Fusion Boundaries",
+    "section": "1. Write the differentiation contract",
+    "asset": "src/content/blog/compiled-training-aotautograd-saved-tensors-fusion/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-006a02c6-f604-4c01-93c1-93441628cca3.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "compression-experiment-quality-deployment",
+    "title": "A Reproducible Compression Experiment: Quality and Deployment",
+    "section": "6. Account for the full memory envelope",
+    "asset": "src/content/blog/compression-experiment-quality-deployment/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-0b1fccfc-1ad9-4bec-8e41-a80973465137.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "cuda-correctness-memory-races-barriers-sanitizer",
+    "title": "CUDA Correctness: Memory Errors, Races, Barriers, and Compute Sanitizer",
+    "section": "2. Prove physical address validity",
+    "asset": "src/content/blog/cuda-correctness-memory-races-barriers-sanitizer/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-0992deb5-219e-4c0d-8129-b428048ea7b1.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "cuda-kernel-indexing-launch-boundaries",
+    "title": "CUDA Kernel Foundations: Indexing, Launch Geometry, and Boundary Masks",
+    "section": "1. State the mathematical operation and ownership contract",
+    "asset": "src/content/blog/cuda-kernel-indexing-launch-boundaries/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-f824e068-954b-437c-8a37-2ad277a86a0d.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "ddp-gradient-buckets-backward-timeline",
+    "title": "DDP: Gradient Buckets and the Backward Communication Timeline",
+    "section": "2. Derive the synchronized gradient",
+    "asset": "src/content/blog/ddp-gradient-buckets-backward-timeline/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-e4d20d47-1f60-4700-a148-ee3e54a42208.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "debugging-nccl-rdma-verify-path-before-tuning",
+    "title": "Debugging NCCL and RDMA: Verify the Path Before Tuning the Knobs",
+    "section": "3. Separate late readiness from slow transfer",
+    "asset": "src/content/blog/debugging-nccl-rdma-verify-path-before-tuning/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-09d08ceb-065c-404e-ba10-61df77ee94f3.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "deepseek-v41-flash-causal-encoder-decoder",
+    "title": "DeepSeek-V4.1-Flash 1: Causal Encoder-Decoder and Phase-Specific Work",
+    "section": "1. Clarify what causal encoding means",
+    "asset": "src/content/blog/deepseek-v41-flash-causal-encoder-decoder/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-ae37b325-624e-40e1-8745-82b3e46fb546.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "deepseek-v41-flash-csa2-hierarchical-indexing",
+    "title": "DeepSeek-V4.1-Flash 2: CSA2 Sharing and Hierarchical Sparse Indexing",
+    "section": "1. Separate representation, selection, and weighting",
+    "asset": "src/content/blog/deepseek-v41-flash-csa2-hierarchical-indexing/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-cac571f8-f343-4da4-8107-8a30132333a1.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "deepseek-v41-flash-fp4-cache-bounded-replay",
+    "title": "DeepSeek-V4.1-Flash 3: FP4 Cache and Bounded Replay",
+    "section": "1. Read the numerical format precisely",
+    "asset": "src/content/blog/deepseek-v41-flash-fp4-cache-bounded-replay/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-6d539557-39ea-4d8d-8eb8-7d4ec0bc9171.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "diffusion-distillation-fewer-generation-steps",
+    "title": "Diffusion Distillation: Fewer Steps and Quality Tradeoffs",
+    "section": "2. Define the noise-level notation",
+    "asset": "src/content/blog/diffusion-distillation-fewer-generation-steps/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-8d1a4d9c-e968-4e5f-8aed-29fbcb2c8ada.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "diffusion-noise-prediction-training-objective",
+    "title": "Diffusion Foundations: Noise, Reverse Prediction, and Training",
+    "section": "1. Define the forward corruption process",
+    "asset": "src/content/blog/diffusion-noise-prediction-training-objective/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-2cd149c0-1f87-4d51-beae-52b37ef4cd51.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "diffusion-sampling-solvers-ode-sde",
+    "title": "Efficient Diffusion Sampling: Solvers, ODEs, and SDEs",
+    "section": "1. Define the continuous forward process",
+    "asset": "src/content/blog/diffusion-sampling-solvers-ode-sde/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-e5ea7f5d-ba24-4594-8b2a-f121153e56f7.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "distillation-features-data-deployment",
+    "title": "Distillation 2: Features, Data, and Deployment Tradeoffs",
+    "section": "1. Define an intermediate interface",
+    "asset": "src/content/blog/distillation-features-data-deployment/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-589a61c2-fe71-44e6-b82d-8a2695d9851c.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "distillation-temperature-teacher-student",
+    "title": "Distillation 1: Teacher\\u2013Student Objectives and Temperature",
+    "section": "1. Begin with supervised learning",
+    "asset": "src/content/blog/distillation-temperature-teacher-student/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-4f51f7f7-c0aa-41ba-96a3-cc1406a97358.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "distributed-checkpoints-recovery-goodput",
+    "title": "Distributed Checkpoints and Recovery: Goodput Under Failure",
+    "section": "3. Derive a simple checkpoint interval",
+    "asset": "src/content/blog/distributed-checkpoints-recovery-goodput/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-5da80b40-5bff-444b-8bac-7094e9f72245.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "dynamic-shapes-guards-buckets-compilation",
+    "title": "Dynamic Shapes: Guards, Buckets, Padding, and Compilation Cost",
+    "section": "3. Model total compilation and execution cost",
+    "asset": "src/content/blog/dynamic-shapes-guards-buckets-compilation/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-f6fc6dba-dea3-4b30-96b6-80fc6aec98cb.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "efficiency-objectives-pareto-deployment",
+    "title": "Efficiency Objectives: Accuracy, Latency, Memory, and Pareto Tradeoffs",
+    "section": "2. Express a constrained objective",
+    "asset": "src/content/blog/efficiency-objectives-pareto-deployment/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-88f85889-8098-44da-9cd8-f1222c45e91f.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "efficient-vision-token-reduction-resolution",
+    "title": "Efficient Vision: Token Reduction and Resolution Tradeoffs",
+    "section": "1. Begin with the token-cost model",
+    "asset": "src/content/blog/efficient-vision-token-reduction-resolution/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-53e340bf-85bc-45f1-847d-a32ce2a36847.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "energy-useful-token-power-clocks-slos",
+    "title": "Energy per Useful Token: Power Caps, Clocks, Thermals, and SLOs",
+    "section": "1. Define energy and useful work on the same interval",
+    "asset": "src/content/blog/energy-useful-token-power-clocks-slos/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-d351093c-ae8d-4696-adb5-4dd7360af5c1.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "ethernet-infiniband-rdma-data-path-guarantees",
+    "title": "Ethernet, InfiniBand, and RDMA: The Data Path and Its Guarantees",
+    "section": "2. Registration makes a memory region accessible under a contract",
+    "asset": "src/content/blog/ethernet-infiniband-rdma-data-path-guarantees/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-56ea4ba9-5333-44f6-9209-f654fc0323bd.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "expert-context-sequence-parallel-process-mesh",
+    "title": "Expert, Context, and Sequence Parallelism: Choosing a Process Mesh",
+    "section": "2. Expert parallelism follows sparse routing",
+    "asset": "src/content/blog/expert-context-sequence-parallel-process-mesh/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-870a4289-cb38-4563-9d7d-96b1923f149d.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "flashattention-online-softmax-io-model",
+    "title": "FlashAttention: Online Softmax, Exact Tiling, and the I/O Model",
+    "section": "1. Start with the objects that attention actually produces",
+    "asset": "src/content/blog/flashattention-online-softmax-io-model/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-c40cb7c4-af0e-4c7c-a895-d466d187a99d.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "fsdp-zero-sharding-materialization",
+    "title": "FSDP and ZeRO: What Gets Sharded and What Must Be Materialized",
+    "section": "2. Derive the stage-by-stage persistent budget",
+    "asset": "src/content/blog/fsdp-zero-sharding-materialization/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-2ebeb844-c2ee-410a-a4fa-2655a118e536.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "gpt-oss-attention-patterns-sinks-representation",
+    "title": "gpt-oss 2: Attention Patterns, Sinks, and Numerical Representation",
+    "section": "1. Derive the alternating mask",
+    "asset": "src/content/blog/gpt-oss-attention-patterns-sinks-representation/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-325c0f81-9db9-4a9e-95db-2c870f99c8a5.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "gpt-oss-residual-structure-sparse-experts",
+    "title": "gpt-oss 1: Residual Structure and Sparse Expert Computation",
+    "section": "1. Follow the residual stream",
+    "asset": "src/content/blog/gpt-oss-residual-structure-sparse-experts/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-a3ababde-f9ea-4852-8676-2b5756f8e931.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "gptq-awq-smoothquant-mechanisms",
+    "title": "LLM Quantization Methods: GPTQ, AWQ, and SmoothQuant",
+    "section": "1. Establish the linear layer convention",
+    "asset": "src/content/blog/gptq-awq-smoothquant-mechanisms/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-016f121c-3c32-4e2f-a39c-f984fd96b990.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "gpu-containers-compatibility-libraries-io-paths",
+    "title": "GPU Containers: Driver Compatibility, Runtime Libraries, and I/O Paths",
+    "section": "2. Treat compatibility as a constrained software tuple",
+    "asset": "src/content/blog/gpu-containers-compatibility-libraries-io-paths/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-1fd05885-c623-49fa-a5a7-1f3f6347fded.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "gpudirect-rdma-locality-transport-verification",
+    "title": "GPUDirect RDMA: GPU–NIC Locality and Transport Verification",
+    "section": "1. Draw both the direct and staged alternatives",
+    "asset": "src/content/blog/gpudirect-rdma-locality-transport-verification/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-aec1dc59-6a32-4f49-aebc-4492e60b1421.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "hardware-aware-model-design-latency",
+    "title": "Hardware-Aware Model Design: Shapes, Latency, and Search Spaces",
+    "section": "2. Count matrix work precisely",
+    "asset": "src/content/blog/hardware-aware-model-design-latency/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-c25de8f8-5b13-4fcf-81b1-806f90e5e51e.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "hybrid-attention-recurrent-state-token-history",
+    "title": "Hybrid Attention: Combining Recurrent State with Token Attention",
+    "section": "1. Start from explicit token retrieval",
+    "asset": "src/content/blog/hybrid-attention-recurrent-state-token-history/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-d1e7d924-99dc-44f2-8104-1adf9e106e9e.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "instruction-level-parallelism-registers-spills",
+    "title": "Instruction-Level Parallelism: Dependency Chains, Registers, and Spills",
+    "section": "2. Derive the single-chain latency bound",
+    "asset": "src/content/blog/instruction-level-parallelism-registers-spills/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-deef2a0a-ba93-4d6e-846d-38af34240d6d.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "kubernetes-slurm-topology-resource-guarantees",
+    "title": "Kubernetes and Slurm: Topology-Aware Placement and Resource Guarantees",
+    "section": "1. Represent demand as several resources and communication groups",
+    "asset": "src/content/blog/kubernetes-slurm-topology-resource-guarantees/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-3a00f8d9-6138-4c5f-b3b8-69cbc254802f.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "lora-low-rank-updates-memory",
+    "title": "LoRA: Low-Rank Updates and Training-State Memory",
+    "section": "1. Define the adapted linear layer",
+    "asset": "src/content/blog/lora-low-rank-updates-memory/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-c8f1169d-6061-4b5b-8035-135f1f647a0f.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "mixed-precision-layer-sensitivity-budget",
+    "title": "Mixed Precision: Layer Sensitivity and a Deployment Budget",
+    "section": "1. Define the allocation variables",
+    "asset": "src/content/blog/mixed-precision-layer-sensitivity-budget/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-e5fe4a20-6260-47bd-8afc-ce0be1b6871f.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "mixture-of-experts-capacity-load-balance-dispatch",
+    "title": "Mixture of Experts 2: Load Balance, Capacity, and Dispatch",
+    "section": "1. Count assignments before buffers",
+    "asset": "src/content/blog/mixture-of-experts-capacity-load-balance-dispatch/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-216122a0-aef6-4ccc-8e4c-52aa27cb0897.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "mixture-of-experts-routing-selected-computation",
+    "title": "Mixture of Experts 1: Routing and Selected Computation",
+    "section": "2. Derive router scores",
+    "asset": "src/content/blog/mixture-of-experts-routing-selected-computation/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-b4925d3f-c57c-48d4-9873-c1f8d5cb656d.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "moe-all-to-all-dispatch-imbalance-cost",
+    "title": "All-to-All for MoE: Expert Dispatch, Imbalance, and Communication Cost",
+    "section": "1. Begin with the routed mathematical result",
+    "asset": "src/content/blog/moe-all-to-all-dispatch-imbalance-cost/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-59255c5d-c0d5-4a8d-8e2b-c9f92e076781.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "multimodal-llms-image-audio-language-representations",
+    "title": "Multimodal LLMs: How Image and Audio Representations Meet Language",
+    "section": "1. Separate signals and representations",
+    "asset": "src/content/blog/multimodal-llms-image-audio-language-representations/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-b6a36edd-9543-4836-a8b9-1b1b23a1d2ff.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "network-benchmarking-latency-bus-bandwidth-scaling",
+    "title": "Network Benchmarking: Latency, Bus Bandwidth, and Multi-Node Scaling",
+    "section": "2. Build a size sweep around the application's messages",
+    "asset": "src/content/blog/network-benchmarking-latency-bus-bandwidth-scaling/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-5bdbf5e2-bb99-4129-b5fa-c89d7f1b86c5.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "network-failures-stragglers-distributed-stalls",
+    "title": "Network Failures and Stragglers: Diagnosing Distributed Job Stalls",
+    "section": "1. Define useful progress at a group-wide boundary",
+    "asset": "src/content/blog/network-failures-stragglers-distributed-stalls/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-1e308dd2-328a-4e13-9e65-ba85f85fcf9a.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "neural-architecture-search-cost-evidence",
+    "title": "Neural Architecture Search: Objectives, Search Cost, and Evidence",
+    "section": "1. Define the architecture variable",
+    "asset": "src/content/blog/neural-architecture-search-cost-evidence/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-1030141a-b2c6-4e67-86a5-9e27117c8845.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "numa-cpu-memory-irq-locality",
+    "title": "NUMA Tuning: CPU Affinity, Memory Placement, and IRQ Locality",
+    "section": "3. Derive a simple remote-latency model",
+    "asset": "src/content/blog/numa-cpu-memory-irq-locality/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-8241af60-9a8b-4c1e-8151-5e8cb329d386.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "performance-experiments-warmup-variance-reproduction",
+    "title": "Performance Experiments: Baselines, Warmup, Variance, and Reproduction",
+    "section": "3. Time asynchronous work at its actual completion boundary",
+    "asset": "src/content/blog/performance-experiments-warmup-variance-reproduction/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-c98dad4e-e71b-49dc-9e24-a6941dbce7fd.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "performance-regression-ci-reproducible-speedups",
+    "title": "Performance Regression CI: Keeping a Speedup After the Next Commit",
+    "section": "4. Define a regression ratio and practical budget",
+    "asset": "src/content/blog/performance-regression-ci-reproducible-speedups/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-0a18adb9-5b46-4870-989e-e0d6cd159c0c.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "persistent-kernels-atomic-queues-irregular-work",
+    "title": "Persistent Kernels and Atomic Queues: Scheduling Irregular Work",
+    "section": "2. Derive the load-balancing bound",
+    "asset": "src/content/blog/persistent-kernels-atomic-queues-irregular-work/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-9f43b398-5cd2-4887-b9aa-89a8c9e3a91d.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "pruning-saliency-magnitude-recovery",
+    "title": "Pruning 1: Magnitude, Saliency, and Recovery Training",
+    "section": "1. Represent the intervention with a mask",
+    "asset": "src/content/blog/pruning-saliency-magnitude-recovery/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-e80d79be-a484-4d85-a32b-1f9f3136976f.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "ptq-qat-fake-quantization-training",
+    "title": "Quantization 2: PTQ, QAT, and Fake-Quantized Training",
+    "section": "2. Explain the PTQ path",
+    "asset": "src/content/blog/ptq-qat-fake-quantization-training/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-a9039e0d-d9ac-4474-821f-35f004e337c3.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "qlora-quantized-base-adapter-numerics",
+    "title": "QLoRA: Quantized Base Weights and Adapter Numerics",
+    "section": "1. Separate base storage and adaptation",
+    "asset": "src/content/blog/qlora-quantized-base-adapter-numerics/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-6b8f5ce8-9f45-4514-8e74-2c682fa2ac2c.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "quantization-scales-clipping-calibration",
+    "title": "Quantization 1: Scales, Clipping, Calibration, and Error",
+    "section": "1. Define encoding and reconstruction",
+    "asset": "src/content/blog/quantization-scales-clipping-calibration/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-adcfb1d4-9192-4afe-89d1-2110120c998b.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "qwen36-hybrid-multimodal-configuration",
+    "title": "Qwen3.6: Reading a Hybrid Multimodal Model Configuration",
+    "section": "1. Expand the repeated layout",
+    "asset": "src/content/blog/qwen36-hybrid-multimodal-configuration/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-a1fc0852-ed53-4ff1-bb0a-92915b59d90c.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "reasoning-models-post-training-inference-compute",
+    "title": "Reasoning Models: Architecture, Post-Training, and Inference-Time Compute",
+    "section": "2. Derive supervised post-training",
+    "asset": "src/content/blog/reasoning-models-post-training-inference-compute/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-0aa29ac4-e468-4a98-8b07-4ce7479b1282.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "roce-congestion-ecn-pfc-tail-latency",
+    "title": "Congestion and RoCE: ECN, PFC, and Tail Latency",
+    "section": "1. Congestion begins with demand at a shared resource",
+    "asset": "src/content/blog/roce-congestion-ecn-pfc-tail-latency/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-765a2b71-4273-4257-a2ae-48599c93bf73.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "serving-observability-traces-counters-capacity",
+    "title": "Serving Observability: Request Traces, GPU Counters, and Capacity Alerts",
+    "section": "1. Begin with the timeline the client experiences",
+    "asset": "src/content/blog/serving-observability-traces-counters-capacity/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-3744b1d1-ce60-4789-b5a7-0b442edaba22.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "shared-memory-banks-padding-swizzling-broadcast",
+    "title": "Shared-Memory Bank Conflicts: Padding, Swizzling, and Broadcast",
+    "section": "1. Begin with lane addresses, not array dimensions",
+    "asset": "src/content/blog/shared-memory-banks-padding-swizzling-broadcast/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-af4142c0-a8ac-43bf-a27c-57c1758e3c79.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "state-space-execution-scans-recurrence-hybrids",
+    "title": "Efficient State-Space Execution: Scans, Recurrence, and Hybrids",
+    "section": "1. Define the affine update",
+    "asset": "src/content/blog/state-space-execution-scans-recurrence-hybrids/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-250678a1-bcab-4046-977b-4161cc35747a.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "state-space-models-dynamics-discretization",
+    "title": "State-Space Models: Dynamics, Discretization, and Stability",
+    "section": "1. Define continuous linear dynamics",
+    "asset": "src/content/blog/state-space-models-dynamics-discretization/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-f2d9b659-d69e-47a4-a842-c84006ee1b47.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "stream-ordered-allocation-pools-events-reuse",
+    "title": "Stream-Ordered Allocation: Memory Pools, Events, and Safe Reuse",
+    "section": "1. Treat memory lifetime as part of the execution graph",
+    "asset": "src/content/blog/stream-ordered-allocation-pools-events-reuse/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-223e05d7-a764-4ac9-97be-8b7cf11dfcff.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "structured-output-grammar-masks-throughput",
+    "title": "Structured Output: Grammar Masks and Constrained Decoding Throughput",
+    "section": "2. Treat decoding as a state transition system",
+    "asset": "src/content/blog/structured-output-grammar-masks-throughput/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-8fa2897b-6294-4713-8384-16b8ba815fe0.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "structured-sparsity-hardware-speedups",
+    "title": "Pruning 2: Structured Sparsity and Real Hardware Speedups",
+    "section": "2. Follow channel dependencies",
+    "asset": "src/content/blog/structured-sparsity-hardware-speedups/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-257f5364-d3ad-47f5-9bf6-e812aef49e38.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "tensor-pipeline-parallelism-partitions-bubbles",
+    "title": "Tensor and Pipeline Parallelism: Partitions, Bubbles, and the Network",
+    "section": "2. Work a column-partitioned linear layer",
+    "asset": "src/content/blog/tensor-pipeline-parallelism-partitions-bubbles/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-b7e9131c-de77-4ff6-934b-1ed812bf29cb.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "tiled-gemm-correctness-measured-memory-model",
+    "title": "Tiled GEMM: From a Correct Kernel to a Measured Memory Model",
+    "section": "1. Define shapes, layouts, and the required result",
+    "asset": "src/content/blog/tiled-gemm-correctness-measured-memory-model/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-5fd66761-6b75-42af-acbf-fd7840152b64.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "training-input-pipeline-workers-pinned-memory-gds",
+    "title": "The Training Input Pipeline: Workers, Prefetch, Pinned Memory, and GDS",
+    "section": "2. Derive the steady-state bottleneck approximation",
+    "asset": "src/content/blog/training-input-pipeline-workers-pinned-memory-gds/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-b734e8f7-785d-41a6-9eb9-79e29c6c08e8.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "training-memory-and-step-time",
+    "title": "Training Memory and Step Time: Account for Every State",
+    "section": "2. Derive the persistent-state budget",
+    "asset": "src/content/blog/training-memory-and-step-time/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-d75ac06a-9289-478b-a32f-49c50c26d42b.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "training-offload-cpu-nvme-critical-path",
+    "title": "Training Offload: CPU, NVMe, Bandwidth, and the Critical Path",
+    "section": "3. Count transfers in both directions",
+    "asset": "src/content/blog/training-offload-cpu-nvme-critical-path/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-29c4e9ad-f26a-4130-8bc8-b6ec4fd1e0f4.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "triton-fused-normalization-reduction-first-principles",
+    "title": "Triton Fusion: A Reduction or Normalization Kernel From First Principles",
+    "section": "1. State the normalization precisely",
+    "asset": "src/content/blog/triton-fused-normalization-reduction-first-principles/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-bf3600be-b86f-4207-9ab4-5abba7cddf69.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "triton-programs-masks-layout-correctness",
+    "title": "Triton Kernel Foundations: Programs, Masks, Layouts, and Correctness",
+    "section": "2. Derive program-owned tile offsets",
+    "asset": "src/content/blog/triton-programs-masks-layout-correctness/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-df7fc0b2-3b01-4cc3-86a7-59a75d39ea97.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "vision-generation-deployment-experiment",
+    "title": "Vision and Generation Deployment: A Controlled Experiment",
+    "section": "4. Account for token and resolution scaling",
+    "asset": "src/content/blog/vision-generation-deployment-experiment/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-a36d43cf-a1a3-4c6e-a641-ab3da41a3df5.png",
+    "method": "built-in image_gen"
+  },
+  {
+    "slug": "vision-transformer-patches-position-cost",
+    "title": "Vision Transformers: Patches, Positions, and Computational Cost",
+    "section": "1. Define the image tensor",
+    "asset": "src/content/blog/vision-transformer-patches-position-cost/deep-dive.png",
+    "source": "/Users/marcus/.codex/generated_images/01a09885-334b-73c0-9b79-e685d6cc7369/exec-4b3e61bc-1fef-4b1a-953e-5729a6b3d117.png",
+    "method": "built-in image_gen"
+  }
+]

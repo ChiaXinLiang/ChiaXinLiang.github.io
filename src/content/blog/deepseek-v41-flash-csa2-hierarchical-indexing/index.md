@@ -18,9 +18,9 @@ The official release card names 3 static modes: Full, Reindex, and Reuse. It say
 
 ## 1. Separate representation, selection, and weighting
 
-![Section overview: DeepSeek-V4.1-Flash 2: CSA2 Sharing and Hierarchical Sparse Indexing. Establish the shared memory; Refresh selection where needed; Reuse compatible indices; Bound deeper candidate work](./section-overview.svg)
+![Concept overview: DeepSeek-V4.1-Flash 2: CSA2 Sharing and Hierarchical Sparse Indexing. Long token history is grouped into hierarchical index levels.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Attention needs a representation of historical content, a policy describing which positions are eligible, and weights over those positions. Dense attention makes the full permitted history eligible. Sparse attention selects a smaller set according to another mechanism.
@@ -33,6 +33,10 @@ $$
 The superscript I identifies indexer representations in this explanatory notation. Main attention representations need not be identical to indexer representations. Selecting an index and calculating its attention weight are different operations, even if both use learned projections.
 
 Reusing an index set therefore does not force identical outputs across layers. Layer-specific queries or other transformations can produce different weights over the same selected positions. Conversely, refreshing weights does not mean the layer refreshed the candidate search.
+
+
+
+![Deep-dive illustration: Separate representation, selection, and weighting](./deep-dive.png)
 
 ## 2. Interpret mode names carefully
 

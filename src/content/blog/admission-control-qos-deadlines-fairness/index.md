@@ -20,9 +20,9 @@ We will derive a simplified workload and cache budget, connect deadlines to queu
 
 ## 1. Separate offered demand from admitted work
 
-![Section overview: Admission Control and QoS: Deadlines, Fairness, and Overload. Estimate resource demand; Admit or reject explicitly; Schedule useful work; Verify under overload](./section-overview.svg)
+![Concept overview: Admission Control and QoS: Deadlines, Fairness, and Overload. Several request classes arrive at a serving gate with deadline clocks.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Let lambda_offered be the rate at which requests reach the service and lambda_admitted the rate accepted for execution. Let lambda_completed count useful successful completions. Rejection, cancellation, and failure explain why these rates can differ, especially outside steady state.
@@ -48,6 +48,10 @@ The coefficients summarize measured service time under a specified configuration
 Predicted output length is uncertain. A requested maximum is an upper bound under the protocol, not a reliable expectation. Historical distributions can support a statistical estimate, but requests whose generation behavior changes can invalidate it. Keep the estimate's uncertainty and update it using actual outcomes.
 
 Do not interpret the sum of isolated request times as an exact batched execution time. Continuous batching creates shared work and interference. Use the model to rank or budget demand, then validate admission thresholds against measurements at the intended mixed workload.
+
+
+
+![Deep-dive illustration: Request count is a poor proxy for resource demand](./deep-dive.png)
 
 ## 3. Reserve cache capacity without pretending all tokens exist yet
 

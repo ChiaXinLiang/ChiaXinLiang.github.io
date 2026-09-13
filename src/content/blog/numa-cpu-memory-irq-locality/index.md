@@ -20,9 +20,9 @@ We will derive simple remote-access costs and build a placement experiment that 
 
 ## 1. Discover the topology and the allowed resources
 
-![Section overview: NUMA Tuning: CPU Affinity, Memory Placement, and IRQ Locality. Discover the physical domains; Place execution and allocation; Inspect the progress path; Measure useful work](./section-overview.svg)
+![Concept overview: NUMA Tuning: CPU Affinity, Memory Placement, and IRQ Locality. Cutaway dual-socket server shows each CPU socket with local RAM and attached GPU/NIC.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Map CPU NUMA nodes, host-memory domains, GPU and NIC PCI identities, and relevant interconnect relationships. Also inspect the CPU and memory-node masks the process is actually allowed to use. A container or scheduler can restrict resources even when the host exposes a larger topology.
@@ -56,6 +56,10 @@ For illustrative local latency 100 nanoseconds, remote latency 180 nanoseconds, 
 Application time does not scale directly with this average. Caches, memory-level parallelism, prefetching, and arithmetic can hide or change access cost. A pointer-dependent workload exposes latency differently from a streaming copy. Select a benchmark that resembles the stage being tuned.
 
 Measure useful stage time and access behavior together. A lower remote fraction with unchanged throughput can mean another bottleneck dominates. A better throughput result without changed placement can reflect different scheduling or background conditions rather than the intended NUMA mechanism.
+
+
+
+![Deep-dive illustration: Derive a simple remote-latency model](./deep-dive.png)
 
 ## 4. Model bandwidth and shared inter-socket demand
 

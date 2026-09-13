@@ -20,9 +20,9 @@ This article starts with a tiny Bernoulli experiment, derives the estimate by ha
 
 ## A model tells us how observations could arise
 
-![Section overview: mle: from observations to a fitted parameter. Fix the observations; Form a log objective; Work the Bernoulli example; Connect to language models](./section-overview.svg)
+![Concept overview: Maximum Likelihood Estimation: From Observed Data to a Training Objective. A fixed set of success/failure observation dots beside several candidate probability sliders.](./section-overview.png)
 
-*Read 1 to 4 to connect the method, its mechanism, and the assumptions behind the equations. The section below develops the details.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Suppose we record whether 10 requests succeed. Each outcome $$y_i$$ is either 1 for success or 0 for failure. Our model assumes an unknown, fixed success probability $$\theta$$ between 0 and 1. It further assumes that outcomes are independent and identically distributed, often written i.i.d. Independence means that knowing 1 outcome does not change the modeled probability of another. Identically distributed means the same parameter applies to all 10 trials.

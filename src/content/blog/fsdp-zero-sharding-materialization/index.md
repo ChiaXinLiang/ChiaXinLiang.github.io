@@ -20,9 +20,9 @@ We will account for the familiar ZeRO stages, derive a simplified per-rank budge
 
 ## 1. Name the state being partitioned
 
-![Section overview: FSDP and ZeRO: What Gets Sharded and What Must Be Materialized. Partition ownership; Materialize a unit; Compute and release; Tune the schedule](./section-overview.svg)
+![Concept overview: FSDP and ZeRO: What Gets Sharded and What Must Be Materialized. Several GPU servers each own a colored parameter shard.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 A conventional mixed-precision Adam example can contain compute weights, gradients, higher-precision master weights, and 2 optimizer moments. With 2-byte weights, 2-byte gradients, and 12 bytes of master and moment state, the persistent total is 16 bytes per parameter. This is an illustrative representation policy, not a mandatory property of every optimizer implementation.
@@ -54,6 +54,10 @@ for the idealized fully partitioned case. These expressions omit activations, wo
 Take P equal to 7 billion, D equal to 8, w equal to 2, g equal to 2, and o equal to 12 bytes. The replicated persistent state is 112 GB. The 3 stage estimates are 38.5 GB, 26.25 GB, and 14 GB per rank. All quantities here use decimal GB consistently.
 
 The diminishing benefit depends on the original state mix. If an optimizer has much smaller state, optimizer sharding removes less memory. If activations dominate the measured peak, even complete persistent-state partitioning may leave the main capacity constraint intact. Begin with the actual tensor inventory rather than applying a stage number as a universal memory multiplier.
+
+
+
+![Deep-dive illustration: Derive the stage-by-stage persistent budget](./deep-dive.png)
 
 ## 3. Parameter sharding introduces materialization
 

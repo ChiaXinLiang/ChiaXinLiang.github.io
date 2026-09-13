@@ -18,9 +18,9 @@ This article follows the official model card checked on September 13, 2026. The 
 
 ## 1. Expand the repeated layout
 
-![Section overview: Qwen3.6: Reading a Hybrid Multimodal Model Configuration. Count each layer family; Read widths independently; Count selected expert work; Include multimodal inputs](./section-overview.svg)
+![Concept overview: Qwen3.6: Reading a Hybrid Multimodal Model Configuration. Hybrid model cutaway alternates disclosed recurrent and attention components, includes selected experts, and receives image patch representations from a vision encoder.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 The card describes 10 repetitions of a group containing 3 Gated DeltaNet blocks and 1 Gated Attention block, with each sequence-mixing block followed by MoE. Expanding that expression gives 30 recurrent-family blocks, 10 attention-family blocks, and an expert branch associated with every listed layer.
@@ -32,6 +32,10 @@ $$
 This simple check matters because applying a conventional attention-cache formula to all 40 layers would misclassify the recurrent state. Conversely, treating the entire model as constant-state recurrence would omit the 10 explicit-attention layers.
 
 The ordering also matters for behavior. Attention blocks appear at particular depths among recurrent blocks rather than as a separate preprocessing stage. Their outputs influence subsequent recurrent and expert computation through the language model's residual structure.
+
+
+
+![Deep-dive illustration: Expand the repeated layout](./deep-dive.png)
 
 ## 2. Read recurrent heads separately
 

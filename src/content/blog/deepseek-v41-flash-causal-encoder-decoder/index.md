@@ -18,9 +18,9 @@ This article follows the official release card checked on September 13, 2026. Th
 
 ## 1. Clarify what causal encoding means
 
-![Section overview: DeepSeek-V4.1-Flash 1: Causal Encoder-Decoder and Phase-Specific Work. Process a causal prefix; Project global memory; Generate with decoder work; Measure the request mix](./section-overview.svg)
+![Concept overview: DeepSeek-V4.1-Flash 1: Causal Encoder-Decoder and Phase-Specific Work. A causal input-prefix representation feeds phase-specific encoder and decoder computation, with separate prefill and incremental decode ribbons.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 An encoder does not necessarily imply unrestricted bidirectional attention. The word describes a role in this architecture, while causality describes which information a representation may use. A causal representation for position i cannot depend on a later token that was unavailable at that step.
@@ -33,6 +33,10 @@ $$
 The derivative notation expresses the intended dependency restriction, not a requirement to calculate those derivatives in serving. Masks, recurrence rules, and architectural operations must jointly enforce the restriction. A component's name alone is not evidence about its attention mask.
 
 This distinction lets a causal encoder process prefix representations that remain compatible with autoregressive generation. It also prevents an incorrect analogy with a translation encoder that can freely inspect an entire source sequence.
+
+
+
+![Deep-dive illustration: Clarify what causal encoding means](./deep-dive.png)
 
 ## 2. Follow global state provenance
 

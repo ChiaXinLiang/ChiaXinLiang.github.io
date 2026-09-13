@@ -20,9 +20,9 @@ We will trace compatibility and I/O responsibilities, define a reproducible soft
 
 ## 1. Separate the image from the running host driver
 
-![Section overview: GPU Containers: Driver Compatibility, Runtime Libraries, and I/O Paths. Identify the host boundary; Record the software tuple; Trace data and device paths; Compare useful execution](./section-overview.svg)
+![Concept overview: GPU Containers: Driver Compatibility, Runtime Libraries, and I/O Paths. Layered server illustration separates host GPU driver, container runtime, container CUDA libraries/application, and physical GPU.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 The host supplies the running operating-system kernel and GPU kernel driver. The image supplies application binaries and many user-space dependencies. NVIDIA's container tooling integrates supported GPU access with container execution, including the relevant device and driver interfaces.
@@ -48,6 +48,10 @@ Compatibility rules connect particular components and supported exceptions. CUDA
 The CUDA version printed by a driver-management utility should not be treated as proof of the toolkit installed in the image. Inspect the application's actual dependencies and environment. Multiple runtime libraries can coexist, and the executable may resolve a different one from the version an operator expected.
 
 Preserve supported compatibility documentation beside the tuple. If a deployment uses an exception or compatibility package, record its applicable hardware and software conditions. The reproduction target is the supported executed combination, not a slogan that all newer drivers or all containers are interchangeable.
+
+
+
+![Deep-dive illustration: Treat compatibility as a constrained software tuple](./deep-dive.png)
 
 ## 3. Verify compiled code and JIT behavior
 

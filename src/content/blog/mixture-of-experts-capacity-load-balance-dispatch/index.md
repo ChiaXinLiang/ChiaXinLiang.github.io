@@ -18,9 +18,9 @@ This article separates training-time balancing from runtime capacity and dispatc
 
 ## 1. Count assignments before buffers
 
-![Section overview: Mixture of Experts 2: Load Balance, Capacity, and Dispatch. Count assignments; Inspect the distribution; Dispatch with identity; Combine every contribution](./section-overview.svg)
+![Concept overview: Mixture of Experts 2: Load Balance, Capacity, and Dispatch. Router sends colored tokens into expert queues with visible capacity boundaries.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Let N tokens each select k experts from a collection of E. There are kN logical assignments when every selected pair is retained. Define n_e as the number assigned to expert e. Their sum equals the assignment population.
@@ -33,6 +33,10 @@ $$
 The average is not a capacity guarantee. A router can send much more than that average to 1 expert. A buffer sized only for the uniform expectation can overflow on a valid routing result.
 
 A token selecting several experts appears in several groups and later receives several contributions. Preserve each token-expert pair as the logical unit of dispatch. Treating the first selected expert as the token's only owner would discard the remaining computation.
+
+
+
+![Deep-dive illustration: Count assignments before buffers](./deep-dive.png)
 
 ## 2. Separate frequency and probability mass
 

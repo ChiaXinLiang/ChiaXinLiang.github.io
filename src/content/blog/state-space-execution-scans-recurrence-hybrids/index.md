@@ -32,6 +32,10 @@ A_k and b_k can vary by token while remaining fixed for the purpose of evaluatin
 
 The important distinction is whether the coefficients themselves require an unavailable previous state. The scan argument considered here assumes they can be formed under the model's supported interface before or during the organized computation. Arbitrary nonlinear recurrent functions do not inherit this simple affine composition law.
 
+
+
+![Deep-dive illustration: Define the affine update](./deep-dive.png)
+
 ## 2. Compose two transitions
 
 Apply transition 1 and then transition 2. Substitution gives a combined matrix product and a combined offset.

@@ -20,9 +20,9 @@ We will derive a tiled execution and its logical traffic model, then connect tha
 
 ## 1. Define shapes, layouts, and the required result
 
-![Section overview: Tiled GEMM: From a Correct Kernel to a Measured Memory Model. Own one output tile; Reuse loaded operands; Budget on-chip state; Measure the complete kernel](./section-overview.svg)
+![Concept overview: Tiled GEMM: From a Correct Kernel to a Measured Memory Model. Matrices A and B are drawn with highlighted tiles feeding a small accumulator tile C inside GPU shared/register memory.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Let A have shape M by K, B shape K by N, and C shape M by N. For the basic operation without an existing-output term,
@@ -36,6 +36,10 @@ Record the actual storage strides and dtypes. A transpose or view changes pointe
 Define accumulator precision and numerical tolerance. Fused operations and reduction ordering can differ from a sequential reference while computing the same mathematical sum within a valid finite-precision contract. Memory corruption and missing reduction terms require a different diagnosis.
 
 Handle empty and partial dimensions through the supported interface. The host can provide a no-work path or reject unsupported shapes. A convenient square aligned benchmark does not establish correctness for all claimed inputs.
+
+
+
+![Deep-dive illustration: Define shapes, layouts, and the required result](./deep-dive.png)
 
 ## 2. Begin from a correct scalar ownership baseline
 

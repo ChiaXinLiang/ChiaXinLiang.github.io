@@ -18,7 +18,7 @@ This is out-of-order execution, and it is the single most elaborate piece of mac
 
 ## Why in-order pipelines stall
 
-![Out-of-order execution overview](./section-overview.svg)
+![Instruction scheduling and ordered retirement.](./section-overview.png)
 
 
 

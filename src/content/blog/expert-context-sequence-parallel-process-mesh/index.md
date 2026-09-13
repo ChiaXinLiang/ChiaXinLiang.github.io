@@ -20,9 +20,9 @@ This article connects the 3 mechanisms to memory, arithmetic, and communication 
 
 ## 1. Treat the process mesh as an ownership map
 
-![Section overview: Expert, Context, and Sequence Parallelism: Choosing a Process Mesh. Expert parallelism; Context parallelism; Sequence parallelism; Process mesh](./section-overview.svg)
+![Concept overview: Expert, Context, and Sequence Parallelism: Choosing a Process Mesh. Draw a labeled multidimensional GPU process mesh, with different colored axes for expert, context, and sequence partitions.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 A process mesh organizes ranks along dimensions corresponding to parts of the computation. Data parallelism assigns different examples to groups. Tensor parallelism partitions operations. Pipeline parallelism assigns layer ranges. Context parallelism can assign sequence positions. Expert parallelism assigns expert ownership and routes token states to the appropriate owners.
@@ -46,6 +46,10 @@ S_{\mathrm{dispatch}}\approx NkHb.
 $$
 
 This counts duplicated token payload sent for selected experts before accounting for local routes, packing, metadata, compression, and implementation reuse. The return path can create another comparable state transfer. Actual inter-rank bytes depend on which selected experts are local and how tokens are aggregated.
+
+
+
+![Deep-dive illustration: Expert parallelism follows sparse routing](./deep-dive.png)
 
 ## 3. Work an expert-dispatch example
 

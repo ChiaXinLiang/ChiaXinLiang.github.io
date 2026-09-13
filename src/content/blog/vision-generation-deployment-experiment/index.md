@@ -56,6 +56,10 @@ The equation explains why resolution can affect tokenwise and pairwise work diff
 
 For a dense latent denoiser, resolution similarly changes feature-map shapes, but its exact cost depends on architecture. Do not import the ViT quadratic formula into every diffusion network. Inspect the actual operators and state sizes before using a scaling estimate to predict resource use.
 
+
+
+![Deep-dive illustration: Account for token and resolution scaling](./deep-dive.png)
+
 ## 5. Count generation evaluations and fixed stages
 
 A generator's total time can be organized into predictor evaluations, scheduler work, and fixed stages. Guidance can change the prediction work per update.

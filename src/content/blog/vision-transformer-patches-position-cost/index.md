@@ -32,6 +32,10 @@ N is the number of patch tokens before adding any special token. If dimensions a
 
 Preserve preprocessing in quality comparisons. A model evaluated at one resolution is answering a different information-budget question from the same architecture evaluated on a larger or differently cropped image.
 
+
+
+![Deep-dive illustration: Define the image tensor](./deep-dive.png)
+
 ## 2. Project each flattened patch
 
 Flattening one P-by-P patch produces P squared C values. A learned linear projection maps that vector to an embedding of width D.

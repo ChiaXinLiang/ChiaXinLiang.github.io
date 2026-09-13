@@ -42,6 +42,10 @@ The feasible set describes the supported quantized representation. The equation 
 
 Calibration cost and data requirements belong in the method comparison. A result described as post-training can still involve substantial reconstruction or parameter-search work. Report the actual procedure rather than interpreting PTQ as always equivalent to rounding every weight independently.
 
+
+
+![Deep-dive illustration: Explain the PTQ path](./deep-dive.png)
+
 ## 3. Define fake quantization
 
 Fake quantization encodes and reconstructs a value during the training forward pass, usually returning it in a wider tensor type for the surrounding computation. The output contains quantization effects even though storage during training is not necessarily packed low precision.

@@ -20,9 +20,9 @@ We will derive a simple FP32 mapping and work a transpose example. The arithmeti
 
 ## 1. Begin with lane addresses, not array dimensions
 
-![Section overview: Shared-Memory Bank Conflicts: Padding, Swizzling, and Broadcast. Map words to banks; Work the transpose; Preserve a swizzle; Verify the actual instruction](./section-overview.svg)
+![Concept overview: Shared-Memory Bank Conflicts: Padding, Swizzling, and Broadcast. Shared memory is drawn as parallel bank columns.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 For a warp access, record which logical element each active lane requests and convert it to a physical shared-memory word address. Shape alone does not determine the access pattern. Threads reading a row and threads reading a column can use the same array with very different bank behavior.
@@ -36,6 +36,10 @@ $$
 The base address adds a constant offset to the mapping. That changes bank labels but not the collision pattern for a uniform stride. Actual alignment and instruction width still matter to the generated requests.
 
 Keep the active-lane mask and instruction scope explicit. A full-warp formula should not be applied unchanged to a partial request or an instruction that is split into multiple transactions. The model is a starting point for analysis, not a replacement for the compiled access.
+
+
+
+![Deep-dive illustration: Begin with lane addresses, not array dimensions](./deep-dive.png)
 
 ## 2. Derive the stride conflict pattern
 

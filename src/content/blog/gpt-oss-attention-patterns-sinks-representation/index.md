@@ -18,9 +18,9 @@ This article follows the official reference code rather than inferring implement
 
 ## 1. Derive the alternating mask
 
-![Section overview: gpt-oss 2: Attention Patterns, Sinks, and Numerical Representation. Apply the causal mask; Share key-value heads; Add a learnable sink score; Keep precision categories separate](./section-overview.svg)
+![Concept overview: gpt-oss 2: Attention Patterns, Sinks, and Numerical Representation. A causal attention grid shows allowed past-token connections, a local sliding window where supported, and protected sink positions.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 The reference applies the local window on every other layer, using the layer index to choose local or unrestricted causal attention. For a local layer, query position t attends to the current position and preceding positions within the window. Global layers retain the ordinary causal eligibility rule.
@@ -33,6 +33,10 @@ $$
 The window convention here includes the current token, matching the reference's mask boundary. Off-by-one definitions matter when comparing kernels. A backend using a different “window size” convention must translate it correctly.
 
 Alternating layers create different paths for recent and distant information. A local layer can receive a representation already influenced by a preceding global layer. It is therefore incorrect to say that every local layer makes the entire model unable to use older context.
+
+
+
+![Deep-dive illustration: Derive the alternating mask](./deep-dive.png)
 
 ## 2. Calculate logical cache capacity
 

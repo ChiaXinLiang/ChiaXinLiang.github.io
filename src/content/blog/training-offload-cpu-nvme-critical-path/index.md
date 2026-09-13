@@ -20,9 +20,9 @@ We will distinguish optimizer offload from parameter offload, derive transfer an
 
 ## 1. Identify exactly what is being offloaded
 
-![Section overview: Training Offload: CPU, NVMe, Bandwidth, and the Critical Path. Move ownership; Transfer at the right time; Update outside the GPU; Evaluate end to end](./section-overview.svg)
+![Concept overview: Training Offload: CPU, NVMe, Bandwidth, and the Critical Path. A memory hierarchy cutaway shows GPU HBM, host RAM, and NVMe storage holding different training-state blocks.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Optimizer offload places selected optimizer state and possibly optimizer computation in host memory. For Adam, the first and second moments and any master-weight copy can be large. Keeping them off the GPU removes an important persistent-state contribution while allowing compute weights to remain available for forward and backward.
@@ -56,6 +56,10 @@ Startup, synchronization, registration, packing, and contention can make the obs
 Suppose 7 billion gradients use 2 bytes each and 7 billion updated compute weights also use 2 bytes each. Moving the gradients out and the weights back transfers 28 GB in total. At an assumed effective 25 GB/s, a serialized two-direction copy budget is at least 1.12 seconds.
 
 A sharded implementation may transfer only local owned slices or use a different data representation. Some systems overlap outgoing and incoming chunks. The example is therefore a deliberately simple accounting baseline. Inspect the actual tensors and ordering to determine the byte volume and concurrency used by a particular offload method.
+
+
+
+![Deep-dive illustration: Count transfers in both directions](./deep-dive.png)
 
 ## 4. The CPU optimizer has a bandwidth bill
 

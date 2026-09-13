@@ -33,6 +33,10 @@ The equation specifies a family of quantizers. Rounding mode, signed interval, s
 
 Quantized codes are not the original values. A downstream computation either uses an integer-compatible arithmetic path with scale accounting or reconstructs values for another precision. Stored bits and accumulation precision should therefore be reported independently.
 
+
+
+![Deep-dive illustration: Define encoding and reconstruction](./deep-dive.png)
+
 ## 2. Derive scale from a range
 
 If the selected real interval runs from a to b and integer codes run from q_min to q_max, a representative affine scale is the real width divided by integer width. Zero-point selection aligns real zero with an allowed code where the policy requires it.

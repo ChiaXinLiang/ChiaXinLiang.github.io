@@ -32,6 +32,10 @@ Constants a and b depend on the actual architecture and counting convention. The
 
 Reducing S can therefore affect several components, not only attention. The reduction point matters: removing tokens after a block cannot save work already performed in that block. Count the sequence length at each layer and include the selection or merging operation itself.
 
+
+
+![Deep-dive illustration: Begin with the token-cost model](./deep-dive.png)
+
 ## 2. Distinguish pruning from masking
 
 Token pruning selects a retained subset. A logical mask can express that subset while leaving tensors at their original dimensions. A generic dense kernel can still perform nearly the same work under that arrangement.

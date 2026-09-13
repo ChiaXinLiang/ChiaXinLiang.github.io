@@ -32,6 +32,10 @@ The sets can differ by layer. An embedding, a projection, and a normalization op
 
 Storage precision also differs from accumulation precision. A layer can read packed weights while accumulating in a wider datatype. Record both in the configuration so that the allocation is a concrete numerical contract.
 
+
+
+![Deep-dive illustration: Define the allocation variables](./deep-dive.png)
+
 ## 2. Start with complete memory accounting
 
 Weight payload is approximately the sum of element counts multiplied by their selected bit widths. Real artifacts also contain scales, zero points, alignment padding, metadata, and any tensors retained in a wider format.

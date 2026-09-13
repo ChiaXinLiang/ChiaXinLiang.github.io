@@ -18,9 +18,9 @@ On its face this is a ridiculous way to store the parameters of 1 trillion-dolla
 
 ## 8 magnitudes and a sign bit
 
-![Section overview: block quantization: values, scales, and error. Represent a compact value; Compare scale granularity; Reconstruct and compare; Validate the complete method](./section-overview.svg)
+![Concept overview: NVFP4 vs MXFP4: Inside the 4-Bit Format War. A magnified row of packed 4-bit values attached to scaling metadata.](./section-overview.png)
 
-*Read 1 to 4 to connect the method, its mechanism, and the assumptions behind the equations. The section below develops the details.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Start with the raw material. Both formats store each individual value in **FP4 E2M1**: 1 sign bit, 2 exponent bits, 1 mantissa bit. 2 exponent bits give you 4 exponent settings; 1 mantissa bit gives you 2 mantissa steps per exponent. Work through the encoding and you get exactly the 8 magnitudes listed above, from 0 to 6.

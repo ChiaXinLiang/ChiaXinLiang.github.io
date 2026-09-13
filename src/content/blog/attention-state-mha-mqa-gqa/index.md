@@ -18,9 +18,9 @@ The original GQA paper studies grouped-query attention as a compromise between m
 
 ## 1. Assign roles to Q, K, and V
 
-![Section overview: Attention State 1: MHA, MQA, and GQA. Project token representations; Compare compatible heads; Group the queries; Store and reuse history](./section-overview.svg)
+![Concept overview: Attention State 1: MHA, MQA, and GQA. Three side-by-side illustrated token/head/cache arrangements: MHA has separate K/V histories per query head; MQA has one shared K/V history read by all query heads; GQA has several query-head groups, each group reads its own shared K/V history.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Let X contain n token representations of width d. Learned projections produce query, key, and value tensors. A query determines which earlier positions are relevant to the current position. A key participates in compatibility scoring. A value supplies the content combined through the resulting weights.
@@ -33,6 +33,10 @@ $$
 This single-head notation uses head width d_h and additive mask M. The output is not the score matrix: it is a weighted combination of value vectors. Changing keys changes addressing; changing values changes retrieved content. The projections can therefore have different dimensions or sharing patterns even though they start from the same token representation.
 
 The square-root scale controls score magnitude under an idealized variance argument. If independent query and key coordinates have unit variance, their dot product has variance proportional to head width. Dividing by its square root keeps that variance roughly stable. Learned representations need not satisfy those assumptions exactly.
+
+
+
+![Deep-dive illustration: Assign roles to Q, K, and V](./deep-dive.png)
 
 ## 2. Make causality explicit
 

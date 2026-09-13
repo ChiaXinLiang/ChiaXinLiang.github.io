@@ -147,8 +147,8 @@ const topicTags = [...new Set(catalog.flatMap(series => series.topicTags))].sort
   .result-count { font-size: .7em; color: rgb(var(--gray)); margin: 1.2rem 0 .5rem; }
   .series-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
   .series-row { border: 1px solid rgb(var(--gray-light)); border-radius: 12px; overflow: hidden; background: var(--bg); }
-  .series-cover { display: block; aspect-ratio: 15 / 8; overflow: hidden; background: rgba(var(--gray-light), .3); }
-  .series-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .series-cover { display: block; aspect-ratio: 15 / 8; overflow: hidden; background: #fff; }
+  .series-cover img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .card-content { padding: 1rem; }
   .view-more { display: block; margin: 1.25rem auto 0; font-size: .85rem; padding: .65rem 1.2rem; }
 

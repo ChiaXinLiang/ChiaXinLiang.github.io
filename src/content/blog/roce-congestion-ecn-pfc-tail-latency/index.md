@@ -20,9 +20,9 @@ We will derive simple queue and headroom models, explain these mechanisms, and b
 
 ## 1. Congestion begins with demand at a shared resource
 
-![Section overview: Congestion and RoCE: ECN, PFC, and Tail Latency. Observe queue growth; Signal congestion early; Understand the pause boundary; Verify useful progress](./section-overview.svg)
+![Concept overview: Congestion and RoCE: ECN, PFC, and Tail Latency. Several sending NICs funnel packets into a switch queue and receiver.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Consider an outgoing link or topology cut with service rate mu bytes per second. Let lambda(t) be aggregate incoming demand and Q(t) queued bytes. While the queue is nonempty, a simplified fluid model is
@@ -36,6 +36,10 @@ When demand exceeds capacity, the queue grows. When demand falls below capacity,
 For an illustrative 100 GB/s arrival burst entering a 50 GB/s outgoing resource, the queue grows at 50 GB/s. Over 10 microseconds, that adds 500000 bytes. A brief synchronized burst can therefore create substantial buffering demand even if long-term average traffic is below link capacity.
 
 Plot arrivals, queue occupancy, and outgoing traffic on compatible intervals. A coarse average can smooth away the burst that caused the pause or tail event. The observation method should resolve the relevant timescale sufficiently to support the hypothesis.
+
+
+
+![Deep-dive illustration: Congestion begins with demand at a shared resource](./deep-dive.png)
 
 ## 2. Queueing delay can grow sharply near saturation
 

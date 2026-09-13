@@ -20,9 +20,9 @@ We will derive the basic accounting, examine power caps and clocks, and build an
 
 ## 1. Define energy and useful work on the same interval
 
-![Section overview: Energy per Useful Token: Power Caps, Clocks, Thermals, and SLOs. Define useful output; Measure one boundary; Sweep the operating point; Choose under constraints](./section-overview.svg)
+![Concept overview: Energy per Useful Token: Power Caps, Clocks, Thermals, and SLOs. Illustrated GPU server has a power meter, thermal gauge, and clock setting.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Power is an instantaneous rate of energy consumption. For an observation interval from time a to time b, energy is the integral of measured power. If N_useful is the number of qualifying output tokens delivered during that interval, define
@@ -36,6 +36,10 @@ Power in watts and time in seconds produce joules. Joules per token is meaningfu
 Choose a useful-output policy suited to the service. A conversational service may count delivered tokens in successfully completed responses. A structured-output service may count accepted complete objects instead. An evaluation workload can report both generated work and accepted work to make the difference visible.
 
 If no useful output completes in the interval, energy per useful token is undefined rather than zero. Report the energy and the absence of useful completions separately. This case is important during startup, failure, or overload, when considerable power consumption can coexist with little usable progress.
+
+
+
+![Deep-dive illustration: Define energy and useful work on the same interval](./deep-dive.png)
 
 ## 2. State whether the boundary is a device or a system
 

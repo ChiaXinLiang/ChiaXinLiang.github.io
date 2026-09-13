@@ -18,9 +18,9 @@ The card reports 890 bytes per token for global cache, roughly 1/4 of DeepSeek-V
 
 ## 1. Read the numerical format precisely
 
-![Section overview: DeepSeek-V4.1-Flash 3: FP4 Cache and Bounded Replay. Store low-precision content; Include all stored bytes; Persist selected state; Replay before resuming](./section-overview.svg)
+![Concept overview: DeepSeek-V4.1-Flash 3: FP4 Cache and Bounded Replay. Illustrate a compressed token-state cache with packed values and scale metadata, alongside a bounded window of source tokens reconstructed when needed.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 The released overview specifies FP4 E2M1 for main cache and an E4M3 scale for each group of 16 channels. E2M1 describes a compact floating-point representation, while the group scale extends the range available to a collection of values. The exact encoding and rounding behavior belong to the implementation's numerical contract.
@@ -32,6 +32,10 @@ $$
 $$
 
 This equation explains the role of scaling without prescribing a particular scale-selection algorithm. The model card's scale format does not by itself disclose clipping, rounding, handling of nonfinite values, or every layout detail. Do not invent those settings from the format name.
+
+
+
+![Deep-dive illustration: Read the numerical format precisely](./deep-dive.png)
 
 ## 2. Calculate scale overhead
 

@@ -7,6 +7,7 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import SeriesSidebar from '../components/SeriesSidebar.astro';
+import ArticleVisuals from '../components/ArticleVisuals.astro';
 
 type NavLink = { href: string; title: string };
 type Heading = { depth: number; slug: string; text: string };
@@ -131,6 +132,7 @@ const showToc = toc.length >= 3;
 						<h1>{title}</h1>
 						<hr />
 					</div>
+					<ArticleVisuals />
 					{
 						showToc && (
 							<nav class="toc">
@@ -145,7 +147,7 @@ const showToc = toc.length >= 3;
 							</nav>
 						)
 					}
-					<slot />
+					<div class="article-content"><slot /></div>
 					{
 						(prev || next) && (
 							<nav class="post-nav">

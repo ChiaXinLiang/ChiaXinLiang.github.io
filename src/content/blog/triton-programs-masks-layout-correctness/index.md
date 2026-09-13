@@ -20,9 +20,9 @@ We will build vector addition from program ownership, then examine masks, stride
 
 ## 1. Start from a precise operation and storage contract
 
-![Section overview: Triton Kernel Foundations: Programs, Masks, Layouts, and Correctness. Assign a logical tile; Mask every boundary; Preserve the layout contract; Verify and measure](./section-overview.svg)
+![Concept overview: Triton Kernel Foundations: Programs, Masks, Layouts, and Correctness. A rectangular tensor grid is divided into program tiles.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 For length N vectors, the required result is c_i=a_i+b_i for every valid index. Assume separate contiguous FP32 device buffers for the initial example. Shape, dtype, device, and storage layout are part of the interface, not implicit properties guaranteed by the language.
@@ -46,6 +46,10 @@ Programs with adjacent identifiers own disjoint intervals, and a grid of ceiling
 For N=1003 and K=256, 4 programs cover 1024 logical positions. Program 3 owns offsets 768 through 1023, of which 235 are valid. The tile shape is 256 even though only 235 positions correspond to useful elements.
 
 A program is not a single hardware thread, and K is not simply a CUDA block width. Compiler layouts and launch configuration distribute tile operations across hardware execution resources. Keep logical ownership separate from assumptions about lane assignment.
+
+
+
+![Deep-dive illustration: Derive program-owned tile offsets](./deep-dive.png)
 
 ## 3. Apply the mask to loads and stores
 

@@ -41,6 +41,10 @@ This expression illustrates coordinate selection under compatible element-wise a
 
 Residual additions need compatible coordinate structure across branches. Normalization parameters, grouped convolutions, attention projections, and tied representations can constrain which channels may be removed together. A local channel decision can therefore propagate through several components. The conversion must preserve the complete graph rather than edit one tensor in isolation.
 
+
+
+![Deep-dive illustration: Follow channel dependencies](./deep-dive.png)
+
 ## 3. Compare unstructured sparse storage
 
 Suppose a matrix contains N entries and retains fraction rho. A simple sparse representation stores retained values plus one index per retained entry and additional row metadata. If values use s bytes and indices use b bytes, approximate storage is:

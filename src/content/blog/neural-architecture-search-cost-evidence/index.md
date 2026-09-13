@@ -32,6 +32,10 @@ Quality Q depends on how candidate weights are obtained and evaluated. Timing T 
 
 Those dependencies belong in the specification. A search over model names with an unexplained quality score and generic FLOP constraint does not fully define an efficient deployment problem.
 
+
+
+![Deep-dive illustration: Define the architecture variable](./deep-dive.png)
+
 ## 2. Design the search space deliberately
 
 A search algorithm cannot choose an operation absent from its space. Conversely, a very broad space can make evaluation expensive and include many unsupported or poor candidates. Search-space design already encodes architectural judgment.

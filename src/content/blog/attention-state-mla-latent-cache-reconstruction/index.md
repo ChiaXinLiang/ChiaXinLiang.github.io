@@ -18,9 +18,9 @@ DeepSeek-V2's primary paper introduces MLA and explains decoupled rotary positio
 
 ## 1. Start with a low-rank factorization
 
-![Section overview: Attention State 2: MLA and Latent Cache Reconstruction. Compress the token state; Reconstruct head content; Absorb compatible maps; Account for side state](./section-overview.svg)
+![Concept overview: Attention State 2: MLA and Latent Cache Reconstruction. An explicit geometric comparison of a full per-token key/value cache and a compact per-token latent cache, with illustrated matrix tiles showing a down-projection into latent state, latent states retained across past tokens, and compatible key/value readout projections used by attention.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Let h_t be the current token's hidden representation. A learned down-projection produces latent vector c_t of width r. Head-specific up-projections map that vector into key and value content. The rank r can be smaller than the combined expanded key-value dimensions.
@@ -34,6 +34,10 @@ $$
 The superscript C labels content components, and j labels a head. This notation isolates the main factorization. The actual architecture includes other projections and positional terms. A smaller rank restricts the family of expanded representations relative to unconstrained independent projections.
 
 The model learns under that constraint. Calling the reconstructed keys “approximate” can be misleading when they are the exact keys defined by the architecture; approximation arises when comparing this learned family with a different unconstrained model, not necessarily in runtime reconstruction.
+
+
+
+![Deep-dive illustration: Start with a low-rank factorization](./deep-dive.png)
 
 ## 2. Derive query-side absorption
 

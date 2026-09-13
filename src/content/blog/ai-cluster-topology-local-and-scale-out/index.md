@@ -20,9 +20,9 @@ This article develops a method for drawing local and scale-out paths, deriving s
 
 ## 1. Separate the logical communication graph from physical links
 
-![Section overview: AI Cluster Topology: PCIe, NVLink, NVSwitch, and Scale-Out Fabrics. Draw the local path; Draw the scale-out path; Identify shared cuts; Place and verify](./section-overview.svg)
+![Concept overview: AI Cluster Topology: PCIe, NVLink, NVSwitch, and Scale-Out Fabrics. Nested topology cutaway: GPUs joined by NVLink/NVSwitch inside a node, PCIe paths to local NICs, network leaf and spine switches joining several nodes.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 The logical graph describes which ranks exchange data, how often, and how many bytes move. The physical graph describes devices, switches, interface capacities, and shared paths. Rank numbering alone does not tell you where a process's GPU or network adapter is located.
@@ -68,6 +68,10 @@ $$
 This is a bottleneck bound, not a complete latency model. Pipelined segments need not add their full serialization times, but no required bottleneck can sustain more traffic than its available capacity. Shared traffic further reduces what one exchange can obtain.
 
 A server with several high-rate adapters therefore needs a mapping that can use them effectively. Port count and aggregate advertised rate do not establish balanced traffic across adapters. Inspect per-adapter counters and application path selection when one part of the server underperforms.
+
+
+
+![Deep-dive illustration: Trace the GPU-to-NIC path before the leaf switch](./deep-dive.png)
 
 ## 5. Model leaf-spine capacity through relevant cuts
 

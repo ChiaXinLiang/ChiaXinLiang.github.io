@@ -18,9 +18,9 @@ This article develops that proof before discussing performance. CUDA exposes mul
 
 ## 1. Separate the three events
 
-![Section overview: Asynchronous Tile Loading: TMA, Barriers, and Buffer Ownership. Reserve an empty stage; Issue an asynchronous transfer; Wait and compute; Release and reuse](./section-overview.svg)
+![Concept overview: Asynchronous Tile Loading: TMA, Barriers, and Buffer Ownership. GPU tile buffers alternate between producer loading and consumer computation.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Issuing a transfer means that the operation has been requested. Completing a transfer means that its data movement has finished according to the mechanism's contract. Finishing consumption means that every reader has stopped accessing the destination. These events create two distinct handoffs: producer to consumer, then consumer back to producer.
@@ -41,6 +41,10 @@ $$
 The approximation assumes independent copy and compute resources, adequate buffering, and no hidden contention. For illustrative values of eight tiles, a three-unit copy and five-unit computation produce sixty-four units serially and forty-three units in the ideal pipeline. This is a schedule calculation, not a measured GPU result.
 
 The speedup approaches the sum of copy and compute time divided by their maximum for a long stream. It cannot eliminate both costs. If transfers and computation compete for the same limiting memory path, their overlapped durations may increase. Measure the overlap rather than inferring it from the presence of asynchronous instructions.
+
+
+
+![Deep-dive illustration: Derive the pipeline's ideal schedule](./deep-dive.png)
 
 ## 3. Determine the number of stages
 

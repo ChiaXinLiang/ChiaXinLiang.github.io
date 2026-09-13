@@ -20,9 +20,9 @@ All numerical examples are capacity calculations or illustrative timing scenario
 
 ## 1. Start with the objects that attention actually produces
 
-![Section overview: FlashAttention: Online Softmax, Exact Tiling, and the I/O Model. Load one query tile; Update stable statistics; Normalize once; Measure the serving phase](./section-overview.svg)
+![Concept overview: FlashAttention: Online Softmax, Exact Tiling, and the I/O Model. Cutaway GPU memory hierarchy shows large Q,K,V blocks in HBM and small attention tiles in SRAM.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 For one attention head, let Q contain N_q query vectors, K contain N_k key vectors, and V contain N_k value vectors. Query and key width is d; value width is d_v. A conventional formulation is
@@ -36,6 +36,10 @@ The mask M excludes disallowed query-key pairs, usually by adding negative infin
 Consider N_q=N_k=8192 and a 2-byte stored score representation. One dense matrix occupies 128 MiB. With 32 heads, that becomes 4 GiB before accounting for probabilities, other activations, and the output. The calculation describes a materialized implementation; optimized attention need not allocate this object.
 
 The two matrix products perform useful arithmetic, but storing their connecting matrix introduces a separate cost. A kernel that improves arithmetic throughput while still writing and reading huge intermediates can leave the main bottleneck intact. Begin performance analysis by identifying which tensors are persistent model state, required outputs, and temporary execution artifacts.
+
+
+
+![Deep-dive illustration: Start with the objects that attention actually produces](./deep-dive.png)
 
 ## 2. Stable softmax creates a dependency across key blocks
 

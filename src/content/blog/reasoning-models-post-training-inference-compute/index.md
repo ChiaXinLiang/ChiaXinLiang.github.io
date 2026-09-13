@@ -18,9 +18,9 @@ DeepSeek-R1's primary paper provides a concrete example of reasoning-oriented po
 
 ## 1. Separate structure and behavior
 
-![Section overview: Reasoning Models: Architecture, Post-Training, and Inference-Time Compute. Identify the base network; Train desired behavior; Spend inference work; Evaluate verified results](./section-overview.svg)
+![Concept overview: Reasoning Models: Architecture, Post-Training, and Inference-Time Compute. Show a model preparation side with supervised examples and reward/verifier feedback, and an inference side with several candidate reasoning trajectories leading to answer selection.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Architecture determines the computation graph: attention, recurrent state, expert functions, residual paths, and representations. Learned weights determine the functions within that graph. Inference policy determines how outputs are sampled, constrained, or searched.
@@ -42,6 +42,10 @@ The examples determine which behavior receives training signal. Long solution de
 Data quality, task coverage, and leakage controls matter. A benchmark overlap can create apparent competence without the intended generalization. Report evaluation separation and use independently verified answers when possible.
 
 The R1 paper distinguishes its cold-start examples from the reinforcement-learning-only R1-Zero experiment. Preserve that distinction rather than describing the complete released pipeline as containing no supervised training.
+
+
+
+![Deep-dive illustration: Derive supervised post-training](./deep-dive.png)
 
 ## 3. Introduce reward optimization
 

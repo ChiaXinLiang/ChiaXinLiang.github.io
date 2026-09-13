@@ -20,9 +20,9 @@ We will model job feasibility, distinguish local from cross-node topology, and b
 
 ## 1. Represent demand as several resources and communication groups
 
-![Section overview: Kubernetes and Slurm: Topology-Aware Placement and Resource Guarantees. Describe the complete job; Align local resources; Allocate a coherent group; Verify the received placement](./section-overview.svg)
+![Concept overview: Kubernetes and Slurm: Topology-Aware Placement and Resource Guarantees. A cluster scheduler places a multi-GPU job onto server racks with visible GPU/NIC locality.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 For a job component i, record GPU demand g_i, CPU demand c_i, host-memory demand m_i, and relevant device-memory needs. Also record its role in the process mesh: tensor, pipeline, expert, context, or data-parallel groups can have different communication locality requirements.
@@ -36,6 +36,10 @@ $$
 The assignment a maps components to nodes. These inequalities omit device topology, allocation granularity, reservations, and runtime overhead, so satisfying them is necessary only within the simplified model, not a complete deployment certificate.
 
 Physical GPU memory also matters. A logical GPU allocation does not guarantee that a model's weights, activations, workspace, and cache fit. Shared-device or partitioned-device mechanisms have their own capacity and isolation semantics that must be included explicitly.
+
+
+
+![Deep-dive illustration: Represent demand as several resources and communication groups](./deep-dive.png)
 
 ## 2. Understand declared requests and effective allocations
 

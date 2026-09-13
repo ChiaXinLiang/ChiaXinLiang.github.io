@@ -41,6 +41,10 @@ The equation is an explanatory optimization model rather than an instruction to 
 
 Hard constraints differ from preferences. A configuration that slightly exceeds memory capacity may fail completely, while a modest energy increase can remain acceptable. Combining everything into one score can hide such distinctions unless the weights and feasibility rules are explicit.
 
+
+
+![Deep-dive illustration: Express a constrained objective](./deep-dive.png)
+
 ## 3. Understand Pareto dominance
 
 Suppose several configurations meet mandatory requirements. One dominates another if it is no worse on every compared objective and strictly better on at least one. The nondominated configurations form a Pareto frontier. A point on that frontier is not automatically the right deployment choice; it preserves a tradeoff requiring application judgment.

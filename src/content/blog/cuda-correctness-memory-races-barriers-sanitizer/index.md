@@ -20,9 +20,9 @@ We will build that method around common kernel failures and a small shared-buffe
 
 ## 1. Define the claimed interface and supported inputs
 
-![Section overview: CUDA Correctness: Memory Errors, Races, Barriers, and Compute Sanitizer. Prove address validity; Define ownership order; Match barrier participation; Use complementary evidence](./section-overview.svg)
+![Concept overview: CUDA Correctness: Memory Errors, Races, Barriers, and Compute Sanitizer. GPU thread lanes write and read a shared-memory tile.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Record shapes, strides, dtypes, pointer relationships, alignment assumptions, launch geometry, and allowed stream dependencies. A contiguous-input kernel does not automatically support every view with the same logical shape. An aligned-load implementation needs its alignment contract preserved.
@@ -48,6 +48,10 @@ Index arithmetic must fit its type before the bounds check. Narrow multiplicatio
 A mask should guard every potentially invalid access. Masking stores while leaving out-of-range loads unguarded is insufficient. For shared staging, invalid logical lanes can write a neutral value into an allocated shared slot so all consumers see initialized data.
 
 Alignment is another invariant for operations that require it. The relevant pointer and offset must satisfy the supported alignment rule. A tensor shape being divisible by a vector width does not establish that its base pointer or view offset is suitably aligned.
+
+
+
+![Deep-dive illustration: Prove physical address validity](./deep-dive.png)
 
 ## 3. Separate coverage from absence of invalid accesses
 

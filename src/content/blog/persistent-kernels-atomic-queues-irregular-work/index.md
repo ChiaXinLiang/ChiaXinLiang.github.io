@@ -18,9 +18,9 @@ The attraction is reduced scheduling overhead and better balancing. The responsi
 
 ## 1. Establish the job contract
 
-![Section overview: Persistent Kernels and Atomic Queues: Scheduling Irregular Work. Describe independent jobs; Claim a unique ticket; Execute and publish; Prove termination](./section-overview.svg)
+![Concept overview: Persistent Kernels and Atomic Queues: Scheduling Irregular Work. A persistent GPU worker grid repeatedly takes irregular task tiles from an atomic queue.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Start with a fixed collection of J independent jobs. Each job has an identifier, immutable input description, and a disjoint output region. Independence means that a job does not wait for a result from another job in this first design. The host initializes the collection before launching workers, using the required stream ordering and buffer lifetimes.
@@ -46,6 +46,10 @@ T_{\mathrm{list}}\le\frac{\sum_j c_j}{W}+\left(1-\frac{1}{W}\right)c_{\max}.
 $$
 
 To understand the bound, consider the last finishing job. Before it starts, either all workers have been busy or no unassigned job remains; its start time cannot exceed the remaining total-work average under the ideal assumptions. The final job adds its own duration. Actual GPU workers are not isolated processors, so treat this as a scheduling reference rather than a hardware guarantee.
+
+
+
+![Deep-dive illustration: Derive the load-balancing bound](./deep-dive.png)
 
 ## 3. Claim fixed jobs with tickets
 

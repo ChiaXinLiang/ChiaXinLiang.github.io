@@ -20,9 +20,9 @@ We will define the state needed for a meaningful restart, derive a simplified ch
 
 ## 1. Define the training point being preserved
 
-![Section overview: Distributed Checkpoints and Recovery: Goodput Under Failure. Capture consistent state; Write and commit; Choose interval; Recover and verify](./section-overview.svg)
+![Concept overview: Distributed Checkpoints and Recovery: Goodput Under Failure. A distributed GPU job writes coordinated checkpoint shards into storage.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 A model-weight checkpoint is useful for inference or evaluation, but continuing training usually requires additional state. The optimizer needs its moments and other persistent values. A learning-rate scheduler needs its position. Mixed-precision machinery may maintain scaling state. The loop needs its optimizer-step count and accumulation position.
@@ -62,6 +62,10 @@ $$
 The result is a useful planning baseline: faster checkpointing permits more frequent saves, while more reliable jobs justify longer intervals. It is not a universal optimal policy when failure risk changes over time, planned preemptions are announced, checkpoint bandwidth varies, or the job is nearly finished.
 
 Use the job-level interruption interval, not an unrelated component reliability number. If one device failure stops a large gang-scheduled job, the effective job failure process can differ greatly from the reliability of one GPU. Shared power, networking, and software failures also violate naive independence assumptions.
+
+
+
+![Deep-dive illustration: Derive a simple checkpoint interval](./deep-dive.png)
 
 ## 4. Work a checkpoint-cost example
 

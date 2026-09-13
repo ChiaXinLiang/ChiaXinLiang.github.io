@@ -18,9 +18,9 @@ The word “linear” can be misleading here. It often refers to how a mechanism
 
 ## 1. Start from explicit token retrieval
 
-![Section overview: Hybrid Attention: Combining Recurrent State with Token Attention. Retain an explicit history; Update a recurrent state; Add forgetting and correction; Combine layer families](./section-overview.svg)
+![Concept overview: Hybrid Attention: Combining Recurrent State with Token Attention. Token history is visible as rows of explicit keys and values beside a compact recurrent-state matrix.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Conventional causal attention compares a query with stored keys and combines the corresponding values. Its state preserves a representation for each retained position. Global attention can address an old position directly through its key, subject to the learned compatibility function.
@@ -32,6 +32,10 @@ $$
 This description is single-headed and omits positional transformations for clarity. Storage grows with retained tokens. A dense decode step also evaluates the relevant history, although optimized kernels can change traffic and materialization behavior.
 
 Sliding-window attention keeps a bounded recent history instead. That is another independent choice: a local window retains individual recent tokens, whereas a recurrent state aggregates updates. Both can have bounded storage without implementing the same mathematical function.
+
+
+
+![Deep-dive illustration: Start from explicit token retrieval](./deep-dive.png)
 
 ## 2. Build an associative state
 

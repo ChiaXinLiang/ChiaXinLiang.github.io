@@ -20,9 +20,9 @@ This article builds a transparent accounting model for a hypothetical dense mode
 
 ## 1. Separate the objects before counting bytes
 
-![Section overview: Training Memory and Step Time: Account for Every State. Persistent state; Transient state; Critical path; Verify](./section-overview.svg)
+![Concept overview: Training Memory and Step Time: Account for Every State. GPU memory is shown as a physical stack of parameter, gradient, optimizer, and activation blocks.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Parameters are the values used during the forward computation. Gradients record derivatives accumulated during backward. Optimizer state stores information needed for future updates. Adam commonly maintains a first moment and a second moment for each optimized parameter. Some mixed-precision implementations also maintain a higher-precision master copy of the parameters. These objects can use different numerical representations.
@@ -46,6 +46,10 @@ One illustrative configuration uses 2-byte compute weights, 2-byte gradients, 4-
 This is a configuration example, not a universal Adam constant. Some systems accumulate gradients in higher precision, omit a separate master copy, compress optimizer state, or partition objects across ranks. Optimizer initialization may allocate its state lazily, so a measurement before the first update can substantially understate steady-state training memory. Inspect the actual state dictionaries and tensor dtypes after an optimizer step.
 
 The accounting also explains why changing the compute-weight dtype alone is insufficient. Moving weights from 4 bytes to 2 bytes saves 2P bytes. If optimizer and gradient state dominate the total, that saving helps but does not halve training memory. The relevant denominator is the complete budget, not the single object highlighted by a precision setting.
+
+
+
+![Deep-dive illustration: Derive the persistent-state budget](./deep-dive.png)
 
 ## 3. Add the schedule-dependent peak
 

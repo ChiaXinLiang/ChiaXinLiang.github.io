@@ -18,9 +18,9 @@ If you profile a naive kernel and a warp-specialized 1 doing the same math, the 
 
 ## From "every warp does everything" to stations on a line
 
-![Section overview: how a producer–consumer kernel works. Producer loads a tile; Consumers compute; Reuse a bounded buffer; Measure steady-state benefit](./section-overview.svg)
+![Concept overview: Assembly Lines Inside a GPU: Warp Specialization. A cutaway GPU shared-memory tile and tensor compute units with a producer warp loading tiles into alternating buffers and consumer warps computing from ready tiles.](./section-overview.png)
 
-*Read 1 to 4 to connect the method, its mechanism, and the assumptions behind the equations. The section below develops the details.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 The classic CUDA mental model is homogeneous: you launch a block of threads, every warp runs the same loop, and each iteration loads a tile from global memory to shared memory, syncs, computes on it, syncs again. Latency is hidden statistically. When 1 warp stalls on a memory load, the SM's schedulers pick another warp that is ready. This works, and for years the tuning advice was simply "raise occupancy so the scheduler has choices." (For why GPUs are built around this throughput trade, see [CPU vs GPU](/blog/cpu-vs-gpu-latency-vs-throughput-machines/).)

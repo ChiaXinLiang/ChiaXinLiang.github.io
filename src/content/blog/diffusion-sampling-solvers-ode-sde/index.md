@@ -32,6 +32,10 @@ The drift and diffusion define how the data distribution evolves toward a noise 
 
 The coefficient convention matters. A discrete checkpoint can be used through an appropriate continuous noise-level interface, but an arbitrary time mapping can change the numerical problem. Preserve the scheduler's definitions and model conditioning rather than identifying timestep indices with continuous time without conversion.
 
+
+
+![Deep-dive illustration: Define the continuous forward process](./deep-dive.png)
+
 ## 2. Introduce the reverse-time SDE
 
 Under the standard regularity conditions, the reverse stochastic equation uses the score of the time-dependent marginal density p_t. Written with time integrated backward, its drift contains the score correction:

@@ -20,9 +20,9 @@ We will derive a simple checkpoint-spacing model, connect it to selective checkp
 
 ## 1. Understand what backward needs
 
-![Section overview: Activation Checkpointing: Selective Recomputation and the Memory–Time Tradeoff. Save boundaries; Recompute; Choose regions; Measure](./section-overview.svg)
+![Concept overview: Activation Checkpointing: Selective Recomputation and the Memory–Time Tradeoff. A neural network drawn as layers with activations: one branch stores every intermediate feature, another stores selected checkpoint anchors and recomputes intervening layers on backward traversal.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 For a function y equal to f(x, w), its backward rule may need x, w, y, or other intermediate values to compute derivatives. A matrix multiplication needs operands to form its input and weight gradients. An activation function may need its input or output. A fused operation can choose a different saved representation than several separately executed operations.
@@ -46,6 +46,10 @@ $$
 Treating k as continuous gives a minimum near the square root of N. At that point the schematic activation term is about 2A times the square root of N. This is a pedagogical chain model rather than a guarantee for arbitrary neural networks. Input retention, nonuniform layers, recomputation implementation, and intermediate workspaces can change both terms.
 
 For N equal to 64 and A equal to 64 MiB, the uncheckpointed estimate is 4096 MiB. Choosing k equal to 8 gives about 16A, or 1024 MiB, under the simplified model. The estimated reduction concerns the saved-activation component only. A model with many additional gigabytes of weights and optimizer state does not receive the same reduction in total memory.
+
+
+
+![Deep-dive illustration: Derive a simple chain model](./deep-dive.png)
 
 ## 3. Count the additional work
 

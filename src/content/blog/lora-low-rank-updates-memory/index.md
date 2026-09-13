@@ -32,6 +32,10 @@ The scalar s controls the update scale. The original LoRA paper uses alpha divid
 
 The rank of BA is at most r. W_0 can still be full rank, and so can the adapted matrix W. LoRA constrains the change to the model rather than replacing the whole pretrained mapping with a low-rank approximation.
 
+
+
+![Deep-dive illustration: Define the adapted linear layer](./deep-dive.png)
+
 ## 2. Count trainable parameters
 
 Full adaptation of this matrix trains d times k values. LoRA trains r times the sum of d and k, excluding any additional trainable biases or modules under the selected recipe.

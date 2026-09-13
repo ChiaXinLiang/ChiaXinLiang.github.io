@@ -20,9 +20,9 @@ We will derive these dependencies, examine pool accounting, and build a measurem
 
 ## 1. Treat memory lifetime as part of the execution graph
 
-![Section overview: Stream-Ordered Allocation: Memory Pools, Events, and Safe Reuse. Allocate in a timeline; Transfer ownership; Release after all uses; Measure pool behavior](./section-overview.svg)
+![Concept overview: Stream-Ordered Allocation: Memory Pools, Events, and Safe Reuse. Two GPU stream timelines share a memory pool.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 An allocation is useful only during a defined lifetime. Producers initialize its contents, consumers read or modify them, and release ends ownership. The scheduler must preserve these dependencies even when host calls return before device work completes.
@@ -36,6 +36,10 @@ $$
 Multiple consumers require release to follow every supported use. One consumer's completion is not sufficient if another stream still accesses the buffer. Aliases and views share the same underlying allocation lifetime. A helper that retains a view therefore remains part of the consumer inventory until its supported work is complete.
 
 Draw the dependency graph before selecting an allocator. An asynchronous API can reduce unnecessary host blocking, but it cannot remove the dependencies required by the computation. A faster host return is not evidence that memory is ready for every execution domain.
+
+
+
+![Deep-dive illustration: Treat memory lifetime as part of the execution graph](./deep-dive.png)
 
 ## 2. Understand the stream-local pattern
 

@@ -32,6 +32,10 @@ A governs how existing state evolves, B maps input into state, and C reads state
 
 A sequence model places these dynamics inside a learned architecture with projections, nonlinearities, and other components. The linear system is an important mechanism, but it is not a complete language model by itself.
 
+
+
+![Deep-dive illustration: Define continuous linear dynamics](./deep-dive.png)
+
 ## 2. Solve the state over an interval
 
 For constant matrices, the solution over an interval of length Delta combines homogeneous state evolution with an integral of the driven input.

@@ -72,6 +72,10 @@ The expression assumes these categories are counted at the relevant peak and avo
 
 Quantization scales, sparse indices, padding, and retained wider tensors belong in weight representation accounting. Cache state and temporary buffers can dominate another workload. Measure the intended maximum operating case rather than extrapolating from a short, low-concurrency demonstration.
 
+
+
+![Deep-dive illustration: Account for the full memory envelope](./deep-dive.png)
+
 ## 7. Measure time under a fair workload
 
 Record latency and throughput with the same inputs, outputs, concurrency, and generation policy. For language serving, report prefill and decode behavior separately where useful. End-to-end timing should include relevant scheduling and data movement.

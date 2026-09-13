@@ -20,9 +20,9 @@ We will connect practical benchmarking to estimators, paired comparisons, and un
 
 ## 1. Define the result the experiment is supposed to estimate
 
-![Section overview: Performance Experiments: Baselines, Warmup, Variance, and Reproduction. Define the estimand; Control execution state; Estimate uncertainty; Reproduce the result](./section-overview.svg)
+![Concept overview: Performance Experiments: Baselines, Warmup, Variance, and Reproduction. A GPU measurement bench shows warmup calls separated from timed repetitions, fixed input tensors, device synchronization boundary, and a distribution of measured durations.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 Specify useful work, input distribution, output requirements, and timing boundaries. A latency experiment measures time for a defined operation or request population. A throughput experiment measures completed useful work per interval. These quantities can move in different directions when batching or concurrency changes.
@@ -58,6 +58,10 @@ The terms depend on the measurement boundary. An event-based device duration and
 Avoid adding unrelated global synchronization merely because it makes timing simple. It can destroy overlap and include other work. Conversely, omitting the necessary boundary can undercount the operation. Verify the timer against the intended dependency timeline.
 
 For distributed execution, preserve rank context and define whether the reported duration is local, maximum across ranks, or client-visible. Averaging local durations can hide the participant that determines group completion. The statistic must match the workload's synchronization semantics.
+
+
+
+![Deep-dive illustration: Time asynchronous work at its actual completion boundary](./deep-dive.png)
 
 ## 4. Use a model of drift as well as random noise
 

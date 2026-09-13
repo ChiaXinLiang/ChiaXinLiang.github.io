@@ -32,6 +32,10 @@ The base representation is fixed during the adapter-training procedure considere
 
 The original paper uses a low-bit storage datatype and usually BFloat16 computation. Other implementations can use different supported paths. Report actual storage and compute formats rather than describing the whole training graph with one nominal bit width.
 
+
+
+![Deep-dive illustration: Separate base storage and adaptation](./deep-dive.png)
+
 ## 2. Explain nonuniform code values
 
 Uniform affine quantization spaces reconstructed values evenly over a range. NormalFloat uses a nonuniform set of representable values motivated by a normal-distribution model for weights. More resolution is placed where that modeled distribution carries more probability.

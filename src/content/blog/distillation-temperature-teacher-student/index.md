@@ -32,6 +32,10 @@ For one observed label, the target puts all probability mass on that class. This
 
 The hard objective remains useful during distillation. Teacher predictions can be wrong or poorly calibrated. Ground-truth supervision provides another source of information when labels are available, and its weight should be chosen through validation rather than discarded by default.
 
+
+
+![Deep-dive illustration: Begin with supervised learning](./deep-dive.png)
+
 ## 2. Define teacher and student distributions
 
 Let a_i denote teacher logits and z_i student logits. A positive temperature T softens both distributions by dividing logits before applying softmax.

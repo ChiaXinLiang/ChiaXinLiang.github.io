@@ -20,9 +20,9 @@ We will derive the mapping and a grid-stride extension, then connect the kernel 
 
 ## 1. State the mathematical operation and ownership contract
 
-![Section overview: CUDA Kernel Foundations: Indexing, Launch Geometry, and Boundary Masks. Map ownership; Handle the last block; Respect memory and lifetime; Measure the useful kernel](./section-overview.svg)
+![Concept overview: CUDA Kernel Foundations: Indexing, Launch Geometry, and Boundary Masks. An output matrix is overlaid with CUDA blocks and threads.](./section-overview.png)
 
-*The diagram connects the mechanism to its execution and verification. The derivation below defines the quantities and assumptions.*
+*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
 
 
 For vectors a and b of length N, the required output is
@@ -36,6 +36,10 @@ Each valid output element needs one writer in this simple implementation. Every 
 Start with a deterministic reference and several lengths, including a size not divisible by the block width. Include N=0 and small lengths in the host-side contract. An empty vector needs a defined no-work path rather than an invalid launch configuration.
 
 Assume separate supported device buffers for the example unless aliasing is explicitly part of the interface. Pointer overlap changes the correctness analysis for more general operations, especially when one output can overwrite data another thread still needs. The simple result does not authorize arbitrary buffer aliasing.
+
+
+
+![Deep-dive illustration: State the mathematical operation and ownership contract](./deep-dive.png)
 
 ## 2. Derive one-dimensional thread indexing
 
