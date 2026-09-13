@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Chunked prefill smooths TPOT</text>
+    <text x="90" y="156" font-size="30" fill="#75786a">An 8,192-token prompt lands in a busy decode loop</text>
+
+    <!-- Panel A -->
+    <text x="90" y="248" font-size="28" font-weight="bold" fill="#33362a">Without chunking: prefill runs as one giant step</text>
+    <!-- decode blocks before -->
+    <rect x="90" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="132" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="174" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="216" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="258" y="280" width="34" height="64" fill="#a8bf92"/>
+    <!-- monolithic prefill -->
+    <rect x="300" y="280" width="430" height="64" fill="#b06a4e"/>
+    <text x="515" y="307" text-anchor="middle" font-size="25" font-weight="bold" fill="#fdfbf4">8,192-token prefill</text>
+    <text x="515" y="335" text-anchor="middle" font-size="24" fill="#f0ddd0">all decodes stall ~900 ms</text>
+    <!-- decode blocks after -->
+    <rect x="738" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="780" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="822" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="864" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="906" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="948" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="990" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="1032" y="280" width="34" height="64" fill="#a8bf92"/>
+    <rect x="1074" y="280" width="34" height="64" fill="#a8bf92"/>
+
+    <!-- TPOT sparkline A -->
+    <text x="90" y="440" font-size="24" fill="#75786a">TPOT</text>
+    <line x1="160" y1="424" x2="1100" y2="424" stroke="#c9973b" stroke-width="2" stroke-dasharray="8 8"/>
+    <text x="1100" y="416" text-anchor="end" font-size="22" fill="#c9973b">TPOT SLO</text>
+    <polyline points="160,452 300,452 320,398 715,398 735,452 1100,452" fill="none" stroke="#b04a3a" stroke-width="4"/>
+    <text x="515" y="388" text-anchor="middle" font-size="24" fill="#b04a3a">p99 spike blows the SLO</text>
+
+    <!-- Panel B -->
+    <text x="90" y="564" font-size="28" font-weight="bold" fill="#33362a">With chunking: one chunk rides each decode step</text>
+    <!-- alternating chunk + decode: unit 90px, 11 units from x=90 -->
+    <rect x="90" y="596" width="44" height="64" fill="#b06a4e"/><rect x="140" y="596" width="34" height="64" fill="#a8bf92"/>
+    <rect x="180" y="596" width="44" height="64" fill="#b06a4e"/><rect x="230" y="596" width="34" height="64" fill="#a8bf92"/>
+    <rect x="270" y="596" width="44" height="64" fill="#b06a4e"/><rect x="320" y="596" width="34" height="64" fill="#a8bf92"/>
+    <rect x="360" y="596" width="44" height="64" fill="#b06a4e"/><rect x="410" y="596" width="34" height="64" fill="#a8bf92"/>
+    <rect x="450" y="596" width="44" height="64" fill="#b06a4e"/><rect x="500" y="596" width="34" height="64" fill="#a8bf92"/>
+    <rect x="540" y="596" width="44" height="64" fill="#b06a4e"/><rect x="590" y="596" width="34" height="64" fill="#a8bf92"/>
+    <rect x="630" y="596" width="44" height="64" fill="#b06a4e"/><rect x="680" y="596" width="34" height="64" fill="#a8bf92"/>
+    <rect x="720" y="596" width="44" height="64" fill="#b06a4e"/><rect x="770" y="596" width="34" height="64" fill="#a8bf92"/>
+    <rect x="810" y="596" width="44" height="64" fill="#b06a4e"/><rect x="860" y="596" width="34" height="64" fill="#a8bf92"/>
+    <rect x="900" y="596" width="44" height="64" fill="#b06a4e"/><rect x="950" y="596" width="34" height="64" fill="#a8bf92"/>
+    <rect x="990" y="596" width="44" height="64" fill="#b06a4e"/><rect x="1040" y="596" width="34" height="64" fill="#a8bf92"/>
+
+    <!-- TPOT sparkline B -->
+    <text x="90" y="756" font-size="24" fill="#75786a">TPOT</text>
+    <line x1="160" y1="740" x2="1100" y2="740" stroke="#c9973b" stroke-width="2" stroke-dasharray="8 8"/>
+    <text x="1100" y="732" text-anchor="end" font-size="22" fill="#c9973b">TPOT SLO</text>
+    <polyline points="160,768 300,764 450,768 600,763 750,768 900,764 1100,767" fill="none" stroke="#5b7c46" stroke-width="4"/>
+    <text x="515" y="802" text-anchor="middle" font-size="24" fill="#5b7c46">slightly higher, always bounded</text>
+
+    <!-- legend -->
+    <rect x="90" y="852" width="34" height="24" fill="#b06a4e"/>
+    <text x="136" y="871" font-size="24" fill="#55584a">prefill chunk (~512 tokens)</text>
+    <rect x="560" y="852" width="34" height="24" fill="#a8bf92"/>
+    <text x="606" y="871" font-size="24" fill="#55584a">decode step (all streams)</text>
+
+    <text x="90" y="932" font-size="25" fill="#55584a">A per-iteration token budget caps the prefill share</text>
+
+    <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+    <text x="90" y="1078" font-size="24" fill="#a3a08f">Mechanism from Agrawal et al. (2024), Sarathi-Serve</text>
+    <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · scale-4</text>
+    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">smooth beats bursty</text>
+  </g>
+</svg>

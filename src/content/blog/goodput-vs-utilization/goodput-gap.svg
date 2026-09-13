@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <!-- Title -->
+  <text x="600" y="110" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="56" font-weight="700" fill="#33362a">Utilization is not Goodput</text>
+  <text x="600" y="168" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="32" fill="#75786a">"busy" GPUs vs. GPUs doing useful work</text>
+
+  <!-- Left bar: what the dashboard shows -->
+  <text x="290" y="270" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="700" fill="#33362a">What the dashboard shows</text>
+  <rect x="170" y="300" width="240" height="640" rx="12" fill="#5b7c46"/>
+  <text x="290" y="590" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="60" font-weight="700" fill="#fdfbf4">100%</text>
+  <text x="290" y="640" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#e7edd9">"utilized"</text>
+
+  <!-- Right bar: what actually helps -->
+  <text x="880" y="270" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="700" fill="#33362a">What actually trains the model</text>
+
+  <!-- wasted portion (top ~70%) -->
+  <rect x="760" y="300" width="240" height="448" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <!-- goodput portion (bottom ~30%) -->
+  <rect x="760" y="748" width="240" height="192" rx="12" fill="#b06a4e"/>
+  <text x="880" y="850" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="700" fill="#fdfbf4">~30%</text>
+  <text x="880" y="896" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#f0ddd0">goodput</text>
+
+  <!-- wasted labels inside the gray zone -->
+  <text x="880" y="380" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">communication stalls</text>
+  <text x="880" y="470" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">data-pipeline waits</text>
+  <text x="880" y="560" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">failed jobs + restarts</text>
+  <text x="880" y="650" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">preemptions, hotspots</text>
+
+  <!-- The gap annotation -->
+  <path d="M 430 620 L 740 620" stroke="#c9973b" stroke-width="5" stroke-dasharray="14 10"/>
+  <text x="585" y="585" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="700" fill="#c9973b">this gap is</text>
+  <text x="585" y="663" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="700" fill="#c9973b">your job</text>
+
+  <!-- Source note -->
+  <text x="600" y="1010" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#a3a08f">Illustrative percentages, not measured fleet results</text>
+
+  <!-- Footer -->
+  <line x1="80" y1="1080" x2="1120" y2="1080" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="80" y="1132" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">AI Performance · intro-2</text>
+  <text x="1120" y="1132" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">busy ≠ useful</text>
+</svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">Will It Fit on One H100?</text>
+  <text x="90" y="156" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">Model weights by precision vs 80 GB of HBM (weights only)</text>
+
+  <!-- scale: 0..150 GB maps x 340..1080 (4.933 px/GB) -->
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <!-- 8B FP16: 16.1 GB -> 79px -->
+    <text x="320" y="326" text-anchor="end" font-size="28" fill="#55584a">8B &#183; FP16</text>
+    <rect x="340" y="290" width="79" height="56" fill="#5b7c46"/>
+    <text x="431" y="326" font-size="26" fill="#33362a">16.1 GB</text>
+
+    <!-- 8B FP8: 8 GB -> 39px -->
+    <text x="320" y="426" text-anchor="end" font-size="28" fill="#55584a">8B &#183; FP8</text>
+    <rect x="340" y="390" width="39" height="56" fill="#5b7c46"/>
+    <text x="391" y="426" font-size="26" fill="#33362a">8.0 GB</text>
+
+    <!-- 8B INT4: 4.5 GB -> 22px -->
+    <text x="320" y="526" text-anchor="end" font-size="28" fill="#55584a">8B &#183; INT4</text>
+    <rect x="340" y="490" width="22" height="56" fill="#5b7c46"/>
+    <text x="374" y="526" font-size="26" fill="#33362a">4.5 GB</text>
+
+    <!-- 70B FP16: 141 GB -> 696px -->
+    <text x="320" y="626" text-anchor="end" font-size="28" fill="#55584a">70B &#183; FP16</text>
+    <rect x="340" y="590" width="696" height="56" fill="#b04a3a"/>
+    <text x="1026" y="626" text-anchor="end" font-size="26" font-weight="bold" fill="#fdfbf4">141 GB &#183; does not fit</text>
+
+    <!-- 70B FP8: 70.6 GB -> 348px -->
+    <text x="320" y="726" text-anchor="end" font-size="28" fill="#55584a">70B &#183; FP8</text>
+    <rect x="340" y="690" width="348" height="56" fill="#c9973b"/>
+    <text x="760" y="714" font-size="26" fill="#33362a">70.6 GB &#183; loads, but only</text>
+    <text x="760" y="744" font-size="26" fill="#33362a">~3 GB left for KV cache</text>
+
+    <!-- 70B INT4: 40 GB -> 197px -->
+    <text x="320" y="826" text-anchor="end" font-size="28" fill="#55584a">70B &#183; INT4</text>
+    <rect x="340" y="790" width="197" height="56" fill="#5b7c46"/>
+    <text x="549" y="826" font-size="26" fill="#33362a">~40 GB</text>
+  </g>
+
+  <!-- 80 GB capacity line at x = 340 + 80*4.933 = 735 -->
+  <line x1="735" y1="250" x2="735" y2="870" stroke="#33362a" stroke-width="3" stroke-dasharray="10,8"/>
+  <text x="748" y="266" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="bold" fill="#33362a">H100: 80 GB (&#8776; 72 usable)</text>
+
+  <text x="90" y="914" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">Weights are only the first tenant: KV cache, activations, and</text>
+  <text x="90" y="946" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">runtime overhead still need their share of the remaining HBM.</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; gpumem-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">subtract before you deploy</text>
+</svg>

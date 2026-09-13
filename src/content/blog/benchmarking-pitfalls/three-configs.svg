@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One GPU, One Model, Three Numbers</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Llama-3.1-8B on one H100 SXM — all three runs honest</text>
+
+<!-- Config A -->
+<text x="90" y="290" font-size="30" font-weight="bold" fill="#33362a">Config A — the batch-1 latency demo</text>
+<rect x="90" y="312" width="78" height="60" rx="8" fill="#c9973b"/>
+<text x="184" y="352" font-size="32" font-weight="bold" fill="#7a5a20">160 tok/s</text>
+<text x="90" y="424" font-size="25" fill="#55584a">TPOT &#8776; 7 ms  ·  ~$3.50 per Mtok — demo economics</text>
+
+<!-- Config B -->
+<text x="90" y="520" font-size="30" font-weight="bold" fill="#33362a">Config B — SLO-first (TPOT p99 &lt; 50 ms)</text>
+<rect x="90" y="542" width="561" height="60" rx="8" fill="#5b7c46"/>
+<text x="667" y="582" font-size="32" font-weight="bold" fill="#5b7c46">3,000 tok/s goodput</text>
+<text x="90" y="654" font-size="25" fill="#55584a">meets the SLO at ~128-192 concurrent — sellable capacity</text>
+
+<!-- Config C -->
+<text x="90" y="750" font-size="30" font-weight="bold" fill="#33362a">Config C — max batch, 512 concurrent</text>
+<rect x="90" y="772" width="790" height="60" rx="8" fill="#b06a4e"/>
+<text x="896" y="812" font-size="32" font-weight="bold" fill="#8a5138">12,000 tok/s</text>
+<text x="90" y="884" font-size="25" fill="#55584a">TPOT p99 &gt; 200 ms — headline only, unusable interactively</text>
+
+<text x="90" y="945" font-size="24" fill="#a3a08f">bar length on a log scale — linear bars would make A invisible</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-3</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">honest is not comparable</text>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Same GPU, Same Rent, 67x the Cost</text>
+    <text x="90" y="156" font-size="30" fill="#75786a">H100 at $2.50/hr serving a 70B model in FP8</text>
+
+    <!-- Row 1: batch size 1 -->
+    <text x="90" y="290" font-size="30" font-weight="bold" fill="#33362a">Batch size 1 — naive serving</text>
+    <rect x="90" y="315" width="323" height="75" rx="6" fill="#e5b3a6" stroke="#b04a3a" stroke-width="3"/>
+    <text x="112" y="363" font-size="28" fill="#33362a">45 tok/s</text>
+    <text x="1110" y="368" text-anchor="end" font-size="46" font-weight="bold" fill="#b04a3a">$15.43 / Mtok</text>
+
+    <!-- Row 2: continuous batching -->
+    <text x="90" y="510" font-size="30" font-weight="bold" fill="#33362a">Continuous batching (batch ~32)</text>
+    <rect x="90" y="535" width="587" height="75" rx="6" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+    <text x="112" y="583" font-size="28" fill="#33362a">1,000 tok/s</text>
+    <text x="1110" y="588" text-anchor="end" font-size="46" font-weight="bold" fill="#7a5a20">$0.69 / Mtok</text>
+
+    <!-- Row 3: tuned stack -->
+    <text x="90" y="730" font-size="30" font-weight="bold" fill="#33362a">Tuned stack — paged KV, spec decode</text>
+    <rect x="90" y="755" width="680" height="75" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+    <text x="112" y="803" font-size="28" fill="#33362a">3,000 tok/s</text>
+    <text x="1110" y="808" text-anchor="end" font-size="46" font-weight="bold" fill="#5b7c46">$0.23 / Mtok</text>
+
+    <text x="90" y="905" font-size="27" fill="#55584a">$/Mtok = $2.50 ÷ (tok/s × 3600 ÷ 1,000,000)</text>
+    <text x="90" y="945" font-size="24" fill="#75786a">Bar length: log-scaled throughput. Illustrative round numbers.</text>
+
+    <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+    <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-4</text>
+    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">throughput is money</text>
+  </g>
+</svg>

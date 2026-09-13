@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">One Register File, Four Kernels</text>
+  <text x="90" y="156" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">65,536 registers per SM, shared by every resident thread</text>
+
+  <!-- 64-warp limit line -->
+  <line x1="1020" y1="285" x2="1020" y2="860" stroke="#a3a08f" stroke-width="2.5" stroke-dasharray="10 8"/>
+  <text x="1020" y="265" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">64-warp limit</text>
+
+  <!-- row 1: 32 regs -->
+  <text x="285" y="340" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">32 regs/thread</text>
+  <rect x="300" y="295" width="720" height="70" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="320" y="340" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="bold" fill="#33362a">64 warps — 100% occupancy</text>
+
+  <!-- row 2: 64 regs -->
+  <text x="285" y="500" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">64 regs/thread</text>
+  <rect x="300" y="455" width="360" height="70" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="320" y="500" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="bold" fill="#33362a">32 warps — 50%</text>
+
+  <!-- row 3: 128 regs -->
+  <text x="285" y="660" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">128 regs/thread</text>
+  <rect x="300" y="615" width="180" height="70" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="500" y="660" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="bold" fill="#33362a">16 warps — 25%</text>
+
+  <!-- row 4: 255 regs -->
+  <text x="285" y="820" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">255 regs/thread</text>
+  <rect x="300" y="775" width="90" height="70" fill="#e5b3a6" stroke="#b04a3a" stroke-width="3"/>
+  <text x="410" y="820" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="bold" fill="#33362a">8 warps — 12.5%</text>
+
+  <text x="600" y="930" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">blocks of 256 threads · no shared memory · Hopper/Blackwell SM</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · exec-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">registers are the budget</text>
+</svg>

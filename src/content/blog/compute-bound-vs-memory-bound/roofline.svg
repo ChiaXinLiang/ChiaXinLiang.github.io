@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The Roofline Model</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Attainable throughput vs. arithmetic intensity (log–log)</text>
+
+  <!-- gridlines -->
+  <line x1="170" y1="725" x2="1050" y2="725" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="170" y1="570" x2="1050" y2="570" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="170" y1="415" x2="1050" y2="415" stroke="#e8e4d7" stroke-width="2"/>
+
+  <!-- axes -->
+  <line x1="170" y1="250" x2="170" y2="880" stroke="#d8d4c4" stroke-width="3"/>
+  <line x1="170" y1="880" x2="1050" y2="880" stroke="#d8d4c4" stroke-width="3"/>
+
+  <!-- y ticks -->
+  <text x="155" y="733" font-size="24" fill="#75786a" text-anchor="end">1</text>
+  <text x="155" y="578" font-size="24" fill="#75786a" text-anchor="end">10</text>
+  <text x="155" y="423" font-size="24" fill="#75786a" text-anchor="end">100</text>
+  <text x="155" y="269" font-size="24" fill="#75786a" text-anchor="end">1000</text>
+  <text x="175" y="240" font-size="26" fill="#55584a">Attainable TFLOPS</text>
+
+  <!-- x ticks -->
+  <text x="170" y="912" font-size="24" fill="#75786a" text-anchor="middle">0.1</text>
+  <text x="346" y="912" font-size="24" fill="#75786a" text-anchor="middle">1</text>
+  <text x="522" y="912" font-size="24" fill="#75786a" text-anchor="middle">10</text>
+  <text x="698" y="912" font-size="24" fill="#75786a" text-anchor="middle">100</text>
+  <text x="874" y="912" font-size="24" fill="#75786a" text-anchor="middle">1000</text>
+  <text x="1050" y="912" font-size="24" fill="#75786a" text-anchor="middle">10k</text>
+  <text x="610" y="948" font-size="26" fill="#55584a" text-anchor="middle">Arithmetic intensity (FLOP / byte)</text>
+
+  <!-- ridge dashed vertical -->
+  <line x1="781" y1="261" x2="781" y2="880" stroke="#c9973b" stroke-width="3" stroke-dasharray="10 8"/>
+
+  <!-- memory roof (slanted) and compute roof (flat) -->
+  <line x1="170" y1="799" x2="781" y2="261" stroke="#b06a4e" stroke-width="6"/>
+  <line x1="781" y1="261" x2="1050" y2="261" stroke="#5b7c46" stroke-width="6"/>
+
+  <!-- roof labels -->
+  <text x="235" y="655" font-size="26" font-weight="bold" fill="#b06a4e" transform="rotate(-41.4 235 655)">memory roof: 3.35 TB/s HBM3</text>
+  <text x="915" y="240" font-size="26" font-weight="bold" fill="#5b7c46" text-anchor="middle">compute roof: 989 TFLOPS</text>
+
+  <!-- region labels -->
+  <text x="300" y="330" font-size="28" font-weight="bold" fill="#a3a08f">MEMORY-BOUND</text>
+  <text x="920" y="520" font-size="28" font-weight="bold" fill="#a3a08f" text-anchor="middle">COMPUTE-BOUND</text>
+
+  <!-- ridge annotation -->
+  <text x="795" y="600" font-size="26" fill="#7a5a20">machine balance</text>
+  <text x="795" y="632" font-size="26" fill="#7a5a20">&#8776; 295 FLOP/B</text>
+
+  <!-- GEMV point -->
+  <circle cx="346" cy="644" r="13" fill="#b06a4e"/>
+  <text x="372" y="668" font-size="26" font-weight="bold" fill="#8a5138">GEMV &#183; decode, batch 1</text>
+  <text x="372" y="700" font-size="24" fill="#75786a">AI &#8776; 1 &#8594; cap 3.4 TFLOPS</text>
+
+  <!-- batched decode point -->
+  <circle cx="611" cy="410" r="13" fill="#c9973b"/>
+  <text x="635" y="440" font-size="26" font-weight="bold" fill="#7a5a20">decode, batch &#8776; 32</text>
+
+  <!-- GEMM point -->
+  <circle cx="898" cy="261" r="13" fill="#5b7c46"/>
+  <text x="945" y="314" font-size="26" font-weight="bold" fill="#5b7c46" text-anchor="middle">large GEMM &#183; prefill</text>
+  <text x="945" y="346" font-size="24" fill="#75786a" text-anchor="middle">AI = 1365</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Roofline model: Williams, Waterman &amp; Patterson (2009)</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; exec-2</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">know your roof first</text>
+</svg>

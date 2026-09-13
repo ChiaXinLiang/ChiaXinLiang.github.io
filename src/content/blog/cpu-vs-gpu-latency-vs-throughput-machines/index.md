@@ -4,7 +4,7 @@ description: "Why a chip with 24 cores beats one with 16,896 at some jobs and lo
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'par-2'
-order: 8
+order: 12
 series: 'comp-arch'
 topic: 'Parallel Architectures'
 tags: [gpu, cpu, parallelism]

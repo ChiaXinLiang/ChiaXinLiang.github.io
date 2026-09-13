@@ -4,7 +4,7 @@ description: "A DRAM access costs your CPU around 200 cycles. Caches hide that a
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'mem-2'
-order: 5
+order: 9
 series: 'comp-arch'
 topic: 'Memory Hierarchy'
 tags: ['computer-architecture', 'caches', 'memory']

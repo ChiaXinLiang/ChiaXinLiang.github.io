@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Workload, Three Cache Sizes</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Llama-3-70B · 8k context · batch 16 · 2 × 80 layers × kv_heads × 128 × bytes</text>
+
+  <!-- scale: 3 px per GiB, bars start x=90 -->
+
+  <!-- Bar 1: MHA FP16 = 320 GiB -> 960 px -->
+  <text x="90" y="300" font-size="28" font-weight="bold" fill="#33362a">Multi-head attention (64 KV heads), FP16</text>
+  <rect x="90" y="320" width="960" height="80" rx="8" fill="#b06a4e"/>
+  <text x="1035" y="372" text-anchor="end" font-size="30" font-weight="bold" fill="#fdfbf4">320 GiB</text>
+  <text x="90" y="440" font-size="24" fill="#75786a">the counterfactual — does not fit on a 4× H100 node</text>
+
+  <!-- transition annotation -->
+  <text x="330" y="510" font-size="27" font-weight="bold" fill="#5b7c46">÷ 8 — grouped-query attention: 8 KV heads instead of 64</text>
+
+  <!-- Bar 2: GQA FP16 = 40 GiB -> 120 px -->
+  <text x="90" y="580" font-size="28" font-weight="bold" fill="#33362a">GQA (8 KV heads), FP16 — as shipped</text>
+  <rect x="90" y="600" width="120" height="80" rx="8" fill="#5b7c46"/>
+  <text x="230" y="652" font-size="30" font-weight="bold" fill="#33362a">40 GiB</text>
+  <text x="90" y="720" font-size="24" fill="#75786a">320 KiB per token · 2.5 GiB per 8k sequence</text>
+
+  <!-- transition annotation -->
+  <text x="330" y="790" font-size="27" font-weight="bold" fill="#7a5a20">÷ 2 — FP8 KV cache: 1 byte per element</text>
+
+  <!-- Bar 3: GQA FP8 = 20 GiB -> 60 px -->
+  <text x="90" y="860" font-size="28" font-weight="bold" fill="#33362a">GQA + FP8 KV cache</text>
+  <rect x="90" y="880" width="60" height="80" rx="8" fill="#c9973b"/>
+  <text x="170" y="932" font-size="30" font-weight="bold" fill="#33362a">20 GiB</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Sizes computed from Llama 3 model config (2024)</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · opt-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">memory is the budget</text>
+</svg>

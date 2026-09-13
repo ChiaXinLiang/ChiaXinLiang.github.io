@@ -33,6 +33,12 @@ export const SERIES = [
 		tagline: 'From transistors to TPUs — how chips actually work, and how AI silicon gets designed. A ground-up course.',
 		level: 'From first principles',
 	},
+	{
+		id: 'llm-architectures',
+		name: 'Modern LLM Architectures',
+		tagline: 'Inside publicly documented models — sparse experts, attention designs, hybrid state, multimodal structure, and reasoning.',
+		level: 'Intermediate to advanced',
+	},
 ] as const;
 
 export type SeriesId = (typeof SERIES)[number]['id'];

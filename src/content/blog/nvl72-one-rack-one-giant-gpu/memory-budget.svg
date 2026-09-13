@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Spending 13.5 TB</text>
+<text x="90" y="156" font-size="30" fill="#75786a">A 1-trillion-parameter FP8 model served on one NVL72</text>
+
+<!-- segment labels with leaders -->
+<text x="90" y="272" font-size="26" fill="#8a5138">Weights: 1.0 TB</text>
+<line x1="128" y1="284" x2="128" y2="352" stroke="#a3a08f" stroke-width="2"/>
+<text x="210" y="322" font-size="26" fill="#7a5a20">Overhead: 1.3 TB</text>
+<line x1="215" y1="334" x2="215" y2="352" stroke="#a3a08f" stroke-width="2"/>
+
+<!-- stacked bar (75.5 px per TB) -->
+<rect x="90" y="360" width="75.5" height="110" fill="#b06a4e"/>
+<rect x="165.5" y="360" width="98" height="110" fill="#c9973b"/>
+<rect x="263.5" y="360" width="846.5" height="110" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+<text x="687" y="428" text-anchor="middle" font-size="34" font-weight="bold" fill="#33362a">KV cache: 11.2 TB</text>
+
+<text x="600" y="540" text-anchor="middle" font-size="26" fill="#55584a">≈ 45M cached tokens → ~350 sequences at 128k context</text>
+
+<!-- decode math panel -->
+<rect x="90" y="610" width="1020" height="310" rx="12" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="3"/>
+<text x="130" y="668" font-size="28" font-weight="bold" fill="#33362a">Per decode step, at full occupancy</text>
+<text x="130" y="722" font-size="26" fill="#55584a">Weights read: 1.0 TB  +  KV read: 11.2 TB</text>
+<text x="130" y="772" font-size="26" fill="#55584a">12.2 TB ÷ 576 TB/s ≈ 21 ms per step</text>
+<text x="130" y="822" font-size="26" fill="#55584a">≈ 47 tok/s per sequence · ~16.5k tok/s per rack</text>
+<text x="130" y="880" font-size="26" font-weight="bold" fill="#b04a3a">KV outweighs weights 11:1 — bandwidth-bound</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1078" font-size="24" fill="#a3a08f">Napkin math; specs from NVIDIA GB200 NVL72 sheet</text>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · rack-1</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">decode buys bandwidth</text>
+</svg>

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Why Speculation Fades at High Batch</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">extra FLOPs are free only while compute sits idle</text>
+
+<text x="330" y="290" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">Batch 1 · memory-bound</text>
+<text x="870" y="290" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">Higher batch · compute-bound</text>
+
+<!-- left capacity bar -->
+<rect x="180" y="330" width="300" height="480" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+<rect x="180" y="666" width="300" height="96" fill="#a8bf92"/>
+<rect x="180" y="762" width="300" height="48" fill="#5b7c46"/>
+<text x="330" y="500" text-anchor="middle" font-size="26" fill="#75786a">idle compute</text>
+<text x="330" y="535" text-anchor="middle" font-size="24" fill="#a3a08f">waiting on HBM</text>
+<text x="330" y="722" text-anchor="middle" font-size="24" fill="#33362a">extra work can fit</text>
+<text x="330" y="794" text-anchor="middle" font-size="24" fill="#fdfbf4">decode ~10%</text>
+
+<!-- right capacity bar -->
+<rect x="720" y="330" width="300" height="480" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+<rect x="720" y="410" width="300" height="400" fill="#5b7c46"/>
+<rect x="720" y="330" width="300" height="80" fill="#e5b3a6"/>
+<text x="870" y="378" text-anchor="middle" font-size="24" fill="#b04a3a">speculative FLOPs</text>
+<text x="870" y="600" text-anchor="middle" font-size="26" fill="#fdfbf4">decode for 64 requests</text>
+
+<text x="330" y="862" text-anchor="middle" font-size="26" fill="#55584a">speculation harvests idle cycles:</text>
+<text x="330" y="897" text-anchor="middle" font-size="26" fill="#55584a">can improve latency while capacity is spare</text>
+<text x="870" y="862" text-anchor="middle" font-size="26" fill="#8a5138">drafts + rejected tokens now</text>
+<text x="870" y="897" text-anchor="middle" font-size="26" fill="#8a5138">displace other requests' work</text>
+
+<text x="600" y="944" text-anchor="middle" font-size="24" fill="#a3a08f">bars: share of GPU compute capacity during one decode step</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · opt-4</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Free lunch ends at scale</text>
+</svg>

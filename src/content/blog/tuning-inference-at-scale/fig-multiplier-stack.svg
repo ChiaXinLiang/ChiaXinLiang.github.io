@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The compounding stack</text>
+    <text x="90" y="156" font-size="30" fill="#75786a">Four modest gains multiply into 5.24x on one 8xH100 node</text>
+
+    <text x="1110" y="258" text-anchor="end" font-size="24" fill="#75786a">$/Mtok at $16/hr</text>
+
+    <!-- Row 1: baseline -->
+    <text x="90" y="272" font-size="26" fill="#55584a">Baseline (static-ish batching, BF16)</text>
+    <rect x="90" y="290" width="160" height="52" fill="#d8d4c4"/>
+    <text x="262" y="325" font-size="30" font-weight="bold" fill="#33362a">1.00x</text>
+    <text x="1110" y="325" text-anchor="end" font-size="30" font-weight="bold" fill="#b06a4e">$0.74</text>
+
+    <!-- Row 2: continuous batching -->
+    <text x="90" y="400" font-size="26" fill="#55584a">+ Continuous batching (x1.8)</text>
+    <rect x="90" y="418" width="288" height="52" fill="#a8bf92"/>
+    <text x="390" y="453" font-size="30" font-weight="bold" fill="#33362a">1.80x</text>
+    <text x="1110" y="453" text-anchor="end" font-size="30" font-weight="bold" fill="#b06a4e">$0.41</text>
+
+    <!-- Row 3: chunked prefill -->
+    <text x="90" y="528" font-size="26" fill="#55584a">+ Chunked prefill (x1.4)</text>
+    <rect x="90" y="546" width="403" height="52" fill="#a8bf92"/>
+    <text x="505" y="581" font-size="30" font-weight="bold" fill="#33362a">2.52x</text>
+    <text x="1110" y="581" text-anchor="end" font-size="30" font-weight="bold" fill="#b06a4e">$0.29</text>
+
+    <!-- Row 4: FP8 -->
+    <text x="90" y="656" font-size="26" fill="#55584a">+ FP8 weights and KV cache (x1.6)</text>
+    <rect x="90" y="674" width="645" height="52" fill="#a8bf92"/>
+    <text x="747" y="709" font-size="30" font-weight="bold" fill="#33362a">4.03x</text>
+    <text x="1110" y="709" text-anchor="end" font-size="30" font-weight="bold" fill="#b06a4e">$0.18</text>
+
+    <!-- Row 5: prefix caching -->
+    <text x="90" y="784" font-size="26" fill="#55584a">+ Prefix caching, chat traffic (x1.3)</text>
+    <rect x="90" y="802" width="838" height="52" fill="#5b7c46"/>
+    <text x="940" y="837" font-size="30" font-weight="bold" fill="#33362a">5.24x</text>
+    <text x="1110" y="837" text-anchor="end" font-size="30" font-weight="bold" fill="#b06a4e">$0.14</text>
+
+    <text x="90" y="930" font-size="28" font-weight="bold" fill="#33362a">Net: 5.24x throughput, so $0.74 becomes $0.14 per Mtok</text>
+
+    <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+    <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · scale-4</text>
+    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">every gain is a cost cut</text>
+  </g>
+</svg>

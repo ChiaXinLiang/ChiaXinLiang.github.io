@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#75786a"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The Ring All-Reduce Cost Model</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Each GPU sends 2(N&#8722;1)/N &#215; S bytes, whatever N is</text>
+
+  <!-- ring arrows (clockwise) -->
+  <path d="M 404 371 A 175 175 0 0 1 489 456" fill="none" stroke="#75786a" stroke-width="4" marker-end="url(#arrow)"/>
+  <path d="M 489 604 A 175 175 0 0 1 404 689" fill="none" stroke="#75786a" stroke-width="4" marker-end="url(#arrow)"/>
+  <path d="M 256 689 A 175 175 0 0 1 171 604" fill="none" stroke="#75786a" stroke-width="4" marker-end="url(#arrow)"/>
+  <path d="M 171 456 A 175 175 0 0 1 256 371" fill="none" stroke="#75786a" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <!-- GPU nodes -->
+  <circle cx="330" cy="355" r="55" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <circle cx="505" cy="530" r="55" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <circle cx="330" cy="705" r="55" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <circle cx="155" cy="530" r="55" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="330" y="364" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">GPU 0</text>
+  <text x="505" y="539" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">GPU 1</text>
+  <text x="330" y="714" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">GPU 2</text>
+  <text x="155" y="539" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">GPU 3</text>
+
+  <text x="330" y="520" text-anchor="middle" font-size="24" fill="#75786a">S/N bytes</text>
+  <text x="330" y="552" text-anchor="middle" font-size="24" fill="#75786a">per step</text>
+
+  <text x="330" y="832" text-anchor="middle" font-size="26" fill="#55584a">Phase 1: reduce-scatter, N&#8722;1 steps</text>
+  <text x="330" y="874" text-anchor="middle" font-size="26" fill="#55584a">Phase 2: all-gather, N&#8722;1 steps</text>
+
+  <!-- formula box -->
+  <rect x="620" y="290" width="490" height="150" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="865" y="365" text-anchor="middle" font-size="40" font-weight="bold" fill="#33362a">T = 2(N&#8722;1)/N &#183; S / B</text>
+  <text x="865" y="414" text-anchor="middle" font-size="24" fill="#75786a">S = buffer bytes &#183; B = link bandwidth</text>
+
+  <!-- worked example box -->
+  <rect x="620" y="480" width="490" height="320" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <rect x="620" y="480" width="10" height="320" fill="#5b7c46"/>
+  <text x="662" y="534" font-size="28" font-weight="bold" fill="#33362a">70B model &#183; 64 GPUs &#183; 400 Gb/s</text>
+  <text x="662" y="586" font-size="26" fill="#55584a">S = 140 GB (BF16 gradients)</text>
+  <text x="662" y="628" font-size="26" fill="#55584a">B = 50 GB/s per link</text>
+  <text x="662" y="670" font-size="26" fill="#55584a">factor = 2 &#215; 63/64 = 1.97</text>
+  <line x1="662" y1="700" x2="1070" y2="700" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="662" y="752" font-size="30" font-weight="bold" fill="#b06a4e">T &#8776; 276 GB / 50 GB/s &#8776; 5.5 s</text>
+
+  <text x="865" y="866" text-anchor="middle" font-size="24" fill="#75786a">As N grows, the factor saturates at 2:</text>
+  <text x="865" y="900" text-anchor="middle" font-size="24" fill="#75786a">time &#8776; 2S/B, flat in GPU count</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; net-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">two passes, one ring</text>
+</svg>

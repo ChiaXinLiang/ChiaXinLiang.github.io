@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The four buckets</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Nsight Compute "Speed of Light": SM vs. memory throughput</text>
+
+  <!-- plot area: x 240..1060, y 260..880 ; split at 60% -> x=732, y=508 -->
+  <!-- cells -->
+  <rect x="240" y="260" width="492" height="248" fill="#f7ecd2"/>   <!-- TL compute-bound -->
+  <rect x="732" y="260" width="328" height="248" fill="#f4f1e6"/>   <!-- TR both -->
+  <rect x="240" y="508" width="492" height="372" fill="#e7edd9"/>   <!-- BL latency/underutilized -->
+  <rect x="732" y="508" width="328" height="372" fill="#f0ddd0"/>   <!-- BR memory-bound -->
+
+  <!-- 60% dashed guides -->
+  <line x1="732" y1="260" x2="732" y2="880" stroke="#a3a08f" stroke-width="2" stroke-dasharray="10 8"/>
+  <line x1="240" y1="508" x2="1060" y2="508" stroke="#a3a08f" stroke-width="2" stroke-dasharray="10 8"/>
+
+  <!-- axes -->
+  <line x1="240" y1="880" x2="1060" y2="880" stroke="#55584a" stroke-width="3"/>
+  <line x1="240" y1="260" x2="240" y2="880" stroke="#55584a" stroke-width="3"/>
+
+  <!-- axis ticks/labels -->
+  <text x="240" y="920" font-size="24" fill="#75786a" text-anchor="middle">0</text>
+  <text x="732" y="920" font-size="24" fill="#75786a" text-anchor="middle">~60%</text>
+  <text x="1060" y="920" font-size="24" fill="#75786a" text-anchor="middle">100%</text>
+  <text x="650" y="960" font-size="27" fill="#55584a" text-anchor="middle">Memory throughput (% of peak)</text>
+
+  <text x="228" y="888" font-size="24" fill="#75786a" text-anchor="end">0</text>
+  <text x="228" y="516" font-size="24" fill="#75786a" text-anchor="end">~60%</text>
+  <text x="228" y="278" font-size="24" fill="#75786a" text-anchor="end">100%</text>
+  <text x="130" y="570" font-size="27" fill="#55584a" transform="rotate(-90 130 570)" text-anchor="middle">SM throughput (% of peak)</text>
+
+  <!-- TL: compute-bound -->
+  <text x="486" y="330" font-size="32" font-weight="bold" fill="#7a5a20" text-anchor="middle">COMPUTE-BOUND</text>
+  <text x="486" y="372" font-size="25" fill="#55584a" text-anchor="middle">math pipes saturated</text>
+  <text x="486" y="406" font-size="25" fill="#55584a" text-anchor="middle">fix: tensor cores, lower</text>
+  <text x="486" y="438" font-size="25" fill="#55584a" text-anchor="middle">precision, fewer FLOPs</text>
+
+  <!-- TR: both near peak -->
+  <text x="896" y="340" font-size="30" font-weight="bold" fill="#55584a" text-anchor="middle">BOTH HIGH</text>
+  <text x="896" y="382" font-size="25" fill="#75786a" text-anchor="middle">at the roofline</text>
+  <text x="896" y="414" font-size="25" fill="#75786a" text-anchor="middle">ridge; well fed</text>
+
+  <!-- BL: latency-bound / underutilized -->
+  <text x="486" y="576" font-size="32" font-weight="bold" fill="#5b7c46" text-anchor="middle">LATENCY-BOUND</text>
+  <text x="486" y="616" font-size="25" fill="#55584a" text-anchor="middle">warps stall, slots go empty</text>
+  <text x="486" y="648" font-size="25" fill="#55584a" text-anchor="middle">fix: more ILP or occupancy</text>
+  <line x1="300" y1="686" x2="672" y2="686" stroke="#a8bf92" stroke-width="2"/>
+  <text x="486" y="728" font-size="26" font-weight="bold" fill="#5b7c46" text-anchor="middle">...unless waves/SM &lt; 1:</text>
+  <text x="486" y="764" font-size="30" font-weight="bold" fill="#33362a" text-anchor="middle">UNDERUTILIZED</text>
+  <text x="486" y="800" font-size="25" fill="#55584a" text-anchor="middle">grid too small, SMs idle</text>
+  <text x="486" y="832" font-size="25" fill="#55584a" text-anchor="middle">fix: batch, fuse launches</text>
+
+  <!-- BR: memory-bound -->
+  <text x="896" y="620" font-size="32" font-weight="bold" fill="#8a5138" text-anchor="middle">MEMORY-</text>
+  <text x="896" y="658" font-size="32" font-weight="bold" fill="#8a5138" text-anchor="middle">BOUND</text>
+  <text x="896" y="700" font-size="25" fill="#55584a" text-anchor="middle">HBM saturated</text>
+  <text x="896" y="736" font-size="25" fill="#55584a" text-anchor="middle">fix: move fewer</text>
+  <text x="896" y="768" font-size="25" fill="#55584a" text-anchor="middle">bytes (fusion,</text>
+  <text x="896" y="800" font-size="25" fill="#55584a" text-anchor="middle">precision, tiling)</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · ktune-1</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">classify before you tune</text>
+</svg>

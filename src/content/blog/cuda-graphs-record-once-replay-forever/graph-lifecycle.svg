@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Capture, Instantiate, Replay</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">The CUDA graph lifecycle: pay setup once, launch forever</text>
+
+<!-- Panel 1: Capture -->
+<rect x="90" y="240" width="320" height="580" rx="16" fill="#e7edd9"/>
+<text x="250" y="302" text-anchor="middle" font-size="34" font-weight="bold" fill="#5b7c46">1 · Capture</text>
+<!-- DAG -->
+<line x1="250" y1="380" x2="190" y2="490" stroke="#55584a" stroke-width="3"/>
+<line x1="250" y1="380" x2="310" y2="490" stroke="#55584a" stroke-width="3"/>
+<line x1="190" y1="490" x2="250" y2="600" stroke="#55584a" stroke-width="3"/>
+<line x1="310" y1="490" x2="250" y2="600" stroke="#55584a" stroke-width="3"/>
+<circle cx="250" cy="380" r="24" fill="#5b7c46"/>
+<circle cx="190" cy="490" r="24" fill="#5b7c46"/>
+<circle cx="310" cy="490" r="24" fill="#5b7c46"/>
+<circle cx="250" cy="600" r="24" fill="#5b7c46"/>
+<text x="250" y="686" text-anchor="middle" font-size="24" fill="#55584a">Run the step on a</text>
+<text x="250" y="718" text-anchor="middle" font-size="24" fill="#55584a">capturing stream.</text>
+<text x="250" y="758" text-anchor="middle" font-size="24" fill="#55584a">Nothing executes:</text>
+<text x="250" y="790" text-anchor="middle" font-size="24" fill="#55584a">ops become nodes.</text>
+
+<!-- arrow 1->2 -->
+<line x1="414" y1="530" x2="432" y2="530" stroke="#75786a" stroke-width="4"/>
+<path d="M 438 530 L 420 520 L 420 540 Z" fill="#75786a"/>
+
+<!-- Panel 2: Instantiate -->
+<rect x="440" y="240" width="320" height="580" rx="16" fill="#f7ecd2"/>
+<text x="600" y="302" text-anchor="middle" font-size="34" font-weight="bold" fill="#7a5a20">2 · Instantiate</text>
+<rect x="490" y="360" width="220" height="230" rx="12" fill="#fdfbf4" stroke="#c9973b" stroke-width="3"/>
+<line x1="600" y1="410" x2="555" y2="475" stroke="#75786a" stroke-width="2.5"/>
+<line x1="600" y1="410" x2="645" y2="475" stroke="#75786a" stroke-width="2.5"/>
+<line x1="555" y1="475" x2="600" y2="540" stroke="#75786a" stroke-width="2.5"/>
+<line x1="645" y1="475" x2="600" y2="540" stroke="#75786a" stroke-width="2.5"/>
+<circle cx="600" cy="410" r="16" fill="#c9973b"/>
+<circle cx="555" cy="475" r="16" fill="#c9973b"/>
+<circle cx="645" cy="475" r="16" fill="#c9973b"/>
+<circle cx="600" cy="540" r="16" fill="#c9973b"/>
+<text x="600" y="636" text-anchor="middle" font-size="24" fill="#7a5a20">cudaGraphExec_t</text>
+<text x="600" y="686" text-anchor="middle" font-size="24" fill="#55584a">Validate and bake</text>
+<text x="600" y="718" text-anchor="middle" font-size="24" fill="#55584a">launch params once.</text>
+<text x="600" y="758" text-anchor="middle" font-size="24" fill="#55584a">Costs milliseconds,</text>
+<text x="600" y="790" text-anchor="middle" font-size="24" fill="#55584a">done at startup.</text>
+
+<!-- arrow 2->3 -->
+<line x1="764" y1="530" x2="782" y2="530" stroke="#75786a" stroke-width="4"/>
+<path d="M 788 530 L 770 520 L 770 540 Z" fill="#75786a"/>
+
+<!-- Panel 3: Replay -->
+<rect x="790" y="240" width="320" height="580" rx="16" fill="#f0ddd0"/>
+<text x="950" y="302" text-anchor="middle" font-size="34" font-weight="bold" fill="#8a5138">3 · Replay</text>
+<!-- loop arc -->
+<path d="M 950 390 A 85 85 0 1 1 875 435" fill="none" stroke="#b06a4e" stroke-width="6"/>
+<path d="M 869 445 L 866 421 L 888 432 Z" fill="#b06a4e"/>
+<text x="950" y="485" text-anchor="middle" font-size="26" font-weight="bold" fill="#8a5138">every</text>
+<text x="950" y="517" text-anchor="middle" font-size="26" font-weight="bold" fill="#8a5138">step</text>
+<text x="950" y="656" text-anchor="middle" font-size="24" fill="#55584a">One cudaGraphLaunch,</text>
+<text x="950" y="688" text-anchor="middle" font-size="24" fill="#55584a">GPU walks the DAG.</text>
+<text x="950" y="728" text-anchor="middle" font-size="24" fill="#55584a">Under 1 µs per node,</text>
+<text x="950" y="760" text-anchor="middle" font-size="24" fill="#55584a">no host round trips.</text>
+
+<!-- contract note -->
+<text x="600" y="890" text-anchor="middle" font-size="26" fill="#75786a">Contract: same shapes, same buffer addresses.</text>
+<text x="600" y="926" text-anchor="middle" font-size="26" fill="#75786a">New data in the same buffers replays fine.</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · orch-2</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">record once, replay forever</text>
+</svg>

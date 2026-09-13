@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">BF16 vs FP16: where the bits go</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Same 16 bits, different bargain: dynamic range vs precision</text>
+
+  <!-- FP16 -->
+  <text x="90" y="295" font-size="30" font-weight="bold" fill="#55584a">FP16 — half precision</text>
+  <rect x="90" y="325" width="57" height="70" fill="#75786a" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="118" y="370" font-size="26" fill="#fdfbf4" text-anchor="middle">S</text>
+  <g fill="#a8bf92" stroke="#d8d4c4" stroke-width="2">
+    <rect x="147" y="325" width="57" height="70"/><rect x="204" y="325" width="57" height="70"/>
+    <rect x="261" y="325" width="57" height="70"/><rect x="318" y="325" width="57" height="70"/>
+    <rect x="375" y="325" width="57" height="70"/>
+  </g>
+  <g font-size="26" fill="#33362a" text-anchor="middle">
+    <text x="175" y="370">E</text><text x="232" y="370">E</text><text x="289" y="370">E</text>
+    <text x="346" y="370">E</text><text x="403" y="370">E</text>
+  </g>
+  <g fill="#f7ecd2" stroke="#d8d4c4" stroke-width="2">
+    <rect x="432" y="325" width="57" height="70"/><rect x="489" y="325" width="57" height="70"/>
+    <rect x="546" y="325" width="57" height="70"/><rect x="603" y="325" width="57" height="70"/>
+    <rect x="660" y="325" width="57" height="70"/><rect x="717" y="325" width="57" height="70"/>
+    <rect x="774" y="325" width="57" height="70"/><rect x="831" y="325" width="57" height="70"/>
+    <rect x="888" y="325" width="57" height="70"/><rect x="945" y="325" width="57" height="70"/>
+  </g>
+  <g font-size="26" fill="#7a5a20" text-anchor="middle">
+    <text x="460" y="370">M</text><text x="517" y="370">M</text><text x="574" y="370">M</text>
+    <text x="631" y="370">M</text><text x="688" y="370">M</text><text x="745" y="370">M</text>
+    <text x="802" y="370">M</text><text x="859" y="370">M</text><text x="916" y="370">M</text>
+    <text x="973" y="370">M</text>
+  </g>
+  <g font-size="24" fill="#75786a" text-anchor="middle">
+    <text x="118" y="430">sign</text>
+    <text x="289" y="430">5 exponent</text>
+    <text x="717" y="430">10 mantissa</text>
+  </g>
+  <text x="90" y="485" font-size="26" fill="#b04a3a">max value 65,504 → gradients overflow → needs GradScaler</text>
+
+  <!-- BF16 -->
+  <text x="90" y="590" font-size="30" font-weight="bold" fill="#55584a">BF16 — brain float</text>
+  <rect x="90" y="620" width="57" height="70" fill="#75786a" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="118" y="665" font-size="26" fill="#fdfbf4" text-anchor="middle">S</text>
+  <g fill="#a8bf92" stroke="#d8d4c4" stroke-width="2">
+    <rect x="147" y="620" width="57" height="70"/><rect x="204" y="620" width="57" height="70"/>
+    <rect x="261" y="620" width="57" height="70"/><rect x="318" y="620" width="57" height="70"/>
+    <rect x="375" y="620" width="57" height="70"/><rect x="432" y="620" width="57" height="70"/>
+    <rect x="489" y="620" width="57" height="70"/><rect x="546" y="620" width="57" height="70"/>
+  </g>
+  <g font-size="26" fill="#33362a" text-anchor="middle">
+    <text x="175" y="665">E</text><text x="232" y="665">E</text><text x="289" y="665">E</text>
+    <text x="346" y="665">E</text><text x="403" y="665">E</text><text x="460" y="665">E</text>
+    <text x="517" y="665">E</text><text x="574" y="665">E</text>
+  </g>
+  <g fill="#f7ecd2" stroke="#d8d4c4" stroke-width="2">
+    <rect x="603" y="620" width="57" height="70"/><rect x="660" y="620" width="57" height="70"/>
+    <rect x="717" y="620" width="57" height="70"/><rect x="774" y="620" width="57" height="70"/>
+    <rect x="831" y="620" width="57" height="70"/><rect x="888" y="620" width="57" height="70"/>
+    <rect x="945" y="620" width="57" height="70"/>
+  </g>
+  <g font-size="26" fill="#7a5a20" text-anchor="middle">
+    <text x="631" y="665">M</text><text x="688" y="665">M</text><text x="745" y="665">M</text>
+    <text x="802" y="665">M</text><text x="859" y="665">M</text><text x="916" y="665">M</text>
+    <text x="973" y="665">M</text>
+  </g>
+  <g font-size="24" fill="#75786a" text-anchor="middle">
+    <text x="118" y="725">sign</text>
+    <text x="360" y="725">8 exponent — same as FP32</text>
+    <text x="802" y="725">7 mantissa</text>
+  </g>
+  <text x="90" y="780" font-size="26" fill="#5b7c46">range ≈ FP32 (~3.4e38) → no scaler, one less moving part</text>
+
+  <text x="90" y="890" font-size="26" fill="#75786a">Ampere and later run both on Tensor Cores at equal throughput;</text>
+  <text x="90" y="928" font-size="26" fill="#75786a">keep matmul dimensions multiples of 8 so they actually engage.</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · pt-1</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">Spend bits on range</text>
+</svg>

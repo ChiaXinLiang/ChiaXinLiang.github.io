@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The H100 Roofline in BF16</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">989 TFLOPS ceiling meets 3.35 TB/s slope at ~295 FLOPs/byte</text>
+
+  <!-- gridlines -->
+  <line x1="230" y1="667" x2="1050" y2="667" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="230" y1="473" x2="1050" y2="473" stroke="#e8e4d7" stroke-width="2"/>
+
+  <!-- axes -->
+  <line x1="230" y1="280" x2="230" y2="860" stroke="#75786a" stroke-width="2"/>
+  <line x1="230" y1="860" x2="1050" y2="860" stroke="#75786a" stroke-width="2"/>
+  <text x="240" y="262" font-size="24" fill="#75786a">Attainable TFLOPS (log scale)</text>
+
+  <!-- y ticks -->
+  <text x="216" y="868" font-size="24" fill="#75786a" text-anchor="end">1</text>
+  <text x="216" y="675" font-size="24" fill="#75786a" text-anchor="end">10</text>
+  <text x="216" y="481" font-size="24" fill="#75786a" text-anchor="end">100</text>
+  <text x="216" y="289" font-size="24" fill="#75786a" text-anchor="end">989</text>
+
+  <!-- x ticks -->
+  <text x="230" y="896" font-size="24" fill="#75786a" text-anchor="middle">1</text>
+  <text x="503" y="896" font-size="24" fill="#75786a" text-anchor="middle">10</text>
+  <text x="777" y="896" font-size="24" fill="#75786a" text-anchor="middle">100</text>
+  <text x="1050" y="896" font-size="24" fill="#75786a" text-anchor="middle">1000</text>
+  <text x="640" y="940" font-size="26" fill="#55584a" text-anchor="middle">Arithmetic intensity (FLOPs / byte)</text>
+
+  <!-- ridge dashed line -->
+  <line x1="905" y1="281" x2="905" y2="810" stroke="#c9973b" stroke-width="3" stroke-dasharray="9 9"/>
+  <text x="905" y="840" font-size="24" fill="#7a5a20" text-anchor="middle">ridge ≈ 295</text>
+
+  <!-- roofline: slope then ceiling -->
+  <line x1="230" y1="759" x2="905" y2="281" stroke="#5b7c46" stroke-width="6"/>
+  <line x1="905" y1="281" x2="1050" y2="281" stroke="#5b7c46" stroke-width="6"/>
+
+  <!-- region labels -->
+  <text x="430" y="745" font-size="26" fill="#75786a" text-anchor="middle">memory-bound</text>
+  <text x="918" y="345" font-size="24" fill="#75786a">compute-bound</text>
+
+  <!-- decode GEMV point -->
+  <circle cx="240" cy="752" r="12" fill="#b04a3a"/>
+  <text x="268" y="790" font-size="26" fill="#33362a">decode GEMV: ~1 FLOP/byte</text>
+  <text x="268" y="824" font-size="26" fill="#55584a">capped at ~3.4 TFLOPS (0.3% of peak)</text>
+
+  <!-- prefill GEMM point -->
+  <circle cx="990" cy="281" r="12" fill="#b06a4e"/>
+  <text x="960" y="250" font-size="26" fill="#33362a" text-anchor="middle">prefill GEMM</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Redrawn after Williams et al. (2009), roofline model</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · exec-1</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">Know your ridge point</text>
+</svg>

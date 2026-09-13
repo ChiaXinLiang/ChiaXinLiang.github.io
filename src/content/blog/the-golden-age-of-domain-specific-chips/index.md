@@ -4,7 +4,7 @@ description: "General-purpose CPU performance now grows about 3% a year. Henness
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'par-4'
-order: 10
+order: 14
 series: 'comp-arch'
 topic: 'Parallel Architectures'
 tags: ['asic', 'accelerators', 'hardware']

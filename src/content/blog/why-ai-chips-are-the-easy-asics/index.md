@@ -4,7 +4,7 @@ description: "A matrix multiplier is the friendliest circuit a chip designer wil
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'asic-4'
-order: 14
+order: 18
 series: 'comp-arch'
 topic: 'ASIC Design'
 tags: ['asic', 'tpu', 'accelerators']

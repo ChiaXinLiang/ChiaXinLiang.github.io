@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="90" y="100" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">The Shared-Memory Transpose Fix</text>
+<text x="90" y="156" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">Coalesced in both directions; padding kills bank conflicts</text>
+<text x="220" y="250" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="bold" fill="#55584a">Global memory (in)</text>
+<text x="600" y="250" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="bold" fill="#55584a">Shared tile 32 &#215; 33</text>
+<text x="980" y="250" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="bold" fill="#55584a">Global memory (out)</text>
+<rect x="90" y="270" width="260" height="270" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<rect x="108" y="292" width="224" height="22" fill="#a8bf92"/>
+<rect x="108" y="332" width="224" height="22" fill="#5b7c46"/>
+<rect x="108" y="372" width="224" height="22" fill="#a8bf92"/>
+<rect x="108" y="412" width="224" height="22" fill="#a8bf92"/>
+<rect x="108" y="452" width="224" height="22" fill="#a8bf92"/>
+<rect x="108" y="492" width="224" height="22" fill="#a8bf92"/>
+<rect x="470" y="270" width="260" height="270" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<rect x="484" y="292" width="23" height="23" fill="#e7edd9"/>
+<rect x="510" y="292" width="23" height="23" fill="#e7edd9"/>
+<rect x="536" y="292" width="23" height="23" fill="#e7edd9"/>
+<rect x="562" y="292" width="23" height="23" fill="#5b7c46"/>
+<rect x="588" y="292" width="23" height="23" fill="#e7edd9"/>
+<rect x="614" y="292" width="23" height="23" fill="#e7edd9"/>
+<rect x="640" y="292" width="23" height="23" fill="#e7edd9"/>
+<rect x="666" y="292" width="23" height="23" fill="#e7edd9"/>
+<rect x="692" y="292" width="23" height="23" fill="#f7ecd2" stroke="#c9973b" stroke-width="1.5"/>
+<rect x="484" y="321" width="23" height="23" fill="#e7edd9"/>
+<rect x="510" y="321" width="23" height="23" fill="#e7edd9"/>
+<rect x="536" y="321" width="23" height="23" fill="#e7edd9"/>
+<rect x="562" y="321" width="23" height="23" fill="#5b7c46"/>
+<rect x="588" y="321" width="23" height="23" fill="#e7edd9"/>
+<rect x="614" y="321" width="23" height="23" fill="#e7edd9"/>
+<rect x="640" y="321" width="23" height="23" fill="#e7edd9"/>
+<rect x="666" y="321" width="23" height="23" fill="#e7edd9"/>
+<rect x="692" y="321" width="23" height="23" fill="#f7ecd2" stroke="#c9973b" stroke-width="1.5"/>
+<rect x="484" y="350" width="23" height="23" fill="#e7edd9"/>
+<rect x="510" y="350" width="23" height="23" fill="#e7edd9"/>
+<rect x="536" y="350" width="23" height="23" fill="#e7edd9"/>
+<rect x="562" y="350" width="23" height="23" fill="#5b7c46"/>
+<rect x="588" y="350" width="23" height="23" fill="#e7edd9"/>
+<rect x="614" y="350" width="23" height="23" fill="#e7edd9"/>
+<rect x="640" y="350" width="23" height="23" fill="#e7edd9"/>
+<rect x="666" y="350" width="23" height="23" fill="#e7edd9"/>
+<rect x="692" y="350" width="23" height="23" fill="#f7ecd2" stroke="#c9973b" stroke-width="1.5"/>
+<rect x="484" y="379" width="23" height="23" fill="#e7edd9"/>
+<rect x="510" y="379" width="23" height="23" fill="#e7edd9"/>
+<rect x="536" y="379" width="23" height="23" fill="#e7edd9"/>
+<rect x="562" y="379" width="23" height="23" fill="#5b7c46"/>
+<rect x="588" y="379" width="23" height="23" fill="#e7edd9"/>
+<rect x="614" y="379" width="23" height="23" fill="#e7edd9"/>
+<rect x="640" y="379" width="23" height="23" fill="#e7edd9"/>
+<rect x="666" y="379" width="23" height="23" fill="#e7edd9"/>
+<rect x="692" y="379" width="23" height="23" fill="#f7ecd2" stroke="#c9973b" stroke-width="1.5"/>
+<rect x="484" y="408" width="23" height="23" fill="#e7edd9"/>
+<rect x="510" y="408" width="23" height="23" fill="#e7edd9"/>
+<rect x="536" y="408" width="23" height="23" fill="#e7edd9"/>
+<rect x="562" y="408" width="23" height="23" fill="#5b7c46"/>
+<rect x="588" y="408" width="23" height="23" fill="#e7edd9"/>
+<rect x="614" y="408" width="23" height="23" fill="#e7edd9"/>
+<rect x="640" y="408" width="23" height="23" fill="#e7edd9"/>
+<rect x="666" y="408" width="23" height="23" fill="#e7edd9"/>
+<rect x="692" y="408" width="23" height="23" fill="#f7ecd2" stroke="#c9973b" stroke-width="1.5"/>
+<rect x="484" y="437" width="23" height="23" fill="#e7edd9"/>
+<rect x="510" y="437" width="23" height="23" fill="#e7edd9"/>
+<rect x="536" y="437" width="23" height="23" fill="#e7edd9"/>
+<rect x="562" y="437" width="23" height="23" fill="#5b7c46"/>
+<rect x="588" y="437" width="23" height="23" fill="#e7edd9"/>
+<rect x="614" y="437" width="23" height="23" fill="#e7edd9"/>
+<rect x="640" y="437" width="23" height="23" fill="#e7edd9"/>
+<rect x="666" y="437" width="23" height="23" fill="#e7edd9"/>
+<rect x="692" y="437" width="23" height="23" fill="#f7ecd2" stroke="#c9973b" stroke-width="1.5"/>
+<rect x="484" y="466" width="23" height="23" fill="#e7edd9"/>
+<rect x="510" y="466" width="23" height="23" fill="#e7edd9"/>
+<rect x="536" y="466" width="23" height="23" fill="#e7edd9"/>
+<rect x="562" y="466" width="23" height="23" fill="#5b7c46"/>
+<rect x="588" y="466" width="23" height="23" fill="#e7edd9"/>
+<rect x="614" y="466" width="23" height="23" fill="#e7edd9"/>
+<rect x="640" y="466" width="23" height="23" fill="#e7edd9"/>
+<rect x="666" y="466" width="23" height="23" fill="#e7edd9"/>
+<rect x="692" y="466" width="23" height="23" fill="#f7ecd2" stroke="#c9973b" stroke-width="1.5"/>
+<rect x="484" y="495" width="23" height="23" fill="#e7edd9"/>
+<rect x="510" y="495" width="23" height="23" fill="#e7edd9"/>
+<rect x="536" y="495" width="23" height="23" fill="#e7edd9"/>
+<rect x="562" y="495" width="23" height="23" fill="#5b7c46"/>
+<rect x="588" y="495" width="23" height="23" fill="#e7edd9"/>
+<rect x="614" y="495" width="23" height="23" fill="#e7edd9"/>
+<rect x="640" y="495" width="23" height="23" fill="#e7edd9"/>
+<rect x="666" y="495" width="23" height="23" fill="#e7edd9"/>
+<rect x="692" y="495" width="23" height="23" fill="#f7ecd2" stroke="#c9973b" stroke-width="1.5"/>
+<rect x="850" y="270" width="260" height="270" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+<rect x="868" y="292" width="224" height="22" fill="#f0ddd0"/>
+<rect x="868" y="332" width="224" height="22" fill="#8a5138"/>
+<rect x="868" y="372" width="224" height="22" fill="#f0ddd0"/>
+<rect x="868" y="412" width="224" height="22" fill="#f0ddd0"/>
+<rect x="868" y="452" width="224" height="22" fill="#f0ddd0"/>
+<rect x="868" y="492" width="224" height="22" fill="#f0ddd0"/>
+<line x1="358" y1="405" x2="446" y2="405" stroke="#75786a" stroke-width="3"/>
+<polygon points="446,397 462,405 446,413" fill="#75786a"/>
+<line x1="738" y1="405" x2="826" y2="405" stroke="#75786a" stroke-width="3"/>
+<polygon points="826,397 842,405 826,413" fill="#75786a"/>
+<text x="410" y="380" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">read row</text>
+<text x="410" y="440" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#5b7c46">coalesced</text>
+<text x="790" y="380" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">write row</text>
+<text x="790" y="440" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#5b7c46">coalesced</text>
+<text x="600" y="585" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" fill="#55584a">the strided column read happens on-chip &#8212; banks absorb it, not DRAM</text>
+<text x="600" y="620" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#7a5a20">wheat column = 1 float of padding per row</text>
+<text x="90" y="700" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="bold" fill="#33362a">Why width 33? Shared-memory banks</text>
+<text x="90" y="768" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">tile[32][32]:</text>
+<rect x="340" y="738" width="56" height="44" rx="6" fill="#e5b3a6" stroke="#b04a3a" stroke-width="1.5"/>
+<text x="368.0" y="768" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b3</text>
+<rect x="406" y="738" width="56" height="44" rx="6" fill="#e5b3a6" stroke="#b04a3a" stroke-width="1.5"/>
+<text x="434.0" y="768" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b3</text>
+<rect x="472" y="738" width="56" height="44" rx="6" fill="#e5b3a6" stroke="#b04a3a" stroke-width="1.5"/>
+<text x="500.0" y="768" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b3</text>
+<rect x="538" y="738" width="56" height="44" rx="6" fill="#e5b3a6" stroke="#b04a3a" stroke-width="1.5"/>
+<text x="566.0" y="768" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b3</text>
+<rect x="604" y="738" width="56" height="44" rx="6" fill="#e5b3a6" stroke="#b04a3a" stroke-width="1.5"/>
+<text x="632.0" y="768" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b3</text>
+<rect x="670" y="738" width="56" height="44" rx="6" fill="#e5b3a6" stroke="#b04a3a" stroke-width="1.5"/>
+<text x="698.0" y="768" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b3</text>
+<rect x="736" y="738" width="56" height="44" rx="6" fill="#e5b3a6" stroke="#b04a3a" stroke-width="1.5"/>
+<text x="764.0" y="768" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b3</text>
+<rect x="802" y="738" width="56" height="44" rx="6" fill="#e5b3a6" stroke="#b04a3a" stroke-width="1.5"/>
+<text x="830.0" y="768" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b3</text>
+<text x="895" y="768" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="bold" fill="#b04a3a">32-way conflict</text>
+<text x="90" y="858" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">tile[32][33]:</text>
+<rect x="340" y="828" width="56" height="44" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="1.5"/>
+<text x="368.0" y="858" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b3</text>
+<rect x="406" y="828" width="56" height="44" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="1.5"/>
+<text x="434.0" y="858" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b4</text>
+<rect x="472" y="828" width="56" height="44" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="1.5"/>
+<text x="500.0" y="858" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b5</text>
+<rect x="538" y="828" width="56" height="44" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="1.5"/>
+<text x="566.0" y="858" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b6</text>
+<rect x="604" y="828" width="56" height="44" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="1.5"/>
+<text x="632.0" y="858" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b7</text>
+<rect x="670" y="828" width="56" height="44" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="1.5"/>
+<text x="698.0" y="858" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b8</text>
+<rect x="736" y="828" width="56" height="44" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="1.5"/>
+<text x="764.0" y="858" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b9</text>
+<rect x="802" y="828" width="56" height="44" rx="6" fill="#e7edd9" stroke="#5b7c46" stroke-width="1.5"/>
+<text x="830.0" y="858" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b10</text>
+<text x="895" y="858" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="bold" fill="#5b7c46">conflict-free</text>
+<text x="90" y="925" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">Column 3 of the tile, first 8 of 32 rows shown &#8212; with width 33,</text>
+<text x="90" y="960" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">each row starts one bank later, so a column spans all 32 banks.</text>
+<text x="90" y="1078" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">After NVIDIA&#8217;s shared-memory transpose example</text>
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · mem-1</text>
+<text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">one column buys 32x</text>
+</svg>

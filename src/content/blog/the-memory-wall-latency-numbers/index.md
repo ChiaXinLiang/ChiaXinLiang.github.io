@@ -4,7 +4,7 @@ description: "Register to RAM is a 300x cliff, RAM to SSD is 1,000x more — sca
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'mem-1'
-order: 4
+order: 8
 series: 'comp-arch'
 topic: 'Memory Hierarchy'
 tags: [memory, latency, hardware]

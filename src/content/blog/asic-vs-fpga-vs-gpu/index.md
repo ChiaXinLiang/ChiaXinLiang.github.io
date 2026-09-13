@@ -4,7 +4,7 @@ description: "Every step from CPU to ASIC removes machinery that decides what to
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'asic-1'
-order: 11
+order: 15
 series: 'comp-arch'
 topic: 'ASIC Design'
 tags: [asic, fpga, gpu]

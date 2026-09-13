@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <defs>
+    <marker id="arrGreen" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#5b7c46"/>
+    </marker>
+    <marker id="arrRed" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#b04a3a"/>
+    </marker>
+  </defs>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Server, Two Memory Domains</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Where your DataLoader lands decides your H2D bandwidth</text>
+
+  <!-- Socket 0 -->
+  <rect x="90" y="250" width="470" height="330" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="325" y="296" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">CPU socket 0</text>
+
+  <rect x="130" y="330" width="180" height="90" rx="10" fill="#e7edd9" stroke="#a8bf92" stroke-width="3"/>
+  <text x="220" y="368" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">DRAM 0</text>
+  <text x="220" y="400" text-anchor="middle" font-size="24" fill="#55584a">batch here</text>
+
+  <rect x="340" y="330" width="190" height="90" rx="10" fill="#e7edd9" stroke="#a8bf92" stroke-width="3"/>
+  <text x="435" y="368" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">DataLoader</text>
+  <text x="435" y="400" text-anchor="middle" font-size="24" fill="#55584a">numactl-pinned</text>
+
+  <rect x="130" y="470" width="400" height="80" rx="10" fill="#fdfbf4" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="330" y="506" text-anchor="middle" font-size="26" fill="#55584a">PCIe root complex</text>
+  <text x="330" y="538" text-anchor="middle" font-size="24" fill="#75786a">Gen4 x16 to GPU</text>
+
+  <!-- Socket 1 -->
+  <rect x="640" y="250" width="470" height="330" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="875" y="296" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">CPU socket 1</text>
+
+  <rect x="680" y="330" width="180" height="90" rx="10" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="770" y="368" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">DRAM 1</text>
+  <text x="770" y="400" text-anchor="middle" font-size="24" fill="#55584a">batch here</text>
+
+  <rect x="890" y="330" width="190" height="90" rx="10" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="985" y="368" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">DataLoader</text>
+  <text x="985" y="400" text-anchor="middle" font-size="24" fill="#55584a">OS default</text>
+
+  <!-- inter-socket link -->
+  <line x1="560" y1="420" x2="640" y2="420" stroke="#75786a" stroke-width="6"/>
+  <text x="600" y="615" text-anchor="middle" font-size="24" fill="#75786a">UPI / xGMI inter-socket link</text>
+
+  <!-- PCIe link to GPU -->
+  <line x1="330" y1="580" x2="330" y2="740" stroke="#55584a" stroke-width="4"/>
+
+  <!-- GPU box -->
+  <rect x="140" y="740" width="380" height="110" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="4"/>
+  <text x="330" y="790" text-anchor="middle" font-size="34" font-weight="bold" fill="#33362a">GPU</text>
+  <text x="330" y="826" text-anchor="middle" font-size="24" fill="#55584a">attached to socket 0</text>
+
+  <!-- green local path -->
+  <line x1="200" y1="424" x2="266" y2="732" stroke="#5b7c46" stroke-width="6" marker-end="url(#arrGreen)"/>
+  <text x="95" y="560" font-size="24" font-weight="bold" fill="#5b7c46">local</text>
+  <text x="95" y="592" font-size="24" fill="#5b7c46">~26 GB/s</text>
+
+  <!-- red remote path -->
+  <polyline points="770,424 770,660 410,660 410,732" fill="none" stroke="#b04a3a" stroke-width="6" marker-end="url(#arrRed)"/>
+  <text x="790" y="530" font-size="24" font-weight="bold" fill="#b04a3a">remote</text>
+  <text x="790" y="562" font-size="24" fill="#b04a3a">crosses the socket link</text>
+
+  <!-- summary strip -->
+  <text x="600" y="908" text-anchor="middle" font-size="26" fill="#55584a">Same PCIe slot, different host configuration:</text>
+  <text x="600" y="944" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">~26 GB/s local + pinned vs ~8 GB/s remote + pageable</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; os-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Feed the GPU locally</text>
+</svg>

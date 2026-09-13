@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Why the KV Cache Exists</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">K and V for old tokens never change — so stop recomputing them</text>
+
+  <!-- panel titles -->
+  <text x="320" y="270" text-anchor="middle" font-size="30" font-weight="bold" fill="#8a5138">Without cache — O(T²)</text>
+  <text x="880" y="270" text-anchor="middle" font-size="30" font-weight="bold" fill="#5b7c46">With cache — O(T)</text>
+
+  <!-- divider between panels -->
+  <line x1="600" y1="240" x2="600" y2="820" stroke="#e8e4d7" stroke-width="3"/>
+
+  <!-- LEFT: recompute everything each step. squares 60px, gap 10, start x=140 -->
+  <!-- step labels -->
+  <text x="140" y="358" text-anchor="end" font-size="24" fill="#75786a">step 1</text>
+  <text x="140" y="448" text-anchor="end" font-size="24" fill="#75786a">step 2</text>
+  <text x="140" y="538" text-anchor="end" font-size="24" fill="#75786a">step 3</text>
+  <text x="140" y="628" text-anchor="end" font-size="24" fill="#75786a">step 4</text>
+  <text x="140" y="718" text-anchor="end" font-size="24" fill="#75786a">step 5</text>
+
+  <!-- step 1: 1 square -->
+  <rect x="160" y="320" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <!-- step 2 -->
+  <rect x="160" y="410" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <rect x="230" y="410" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <!-- step 3 -->
+  <rect x="160" y="500" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <rect x="230" y="500" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <rect x="300" y="500" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <!-- step 4 -->
+  <rect x="160" y="590" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <rect x="230" y="590" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <rect x="300" y="590" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <rect x="370" y="590" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <!-- step 5 -->
+  <rect x="160" y="680" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <rect x="230" y="680" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <rect x="300" y="680" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <rect x="370" y="680" width="60" height="60" rx="6" fill="#b06a4e"/>
+  <rect x="440" y="680" width="60" height="60" rx="6" fill="#b06a4e"/>
+
+  <text x="320" y="800" text-anchor="middle" font-size="26" fill="#55584a">15 K/V projections for 5 tokens</text>
+
+  <!-- RIGHT: cached. start x=700 -->
+  <text x="700" y="358" text-anchor="end" font-size="24" fill="#75786a">step 1</text>
+  <text x="700" y="448" text-anchor="end" font-size="24" fill="#75786a">step 2</text>
+  <text x="700" y="538" text-anchor="end" font-size="24" fill="#75786a">step 3</text>
+  <text x="700" y="628" text-anchor="end" font-size="24" fill="#75786a">step 4</text>
+  <text x="700" y="718" text-anchor="end" font-size="24" fill="#75786a">step 5</text>
+
+  <!-- step 1: new -->
+  <rect x="720" y="320" width="60" height="60" rx="6" fill="#5b7c46"/>
+  <!-- step 2 -->
+  <rect x="720" y="410" width="60" height="60" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="790" y="410" width="60" height="60" rx="6" fill="#5b7c46"/>
+  <!-- step 3 -->
+  <rect x="720" y="500" width="60" height="60" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="790" y="500" width="60" height="60" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="860" y="500" width="60" height="60" rx="6" fill="#5b7c46"/>
+  <!-- step 4 -->
+  <rect x="720" y="590" width="60" height="60" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="790" y="590" width="60" height="60" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="860" y="590" width="60" height="60" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="930" y="590" width="60" height="60" rx="6" fill="#5b7c46"/>
+  <!-- step 5 -->
+  <rect x="720" y="680" width="60" height="60" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="790" y="680" width="60" height="60" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="860" y="680" width="60" height="60" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="930" y="680" width="60" height="60" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <rect x="1000" y="680" width="60" height="60" rx="6" fill="#5b7c46"/>
+
+  <text x="880" y="800" text-anchor="middle" font-size="26" fill="#55584a">5 projections + cheap cache reads</text>
+
+  <!-- legend -->
+  <rect x="240" y="860" width="36" height="36" rx="6" fill="#b06a4e"/>
+  <text x="290" y="887" font-size="26" fill="#55584a">recomputed / computed this step</text>
+  <rect x="740" y="860" width="36" height="36" rx="6" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <text x="790" y="887" font-size="26" fill="#55584a">read from KV cache</text>
+
+  <text x="600" y="950" text-anchor="middle" font-size="27" fill="#33362a" font-weight="bold">The O(n) term never disappears — it turns from FLOPs into bytes.</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · opt-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">compute traded for bytes</text>
+</svg>

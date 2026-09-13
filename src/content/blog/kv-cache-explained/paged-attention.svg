@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">PagedAttention in One Picture</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Virtual-memory-style block tables replace contiguous reservations</text>
+
+  <!-- LEFT: logical blocks -->
+  <text x="90" y="278" font-size="28" font-weight="bold" fill="#33362a">Sequence A — logical blocks</text>
+  <rect x="90" y="300" width="130" height="100" rx="8" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="155" y="342" text-anchor="middle" font-size="26" fill="#55584a">A0</text>
+  <text x="155" y="380" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">&#8594; 7</text>
+  <rect x="240" y="300" width="130" height="100" rx="8" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="305" y="342" text-anchor="middle" font-size="26" fill="#55584a">A1</text>
+  <text x="305" y="380" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">&#8594; 1</text>
+  <rect x="390" y="300" width="130" height="100" rx="8" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="455" y="342" text-anchor="middle" font-size="26" fill="#55584a">A2</text>
+  <text x="455" y="380" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">&#8594; 9</text>
+
+  <text x="90" y="518" font-size="28" font-weight="bold" fill="#33362a">Sequence B — logical blocks</text>
+  <rect x="90" y="540" width="130" height="100" rx="8" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="155" y="582" text-anchor="middle" font-size="26" fill="#55584a">B0</text>
+  <text x="155" y="620" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">&#8594; 7</text>
+  <rect x="240" y="540" width="130" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="305" y="582" text-anchor="middle" font-size="26" fill="#55584a">B1</text>
+  <text x="305" y="620" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">&#8594; 4</text>
+
+  <text x="90" y="700" font-size="24" fill="#75786a">Each block holds 16 tokens of K/V for all layers.</text>
+  <text x="90" y="736" font-size="24" fill="#75786a">The table maps logical &#8594; physical.</text>
+
+  <!-- RIGHT: physical memory grid, 3 cols x 4 rows, cells 110x100, gap 10 -->
+  <text x="855" y="250" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">Physical KV memory</text>
+
+  <!-- row 0: blocks 0,1,2 -->
+  <rect x="680" y="280" width="110" height="100" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="735" y="322" text-anchor="middle" font-size="24" fill="#a3a08f">0</text>
+  <text x="735" y="356" text-anchor="middle" font-size="24" fill="#a3a08f">free</text>
+  <rect x="800" y="280" width="110" height="100" rx="8" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="855" y="322" text-anchor="middle" font-size="24" fill="#55584a">1</text>
+  <text x="855" y="356" text-anchor="middle" font-size="26" font-weight="bold" fill="#8a5138">A1</text>
+  <rect x="920" y="280" width="110" height="100" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="975" y="322" text-anchor="middle" font-size="24" fill="#a3a08f">2</text>
+  <text x="975" y="356" text-anchor="middle" font-size="24" fill="#a3a08f">free</text>
+
+  <!-- row 1: blocks 3,4,5 -->
+  <rect x="680" y="400" width="110" height="100" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="735" y="442" text-anchor="middle" font-size="24" fill="#a3a08f">3</text>
+  <text x="735" y="476" text-anchor="middle" font-size="24" fill="#a3a08f">free</text>
+  <rect x="800" y="400" width="110" height="100" rx="8" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="855" y="442" text-anchor="middle" font-size="24" fill="#55584a">4</text>
+  <text x="855" y="476" text-anchor="middle" font-size="26" font-weight="bold" fill="#7a5a20">B1</text>
+  <rect x="920" y="400" width="110" height="100" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="975" y="442" text-anchor="middle" font-size="24" fill="#a3a08f">5</text>
+  <text x="975" y="476" text-anchor="middle" font-size="24" fill="#a3a08f">free</text>
+
+  <!-- row 2: blocks 6,7,8 -->
+  <rect x="680" y="520" width="110" height="100" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="735" y="562" text-anchor="middle" font-size="24" fill="#a3a08f">6</text>
+  <text x="735" y="596" text-anchor="middle" font-size="24" fill="#a3a08f">free</text>
+  <rect x="800" y="520" width="110" height="100" rx="8" fill="#e7edd9" stroke="#5b7c46" stroke-width="4"/>
+  <text x="855" y="562" text-anchor="middle" font-size="24" fill="#55584a">7</text>
+  <text x="855" y="596" text-anchor="middle" font-size="26" font-weight="bold" fill="#5b7c46">A0+B0</text>
+  <rect x="920" y="520" width="110" height="100" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="975" y="562" text-anchor="middle" font-size="24" fill="#a3a08f">8</text>
+  <text x="975" y="596" text-anchor="middle" font-size="24" fill="#a3a08f">free</text>
+
+  <!-- row 3: blocks 9,10,11 -->
+  <rect x="680" y="640" width="110" height="100" rx="8" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="735" y="682" text-anchor="middle" font-size="24" fill="#55584a">9</text>
+  <text x="735" y="716" text-anchor="middle" font-size="26" font-weight="bold" fill="#8a5138">A2</text>
+  <rect x="800" y="640" width="110" height="100" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="855" y="682" text-anchor="middle" font-size="24" fill="#a3a08f">10</text>
+  <text x="855" y="716" text-anchor="middle" font-size="24" fill="#a3a08f">free</text>
+  <rect x="920" y="640" width="110" height="100" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="975" y="682" text-anchor="middle" font-size="24" fill="#a3a08f">11</text>
+  <text x="975" y="716" text-anchor="middle" font-size="24" fill="#a3a08f">free</text>
+
+  <!-- bottom callouts -->
+  <text x="600" y="850" text-anchor="middle" font-size="27" font-weight="bold" fill="#5b7c46">A0 and B0 point at the same physical block: shared prefix, one copy.</text>
+  <text x="600" y="900" text-anchor="middle" font-size="26" fill="#55584a">Blocks are allocated on demand, anywhere in HBM — waste falls</text>
+  <text x="600" y="938" text-anchor="middle" font-size="26" fill="#55584a">from 60&#8211;80% to under 4% (Kwon et al., 2023).</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Adapted from Kwon et al. (2023), SOSP — vLLM paper</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · opt-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">paging beats reserving</text>
+</svg>

@@ -4,7 +4,7 @@ description: "Your CPU runs instructions in whatever order the data allows, then
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'arch-3'
-order: 3
+order: 7
 series: 'comp-arch'
 topic: 'CPU Fundamentals'
 tags: ['computer-architecture', 'cpu', 'microarchitecture']

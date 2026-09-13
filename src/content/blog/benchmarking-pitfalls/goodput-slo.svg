@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Fix the SLO First, Then Measure</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">raw throughput keeps climbing after goodput dies</text>
+
+<!-- SLO-violated shading -->
+<rect x="430" y="380" width="650" height="520" fill="#f0ddd0" opacity="0.35"/>
+
+<!-- gridlines -->
+<line x1="150" y1="740" x2="1090" y2="740" stroke="#e8e4d7" stroke-width="2"/>
+<line x1="150" y1="580" x2="1090" y2="580" stroke="#e8e4d7" stroke-width="2"/>
+<line x1="150" y1="420" x2="1090" y2="420" stroke="#e8e4d7" stroke-width="2"/>
+<line x1="150" y1="260" x2="1090" y2="260" stroke="#e8e4d7" stroke-width="2"/>
+<text x="138" y="748" text-anchor="end" font-size="24" fill="#75786a">3k</text>
+<text x="138" y="588" text-anchor="end" font-size="24" fill="#75786a">6k</text>
+<text x="138" y="428" text-anchor="end" font-size="24" fill="#75786a">9k</text>
+<text x="138" y="268" text-anchor="end" font-size="24" fill="#75786a">12k</text>
+
+<!-- axes -->
+<line x1="150" y1="250" x2="150" y2="900" stroke="#d8d4c4" stroke-width="2"/>
+<line x1="150" y1="900" x2="1090" y2="900" stroke="#d8d4c4" stroke-width="2"/>
+<text x="90" y="228" font-size="24" fill="#75786a">output tok/s</text>
+<text x="152" y="936" text-anchor="middle" font-size="24" fill="#75786a">1</text>
+<text x="380" y="936" text-anchor="middle" font-size="24" fill="#75786a">128</text>
+<text x="611" y="936" text-anchor="middle" font-size="24" fill="#75786a">256</text>
+<text x="841" y="936" text-anchor="middle" font-size="24" fill="#75786a">384</text>
+<text x="1072" y="936" text-anchor="middle" font-size="24" fill="#75786a">512</text>
+<text x="620" y="978" text-anchor="middle" font-size="25" fill="#75786a">concurrent requests</text>
+
+<!-- SLO knee line -->
+<line x1="430" y1="380" x2="430" y2="900" stroke="#b04a3a" stroke-width="3" stroke-dasharray="10 6"/>
+<text x="445" y="412" font-size="25" font-weight="bold" fill="#b04a3a">SLO knee</text>
+<text x="445" y="444" font-size="24" fill="#75786a">TPOT p99 hits 50 ms</text>
+
+<!-- raw throughput -->
+<path d="M152 891 L265 804 L380 724 L496 644 L611 564 L726 484 L841 404 L956 329 L1072 260" fill="none" stroke="#c9973b" stroke-width="5"/>
+<!-- goodput -->
+<path d="M152 891 L265 804 L380 724 L420 706 L450 715 L496 793 L560 850 L611 873 L690 898" fill="none" stroke="#5b7c46" stroke-width="6"/>
+
+<!-- legend -->
+<line x1="180" y1="292" x2="240" y2="292" stroke="#c9973b" stroke-width="5"/>
+<text x="252" y="300" font-size="25" fill="#55584a">raw throughput</text>
+<line x1="180" y1="337" x2="240" y2="337" stroke="#5b7c46" stroke-width="6"/>
+<text x="252" y="345" font-size="25" fill="#55584a">goodput (TPOT p99 &lt; 50 ms)</text>
+
+<!-- markers -->
+<circle cx="152" cy="891" r="9" fill="#c9973b"/>
+<text x="240" y="891" font-size="24" font-weight="bold" fill="#7a5a20">A: 160</text>
+<circle cx="420" cy="706" r="9" fill="#5b7c46"/>
+<text x="398" y="680" text-anchor="end" font-size="25" font-weight="bold" fill="#5b7c46">B: goodput peak &#8776; 3,000</text>
+<circle cx="1072" cy="260" r="9" fill="#b06a4e"/>
+<text x="1044" y="248" text-anchor="end" font-size="24" font-weight="bold" fill="#8a5138">C: 12,000 raw, p99 blown</text>
+<text x="1080" y="878" text-anchor="end" font-size="24" fill="#8a5138">SLO violated</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-3</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">goodput beats headline</text>
+</svg>

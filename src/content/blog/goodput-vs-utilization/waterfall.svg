@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="50" font-weight="700" fill="#33362a">Where the compute goes</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">Hypothetical nonoverlapping losses; percentage points</text>
+
+  <!-- baseline -->
+  <line x1="100" y1="960" x2="1100" y2="960" stroke="#d8d4c4" stroke-width="4"/>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <!-- theoretical 100% h=660 top=300 -->
+    <rect x="120" y="300" width="150" height="660" rx="8" fill="#5b7c46"/>
+    <text x="195" y="270" text-anchor="middle" font-size="34" font-weight="700" fill="#5b7c46">100%</text>
+    <text x="195" y="1005" text-anchor="middle" font-size="24" font-weight="700" fill="#33362a">theoretical</text>
+    <text x="195" y="1035" text-anchor="middle" font-size="24" fill="#75786a">peak</text>
+
+    <!-- data stalls -25 → 75 h=495 top=465 -->
+    <rect x="330" y="300" width="150" height="165" rx="8" fill="#e5b3a6"/>
+    <rect x="330" y="465" width="150" height="495" rx="8" fill="#a8bf92"/>
+    <text x="405" y="270" text-anchor="middle" font-size="28" font-weight="700" fill="#b04a3a">−25%</text>
+    <text x="405" y="1005" text-anchor="middle" font-size="24" font-weight="700" fill="#33362a">data pipeline</text>
+    <text x="405" y="1035" text-anchor="middle" font-size="24" fill="#75786a">GPUs starved</text>
+
+    <!-- comm -20 → 55 h=363 top=597 -->
+    <rect x="540" y="465" width="150" height="132" rx="8" fill="#e5b3a6"/>
+    <rect x="540" y="597" width="150" height="363" rx="8" fill="#a8bf92"/>
+    <text x="615" y="435" text-anchor="middle" font-size="28" font-weight="700" fill="#b04a3a">−20%</text>
+    <text x="615" y="1005" text-anchor="middle" font-size="24" font-weight="700" fill="#33362a">communication</text>
+    <text x="615" y="1035" text-anchor="middle" font-size="24" fill="#75786a">sync waits</text>
+
+    <!-- failures -15 → 40 h=264 top=696 -->
+    <rect x="750" y="597" width="150" height="99" rx="8" fill="#e5b3a6"/>
+    <rect x="750" y="696" width="150" height="264" rx="8" fill="#a8bf92"/>
+    <text x="825" y="567" text-anchor="middle" font-size="28" font-weight="700" fill="#b04a3a">−15%</text>
+    <text x="825" y="1005" text-anchor="middle" font-size="24" font-weight="700" fill="#33362a">failures +</text>
+    <text x="825" y="1035" text-anchor="middle" font-size="24" fill="#75786a">restarts, stragglers</text>
+
+    <!-- goodput 40 h=264 -->
+    <rect x="950" y="696" width="150" height="264" rx="8" fill="#b06a4e"/>
+    <text x="1025" y="666" text-anchor="middle" font-size="34" font-weight="700" fill="#b06a4e">~40%</text>
+    <text x="1025" y="1005" text-anchor="middle" font-size="24" font-weight="700" fill="#33362a">goodput</text>
+    <text x="1025" y="1035" text-anchor="middle" font-size="24" fill="#75786a">useful work</text>
+  </g>
+
+  <line x1="80" y1="1090" x2="1120" y2="1090" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">AI Performance · intro-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">illustration, not a measurement</text>
+</svg>

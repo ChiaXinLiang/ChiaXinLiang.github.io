@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Reading the report</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Mock Nsight Compute summary, classified by hand</text>
+
+  <!-- report card -->
+  <rect x="90" y="240" width="600" height="600" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+
+  <!-- highlight strips -->
+  <rect x="102" y="468" width="576" height="46" fill="#f0ddd0"/>   <!-- memory throughput line -->
+  <rect x="102" y="633" width="576" height="46" fill="#e7edd9"/>   <!-- waves line -->
+  <rect x="102" y="743" width="576" height="46" fill="#f0ddd0"/>   <!-- stall line -->
+
+  <text x="120" y="300" font-size="26" font-weight="bold" fill="#33362a">Kernel: rmsnorm_fp16</text>
+  <text x="120" y="355" font-size="25" fill="#55584a">Grid: 16,384 blocks x 256 thr</text>
+  <text x="120" y="410" font-size="25" fill="#55584a">Duration: 182 &#181;s</text>
+  <text x="120" y="445" font-size="25" fill="#55584a">SM Throughput: 23.4 %</text>
+  <text x="120" y="500" font-size="25" font-weight="bold" fill="#8a5138">Memory Throughput: 87.1 %</text>
+  <text x="120" y="555" font-size="25" fill="#55584a">DRAM Throughput: 87.1 %</text>
+  <text x="120" y="610" font-size="25" fill="#55584a">Achieved Occupancy: 61.2 %</text>
+  <text x="120" y="665" font-size="25" font-weight="bold" fill="#5b7c46">Waves per SM: ~62</text>
+  <text x="120" y="720" font-size="25" fill="#55584a">Warp Cyc / Issued Instr: 38.7</text>
+  <text x="120" y="775" font-size="25" font-weight="bold" fill="#8a5138">Stall: Long Scoreboard 63 %</text>
+
+  <!-- annotations -->
+  <line x1="700" y1="437" x2="756" y2="420" stroke="#75786a" stroke-width="3"/>
+  <text x="770" y="410" font-size="25" fill="#55584a">SM mostly idle: this is</text>
+  <text x="770" y="443" font-size="25" fill="#55584a">not a compute problem</text>
+
+  <line x1="700" y1="492" x2="756" y2="520" stroke="#b06a4e" stroke-width="3"/>
+  <text x="770" y="518" font-size="25" font-weight="bold" fill="#8a5138">HBM near peak:</text>
+  <text x="770" y="551" font-size="25" fill="#55584a">bandwidth is the limiter,</text>
+  <text x="770" y="584" font-size="25" fill="#55584a">2.95 of 3.35 TB/s (88%)</text>
+
+  <line x1="700" y1="656" x2="756" y2="660" stroke="#5b7c46" stroke-width="3"/>
+  <text x="770" y="653" font-size="25" font-weight="bold" fill="#5b7c46">Grid is plenty:</text>
+  <text x="770" y="686" font-size="25" fill="#55584a">rules out "underutilized"</text>
+
+  <line x1="700" y1="766" x2="756" y2="770" stroke="#b06a4e" stroke-width="3"/>
+  <text x="770" y="763" font-size="25" fill="#55584a">Warps wait on DRAM data,</text>
+  <text x="770" y="796" font-size="25" fill="#55584a">and DRAM is saturated: more</text>
+  <text x="770" y="829" font-size="25" fill="#55584a">parallelism buys nothing</text>
+
+  <!-- verdict band -->
+  <rect x="90" y="880" width="1020" height="80" rx="14" fill="#8a5138"/>
+  <text x="600" y="930" font-size="31" font-weight="bold" fill="#fdfbf4" text-anchor="middle">Verdict: MEMORY-BOUND &#8594; move fewer bytes (fusion)</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · ktune-1</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">two numbers, one verdict</text>
+</svg>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">Latency Hiding Saturates Early</text>
+  <text x="90" y="156" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">Memory throughput vs. occupancy, by per-thread ILP</text>
+
+  <!-- axes -->
+  <line x1="200" y1="300" x2="200" y2="870" stroke="#d8d4c4" stroke-width="3"/>
+  <line x1="200" y1="870" x2="1040" y2="870" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="90" y="270" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">% of peak HBM bandwidth</text>
+
+  <!-- x ticks -->
+  <text x="200" y="910" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">0%</text>
+  <text x="410" y="910" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">25%</text>
+  <text x="620" y="910" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">50%</text>
+  <text x="830" y="910" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">75%</text>
+  <text x="1040" y="910" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">100%</text>
+  <text x="620" y="948" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">occupancy (resident warps out of 64)</text>
+
+  <!-- bandwidth ceiling -->
+  <line x1="200" y1="325" x2="1040" y2="325" stroke="#a3a08f" stroke-width="2.5" stroke-dasharray="10 8"/>
+  <text x="1030" y="312" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">bandwidth ceiling</text>
+
+  <!-- 25% marker -->
+  <line x1="410" y1="330" x2="410" y2="870" stroke="#a3a08f" stroke-width="2" stroke-dasharray="4 8"/>
+
+  <!-- curves -->
+  <path d="M 200,860 C 260,520 320,375 420,337 L 1040,337" fill="none" stroke="#5b7c46" stroke-width="6"/>
+  <path d="M 200,860 C 300,610 420,430 620,350 L 1040,348" fill="none" stroke="#c9973b" stroke-width="6"/>
+  <path d="M 200,860 C 380,700 600,500 900,392 C 950,378 1000,368 1040,364" fill="none" stroke="#b06a4e" stroke-width="6"/>
+
+  <!-- legend -->
+  <line x1="640" y1="572" x2="690" y2="572" stroke="#5b7c46" stroke-width="6"/>
+  <text x="700" y="580" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">4 independent loads per thread</text>
+  <line x1="640" y1="627" x2="690" y2="627" stroke="#c9973b" stroke-width="6"/>
+  <text x="700" y="635" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">2 independent loads per thread</text>
+  <line x1="640" y1="682" x2="690" y2="682" stroke="#b06a4e" stroke-width="6"/>
+  <text x="700" y="690" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">1 load per thread</text>
+
+  <!-- annotation -->
+  <text x="425" y="770" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">with 4 loads in flight per thread,</text>
+  <text x="425" y="802" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">25% occupancy saturates bandwidth</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">After Volkov, GTC 2010</text>
+  <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · exec-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">warps are a means</text>
+</svg>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="50" font-weight="700" fill="#33362a">The pipeline: laundry for instructions</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">F = fetch · D = decode · E = execute</text>
+
+  <g font-family="Helvetica Neue, Arial, sans-serif" font-size="30">
+    <!-- column headers: ticks 1..6 at x = 320 + (t-1)*130, cell w=110 -->
+    <text x="375" y="270" text-anchor="middle" font-weight="700" fill="#75786a">t1</text>
+    <text x="505" y="270" text-anchor="middle" font-weight="700" fill="#75786a">t2</text>
+    <text x="635" y="270" text-anchor="middle" font-weight="700" fill="#75786a">t3</text>
+    <text x="765" y="270" text-anchor="middle" font-weight="700" fill="#75786a">t4</text>
+    <text x="895" y="270" text-anchor="middle" font-weight="700" fill="#75786a">t5</text>
+    <text x="1025" y="270" text-anchor="middle" font-weight="700" fill="#75786a">t6</text>
+
+    <!-- rows: instr 1..4 at y = 300 + (i-1)*140, cell h=110 -->
+    <text x="180" y="370" font-weight="700" fill="#33362a">instr 1</text>
+    <rect x="320" y="300" width="110" height="110" rx="10" fill="#e7edd9"/><text x="375" y="368" text-anchor="middle" fill="#5b7c46" font-weight="700">F</text>
+    <rect x="450" y="300" width="110" height="110" rx="10" fill="#f0ddd0"/><text x="505" y="368" text-anchor="middle" fill="#b06a4e" font-weight="700">D</text>
+    <rect x="580" y="300" width="110" height="110" rx="10" fill="#f7ecd2"/><text x="635" y="368" text-anchor="middle" fill="#c9973b" font-weight="700">E</text>
+
+    <text x="180" y="510" font-weight="700" fill="#33362a">instr 2</text>
+    <rect x="450" y="440" width="110" height="110" rx="10" fill="#e7edd9"/><text x="505" y="508" text-anchor="middle" fill="#5b7c46" font-weight="700">F</text>
+    <rect x="580" y="440" width="110" height="110" rx="10" fill="#f0ddd0"/><text x="635" y="508" text-anchor="middle" fill="#b06a4e" font-weight="700">D</text>
+    <rect x="710" y="440" width="110" height="110" rx="10" fill="#f7ecd2"/><text x="765" y="508" text-anchor="middle" fill="#c9973b" font-weight="700">E</text>
+
+    <text x="180" y="650" font-weight="700" fill="#33362a">instr 3</text>
+    <rect x="580" y="580" width="110" height="110" rx="10" fill="#e7edd9"/><text x="635" y="648" text-anchor="middle" fill="#5b7c46" font-weight="700">F</text>
+    <rect x="710" y="580" width="110" height="110" rx="10" fill="#f0ddd0"/><text x="765" y="648" text-anchor="middle" fill="#b06a4e" font-weight="700">D</text>
+    <rect x="840" y="580" width="110" height="110" rx="10" fill="#f7ecd2"/><text x="895" y="648" text-anchor="middle" fill="#c9973b" font-weight="700">E</text>
+
+    <text x="180" y="790" font-weight="700" fill="#33362a">instr 4</text>
+    <rect x="710" y="720" width="110" height="110" rx="10" fill="#e7edd9"/><text x="765" y="788" text-anchor="middle" fill="#5b7c46" font-weight="700">F</text>
+    <rect x="840" y="720" width="110" height="110" rx="10" fill="#f0ddd0"/><text x="895" y="788" text-anchor="middle" fill="#b06a4e" font-weight="700">D</text>
+    <rect x="970" y="720" width="110" height="110" rx="10" fill="#f7ecd2"/><text x="1025" y="788" text-anchor="middle" fill="#c9973b" font-weight="700">E</text>
+  </g>
+
+  <!-- completion markers -->
+  <text x="600" y="920" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" fill="#55584a">from t3 on, one instruction finishes EVERY tick —</text>
+  <text x="600" y="962" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" font-weight="700" fill="#b06a4e">latency per instruction unchanged, throughput ×3</text>
+
+  <line x1="80" y1="1090" x2="1120" y2="1090" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">Comp Arch · arch-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">idealized three-stage example</text>
+</svg>

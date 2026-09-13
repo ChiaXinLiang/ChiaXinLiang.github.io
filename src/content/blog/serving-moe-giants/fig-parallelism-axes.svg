@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Four Axes, One Deployment</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">What each parallelism splits, and what it costs</text>
+
+  <!-- Row 1: TP -->
+  <text x="90" y="300" font-size="44" font-weight="bold" fill="#5b7c46">TP</text>
+  <text x="90" y="334" font-size="24" fill="#75786a">tensor parallel</text>
+  <rect x="300" y="250" width="60" height="100" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+  <rect x="360" y="250" width="60" height="100" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <rect x="420" y="250" width="60" height="100" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+  <rect x="480" y="250" width="60" height="100" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="330" y="307" font-size="22" fill="#33362a" text-anchor="middle">W0</text>
+  <text x="390" y="307" font-size="22" fill="#33362a" text-anchor="middle">W1</text>
+  <text x="450" y="307" font-size="22" fill="#33362a" text-anchor="middle">W2</text>
+  <text x="510" y="307" font-size="22" fill="#33362a" text-anchor="middle">W3</text>
+  <text x="420" y="386" font-size="23" fill="#55584a" text-anchor="middle">one matmul, 4 shards + all-reduce</text>
+  <text x="700" y="282" font-size="25" fill="#33362a">Splits every weight matrix.</text>
+  <text x="700" y="316" font-size="25" fill="#55584a">Prefers fast links; often in-node.</text>
+  <text x="700" y="350" font-size="25" fill="#55584a">Naive on MoE: sliver GEMMs.</text>
+
+  <!-- Row 2: EP -->
+  <text x="90" y="475" font-size="44" font-weight="bold" fill="#b06a4e">EP</text>
+  <text x="90" y="509" font-size="24" fill="#75786a">expert parallel</text>
+  <g stroke="#b06a4e" stroke-width="2">
+    <rect x="300" y="428" width="80" height="92" fill="#f0ddd0"/>
+    <rect x="395" y="428" width="80" height="92" fill="#f0ddd0"/>
+    <rect x="490" y="428" width="80" height="92" fill="#f0ddd0"/>
+    <rect x="585" y="428" width="80" height="92" fill="#f0ddd0"/>
+  </g>
+  <text x="340" y="465" font-size="22" fill="#33362a" text-anchor="middle">E0–3</text>
+  <text x="435" y="465" font-size="22" fill="#33362a" text-anchor="middle">E4–7</text>
+  <text x="530" y="465" font-size="22" fill="#33362a" text-anchor="middle">E8–11</text>
+  <text x="625" y="465" font-size="22" fill="#33362a" text-anchor="middle">E12–15</text>
+  <text x="340" y="500" font-size="20" fill="#75786a" text-anchor="middle">G0</text>
+  <text x="435" y="500" font-size="20" fill="#75786a" text-anchor="middle">G1</text>
+  <text x="530" y="500" font-size="20" fill="#75786a" text-anchor="middle">G2</text>
+  <text x="625" y="500" font-size="20" fill="#75786a" text-anchor="middle">G3</text>
+  <text x="482" y="556" font-size="23" fill="#55584a" text-anchor="middle">whole experts; tokens travel</text>
+  <text x="700" y="457" font-size="25" fill="#33362a">Splits the expert set.</text>
+  <text x="700" y="491" font-size="25" fill="#55584a">GEMMs stay full-width.</text>
+  <text x="700" y="525" font-size="25" fill="#55584a">Cost: all-to-all dispatch.</text>
+
+  <!-- Row 3: PP -->
+  <text x="90" y="650" font-size="44" font-weight="bold" fill="#7a5a20">PP</text>
+  <text x="90" y="684" font-size="24" fill="#75786a">pipeline parallel</text>
+  <g stroke="#c9973b" stroke-width="2">
+    <rect x="300" y="608" width="110" height="76" fill="#f7ecd2"/>
+    <rect x="455" y="608" width="110" height="76" fill="#f7ecd2"/>
+    <rect x="610" y="608" width="110" height="76" fill="#f7ecd2"/>
+  </g>
+  <text x="355" y="654" font-size="22" fill="#33362a" text-anchor="middle">L1–20</text>
+  <text x="510" y="654" font-size="22" fill="#33362a" text-anchor="middle">L21–40</text>
+  <text x="665" y="654" font-size="22" fill="#33362a" text-anchor="middle">L41–61</text>
+  <line x1="410" y1="646" x2="453" y2="646" stroke="#7a5a20" stroke-width="3"/>
+  <path d="M 453 646 l -10 -6 v 12 z" fill="#7a5a20"/>
+  <line x1="565" y1="646" x2="608" y2="646" stroke="#7a5a20" stroke-width="3"/>
+  <path d="M 608 646 l -10 -6 v 12 z" fill="#7a5a20"/>
+  <text x="510" y="724" font-size="23" fill="#55584a" text-anchor="middle">activations hop stage to stage</text>
+  <text x="750" y="632" font-size="25" fill="#33362a">Splits by layer.</text>
+  <text x="750" y="666" font-size="25" fill="#55584a">Cheap across nodes.</text>
+  <text x="750" y="700" font-size="25" fill="#55584a">Cost: pipeline bubbles.</text>
+
+  <!-- Row 4: DP -->
+  <text x="90" y="825" font-size="44" font-weight="bold" fill="#75786a">DP</text>
+  <text x="90" y="859" font-size="24" fill="#75786a">data parallel</text>
+  <rect x="320" y="782" width="150" height="90" fill="#f4f1e6" stroke="#a3a08f" stroke-width="2"/>
+  <rect x="520" y="782" width="150" height="90" fill="#f4f1e6" stroke="#a3a08f" stroke-width="2"/>
+  <text x="395" y="822" font-size="22" fill="#33362a" text-anchor="middle">replica 0</text>
+  <text x="595" y="822" font-size="22" fill="#33362a" text-anchor="middle">replica 1</text>
+  <text x="395" y="850" font-size="20" fill="#75786a" text-anchor="middle">full stack</text>
+  <text x="595" y="850" font-size="20" fill="#75786a" text-anchor="middle">full stack</text>
+  <text x="495" y="908" font-size="23" fill="#55584a" text-anchor="middle">clone everything, split traffic</text>
+  <text x="750" y="806" font-size="25" fill="#33362a">Clones the deployment.</text>
+  <text x="750" y="840" font-size="25" fill="#55584a">Ideal independent scaling.</text>
+  <text x="750" y="874" font-size="25" fill="#55584a">Cost: memory per replica.</text>
+
+  <text x="600" y="948" font-size="26" font-weight="bold" fill="#33362a" text-anchor="middle">DeepSeek-V3 decode unit: TP4 + DP80 attention, EP320 experts</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · scale-3</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">compose, don't choose</text>
+</svg>

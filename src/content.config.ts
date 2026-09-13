@@ -15,7 +15,7 @@ const blog = defineCollection({
 			// pubDate, which is the date the article was uploaded to the blog.
 			linkedinDate: z.coerce.date().optional(),
 			heroImage: z.optional(image()),
-			series: z.enum(['llm-basics', 'ai-performance', 'efficient-ai', 'comp-arch']).optional(),
+			series: z.enum(['llm-basics', 'ai-performance', 'efficient-ai', 'comp-arch', 'llm-architectures']).optional(),
 			// article code in content.db (e.g. 'nn-1') — lets `tools/content sync` auto-track status
 			code: z.string().optional(),
 			// reading order within the series (drives series-page sorting)

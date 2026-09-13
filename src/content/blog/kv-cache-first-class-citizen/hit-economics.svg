@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Prompt, Ten Thousand Requests</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">70B GQA model, 2,000-token shared prefix, H100-class GPU</text>
+
+  <text x="90" y="260" font-size="30" font-weight="bold" fill="#33362a">Time to make the prefix KV available (one request)</text>
+
+  <text x="90" y="310" font-size="26" fill="#55584a">recompute prefill (280 TFLOPs)</text>
+  <rect x="90" y="322" width="700" height="40" fill="#b04a3a"/>
+  <text x="805" y="350" font-size="26" font-weight="bold" fill="#33362a">&#8776; 560 ms</text>
+
+  <text x="90" y="402" font-size="26" fill="#55584a">fetch 0.655 GB from local NVMe (&#8776; 6 GB/s)</text>
+  <rect x="90" y="414" width="137.5" height="40" fill="#c9973b"/>
+  <text x="245" y="442" font-size="26" font-weight="bold" fill="#33362a">&#8776; 110 ms</text>
+
+  <text x="90" y="494" font-size="26" fill="#55584a">fetch from peer GPU, 400G GPUDirect RDMA</text>
+  <rect x="90" y="506" width="16.5" height="40" fill="#a8bf92"/>
+  <text x="138" y="534" font-size="26" font-weight="bold" fill="#33362a">&#8776; 13 ms</text>
+
+  <text x="90" y="586" font-size="26" fill="#55584a">fetch from host DRAM, PCIe Gen5</text>
+  <rect x="90" y="598" width="12.5" height="40" fill="#5b7c46"/>
+  <text x="130" y="626" font-size="26" font-weight="bold" fill="#33362a">&#8776; 10 ms</text>
+
+  <text x="90" y="710" font-size="30" font-weight="bold" fill="#33362a">Prefill compute at 10,000 requests/hour</text>
+
+  <text x="90" y="760" font-size="26" fill="#55584a">no prefix cache (&#8776; 1.6 GPU-hours, every hour)</text>
+  <rect x="90" y="772" width="700" height="40" fill="#b04a3a"/>
+  <text x="805" y="800" font-size="26" font-weight="bold" fill="#33362a">&#8776; 5,600 GPU&#183;s</text>
+
+  <text x="90" y="852" font-size="26" fill="#55584a">prefix compute only (transfer costs excluded)</text>
+  <rect x="90" y="864" width="12.5" height="40" fill="#5b7c46"/>
+  <text x="130" y="892" font-size="26" font-weight="bold" fill="#33362a">&#8776; 0.6 GPU&#183;s</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; scale-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">stop paying twice</text>
+</svg>

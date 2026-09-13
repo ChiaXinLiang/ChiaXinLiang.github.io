@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Fewer warps, same bandwidth</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Little's law: warps needed per SM to saturate HBM share</text>
+
+  <!-- target note -->
+  <text x="90" y="250" font-size="26" fill="#55584a">Target: ~8.5 KB of loads in flight per SM</text>
+  <text x="90" y="286" font-size="24" fill="#75786a">(14 B/cycle x ~600-cycle DRAM latency, H100 SXM)</text>
+
+  <!-- hardware limit line: x = 380 + 64*9.71 = 1001 -->
+  <line x1="1001" y1="330" x2="1001" y2="810" stroke="#b04a3a" stroke-width="3" stroke-dasharray="12 8"/>
+  <text x="990" y="356" font-size="24" font-weight="bold" fill="#b04a3a" text-anchor="end">HW limit: 64 warps/SM</text>
+
+  <!-- row 1: scalar, 66 warps -->
+  <text x="90" y="425" font-size="26" font-weight="bold" fill="#33362a">scalar 4-B loads</text>
+  <text x="90" y="458" font-size="24" fill="#75786a">128 B in flight / warp</text>
+  <rect x="380" y="390" width="641" height="80" fill="#e5b3a6" stroke="#b04a3a" stroke-width="3"/>
+  <text x="990" y="442" font-size="30" font-weight="bold" fill="#b04a3a" text-anchor="end">66</text>
+  <text x="980" y="530" font-size="24" fill="#b04a3a" text-anchor="end">impossible: needs more warps than fit</text>
+
+  <!-- row 2: float4, 17 warps -->
+  <text x="90" y="625" font-size="26" font-weight="bold" fill="#33362a">float4 loads</text>
+  <text x="90" y="658" font-size="24" fill="#75786a">512 B in flight / warp</text>
+  <rect x="380" y="590" width="165" height="80" fill="#c9973b"/>
+  <text x="565" y="642" font-size="30" font-weight="bold" fill="#7a5a20">17</text>
+
+  <!-- row 3: float4 + unroll, 9 warps -->
+  <text x="90" y="785" font-size="26" font-weight="bold" fill="#33362a">float4 + unroll x2</text>
+  <text x="90" y="818" font-size="24" fill="#75786a">1,024 B in flight / warp</text>
+  <rect x="380" y="750" width="87" height="80" fill="#5b7c46"/>
+  <text x="487" y="802" font-size="30" font-weight="bold" fill="#5b7c46">9</text>
+  <text x="540" y="802" font-size="25" fill="#55584a">unrolling halves the warps needed</text>
+
+  <!-- axis -->
+  <line x1="380" y1="850" x2="1060" y2="850" stroke="#55584a" stroke-width="3"/>
+  <text x="380" y="890" font-size="24" fill="#75786a" text-anchor="middle">0</text>
+  <text x="720" y="890" font-size="24" fill="#75786a" text-anchor="middle">35</text>
+  <text x="1060" y="890" font-size="24" fill="#75786a" text-anchor="middle">70</text>
+  <text x="720" y="935" font-size="27" fill="#55584a" text-anchor="middle">warps needed per SM</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · ktune-1</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">ILP is currency too</text>
+</svg>

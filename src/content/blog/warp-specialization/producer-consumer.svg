@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">One SM as an Assembly Line</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Producer warps load, consumer warpgroups compute</text>
+
+  <defs>
+    <marker id="arrGreen" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#5b7c46"/>
+    </marker>
+    <marker id="arrTerra" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#b06a4e"/>
+    </marker>
+    <marker id="arrGrey" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#a3a08f"/>
+    </marker>
+  </defs>
+
+  <!-- Producer box -->
+  <rect x="90" y="330" width="280" height="240" rx="14" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="230" y="385" font-size="30" font-weight="bold" fill="#7a5a20" text-anchor="middle">Producer</text>
+  <text x="230" y="423" font-size="30" font-weight="bold" fill="#7a5a20" text-anchor="middle">warpgroup</text>
+  <text x="230" y="470" font-size="25" fill="#55584a" text-anchor="middle">issues TMA loads</text>
+  <text x="230" y="505" font-size="25" fill="#55584a" text-anchor="middle">no math at all</text>
+  <text x="230" y="545" font-size="25" fill="#75786a" text-anchor="middle">24-40 registers</text>
+
+  <!-- SMEM ring -->
+  <rect x="460" y="255" width="280" height="530" rx="14" fill="none" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="600" y="300" font-size="27" font-weight="bold" fill="#55584a" text-anchor="middle">Shared-memory ring</text>
+
+  <rect x="485" y="325" width="230" height="90" rx="10" fill="#e7edd9" stroke="#5b7c46" stroke-width="2.5"/>
+  <text x="600" y="363" font-size="25" fill="#33362a" text-anchor="middle">Stage 0 · 48 KB</text>
+  <text x="600" y="396" font-size="24" fill="#5b7c46" text-anchor="middle">full</text>
+
+  <rect x="485" y="435" width="230" height="90" rx="10" fill="#e7edd9" stroke="#5b7c46" stroke-width="2.5"/>
+  <text x="600" y="473" font-size="25" fill="#33362a" text-anchor="middle">Stage 1 · 48 KB</text>
+  <text x="600" y="506" font-size="24" fill="#5b7c46" text-anchor="middle">full</text>
+
+  <rect x="485" y="545" width="230" height="90" rx="10" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+  <text x="600" y="583" font-size="25" fill="#33362a" text-anchor="middle">Stage 2 · 48 KB</text>
+  <text x="600" y="616" font-size="24" fill="#7a5a20" text-anchor="middle">filling (TMA)</text>
+
+  <rect x="485" y="655" width="230" height="90" rx="10" fill="#f4f1e6" stroke="#a3a08f" stroke-width="2.5"/>
+  <text x="600" y="693" font-size="25" fill="#33362a" text-anchor="middle">Stage 3 · 48 KB</text>
+  <text x="600" y="726" font-size="24" fill="#75786a" text-anchor="middle">empty</text>
+
+  <!-- Consumer boxes -->
+  <rect x="830" y="300" width="280" height="180" rx="14" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="970" y="350" font-size="29" font-weight="bold" fill="#5b7c46" text-anchor="middle">Consumer wg A</text>
+  <text x="970" y="392" font-size="25" fill="#55584a" text-anchor="middle">WGMMA tensor cores</text>
+  <text x="970" y="427" font-size="25" fill="#75786a" text-anchor="middle">160-240 registers</text>
+
+  <rect x="830" y="520" width="280" height="180" rx="14" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="970" y="570" font-size="29" font-weight="bold" fill="#5b7c46" text-anchor="middle">Consumer wg B</text>
+  <text x="970" y="612" font-size="25" fill="#55584a" text-anchor="middle">WGMMA tensor cores</text>
+  <text x="970" y="647" font-size="25" fill="#75786a" text-anchor="middle">160-240 registers</text>
+
+  <!-- Arrows producer -> ring -->
+  <line x1="370" y1="430" x2="455" y2="430" stroke="#b06a4e" stroke-width="4" marker-end="url(#arrTerra)"/>
+  <text x="230" y="262" font-size="24" fill="#8a5138" text-anchor="middle">TMA copies go</text>
+  <text x="230" y="294" font-size="24" fill="#8a5138" text-anchor="middle">HBM to SMEM directly</text>
+  <text x="412" y="480" font-size="23" fill="#75786a" text-anchor="middle">arrive</text>
+  <text x="412" y="510" font-size="23" fill="#75786a" text-anchor="middle">"full"</text>
+
+  <!-- Arrows ring -> consumers -->
+  <line x1="740" y1="390" x2="825" y2="390" stroke="#5b7c46" stroke-width="4" marker-end="url(#arrGreen)"/>
+  <line x1="740" y1="610" x2="825" y2="610" stroke="#5b7c46" stroke-width="4" marker-end="url(#arrGreen)"/>
+  <text x="782" y="360" font-size="23" fill="#5b7c46" text-anchor="middle">wait</text>
+  <text x="782" y="580" font-size="23" fill="#5b7c46" text-anchor="middle">wait</text>
+
+  <!-- Empty arrow back -->
+  <path d="M 830 690 L 600 830 L 596 755" fill="none" stroke="#a3a08f" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#arrGrey)"/>
+  <text x="600" y="872" font-size="24" fill="#75786a" text-anchor="middle">arrive "empty" — stage reusable</text>
+
+  <!-- Epilogue bar -->
+  <rect x="830" y="820" width="280" height="80" rx="12" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="970" y="855" font-size="26" font-weight="bold" fill="#8a5138" text-anchor="middle">Epilogue warps</text>
+  <text x="970" y="888" font-size="24" fill="#8a5138" text-anchor="middle">TMA store to HBM</text>
+  <line x1="970" y1="700" x2="970" y2="813" stroke="#b06a4e" stroke-width="4" marker-end="url(#arrTerra)"/>
+
+  <!-- Note -->
+  <text x="230" y="640" font-size="24" fill="#75786a" text-anchor="middle">mbarriers count</text>
+  <text x="230" y="672" font-size="24" fill="#75786a" text-anchor="middle">TMA bytes landed,</text>
+  <text x="230" y="704" font-size="24" fill="#75786a" text-anchor="middle">not just arrivals</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Pattern of CUTLASS Hopper GEMMs and FlashAttention-3</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · ktune-3</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">every warp, one job</text>
+</svg>

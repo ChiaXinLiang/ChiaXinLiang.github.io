@@ -4,7 +4,7 @@ description: "The fixed-cost anatomy of an advanced-node chip: design teams, EDA
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'asic-3'
-order: 13
+order: 17
 series: 'comp-arch'
 topic: 'ASIC Design'
 tags: [asic, economics, silicon]

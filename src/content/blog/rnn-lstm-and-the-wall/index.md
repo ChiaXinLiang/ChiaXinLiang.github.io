@@ -2,6 +2,7 @@
 title: 'RNN and LSTM: How Machines Learned Sequences — and Why They Hit a Wall'
 description: "Recurrent networks read text the way you do: one word at a time, carrying a memory. That design worked — until its two flaws collided with the age of scale."
 pubDate: 'Sep 12 2026'
+updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'arch-2'
 order: 4
@@ -10,9 +11,9 @@ topic: 'Neural Networks'
 tags: ['rnn', 'lstm', 'sequences']
 ---
 
-Before 2017, the state of the art in machine translation read a sentence the same way you do: left to right, one word at a time, updating a running memory. Then the field threw that entire design away — deliberately.
+Before 2017, the state of the art in machine translation read a sentence the same way you do: left to right, one word at a time, updating a running memory. Attention-based models later became prominent for large-scale translation and language modeling.
 
-This article covers recurrent networks: the architecture that first made machines competent at language, the clever patch (LSTM) that kept it alive for twenty years, and the two structural flaws that eventually killed it. Understanding *why it died* is the setup for understanding why the Transformer looks the way it does.
+This article covers recurrent networks: the architecture that first made machines competent at language, the clever patch (LSTM) that kept it alive for twenty years, and the structural limitations that motivated highly parallel alternatives. Understanding these limitations is the setup for understanding why the Transformer looks the way it does.
 
 ## Sequences need memory
 
@@ -83,11 +84,38 @@ The setting was 2014 translation systems, which worked by having one LSTM squeez
 
 For three years the field ran hybrids: recurrence for the backbone, attention for the long-range lookups. The 2017 insight was noticing which half was pulling the weight. If attention handles the relationships, what exactly is the recurrence *for*? Delete it, keep attention, and the sequential wall goes with it — the title "Attention Is All You Need" is literally a verdict on this question. Architecture history rarely moves in clean breaks; the revolution shipped as a bug-fix first.
 
+## Write the recurrence and see the dependency
+
+A simple recurrent layer computes
+
+$$
+h_t=\tanh(W_xx_t+W_hh_{t-1}+b).
+$$
+
+Here $$x_t$$ is the input vector at time t, $$h_t$$ is the hidden state, the two W matrices are learned weights, and b is a bias. The state at time t depends on the previous state, so ordinary evaluation follows the sequence. Multiple independent sequences and matrix operations inside a step can still be parallelized; recurrence does not mean the whole program runs on one scalar unit.
+
+For a scalar illustrative recurrence with input one, recurrent weight 0.5, input weight one, zero bias, and initial state zero, the first state is tanh(1), approximately 0.7616. The second is tanh(1+0.5×0.7616), approximately 0.8811. Even this toy computation cannot obtain the second state without the first.
+
+During training, gradients connecting distant positions contain products of local derivatives. Repeated small factors can shrink a signal; larger factors can amplify it. LSTM introduces an additive cell-state path controlled by gates, which can preserve gradients more effectively. It improves a mechanism rather than guaranteeing perfect memory for any sequence length.
+
+Recurrent models did not disappear. They remain useful for streaming workloads and appear in newer state-space and hybrid designs. The relevant comparison is which dependencies and state representations fit a task and hardware budget, rather than declaring one architecture permanently dead.
+
+## Match state to the streaming task
+
+For an online sensor model, a fixed-size recurrent state can be an advantage: each new measurement updates a bounded vector rather than retaining every earlier activation for inference. Training through an entire sequence still has a separate memory cost because gradient computation may need intermediate states.
+
+Truncated backpropagation limits how many time steps gradients traverse in one training segment. It can reduce training cost, but it also limits the direct optimization signal connecting distant positions. Carrying a hidden state across segments is not the same as propagating gradients across all those segments.
+
+For a fair comparison with cached attention, specify state size, sequence length, batch size, and the exact task. An RNN's fixed-dimensional state compresses the history; a conventional attention cache keeps more token-specific state and grows with context. Neither representation guarantees that all relevant information is retained. The tradeoff is between state budget, access mechanism, trainability, and useful predictions under the deployment constraints.
+
 ## Takeaway
 
 - RNNs read sequences with a running memory (hidden state) — one cell, reused across time. It made machines competent at language for two decades.
 - Flaw one: long-range information and gradients fade over many steps (vanishing gradients); LSTM's gated express lane patched this well enough for translation-era systems.
 - Flaw two, the fatal one: strict step-by-step processing can't use parallel hardware — so RNNs couldn't ride the scaling wave. The replacement had to connect all words directly, all at once.
+
+
+A practical comparison should measure the complete task rather than only the recurrent cell. Hold the input representation, quality target, and evaluation split constant. Then report memory, latency, and accuracy separately. A compact streaming classifier and a general conversational model have different requirements, so a result on one does not establish superiority on the other. For streaming work, also test state resets and unusually long sequences. A system can look accurate on independent examples while drifting when hidden state carries across a continuous stream. Reset policy is therefore part of the model specification and its deployment contract.
 
 ## Sources
 

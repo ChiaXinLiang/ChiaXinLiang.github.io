@@ -4,7 +4,7 @@ description: "Your CPU bets on the outcome of every if-statement before it knows
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'arch-2'
-order: 2
+order: 6
 series: 'comp-arch'
 topic: 'CPU Fundamentals'
 tags: [cpu, branch-prediction, hardware]

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Six Variables Most Benchmarks Omit</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">any one of them moves tokens/sec by 2-100x</text>
+
+<!-- row 1 -->
+<rect x="90" y="240" width="495" height="215" rx="14" fill="#e7edd9" stroke="#d8d4c4" stroke-width="2"/>
+<text x="120" y="294" font-size="29" font-weight="bold" fill="#33362a">Concurrency / batch size</text>
+<text x="120" y="342" font-size="24" fill="#55584a">decode bandwidth is amortized</text>
+<text x="120" y="376" font-size="24" fill="#55584a">across the whole batch</text>
+<text x="120" y="424" font-size="24" font-weight="bold" fill="#5b7c46">swing: ~100x (batch 1 vs 512)</text>
+
+<rect x="615" y="240" width="495" height="215" rx="14" fill="#f0ddd0" stroke="#d8d4c4" stroke-width="2"/>
+<text x="645" y="294" font-size="29" font-weight="bold" fill="#33362a">Length ratio &amp; accounting</text>
+<text x="645" y="342" font-size="24" fill="#55584a">prefill tokens are cheap; total</text>
+<text x="645" y="376" font-size="24" fill="#55584a">vs output-only counting differs</text>
+<text x="645" y="424" font-size="24" font-weight="bold" fill="#8a5138">swing: ~10x</text>
+
+<!-- row 2 -->
+<rect x="90" y="475" width="495" height="215" rx="14" fill="#f7ecd2" stroke="#d8d4c4" stroke-width="2"/>
+<text x="120" y="529" font-size="29" font-weight="bold" fill="#33362a">Quantization</text>
+<text x="120" y="577" font-size="24" fill="#55584a">FP8 halves bytes streamed</text>
+<text x="120" y="611" font-size="24" fill="#55584a">per decode step vs BF16</text>
+<text x="120" y="659" font-size="24" font-weight="bold" fill="#7a5a20">swing: ~2x per format step</text>
+
+<rect x="615" y="475" width="495" height="215" rx="14" fill="#e7edd9" stroke="#d8d4c4" stroke-width="2"/>
+<text x="645" y="529" font-size="29" font-weight="bold" fill="#33362a">Warmup &amp; prefix caching</text>
+<text x="645" y="577" font-size="24" fill="#55584a">a cached prefill turns compute</text>
+<text x="645" y="611" font-size="24" fill="#55584a">into a table lookup</text>
+<text x="645" y="659" font-size="24" font-weight="bold" fill="#5b7c46">swing: 2-10x on repeated prompts</text>
+
+<!-- row 3 -->
+<rect x="90" y="710" width="495" height="215" rx="14" fill="#f0ddd0" stroke="#d8d4c4" stroke-width="2"/>
+<text x="120" y="764" font-size="29" font-weight="bold" fill="#33362a">Arrival: closed vs open loop</text>
+<text x="120" y="812" font-size="24" fill="#55584a">closed-loop clients slow down</text>
+<text x="120" y="846" font-size="24" fill="#55584a">with the server, hiding collapse</text>
+<text x="120" y="894" font-size="24" font-weight="bold" fill="#8a5138">tails silently understated</text>
+
+<rect x="615" y="710" width="495" height="215" rx="14" fill="#f7ecd2" stroke="#d8d4c4" stroke-width="2"/>
+<text x="645" y="764" font-size="29" font-weight="bold" fill="#33362a">Statistic: p50 / mean / p99</text>
+<text x="645" y="812" font-size="24" fill="#55584a">identical p50 can hide</text>
+<text x="645" y="846" font-size="24" fill="#55584a">a 5x gap at p99</text>
+<text x="645" y="894" font-size="24" font-weight="bold" fill="#7a5a20">users feel the tail</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-3</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">state every variable</text>
+</svg>

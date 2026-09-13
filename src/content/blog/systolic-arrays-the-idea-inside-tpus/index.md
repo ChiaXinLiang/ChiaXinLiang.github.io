@@ -4,7 +4,7 @@ description: "How a forty-year-old paper about data pulsing through a grid of mu
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'par-3'
-order: 9
+order: 13
 series: 'comp-arch'
 topic: 'Parallel Architectures'
 tags: [tpu, hardware, matmul]

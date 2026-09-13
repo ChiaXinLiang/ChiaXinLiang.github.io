@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">Anatomy of the KV Cache</text>
+  <text x="90" y="156" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">Per-token cost, with Llama-3-8B numbers plugged in</text>
+
+  <!-- formula factor boxes -->
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <!-- box 1 -->
+    <rect x="90" y="290" width="180" height="120" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <text x="180" y="345" text-anchor="middle" font-size="44" font-weight="bold" fill="#33362a">2</text>
+    <text x="180" y="385" text-anchor="middle" font-size="24" fill="#55584a">K and V</text>
+    <!-- x -->
+    <text x="285" y="365" text-anchor="middle" font-size="36" fill="#75786a">&#215;</text>
+    <!-- box 2 -->
+    <rect x="300" y="290" width="180" height="120" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <text x="390" y="345" text-anchor="middle" font-size="44" font-weight="bold" fill="#33362a">32</text>
+    <text x="390" y="385" text-anchor="middle" font-size="24" fill="#55584a">layers</text>
+    <!-- x -->
+    <text x="495" y="365" text-anchor="middle" font-size="36" fill="#75786a">&#215;</text>
+    <!-- box 3 -->
+    <rect x="510" y="290" width="180" height="120" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <text x="600" y="345" text-anchor="middle" font-size="44" font-weight="bold" fill="#33362a">8</text>
+    <text x="600" y="385" text-anchor="middle" font-size="24" fill="#55584a">KV heads</text>
+    <!-- x -->
+    <text x="705" y="365" text-anchor="middle" font-size="36" fill="#75786a">&#215;</text>
+    <!-- box 4 -->
+    <rect x="720" y="290" width="180" height="120" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <text x="810" y="345" text-anchor="middle" font-size="44" font-weight="bold" fill="#33362a">128</text>
+    <text x="810" y="385" text-anchor="middle" font-size="24" fill="#55584a">head dim</text>
+    <!-- x -->
+    <text x="915" y="365" text-anchor="middle" font-size="36" fill="#75786a">&#215;</text>
+    <!-- box 5 -->
+    <rect x="930" y="290" width="180" height="120" rx="12" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+    <text x="1020" y="345" text-anchor="middle" font-size="44" font-weight="bold" fill="#33362a">2 B</text>
+    <text x="1020" y="385" text-anchor="middle" font-size="24" fill="#55584a">FP16</text>
+  </g>
+
+  <text x="600" y="480" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="38" font-weight="bold" fill="#b06a4e">= 131,072 bytes &#8776; 131 KB per token</text>
+
+  <text x="600" y="530" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" fill="#75786a">GQA: 8 KV heads instead of 32 query heads already saves 4&#215;</text>
+
+  <!-- scaling cards -->
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <rect x="90" y="590" width="1020" height="88" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+    <text x="120" y="644" font-size="30" fill="#33362a">1 token</text>
+    <text x="1080" y="644" text-anchor="end" font-size="30" font-weight="bold" fill="#5b7c46">131 KB</text>
+
+    <line x1="600" y1="678" x2="600" y2="712" stroke="#a3a08f" stroke-width="3"/>
+    <path d="M 590 704 L 600 718 L 610 704" fill="none" stroke="#a3a08f" stroke-width="3"/>
+    <text x="625" y="708" font-size="25" fill="#75786a">&#215; 8,192-token context</text>
+
+    <rect x="90" y="726" width="1020" height="88" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+    <text x="120" y="780" font-size="30" fill="#33362a">1 sequence at 8k</text>
+    <text x="1080" y="780" text-anchor="end" font-size="30" font-weight="bold" fill="#c9973b">1.07 GB</text>
+
+    <line x1="600" y1="814" x2="600" y2="848" stroke="#a3a08f" stroke-width="3"/>
+    <path d="M 590 840 L 600 854 L 610 840" fill="none" stroke="#a3a08f" stroke-width="3"/>
+    <text x="625" y="844" font-size="25" fill="#75786a">&#215; 48 concurrent sequences</text>
+
+    <rect x="90" y="862" width="1020" height="88" rx="12" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+    <text x="120" y="916" font-size="30" fill="#33362a">KV cache for 48 sequences</text>
+    <text x="1080" y="916" text-anchor="end" font-size="30" font-weight="bold" fill="#8a5138">&#8776; 51 GB KV + 16 GB weights</text>
+  </g>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; gpumem-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">count the bytes first</text>
+</svg>

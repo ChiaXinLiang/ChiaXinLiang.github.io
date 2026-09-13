@@ -4,7 +4,7 @@ description: "How a few thousand lines of Verilog become billions of polygons on
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'asic-2'
-order: 12
+order: 16
 series: 'comp-arch'
 topic: 'ASIC Design'
 tags: ['asic', 'eda', 'chip-design']

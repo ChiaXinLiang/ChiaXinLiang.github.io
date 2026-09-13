@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Fusing the Epilogue</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">GEMM + bias + GELU, 67 MB output tensor (BF16)</text>
+
+  <!-- LEFT PANEL: unfused -->
+  <rect x="90" y="240" width="490" height="560" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="335" y="292" text-anchor="middle" font-size="30" font-weight="bold" fill="#8a5138">Unfused: 3 kernels</text>
+
+  <!-- pass rows -->
+  <rect x="120" y="320" width="430" height="70" rx="10" fill="#f0ddd0"/>
+  <text x="140" y="352" font-size="25" font-weight="bold" fill="#33362a">1&#183; GEMM writes C</text>
+  <text x="530" y="378" text-anchor="end" font-size="24" fill="#8a5138">67 MB to HBM</text>
+
+  <rect x="120" y="404" width="430" height="70" rx="10" fill="#f0ddd0"/>
+  <text x="140" y="436" font-size="25" font-weight="bold" fill="#33362a">2&#183; bias kernel reads C</text>
+  <text x="530" y="462" text-anchor="end" font-size="24" fill="#8a5138">67 MB from HBM</text>
+
+  <rect x="120" y="488" width="430" height="70" rx="10" fill="#f0ddd0"/>
+  <text x="140" y="520" font-size="25" font-weight="bold" fill="#33362a">3&#183; bias kernel writes C</text>
+  <text x="530" y="546" text-anchor="end" font-size="24" fill="#8a5138">67 MB to HBM</text>
+
+  <rect x="120" y="572" width="430" height="70" rx="10" fill="#f0ddd0"/>
+  <text x="140" y="604" font-size="25" font-weight="bold" fill="#33362a">4&#183; GELU kernel reads C</text>
+  <text x="530" y="630" text-anchor="end" font-size="24" fill="#8a5138">67 MB from HBM</text>
+
+  <rect x="120" y="656" width="430" height="70" rx="10" fill="#f0ddd0"/>
+  <text x="140" y="688" font-size="25" font-weight="bold" fill="#33362a">5&#183; GELU kernel writes C</text>
+  <text x="530" y="714" text-anchor="end" font-size="24" fill="#8a5138">67 MB to HBM</text>
+
+  <text x="335" y="775" text-anchor="middle" font-size="28" font-weight="bold" fill="#b04a3a">total: 335 MB, 5 passes</text>
+
+  <!-- RIGHT PANEL: fused -->
+  <rect x="620" y="240" width="490" height="560" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="865" y="292" text-anchor="middle" font-size="30" font-weight="bold" fill="#5b7c46">Fused: 1 kernel</text>
+
+  <rect x="650" y="320" width="430" height="238" rx="10" fill="#e7edd9"/>
+  <text x="670" y="360" font-size="25" font-weight="bold" fill="#33362a">GEMM main loop</text>
+  <text x="670" y="396" font-size="24" fill="#55584a">output tile stays in registers</text>
+  <text x="670" y="452" font-size="25" font-weight="bold" fill="#33362a">epilogue, on-chip:</text>
+  <text x="670" y="488" font-size="24" fill="#55584a">+ bias &#8594; GELU &#8594; store</text>
+  <text x="670" y="536" font-size="24" fill="#5b7c46">no HBM round trip in between</text>
+
+  <rect x="650" y="572" width="430" height="70" rx="10" fill="#a8bf92"/>
+  <text x="670" y="604" font-size="25" font-weight="bold" fill="#33362a">1&#183; kernel writes result</text>
+  <text x="1060" y="630" text-anchor="end" font-size="24" fill="#33362a">67 MB to HBM</text>
+
+  <text x="865" y="775" text-anchor="middle" font-size="28" font-weight="bold" fill="#5b7c46">total: 67 MB, 1 pass</text>
+
+  <!-- savings banner -->
+  <rect x="150" y="850" width="900" height="90" rx="14" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
+  <text x="600" y="888" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">268 MB of HBM traffic eliminated</text>
+  <text x="600" y="924" text-anchor="middle" font-size="25" fill="#55584a">&#8776; 80 &#181;s saved at 3.35 TB/s, a 22% speedup</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; ktune-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">write once, not five times</text>
+</svg>

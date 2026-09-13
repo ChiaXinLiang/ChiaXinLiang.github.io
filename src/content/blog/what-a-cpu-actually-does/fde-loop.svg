@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#55584a"/>
+    </marker>
+    <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c9973b"/>
+    </marker>
+  </defs>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="50" font-weight="700" fill="#33362a">The loop every computer runs</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">clocked ~4,000,000,000 times per second</text>
+
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <!-- PC -->
+    <rect x="110" y="380" width="220" height="140" rx="14" fill="#f4f1e6" stroke="#a3a08f" stroke-width="4"/>
+    <text x="220" y="440" text-anchor="middle" font-size="30" font-weight="700" fill="#33362a">program</text>
+    <text x="220" y="480" text-anchor="middle" font-size="30" font-weight="700" fill="#33362a">counter</text>
+
+    <line x1="330" y1="450" x2="400" y2="450" stroke="#55584a" stroke-width="5" marker-end="url(#a2)"/>
+
+    <!-- FETCH -->
+    <rect x="405" y="360" width="230" height="180" rx="14" fill="#e7edd9" stroke="#5b7c46" stroke-width="5"/>
+    <text x="520" y="430" text-anchor="middle" font-size="34" font-weight="700" fill="#5b7c46">FETCH</text>
+    <text x="520" y="475" text-anchor="middle" font-size="24" fill="#55584a">read instruction</text>
+    <text x="520" y="508" text-anchor="middle" font-size="24" fill="#55584a">from memory</text>
+
+    <line x1="635" y1="450" x2="705" y2="450" stroke="#55584a" stroke-width="5" marker-end="url(#a2)"/>
+
+    <!-- DECODE -->
+    <rect x="710" y="360" width="230" height="180" rx="14" fill="#f0ddd0" stroke="#b06a4e" stroke-width="5"/>
+    <text x="825" y="430" text-anchor="middle" font-size="34" font-weight="700" fill="#b06a4e">DECODE</text>
+    <text x="825" y="475" text-anchor="middle" font-size="24" fill="#55584a">what does this</text>
+    <text x="825" y="508" text-anchor="middle" font-size="24" fill="#55584a">number mean?</text>
+
+    <!-- EXECUTE below decode -->
+    <line x1="825" y1="540" x2="825" y2="620" stroke="#55584a" stroke-width="5" marker-end="url(#a2)"/>
+    <rect x="710" y="625" width="230" height="180" rx="14" fill="#f7ecd2" stroke="#c9973b" stroke-width="5"/>
+    <text x="825" y="695" text-anchor="middle" font-size="34" font-weight="700" fill="#c9973b">EXECUTE</text>
+    <text x="825" y="740" text-anchor="middle" font-size="24" fill="#55584a">ALU computes,</text>
+    <text x="825" y="773" text-anchor="middle" font-size="24" fill="#55584a">registers store</text>
+
+    <!-- loop back -->
+    <path d="M 710 715 C 400 715, 220 640, 220 525" fill="none" stroke="#c9973b" stroke-width="6" stroke-dasharray="16 10" marker-end="url(#a3)"/>
+    <text x="430" y="668" text-anchor="middle" font-size="27" font-weight="700" fill="#c9973b">next instruction address</text>
+
+    <text x="600" y="930" text-anchor="middle" font-size="30" fill="#55584a">a program is just a long list of numbers — this loop eats the list</text>
+  </g>
+
+  <line x1="80" y1="1090" x2="1120" y2="1090" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">Comp Arch · arch-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">fetch · decode · execute</text>
+</svg>

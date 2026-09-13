@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Throughput vs batch size</text>
+    <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Llama-3-8B &#183; FP16 &#183; one H100 &#183; 4K context (bandwidth model)</text>
+
+    <text x="225" y="262" font-size="24" fill="#75786a">Aggregate tokens/sec</text>
+
+    <!-- gridlines -->
+    <line x1="200" y1="734" x2="1100" y2="734" stroke="#e8e4d7" stroke-width="2"/>
+    <line x1="200" y1="617" x2="1100" y2="617" stroke="#e8e4d7" stroke-width="2"/>
+    <line x1="200" y1="501" x2="1100" y2="501" stroke="#e8e4d7" stroke-width="2"/>
+    <line x1="200" y1="384" x2="1100" y2="384" stroke="#e8e4d7" stroke-width="2"/>
+    <text x="188" y="742" text-anchor="end" font-size="24" fill="#a3a08f">1k</text>
+    <text x="188" y="625" text-anchor="end" font-size="24" fill="#a3a08f">2k</text>
+    <text x="188" y="509" text-anchor="end" font-size="24" fill="#a3a08f">3k</text>
+    <text x="188" y="392" text-anchor="end" font-size="24" fill="#a3a08f">4k</text>
+
+    <!-- bars: baseline 850, scale 0.1164 px per tok/s -->
+    <rect x="225" y="826" width="150" height="24" fill="#5b7c46"/>
+    <rect x="465" y="694" width="150" height="156" fill="#5b7c46"/>
+    <rect x="705" y="460" width="150" height="390" fill="#5b7c46"/>
+    <rect x="945" y="330" width="150" height="520" fill="#5b7c46"/>
+    <line x1="200" y1="850" x2="1100" y2="850" stroke="#d8d4c4" stroke-width="3"/>
+
+    <text x="300" y="800" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">203</text>
+    <text x="540" y="668" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">1,340</text>
+    <text x="780" y="434" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">3,351</text>
+    <text x="1020" y="304" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">4,468</text>
+
+    <!-- annotation -->
+    <text x="540" y="560" text-anchor="middle" font-size="25" fill="#8a5138">8&#215; the batch,</text>
+    <text x="540" y="594" text-anchor="middle" font-size="25" fill="#8a5138">+21% step time</text>
+
+    <!-- x labels -->
+    <text x="300" y="892" text-anchor="middle" font-size="28" font-weight="bold" fill="#55584a">B = 1</text>
+    <text x="540" y="892" text-anchor="middle" font-size="28" font-weight="bold" fill="#55584a">B = 8</text>
+    <text x="780" y="892" text-anchor="middle" font-size="28" font-weight="bold" fill="#55584a">B = 32</text>
+    <text x="1020" y="892" text-anchor="middle" font-size="28" font-weight="bold" fill="#55584a">B = 64</text>
+
+    <text x="300" y="928" text-anchor="middle" font-size="24" fill="#75786a">203 /req</text>
+    <text x="540" y="928" text-anchor="middle" font-size="24" fill="#75786a">167 /req</text>
+    <text x="780" y="928" text-anchor="middle" font-size="24" fill="#75786a">105 /req</text>
+    <text x="1020" y="928" text-anchor="middle" font-size="24" fill="#75786a">70 /req</text>
+
+    <text x="300" y="962" text-anchor="middle" font-size="24" fill="#b06a4e">4.9 ms/step</text>
+    <text x="540" y="962" text-anchor="middle" font-size="24" fill="#b06a4e">6.0 ms/step</text>
+    <text x="780" y="962" text-anchor="middle" font-size="24" fill="#b06a4e">9.6 ms/step</text>
+    <text x="1020" y="962" text-anchor="middle" font-size="24" fill="#b06a4e">14.3 ms/step</text>
+
+    <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+    <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Computed from HBM bandwidth math (3.35 TB/s)</text>
+    <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; opt-1</text>
+    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">batch until it bends</text>
+  </g>
+</svg>

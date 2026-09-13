@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Exposed vs. Hidden Communication</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Same bytes on the wire, 1.4&#215; faster when overlapped</text>
+
+  <!-- Row 1: no overlap -->
+  <text x="130" y="296" font-size="28" font-weight="bold" fill="#33362a">No overlap: communicate after backward</text>
+  <text x="1070" y="296" text-anchor="end" font-size="28" font-weight="bold" fill="#b04a3a">step = 18.7 s</text>
+
+  <rect x="130" y="320" width="221" height="70" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+  <text x="240" y="349" text-anchor="middle" font-size="24" fill="#33362a">forward</text>
+  <text x="240" y="379" text-anchor="middle" font-size="24" fill="#33362a">4.4 s</text>
+
+  <rect x="351" y="320" width="442" height="70" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="572" y="349" text-anchor="middle" font-size="24" fill="#33362a">backward</text>
+  <text x="572" y="379" text-anchor="middle" font-size="24" fill="#33362a">8.8 s</text>
+
+  <rect x="793" y="320" width="277" height="70" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="931" y="349" text-anchor="middle" font-size="24" fill="#8a5138">all-reduce 5.5 s</text>
+  <text x="931" y="379" text-anchor="middle" font-size="24" fill="#8a5138">(exposed)</text>
+
+  <!-- Row 2: overlapped -->
+  <text x="130" y="556" font-size="28" font-weight="bold" fill="#33362a">Overlap: buckets fly during backward</text>
+
+  <rect x="130" y="580" width="221" height="70" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+  <text x="240" y="609" text-anchor="middle" font-size="24" fill="#33362a">forward</text>
+  <text x="240" y="639" text-anchor="middle" font-size="24" fill="#33362a">4.4 s</text>
+
+  <rect x="351" y="580" width="442" height="70" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="572" y="609" text-anchor="middle" font-size="24" fill="#33362a">backward</text>
+  <text x="572" y="639" text-anchor="middle" font-size="24" fill="#33362a">8.8 s</text>
+
+  <text x="815" y="624" font-size="28" font-weight="bold" fill="#5b7c46">step = 13.3 s</text>
+
+  <!-- gradient buckets -->
+  <rect x="400" y="674" width="60" height="34" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <rect x="475" y="674" width="60" height="34" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <rect x="550" y="674" width="60" height="34" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <rect x="625" y="674" width="60" height="34" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <rect x="700" y="674" width="60" height="34" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="580" y="748" text-anchor="middle" font-size="24" fill="#8a5138">async all-reduce, one 25 MB bucket at a time</text>
+
+  <!-- summary -->
+  <text x="600" y="872" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">5.5 s on the wire, ~0 s exposed</text>
+  <text x="600" y="916" text-anchor="middle" font-size="26" fill="#55584a">70B model, 64 GPUs: 18.7 s &#8594; 13.3 s per step</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; net-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">keep the wire busy</text>
+</svg>

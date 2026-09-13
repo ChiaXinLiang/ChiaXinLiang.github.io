@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Three Quantization Targets</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">What you quantize decides what speeds up, and what breaks</text>
+
+  <!-- Column 1: WEIGHTS -->
+  <rect x="90" y="240" width="320" height="650" rx="14" fill="#e7edd9"/>
+  <rect x="90" y="240" width="320" height="110" rx="14" fill="#5b7c46"/>
+  <rect x="90" y="322" width="320" height="28" fill="#5b7c46"/>
+  <text x="250" y="292" text-anchor="middle" font-size="34" font-weight="bold" fill="#fdfbf4">WEIGHTS</text>
+  <text x="250" y="332" text-anchor="middle" font-size="24" fill="#fdfbf4">W4A16 / W8A16</text>
+  <text x="250" y="410" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">GPTQ &#183; AWQ</text>
+  <text x="250" y="452" text-anchor="middle" font-size="24" fill="#55584a">dequant inside matmul</text>
+  <text x="250" y="524" text-anchor="middle" font-size="24" font-weight="bold" fill="#5b7c46">GAIN</text>
+  <text x="250" y="566" text-anchor="middle" font-size="25" fill="#33362a">2&#8211;4&#215; fewer bytes</text>
+  <text x="250" y="608" text-anchor="middle" font-size="25" fill="#33362a">decode ceiling rises</text>
+  <text x="250" y="680" text-anchor="middle" font-size="24" font-weight="bold" fill="#5b7c46">LIMIT</text>
+  <text x="250" y="722" text-anchor="middle" font-size="25" fill="#33362a">math still runs FP16</text>
+  <text x="250" y="764" text-anchor="middle" font-size="25" fill="#33362a">prefill unchanged</text>
+  <rect x="150" y="810" width="200" height="54" rx="27" fill="#a8bf92"/>
+  <text x="250" y="846" text-anchor="middle" font-size="25" font-weight="bold" fill="#33362a">risk: low</text>
+
+  <!-- Column 2: ACTIVATIONS -->
+  <rect x="440" y="240" width="320" height="650" rx="14" fill="#f7ecd2"/>
+  <rect x="440" y="240" width="320" height="110" rx="14" fill="#c9973b"/>
+  <rect x="440" y="322" width="320" height="28" fill="#c9973b"/>
+  <text x="600" y="292" text-anchor="middle" font-size="34" font-weight="bold" fill="#fdfbf4">ACTIVATIONS</text>
+  <text x="600" y="332" text-anchor="middle" font-size="24" fill="#fdfbf4">W8A8 / FP8</text>
+  <text x="600" y="410" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">SmoothQuant &#183; FP8</text>
+  <text x="600" y="452" text-anchor="middle" font-size="24" fill="#55584a">tame outlier channels</text>
+  <text x="600" y="524" text-anchor="middle" font-size="24" font-weight="bold" fill="#7a5a20">GAIN</text>
+  <text x="600" y="566" text-anchor="middle" font-size="25" fill="#33362a">8-bit tensor cores</text>
+  <text x="600" y="608" text-anchor="middle" font-size="25" fill="#33362a">2&#215; FLOPS for prefill</text>
+  <text x="600" y="680" text-anchor="middle" font-size="24" font-weight="bold" fill="#7a5a20">LIMIT</text>
+  <text x="600" y="722" text-anchor="middle" font-size="25" fill="#33362a">20&#8211;100&#215; outliers</text>
+  <text x="600" y="764" text-anchor="middle" font-size="25" fill="#33362a">needs calibration</text>
+  <rect x="500" y="810" width="200" height="54" rx="27" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="600" y="846" text-anchor="middle" font-size="25" font-weight="bold" fill="#7a5a20">risk: medium</text>
+
+  <!-- Column 3: KV CACHE -->
+  <rect x="790" y="240" width="320" height="650" rx="14" fill="#f0ddd0"/>
+  <rect x="790" y="240" width="320" height="110" rx="14" fill="#b06a4e"/>
+  <rect x="790" y="322" width="320" height="28" fill="#b06a4e"/>
+  <text x="950" y="292" text-anchor="middle" font-size="34" font-weight="bold" fill="#fdfbf4">KV CACHE</text>
+  <text x="950" y="332" text-anchor="middle" font-size="24" fill="#fdfbf4">INT8 / FP8 / FP4</text>
+  <text x="950" y="410" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">per-block scaling</text>
+  <text x="950" y="452" text-anchor="middle" font-size="24" fill="#55584a">quantize K and V</text>
+  <text x="950" y="524" text-anchor="middle" font-size="24" font-weight="bold" fill="#8a5138">GAIN</text>
+  <text x="950" y="566" text-anchor="middle" font-size="25" fill="#33362a">2&#8211;4&#215; more seqs fit</text>
+  <text x="950" y="608" text-anchor="middle" font-size="25" fill="#33362a">bigger decode batches</text>
+  <text x="950" y="680" text-anchor="middle" font-size="24" font-weight="bold" fill="#8a5138">LIMIT</text>
+  <text x="950" y="722" text-anchor="middle" font-size="25" fill="#33362a">error grows with length</text>
+  <text x="950" y="764" text-anchor="middle" font-size="25" fill="#33362a">bites long reasoning</text>
+  <rect x="850" y="810" width="200" height="54" rx="27" fill="#e5b3a6"/>
+  <text x="950" y="846" text-anchor="middle" font-size="25" font-weight="bold" fill="#8a5138">risk: high</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; opt-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">quantize the bottleneck</text>
+</svg>

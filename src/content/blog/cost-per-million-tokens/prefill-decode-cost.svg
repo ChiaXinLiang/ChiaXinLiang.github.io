@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Why Output Tokens Cost 3–5x More</text>
+    <text x="90" y="156" font-size="30" fill="#75786a">One prompt pass amortizes; every output token pays full freight</text>
+
+    <!-- Model weights block -->
+    <rect x="830" y="300" width="270" height="560" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+    <text x="965" y="545" text-anchor="middle" font-size="34" font-weight="bold" fill="#55584a">MODEL</text>
+    <text x="965" y="590" text-anchor="middle" font-size="34" font-weight="bold" fill="#55584a">WEIGHTS</text>
+    <text x="965" y="635" text-anchor="middle" font-size="26" fill="#75786a">~70 GB in HBM</text>
+
+    <!-- Prefill panel -->
+    <text x="90" y="288" font-size="32" font-weight="bold" fill="#5b7c46">PREFILL — the prompt</text>
+    <rect x="90" y="318" width="46" height="46" rx="5" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <rect x="146" y="318" width="46" height="46" rx="5" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <rect x="202" y="318" width="46" height="46" rx="5" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <rect x="258" y="318" width="46" height="46" rx="5" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <rect x="314" y="318" width="46" height="46" rx="5" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <rect x="370" y="318" width="46" height="46" rx="5" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <rect x="426" y="318" width="46" height="46" rx="5" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <rect x="482" y="318" width="46" height="46" rx="5" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
+    <line x1="548" y1="341" x2="788" y2="341" stroke="#5b7c46" stroke-width="10"/>
+    <polygon points="788,325 822,341 788,357" fill="#5b7c46"/>
+    <text x="90" y="430" font-size="27" fill="#33362a">All prompt tokens in one parallel pass over the weights</text>
+    <text x="90" y="472" font-size="26" fill="#75786a">Compute-bound · ~10,000+ prompt tok/s per GPU</text>
+
+    <line x1="90" y1="555" x2="780" y2="555" stroke="#e8e4d7" stroke-width="3"/>
+
+    <!-- Decode panel -->
+    <text x="90" y="628" font-size="32" font-weight="bold" fill="#b06a4e">DECODE — the answer</text>
+    <rect x="90" y="655" width="50" height="50" rx="5" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+    <text x="115" y="688" text-anchor="middle" font-size="24" fill="#8a5138">t1</text>
+    <line x1="150" y1="680" x2="796" y2="680" stroke="#b06a4e" stroke-width="4"/>
+    <polygon points="796,670 822,680 796,690" fill="#b06a4e"/>
+    <rect x="90" y="712" width="50" height="50" rx="5" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+    <text x="115" y="745" text-anchor="middle" font-size="24" fill="#8a5138">t2</text>
+    <line x1="150" y1="737" x2="796" y2="737" stroke="#b06a4e" stroke-width="4"/>
+    <polygon points="796,727 822,737 796,747" fill="#b06a4e"/>
+    <rect x="90" y="769" width="50" height="50" rx="5" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+    <text x="115" y="802" text-anchor="middle" font-size="24" fill="#8a5138">t3</text>
+    <line x1="150" y1="794" x2="796" y2="794" stroke="#b06a4e" stroke-width="4"/>
+    <polygon points="796,784 822,794 796,804" fill="#b06a4e"/>
+    <rect x="90" y="826" width="50" height="50" rx="5" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+    <text x="115" y="859" text-anchor="middle" font-size="24" fill="#8a5138">t4</text>
+    <line x1="150" y1="851" x2="796" y2="851" stroke="#b06a4e" stroke-width="4"/>
+    <polygon points="796,841 822,851 796,861" fill="#b06a4e"/>
+
+    <text x="90" y="915" font-size="27" fill="#33362a">Each output token re-reads all the weights, one at a time</text>
+    <text x="90" y="950" font-size="26" fill="#75786a">Bandwidth-bound · ~45 tok/s per stream on one H100</text>
+
+    <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+    <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-4</text>
+    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">prefill amortizes, decode pays</text>
+  </g>
+</svg>

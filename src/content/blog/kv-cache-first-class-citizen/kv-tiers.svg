@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The KV Cache Memory Hierarchy</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Hot in HBM, warm in DRAM, cold on NVMe</text>
+
+  <!-- RDMA label above peer link -->
+  <text x="355" y="238" text-anchor="middle" font-size="24" fill="#75786a">NIXL / GPUDirect RDMA</text>
+
+  <!-- peer GPU box -->
+  <rect x="90" y="255" width="220" height="110" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="200" y="303" text-anchor="middle" font-size="24" fill="#33362a">peer GPU HBM</text>
+  <text x="200" y="338" text-anchor="middle" font-size="24" fill="#75786a">(prefill node)</text>
+
+  <!-- double arrow peer <-> HBM -->
+  <line x1="322" y1="310" x2="388" y2="310" stroke="#a3a08f" stroke-width="3"/>
+  <polygon points="312,310 328,302 328,318" fill="#a3a08f"/>
+  <polygon points="398,310 382,302 382,318" fill="#a3a08f"/>
+
+  <!-- HBM tier -->
+  <rect x="400" y="250" width="400" height="140" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="600" y="305" text-anchor="middle" font-size="32" font-weight="bold" fill="#33362a">GPU HBM</text>
+  <text x="600" y="350" text-anchor="middle" font-size="26" fill="#55584a">80&#8211;288 GB &#183; 3&#8211;8 TB/s</text>
+
+  <!-- arrows HBM <-> DRAM -->
+  <line x1="520" y1="395" x2="520" y2="428" stroke="#a3a08f" stroke-width="3"/>
+  <polygon points="520,440 512,426 528,426" fill="#a3a08f"/>
+  <line x1="680" y1="435" x2="680" y2="402" stroke="#a3a08f" stroke-width="3"/>
+  <polygon points="680,390 672,404 688,404" fill="#a3a08f"/>
+
+  <!-- DRAM tier -->
+  <rect x="300" y="440" width="600" height="140" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="600" y="495" text-anchor="middle" font-size="32" font-weight="bold" fill="#33362a">Host DRAM</text>
+  <text x="600" y="540" text-anchor="middle" font-size="26" fill="#55584a">1&#8211;2 TB &#183; PCIe Gen5 &#8776; 64 GB/s</text>
+
+  <!-- arrows DRAM <-> NVMe -->
+  <line x1="520" y1="585" x2="520" y2="618" stroke="#a3a08f" stroke-width="3"/>
+  <polygon points="520,630 512,616 528,616" fill="#a3a08f"/>
+  <line x1="680" y1="625" x2="680" y2="592" stroke="#a3a08f" stroke-width="3"/>
+  <polygon points="680,580 672,594 688,594" fill="#a3a08f"/>
+
+  <!-- NVMe tier -->
+  <rect x="200" y="630" width="800" height="140" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="600" y="685" text-anchor="middle" font-size="32" font-weight="bold" fill="#33362a">NVMe / remote store</text>
+  <text x="600" y="730" text-anchor="middle" font-size="26" fill="#55584a">tens of TB &#183; 6&#8211;14 GB/s per drive</text>
+
+  <!-- right gauge -->
+  <line x1="1050" y1="290" x2="1050" y2="728" stroke="#a3a08f" stroke-width="3"/>
+  <polygon points="1050,742 1042,726 1058,726" fill="#a3a08f"/>
+  <text x="1030" y="480" text-anchor="end" font-size="24" fill="#75786a">bigger</text>
+  <text x="1030" y="530" text-anchor="end" font-size="24" fill="#75786a">slower</text>
+
+  <!-- notes -->
+  <text x="600" y="835" text-anchor="middle" font-size="26" fill="#55584a">Down-arrows evict cold prefixes; up-arrows promote hits</text>
+  <text x="600" y="885" text-anchor="middle" font-size="26" fill="#55584a">GPUDirect RDMA moves KV at &#8776; 50 GB/s per 400G NIC</text>
+  <text x="600" y="935" text-anchor="middle" font-size="26" font-weight="bold" fill="#5b7c46">Every tier clears the &#8776; 1.17 GB/s break-even vs recompute</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; scale-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">cold, cheap, still fast</text>
+</svg>

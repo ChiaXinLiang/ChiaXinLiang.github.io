@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">One .item(), one pipeline stall</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">CUDA is asynchronous — until Python asks for a value</text>
+
+  <!-- Panel A -->
+  <text x="90" y="285" font-size="30" font-weight="bold" fill="#55584a">A. Healthy loop: CPU runs ahead</text>
+  <text x="230" y="330" font-size="24" fill="#75786a">enqueue kernels (µs each)</text>
+  <text x="90" y="382" font-size="26" fill="#55584a">CPU</text>
+  <g fill="#f7ecd2" stroke="#c9973b" stroke-width="2">
+    <rect x="230" y="348" width="50" height="50"/><rect x="290" y="348" width="50" height="50"/>
+    <rect x="350" y="348" width="50" height="50"/><rect x="410" y="348" width="50" height="50"/>
+    <rect x="470" y="348" width="50" height="50"/><rect x="530" y="348" width="50" height="50"/>
+    <rect x="590" y="348" width="50" height="50"/><rect x="650" y="348" width="50" height="50"/>
+    <rect x="710" y="348" width="50" height="50"/><rect x="770" y="348" width="50" height="50"/>
+    <rect x="830" y="348" width="50" height="50"/><rect x="890" y="348" width="50" height="50"/>
+    <rect x="950" y="348" width="50" height="50"/><rect x="1010" y="348" width="50" height="50"/>
+  </g>
+  <text x="90" y="492" font-size="26" fill="#55584a">GPU</text>
+  <rect x="290" y="458" width="770" height="50" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="675" y="491" font-size="24" fill="#33362a" text-anchor="middle">executing — the queue never empties</text>
+
+  <!-- Panel B -->
+  <text x="90" y="605" font-size="30" font-weight="bold" fill="#55584a">B. loss.item() every step</text>
+  <line x1="530" y1="648" x2="530" y2="850" stroke="#b04a3a" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="545" y="648" font-size="24" fill="#b04a3a">.item() called here</text>
+  <text x="90" y="700" font-size="26" fill="#55584a">CPU</text>
+  <g fill="#f7ecd2" stroke="#c9973b" stroke-width="2">
+    <rect x="230" y="666" width="50" height="50"/><rect x="290" y="666" width="50" height="50"/>
+    <rect x="350" y="666" width="50" height="50"/><rect x="410" y="666" width="50" height="50"/>
+    <rect x="470" y="666" width="50" height="50"/>
+  </g>
+  <rect x="530" y="666" width="270" height="50" fill="#e5b3a6" stroke="#b04a3a" stroke-width="2"/>
+  <text x="665" y="699" font-size="24" fill="#33362a" text-anchor="middle">blocked on sync</text>
+  <g fill="#f7ecd2" stroke="#c9973b" stroke-width="2">
+    <rect x="810" y="666" width="50" height="50"/><rect x="870" y="666" width="50" height="50"/>
+    <rect x="930" y="666" width="50" height="50"/><rect x="990" y="666" width="50" height="50"/>
+  </g>
+  <text x="90" y="822" font-size="26" fill="#55584a">GPU</text>
+  <rect x="290" y="788" width="500" height="50" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="540" y="821" font-size="24" fill="#33362a" text-anchor="middle">drains the queue</text>
+  <rect x="800" y="788" width="180" height="50" fill="none" stroke="#b04a3a" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="890" y="821" font-size="24" fill="#b04a3a" text-anchor="middle">idle</text>
+  <rect x="990" y="788" width="70" height="50" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="890" y="905" font-size="26" fill="#b04a3a" text-anchor="middle">the bubble: GPU waits for Python</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · pt-1</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">Keep the queue full</text>
+</svg>

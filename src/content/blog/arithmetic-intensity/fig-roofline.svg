@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The Roofline Model</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">H100 SXM, BF16 tensor cores (schematic)</text>
+
+  <!-- plot area -->
+  <!-- axes -->
+  <line x1="180" y1="260" x2="180" y2="900" stroke="#75786a" stroke-width="3"/>
+  <line x1="180" y1="900" x2="1060" y2="900" stroke="#75786a" stroke-width="3"/>
+  <text x="180" y="240" font-size="26" fill="#55584a">attainable TFLOPS</text>
+  <text x="1060" y="945" text-anchor="end" font-size="26" fill="#55584a">arithmetic intensity (FLOP / byte)</text>
+
+  <!-- memory-bound shaded region under slope -->
+  <polygon points="180,900 700,340 700,900" fill="#f0ddd0" opacity="0.55"/>
+  <!-- compute-bound shaded region under flat roof -->
+  <polygon points="700,340 1060,340 1060,900 700,900" fill="#e7edd9" opacity="0.6"/>
+
+  <!-- bandwidth roof (slope) -->
+  <line x1="180" y1="900" x2="700" y2="340" stroke="#b06a4e" stroke-width="6"/>
+  <!-- compute roof (flat) -->
+  <line x1="700" y1="340" x2="1060" y2="340" stroke="#5b7c46" stroke-width="6"/>
+
+  <!-- ridge point dashed line -->
+  <line x1="700" y1="340" x2="700" y2="900" stroke="#a3a08f" stroke-width="3" stroke-dasharray="10 8"/>
+  <circle cx="700" cy="340" r="10" fill="#33362a"/>
+  <text x="716" y="875" font-size="26" font-weight="bold" fill="#55584a">ridge &#8776; 295 FLOP/byte</text>
+
+  <!-- roof labels -->
+  <text x="240" y="560" font-size="27" fill="#8a5138">bandwidth roof</text>
+  <text x="240" y="596" font-size="27" fill="#8a5138">3.35 TB/s</text>
+  <text x="880" y="310" text-anchor="middle" font-size="27" fill="#5b7c46">compute roof: 989 TFLOPS</text>
+
+  <!-- region labels -->
+  <text x="560" y="820" text-anchor="middle" font-size="25" fill="#b06a4e">memory-bound</text>
+  <text x="880" y="820" text-anchor="middle" font-size="25" fill="#5b7c46">compute-bound</text>
+
+  <!-- kernel points on the slope: line from (180,900) to (700,340) -->
+  <circle cx="232" cy="844" r="12" fill="#b04a3a"/>
+  <text x="256" y="852" font-size="26" fill="#33362a">decode GEMV, AI &#8776; 1</text>
+  <circle cx="290" cy="782" r="12" fill="#b04a3a"/>
+  <text x="314" y="790" font-size="26" fill="#33362a">bias+GELU kernel, AI &#8776; 4</text>
+  <!-- fused GEMM on flat roof -->
+  <circle cx="950" cy="340" r="12" fill="#5b7c46"/>
+  <text x="950" y="395" text-anchor="middle" font-size="26" fill="#33362a">fused GEMM, AI &#8776; 1,600</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Redrawn after Williams et al. (2009), CACM</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; ktune-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">feed the tensor cores</text>
+</svg>

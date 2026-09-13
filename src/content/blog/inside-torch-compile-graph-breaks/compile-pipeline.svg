@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The torch.compile Stack</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">From Python bytecode to Triton kernels</text>
+
+  <!-- pipeline boxes -->
+  <rect x="90" y="260" width="225" height="130" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="202" y="315" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">Python</text>
+  <text x="202" y="352" text-anchor="middle" font-size="24" fill="#55584a">bytecode</text>
+
+  <rect x="345" y="260" width="225" height="130" rx="10" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="457" y="315" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">TorchDynamo</text>
+  <text x="457" y="352" text-anchor="middle" font-size="24" fill="#55584a">FX graph + guards</text>
+
+  <rect x="600" y="260" width="225" height="130" rx="10" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <text x="712" y="315" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">AOTAutograd</text>
+  <text x="712" y="352" text-anchor="middle" font-size="24" fill="#55584a">fwd + bwd graphs</text>
+
+  <rect x="855" y="260" width="225" height="130" rx="10" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="967" y="315" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">TorchInductor</text>
+  <text x="967" y="352" text-anchor="middle" font-size="24" fill="#55584a">Triton kernels</text>
+
+  <!-- arrows between boxes -->
+  <line x1="315" y1="325" x2="337" y2="325" stroke="#75786a" stroke-width="4"/>
+  <path d="M337 317 L349 325 L337 333 Z" fill="#75786a"/>
+  <line x1="570" y1="325" x2="592" y2="325" stroke="#75786a" stroke-width="4"/>
+  <path d="M592 317 L604 325 L592 333 Z" fill="#75786a"/>
+  <line x1="825" y1="325" x2="847" y2="325" stroke="#75786a" stroke-width="4"/>
+  <path d="M847 317 L859 325 L847 333 Z" fill="#75786a"/>
+
+  <text x="600" y="450" text-anchor="middle" font-size="24" fill="#75786a">Guards checked on every call; cached code reruns when they pass</text>
+
+  <!-- lower panel -->
+  <text x="600" y="560" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">What one graph break does to a forward pass</text>
+
+  <!-- row 1: no breaks -->
+  <text x="90" y="655" font-size="26" fill="#55584a">no breaks</text>
+  <rect x="280" y="615" width="800" height="70" rx="8" fill="#a8bf92" stroke="#5b7c46" stroke-width="3"/>
+  <text x="680" y="658" text-anchor="middle" font-size="26" fill="#33362a">one compiled region &#183; fusion opportunities</text>
+
+  <!-- row 2: one break -->
+  <text x="90" y="775" font-size="26" fill="#55584a">one break</text>
+  <rect x="280" y="735" width="310" height="70" rx="8" fill="#a8bf92" stroke="#5b7c46" stroke-width="3"/>
+  <text x="435" y="778" text-anchor="middle" font-size="26" fill="#33362a">compiled #1</text>
+  <rect x="600" y="735" width="160" height="70" rx="8" fill="#e5b3a6" stroke="#b04a3a" stroke-width="3"/>
+  <text x="680" y="766" text-anchor="middle" font-size="24" fill="#33362a">eager</text>
+  <text x="680" y="794" text-anchor="middle" font-size="24" fill="#33362a">may sync</text>
+  <rect x="770" y="735" width="310" height="70" rx="8" fill="#a8bf92" stroke="#5b7c46" stroke-width="3"/>
+  <text x="925" y="778" text-anchor="middle" font-size="26" fill="#33362a">compiled #2</text>
+
+  <text x="600" y="880" text-anchor="middle" font-size="26" fill="#75786a">Boundary costs: lost fusion, resume; some operations also sync</text>
+  <text x="600" y="920" text-anchor="middle" font-size="26" fill="#75786a">Find every one: TORCH_LOGS="graph_breaks"</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; pt-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">keep the graph whole</text>
+</svg>

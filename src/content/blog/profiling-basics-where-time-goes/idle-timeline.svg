@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Decode Step Under nsys</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Mock trace: 8B model, batch 32, one H100 — 20 ms wall clock</text>
+
+  <!-- Legend -->
+  <rect x="140" y="232" width="36" height="24" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="188" y="252" font-size="24" fill="#55584a">GPU busy</text>
+  <rect x="330" y="232" width="36" height="24" fill="#e5b3a6" stroke="#b04a3a" stroke-width="2"/>
+  <text x="378" y="252" font-size="24" fill="#55584a">GPU idle (gap)</text>
+  <rect x="580" y="232" width="36" height="24" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="628" y="252" font-size="24" fill="#55584a">CPU busy</text>
+
+  <!-- CPU track -->
+  <text x="140" y="310" font-size="26" font-weight="bold" fill="#55584a">CPU thread</text>
+  <rect x="140" y="322" width="920" height="64" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <rect x="140" y="322" width="138" height="64" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="209" y="362" text-anchor="middle" font-size="24" fill="#7a5a20">schedule</text>
+  <rect x="531" y="322" width="57" height="64" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <rect x="841" y="322" width="58" height="64" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <rect x="945" y="322" width="115" height="64" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="1002" y="362" text-anchor="middle" font-size="24" fill="#7a5a20">sample</text>
+
+  <!-- GPU track -->
+  <text x="140" y="445" font-size="26" font-weight="bold" fill="#55584a">GPU (SMs)</text>
+  <rect x="140" y="458" width="920" height="64" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <rect x="140" y="458" width="138" height="64" fill="#e5b3a6" stroke="#b04a3a" stroke-width="2"/>
+  <rect x="278" y="458" width="253" height="64" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <rect x="531" y="458" width="57" height="64" fill="#e5b3a6" stroke="#b04a3a" stroke-width="2"/>
+  <rect x="588" y="458" width="253" height="64" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <rect x="841" y="458" width="58" height="64" fill="#e5b3a6" stroke="#b04a3a" stroke-width="2"/>
+  <rect x="899" y="458" width="46" height="64" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <rect x="945" y="458" width="115" height="64" fill="#e5b3a6" stroke="#b04a3a" stroke-width="2"/>
+
+  <!-- Gap callouts -->
+  <line x1="209" y1="522" x2="209" y2="558" stroke="#75786a" stroke-width="2"/>
+  <text x="209" y="588" text-anchor="middle" font-size="24" fill="#33362a">scheduler</text>
+  <text x="209" y="618" text-anchor="middle" font-size="24" fill="#75786a">3.0 ms</text>
+
+  <line x1="560" y1="522" x2="560" y2="558" stroke="#75786a" stroke-width="2"/>
+  <line x1="870" y1="522" x2="870" y2="558" stroke="#75786a" stroke-width="2"/>
+  <line x1="560" y1="558" x2="715" y2="558" stroke="#75786a" stroke-width="2"/>
+  <line x1="870" y1="558" x2="715" y2="558" stroke="#75786a" stroke-width="2"/>
+  <text x="715" y="588" text-anchor="middle" font-size="24" fill="#33362a">kernel-launch gaps</text>
+  <text x="715" y="618" text-anchor="middle" font-size="24" fill="#75786a">2.5 ms total</text>
+
+  <line x1="1002" y1="522" x2="1002" y2="648" stroke="#75786a" stroke-width="2"/>
+  <text x="1060" y="678" text-anchor="end" font-size="24" fill="#33362a">sampling sync (.item)</text>
+  <text x="1060" y="708" text-anchor="end" font-size="24" fill="#75786a">2.5 ms</text>
+
+  <!-- Axis -->
+  <line x1="140" y1="750" x2="1060" y2="750" stroke="#d8d4c4" stroke-width="2"/>
+  <line x1="140" y1="744" x2="140" y2="756" stroke="#a3a08f" stroke-width="2"/>
+  <line x1="370" y1="744" x2="370" y2="756" stroke="#a3a08f" stroke-width="2"/>
+  <line x1="600" y1="744" x2="600" y2="756" stroke="#a3a08f" stroke-width="2"/>
+  <line x1="830" y1="744" x2="830" y2="756" stroke="#a3a08f" stroke-width="2"/>
+  <line x1="1060" y1="744" x2="1060" y2="756" stroke="#a3a08f" stroke-width="2"/>
+  <text x="140" y="788" text-anchor="middle" font-size="24" fill="#75786a">0 ms</text>
+  <text x="370" y="788" text-anchor="middle" font-size="24" fill="#75786a">5</text>
+  <text x="600" y="788" text-anchor="middle" font-size="24" fill="#75786a">10</text>
+  <text x="830" y="788" text-anchor="middle" font-size="24" fill="#75786a">15</text>
+  <text x="1060" y="788" text-anchor="middle" font-size="24" fill="#75786a">20 ms</text>
+
+  <!-- Summary bar -->
+  <text x="140" y="855" font-size="28" font-weight="bold" fill="#33362a">Where the 20 ms went</text>
+  <rect x="140" y="875" width="552" height="56" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="416" y="911" text-anchor="middle" font-size="26" fill="#33362a">busy 12 ms (60%)</text>
+  <rect x="692" y="875" width="368" height="56" fill="#e5b3a6" stroke="#b04a3a" stroke-width="2"/>
+  <text x="876" y="911" text-anchor="middle" font-size="26" fill="#33362a">idle 8 ms (40%)</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">find the gaps first</text>
+</svg>

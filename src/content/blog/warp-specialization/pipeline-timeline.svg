@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The Pipeline Math: 8.5 vs 5.0 µs</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">8 K-slices per tile · load 0.5 µs · MMA 0.56 µs per stage</text>
+
+  <!-- Legend -->
+  <rect x="90" y="240" width="34" height="34" rx="6" fill="#f7ecd2" stroke="#c9973b" stroke-width="2.5"/>
+  <text x="138" y="266" font-size="26" fill="#55584a">TMA load (0.5 µs)</text>
+  <rect x="410" y="240" width="34" height="34" rx="6" fill="#a8bf92" stroke="#5b7c46" stroke-width="2.5"/>
+  <text x="458" y="266" font-size="26" fill="#55584a">Tensor-core MMA (0.56 µs)</text>
+
+  <!-- Monolithic -->
+  <text x="90" y="360" font-size="30" font-weight="bold" fill="#33362a">Monolithic kernel</text>
+  <text x="90" y="396" font-size="25" fill="#75786a">load, sync, compute, sync — serial every stage</text>
+
+  <!-- row y 430..500; start x=95; pair width 60 + 67 -->
+  <g stroke-width="2">
+    <rect x="95" y="430" width="60" height="70" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="155" y="430" width="67" height="70" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="222" y="430" width="60" height="70" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="282" y="430" width="67" height="70" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="349" y="430" width="60" height="70" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="409" y="430" width="67" height="70" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="476" y="430" width="60" height="70" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="536" y="430" width="67" height="70" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="603" y="430" width="60" height="70" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="663" y="430" width="67" height="70" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="730" y="430" width="60" height="70" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="790" y="430" width="67" height="70" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="857" y="430" width="60" height="70" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="917" y="430" width="67" height="70" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="984" y="430" width="60" height="70" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="1044" y="430" width="67" height="70" fill="#a8bf92" stroke="#5b7c46"/>
+  </g>
+  <line x1="1111" y1="415" x2="1111" y2="515" stroke="#b04a3a" stroke-width="3" stroke-dasharray="8 6"/>
+  <text x="1108" y="545" font-size="26" font-weight="bold" fill="#b04a3a" text-anchor="end">8.5 µs</text>
+  <text x="95" y="545" font-size="25" fill="#75786a">tensor cores busy only 53% of the time</text>
+
+  <!-- Specialized -->
+  <text x="90" y="680" font-size="30" font-weight="bold" fill="#33362a">Warp-specialized pipeline</text>
+  <text x="90" y="716" font-size="25" fill="#75786a">producer loads run underneath consumer MMAs</text>
+
+  <text x="95" y="778" font-size="24" fill="#7a5a20">Producer warps</text>
+  <!-- producer row y 792..852: 8 loads of 60 from x=95 -->
+  <g stroke-width="2">
+    <rect x="95" y="792" width="60" height="60" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="155" y="792" width="60" height="60" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="215" y="792" width="60" height="60" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="275" y="792" width="60" height="60" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="335" y="792" width="60" height="60" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="395" y="792" width="60" height="60" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="455" y="792" width="60" height="60" fill="#f7ecd2" stroke="#c9973b"/>
+    <rect x="515" y="792" width="60" height="60" fill="#f7ecd2" stroke="#c9973b"/>
+  </g>
+
+  <text x="95" y="898" font-size="24" fill="#5b7c46">Consumer warpgroups</text>
+  <!-- consumer row y 912..972: 8 MMAs of 67 from x=155 -->
+  <g stroke-width="2">
+    <rect x="155" y="912" width="67" height="60" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="222" y="912" width="67" height="60" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="289" y="912" width="67" height="60" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="356" y="912" width="67" height="60" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="423" y="912" width="67" height="60" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="490" y="912" width="67" height="60" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="557" y="912" width="67" height="60" fill="#a8bf92" stroke="#5b7c46"/>
+    <rect x="624" y="912" width="67" height="60" fill="#a8bf92" stroke="#5b7c46"/>
+  </g>
+  <line x1="695" y1="770" x2="695" y2="985" stroke="#5b7c46" stroke-width="3" stroke-dasharray="8 6"/>
+  <text x="715" y="940" font-size="26" font-weight="bold" fill="#5b7c46">5.0 µs — 1.7x faster</text>
+  <text x="715" y="975" font-size="24" fill="#75786a">cost per stage = max(load, MMA)</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">128x256 FP16 tile, K-slice 64, H100 per-SM budgets</text>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · ktune-3</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">overlap is free speed</text>
+</svg>

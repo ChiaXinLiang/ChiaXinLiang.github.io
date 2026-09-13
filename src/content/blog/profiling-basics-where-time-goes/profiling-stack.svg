@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Profile Top-Down</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Three tools, three questions — in this order</text>
+
+  <!-- Card 1 -->
+  <rect x="120" y="240" width="960" height="200" rx="16" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <circle cx="190" cy="340" r="34" fill="#fdfbf4" stroke="#5b7c46" stroke-width="3"/>
+  <text x="190" y="354" text-anchor="middle" font-size="40" font-weight="bold" fill="#5b7c46">1</text>
+  <text x="260" y="312" font-size="38" font-weight="bold" fill="#33362a">Nsight Systems (nsys)</text>
+  <text x="260" y="358" font-size="27" fill="#55584a">Where does the wall-clock time go?</text>
+  <text x="260" y="400" font-size="24" fill="#75786a">Whole-app timeline: CPU, CUDA API, GPU streams. Gaps = idle GPU</text>
+
+  <line x1="600" y1="444" x2="600" y2="462" stroke="#a3a08f" stroke-width="3"/>
+  <path d="M 590 460 L 600 470 L 610 460" fill="none" stroke="#a3a08f" stroke-width="3"/>
+
+  <!-- Card 2 -->
+  <rect x="120" y="474" width="960" height="200" rx="16" fill="#f7ecd2" stroke="#c9973b" stroke-width="3"/>
+  <circle cx="190" cy="574" r="34" fill="#fdfbf4" stroke="#c9973b" stroke-width="3"/>
+  <text x="190" y="588" text-anchor="middle" font-size="40" font-weight="bold" fill="#7a5a20">2</text>
+  <text x="260" y="546" font-size="38" font-weight="bold" fill="#33362a">Nsight Compute (ncu)</text>
+  <text x="260" y="592" font-size="27" fill="#55584a">Why is this specific kernel slow?</text>
+  <text x="260" y="634" font-size="24" fill="#75786a">Per-kernel counters: memory vs compute, occupancy, roofline</text>
+
+  <line x1="600" y1="678" x2="600" y2="696" stroke="#a3a08f" stroke-width="3"/>
+  <path d="M 590 694 L 600 704 L 610 694" fill="none" stroke="#a3a08f" stroke-width="3"/>
+
+  <!-- Card 3 -->
+  <rect x="120" y="708" width="960" height="200" rx="16" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <circle cx="190" cy="808" r="34" fill="#fdfbf4" stroke="#b06a4e" stroke-width="3"/>
+  <text x="190" y="822" text-anchor="middle" font-size="40" font-weight="bold" fill="#8a5138">3</text>
+  <text x="260" y="780" font-size="38" font-weight="bold" fill="#33362a">torch.profiler</text>
+  <text x="260" y="826" font-size="27" fill="#55584a">Which framework op launched that kernel?</text>
+  <text x="260" y="868" font-size="24" fill="#75786a">Maps GPU kernels back to Python operators and call stacks</text>
+
+  <text x="600" y="945" text-anchor="middle" font-size="26" fill="#55584a">Never skip layer 1: kernel wins cannot fix idle time</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">measure before you move</text>
+</svg>

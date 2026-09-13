@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Two Levers on Arithmetic Intensity</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">shrink the denominator, or reuse what you loaded</text>
+
+  <!-- LEFT PANEL: shrink bytes -->
+  <rect x="90" y="240" width="490" height="640" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="335" y="296" text-anchor="middle" font-size="32" font-weight="bold" fill="#8a5138">Lever 1: shrink the bytes</text>
+  <text x="335" y="336" text-anchor="middle" font-size="25" fill="#75786a">bytes per weight</text>
+
+  <!-- bars: max width 320 for 4 bytes -->
+  <text x="130" y="408" font-size="26" font-weight="bold" fill="#33362a">FP32</text>
+  <rect x="220" y="380" width="320" height="44" rx="8" fill="#b06a4e"/>
+  <text x="530" y="410" text-anchor="end" font-size="24" fill="#fdfbf4">4 B</text>
+
+  <text x="130" y="508" font-size="26" font-weight="bold" fill="#33362a">BF16</text>
+  <rect x="220" y="480" width="160" height="44" rx="8" fill="#c9973b"/>
+  <text x="392" y="510" font-size="24" fill="#55584a">2 B</text>
+
+  <text x="130" y="608" font-size="26" font-weight="bold" fill="#33362a">FP8</text>
+  <rect x="220" y="580" width="80" height="44" rx="8" fill="#a8bf92"/>
+  <text x="312" y="610" font-size="24" fill="#55584a">1 B</text>
+
+  <text x="130" y="708" font-size="26" font-weight="bold" fill="#33362a">FP4</text>
+  <rect x="220" y="680" width="40" height="44" rx="8" fill="#5b7c46"/>
+  <text x="272" y="710" font-size="24" fill="#55584a">0.5 B</text>
+
+  <text x="335" y="800" text-anchor="middle" font-size="26" font-weight="bold" fill="#5b7c46">same FLOPs, up to 8x intensity</text>
+  <text x="335" y="836" text-anchor="middle" font-size="24" fill="#75786a">helps most when memory-bound</text>
+
+  <!-- RIGHT PANEL: reuse bytes -->
+  <rect x="620" y="240" width="490" height="640" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="865" y="296" text-anchor="middle" font-size="32" font-weight="bold" fill="#5b7c46">Lever 2: reuse the bytes</text>
+  <text x="865" y="336" text-anchor="middle" font-size="25" fill="#75786a">GEMM tile reuse = BM&#183;BN / (BM+BN)</text>
+
+  <!-- bars: FLOP/byte 32, 64, 85 -> scale x3.4 -->
+  <text x="660" y="410" font-size="26" font-weight="bold" fill="#33362a">64 x 64</text>
+  <rect x="790" y="382" width="122" height="44" rx="8" fill="#a8bf92"/>
+  <text x="924" y="412" font-size="24" fill="#55584a">32 FLOP/B</text>
+
+  <text x="660" y="510" font-size="26" font-weight="bold" fill="#33362a">128 x 128</text>
+  <rect x="790" y="482" width="218" height="44" rx="8" fill="#5b7c46"/>
+  <text x="1020" y="512" font-size="24" fill="#55584a">64</text>
+
+  <text x="660" y="610" font-size="26" font-weight="bold" fill="#33362a">256 x 128</text>
+  <rect x="790" y="582" width="289" height="44" rx="8" fill="#33362a" opacity="0.75"/>
+  <text x="1060" y="612" text-anchor="end" font-size="24" fill="#fdfbf4">85</text>
+
+  <text x="660" y="690" font-size="25" fill="#55584a">tile size is capped by registers</text>
+  <text x="660" y="724" font-size="25" fill="#55584a">and shared memory per SM</text>
+
+  <text x="865" y="800" text-anchor="middle" font-size="26" font-weight="bold" fill="#5b7c46">then L2 reuse across blocks</text>
+  <text x="865" y="836" text-anchor="middle" font-size="24" fill="#75786a">fusion: reuse across ops, in registers</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; ktune-2</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">bytes are the budget</text>
+</svg>

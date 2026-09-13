@@ -2,6 +2,7 @@
 title: 'CNN: How Machines Learned to See'
 description: "A convolutional network reads images the way you'd search a photo with a magnifying glass — one small pattern at a time. Here's the idea that owned computer vision for a decade."
 pubDate: 'Sep 12 2026'
+updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'arch-1'
 order: 3
@@ -30,7 +31,7 @@ That window is called a **filter**, and it is just a tiny set of weights — a 3
 
 Two enormous wins fall out of this design:
 
-- **Weight sharing.** Nine weights cover the entire image, because the same filter is reused at every position. The million-weight problem collapses to dozens.
+- **Weight sharing.** In this single-channel, single-filter example, nine weights cover spatial positions, because the same filter is reused at every position. The million-weight problem collapses to dozens.
 - **Translation tolerance.** A cat ear activates the same filter wherever it appears. Learn once, detect anywhere.
 
 Nobody designs the filters, by the way. They're weights — [gradient descent and backprop](/blog/how-models-learn/) set them, exactly as before. Early filters reliably converge to edge and color detectors on their own.
@@ -65,7 +66,7 @@ patch A (uniform):     patch B (vertical edge):
 - **Patch A**: (+1×5+0×5−1×5) × 3 rows = **0**. Nothing to see.
 - **Patch B**: each row gives +1×9 + 0×9 − 1×0 = 9, total **27**. Strong response.
 
-This filter fires precisely where brightness drops from left to right — it is a *vertical-edge detector*, built from nine numbers. Rotate the weights 90° and you detect horizontal edges. Nobody chose these values in a real CNN: [gradient descent](/blog/how-models-learn/) discovers edge detectors (and color-blob detectors, and texture detectors) in the first layer of essentially every vision network ever trained, because edges are the most reusable evidence about what's in an image. When AlexNet's authors visualized their trained first-layer filters, the grid looked like a catalog of oriented edges and color patches — learned, not designed.
+This filter fires precisely where brightness drops from left to right — it is a *vertical-edge detector*, built from nine numbers. Rotate the weights 90° and you detect horizontal edges. Nobody chose these values in a real CNN: [gradient descent](/blog/how-models-learn/) discovers edge detectors (and color-blob detectors, and texture detectors) in the first layers of many image-trained convolutional networks, because edges are the most reusable evidence about what's in an image. When AlexNet's authors visualized their trained first-layer filters, the grid looked like a catalog of oriented edges and color patches — learned, not designed.
 
 ## Going deeper: pooling, stride, and the growing field of view
 
@@ -95,15 +96,40 @@ Hold that thought. In a few articles, we'll meet text — where the structure is
 
 There's a hardware subplot here that foreshadows this blog's other series. Convolution looks like a bespoke operation, but implementations unroll it into **giant matrix multiplications** — thousands of independent patch-times-filter products with no ordering constraints between them. That's precisely the workload GPUs were built for (originally to shade millions of independent pixels for games).
 
-The numbers behind the 2012 moment: AlexNet trained on **two consumer GTX 580 gaming cards** (~$500 each) for about six days. The authors estimated the same run on the CPUs of the day would have taken months — long enough that nobody would have bothered iterating. The experiment only became *runnable* because an architecture whose core op was embarrassingly parallel met a mass-market chip built for embarrassingly parallel math. Neither was designed for the other; the fit was luck, then strategy. NVIDIA noticed what its gaming chips were being used for, invested in CUDA and cuDNN for neural workloads, and a graphics company became the most valuable AI company on earth.
+The numbers behind the 2012 moment: AlexNet trained on **two consumer GTX 580 gaming cards** (with 3 GB memory each) for about six days. The authors estimated the same run on the CPUs of the day would have taken months — long enough that nobody would have bothered iterating. The experiment only became *runnable* because an architecture whose core op was embarrassingly parallel met mass-market parallel hardware with a general-purpose programming ecosystem. This fit helped establish GPUs as practical neural-network training hardware.
 
 Keep this pattern; it's the thesis of the [Efficient AI series](/blog/blackwell-to-rubin-memory-math/): **architectures win when they fit the hardware of their moment, and hardware evolves toward the architectures that win.** CNNs-meet-GPUs was the first round. Transformers-meet-tensor-cores was the second. Whatever wins next will fit the silicon of 2030.
+
+## Count channels, outputs, and parameters
+
+The nine-weight example assumed one input channel and one output filter. A color image ordinarily has three channels. A convolution with a 3×3 kernel, three input channels, and sixteen output channels uses $$3\times3\times3\times16=432$$ kernel weights, plus sixteen biases if biases are enabled. Each output filter combines all three input channels, and the learned weights are reused across spatial positions.
+
+For an input width W, kernel width K, padding P on each side, and stride S, the output width is
+
+$$
+W_{\mathrm{out}}=\left\lfloor\frac{W+2P-K}{S}\right\rfloor+1.
+$$
+
+A 32×32 input with kernel three, padding one, and stride one stays 32×32. Changing stride to two produces 16×16. Those output positions multiply arithmetic and activation storage, but they do not multiply the number of learned kernel parameters. This is the key separation between parameter count and work.
+
+Spatial translation equivariance means shifting the input can shift a convolution's output correspondingly under suitable boundary and stride assumptions. Classification invariance is a stronger requirement and is not guaranteed by convolution alone. Pooling, augmentation, padding, and downstream computation influence how much a final prediction changes after an image moves.
+
+## Separate arithmetic cost from parameter efficiency
+
+A 32×32 output with sixteen channels contains 16,384 output values. With a 3×3 kernel and three input channels, each output value uses twenty-seven multiplications and an accumulation. The layer therefore performs 442,368 multiplications before counting bias additions or activation work. It stores only 432 kernel weights because they are reused.
+
+That reuse can be useful for GPUs, but convolution implementations need not explicitly unroll the entire image into a large temporary matrix. Direct kernels, implicit matrix multiplication, and other algorithms trade arithmetic, memory, and numerical behavior differently. “It becomes a matrix multiplication” is a useful implementation connection rather than a universal requirement to materialize every patch.
+
+This accounting also reveals why shrinking spatial resolution can reduce compute dramatically without changing parameter count. Halving both output dimensions quarters the number of spatial positions. A network can be parameter-efficient yet expensive on high-resolution inputs, so report input size alongside parameter counts when comparing inference cost.
 
 ## Takeaway
 
 - Plain networks waste millions of weights on images and re-learn every pattern per location; CNNs fix both with one move — a small filter slid across the whole image.
 - Weight sharing (nine weights, million positions) plus stacking (edges → textures → objects) is the entire recipe, from 1998's LeNet to 2012's AlexNet.
 - The transferable lesson: match the network's shape to the data's structure. That principle picks the winners in every architecture era, including the Transformer's.
+
+
+A deployment benchmark should preserve the actual image pipeline. Decoding, resizing, normalization, and transfers can consume more time than the convolutional layers for a small model. Measure the pipeline first, then isolate the network if you need to understand its kernels. Keep input resolution and batch size explicit because both affect activation memory and arithmetic. Finally, inspect examples after preprocessing: an incorrect channel order or normalization scale can produce a fast system with poor predictions. The architecture describes how features are computed, while the surrounding pipeline determines which pixels the architecture actually receives and how quickly results reach the application.
 
 ## Sources
 

@@ -4,7 +4,7 @@ description: "A DDR5 module moves ~50 GB/s; an HBM3e package moves 8 TB/s. The 1
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'mem-3'
-order: 6
+order: 10
 series: 'comp-arch'
 topic: 'Memory Hierarchy'
 tags: ['dram', 'hbm', 'memory']

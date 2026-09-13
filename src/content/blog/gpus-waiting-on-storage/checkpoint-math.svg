@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">How Often Should You Checkpoint?</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">waste = δ/τ + τ/2M  ·  1,024 GPUs  ·  MTBF ≈ 50 h</text>
+
+  <text x="180" y="256" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">goodput wasted</text>
+
+  <!-- horizontal gridlines -->
+  <line x1="180" y1="870" x2="1080" y2="870" stroke="#d8d4c4" stroke-width="3"/>
+  <line x1="180" y1="772" x2="1080" y2="772" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="180" y1="673" x2="1080" y2="673" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="180" y1="575" x2="1080" y2="575" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="180" y1="477" x2="1080" y2="477" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="180" y1="378" x2="1080" y2="378" stroke="#e8e4d7" stroke-width="2"/>
+  <line x1="180" y1="280" x2="1080" y2="280" stroke="#e8e4d7" stroke-width="2"/>
+
+  <!-- y labels -->
+  <text x="160" y="878" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">0%</text>
+  <text x="160" y="780" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">2%</text>
+  <text x="160" y="681" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">4%</text>
+  <text x="160" y="583" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">6%</text>
+  <text x="160" y="485" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">8%</text>
+  <text x="160" y="386" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">10%</text>
+  <text x="160" y="288" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">12%</text>
+
+  <!-- x labels -->
+  <text x="180" y="912" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">0h</text>
+  <text x="330" y="912" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">1h</text>
+  <text x="480" y="912" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">2h</text>
+  <text x="630" y="912" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">3h</text>
+  <text x="780" y="912" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">4h</text>
+  <text x="930" y="912" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">5h</text>
+  <text x="1080" y="912" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">6h</text>
+  <text x="630" y="952" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">checkpoint interval τ</text>
+
+  <!-- slow storage curve -->
+  <polyline points="255,310 293,476 330,552 405,617 480,637 528,639 630,631 780,604 930,568 1080,527" fill="none" stroke="#b06a4e" stroke-width="5"/>
+  <!-- fast storage curve -->
+  <polyline points="205,728 230,786 280,804 330,798 480,759 630,714 780,665 930,617 1080,568" fill="none" stroke="#5b7c46" stroke-width="5"/>
+
+  <!-- curve labels -->
+  <text x="340" y="440" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#b06a4e">slow storage: δ = 196 s (5 GB/s)</text>
+  <text x="560" y="800" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="bold" fill="#5b7c46">fast storage: δ = 16 s (60 GB/s)</text>
+
+  <!-- minima -->
+  <circle cx="528" cy="639" r="10" fill="#8a5138"/>
+  <text x="505" y="700" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#8a5138">τ_opt = 2.3 h → 4.7% wasted</text>
+  <circle cx="280" cy="804" r="10" fill="#5b7c46"/>
+  <text x="300" y="850" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#5b7c46">τ_opt = 40 min → 1.4% wasted</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · storage-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">checkpoint by the math</text>
+</svg>

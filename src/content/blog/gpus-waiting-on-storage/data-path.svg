@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">Two Paths from Flash to GPU</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">GPUDirect Storage removes the CPU bounce buffer</text>
+
+  <line x1="600" y1="240" x2="600" y2="900" stroke="#e8e4d7" stroke-width="3"/>
+
+  <text x="335" y="278" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="32" font-weight="bold" fill="#33362a">Traditional POSIX path</text>
+  <text x="865" y="278" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="32" font-weight="bold" fill="#33362a">GPUDirect Storage</text>
+
+  <!-- LEFT: GPU HBM -->
+  <rect x="165" y="320" width="340" height="90" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="335" y="376" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#33362a">GPU HBM</text>
+
+  <!-- arrow gap 410-480 -->
+  <line x1="280" y1="480" x2="280" y2="424" stroke="#75786a" stroke-width="4"/>
+  <polygon points="280,410 270,428 290,428" fill="#75786a"/>
+  <text x="310" y="454" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">3. copy over PCIe</text>
+
+  <!-- LEFT: CPU copy -->
+  <rect x="165" y="480" width="340" height="80" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="335" y="514" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#33362a">CPU memcpy</text>
+  <text x="335" y="546" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">to user buffer</text>
+
+  <!-- arrow gap 560-630 -->
+  <line x1="280" y1="630" x2="280" y2="574" stroke="#75786a" stroke-width="4"/>
+  <polygon points="280,560 270,578 290,578" fill="#75786a"/>
+  <text x="310" y="604" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">2. CPU copy</text>
+
+  <!-- LEFT: bounce buffer -->
+  <rect x="165" y="630" width="340" height="90" fill="#f0ddd0" stroke="#b06a4e" stroke-width="3"/>
+  <text x="335" y="668" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#33362a">host DRAM page cache</text>
+  <text x="335" y="702" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#b06a4e">(the bounce buffer)</text>
+
+  <!-- arrow gap 720-810 -->
+  <line x1="280" y1="810" x2="280" y2="734" stroke="#75786a" stroke-width="4"/>
+  <polygon points="280,720 270,738 290,738" fill="#75786a"/>
+  <text x="310" y="774" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">1. drive DMA</text>
+
+  <!-- LEFT: NVMe -->
+  <rect x="165" y="810" width="340" height="80" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="335" y="860" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#33362a">NVMe SSD</text>
+
+  <!-- RIGHT: GPU HBM -->
+  <rect x="695" y="320" width="340" height="90" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+  <text x="865" y="376" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#33362a">GPU HBM</text>
+
+  <!-- RIGHT: direct arrow -->
+  <line x1="780" y1="810" x2="780" y2="428" stroke="#5b7c46" stroke-width="6"/>
+  <polygon points="780,410 766,434 794,434" fill="#5b7c46"/>
+  <text x="808" y="580" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#5b7c46">one DMA,</text>
+  <text x="808" y="616" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#5b7c46">peer-to-peer PCIe</text>
+  <text x="808" y="652" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">via cuFile API</text>
+
+  <!-- RIGHT: NVMe -->
+  <rect x="695" y="810" width="340" height="80" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="865" y="860" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#33362a">NVMe SSD</text>
+
+  <text x="600" y="944" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">Left: every byte crosses host DRAM twice.  Right: zero host copies.</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · storage-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">skip the detour</text>
+</svg>

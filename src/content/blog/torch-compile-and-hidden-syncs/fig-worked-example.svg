@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Three syncs, fixed one by one</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Illustrative A100 fine-tune; GPU needs 80 ms of compute per step</text>
+
+  <line x1="840" y1="265" x2="840" y2="900" stroke="#a3a08f" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="840" y="250" font-size="24" fill="#75786a" text-anchor="middle">80 ms compute floor (eager)</text>
+
+  <text x="90" y="300" font-size="26" fill="#55584a">Baseline — three hidden syncs</text>
+  <rect x="90" y="316" width="900" height="44" fill="#b06a4e"/>
+  <text x="1006" y="348" font-size="28" font-weight="bold" fill="#33362a">96 ms</text>
+
+  <text x="90" y="435" font-size="26" fill="#55584a">Fix 1 · amortize loss.item() logging</text>
+  <rect x="90" y="451" width="853" height="44" fill="#c9973b"/>
+  <text x="959" y="483" font-size="28" font-weight="bold" fill="#33362a">91 ms</text>
+
+  <text x="90" y="570" font-size="26" fill="#55584a">Fix 2 · delete the tensor-valued if branch</text>
+  <rect x="90" y="586" width="806" height="44" fill="#c9973b"/>
+  <text x="912" y="618" font-size="28" font-weight="bold" fill="#33362a">86 ms</text>
+
+  <text x="90" y="705" font-size="26" fill="#55584a">Fix 3 · pinned memory + non_blocking copies</text>
+  <rect x="90" y="721" width="759" height="44" fill="#a8bf92"/>
+  <text x="865" y="753" font-size="28" font-weight="bold" fill="#33362a">81 ms</text>
+
+  <text x="90" y="840" font-size="26" fill="#55584a">Then torch.compile — kernels fused</text>
+  <rect x="90" y="856" width="609" height="44" fill="#5b7c46"/>
+  <text x="715" y="888" font-size="28" font-weight="bold" fill="#33362a">65 ms</text>
+
+  <text x="90" y="945" font-size="26" fill="#75786a">96 → 65 ms per step: 1.48x, and no kernel was hand-written</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · pt-1</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">Bubbles cost milliseconds</text>
+</svg>

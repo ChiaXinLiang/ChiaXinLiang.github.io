@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Latency Hiding by Warp Switching</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">When a warp stalls, another ready warp can issue</text>
+
+  <!-- legend -->
+  <rect x="250" y="228" width="36" height="26" rx="4" fill="#5b7c46"/>
+  <text x="296" y="249" font-size="24" fill="#55584a">issuing instructions</text>
+  <rect x="620" y="228" width="36" height="26" rx="4" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="666" y="249" font-size="24" fill="#55584a">stalled on memory load</text>
+
+  <!-- warp 0 -->
+  <text x="90" y="342" font-size="26" fill="#55584a">Warp 0</text>
+  <rect x="250" y="300" width="150" height="64" rx="8" fill="#5b7c46"/>
+  <rect x="400" y="300" width="360" height="64" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="580" y="340" font-size="24" fill="#75786a" text-anchor="middle">waiting ~600 cycles</text>
+  <rect x="760" y="300" width="150" height="64" rx="8" fill="#5b7c46"/>
+  <rect x="910" y="300" width="140" height="64" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+
+  <!-- warp 1 -->
+  <text x="90" y="442" font-size="26" fill="#55584a">Warp 1</text>
+  <rect x="250" y="400" width="120" height="64" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <rect x="370" y="400" width="150" height="64" rx="8" fill="#5b7c46"/>
+  <rect x="520" y="400" width="360" height="64" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <rect x="880" y="400" width="170" height="64" rx="8" fill="#5b7c46"/>
+
+  <!-- warp 2 -->
+  <text x="90" y="542" font-size="26" fill="#55584a">Warp 2</text>
+  <rect x="250" y="500" width="240" height="64" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <rect x="490" y="500" width="150" height="64" rx="8" fill="#5b7c46"/>
+  <rect x="640" y="500" width="410" height="64" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+
+  <!-- warp 3 -->
+  <text x="90" y="642" font-size="26" fill="#55584a">Warp 3</text>
+  <rect x="250" y="600" width="360" height="64" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <rect x="610" y="600" width="150" height="64" rx="8" fill="#5b7c46"/>
+  <rect x="760" y="600" width="290" height="64" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+
+  <!-- scheduler -->
+  <text x="90" y="770" font-size="24" fill="#55584a">Scheduler</text>
+  <rect x="250" y="730" width="800" height="64" rx="8" fill="#5b7c46"/>
+
+  <text x="650" y="862" font-size="26" fill="#55584a" text-anchor="middle">With enough ready warps, useful work can hide load latency</text>
+  <text x="650" y="906" font-size="26" fill="#55584a" text-anchor="middle">Zero-cost switch: every resident warp keeps its own registers</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · exec-1</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">Latency hidden, bandwidth not</text>
+</svg>

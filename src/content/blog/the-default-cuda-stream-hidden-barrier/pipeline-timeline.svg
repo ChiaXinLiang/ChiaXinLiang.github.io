@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Three chunks: 18 ms &#8594; 10 ms</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Pipelining hides 8 of the 12 copy milliseconds</text>
+
+  <!-- serialized section -->
+  <text x="270" y="272" font-size="26" fill="#55584a">Serialized (default stream)</text>
+  <text x="1110" y="272" text-anchor="end" font-size="26" font-weight="bold" fill="#75786a">18 ms</text>
+  <!-- serial bar: 9 segments of 93.3px from x=270 -->
+  <rect x="270" y="285" width="93.3" height="60" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="316.7" y="323" text-anchor="middle" font-size="24" fill="#33362a">H1</text>
+  <rect x="363.3" y="285" width="93.3" height="60" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="410" y="323" text-anchor="middle" font-size="24" fill="#33362a">K1</text>
+  <rect x="456.7" y="285" width="93.3" height="60" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="503.3" y="323" text-anchor="middle" font-size="24" fill="#33362a">D1</text>
+  <rect x="550" y="285" width="93.3" height="60" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="596.7" y="323" text-anchor="middle" font-size="24" fill="#33362a">H2</text>
+  <rect x="643.3" y="285" width="93.3" height="60" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="690" y="323" text-anchor="middle" font-size="24" fill="#33362a">K2</text>
+  <rect x="736.7" y="285" width="93.3" height="60" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="783.3" y="323" text-anchor="middle" font-size="24" fill="#33362a">D2</text>
+  <rect x="830" y="285" width="93.3" height="60" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="876.7" y="323" text-anchor="middle" font-size="24" fill="#33362a">H3</text>
+  <rect x="923.3" y="285" width="93.3" height="60" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="970" y="323" text-anchor="middle" font-size="24" fill="#33362a">K3</text>
+  <rect x="1016.7" y="285" width="93.3" height="60" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="1063.3" y="323" text-anchor="middle" font-size="24" fill="#33362a">D3</text>
+
+  <!-- legend -->
+  <rect x="270" y="392" width="28" height="28" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="310" y="414" font-size="24" fill="#55584a">H2D copy</text>
+  <rect x="480" y="392" width="28" height="28" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="520" y="414" font-size="24" fill="#55584a">kernel</text>
+  <rect x="650" y="392" width="28" height="28" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="690" y="414" font-size="24" fill="#55584a">D2H copy</text>
+
+  <!-- pipelined section -->
+  <text x="270" y="472" font-size="26" fill="#55584a">Pipelined (3 streams, pinned)</text>
+  <text x="1110" y="472" text-anchor="end" font-size="26" font-weight="bold" fill="#b04a3a">10 ms</text>
+
+  <!-- stream 1 -->
+  <text x="95" y="530" font-size="24" fill="#55584a">stream 1</text>
+  <rect x="270" y="495" width="93.3" height="56" fill="#a8bf92" stroke="#b04a3a" stroke-width="3.5"/>
+  <text x="316.7" y="531" text-anchor="middle" font-size="24" fill="#33362a">H1</text>
+  <rect x="363.3" y="495" width="93.3" height="56" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="410" y="531" text-anchor="middle" font-size="24" fill="#33362a">K1</text>
+  <rect x="456.7" y="495" width="93.3" height="56" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="503.3" y="531" text-anchor="middle" font-size="24" fill="#33362a">D1</text>
+  <!-- stream 2 -->
+  <text x="95" y="598" font-size="24" fill="#55584a">stream 2</text>
+  <rect x="363.3" y="563" width="93.3" height="56" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="410" y="599" text-anchor="middle" font-size="24" fill="#33362a">H2</text>
+  <rect x="456.7" y="563" width="93.3" height="56" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="503.3" y="599" text-anchor="middle" font-size="24" fill="#33362a">K2</text>
+  <rect x="550" y="563" width="93.3" height="56" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
+  <text x="596.7" y="599" text-anchor="middle" font-size="24" fill="#33362a">D2</text>
+  <!-- stream 3 -->
+  <text x="95" y="666" font-size="24" fill="#55584a">stream 3</text>
+  <rect x="456.7" y="631" width="93.3" height="56" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
+  <text x="503.3" y="667" text-anchor="middle" font-size="24" fill="#33362a">H3</text>
+  <rect x="550" y="631" width="93.3" height="56" fill="#f7ecd2" stroke="#c9973b" stroke-width="2"/>
+  <text x="596.7" y="667" text-anchor="middle" font-size="24" fill="#33362a">K3</text>
+  <rect x="643.3" y="631" width="93.3" height="56" fill="#f0ddd0" stroke="#b04a3a" stroke-width="3.5"/>
+  <text x="690" y="667" text-anchor="middle" font-size="24" fill="#33362a">D3</text>
+
+  <!-- 10 ms marker -->
+  <line x1="736.7" y1="485" x2="736.7" y2="710" stroke="#b04a3a" stroke-width="2.5" stroke-dasharray="8 7"/>
+
+  <!-- axis -->
+  <line x1="270" y1="710" x2="1110" y2="710" stroke="#d8d4c4" stroke-width="2.5"/>
+  <line x1="270" y1="710" x2="270" y2="720" stroke="#d8d4c4" stroke-width="2.5"/>
+  <line x1="363.3" y1="710" x2="363.3" y2="720" stroke="#d8d4c4" stroke-width="2.5"/>
+  <line x1="456.7" y1="710" x2="456.7" y2="720" stroke="#d8d4c4" stroke-width="2.5"/>
+  <line x1="550" y1="710" x2="550" y2="720" stroke="#d8d4c4" stroke-width="2.5"/>
+  <line x1="643.3" y1="710" x2="643.3" y2="720" stroke="#d8d4c4" stroke-width="2.5"/>
+  <line x1="736.7" y1="710" x2="736.7" y2="720" stroke="#b04a3a" stroke-width="2.5"/>
+  <line x1="830" y1="710" x2="830" y2="720" stroke="#d8d4c4" stroke-width="2.5"/>
+  <line x1="923.3" y1="710" x2="923.3" y2="720" stroke="#d8d4c4" stroke-width="2.5"/>
+  <line x1="1016.7" y1="710" x2="1016.7" y2="720" stroke="#d8d4c4" stroke-width="2.5"/>
+  <line x1="1110" y1="710" x2="1110" y2="720" stroke="#d8d4c4" stroke-width="2.5"/>
+  <text x="270" y="750" text-anchor="middle" font-size="24" fill="#75786a">0</text>
+  <text x="363.3" y="750" text-anchor="middle" font-size="24" fill="#75786a">2</text>
+  <text x="456.7" y="750" text-anchor="middle" font-size="24" fill="#75786a">4</text>
+  <text x="550" y="750" text-anchor="middle" font-size="24" fill="#75786a">6</text>
+  <text x="643.3" y="750" text-anchor="middle" font-size="24" fill="#75786a">8</text>
+  <text x="736.7" y="750" text-anchor="middle" font-size="24" font-weight="bold" fill="#b04a3a">10</text>
+  <text x="830" y="750" text-anchor="middle" font-size="24" fill="#75786a">12</text>
+  <text x="923.3" y="750" text-anchor="middle" font-size="24" fill="#75786a">14</text>
+  <text x="1016.7" y="750" text-anchor="middle" font-size="24" fill="#75786a">16</text>
+  <text x="1110" y="750" text-anchor="end" font-size="24" fill="#75786a">18</text>
+  <text x="600" y="792" text-anchor="middle" font-size="24" fill="#75786a">time (ms)</text>
+
+  <!-- annotation -->
+  <text x="600" y="852" text-anchor="middle" font-size="26" fill="#55584a">12 ms of copy work; only the red-edged 4 ms</text>
+  <text x="600" y="890" text-anchor="middle" font-size="26" fill="#55584a">(first H2D, last D2H) show up in the total.</text>
+  <text x="600" y="940" text-anchor="middle" font-size="26" fill="#75786a">One stream-0 call collapses this back to 18 ms.</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; orch-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Overlap hides the copies</text>
+</svg>

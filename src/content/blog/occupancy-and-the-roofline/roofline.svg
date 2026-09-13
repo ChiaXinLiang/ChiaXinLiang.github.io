@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="90" y="100" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">The Roofline: H100 SXM</text>
+  <text x="90" y="156" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">Attainable throughput vs. arithmetic intensity (log–log)</text>
+
+  <!-- axes -->
+  <line x1="220" y1="300" x2="220" y2="870" stroke="#d8d4c4" stroke-width="3"/>
+  <line x1="220" y1="870" x2="1040" y2="870" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="205" y="270" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">TFLOP/s</text>
+
+  <!-- y ticks -->
+  <text x="205" y="735" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">1</text>
+  <text x="205" y="593" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">10</text>
+  <text x="205" y="450" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">100</text>
+  <text x="205" y="308" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">1000</text>
+
+  <!-- x ticks -->
+  <text x="220" y="910" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">0.1</text>
+  <text x="425" y="910" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">1</text>
+  <text x="630" y="910" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">10</text>
+  <text x="835" y="910" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">100</text>
+  <text x="1040" y="910" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">1000</text>
+  <text x="630" y="948" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">arithmetic intensity (FLOP / byte)</text>
+
+  <!-- ridge vertical -->
+  <line x1="931" y1="301" x2="931" y2="870" stroke="#d8d4c4" stroke-width="2" stroke-dasharray="6 8"/>
+
+  <!-- roofline: bandwidth slope then compute ceiling -->
+  <path d="M 220,795 L 931,301 L 1040,301" fill="none" stroke="#33362a" stroke-width="6"/>
+
+  <!-- bandwidth label along slope -->
+  <text x="500" y="520" transform="rotate(-34.8 500 520)" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">HBM3: 3.35 TB/s</text>
+
+  <!-- ceiling label -->
+  <text x="880" y="282" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#55584a">990 TFLOP/s BF16 dense</text>
+
+  <!-- ridge point -->
+  <circle cx="931" cy="301" r="10" fill="#c9973b" stroke="#7a5a20" stroke-width="3"/>
+  <text x="905" y="352" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#7a5a20">ridge ≈ 295 FLOP/byte</text>
+
+  <!-- decode attention marker -->
+  <circle cx="425" cy="652" r="12" fill="#b06a4e" stroke="#8a5138" stroke-width="3"/>
+  <text x="450" y="662" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">decode attention (≈1 FLOP/byte)</text>
+
+  <!-- GEMM marker -->
+  <circle cx="985" cy="301" r="12" fill="#a8bf92" stroke="#5b7c46" stroke-width="3"/>
+  <text x="1040" y="250" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#5b7c46">large-batch GEMM</text>
+
+  <!-- region labels -->
+  <text x="480" y="800" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#75786a">memory-bound</text>
+  <text x="950" y="490" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#75786a">compute-bound</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1078" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Adapted from Williams et al. (2009), CACM</text>
+  <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · exec-3</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">know your ceiling</text>
+</svg>

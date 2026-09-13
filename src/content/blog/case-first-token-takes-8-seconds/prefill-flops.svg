@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The Prefill Bill Goes Quadratic</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">70B model prefill FLOPs: linear vs attention</text>
+
+  <!-- legend -->
+  <rect x="200" y="232" width="36" height="36" fill="#5b7c46"/>
+  <text x="252" y="259" font-size="26" fill="#55584a">Linear layers · 2·N·S</text>
+  <rect x="640" y="232" width="36" height="36" fill="#b06a4e"/>
+  <text x="692" y="259" font-size="26" fill="#55584a">Attention · 2·S²·d·L</text>
+
+  <!-- row 1: 8k -->
+  <text x="90" y="335" font-size="26" font-weight="bold" fill="#33362a">8k tokens</text>
+  <rect x="90" y="350" width="29" height="56" fill="#5b7c46"/>
+  <rect x="119" y="350" width="3" height="56" fill="#b06a4e"/>
+  <text x="140" y="388" font-size="26" fill="#55584a">1.2 PFLOPs · attention 7%</text>
+
+  <!-- row 2: 32k -->
+  <text x="90" y="465" font-size="26" font-weight="bold" fill="#33362a">32k tokens</text>
+  <rect x="90" y="480" width="114" height="56" fill="#5b7c46"/>
+  <rect x="204" y="480" width="35" height="56" fill="#b06a4e"/>
+  <text x="257" y="518" font-size="26" fill="#55584a">6.0 PFLOPs · attention 23%</text>
+
+  <!-- row 3: 128k -->
+  <text x="90" y="595" font-size="26" font-weight="bold" fill="#33362a">128k tokens</text>
+  <rect x="90" y="610" width="458" height="56" fill="#5b7c46"/>
+  <rect x="548" y="610" width="560" height="56" fill="#b06a4e"/>
+  <text x="319" y="646" text-anchor="middle" font-size="26" font-weight="bold" fill="#fdfbf4">18.4 PF linear</text>
+  <text x="828" y="646" text-anchor="middle" font-size="26" font-weight="bold" fill="#fdfbf4">22.5 PF attention</text>
+  <text x="90" y="706" font-size="26" fill="#55584a">40.9 PFLOPs total · attention now 55% of the bill</text>
+
+  <!-- annotations -->
+  <line x1="90" y1="750" x2="1110" y2="750" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="800" font-size="28" font-weight="bold" fill="#33362a">Crossover: attention overtakes linear at ≈107k tokens</text>
+  <text x="90" y="842" font-size="26" fill="#55584a">S* = N / (d · layers) = 70e9 / (8192 · 80)</text>
+  <text x="90" y="902" font-size="28" font-weight="bold" fill="#33362a">One 8×H100 node, BF16, ~62% MFU:</text>
+  <text x="90" y="944" font-size="26" fill="#55584a">41 PFLOPs ÷ 4.9 PFLOPS sustained ≈ 8.4 seconds to first token</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · case-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">physics, not bugs</text>
+</svg>

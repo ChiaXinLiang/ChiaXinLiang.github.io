@@ -4,7 +4,7 @@ description: "How a single AVX-512 instruction adds 16 floats at once, why the c
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'par-1'
-order: 7
+order: 11
 series: 'comp-arch'
 topic: 'Parallel Architectures'
 tags: ['simd', 'vectorization', 'parallelism']

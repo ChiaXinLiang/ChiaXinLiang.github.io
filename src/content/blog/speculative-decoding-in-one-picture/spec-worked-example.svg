@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<rect width="1200" height="1200" fill="#fdfbf4"/>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Cycle, Five Outcomes</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">k = 4 drafted tokens, 70% per-token acceptance</text>
+
+<rect x="90" y="235" width="1020" height="95" rx="10" fill="#e7edd9"/>
+<text x="600" y="275" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">Expected: 2.77 tokens per target pass</text>
+<text x="600" y="311" text-anchor="middle" font-size="24" fill="#55584a">E = (1 - 0.7^5) / (1 - 0.7) = 2.77</text>
+
+<!-- bars: baseline 860, scale 1467 px per unit prob -->
+<rect x="150" y="420" width="140" height="440" fill="#a8bf92"/>
+<rect x="335" y="552" width="140" height="308" fill="#a8bf92"/>
+<rect x="520" y="644" width="140" height="216" fill="#a8bf92"/>
+<rect x="705" y="709" width="140" height="151" fill="#a8bf92"/>
+<rect x="890" y="508" width="140" height="352" fill="#5b7c46"/>
+
+<text x="220" y="404" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">30%</text>
+<text x="405" y="536" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">21%</text>
+<text x="590" y="628" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">15%</text>
+<text x="775" y="693" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">10%</text>
+<text x="960" y="492" text-anchor="middle" font-size="26" font-weight="bold" fill="#33362a">24%</text>
+
+<text x="960" y="425" text-anchor="middle" font-size="24" fill="#75786a">all 4 accepted</text>
+<text x="960" y="455" text-anchor="middle" font-size="24" fill="#75786a">+ bonus token</text>
+
+<line x1="120" y1="860" x2="1080" y2="860" stroke="#d8d4c4" stroke-width="3"/>
+<text x="220" y="902" text-anchor="middle" font-size="26" fill="#55584a">1 token</text>
+<text x="405" y="902" text-anchor="middle" font-size="26" fill="#55584a">2</text>
+<text x="590" y="902" text-anchor="middle" font-size="26" fill="#55584a">3</text>
+<text x="775" y="902" text-anchor="middle" font-size="26" fill="#55584a">4</text>
+<text x="960" y="902" text-anchor="middle" font-size="26" fill="#55584a">5 tokens</text>
+<text x="600" y="944" text-anchor="middle" font-size="24" fill="#75786a">tokens emitted in one draft-verify cycle</text>
+
+<line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+<text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · opt-4</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Acceptance is the game</text>
+</svg>

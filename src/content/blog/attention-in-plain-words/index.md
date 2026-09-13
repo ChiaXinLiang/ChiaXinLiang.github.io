@@ -2,6 +2,7 @@
 title: 'Attention in Plain Words: Every Token Looks at Every Other Token'
 description: "The mechanism inside every modern LLM is a lookup that's softly blurred: each word asks the whole sentence what's relevant, and blends the answers. No relay, no fading memory."
 pubDate: 'Sep 12 2026'
+updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'tf-1'
 order: 5
@@ -38,7 +39,7 @@ That's it. Attention is a lookup table where, instead of retrieving one entry, y
 
 - **All the queries, keys, and values are produced by weights** — learned by [the same gradient descent as ever](/blog/how-models-learn/). Nobody tells the model that "tired" relates to "animal"; that emerges from predicting text.
 - **It runs several times in parallel** ("multi-head" attention): one head might track pronoun reference, another syntax, another nearby words. Each head is the same mechanism with its own learned weights.
-- **Distance doesn't exist.** Word 1 attends to word 1,000 exactly as easily as to word 2. The fading-relay problem is simply gone — which is why long documents became feasible.
+- **Direct connectivity replaces a relay.** Allowed distant tokens can exchange information without passing through every intervening hidden state; positional encoding and training still affect long-range behavior.
 
 ## A worked example you can follow by hand
 
@@ -56,7 +57,7 @@ Suppose *sat* is computing its new representation, and its **query** is (0.3, 1.
 - vs *sat*: 0.3×0.1 + 1.0×0.9 = **0.93**
 - vs *down*: 0.3×0.2 + 1.0×0.8 = **0.86**
 
-Normalize those into weights that sum to 1 (the real model uses softmax, which also sharpens the winners) — roughly 0.24 / 0.41 / 0.35. *Sat*'s updated representation becomes 0.24×(cat's value) + 0.41×(its own) + 0.35×(down's): still mostly "a past action," now measurably flavored with *who* did it and *which way*. Every word in the sentence does this simultaneously; that's one attention layer. Real models do it with 128-number vectors and dozens of heads, but the arithmetic you just did is the whole mechanism.
+Normalize those into weights that sum to 1 (the real model uses softmax, whose concentration depends on the score scale) — approximately 0.274 / 0.372 / 0.354 for scaled, unmasked softmax. *Sat*'s updated representation becomes 0.274×(cat's value) + 0.372×(its own) + 0.354×(down's): still mostly "a past action," now measurably flavored with *who* did it and *which way*. Every word in the sentence does this simultaneously; that's one attention layer. Real models do it with 128-number vectors and dozens of heads, but the arithmetic you just did is the whole mechanism.
 
 The engineering aside worth planting now: notice each word needed its key and value available for everyone else's lookup. During generation, models **cache** those keys and values instead of recomputing them per token — that's the KV cache whose memory appetite drives half the serving economics in [the performance series](/blog/goodput-vs-utilization/).
 
@@ -70,7 +71,7 @@ Why not one big head with more capacity? Because ten cheap specialists beat one 
 
 **"Attention is what the model 'focuses on,' like human attention."** The name invites the analogy, but resist it: attention weights are just learned similarity scores that route information. High weight on a word doesn't mean the model "cares about" it in any human sense, and researchers have shown attention maps can be misleading as explanations of *why* a model answered as it did.
 
-**"Each word attends to a few relevant words."** No — every token attends to *every* token, always. The weights are merely concentrated on a few. The compute cost is paid for all pairs regardless of how peaked the distribution is; that's exactly why the quadratic cost is unavoidable in vanilla attention.
+**"Each word attends to a few relevant words."** In dense attention, each query scores every allowed key; causal and other masks restrict allowed pairs. The weights are merely concentrated on a few. The compute cost is paid for all pairs regardless of how peaked the distribution is; that's exactly why the quadratic cost is unavoidable in vanilla attention.
 
 **"Attention replaced neural networks."** Attention layers are *made of* the [same weighted sums](/blog/what-is-a-neural-network/) as everything else — the queries, keys, and values are produced by ordinary learned matrices, and attention alternates with plain feed-forward layers in the full architecture ([next article](/blog/transformer-architecture-in-one-picture/)). It's a new wiring diagram, not new physics.
 
@@ -95,11 +96,40 @@ One honest cost, which becomes a running theme in the performance series: all-pa
 
 A 100× longer document costs 10,000× the attention compute — and the keys and values that must sit in GPU memory for the lookup grow linearly too, which is the [KV cache's memory bill](/blog/goodput-vs-utilization/). This single table explains an enormous amount of the modern landscape: why long-context pricing is premium, why papers on linear attention and state-space hybrids keep coming, why [DeepSeek's sparse attention triggered an API price cut](/blog/blackwell-to-rubin-memory-math/), and why "context window" is a marketing number with a very real cost function behind it. When you meet those topics later in this blog, this is the table they're all negotiating with.
 
+## The equation fixes the normalization
+
+Scaled dot-product attention is
+
+$$
+\operatorname{Attention}(Q,K,V)=\operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}+M\right)V.
+$$
+
+Q contains query vectors, K key vectors, V value vectors, and $$d_k$$ is key-vector width. The mask M contains zero for allowed pairs and negative infinity for forbidden pairs. Softmax acts across keys for each query. The result is a weighted combination of numerical value vectors, not a blend of literal English labels.
+
+In our toy example, raw dot products were 0.50, 0.93, and 0.86. Dividing by the square root of two gives approximately 0.354, 0.658, and 0.608. Applying softmax produces weights approximately 0.274, 0.372, and 0.354. These are the correct scaled, unmasked weights for the stated numbers; they are not the earlier informal normalization.
+
+The scale factor matters because dot-product magnitudes tend to grow with vector width under typical initialization assumptions. Large logits can make softmax extremely concentrated and affect gradients. Scaling helps control that behavior. It does not make every attention head equally interpretable or every learned relationship useful.
+
+For autoregressive prediction, the mask disallows future positions. The query at “sat” cannot use the later “down” token in a causal decoder. Its probabilities would instead be renormalized over the allowed prefix. Full bidirectional attention is appropriate for some encoder tasks, while causal attention is required when the training target must not leak into its own prediction.
+
+## Training parallelism is not generation parallelism
+
+Given a complete observed training sequence, a causal model can compute representations for all positions together with a triangular mask. It uses the actual earlier tokens from the dataset. The mask enforces the probability factorization even though the implementation processes positions in parallel.
+
+During ordinary autoregressive generation, the next token has not been selected yet. The model computes its distribution, selects a token, and then uses that selected token in the next step. Parallel training positions therefore do not imply that an unknown answer can be generated all at once.
+
+The quadratic pair-count table describes dense attention over a complete sequence, holding head width and other dimensions fixed. With cached keys and values, one decode step compares one new query with the current prefix, so that step's attention work grows roughly linearly with prefix length. Prefill and full-sequence training have a different cost shape.
+
+Sparse patterns can reduce the number of evaluated pairs, and FlashAttention can reduce memory traffic without changing exact dense-attention semantics. Positional encoding, finite context, and training data still influence long-range behavior. A direct connection removes a recurrent relay but does not make distance irrelevant to learned predictions.
+
 ## Takeaway
 
 - Attention = every token directly scores its relevance to every other token, then takes a weighted average of their content. A lookup, softly blurred.
-- Query/key/value are all learned; multiple heads run the mechanism in parallel with different learned specialties. Distance costs nothing — long-range understanding stops being special.
+- Query/key/value are all learned; multiple heads run the mechanism in parallel with different learned specialties. Direct connectivity helps long-range information flow; positions, masks, and learned behavior still matter.
 - It won because it fits both the data ("anything can relate to anything") and the hardware (all positions compute at once). The price: compute grows with the square of sequence length.
+
+
+Attention visualizations require careful interpretation. A large weight shows that a value contributes strongly to that particular head and query under the current projections. It does not prove that the corresponding word caused the final answer, or that a human would assign it the same meaning. Later layers can transform or cancel the contribution, and multiple heads can represent different relationships. Use the visualization to inspect the mechanism and generate debugging questions. To test a claim about model behavior, change the input, control the comparison, and observe the resulting predictions rather than relying on a single attractive heatmap.
 
 ## Sources
 

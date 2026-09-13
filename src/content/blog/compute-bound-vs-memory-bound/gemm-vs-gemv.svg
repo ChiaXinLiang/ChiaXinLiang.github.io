@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">One Chip, Two Regimes</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">4096&#179; GEMM vs. 4096&#178; GEMV on an H100 SXM (BF16)</text>
+
+  <!-- GEMM card -->
+  <rect x="90" y="230" width="490" height="510" rx="16" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="335" y="286" font-size="30" font-weight="bold" fill="#5b7c46" text-anchor="middle">GEMM &#183; 4096 &#215; 4096 &#215; 4096</text>
+
+  <text x="120" y="346" font-size="24" fill="#75786a">FLOPs</text>
+  <text x="120" y="380" font-size="27" fill="#33362a">2 &#215; 4096&#179; = 137.4 GFLOP</text>
+
+  <text x="120" y="436" font-size="24" fill="#75786a">Minimum HBM traffic</text>
+  <text x="120" y="470" font-size="27" fill="#33362a">3 &#215; 4096&#178; &#215; 2 B = 100.7 MB</text>
+
+  <text x="120" y="526" font-size="24" fill="#75786a">Arithmetic intensity</text>
+  <text x="120" y="564" font-size="34" font-weight="bold" fill="#5b7c46">1365 FLOP / byte</text>
+
+  <text x="120" y="620" font-size="24" fill="#75786a">Time budgets</text>
+  <text x="120" y="654" font-size="27" fill="#33362a">compute 139 &#181;s &#183; memory 30 &#181;s</text>
+
+  <rect x="120" y="678" width="430" height="46" rx="10" fill="#5b7c46"/>
+  <text x="335" y="710" font-size="26" font-weight="bold" fill="#e7edd9" text-anchor="middle">COMPUTE-BOUND</text>
+
+  <!-- GEMV card -->
+  <rect x="620" y="230" width="490" height="510" rx="16" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
+  <text x="865" y="286" font-size="30" font-weight="bold" fill="#b06a4e" text-anchor="middle">GEMV &#183; 4096 &#215; 4096</text>
+
+  <text x="650" y="346" font-size="24" fill="#75786a">FLOPs</text>
+  <text x="650" y="380" font-size="27" fill="#33362a">2 &#215; 4096&#178; = 33.6 MFLOP</text>
+
+  <text x="650" y="436" font-size="24" fill="#75786a">Minimum HBM traffic</text>
+  <text x="650" y="470" font-size="27" fill="#33362a">4096&#178; &#215; 2 B = 33.6 MB</text>
+
+  <text x="650" y="526" font-size="24" fill="#75786a">Arithmetic intensity</text>
+  <text x="650" y="564" font-size="34" font-weight="bold" fill="#b06a4e">1 FLOP / byte</text>
+
+  <text x="650" y="620" font-size="24" fill="#75786a">Time budgets</text>
+  <text x="650" y="654" font-size="27" fill="#33362a">compute 0.03 &#181;s &#183; memory 10 &#181;s</text>
+
+  <rect x="650" y="678" width="430" height="46" rx="10" fill="#b06a4e"/>
+  <text x="865" y="710" font-size="26" font-weight="bold" fill="#f0ddd0" text-anchor="middle">MEMORY-BOUND</text>
+
+  <!-- intensity axis strip -->
+  <text x="786" y="812" font-size="26" font-weight="bold" fill="#7a5a20" text-anchor="middle">H100 ridge &#8776; 295</text>
+  <line x1="786" y1="824" x2="786" y2="896" stroke="#c9973b" stroke-width="3" stroke-dasharray="8 7"/>
+
+  <circle cx="312" cy="880" r="12" fill="#b06a4e"/>
+  <text x="312" y="848" font-size="26" font-weight="bold" fill="#8a5138" text-anchor="middle">GEMV = 1</text>
+
+  <circle cx="914" cy="880" r="12" fill="#5b7c46"/>
+  <text x="944" y="848" font-size="26" font-weight="bold" fill="#5b7c46" text-anchor="middle">GEMM = 1365</text>
+
+  <line x1="120" y1="880" x2="1080" y2="880" stroke="#d8d4c4" stroke-width="3"/>
+  <text x="600" y="940" font-size="24" fill="#75786a" text-anchor="middle">arithmetic intensity (FLOP / byte, log scale)</text>
+
+  <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; exec-2</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">count flops per byte</text>
+</svg>
