@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img">
+<title>QLoRA compresses the base while training a separate update</title>
+<rect width="1400" height="1000" fill="#f7fbff"/>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#367bb5"/></marker></defs>
+<text x="50" y="58" text-anchor="start" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17334a">QLoRA compresses the base while training a separate update</text>
+<text x="50" y="100" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536579">Packed codebook indices and scale reconstruction feed wider-precision computation</text>
+<text x="80" y="190" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#17334a">Nonuniform NF4 codebook</text>
+<path d="M90 320L640 320" stroke="#367bb5" stroke-width="2" fill="none"/>
+<circle cx="110.0" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="199.0044444444444" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="264.4355555555556" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="309.92" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="339.08444444444444" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="355.55555555555554" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="362.96" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="364.9244444444444" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="365.0755555555556" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="367.04" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="374.44444444444446" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="390.91555555555556" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="420.08" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="465.5644444444444" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="530.9955555555556" cy="320" r="5" fill="#14a6a0"/>
+<circle cx="620.0" cy="320" r="5" fill="#14a6a0"/>
+<text x="85" y="390" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#17334a">More codes near the modeled center</text>
+<rect x="770" y="220" width="510" height="180" rx="10" fill="#e6f5ee" stroke="#14a6a0" stroke-width="2"/>
+<text x="800" y="265" text-anchor="start" font-family="Arial,sans-serif" font-size="28" font-weight="700" fill="#17334a">Packed frozen base</text>
+<text x="800" y="310" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#17334a">Weight codes + quantized scales</text>
+<text x="800" y="355" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Double quantization reduces scale bytes</text>
+<path d="M1025 410L1025 490" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<rect x="800" y="515" width="450" height="130" rx="10" fill="#e4f2ff" stroke="#367bb5" stroke-width="2"/>
+<text x="830" y="555" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#17334a">Reconstructed matrix computation</text>
+<text x="830" y="605" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="400" fill="#17334a">+ trainable low-rank branch</text>
+<rect x="95" y="535" width="340" height="135" rx="10" fill="#14a6a0" stroke="none" stroke-width="2"/>
+<text x="95" y="715" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Base storage</text>
+<rect x="455" y="535" width="110" height="135" rx="10" fill="#de7d58" stroke="none" stroke-width="2"/>
+<text x="455" y="715" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Adapters</text>
+<rect x="585" y="535" width="145" height="135" rx="10" fill="#91b9d8" stroke="none" stroke-width="2"/>
+<text x="585" y="715" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Activations</text>
+<rect x="50" y="815" width="1300" height="145" rx="10" fill="#fff8dc" stroke="#d4b359" stroke-width="2"/>
+<text x="75" y="852" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Storage datatype and computation datatype are different parts of the numerical contract.</text>
+<text x="75" y="883" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Only adapter parameters receive updates in the frozen-base procedure shown here.</text>
+<text x="75" y="914" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Activations and transient workspace remain; paging manages residency rather than deleting state.</text>
+</svg>

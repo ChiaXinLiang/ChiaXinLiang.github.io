@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img">
+<title>Distillation transfers a probability landscape</title>
+<rect width="1400" height="1000" fill="#f7fbff"/>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#367bb5"/></marker></defs>
+<text x="50" y="58" text-anchor="start" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17334a">Distillation transfers a probability landscape</text>
+<text x="50" y="100" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536579">A student learns relative alternatives from a fixed teacher, alongside available hard labels</text>
+<path d="M105 310L260 230" stroke="#c8d7e5" stroke-width="2" fill="none" stroke-dasharray="7 6"/>
+<path d="M105 310L260 310" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M105 310L260 390" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M105 310L260 470" stroke="#c8d7e5" stroke-width="2" fill="none" stroke-dasharray="7 6"/>
+<path d="M105 310L260 550" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M105 390L260 230" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M105 390L260 310" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M105 390L260 390" stroke="#c8d7e5" stroke-width="2" fill="none" stroke-dasharray="7 6"/>
+<path d="M105 390L260 470" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M105 390L260 550" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M105 470L260 230" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M105 470L260 310" stroke="#c8d7e5" stroke-width="2" fill="none" stroke-dasharray="7 6"/>
+<path d="M105 470L260 390" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M105 470L260 470" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M105 470L260 550" stroke="#c8d7e5" stroke-width="2" fill="none" stroke-dasharray="7 6"/>
+<path d="M260 230L415 310" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M260 230L415 390" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M260 230L415 470" stroke="#c8d7e5" stroke-width="2" fill="none" stroke-dasharray="7 6"/>
+<path d="M260 310L415 310" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M260 310L415 390" stroke="#c8d7e5" stroke-width="2" fill="none" stroke-dasharray="7 6"/>
+<path d="M260 310L415 470" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M260 390L415 310" stroke="#c8d7e5" stroke-width="2" fill="none" stroke-dasharray="7 6"/>
+<path d="M260 390L415 390" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M260 390L415 470" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M260 470L415 310" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M260 470L415 390" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M260 470L415 470" stroke="#c8d7e5" stroke-width="2" fill="none" stroke-dasharray="7 6"/>
+<path d="M260 550L415 310" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<path d="M260 550L415 390" stroke="#c8d7e5" stroke-width="2" fill="none" stroke-dasharray="7 6"/>
+<path d="M260 550L415 470" stroke="#14a6a0" stroke-width="2" fill="none"/>
+<circle cx="105" cy="310" r="19" fill="#14a6a0"/>
+<circle cx="105" cy="390" r="19" fill="#14a6a0"/>
+<circle cx="105" cy="470" r="19" fill="#14a6a0"/>
+<circle cx="260" cy="230" r="19" fill="#14a6a0"/>
+<circle cx="260" cy="310" r="19" fill="#14a6a0"/>
+<circle cx="260" cy="390" r="19" fill="#14a6a0"/>
+<circle cx="260" cy="470" r="19" fill="#14a6a0"/>
+<circle cx="260" cy="550" r="19" fill="#14a6a0"/>
+<circle cx="415" cy="310" r="19" fill="#14a6a0"/>
+<circle cx="415" cy="390" r="19" fill="#14a6a0"/>
+<circle cx="415" cy="470" r="19" fill="#14a6a0"/>
+<text x="95" y="180" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#17334a">Fixed teacher</text>
+<circle cx="1030" cy="275" r="24" fill="#14a6a0"/>
+<circle cx="1030" cy="400" r="24" fill="#14a6a0"/>
+<circle cx="1200" cy="340" r="24" fill="#14a6a0"/>
+<path d="M1055 275L1175 340" stroke="#367bb5" stroke-width="2" fill="none"/>
+<path d="M1055 400L1175 340" stroke="#367bb5" stroke-width="2" fill="none"/>
+<text x="1015" y="180" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#17334a">Trainable student</text>
+<text x="500" y="225" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#17334a">Soft targets q(T)</text>
+<rect x="520" y="279.0" width="70" height="161.0" rx="3" fill="#367bb5" stroke="none" stroke-width="2"/>
+<rect x="602" y="394.0" width="70" height="46.0" rx="3" fill="#367bb5" stroke="none" stroke-width="2"/>
+<rect x="684" y="417.0" width="70" height="23.0" rx="3" fill="#367bb5" stroke="none" stroke-width="2"/>
+<text x="500" y="520" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#17334a">Student p(T)</text>
+<rect x="520" y="620.0" width="70" height="115.0" rx="3" fill="#de7d58" stroke="none" stroke-width="2"/>
+<rect x="602" y="666.0" width="70" height="69.0" rx="3" fill="#de7d58" stroke="none" stroke-width="2"/>
+<rect x="684" y="689.0" width="70" height="46.0" rx="3" fill="#de7d58" stroke="none" stroke-width="2"/>
+<path d="M440 355L505 355" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<path d="M800 585L995 400" stroke="#367bb5" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="915" y="625" text-anchor="start" font-family="Arial,sans-serif" font-size="28" font-weight="700" fill="#17334a">T² KL(q || p)</text>
+<text x="915" y="678" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#17334a">+ hard-label loss</text>
+<text x="85" y="690" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="400" fill="#17334a">Temperature exposes</text>
+<text x="85" y="730" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="400" fill="#17334a">relative alternatives</text>
+<rect x="50" y="815" width="1300" height="145" rx="10" fill="#fff8dc" stroke="#d4b359" stroke-width="2"/>
+<text x="75" y="852" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Teacher and student probabilities share the same class interface and temperature.</text>
+<text x="75" y="883" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">The scaled logit gradient is T(p − q); high-temperature matching concerns centered logits.</text>
+<text x="75" y="914" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#17334a">Smaller deployment cost requires an efficient student architecture and measured execution.</text>
+</svg>

@@ -15,9 +15,11 @@ const steps = [
  {id:'gpu-performance', before:['comp-arch','ai-performance'], goal:'Understand GPU execution, memory access, kernels, and compilation.'},
  {id:'distributed-training', before:['llm-basics','ai-performance','ai-networking','gpu-performance'], goal:'Budget training state, shard work, and preserve progress across failures.'},
  {id:'llm-serving', before:['llm-basics','ai-performance','ai-networking','gpu-performance'], goal:'Combine batching, cache management, scheduling, and production measurement.'},
+ {id:'efficient-ml', before:['llm-basics','ai-performance'], goal:'Connect pruning, quantization, distillation, and model design to quality and deployment cost.'},
+ {id:'efficient-vision', before:['llm-basics','gpu-performance'], goal:'Understand image tokens, diffusion objectives, sampling, and efficient generation.'},
  {id:'efficient-ai', before:['comp-arch','llm-architectures','gpu-performance'], goal:'Evaluate quantization and algorithm–hardware design tradeoffs.'},
 ].map(step => ({...step, ...SERIES.find(s => s.id === step.id)!, articles:publishedSeriesOrder(posts.filter(p=>p.data.series===step.id)).map(p=>({id:p.id,title:p.data.title,href:`/blog/${p.id}/`}))})).filter(s=>s.articles.length);
-const paths = {all:steps.map(s=>s.id),infra:['comp-arch','llm-basics','ai-performance','ai-networking','gpu-performance','distributed-training','llm-serving'],models:['llm-basics','llm-architectures','llm-serving'],hardware:['comp-arch','ai-performance','gpu-performance','llm-architectures','efficient-ai']};
+const paths = {all:steps.map(s=>s.id),infra:['comp-arch','llm-basics','ai-performance','ai-networking','gpu-performance','distributed-training','llm-serving'],models:['llm-basics','llm-architectures','efficient-ml','efficient-vision','llm-serving'].filter(id=>steps.some(s=>s.id===id)),hardware:['comp-arch','ai-performance','gpu-performance','llm-architectures','efficient-ai']};
 const mapHeight = Math.ceil(steps.length / 2) * 128 - 32;
 const edges = steps.flatMap((step, target) => step.before.flatMap(id => {
  const source = steps.findIndex(s => s.id === id);
