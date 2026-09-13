@@ -4,7 +4,7 @@
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Same document, wildly different dependency chains</text>
 
   <!-- Panel A: RNN -->
-  <text x="90" y="268" font-size="34" font-weight="bold" fill="#8a5138">RNN training: one step at a time</text>
+  <text x="90" y="268" font-size="34" font-weight="bold" fill="#8a5138">RNN training: 1 step at a time</text>
 
   <!-- chain boxes -->
   <g stroke="#b06a4e" stroke-width="3" fill="#f0ddd0">
@@ -96,12 +96,12 @@
   </g>
 
   <rect x="95" y="740" width="1010" height="86" rx="10" fill="#a8bf92" stroke="#5b7c46" stroke-width="3"/>
-  <text x="600" y="776" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">one layer = a few big matrix multiplies</text>
+  <text x="600" y="776" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">1 layer = a few big matrix multiplies</text>
   <text x="600" y="810" text-anchor="middle" font-size="24" fill="#55584a">every token processed simultaneously</text>
   <text x="600" y="872" text-anchor="middle" font-size="28" fill="#55584a">&#215; 24 layers</text>
-  <text x="600" y="925" text-anchor="middle" font-size="27" font-weight="bold" fill="#5b7c46">critical path = ~150 big ops, each one fills the GPU</text>
+  <text x="600" y="925" text-anchor="middle" font-size="27" font-weight="bold" fill="#5b7c46">critical path = ~150 big ops, wide operations expose parallel work</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics &#183; tf-3</text>
   <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Short chains scale</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Elapsed time ≥ max(total work / useful rate, dependent chain)</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">Parallel token rows shorten position dependencies; layers still depend</text></g></svg>

@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif"><rect width="1200" height="1200" fill="#fdfbf4"/><g transform="translate(102 0) scale(0.83)">
 <rect width="1200" height="1200" fill="#fdfbf4"/>
 <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Where the Microseconds Go</text>
-<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Eager launch vs. CUDA graph replay, one decode step</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Eager launch vs. CUDA graph replay, 1 decode step</text>
 
 <!-- Panel A -->
 <text x="100" y="252" font-size="32" font-weight="bold" fill="#33362a">Eager: CPU launches every kernel</text>
@@ -52,7 +52,7 @@
 <text x="290" y="535" font-size="26" fill="#b04a3a">gap = GPU idle, waiting for the next launch</text>
 
 <!-- Panel B -->
-<text x="100" y="618" font-size="32" font-weight="bold" fill="#33362a">Graph replay: one launch, GPU runs the whole DAG</text>
+<text x="100" y="618" font-size="32" font-weight="bold" fill="#33362a">Graph replay: 1 launch, GPU runs the whole DAG</text>
 
 <!-- CPU lane B -->
 <rect x="200" y="640" width="900" height="70" fill="#f4f1e6"/>
@@ -90,4 +90,4 @@
 <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
 <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · orch-2</text>
 <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">kill the launch tax</text>
-</svg>
+</g><rect x="60" y="996" width="1080" height="156" rx="12" fill="#e7edd9"/><text x="85" y="1033" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" font-weight="bold" fill="#33362a">Eager ≈ h+d+(n−1) max(h,d); graph ≈ g+nd+e</text><text x="85" y="1080" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" font-weight="normal" fill="#33362a">500 kernels; h = 5 µs; d = 4 µs → eager ≈ 2.504 ms</text><text x="85" y="1122" font-family="Helvetica Neue, Arial, sans-serif" font-size="23" font-weight="normal" fill="#33362a">h: submission; d: device; g: replay; e: residual graph overhead</text></svg>

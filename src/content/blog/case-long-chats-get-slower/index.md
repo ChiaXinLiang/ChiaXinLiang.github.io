@@ -2,6 +2,7 @@
 title: "Case File: Long Chats Get Slower and Slower"
 description: "Model KV-cache growth, distinguish capacity from attention traffic, and test why long conversations slow down even when weights and GPU utilization remain stable."
 pubDate: 'Sep 12 2026'
+updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'case-7'
 order: 39
@@ -9,6 +10,7 @@ series: 'ai-performance'
 topic: 'Troubleshooting'
 tags: [troubleshooting, inference, performance]
 ---
+
 A conversation streams quickly at its first turn and slowly at its twentieth. The model checkpoint, GPU, and decoding parameters are unchanged. Restarting the conversation restores the earlier speed. That pattern suggests context-dependent work, but it does not yet distinguish longer prompt prefill, larger decode attention, cache recomputation, or a client that repeatedly sends unnecessary history.
 
 This case follows a hypothetical service whose contexts grow from 4096 to 32768 tokens. Its operators see both higher first-token latency on later turns and wider gaps between generated tokens. Treat those as separate symptoms. The first concerns processing a newly submitted prompt; the second concerns repeatedly consulting historical keys and values during decode. Both depend on context, but their costs and remedies differ.
@@ -19,7 +21,7 @@ Conversation length is not the same as the number of visible user messages. The 
 
 Track how much history is reused across turns. Many stateless chat APIs receive the entire transcript again. A server-side prefix cache may avoid recomputing matching prefix tokens, but the presence of a cache feature does not guarantee a hit. Differences in templates, ordering, tokenization, or content can invalidate the reusable prefix.
 
-Separate three lengths: the serialized prompt length, the reused prefix length, and the active decode context length. A prompt of 16000 tokens with 14000 cached prefix tokens has only 2000 newly computed prompt tokens, yet its decode attention can still need to consult a much longer retained history. Prefix reuse changes prefill work; it does not make all later attention work constant.
+Separate 3 lengths: the serialized prompt length, the reused prefix length, and the active decode context length. A prompt of 16000 tokens with 14000 cached prefix tokens has only 2000 newly computed prompt tokens, yet its decode attention can still need to consult a much longer retained history. Prefix reuse changes prefill work; it does not make all later attention work constant.
 
 Record input and output lengths per turn and per request cohort. Later turns may generate longer answers, use tools more frequently, or arrive at busier times. Compare token intervals at matched active batch sizes before attributing every latency change to context growth. Good observability makes the context hypothesis testable instead of merely intuitive.
 
@@ -35,13 +37,13 @@ $$
 M_{\mathrm{KV}}=2 L H_{\mathrm{kv}} d s_{\mathrm{kv}}\sum_i C_i.
 $$
 
-The leading two accounts for keys and values. Use the KV-head count rather than the query-head count for grouped-query or multi-query attention. Using all query heads in the formula can overestimate the cache by the grouping ratio. Conversely, assuming every model uses grouped-query attention can severely underestimate capacity.
+The leading 2 accounts for keys and values. Use the KV-head count rather than the query-head count for grouped-query or multi-query attention. Using all query heads in the formula can overestimate the cache by the grouping ratio. Conversely, assuming every model uses grouped-query attention can severely underestimate capacity.
 
 This formula covers the raw tensors. A production allocation also includes block rounding, metadata, quantization scales when applicable, allocator overhead, and any implementation-specific cache layout. Reserved workspaces and activations belong in the total GPU memory budget even though they are not KV entries. Distinguish raw size from the serving engine's available block pool.
 
-For an illustrative model with 32 layers, eight KV heads, dimension 128, and BF16 cache entries, each retained token uses 131072 bytes, exactly 128 KiB. At 4096 tokens, one sequence holds 512 MiB. At 32768 tokens, it holds 4 GiB. Sixteen such long-context sequences require 64 GiB of raw KV data before weights and overhead.
+For an illustrative model with 32 layers, 8 KV heads, dimension 128, and BF16 cache entries, each retained token uses 131072 bytes, exactly 128 KiB. At 4096 tokens, 1 sequence holds 512 MiB. At 32768 tokens, it holds 4 GiB. 16 such long-context sequences require 64 GiB of raw KV data before weights and overhead.
 
-Suppose a GPU has 80 GiB usable in our hypothetical budget, weights and persistent buffers consume 20 GiB, and another 8 GiB is reserved for workspaces and operating margin. The remaining 52 GiB supports at most thirteen 4-GiB caches by raw arithmetic. Block fragmentation or additional buffers can lower that number. Sixteen long conversations cannot be admitted at their full length under these assumptions, even if the same server comfortably supports sixteen short ones.
+Suppose a GPU has 80 GiB usable in our hypothetical budget, weights and persistent buffers consume 20 GiB, and another 8 GiB is reserved for workspaces and operating margin. The remaining 52 GiB supports at most 13 4-GiB caches by raw arithmetic. Block fragmentation or additional buffers can lower that number. 16 long conversations cannot be admitted at their full length under these assumptions, even if the same server comfortably supports 16 short ones.
 
 ## Capacity and speed are different problems
 
@@ -55,7 +57,7 @@ $$
 
 This model intentionally omits attention arithmetic, intermediate traffic, launch overhead, and cache effects. Actual HBM reads depend on the kernel's tiling and reuse, especially with grouped-query attention. The estimate is useful as a trend model, not a replacement for profiling.
 
-If the batch contains sixteen short sequences, their raw KV total is 8 GiB. Growing them to 32768 tokens raises it to 64 GiB. With a hypothetical 16-GiB weight stream and 1 TiB/s effective bandwidth, the simple traffic lower bound rises from about 23.4 milliseconds to 78.1 milliseconds per step. Individual streaming speed falls from a weight-and-cache ceiling near 43 tokens per second to roughly 13, even though the checkpoint is identical.
+If the batch contains 16 short sequences, their raw KV total is 8 GiB. Growing them to 32768 tokens raises it to 64 GiB. With a hypothetical 16-GiB weight stream and 1 TiB/s effective bandwidth, the simple traffic lower bound rises from about 23.4 milliseconds to 78.1 milliseconds per step. Individual streaming speed falls from a weight-and-cache ceiling near 43 tokens per second to roughly 13, even though the checkpoint is identical.
 
 The calculation also reveals a capacity violation under the previous 52-GiB cache budget. In reality the engine would need to admit fewer sequences, limit their histories, distribute the model differently, or handle memory pressure through another supported policy. Never present a throughput estimate for an impossible memory configuration as an achievable benchmark.
 
@@ -77,6 +79,17 @@ For C equal to 4096 and G equal to 1024, the sum is 4718080 token-history entrie
 
 Models with sliding-window or other restricted attention can have different scaling. If a layer consults only a window of size C_max, its historical work can stop growing after that window fills. Hybrid models may mix local and full-attention layers. Read the model configuration and serving implementation before applying a full-attention equation to every layer.
 
+A fixed-batch context sweep can estimate the history cost without assuming that every slowdown comes from the same cause. If W is the approximately fixed weight stream, m cache bytes per token, B active sequences with matched length C, and beta effective bandwidth:
+
+$$
+t(C)\approx t_0+\frac{W+BmC}{\beta},\qquad
+\frac{dt}{dC}\approx\frac{Bm}{\beta}.
+$$
+
+The intercept t_0 collects exposed work not represented by the traffic estimate. For B equal to 8, m equal to 131072 bytes, and beta equal to 1 TiB/s, the predicted slope is about 0.000954 milliseconds per added context token. Increasing C from 4096 to 32768 adds approximately 27.34 milliseconds of ideal cache service per iteration.
+
+Fit that trend using several context lengths while holding batch, dtype, and kernel path fixed. A smooth measured slope supports the history-traffic explanation; a sudden jump accompanied by preemptions supports a separate capacity mechanism. A changed attention kernel can also change the slope or intercept. Prefix reuse reduces new prefill work but not this full-attention context term. Shortening history changes the information supplied to the model, so accept that method only with task-quality checks as well as a faster latency curve.
+
 ## Distinguish growth from memory-pressure amplification
 
 Plot inter-token latency against retained context at fixed batch size. A gradual increase without preemptions supports the attention-growth explanation. Abrupt jumps near a cache threshold suggest capacity effects layered on top. Correlate those jumps with available cache blocks, active requests, and preemption or recomputation events.
@@ -95,7 +108,7 @@ Retrieve relevant earlier turns rather than appending every turn. This changes t
 
 KV quantization reduces stored cache bytes when the engine and model support it. Its effect on speed depends on the attention kernel and conversion overhead, while its quality impact depends on the quantization method and workload. Validate long-context tasks, because short-prompt evaluations may miss the very accuracy loss this change could introduce.
 
-Lower concurrency for long contexts or route them to a separate pool. This can reduce memory pressure and interference, although it may increase queueing unless capacity is added. Admit work according to its expected token-state footprint rather than a single request-count limit. Sixteen short requests and sixteen long conversations are not equivalent resource commitments.
+Lower concurrency for long contexts or route them to a separate pool. This can reduce memory pressure and interference, although it may increase queueing unless capacity is added. Admit work according to its expected token-state footprint rather than a single request-count limit. 16 short requests and 16 long conversations are not equivalent resource commitments.
 
 Prefix caching helps repeated prompt processing; paged allocation helps cache management and sharing opportunities. Neither removes the information that full attention must consult during decode. The separate article on [KV cache as a first-class serving resource](/blog/kv-cache-first-class-citizen/) develops those management decisions.
 

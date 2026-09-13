@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
 <rect width="1200" height="1200" fill="#fdfbf4"/>
-<text x="90" y="100" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">One Warp, Two Outcomes</text>
+<text x="90" y="100" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">1 Warp, 2 Outcomes</text>
 <text x="90" y="156" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">Where 32 loads land decides how many bytes move</text>
 <text x="90" y="245" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="bold" fill="#5b7c46">Coalesced &#8212; A[row][col + t]</text>
 <text x="1110" y="245" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">threads t = 0 &#8230; 31</text>
@@ -69,7 +69,7 @@
 <line x1="1031.0" y1="322" x2="757.2" y2="425" stroke="#a8bf92" stroke-width="1.5"/>
 <line x1="1061.0" y1="322" x2="768.0" y2="425" stroke="#a8bf92" stroke-width="1.5"/>
 <rect x="420" y="425" width="360" height="56" fill="#e7edd9" stroke="#5b7c46" stroke-width="2.5"/>
-<text x="600" y="461" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">one 128-byte line &#183; 4 sectors</text>
+<text x="600" y="461" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">1 128-byte line &#183; 4 sectors</text>
 <text x="600" y="540" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="27" fill="#55584a">128 B moved &#183; 128 B used &#183; <tspan font-weight="bold" fill="#5b7c46">100% efficient</tspan></text>
 <text x="90" y="640" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="bold" fill="#b06a4e">Strided &#8212; A[row + t][col]  (stride 16 KB)</text>
 <rect x="120" y="675" width="22" height="32" fill="#f4f1e6" stroke="#75786a" stroke-width="1.5"/>
@@ -168,9 +168,9 @@
 <rect x="990" y="780" width="22" height="56" fill="#f0ddd0" stroke="#8a5138" stroke-width="1.5"/>
 <rect x="1020" y="780" width="22" height="56" fill="#f0ddd0" stroke="#8a5138" stroke-width="1.5"/>
 <rect x="1050" y="780" width="22" height="56" fill="#f0ddd0" stroke="#8a5138" stroke-width="1.5"/>
-<text x="600" y="880" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">32 separate 128-byte lines &#183; one 32 B sector used in each</text>
+<text x="600" y="880" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">32 separate 128-byte lines &#183; 1 32 B sector used in each</text>
 <text x="600" y="935" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="27" fill="#55584a">1,024 B moved &#183; 128 B used &#183; <tspan font-weight="bold" fill="#b04a3a">12.5% efficient</tspan></text>
 <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
 <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · mem-1</text>
 <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">stride is the enemy</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Sector efficiency = useful bytes / requested bytes = 128/(32ns)</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">ns = 4 → 100%; ns = 32 → 12.5%; cache can reduce physical HBM bytes</text></g></svg>

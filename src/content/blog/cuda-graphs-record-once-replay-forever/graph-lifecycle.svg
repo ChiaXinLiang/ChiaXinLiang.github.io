@@ -54,7 +54,7 @@
 <path d="M 869 445 L 866 421 L 888 432 Z" fill="#b06a4e"/>
 <text x="950" y="485" text-anchor="middle" font-size="26" font-weight="bold" fill="#8a5138">every</text>
 <text x="950" y="517" text-anchor="middle" font-size="26" font-weight="bold" fill="#8a5138">step</text>
-<text x="950" y="656" text-anchor="middle" font-size="24" fill="#55584a">One cudaGraphLaunch,</text>
+<text x="950" y="656" text-anchor="middle" font-size="24" fill="#55584a">1 cudaGraphLaunch,</text>
 <text x="950" y="688" text-anchor="middle" font-size="24" fill="#55584a">GPU walks the DAG.</text>
 <text x="950" y="728" text-anchor="middle" font-size="24" fill="#55584a">Under 1 µs per node,</text>
 <text x="950" y="760" text-anchor="middle" font-size="24" fill="#55584a">no host round trips.</text>

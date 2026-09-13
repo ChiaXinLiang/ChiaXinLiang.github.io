@@ -35,10 +35,10 @@
   </g>
 
   <!-- completion markers -->
-  <text x="600" y="920" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" fill="#55584a">from t3 on, one instruction finishes EVERY tick —</text>
-  <text x="600" y="962" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" font-weight="700" fill="#b06a4e">latency per instruction unchanged, throughput ×3</text>
+  <text x="600" y="920" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" fill="#55584a">from t3 on, 1 instruction finishes EVERY tick —</text>
+  <text x="600" y="962" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" font-weight="700" fill="#b06a4e">same latency; steady-state throughput ×3</text>
 
   <line x1="80" y1="1090" x2="1120" y2="1090" stroke="#e8e4d7" stroke-width="3"/>
   <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">Comp Arch · arch-1</text>
-  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">idealized three-stage example</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">n=4, k=3: cycles = n + k − 1 = 6</text>
 </svg>

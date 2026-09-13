@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif"><rect width="1200" height="1200" fill="#fdfbf4"/><g transform="translate(102 0) scale(0.83)">
 <rect width="1200" height="1200" fill="#fdfbf4"/>
 <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Spending 13.5 TB</text>
-<text x="90" y="156" font-size="30" fill="#75786a">A 1-trillion-parameter FP8 model served on one NVL72</text>
+<text x="90" y="156" font-size="30" fill="#75786a">A 1-trillion-parameter FP8 model served on 1 NVL72</text>
 
 <!-- segment labels with leaders -->
 <text x="90" y="272" font-size="26" fill="#8a5138">Weights: 1.0 TB</text>
@@ -29,4 +29,4 @@
 <text x="90" y="1078" font-size="24" fill="#a3a08f">Napkin math; specs from NVIDIA GB200 NVL72 sheet</text>
 <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · rack-1</text>
 <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">decode buys bandwidth</text>
-</svg>
+</g><rect x="60" y="996" width="1080" height="156" rx="12" fill="#e7edd9"/><text x="85" y="1033" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" font-weight="bold" fill="#33362a">Sequences ≤ floor(cache bytes / bytes per sequence)</text><text x="85" y="1080" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" font-weight="normal" fill="#33362a">11.2 TB / (128,000 × 245,760 B) → at most 356</text><text x="85" y="1122" font-family="Helvetica Neue, Arial, sans-serif" font-size="23" font-weight="normal" fill="#33362a">Hypothetical balanced cache; KV replication lowers capacity</text></svg>

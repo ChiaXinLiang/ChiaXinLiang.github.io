@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif"><rect width="1200" height="1200" fill="#fdfbf4"/><g transform="translate(102 0) scale(0.83)">
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto">
       <path d="M0,0 L8,4 L0,8 z" fill="#75786a"/>
@@ -39,7 +39,7 @@
   <!-- worked example box -->
   <rect x="620" y="480" width="490" height="320" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
   <rect x="620" y="480" width="10" height="320" fill="#5b7c46"/>
-  <text x="662" y="534" font-size="28" font-weight="bold" fill="#33362a">70B model &#183; 64 GPUs &#183; 400 Gb/s</text>
+  <text x="662" y="534" font-size="28" font-weight="bold" fill="#33362a">Analytical 140 GB buffer &#183; 64 GPUs &#183; 400 Gb/s</text>
   <text x="662" y="586" font-size="26" fill="#55584a">S = 140 GB (BF16 gradients)</text>
   <text x="662" y="628" font-size="26" fill="#55584a">B = 50 GB/s per link</text>
   <text x="662" y="670" font-size="26" fill="#55584a">factor = 2 &#215; 63/64 = 1.97</text>
@@ -51,5 +51,5 @@
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; net-1</text>
-  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">two passes, one ring</text>
-</svg>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">2 passes, 1 ring</text>
+</g><rect x="60" y="996" width="1080" height="156" rx="12" fill="#e7edd9"/><text x="85" y="1033" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" font-weight="bold" fill="#33362a">Ring time ≈ 2(N−1) × [startup + S/(Nβ)]</text><text x="85" y="1080" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" font-weight="normal" fill="#33362a">N: ranks; S: bytes/rank; β: delivered link bandwidth</text><text x="85" y="1122" font-family="Helvetica Neue, Arial, sans-serif" font-size="23" font-weight="normal" fill="#33362a">More ranks shrink chunks but add message startups; ideal ring</text></svg>

@@ -2,7 +2,7 @@
   <rect width="1200" height="1200" fill="#fdfbf4"/>
 
   <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Temperature Reshapes the Dice</text>
-  <text x="90" y="156" font-size="30" fill="#75786a">Same four logits (5, 4, 3, 1), three temperatures</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">Same 4 logits (5, 4, 3, 1), 3 temperatures</text>
 
   <!-- Panel titles -->
   <text x="252" y="300" font-size="28" font-weight="bold" fill="#33362a" text-anchor="middle">T = 0.5 · sharper</text>
@@ -63,4 +63,4 @@
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics · llm-3</text>
   <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">randomness is a dial</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">pi = exp(zi/T) / Σj exp(zj/T)</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">T rescales logit gaps: p1/p2 = exp((z1 − z2)/T); weights unchanged</text></g></svg>

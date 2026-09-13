@@ -94,7 +94,7 @@
 
 <!-- annotations -->
 <text x="600" y="884" text-anchor="middle" font-size="26" fill="#55584a">each cell multiplies, adds, and passes both values on;</text>
-<text x="600" y="922" text-anchor="middle" font-size="26" fill="#55584a">rows start one cycle apart, so operands meet in step</text>
+<text x="600" y="922" text-anchor="middle" font-size="26" fill="#55584a">rows start 1 cycle apart, so operands meet in step</text>
 
 <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
 <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Redrawn from Jouppi et al. (2017), Fig. 4</text>

@@ -2,7 +2,7 @@
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <g font-family="Helvetica Neue, Arial, sans-serif">
     <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Throughput vs batch size</text>
-    <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Llama-3-8B &#183; FP16 &#183; one H100 &#183; 4K context (bandwidth model)</text>
+    <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Llama-3-8B &#183; FP16 &#183; 1 H100 &#183; 4K context (bandwidth model)</text>
 
     <text x="225" y="262" font-size="24" fill="#75786a">Aggregate tokens/sec</text>
 
@@ -51,6 +51,6 @@
     <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
     <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Computed from HBM bandwidth math (3.35 TB/s)</text>
     <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; opt-1</text>
-    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">batch until it bends</text>
+    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">tok/s ≤ B × bandwidth / (W + B × KV)</text>
   </g>
 </svg>

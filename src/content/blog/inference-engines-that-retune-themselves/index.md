@@ -1,6 +1,7 @@
 ---
 title: 'Inference Engines That Retune Themselves at Runtime'
 description: "Traffic moves 5x in a day while your serving config stands still: how adaptive engines switch precision, reshape parallelism, and migrate KV cache on the fly."
+updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'scale-5'
@@ -10,17 +11,17 @@ topic: 'Inference'
 tags: [inference, serving, adaptive]
 ---
 
-The same eight H100s serving the same 70B model can decode roughly 16,000 tokens per second under one configuration and 37,000 under another. Nothing about the hardware changes between those two numbers; what changes is the weight precision, the KV cache format, and the concurrency cap, and which configuration is *right* depends on what the traffic looks like at that hour. Traffic refuses to hold still. Production LLM APIs routinely swing 5x between the 4 a.m. trough and the lunchtime peak, and the prompt mix shifts underneath the volume curve: short chat turns in the morning, long RAG contexts at midday, agent sessions with 30k-token histories in the evening.
+The same 8 H100s serving the same 70B model can decode roughly 16,000 tokens per second under 1 configuration and 37,000 under another. Nothing about the hardware changes between those 2 numbers; what changes is the weight precision, the KV cache format, and the concurrency cap, and which configuration is *right* depends on what the traffic looks like at that hour. Traffic refuses to hold still. Production LLM APIs routinely swing 5x between the 4 a.m. trough and the lunchtime peak, and the prompt mix shifts underneath the volume curve: short chat turns in the morning, long RAG contexts at midday, agent sessions with 30k-token histories in the evening.
 
 Most serving stacks handle this the way we handled it in 2023: benchmark once, pick a tensor-parallel degree, a precision, a scheduler budget, and ship that config for months. The config is correct for exactly the traffic snapshot it was benchmarked on. Every other hour of the day it is leaving something on the table, and on a large fleet "something" is measured in millions of dollars. The frontier of inference at scale is treating the serving stack as a control system: measure goodput continuously, compare it to the SLO, and actuate the knobs that close the gap.
 
 If goodput is a fuzzy term for you, [the goodput article](/blog/goodput-vs-utilization/) covers it; the one-line version is *throughput that actually meets the latency SLO*, typically defined over TTFT and TPOT targets ([basics here](/blog/ttft-and-tpot/)). Adaptive engines optimize goodput per dollar, not utilization, and that distinction drives everything below.
 
-## The four knob families
+## The 4 knob families
 
-An adaptive serving stack has, broadly, four families of actuators. They differ enormously in how fast they act and how much they cost to move.
+An adaptive serving stack has, broadly, 4 families of actuators. They differ enormously in how fast they act and how much they cost to move.
 
-**Precision switching (FP8 ↔ FP4).** Decode is bandwidth-bound: every generated token requires streaming the weights and the active KV cache through HBM. Halving the weight bytes with NVFP4 roughly halves the weight-streaming floor. The trick is that you do not quantize at runtime; you keep two pre-quantized, pre-calibrated copies of the checkpoint, with the inactive one staged in host RAM, and swap the resident copy when load crosses a threshold. Quality deltas are measured offline on your evals; the runtime decision is a deliberate quality-for-capacity trade, taken only when the alternative is queueing or shedding requests. (The formats themselves are covered in [NVFP4 vs MXFP4](/blog/nvfp4-vs-mxfp4-the-4bit-format-war/).)
+**Precision switching (FP8 ↔ FP4).** Decode is bandwidth-bound: every generated token requires streaming the weights and the active KV cache through HBM. Halving the weight bytes with NVFP4 roughly halves the weight-streaming floor. The trick is that you do not quantize at runtime; you keep 2 pre-quantized, pre-calibrated copies of the checkpoint, with the inactive 1 staged in host RAM, and swap the resident copy when load crosses a threshold. Quality deltas are measured offline on your evals; the runtime decision is a deliberate quality-for-capacity trade, taken only when the alternative is queueing or shedding requests. (The formats themselves are covered in [NVFP4 vs MXFP4](/blog/nvfp4-vs-mxfp4-the-4bit-format-war/).)
 
 **Parallelism reshaping (TP ↔ PP, and the P/D ratio).** Tensor parallelism aggregates memory bandwidth across GPUs, which cuts per-token latency, but pays an all-reduce every layer. Pipeline parallelism communicates far less and yields better throughput per GPU, but adds pipeline latency and bubbles. Interactive daytime traffic wants TP; overnight batch backfill tolerates PP happily. In disaggregated stacks the analogous knob is the prefill-to-decode worker ratio: NVIDIA's Dynamo ships a Planner component that watches TTFT and inter-token latency against SLO targets and rebalances or scales prefill and decode workers accordingly. Reshaping is the slowest actuator, since it requires draining in-flight requests from the affected group.
 
@@ -30,9 +31,9 @@ An adaptive serving stack has, broadly, four families of actuators. They differ 
 
 ![Serving as a feedback controller: SENSE — Queue depth; KV occupancy — Goodput under TTFT/TPOT SLOs; DECIDE — Thresholds, forecast, hysteresis — Account for transition costs; ACTUATE — Batch/chunk: ms; KV moves: seconds — Parallel reshape: tens of seconds+. Original controller schematic · Dynamo; DistServe (2024)](./control-loop.png)
 
-## A worked example: one day, one node
+## A worked example: 1 day, 1 node
 
-Numbers make this concrete. Take a dense 70B model on one 8×H100 node, TP8. The relevant hardware constants: 8 × 80 GB = 640 GB of HBM, and 8 × 3.35 TB/s = 26.8 TB/s of aggregate bandwidth. FP8 weights are 70 GB; NVFP4 weights are 35 GB. With 80 layers, 8 KV heads, and head dimension 128, the KV cache costs 80 × 8 × 128 × 2 × 2 bytes = 320 KB per token at FP16, or 160 KB at FP8.
+Numbers make this concrete. Take a dense 70B model on 1 8×H100 node, TP8. The relevant hardware constants: 8 × 80 GB = 640 GB of HBM, and 8 × 3.35 TB/s = 26.8 TB/s of aggregate bandwidth. FP8 weights are 70 GB; NVFP4 weights are 35 GB. With 80 layers, 8 KV heads, and head dimension 128, the KV cache costs 80 × 8 × 128 × 2 × 2 bytes = 320 KB per token at FP16, or 160 KB at FP8.
 
 A decode step must stream the weights once plus every active sequence's KV, so a useful floor is:
 
@@ -42,15 +43,15 @@ step time ≈ (weight bytes + total KV bytes) / 26.8 TB/s
 
 This is a roofline-style bound; real engines land within about 1.3–2x of it once kernel overheads and all-reduces are counted. The *ratios* between configurations survive that gap, which is what the controller cares about.
 
-**03:00, the trough.** Ten interactive streams. Even naively, step bytes are 70 GB + 10 × 2,000 tokens × 160 KB ≈ 73 GB, a 2.7 ms TPOT floor. Latency is free at night. A static config stops there; an adaptive one notices the SLO headroom, raises the batch cap, and pulls from the backfill queue (evals, summarization jobs, cache warming). At 300 backfill streams averaging 2k context: 70 + 96 = 166 GB per step, a 6.2 ms floor, about 48,000 tok/s of otherwise-free batch work. If the trough is long and deep enough, it reshapes to PP to shed the all-reduce tax entirely.
+**03:00, the trough.** 10 interactive streams. Even naively, step bytes are 70 GB + 10 × 2,000 tokens × 160 KB ≈ 73 GB, a 2.7 ms TPOT floor. Latency is free at night. A static config stops there; an adaptive 1 notices the SLO headroom, raises the batch cap, and pulls from the backfill queue (evals, summarization jobs, cache warming). At 300 backfill streams averaging 2k context: 70 + 96 = 166 GB per step, a 6.2 ms floor, about 48,000 tok/s of otherwise-free batch work. If the trough is long and deep enough, it reshapes to PP to shed the all-reduce tax entirely.
 
 **09:00, the ramp.** Chat traffic, short prompts, TTFT-sensitive. The engine is back in TP8 and the contested knob is the chunked-prefill budget: a bigger chunk finishes a new request's prefill sooner (better TTFT) but stalls the decode of every ongoing stream for longer (worse TPOT). There is no statically correct value, because the right trade depends on the arrival rate and prompt-length mix of the current minute. This is the knob a controller retunes continuously.
 
-**13:00, the peak.** Two hundred concurrent streams at 4k average context, FP8 weights, FP16 KV: 70 + 200 × 4,000 × 320 KB = 70 + 256 = 326 GB per step. That is a 12.2 ms TPOT floor and about 16,400 tok/s, and the queue is growing. The engine swaps in the FP4 weight copy and switches new sessions to FP8 KV. At the same 200 streams that would be 35 + 128 = 163 GB and 6.1 ms, but the controller does not want lower latency; it wants to stop shedding load. So it holds the 12 ms SLO and doubles admission: 400 streams × 4k × 160 KB = 256 GB, plus 35 GB of weights, is 291 GB per step, a 10.9 ms floor, roughly 37,000 tok/s. Same node, same model family, 2.2x the goodput, paid for with a quality delta that was measured and signed off before the switch was ever armed.
+**13:00, the peak.** 2 hundred concurrent streams at 4k average context, FP8 weights, FP16 KV: 70 + 200 × 4,000 × 320 KB = 70 + 256 = 326 GB per step. That is a 12.2 ms TPOT floor and about 16,400 tok/s, and the queue is growing. The engine swaps in the FP4 weight copy and switches new sessions to FP8 KV. At the same 200 streams that would be 35 + 128 = 163 GB and 6.1 ms, but the controller does not want lower latency; it wants to stop shedding load. So it holds the 12 ms SLO and doubles admission: 400 streams × 4k × 160 KB = 256 GB, plus 35 GB of weights, is 291 GB per step, a 10.9 ms floor, roughly 37,000 tok/s. Same node, same model family, 2.2x the goodput, paid for with a quality delta that was measured and signed off before the switch was ever armed.
 
-**20:00, the agents.** Volume is moderate but contexts are long and bursty. A single agent session with a 30k-token history holds 30,000 × 320 KB ≈ 9.6 GB of FP16 KV, and it spends much of its wall-clock time idle, waiting on tool calls. Sixty such sessions would be 576 GB, nearly the whole node's HBM, mostly cold. The engine offloads idle-session KV to CPU DRAM over PCIe Gen5 (~64 GB/s per direction): about 0.15 s out and 0.15 s back for that 9.6 GB, invisible next to a multi-second tool call, and it frees HBM for streams that are actually decoding. Hot shared prefixes stay pinned; see [the KV cache article](/blog/kv-cache-explained/) for why prefix reuse is worth protecting.
+**20:00, the agents.** Volume is moderate but contexts are long and bursty. A single agent session with a 30k-token history holds 30,000 × 320 KB ≈ 9.6 GB of FP16 KV, and it spends much of its wall-clock time idle, waiting on tool calls. 60 such sessions would be 576 GB, nearly the whole node's HBM, mostly cold. The engine offloads idle-session KV to CPU DRAM over PCIe Gen5 (~64 GB/s per direction): about 0.15 s out and 0.15 s back for that 9.6 GB, invisible next to a multi-second tool call, and it frees HBM for streams that are actually decoding. Hot shared prefixes stay pinned; see [the KV cache article](/blog/kv-cache-explained/) for why prefix reuse is worth protecting.
 
-![Four traffic phases, different actuators: 03:00 / 09:00 — Trough: backfill useful batch work — Ramp: retune chunked prefill; 13:00 PEAK — Use prevalidated precision variants — Raise admission within quality limits; 20:00 AGENTS — Long contexts, idle tool-call intervals — Offload cold KV; pin hot prefixes. Hypothetical day · an architectural proposal, not live data](./traffic-day.png)
+![4 traffic phases, different actuators: 03:00 / 09:00 — Trough: backfill useful batch work — Ramp: retune chunked prefill; 13:00 PEAK — Use prevalidated precision variants — Raise admission within quality limits; 20:00 AGENTS — Long contexts, idle tool-call intervals — Offload cold KV; pin hot prefixes. Hypothetical day · an architectural proposal, not live data](./traffic-day.png)
 
 ## Going deeper: it really is a control system
 
@@ -58,13 +59,27 @@ Once you draw the loop, classical control problems show up on schedule.
 
 **Sense.** The signal is per-SLO-class goodput plus leading indicators: queue depth, KV occupancy, prefill backlog. Utilization is explicitly not in the loop; a node can sit at 95% utilization while goodput collapses, and a controller that optimizes utilization will happily drive you there.
 
-**Decide.** In practice there is a maturity ladder. Rule-based thresholds with hysteresis come first. Then forecasting: diurnal traffic is highly predictable, so the controller can begin a two-minute parallelism reshape *before* the ramp instead of reacting mid-ramp. Learned policies come last, and mostly for the cheap, reversible knobs.
+**Decide.** In practice there is a maturity ladder. Rule-based thresholds with hysteresis come first. Then forecasting: diurnal traffic is highly predictable, so the controller can begin a 2-minute parallelism reshape *before* the ramp instead of reacting mid-ramp. Learned policies come last, and mostly for the cheap, reversible knobs.
 
 **Actuate, respecting cost.** The actuators form a hierarchy. Scheduler knobs move in milliseconds and are free. KV migration costs seconds of PCIe traffic. A precision swap costs seconds of weight streaming from host RAM. A TP↔PP reshape costs tens of seconds to minutes of drained capacity, which means the controller must forecast that the new shape will repay the transition before it commits. Cheap knobs absorb noise; expensive knobs follow trends.
 
 **Stay stable.** A controller that flips FP8→FP4 at 70% load and back at 69% will oscillate, and every oscillation costs a weight swap. Hysteresis bands, minimum dwell times, and rate limits on expensive actuators are not optional engineering polish; they are the difference between a control system and a self-inflicted incident generator.
 
 ![Less traffic creates admission headroom: BEFORE — 200 STREAMS — 70 GB FP8 weights + 256 GB FP16 KV — 326 / 26.8 TB/s ≈ 12.2 ms; AFTER — 400 STREAMS — 35 GB FP4 weights + 256 GB FP8 KV — 291 / 26.8 TB/s ≈ 10.9 ms; LIMITS — Bandwidth floor, not measured TPOT — Quality validation required first. Illustrative dense 70B, 8×H100 model · excludes overhead](./step-bytes.png)
+
+## A controller must repay the transition
+
+Let a new configuration improve acceptable output rate by $$\Delta G$$ tokens per second, remain useful for $$t_d$$ seconds, and lose $$C_t$$ acceptable tokens while draining or converting state. A necessary transition test is
+
+$$
+\Delta G\,t_d>C_t.
+$$
+
+If switching loses 10 seconds of a 10-thousand-token-per-second baseline, the lost output is 1 hundred thousand tokens. A gain of 2 thousand per second needs more than 50 seconds at the new workload to repay that loss. This is an illustrative opportunity-cost model; actual transition billing and delayed users can impose additional costs.
+
+Compared with a static configuration, adaptation exploits changing load, but it creates a state migration problem. Precision changes may require different resident weights and cache representations; they are not necessarily pointer swaps. A device without native support for a 4-bit format cannot be assumed to realize its advertised arithmetic gain. Scheduler settings also vary in whether they can change safely during a running engine.
+
+Use hysteresis and a minimum dwell time, include transition cost in the objective, and constrain the decision by quality and tail latency. Compare the controller against a stable baseline on replayed load, then verify actual recovery after a wrong prediction. More knobs can increase flexibility while making control slower, noisier, and less reliable.
 
 ## Common misconceptions
 
@@ -76,7 +91,7 @@ Once you draw the loop, classical control problems show up on schedule.
 
 ## Where this sits, and an honest caveat
 
-Adaptive serving is the natural next step of a story this series has been tracking. Disaggregation split prefill from decode so each could be provisioned separately ([the disaggregation story](/blog/the-prefill-decode-disaggregation-story/)); once the split exists, the P/D ratio becomes a runtime variable, and Dynamo's Planner already treats it as one. Hardware is moving the same direction, with prefill-specialized parts like [Rubin CPX](/blog/prefill-gets-its-own-chip-rubin-cpx/) making the fleet mix itself a tunable. The through-line is that every boundary that used to be fixed at deployment time is becoming a control variable.
+Adaptive serving is the natural next step of a story this series has been tracking. Disaggregation split prefill from decode so each could be provisioned separately ([the disaggregation story](/blog/the-prefill-decode-disaggregation-story/)); once the split exists, the P/D ratio becomes a runtime variable, and Dynamo's Planner already treats it as 1. Hardware is moving the same direction, with prefill-specialized parts like [Rubin CPX](/blog/prefill-gets-its-own-chip-rubin-cpx/) making the fleet mix itself a tunable. The through-line is that every boundary that used to be fixed at deployment time is becoming a control variable.
 
 The caveat: most teams should not build any of this yet. If you have not exhausted static tuning, so a properly benchmarked TP degree, precision, and scheduler config for your *actual* traffic mix, plus plain replica autoscaling, you will capture the large majority of the available win with a fraction of the complexity. Every runtime actuator is also a new failure mode, and a buggy controller is an outage with a feedback loop. The adaptive frontier pays off where fleets are large enough that a recovered 20% is millions of dollars a year and where an infra team can own a control system as a product. Everyone else should read this as a preview of what their serving framework will eventually do for them; the vLLM, SGLang, and Dynamo roadmaps all point here.
 

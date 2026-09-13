@@ -2,7 +2,7 @@
   <rect width="1200" height="1200" fill="#fdfbf4"/>
 
   <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">What the Model Sees</text>
-  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">The word never enters the network &#8212; three IDs do</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Token IDs encode text; letters are not explicit inputs</text>
 
   <!-- stage 1: text -->
   <text x="90" y="300" font-size="24" fill="#75786a">you type</text>
@@ -59,8 +59,8 @@
 
   <!-- callout -->
   <rect x="120" y="920" width="960" height="88" rx="14" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
-  <text x="600" y="956" text-anchor="middle" font-size="26" fill="#8a5138">Ask &#8220;how many r&#8217;s?&#8221; and the letters just aren&#8217;t there.</text>
-  <text x="600" y="992" text-anchor="middle" font-size="26" fill="#8a5138">The model can recall spelling trivia, not look and count.</text>
+  <text x="600" y="956" text-anchor="middle" font-size="26" fill="#8a5138">Character counting must operate through token representations.</text>
+  <text x="600" y="992" text-anchor="middle" font-size="26" fill="#8a5138">A learned spelling procedure can help; success requires evaluation.</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Token split per OpenAI cl100k_base (tiktoken)</text>

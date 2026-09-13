@@ -2,6 +2,7 @@
 title: "Instruction Sets: The Contract Between Software and Hardware"
 description: "Understand registers, instructions, memory, privilege, and the ABI through a worked load-add-store example."
 pubDate: 'Sep 12 2026'
+updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'isa-1'
 order: 2
@@ -10,7 +11,7 @@ topic: 'CPU Fundamentals'
 tags: ['computer-architecture', 'isa', 'cpu']
 ---
 
-The same four-line calculation can execute on processors with very different pipelines. One core may run instructions in order, another may speculate far ahead, and both can produce the same architecturally correct result. The agreement between software and hardware is the instruction set architecture, usually shortened to ISA.
+The same 4-line calculation can execute on processors with very different pipelines. 1 core may run instructions in order, another may speculate far ahead, and both can produce the same architecturally correct result. The agreement between software and hardware is the instruction set architecture, usually shortened to ISA.
 
 After [the fetch-decode-execute introduction](../what-a-cpu-actually-does/), this is the next foundation. Fetch supplies instruction bits; decode interprets them according to an ISA; execution implements their defined effects. Understanding that boundary makes Arm, RISC-V, and x86-64 easier to compare without reducing each family to a marketing slogan.
 
@@ -20,7 +21,7 @@ We will trace a small integer calculation, distinguish architecture from microar
 
 An ISA defines the machine state visible to software and how instructions change it. That state includes registers, memory effects, control flow, and the conditions under which an instruction raises an exception. A register is a small named storage location directly operated on by instructions. Memory is a much larger addressable collection of bytes.
 
-An instruction's specification describes operands and results. An integer addition might read two registers and write their sum to a third. A load reads bytes at an address and places a value in a register. A branch chooses the address of the next instruction according to a condition.
+An instruction's specification describes operands and results. An integer addition might read 2 registers and write their sum to a third. A load reads bytes at an address and places a value in a register. A branch chooses the address of the next instruction according to a condition.
 
 The ISA also defines encodings: the bit patterns that identify operations and operands. Assembly is a human-readable representation of those patterns. The processor consumes machine code, not the text string `add`. An assembler translates the text into bytes, while a disassembler interprets bytes as instructions.
 
@@ -30,7 +31,7 @@ A programmer can rely on the defined behavior, but cannot infer execution time f
 
 ## What the ISA leaves to implementation
 
-Microarchitecture is the machinery that implements the contract. Pipeline depth, issue width, execution units, cache sizes, branch prediction, and instruction scheduling are implementation choices. Two processors with the same ISA can make different choices and have very different performance.
+Microarchitecture is the machinery that implements the contract. Pipeline depth, issue width, execution units, cache sizes, branch prediction, and instruction scheduling are implementation choices. 2 processors with the same ISA can make different choices and have very different performance.
 
 Suppose instructions first compute a value and then store it. An out-of-order core may overlap independent work or execute speculatively, but it must preserve the required architectural results and exceptions. The software-visible sequence is not a literal diagram of every internal event.
 
@@ -38,11 +39,11 @@ This freedom explains compatibility. A binary can continue to work on a newer pr
 
 The ISA is therefore a behavioral contract rather than a complete chip blueprint. A processor additionally contains interconnects, memory controllers, power management, and often accelerators. Those systems may have their own interfaces and are not explained by the CPU's integer instruction list.
 
-## Three basic kinds of instructions
+## 3 basic kinds of instructions
 
 Data-processing instructions transform register values. Examples include addition, subtraction, bitwise AND, shifts, and comparison. Some operations affect condition flags, while other architectures encode comparisons into branch instructions directly.
 
-Load/store instructions transfer data between registers and memory. The instruction specifies the access width and an address calculation. Loading a 32-bit integer is different from loading eight bytes, even when the base address is identical. Alignment, access permissions, and memory type can also affect whether the operation is valid.
+Load/store instructions transfer data between registers and memory. The instruction specifies the access width and an address calculation. Loading a 32-bit integer is different from loading 8 bytes, even when the base address is identical. Alignment, access permissions, and memory type can also affect whether the operation is valid.
 
 Control-flow instructions change which instruction executes next. Conditional branches support loops and decisions. Calls and returns support functions, usually with help from an ABI. System instructions manage privileged behavior, synchronization, or architectural controls, subject to the execution environment.
 
@@ -58,37 +59,49 @@ add x1, x1, #5
 str x1, [x0]
 ```
 
-The load reads eight bytes because `x1` names a 64-bit register operand. After it completes architecturally, `x1` holds 7. The addition updates `x1` to 12. The store writes the 64-bit representation of 12 to the same address.
+The load reads 8 bytes because `x1` names a 64-bit register operand. After it completes architecturally, `x1` holds 7. The addition updates `x1` to 12. The store writes the 64-bit representation of 12 to the same address.
 
-Under a little-endian memory convention, the initial eight bytes are `07 00 00 00 00 00 00 00`. After the store they are `0c 00 00 00 00 00 00 00`. Endianness describes byte order in memory, not whether the mathematical value is 7 or 12.
+Under a little-endian memory convention, the initial 8 bytes are `07 00 00 00 00 00 00 00`. After the store they are `0c 00 00 00 00 00 00 00`. Endianness describes byte order in memory, not whether the mathematical value is 7 or 12.
 
 For this trace, assume mapped normal memory, appropriate access permissions, and no competing writer. A real system must establish those conditions. The ISA defines the instructions, while the execution environment determines whether address `0x1000` is accessible to this program.
 
 ![Trace the architectural state after each instruction](./figure-02.png)
 
+
+The load-add-store example has a compact state specification. Let $$a$$ be the byte address, $$M[a]$$ the initially stored unsigned 64-bit value, and $$v$$ the addend. For a completed sequence without faults,
+
+$$
+M'[a]=(M[a]+v)\bmod2^{64}.
+$$
+
+Assume the location is valid, the access width is 64 bits, and no other agent modifies it during the sequence. With $$M[a]=7$$ and $$v=5$$, the result is 12. With $$M[a]=2^{64}-1$$ and $$v=1$$, it is 0. This states modular machine arithmetic rather than a source-language promise about signed overflow.
+
+The method is to describe architectural effects independently of the internal schedule. Register renaming, forwarding, and speculative execution may change when operations run, but a correct implementation preserves the specified visible result. The concurrency assumption matters: ordinary separate load and store instructions do not make an increment atomic. If 2 threads both load 7 before either stores, both may store 12 and lose an intended increment. An ISA's atomic operation or a correctly implemented synchronization protocol is needed for that different contract. Memory ordering and atomicity are related but distinct; a barrier can constrain ordering without converting this entire sequence into an indivisible update. Architectural reasoning starts by stating which shared-memory guarantee the program requires.
+
+
 ## Why width and signedness matter
 
-A 64-bit integer register can represent bit patterns from zero through $$2^{64}-1$$ when interpreted as unsigned. The same bits can represent signed two's-complement values. Many operations act on bits identically regardless of interpretation; signedness becomes decisive for comparisons, division, and extension into a larger width.
+A 64-bit integer register can represent bit patterns from 0 through $$2^{64}-1$$ when interpreted as unsigned. The same bits can represent signed 2's-complement values. Many operations act on bits identically regardless of interpretation; signedness becomes decisive for comparisons, division, and extension into a larger width.
 
-Ordinary fixed-width integer addition retains the low bits of the result. For unsigned 64-bit arithmetic, adding one to the all-ones pattern produces zero modulo $$2^{64}$$. A programming language can impose different rules: signed integer overflow in C is not simply a promise to wrap in every optimized program.
+Ordinary fixed-width integer addition retains the low bits of the result. For unsigned 64-bit arithmetic, adding 1 to the all-ones pattern produces 0 modulo $$2^{64}$$. A programming language can impose different rules: signed integer overflow in C is not simply a promise to wrap in every optimized program.
 
 The compiler must translate language semantics into instructions correctly. Seeing a wrapping hardware addition does not permit a C programmer to assume every signed overflow behaves that way. This is another reason to distinguish the source-language contract from the ISA contract.
 
-Loads can sign-extend or zero-extend a smaller memory value. A byte `ff` becomes 255 under unsigned extension and minus one under signed extension. The opcode and operand width determine the hardware behavior; the source type guides the compiler's choice.
+Loads can sign-extend or zero-extend a smaller memory value. A byte `ff` becomes 255 under unsigned extension and minus 1 under signed extension. The opcode and operand width determine the hardware behavior; the source type guides the compiler's choice.
 
 ## Registers are named roles, not ordinary RAM
 
-An instruction usually encodes register indices in a limited number of bits. AArch64 exposes 31 general-purpose integer registers, while base RISC-V exposes 32 integer register names with register zero hardwired to zero. Those counts do not describe every physical register inside a modern core.
+An instruction usually encodes register indices in a limited number of bits. AArch64 exposes 31 general-purpose integer registers, while base RISC-V exposes 32 integer register names with register 0 hardwired to 0. Those counts do not describe every physical register inside a modern core.
 
 Register renaming can map architectural registers to a larger internal collection. Software still names the architectural register. The processor uses the larger collection to avoid unnecessary dependencies while preserving visible behavior.
 
-Registers also have conventions imposed by an ABI. One register may carry a function argument, another may need preservation across calls. Those conventions are not the same as an instruction's fundamental ability to add or load the register. The next article develops AArch64's register model and calling convention.
+Registers also have conventions imposed by an ABI. 1 register may carry a function argument, another may need preservation across calls. Those conventions are not the same as an instruction's fundamental ability to add or load the register. The next article develops AArch64's register model and calling convention.
 
 ## The ABI is a second contract
 
 An application binary interface describes how compiled pieces cooperate. It defines matters such as argument passing, return values, stack alignment, and which registers a called function must preserve. Object-file format and linking conventions belong to the broader binary environment.
 
-Two functions can use the same ISA and still fail to cooperate if they disagree on the ABI. If a caller passes an argument in one register while the callee expects another, instruction execution can be individually correct while the program's result is wrong.
+2 functions can use the same ISA and still fail to cooperate if they disagree on the ABI. If a caller passes an argument in 1 register while the callee expects another, instruction execution can be individually correct while the program's result is wrong.
 
 For AArch64, Arm's AAPCS64 uses `x0` through `x7` for initial integer/pointer parameter and result roles under its detailed rules. Other architectures and operating systems have their own conventions. Do not infer the x86-64 argument registers merely from knowing that the processor supports 64-bit instructions.
 
@@ -98,7 +111,7 @@ Operating-system interfaces add another layer. System-call numbers, executable l
 
 A single-thread trace is not a complete account of concurrent software. Different architectures allow different observable orderings of memory operations. A processor may buffer stores or overlap loads, while coherence and memory-model rules constrain what other observers can see.
 
-A plain load-add-store sequence is not an atomic increment. Two threads can both load 7, both compute 12, and both store 12. The final value can lose one update. An atomic read-modify-write operation or a correctly synchronized critical section is needed when the intended behavior requires indivisibility.
+A plain load-add-store sequence is not an atomic increment. 2 threads can both load 7, both compute 12, and both store 12. The final value can lose 1 update. An atomic read-modify-write operation or a correctly synchronized critical section is needed when the intended behavior requires indivisibility.
 
 Memory ordering and atomicity are related but distinct. An operation can be atomic while offering weak ordering for unrelated accesses. Acquire/release semantics describe synchronization relationships, and barriers can constrain ordering under specific rules. Learn the language-level atomic model together with the architecture's implementation.
 

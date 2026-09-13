@@ -2,7 +2,7 @@
   <rect width="1200" height="1200" fill="#fdfbf4"/>
 
   <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">In-Order vs Out-of-Order Timing</text>
-  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">LOAD takes 4 cycles, MUL 3, ADD and SUB 1 · one start per cycle</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">LOAD takes 4 cycles, MUL 3, ADD and SUB 1 · 1 start per cycle</text>
 
   <!-- Panel A: in-order -->
   <text x="90" y="272" font-size="30" font-weight="bold" fill="#33362a">In-order: 8 cycles</text>
@@ -90,9 +90,9 @@
   <text x="927" y="895" text-anchor="middle" font-size="24" fill="#75786a">7</text>
   <text x="1022" y="895" text-anchor="middle" font-size="24" fill="#75786a">8</text>
 
-  <text x="600" y="945" text-anchor="middle" font-size="24" fill="#5b7c46">MUL and SUB slide into the shadow of the load</text>
+  <text x="600" y="945" text-anchor="middle" font-size="24" fill="#5b7c46">Critical chain: LOAD 4 + ADD 1 = 5 cycles</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · arch-3</text>
-  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">hide the wait</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">T ≥ max(ceil(N/w), critical chain)</text>
 </svg>

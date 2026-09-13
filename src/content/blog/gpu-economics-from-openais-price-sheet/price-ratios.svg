@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">One Model, Four Prices</text>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">1 Model, 4 Prices</text>
   <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">gpt-5.6-sol &#183; dollars per 1M tokens &#183; Sep 2026</text>
 
   <!-- Row 1: Cached input -->
@@ -26,5 +26,5 @@
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1078" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Data: OpenAI API pricing page, September 2026</text>
   <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; econ-2</text>
-  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">prices encode physics</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">prices suggest optimization questions</text>
 </svg>

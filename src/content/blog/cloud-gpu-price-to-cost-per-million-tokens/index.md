@@ -1,6 +1,7 @@
 ---
 title: "From Cloud GPU Price to Cost per Million Tokens"
 description: "Convert measured output throughput into serving cost, with utilization, batching, latency requirements, and uncertainty."
+updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'math-4'
@@ -18,7 +19,7 @@ This article connects the resource calculations in the preceding GPU Math articl
 
 ## Derive the basic conversion
 
-Let $$p$$ be the hourly cost of the complete serving unit in dollars per hour. Let $$R$$ be its useful aggregate output rate in tokens per second during the measured interval. In one hour it produces
+Let $$p$$ be the hourly cost of the complete serving unit in dollars per hour. Let $$R$$ be its useful aggregate output rate in tokens per second during the measured interval. In 1 hour it produces
 
 $$
 N_{\mathrm{hour}}=3{,}600R.
@@ -30,7 +31,7 @@ $$
 C_{\mathrm{Mtok}}=\frac{10^6p}{3{,}600R}.
 $$
 
-The factor 3,600 converts seconds to hours; one million converts tokens to the reporting unit. Omitting either factor is a common spreadsheet error. Dimensionally, dollars/hour divided by tokens/hour gives dollars/token.
+The factor 3,600 converts seconds to hours; 1 million converts tokens to the reporting unit. Omitting either factor is a common spreadsheet error. Dimensionally, dollars/hour divided by tokens/hour gives dollars/token.
 
 For $$p=3$$ and $$R=450$$,
 
@@ -42,7 +43,7 @@ Round to about $1.85 for reporting. The many decimal places in the arithmetic do
 
 ## The serving unit must be complete
 
-A model may need two, four, or eight GPUs. If a four-GPU replica costs $3 per GPU-hour, its GPU rental is $12 per replica-hour. Its measured throughput must be the replica's aggregate throughput, not one GPU's shard throughput.
+A model may need 2, 4, or 8 GPUs. If a 4-GPU replica costs $3 per GPU-hour, its GPU rental is $12 per replica-hour. Its measured throughput must be the replica's aggregate throughput, not 1 GPU's shard throughput.
 
 Some providers quote a complete instance including CPU, RAM, and networking; others quote GPUs separately. If the complete instance costs $14 per hour, use $14 rather than adding the same CPU cost a second time. Read the billing unit and configuration before inserting a price.
 
@@ -60,7 +61,7 @@ GPU-only cost is a meaningful engineering metric if labeled. It is not the same 
 
 ## Use useful aggregate output throughput
 
-A batch-eight server might stream 40 output tokens per second to each active request, producing 320 aggregate tokens per second. Insert 320 into the replica cost equation. Inserting 40 would charge all eight users for the entire server separately.
+A batch-8 server might stream 40 output tokens per second to each active request, producing 320 aggregate tokens per second. Insert 320 into the replica cost equation. Inserting 40 would charge all 8 users for the entire server separately.
 
 Conversely, do not multiply a benchmark's already aggregate throughput by batch size again. Read its metric definition. Input prompt tokens, generated output tokens, and total processed tokens are different denominators and have different computational costs.
 
@@ -95,15 +96,15 @@ $$
 
 This is the safest operational definition because it handles varying demand, multiple replica types, and changing prices. The hourly formula is a special case when price and rate are steady.
 
-For example, two replicas costing $3 per hour each run for 24 hours, so GPU rental totals $144. Suppose the service delivers 60 million acceptable output tokens during that day. Its GPU-only cost is $2.40 per million outputs. If CPU and other attributable expenses add $36, the selected broader cost becomes $3.00.
+For example, 2 replicas costing $3 per hour each run for 24 hours, so GPU rental totals $144. Suppose the service delivers 60 million acceptable output tokens during that day. Its GPU-only cost is $2.40 per million outputs. If CPU and other attributable expenses add $36, the selected broader cost becomes $3.00.
 
-The required bookkeeping is straightforward: define the interval, cost boundary, accepted-output counter, and attribution policy. If one fleet serves several models, allocate shared costs consistently and document that policy. A precise token counter paired with an arbitrary allocation rule still yields an uncertain estimate.
+The required bookkeeping is straightforward: define the interval, cost boundary, accepted-output counter, and attribution policy. If 1 fleet serves several models, allocate shared costs consistently and document that policy. A precise token counter paired with an arbitrary allocation rule still yields an uncertain estimate.
 
 ![Idle paid capacity raises cost even when active inference is efficient](./figure-02.png)
 
 ## A worked latency-constrained comparison
 
-Consider two hypothetical configurations for the same model and request distribution. Configuration A costs $3 per hour and delivers 450 aggregate output tokens per second while meeting the chosen latency limits. Configuration B costs $5 per hour and delivers 900 compliant output tokens per second.
+Consider 2 hypothetical configurations for the same model and request distribution. Configuration A costs $3 per hour and delivers 450 aggregate output tokens per second while meeting the chosen latency limits. Configuration B costs $5 per hour and delivers 900 compliant output tokens per second.
 
 Their active GPU-only costs are approximately $1.85 and $1.54 per million outputs, respectively. B is more expensive per hour but cheaper per useful token. Its doubled throughput more than compensates for the 67% hourly-price increase.
 
@@ -111,7 +112,7 @@ Now suppose B's 900-token result requires a batch policy that violates the servi
 
 A peak-throughput comparison would have selected the wrong configuration. Define the time-to-first-token and time-per-output-token limits before benchmarking, and count the output rate achieved within them. Tail behavior matters because a fleet average can conceal a subset of users experiencing unacceptable stalls.
 
-If the two configurations have different occupancies, compare paid-interval cost rather than active cost. A faster replica may finish demand sooner, but if it remains rented and idle, that theoretical capacity has not necessarily become a billing saving. Autoscaling delay and minimum replica count affect the result.
+If the 2 configurations have different occupancies, compare paid-interval cost rather than active cost. A faster replica may finish demand sooner, but if it remains rented and idle, that theoretical capacity has not necessarily become a billing saving. Autoscaling delay and minimum replica count affect the result.
 
 ## Going deeper: prompt and output work
 
@@ -135,7 +136,7 @@ Prefix caching can save repeated prefill, but the hit rate and shared-prefix len
 
 Real kernels may achieve less bandwidth, and request scheduling adds overhead. Long histories increase cache traffic. Sampling, communication, and prefill interfere with decode. Every reduction in useful rate raises unit cost if hourly expense remains fixed.
 
-A useful report can include three columns: theoretical resource bound, measured active compliant rate, and paid-interval useful average. They explain hardware potential, implementation efficiency, and operational demand respectively. Presenting only the first column creates an unrealistically favorable price estimate.
+A useful report can include 3 columns: theoretical resource bound, measured active compliant rate, and paid-interval useful average. They explain hardware potential, implementation efficiency, and operational demand respectively. Presenting only the first column creates an unrealistically favorable price estimate.
 
 ## Sensitivity and uncertainty
 
@@ -153,7 +154,7 @@ Correlations also matter. Higher demand may improve batching and occupancy while
 
 A service may keep spare replicas to survive failures or demand spikes. Those replicas belong in paid cost even when healthy active replicas could theoretically handle average traffic. The reserve is part of the availability policy.
 
-A two-replica service that must tolerate one failure may operate each below its maximum capacity. Comparing its cost with a single saturated benchmark is unfair unless the benchmark also satisfies the same availability requirement. State replica count and failure assumptions alongside the latency targets.
+A 2-replica service that must tolerate 1 failure may operate each below its maximum capacity. Comparing its cost with a single saturated benchmark is unfair unless the benchmark also satisfies the same availability requirement. State replica count and failure assumptions alongside the latency targets.
 
 Spot capacity and reserved contracts can change hourly expense, but interruption behavior and commitment periods matter. Use the realized cost and useful output over the relevant interval. A low advertised rate is not automatically the cheapest way to deliver reliable output.
 

@@ -1,6 +1,7 @@
 ---
 title: "Theoretical Tokens per Second from Memory Bandwidth"
 description: "Derive decode throughput from weight traffic, then add batching, KV-cache reads, precision, and compute limits."
+updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
 heroImage: './cover.png'
 code: 'math-2'
@@ -14,7 +15,7 @@ tags: ['gpu', 'inference', 'math']
 
 The calculation is useful precisely because its assumptions are visible. It can reject an implausible claim, explain why batching changes aggregate throughput, and identify when cache traffic matters. It cannot describe a deployment that does not fit in memory, or replace a benchmark with the actual checkpoint, kernels, and request distribution.
 
-We use NVIDIA's specified H100 SXM bandwidth as a hardware input and a rounded dense 70B model as the workload. Since its BF16 weights exceed one H100's memory, the 23.9 figure is a counterfactual bandwidth illustration. A practical one-GPU example will instead use an illustrative four-bit representation. Keep that distinction explicit when quoting any ceiling.
+We use NVIDIA's specified H100 SXM bandwidth as a hardware input and a rounded dense 70B model as the workload. Since its BF16 weights exceed 1 H100's memory, the 23.9 figure is a counterfactual bandwidth illustration. A practical 1-GPU example will instead use an illustrative 4-bit representation. Keep that distinction explicit when quoting any ceiling.
 
 ## Start from a time lower bound
 
@@ -24,21 +25,21 @@ $$
 t_{\mathrm{memory}}\ge\frac{D}{\beta}.
 $$
 
-If a step emits one token for each of $$B$$ active sequences, its aggregate output rate obeys
+If a step emits 1 token for each of $$B$$ active sequences, its aggregate output rate obeys
 
 $$
 R_{\mathrm{aggregate}}\le\frac{B\beta}{D}.
 $$
 
-For a batch of one, aggregate rate and per-request streaming rate coincide. For a batch of 32, the aggregate rate counts 32 emitted tokens per step, while an individual request receives one. Both metrics are legitimate, but they answer different questions.
+For a batch of 1, aggregate rate and per-request streaming rate coincide. For a batch of 32, the aggregate rate counts 32 emitted tokens per step, while an individual request receives 1. Both metrics are legitimate, but they answer different questions.
 
 This distinction is developed in [Tokens per Second: What It Means and What It Hides](../tokens-per-second-what-it-hides/). Here we focus on the physical model that supplies the denominator. A hardware bandwidth specification becomes meaningful only after describing which bytes cross that interface.
 
 ## Why weights dominate short-context decode
 
-A dense transformer's linear layers multiply the current token's activation by learned matrices. With one active sequence, the operation resembles many matrix-vector products. Each weight participates in relatively little arithmetic before the next weight must arrive. The entire model is much larger than on-chip cache, so it cannot remain there between full decode steps.
+A dense transformer's linear layers multiply the current token's activation by learned matrices. With 1 active sequence, the operation resembles many matrix-vector products. Each weight participates in relatively little arithmetic before the next weight must arrive. The entire model is much larger than on-chip cache, so it cannot remain there between full decode steps.
 
-As a first approximation, count one HBM read of each weight per step. For $$P$$ parameters at $$b_w$$ bytes per parameter,
+As a first approximation, count 1 HBM read of each weight per step. For $$P$$ parameters at $$b_w$$ bytes per parameter,
 
 $$
 D_w=P b_w.
@@ -46,19 +47,19 @@ $$
 
 This is a model for well-organized execution, not a law that every implementation reads each byte exactly once. Layout conversions, quantization metadata, intermediate writes, and inefficient kernels can increase traffic. Cache reuse or specialized execution paths can change some terms. The estimate works best as an explicit baseline for ordinary dense decode.
 
-For 70 billion parameters at two bytes each, $$D_w=140\times10^9$$ bytes. With $$\beta=3.35\times10^{12}$$ bytes per second,
+For 70 billion parameters at 2 bytes each, $$D_w=140\times10^9$$ bytes. With $$\beta=3.35\times10^{12}$$ bytes per second,
 
 $$
 t_w\ge41.79\ \mathrm{ms},\qquad R\le23.93\ \mathrm{tokens/s}.
 $$
 
-The model does not fit that single GPU in BF16. Using a bandwidth number from one device while quietly assuming capacity from two devices would make the example misleading. For a two-GPU deployment, compute each shard's traffic and add communication constraints rather than carrying this number over unchanged.
+The model does not fit that single GPU in BF16. Using a bandwidth number from 1 device while quietly assuming capacity from 2 devices would make the example misleading. For a 2-GPU deployment, compute each shard's traffic and add communication constraints rather than carrying this number over unchanged.
 
 ![A decode step must service weight traffic before emitting tokens](./figure-01.png)
 
 ## A feasible quantized illustration
 
-Use the four-bit format from [the memory-budget article](../does-llama-70b-fit-on-one-h100/): packed weights plus four metadata bytes per 128 weights. Its effective payload is 37.1875 GB for the rounded model.
+Use the 4-bit format from [the memory-budget article](../does-llama-70b-fit-on-one-h100/): packed weights plus 4 metadata bytes per 128 weights. Its effective payload is 37.1875 GB for the rounded model.
 
 Ignoring cache and all other traffic gives
 
@@ -67,9 +68,9 @@ t_w\ge\frac{37.1875\times10^9}{3.35\times10^{12}}
 =11.10\ \mathrm{ms},
 $$
 
-or 90.08 output tokens per second for a batch of one. A nominal four-bit payload without metadata would suggest 95.71 tokens per second. The five-token difference is entirely accounting: it appears before discussing kernel efficiency.
+or 90.08 output tokens per second for a batch of 1. A nominal 4-bit payload without metadata would suggest 95.71 tokens per second. The 5-token difference is entirely accounting: it appears before discussing kernel efficiency.
 
-Quantization does not guarantee that the engine reaches either ceiling. Some weight formats unpack or convert values as part of a fused GEMM. Their actual execution may have a different compute ceiling from dense BF16 Tensor Cores. Small shapes can underfill the device, and launch overhead is more noticeable as weight traffic shrinks. A smaller representation removes one constraint while potentially exposing another.
+Quantization does not guarantee that the engine reaches either ceiling. Some weight formats unpack or convert values as part of a fused GEMM. Their actual execution may have a different compute ceiling from dense BF16 Tensor Cores. Small shapes can underfill the device, and launch overhead is more noticeable as weight traffic shrinks. A smaller representation removes 1 constraint while potentially exposing another.
 
 Introduce a measured bandwidth efficiency $$\eta_b$$ when available:
 
@@ -81,7 +82,7 @@ If an illustrative execution achieved 65% of peak, the weight-only ceiling would
 
 ## Batching shares weight reads
 
-For a batched linear layer, several token activations multiply the same weight matrix. A suitable GEMM can reuse weights across those rows. If weight traffic remains near one model read per step, increasing $$B$$ increases the number of emitted tokens without multiplying that weight traffic by $$B$$.
+For a batched linear layer, several token activations multiply the same weight matrix. A suitable GEMM can reuse weights across those rows. If weight traffic remains near 1 model read per step, increasing $$B$$ increases the number of emitted tokens without multiplying that weight traffic by $$B$$.
 
 In the ideal weight-only regime,
 
@@ -89,7 +90,7 @@ $$
 R_{\mathrm{aggregate}}\le\frac{B\beta}{D_w}.
 $$
 
-At batch 16, the quantized example's ideal aggregate ceiling is approximately 1,441 tokens per second. It does not mean one user receives 1,441 tokens per second. The ideal per-sequence rate remains around 90, and real per-sequence speed can decline as cache and compute work grow.
+At batch 16, the quantized example's ideal aggregate ceiling is approximately 1,441 tokens per second. It does not mean 1 user receives 1,441 tokens per second. The ideal per-sequence rate remains around 90, and real per-sequence speed can decline as cache and compute work grow.
 
 This simple model explains the economic appeal of continuous batching. A server can admit requests into available slots as others finish, keeping useful rows in the matrix multiplication. It also explains why a high aggregate benchmark can coexist with worse individual latency.
 
@@ -99,7 +100,7 @@ Weight reuse has limits. Large batches demand more arithmetic, activations, cach
 
 ## Add attention history
 
-For a grouped-query model with 80 layers, eight KV heads, head dimension 128, and a two-byte cache, the cache payload is 327,680 bytes per retained token. Ordinary full-context attention must access past key and value state to evaluate the next token.
+For a grouped-query model with 80 layers, 8 KV heads, head dimension 128, and a 2-byte cache, the cache payload is 327,680 bytes per retained token. Ordinary full-context attention must access past key and value state to evaluate the next token.
 
 A transparent lower-bound traffic model for independent requests with histories $$S_i$$ is
 
@@ -117,11 +118,11 @@ $$
 
 The bandwidth-only step time becomes about 23.92 ms. Aggregate throughput is at most about 669 tokens per second, and per-request streaming at most about 41.8 tokens per second. Those are already less than half the ideal weight-only batch result.
 
-This particular batch also needs approximately 42.95 GB merely to store its BF16 cache, so it exceeds the worked one-GPU memory budget in the preceding article once headroom is included. Traffic calculations do not establish capacity feasibility. A smaller batch, shorter histories, or different cache representation is required.
+This particular batch also needs approximately 42.95 GB merely to store its BF16 cache, so it exceeds the worked 1-GPU memory budget in the preceding article once headroom is included. Traffic calculations do not establish capacity feasibility. A smaller batch, shorter histories, or different cache representation is required.
 
 ## A capacity-compatible example
 
-Take batch eight at 8,192 retained tokens per request. Its logical cache payload is 20 GiB, approximately 21.47 GB, which fits the illustrative 34.81 GB cache pool from the preceding article.
+Take batch 8 at 8,192 retained tokens per request. Its logical cache payload is 20 GiB, approximately 21.47 GB, which fits the illustrative 34.81 GB cache pool from the preceding article.
 
 Weight plus logical cache reads total approximately 58.66 GB per step. Peak-bandwidth arithmetic gives 17.51 ms per step, 57.1 tokens per second per request, and 456.9 aggregate tokens per second. These remain ceilings: temporary traffic, kernel efficiency, sampling, and scheduling can lower the observed rates.
 
@@ -129,7 +130,7 @@ This is a useful pair of numbers to attach to a measurement. If observed streami
 
 ## Going deeper: the compute ceiling
 
-Dense linear-layer work is roughly two floating-point operations per parameter per token. One multiply and one add count as two operations. Let $$C$$ denote an appropriate attainable compute rate. Ignoring attention and other operations,
+Dense linear-layer work is roughly 2 floating-point operations per parameter per token. 1 multiply and 1 add count as 2 operations. Let $$C$$ denote an appropriate attainable compute rate. Ignoring attention and other operations,
 
 $$
 t_{\mathrm{compute}}\gtrsim\frac{2PB}{C}.
@@ -141,15 +142,15 @@ $$
 t_{\mathrm{step}}\gtrsim\max\left(\frac{D}{\beta},\frac{F}{C}\right).
 $$
 
-This is a roofline model. It assumes the resource demands can overlap sufficiently and ignores serial overheads. In actual execution, different kernels run sequentially and can have different limiting resources, so summing kernel times gives a better prediction than taking one maximum over the entire model.
+This is a roofline model. It assumes the resource demands can overlap sufficiently and ignores serial overheads. In actual execution, different kernels run sequentially and can have different limiting resources, so summing kernel times gives a better prediction than taking 1 maximum over the entire model.
 
-NVIDIA's current H100 table lists BF16 Tensor Core throughput with a sparsity footnote. A dense workload cannot simply claim the sparse figure. More importantly, a four-bit weight kernel's applicable execution ceiling depends on its actual arithmetic path. Use measured or format-appropriate throughput rather than inserting a convenient advertised TFLOPS value.
+NVIDIA's current H100 table lists BF16 Tensor Core throughput with a sparsity footnote. A dense workload cannot simply claim the sparse figure. More importantly, a 4-bit weight kernel's applicable execution ceiling depends on its actual arithmetic path. Use measured or format-appropriate throughput rather than inserting a convenient advertised TFLOPS value.
 
 The final GPU Math article derives [the batch size at the compute-bound transition](../how-big-a-batch-before-compute-bound/). Its main lesson is that the transition is workload-dependent and can disappear when history traffic grows faster than useful arithmetic.
 
 ## Prefill is a different calculation
 
-Prefill processes many prompt tokens together, creating large matrix multiplications with more weight reuse. Its arithmetic intensity can be far higher than one-token decode. A prompt ingestion rate therefore cannot be inferred by dividing bandwidth by model weight size.
+Prefill processes many prompt tokens together, creating large matrix multiplications with more weight reuse. Its arithmetic intensity can be far higher than 1-token decode. A prompt ingestion rate therefore cannot be inferred by dividing bandwidth by model weight size.
 
 Attention work also grows with sequence length for ordinary full attention, though optimized algorithms avoid materializing a full score matrix in HBM. Long prompts may expose compute or workspace constraints that are absent in short decode. Separate input-token throughput, time to first token, output-token throughput, and time per output token in every report.
 
@@ -159,7 +160,7 @@ A serving system combines those phases under a scheduler. Chunked prefill may sh
 
 **Peak bandwidth is observed bandwidth.** A specification describes a hardware capability. Kernels must generate enough well-coalesced traffic and hide latency to approach it. A theoretical ceiling is intentionally optimistic.
 
-**Batch 16 makes each user sixteen times faster.** It makes the step emit sixteen tokens across users. Weight reuse improves aggregate throughput; individual streaming remains tied to step duration.
+**Batch 16 makes each user 16 times faster.** It makes the step emit 16 tokens across users. Weight reuse improves aggregate throughput; individual streaming remains tied to step duration.
 
 **A small checkpoint means short-context speed applies at 128k.** The checkpoint size stays fixed while attention history grows. Cache traffic can dominate even when quantized weights fit comfortably.
 
@@ -177,7 +178,7 @@ Compute the weight-only ceiling first, then add logical cache traffic and compar
 
 Bandwidth divided by bytes per decode step gives a useful ceiling. To use it responsibly, count weight metadata, distinguish per-user from aggregate throughput, and add history traffic. Confirm that the resulting workload fits before interpreting its rate.
 
-For our illustrative quantized model, batch eight at 8k histories has a peak-bandwidth ceiling near 457 aggregate output tokens per second, not the 721 suggested by weights alone. The difference is the KV cache, and longer histories increase it further.
+For our illustrative quantized model, batch 8 at 8k histories has a peak-bandwidth ceiling near 457 aggregate output tokens per second, not the 721 suggested by weights alone. The difference is the KV cache, and longer histories increase it further.
 
 
 To validate the ceiling, collect a steady interval after warmup and separate generated tokens from prompt tokens. Record the number of simultaneously decoding sequences and their context lengths. Then compare observed memory traffic with the assumed weight traffic. If throughput changes while the estimated weight bytes stay fixed, investigate batching, cache reads, kernel efficiency, or scheduling overhead. A bandwidth formula is most useful when it leads to a testable hypothesis. It should explain which measurement would confirm the proposed bottleneck and which observation would require a different model of the workload.

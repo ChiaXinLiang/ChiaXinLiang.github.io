@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
 <rect width="1200" height="1200" fill="#fdfbf4"/>
 <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The Design-Cost Escalation Curve</text>
-<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Estimated cost to design one chip, by process node</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Estimated cost to design 1 chip, by process node</text>
 
 <!-- baseline y=890, 0.8 px per $M, bar width 130 -->
 <rect x="105" y="849" width="130" height="41" fill="#5b7c46"/>

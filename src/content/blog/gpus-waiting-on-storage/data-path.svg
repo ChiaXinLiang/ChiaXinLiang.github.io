@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">Two Paths from Flash to GPU</text>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">2 Paths from Flash to GPU</text>
   <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">GPUDirect Storage removes the CPU bounce buffer</text>
 
   <line x1="600" y1="240" x2="600" y2="900" stroke="#e8e4d7" stroke-width="3"/>
@@ -48,7 +48,7 @@
   <!-- RIGHT: direct arrow -->
   <line x1="780" y1="810" x2="780" y2="428" stroke="#5b7c46" stroke-width="6"/>
   <polygon points="780,410 766,434 794,434" fill="#5b7c46"/>
-  <text x="808" y="580" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#5b7c46">one DMA,</text>
+  <text x="808" y="580" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#5b7c46">1 DMA,</text>
   <text x="808" y="616" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#5b7c46">peer-to-peer PCIe</text>
   <text x="808" y="652" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">via cuFile API</text>
 
@@ -56,7 +56,7 @@
   <rect x="695" y="810" width="340" height="80" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
   <text x="865" y="860" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#33362a">NVMe SSD</text>
 
-  <text x="600" y="944" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">Left: every byte crosses host DRAM twice.  Right: zero host copies.</text>
+  <text x="600" y="944" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#55584a">Left: every byte crosses host DRAM 2 times.  Right: 0 host copies.</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · storage-1</text>

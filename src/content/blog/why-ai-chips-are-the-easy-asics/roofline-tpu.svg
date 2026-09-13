@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">One roofline, two fates</text>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">1 roofline, 2 fates</text>
   <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">TPU v1: a 92 TOPS ceiling behind a 34 GB/s front door</text>
 
   <defs>
@@ -45,10 +45,10 @@
   <rect x="255" y="270" width="420" height="150" rx="14" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
   <text x="285" y="315" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" fill="#55584a">Left of the ridge, the multipliers</text>
   <text x="285" y="352" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" fill="#55584a">starve: most 2016 traffic ran at</text>
-  <text x="285" y="389" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" fill="#55584a">a tenth of the datasheet number.</text>
+  <text x="285" y="389" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" fill="#55584a">~0.1 of the datasheet number.</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1078" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Data from Jouppi et al. (2017)</text>
   <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · asic-4</text>
-  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">feeding beats flops</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">R ≤ min(C, bandwidth × intensity)</text>
 </svg>

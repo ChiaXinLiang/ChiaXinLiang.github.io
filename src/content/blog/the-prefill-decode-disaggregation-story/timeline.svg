@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Paper to Silicon in ~24 Months</text>
-  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">The fastest serving-idea-to-chip pipeline on record</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">A public timeline of papers, engine support, and hardware</text>
 
   <line x1="270" y1="255" x2="270" y2="925" stroke="#d8d4c4" stroke-width="4"/>
 
@@ -19,7 +19,7 @@
   <!-- Event 3 -->
   <circle cx="270" cy="532" r="11" fill="#c9973b"/>
   <text x="240" y="541" text-anchor="end" font-size="28" font-weight="bold" fill="#55584a">2024–25</text>
-  <text x="310" y="541" font-size="27" fill="#33362a">Becomes the default: vLLM, SGLang,</text>
+  <text x="310" y="541" font-size="27" fill="#33362a">Support expands: vLLM, SGLang,</text>
   <text x="310" y="577" font-size="25" fill="#75786a">TensorRT-LLM, Dynamo, llm-d, in-house stacks</text>
 
   <!-- Event 4 -->
@@ -37,7 +37,7 @@
   <!-- Event 6 -->
   <circle cx="270" cy="922" r="11" fill="#8a5138"/>
   <text x="240" y="931" text-anchor="end" font-size="28" font-weight="bold" fill="#55584a">Late 2026</text>
-  <text x="310" y="931" font-size="27" fill="#33362a">Rubin CPX ships: GDDR7 memory, no HBM</text>
+  <text x="310" y="931" font-size="27" fill="#33362a">Rubin CPX planned: GDDR7 memory, no HBM</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Dates from DistServe retrospective and NVIDIA announcements</text>

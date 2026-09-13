@@ -6,7 +6,7 @@
 <!-- bar 1: NVLink -->
 <text x="90" y="300" font-size="28" font-weight="bold" fill="#33362a">Inside the rack · NVLink 5</text>
 <rect x="90" y="318" width="990" height="90" rx="8" fill="#5b7c46"/>
-<text x="1060" y="374" text-anchor="end" font-size="32" font-weight="bold" fill="#e7edd9">900 GB/s per GPU, one way</text>
+<text x="1060" y="374" text-anchor="end" font-size="32" font-weight="bold" fill="#e7edd9">900 GB/s per GPU, 1 way</text>
 
 <!-- bar 2: InfiniBand -->
 <text x="90" y="558" font-size="28" font-weight="bold" fill="#33362a">Across racks · InfiniBand 400G</text>

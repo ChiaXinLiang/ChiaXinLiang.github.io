@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif"><rect width="1200" height="1200" fill="#fdfbf4"/><g transform="translate(102 0) scale(0.83)">
 <rect width="1200" height="1200" fill="#fdfbf4"/>
-<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One GPU, One Model, Three Numbers</text>
-<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Llama-3.1-8B on one H100 SXM — all three runs honest</text>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">1 GPU, 1 Model, 3 Numbers</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Llama-3.1-8B on 1 H100 SXM — illustrative timing scenarios</text>
 
 <!-- Config A -->
 <text x="90" y="290" font-size="30" font-weight="bold" fill="#33362a">Config A — the batch-1 latency demo</text>
@@ -13,7 +13,7 @@
 <text x="90" y="520" font-size="30" font-weight="bold" fill="#33362a">Config B — SLO-first (TPOT p99 &lt; 50 ms)</text>
 <rect x="90" y="542" width="561" height="60" rx="8" fill="#5b7c46"/>
 <text x="667" y="582" font-size="32" font-weight="bold" fill="#5b7c46">3,000 tok/s goodput</text>
-<text x="90" y="654" font-size="25" fill="#55584a">meets the SLO at ~128-192 concurrent — sellable capacity</text>
+<text x="90" y="654" font-size="25" fill="#55584a">Hypothetical SLO point; validate under matched load</text>
 
 <!-- Config C -->
 <text x="90" y="750" font-size="30" font-weight="bold" fill="#33362a">Config C — max batch, 512 concurrent</text>
@@ -26,4 +26,4 @@
 <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
 <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-3</text>
 <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">honest is not comparable</text>
-</svg>
+</g><rect x="60" y="996" width="1080" height="156" rx="12" fill="#e7edd9"/><text x="85" y="1033" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" font-weight="bold" fill="#33362a">Goodput G = Σ(output tokens × accepted) / window</text><text x="85" y="1080" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" font-weight="normal" fill="#33362a">Accepted: declared TTFT, streaming and quality targets</text><text x="85" y="1122" font-family="Helvetica Neue, Arial, sans-serif" font-size="23" font-weight="normal" fill="#33362a">Compare matched arrivals and cache state; timings illustrative</text></svg>

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Three Bets on One Problem</text>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">3 Bets on 1 Problem</text>
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">vLLM, TensorRT-LLM, SGLang: what each optimizes first</text>
 
   <!-- Column 1: vLLM -->
@@ -13,7 +13,7 @@
   <text x="250" y="464" text-anchor="middle" font-size="24" fill="#55584a">maps position to block</text>
   <rect x="90" y="506" width="320" height="150" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
   <text x="250" y="544" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">Broadest ecosystem</text>
-  <text x="250" y="580" text-anchor="middle" font-size="24" fill="#55584a">most models, day one</text>
+  <text x="250" y="580" text-anchor="middle" font-size="24" fill="#55584a">most models, day 1</text>
   <text x="250" y="610" text-anchor="middle" font-size="24" fill="#55584a">NVIDIA, AMD, TPU, AWS</text>
   <text x="250" y="640" text-anchor="middle" font-size="24" fill="#55584a">Python-first codebase</text>
   <rect x="90" y="682" width="320" height="56" rx="10" fill="#a8bf92"/>
@@ -47,7 +47,7 @@
   <text x="950" y="544" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">Structured output</text>
   <text x="950" y="580" text-anchor="middle" font-size="24" fill="#55584a">compressed FSM jumps</text>
   <text x="950" y="610" text-anchor="middle" font-size="24" fill="#55584a">through fixed JSON</text>
-  <text x="950" y="640" text-anchor="middle" font-size="24" fill="#55584a">tokens in one step</text>
+  <text x="950" y="640" text-anchor="middle" font-size="24" fill="#55584a">tokens in 1 step</text>
   <rect x="790" y="682" width="320" height="56" rx="10" fill="#c9973b"/>
   <text x="950" y="719" text-anchor="middle" font-size="25" font-weight="bold" fill="#33362a">Bet: prefix reuse</text>
 
@@ -55,9 +55,9 @@
   <rect x="90" y="790" width="1020" height="150" rx="10" fill="#fdfbf4" stroke="#a3a08f" stroke-width="2" stroke-dasharray="8 6"/>
   <text x="600" y="838" text-anchor="middle" font-size="27" font-weight="bold" fill="#33362a">2026: the features converged</text>
   <text x="600" y="878" text-anchor="middle" font-size="24" fill="#55584a">continuous batching, paged KV, prefix caching,</text>
-  <text x="600" y="910" text-anchor="middle" font-size="24" fill="#55584a">quantization, speculative decoding: all three</text>
+  <text x="600" y="910" text-anchor="middle" font-size="24" fill="#55584a">quantization, speculative decoding: all 3</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-2</text>
-  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">one job, three bets</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">1 job, 3 bets</text>
 </svg>

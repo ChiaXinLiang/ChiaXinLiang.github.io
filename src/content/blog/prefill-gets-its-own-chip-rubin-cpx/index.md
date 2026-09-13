@@ -1,6 +1,7 @@
 ---
 title: 'Prefill Gets Its Own Chip: The Roofline Bet Behind Rubin CPX'
 description: "Why NVIDIA put gaming-class GDDR7 on a datacenter GPU: the roofline math that makes HBM a waste of money for prefill."
+updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'chip-2'
@@ -10,27 +11,27 @@ topic: 'AI Chips'
 tags: [gpu, inference, roofline]
 ---
 
-Thirty petaflops of 4-bit compute, fed by gaming-class memory. That is Rubin CPX, the GPU NVIDIA announced for "massive-context inference": 30 PFLOPS of NVFP4 next to 128 GB of GDDR7, the same memory family that ships on a $700 graphics card. Every serious datacenter GPU of the past eight years has used HBM, the stacked memory whose price is a large slice of the entire board. Dropping it looks like corner-cutting. It is actually one of the most legible pieces of hardware-software co-design in years, and you can derive the whole decision from a single chart called the roofline. This article draws that chart with real numbers.
+30 petaflops of 4-bit compute, fed by gaming-class memory. That is Rubin CPX, the GPU NVIDIA announced for "massive-context inference": 30 PFLOPS of NVFP4 next to 128 GB of GDDR7, the same memory family that ships on a $700 graphics card. Every serious datacenter GPU of the past 8 years has used HBM, the stacked memory whose price is a large slice of the entire board. Dropping it looks like corner-cutting. It is actually one of the most legible pieces of hardware-software co-design in years, and you can derive the whole decision from a single chart called the roofline. This article draws that chart with real numbers.
 
-## Inference is two different jobs wearing one trench coat
+## Inference is 2 different jobs wearing 1 trench coat
 
-When an LLM answers you, the GPU does two phases of work that could hardly be less alike.
+When an LLM answers you, the GPU does 2 phases of work that could hardly be less alike.
 
-**Prefill** is the prompt-processing phase. The model ingests your entire input, whether that is 200 tokens of chat or 500,000 tokens of codebase, and builds up the *KV cache*: the stored key and value vectors that every later token will attend to. Crucially, all input tokens are processed at once, as one giant batch of matrix multiplications. Load a weight matrix from memory a single time and you get to use it against thousands of token vectors before moving on.
+**Prefill** is the prompt-processing phase. The model ingests your entire input, whether that is 200 tokens of chat or 500,000 tokens of codebase, and builds up the *KV cache*: the stored key and value vectors that every later token will attend to. Crucially, all input tokens are processed at once, as 1 giant batch of matrix multiplications. Load a weight matrix from memory a single time and you get to use it against thousands of token vectors before moving on.
 
-**Decode** is the generation phase. Tokens come out one at a time, because each new token depends on the one before it. To produce a single token, the GPU must stream *every* weight of the model (plus the growing KV cache) through the compute units, and each loaded byte does almost no work before being discarded. Then it does the whole thing again for the next token.
+**Decode** is the generation phase. Tokens come out 1 at a time, because each new token depends on the one before it. To produce a single token, the GPU must stream *every* weight of the model (plus the growing KV cache) through the compute units, and each loaded byte does almost no work before being discarded. Then it does the whole thing again for the next token.
 
-Same model, same silicon, opposite bottlenecks. Prefill is limited by how fast you can multiply; decode is limited by how fast you can read memory. The serving world figured this out in 2024: the DistServe paper showed that colocating the two phases on one GPU lets prefill bursts inflate decode latency between tokens by 2 to 30 times, and within about 18 months prefill/decode *disaggregation*, running the phases on separate GPU pools, became the default in vLLM, SGLang, TensorRT-LLM, and NVIDIA's Dynamo. In MLPerf v5.1, NVIDIA's first official disaggregated submission delivered roughly 1.5x the throughput of the colocated setup on the same hardware.
+Same model, same silicon, opposite bottlenecks. Prefill is limited by how fast you can multiply; decode is limited by how fast you can read memory. The serving world figured this out in 2024: the DistServe paper showed that colocating the 2 phases on 1 GPU lets prefill bursts inflate decode latency between tokens by 2 to 30 times, and within about 18 months prefill/decode *disaggregation*, running the phases on separate GPU pools, became the default in vLLM, SGLang, TensorRT-LLM, and NVIDIA's Dynamo. In MLPerf v5.1, NVIDIA's first official disaggregated submission delivered roughly 1.5x the throughput of the colocated setup on the same hardware.
 
 Rubin CPX is what happens when that software insight jumps the boundary into silicon. If prefill runs on its own pool of chips anyway, why should those chips carry memory sized for decode?
 
 ## The roofline, in plain words
 
-The roofline model, introduced by Williams, Waterman, and Patterson in 2009, answers one question: for a given piece of code on a given machine, is the ceiling set by compute or by memory bandwidth?
+The roofline model, introduced by Williams, Waterman, and Patterson in 2009, answers 1 question: for a given piece of code on a given machine, is the ceiling set by compute or by memory bandwidth?
 
-You need two numbers. The first belongs to the workload: **arithmetic intensity**, the number of floating-point operations performed per byte moved from memory. The second belongs to the machine: its peak compute (FLOP/s) divided by its memory bandwidth (bytes/s), often called the **ridge point**, also measured in FLOPs per byte.
+You need 2 numbers. The first belongs to the workload: **arithmetic intensity**, the number of floating-point operations performed per byte moved from memory. The second belongs to the machine: its peak compute (FLOP/s) divided by its memory bandwidth (bytes/s), often called the **ridge point**, also measured in FLOPs per byte.
 
-The rule is one comparison. If your workload's arithmetic intensity is below the machine's ridge point, you are memory-bound: the compute units idle while bytes trickle in, and attainable performance equals bandwidth times intensity. If intensity is above the ridge point, you are compute-bound: memory keeps up fine, and you hit the FLOP/s ceiling. Plotted on log-log axes, this gives a slanted line that flattens into a roof, hence the name.
+The rule is 1 comparison. If your workload's arithmetic intensity is below the machine's ridge point, you are memory-bound: the compute units idle while bytes trickle in, and attainable performance equals bandwidth times intensity. If intensity is above the ridge point, you are compute-bound: memory keeps up fine, and you hit the FLOP/s ceiling. Plotted on log-log axes, this gives a slanted line that flattens into a roof, hence the name.
 
 ![Roofline chart showing decode stuck on the bandwidth slope where HBM helps 10x, and prefill sitting on the compute roof where HBM adds nothing](./roofline.png)
 
@@ -42,13 +43,27 @@ Let's put real numbers on it. Rubin CPX: 30 PFLOPS of dense NVFP4 compute and ro
 
 **Ridge point.** 30 × 10¹⁵ FLOP/s ÷ 2.1 × 10¹² B/s ≈ **14,300 FLOPs per byte**. Any workload doing fewer than ~14,300 operations per loaded byte leaves this chip's compute idle.
 
-**Prefill's intensity.** In NVFP4, a weight occupies half a byte. A matrix multiply that pushes T tokens through P parameters costs 2·P·T FLOPs while loading 0.5·P bytes of weights, so the intensity is 2·P·T ÷ 0.5·P = **4T FLOPs per byte**. For a 32,768-token prompt that is about 131,000 FLOPs per byte, nine times past the ridge point. Prefill saturates the compute roof even on GDDR7. Note what that means: swapping in HBM with five or ten times the bandwidth would change prefill throughput by approximately nothing, because bandwidth was never the binding constraint. Every HBM dollar spent on a prefill chip buys zero prefill tokens.
+**Prefill's intensity.** In NVFP4, a weight occupies 0.5 bytes. A matrix multiply that pushes T tokens through P parameters costs 2·P·T FLOPs while loading 0.5·P bytes of weights, so the intensity is 2·P·T ÷ 0.5·P = **4T FLOPs per byte**. For a 32,768-token prompt that is about 131,000 FLOPs per byte, 9 times past the ridge point. Prefill saturates the compute roof even on GDDR7. Note what that means: swapping in HBM with 5 or 10 times the bandwidth would change prefill throughput by approximately nothing, because bandwidth was never the binding constraint. Every HBM dollar spent on a prefill chip buys 0 prefill tokens.
 
-**Decode's intensity.** Generate one token for one user and T = 1: intensity ≈ 4 FLOPs per byte, more than three thousand times below the ridge. Attainable compute is 2.1 TB/s × 4 = **8.4 TFLOPS, about 0.03% of the chip's 30 PFLOPS**. Concretely, a 200B-parameter model in NVFP4 is 100 GB of weights; streaming them once takes 100 ÷ 2.1 ≈ 48 ms, capping single-stream decode near 21 tokens/s. The same model on an HBM4 part at ~22 TB/s (Glenn Lockwood's community-tracked figure for Rubin R200; unofficial) streams in 4.5 ms, roughly 220 tokens/s. For decode, HBM buys you a full 10x. That is the asymmetry in one sentence: **HBM is 10x for decode and 0x for prefill.**
+**Decode's intensity.** Generate 1 token for one user and T = 1: intensity ≈ 4 FLOPs per byte, more than 3 thousand times below the ridge. Attainable compute is 2.1 TB/s × 4 = **8.4 TFLOPS, about 0.03% of the chip's 30 PFLOPS**. Concretely, a 200B-parameter model in NVFP4 is 100 GB of weights; streaming them once takes 100 ÷ 2.1 ≈ 48 ms, capping single-stream decode near 21 tokens/s. The same model on an HBM4 part at ~22 TB/s (Glenn Lockwood's community-tracked figure for Rubin R200; unofficial) streams in 4.5 ms, roughly 220 tokens/s. For decode, HBM buys you a full 10x. That is the asymmetry in 1 sentence: **HBM is 10x for decode and 0x for prefill.**
 
-**The threshold.** Setting 4T equal to 14,300 gives T ≈ 3,600: on CPX, any prefill batch beyond about 3,600 tokens is compute-bound. NVIDIA is pitching this chip at million-token contexts, two to three orders of magnitude past the crossover, and long context makes the case even stronger, because attention FLOPs grow with the *square* of sequence length while the weight bytes stay fixed. The longer the prompt, the more absurdly compute-bound prefill becomes.
+**The threshold.** Setting 4T equal to 14,300 gives T ≈ 3,600: on CPX, any prefill batch beyond about 3,600 tokens is compute-bound. NVIDIA is pitching this chip at million-token contexts, 2 to 3 orders of magnitude past the crossover, and long context makes the case even stronger, because attention FLOPs grow with the *square* of sequence length while the weight bytes stay fixed. The longer the prompt, the more absurdly compute-bound prefill becomes.
 
 So the design writes itself. Keep the compute (in fact, The Next Platform reports the CPX die is a single Rubin compute chiplet clocked about 20% higher). Replace the memory with something cheap, dense, and merely adequate: 128 GB of GDDR7 holds the weights and the in-flight KV cache with room to spare, and 2.1 TB/s is plenty when your intensity is 131,000.
+
+## Correct the roofline for scale metadata
+
+For $$P$$ weights, $$T$$ prompt rows, effective weight storage $$s$$ bytes per parameter, and additional activation/cache traffic $$D_a$$, a weight-reuse model gives
+
+$$
+I\approx\frac{2PT}{Ps+D_a},\qquad T_*\approx\frac{Cs}{2\beta}\quad(D_a\approx0).
+$$
+
+Here compute rate $$C$$ is useful operations per second and bandwidth $$\beta$$ is bytes per second on the same execution path. The earlier 4-bit payload estimate uses 0.5 bytes per weight. Including an 8-bit scale per 16 weights instead gives 0.5625 bytes. With 30 peta-operations per second and 2.1 terabytes per second, the ideal crossing rises from about 3,571 to about 4,018 prompt rows.
+
+Even that corrected crossing omits activations, attention history, staging, and shape inefficiency. A 200B model's 4-bit payload already takes 100 GB, and scale bytes raise it to 112.5 GB before runtime state. A 128 GB device does not automatically have room for arbitrary long contexts. Chunking and parallel placement can become necessary.
+
+The specialization favors reuse-rich prefill; it does not make memory bandwidth irrelevant. Benchmark the actual format, prompt distribution, and handoff. Compared with buying the same expensive memory system for both phases, the design reallocates cost toward a different balance point, while accepting tighter capacity and communication constraints.
 
 ## Going deeper: the handoff and the rack
 
@@ -56,11 +71,11 @@ Disaggregation only works if the KV cache built during prefill reaches the decod
 
 ![Disaggregated serving pipeline: long prompt enters Rubin CPX for compute-bound prefill, KV cache hands off to HBM Rubin GPUs for bandwidth-bound decode](./disagg.png)
 
-At rack scale, NVIDIA packages the split as the Vera Rubin NVL144 CPX: standard HBM Rubin GPUs for decode plus CPX chips for prefill in one system, claimed at 8 exaflops of NVFP4 and 7.5x the AI performance of a GB300 NVL72 rack. Treat both numbers as vendor claims until MLPerf-style submissions exist; the comparison spans different workload mixes and precisions. The Next Platform's sharper framing of the economics: the CPX add-in delivers a claimed ~6x on long-context throughput for about 2.25x added compute cost, precisely because the added compute skips the most expensive component on a modern accelerator. HBM can account for on the order of half the bill of materials of a high-end datacenter GPU, and it is supply-constrained; every stack not soldered onto a prefill chip is a stack available for a decode chip that actually needs it.
+At rack scale, NVIDIA packages the split as the Vera Rubin NVL144 CPX: standard HBM Rubin GPUs for decode plus CPX chips for prefill in 1 system, claimed at 8 exaflops of NVFP4 and 7.5x the AI performance of a GB300 NVL72 rack. Treat both numbers as vendor claims until MLPerf-style submissions exist; the comparison spans different workload mixes and precisions. The Next Platform's sharper framing of the economics: the CPX add-in delivers a claimed ~6x on long-context throughput for about 2.25x added compute cost, precisely because the added compute skips the most expensive component on a modern accelerator. HBM can account for on the order of half the bill of materials of a high-end datacenter GPU, and it is supply-constrained; every stack not soldered onto a prefill chip is a stack available for a decode chip that actually needs it.
 
 ![Spec comparison card: Rubin CPX with GDDR7, 128 GB, ~2.1 TB/s, 30 PF NVFP4 built for prefill, versus Rubin R200 with HBM4, 288 GB, ~22 TB/s built for decode](./specs.png)
 
-One number from the launch deserves explicit labeling: NVIDIA's claim that $100M of CPX capex can generate "$5B in token revenue." That figure is pure marketing. It assumes a token price, a utilization rate, a workload mix, and a depreciation schedule, none of which NVIDIA publishes, and it should never be quoted as an engineering result. The roofline argument stands on its own; the revenue projection does not.
+1 number from the launch deserves explicit labeling: NVIDIA's claim that $100M of CPX capex can generate "$5B in token revenue." That figure is pure marketing. It assumes a token price, a utilization rate, a workload mix, and a depreciation schedule, none of which NVIDIA publishes, and it should never be quoted as an engineering result. The roofline argument stands on its own; the revenue projection does not.
 
 ## Common misconceptions
 
@@ -74,7 +89,7 @@ One number from the launch deserves explicit labeling: NVIDIA's claim that $100M
 
 The deepest thing about Rubin CPX is the direction of causality. For decades, hardware shipped and software adapted. Here a scheduling idea, published in an academic paper, became the default serving architecture in a year and a half, and then reached back across the hardware-software boundary and changed what chips get built. That is the co-design flywheel running at product-line scale.
 
-It also completes a picture from earlier in this series. In [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/) we saw that HBM bandwidth, not capacity, is the scarce resource that defines each GPU generation, with capacity flat at 288 GB while bandwidth roughly triples. CPX is the corollary: if bandwidth is the precious thing, stop spending it on workloads that cannot use it. The interference numbers that motivated disaggregation in the first place are a [goodput story](/blog/goodput-vs-utilization/): a colocated GPU can show beautiful utilization while prefill bursts wreck the per-token latency that users actually experience. The reason prefill and decode diverge at all traces back to the [attention mechanism](/blog/attention-in-plain-words/) and the [transformer's structure](/blog/transformer-architecture-in-one-picture/): one weight matrix, many tokens in parallel during prefill, one token at a time during decode. And turning a roofline sketch into a purchasing decision for heterogeneous racks is exactly the kind of judgment that [ML performance engineers](/blog/what-does-an-ml-performance-engineer-do/) get paid for.
+It also completes a picture from earlier in this series. In [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/) we saw that HBM bandwidth, not capacity, is the scarce resource that defines each GPU generation, with capacity flat at 288 GB while bandwidth roughly triples. CPX is the corollary: if bandwidth is the precious thing, stop spending it on workloads that cannot use it. The interference numbers that motivated disaggregation in the first place are a [goodput story](/blog/goodput-vs-utilization/): a colocated GPU can show beautiful utilization while prefill bursts wreck the per-token latency that users actually experience. The reason prefill and decode diverge at all traces back to the [attention mechanism](/blog/attention-in-plain-words/) and the [transformer's structure](/blog/transformer-architecture-in-one-picture/): 1 weight matrix, many tokens in parallel during prefill, 1 token at a time during decode. And turning a roofline sketch into a purchasing decision for heterogeneous racks is exactly the kind of judgment that [ML performance engineers](/blog/what-does-an-ml-performance-engineer-do/) get paid for.
 
 Expect the split to deepen. Once prefill and decode are separate line items, each can evolve at its own pace: prefill parts chasing FLOPs per dollar on cheap memory, decode parts chasing bytes per second per dollar on whatever HBM5 becomes. The trench coat is off.
 

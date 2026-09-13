@@ -3,7 +3,7 @@
   <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The Entire FP4 Number System</text>
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Every positive value E2M1 can represent (a sign bit doubles it)</text>
 
-  <text x="600" y="300" text-anchor="middle" font-size="28" fill="#55584a">16 codes = 1 sign bit &#215; 8 magnitudes</text>
+  <text x="600" y="300" text-anchor="middle" font-size="28" fill="#55584a">16 codes = 2 signs &#215; 8 magnitudes</text>
 
   <!-- number line -->
   <line x1="130" y1="560" x2="1070" y2="560" stroke="#55584a" stroke-width="3"/>
@@ -45,10 +45,10 @@
   <line x1="1050" y1="690" x2="1050" y2="678" stroke="#b06a4e" stroke-width="3"/>
   <text x="906" y="738" text-anchor="middle" font-size="26" fill="#8a5138">step 2.0</text>
 
-  <text x="600" y="860" text-anchor="middle" font-size="28" fill="#55584a">Dense near zero, sparse near the top &#8212;</text>
+  <text x="600" y="860" text-anchor="middle" font-size="28" fill="#55584a">Dense near 0, sparse near the top &#8212;</text>
   <text x="600" y="902" text-anchor="middle" font-size="28" fill="#55584a">and nothing exists above 6</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; fmt-1</text>
-  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">sixteen values, that's all</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">16 encodings, including signed zero</text>
 </svg>

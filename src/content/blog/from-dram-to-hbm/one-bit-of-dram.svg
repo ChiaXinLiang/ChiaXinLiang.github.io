@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">One Bit of DRAM</text>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">1 Bit of DRAM</text>
   <text x="90" y="156" font-size="30" fill="#75786a">A transistor, a capacitor, and 40,000 electrons</text>
 
   <!-- wordline (horizontal) -->
@@ -45,7 +45,7 @@
 
   <!-- annotations -->
   <circle cx="140" cy="762" r="9" fill="#c9973b"/>
-  <text x="170" y="772" font-size="28" fill="#33362a">The capacitor is ~20 fF: one bit is about 40,000 electrons</text>
+  <text x="170" y="772" font-size="28" fill="#33362a">The capacitor is ~20 fF: 1 bit is about 40,000 electrons</text>
   <circle cx="140" cy="832" r="9" fill="#b06a4e"/>
   <text x="170" y="842" font-size="28" fill="#33362a">It leaks &#8212; every cell is refreshed at least every 64 ms</text>
   <circle cx="140" cy="902" r="9" fill="#5b7c46"/>
@@ -53,5 +53,5 @@
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; mem-3</text>
-  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">one bit, one leaky bucket</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">1 bit, 1 leaky bucket</text>
 </svg>

@@ -27,7 +27,7 @@
 <text x="870" y="862" text-anchor="middle" font-size="26" fill="#8a5138">drafts + rejected tokens now</text>
 <text x="870" y="897" text-anchor="middle" font-size="26" fill="#8a5138">displace other requests' work</text>
 
-<text x="600" y="944" text-anchor="middle" font-size="24" fill="#a3a08f">bars: share of GPU compute capacity during one decode step</text>
+<text x="600" y="944" text-anchor="middle" font-size="24" fill="#a3a08f">bars: share of GPU compute capacity during 1 decode step</text>
 
 <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
 <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · opt-4</text>

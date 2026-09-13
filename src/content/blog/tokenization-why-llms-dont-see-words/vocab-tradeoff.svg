@@ -58,4 +58,4 @@
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics &#183; llm-2</text>
   <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">compression has a price</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Embedding parameters = Vd; dense attention pairs scale as T²</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">V: vocabulary; d: width; T: token length; fewer tokens can cost more rows</text></g></svg>

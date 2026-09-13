@@ -5,7 +5,7 @@
     <text x="90" y="156" font-size="30" fill="#75786a">An 8,192-token prompt lands in a busy decode loop</text>
 
     <!-- Panel A -->
-    <text x="90" y="248" font-size="28" font-weight="bold" fill="#33362a">Without chunking: prefill runs as one giant step</text>
+    <text x="90" y="248" font-size="28" font-weight="bold" fill="#33362a">Without chunking: prefill runs as 1 giant step</text>
     <!-- decode blocks before -->
     <rect x="90" y="280" width="34" height="64" fill="#a8bf92"/>
     <rect x="132" y="280" width="34" height="64" fill="#a8bf92"/>
@@ -35,7 +35,7 @@
     <text x="515" y="388" text-anchor="middle" font-size="24" fill="#b04a3a">p99 spike blows the SLO</text>
 
     <!-- Panel B -->
-    <text x="90" y="564" font-size="28" font-weight="bold" fill="#33362a">With chunking: one chunk rides each decode step</text>
+    <text x="90" y="564" font-size="28" font-weight="bold" fill="#33362a">With chunking: 1 chunk rides each decode step</text>
     <!-- alternating chunk + decode: unit 90px, 11 units from x=90 -->
     <rect x="90" y="596" width="44" height="64" fill="#b06a4e"/><rect x="140" y="596" width="34" height="64" fill="#a8bf92"/>
     <rect x="180" y="596" width="44" height="64" fill="#b06a4e"/><rect x="230" y="596" width="34" height="64" fill="#a8bf92"/>

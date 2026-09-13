@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="90" y="100" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">Will It Fit on One H100?</text>
+  <text x="90" y="100" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">Will It Fit on 1 H100?</text>
   <text x="90" y="156" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">Model weights by precision vs 80 GB of HBM (weights only)</text>
 
   <!-- scale: 0..150 GB maps x 340..1080 (4.933 px/GB) -->
@@ -29,7 +29,7 @@
     <text x="320" y="726" text-anchor="end" font-size="28" fill="#55584a">70B &#183; FP8</text>
     <rect x="340" y="690" width="348" height="56" fill="#c9973b"/>
     <text x="760" y="714" font-size="26" fill="#33362a">70.6 GB &#183; loads, but only</text>
-    <text x="760" y="744" font-size="26" fill="#33362a">~3 GB left for KV cache</text>
+    <text x="760" y="744" font-size="26" fill="#33362a">1.4 GB before added reserve</text>
 
     <!-- 70B INT4: 40 GB -> 197px -->
     <text x="320" y="826" text-anchor="end" font-size="28" fill="#55584a">70B &#183; INT4</text>

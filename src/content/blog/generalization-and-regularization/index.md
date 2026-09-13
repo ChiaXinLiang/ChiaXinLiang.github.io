@@ -2,6 +2,7 @@
 title: "Generalization and Regularization: Fitting the Data Without Memorizing It"
 description: "Separate training error from expected deployment loss, calculate an L2-regularized estimator, and explain validation, early stopping, and the limits of simple bias\u2013variance stories."
 pubDate: 'Sep 12 2026'
+updatedDate: 'Sep 12 2026'
 heroImage: './cover.png'
 series: 'llm-basics'
 code: 'stat-5'
@@ -9,13 +10,14 @@ order: 18
 topic: 'Statistical Learning'
 tags: [statistics, theory, learning]
 ---
+
 A model can make almost no mistakes on its training examples and still fail on new inputs. Training asks an optimizer to fit observed data; generalization asks whether the resulting rule performs well on another draw from the relevant population. The second question cannot be answered by the training loss alone.
 
 Regularization changes which fitted solutions are preferred. It can discourage large coefficients, constrain a hypothesis class, or stop optimization before it fits unstable patterns. Those mechanisms can improve held-out performance, but none guarantees that a model will work under arbitrary distribution shift. This article connects the statistical objective to a numerical example and a practical evaluation design.
 
 ## Define population risk and empirical risk
 
-Let D denote the population distribution over inputs x and targets y. A model f_theta uses parameters theta to make a prediction, and a loss function ell measures its error on one input-target pair. Population risk is the expected loss on a new pair drawn from D:
+Let D denote the population distribution over inputs x and targets y. A model f_theta uses parameters theta to make a prediction, and a loss function ell measures its error on 1 input-target pair. Population risk is the expected loss on a new pair drawn from D:
 
 $$
 R(\theta)=E_{(x,y)\sim D}[\ell(f_\theta(x),y)].
@@ -29,7 +31,7 @@ $$
 
 The optimizer sees empirical risk, possibly plus other terms. Deployment cares about a relevant population risk. A model chosen to minimize the observed average may exploit accidental properties of the finite training sample. That is why the hats, averaging convention, and population definition matter.
 
-The familiar i.i.d. assumption says examples are independent draws from the same D. Real datasets can contain repeated documents, multiple measurements from one person, or temporally correlated incidents. Randomly splitting such examples may leave nearly identical information in both training and evaluation. The apparent held-out result then overstates performance on genuinely new cases.
+The familiar i.i.d. assumption says examples are independent draws from the same D. Real datasets can contain repeated documents, multiple measurements from 1 person, or temporally correlated incidents. Randomly splitting such examples may leave nearly identical information in both training and evaluation. The apparent held-out result then overstates performance on genuinely new cases.
 
 ## Overfitting is a comparison, not a coefficient count
 
@@ -47,25 +49,25 @@ The loss being compared must also match. Training can use augmentation, dropout,
 
 ## Work an L2-regularized estimator by hand
 
-Consider the simplest regression model: every prediction is the same scalar parameter w. Our three illustrative targets are 1, 2, and 6. Use mean squared error with a factor one half, plus an L2 penalty with strength lambda greater than or equal to zero:
+Consider the simplest regression model: every prediction is the same scalar parameter w. Our 3 illustrative targets are 1, 2, and 6. Use mean squared error with a factor 1 half, plus an L2 penalty with strength lambda greater than or equal to 0:
 
 $$
 J(w)=\frac{1}{2n}\sum_{i=1}^{n}(w-y_i)^2+\frac{\lambda}{2}w^2.
 $$
 
-Here n equals three and the sample mean y_bar equals three. Differentiating gives J prime equal to w minus y_bar plus lambda times w. Setting the derivative to zero yields:
+Here n equals 3 and the sample mean y_bar equals 3. Differentiating gives J prime equal to w minus y_bar plus lambda times w. Setting the derivative to 0 yields:
 
 $$
 \widehat w_\lambda=\frac{\bar y}{1+\lambda}.
 $$
 
-Without regularization, lambda equals zero and the fitted prediction is three. With lambda equal to one half, the fitted prediction becomes two. The penalty pulls the coefficient toward zero, accepting worse fit to the observed targets in exchange for a preference built into the objective.
+Without regularization, lambda equals 0 and the fitted prediction is 3. With lambda equal to 1 half, the fitted prediction becomes 2. The penalty pulls the coefficient toward 0, accepting worse fit to the observed targets in exchange for a preference built into the objective.
 
-Unregularized mean squared error at w equal to three is fourteen divided by three, about 4.667. At w equal to two it is seventeen divided by three, about 5.667. The regularized model has worse training fit. That is expected, not evidence that the derivative is wrong. The regularized objective includes a second term.
+Unregularized mean squared error at w equal to 3 is 14 divided by 3, about 4.667. At w equal to 2 it is 17 divided by 3, about 5.667. The regularized model has worse training fit. That is expected, not evidence that the derivative is wrong. The regularized objective includes a second term.
 
-Suppose a tiny illustrative validation set contains targets one and two. Its mean squared error is 2.5 at w equal to three and 0.5 at w equal to two. In that example the regularized prediction performs better on validation. A different validation population could reverse the result. Two held-out points are far too little evidence for a broad guarantee; the calculation demonstrates the tradeoff, not universal superiority.
+Suppose a tiny illustrative validation set contains targets 1 and 2. Its mean squared error is 2.5 at w equal to 3 and 0.5 at w equal to 2. In that example the regularized prediction performs better on validation. A different validation population could reverse the result. 2 held-out points are far too little evidence for a broad guarantee; the calculation demonstrates the tradeoff, not universal superiority.
 
-![The L2 example shrinks the fitted constant from three to two while increasing training error.](figure-02.png)
+![The L2 example shrinks the fitted constant from 3 to two while increasing training error.](figure-02.png)
 
 *Original numerical example. Training and validation targets are illustrative and all errors are calculated in the article.*
 
@@ -73,7 +75,7 @@ Suppose a tiny illustrative validation set contains targets one and two. Its mea
 
 L2 regularization penalizes squared parameter magnitude. For a vector w, the penalty uses the sum of squared coefficients. It prefers smaller weights relative to the chosen parameterization and feature scale. Multiplying an input feature by a large constant can permit a smaller coefficient for the same predictions, changing the effective penalty unless scaling is handled consistently.
 
-That is why regularization strength cannot be interpreted independently of preprocessing, objective normalization, and which parameters receive the penalty. Intercepts are often excluded in classical regression; neural-network implementations may exclude bias or normalization parameters. Specify those choices before comparing two “weight decay” settings.
+That is why regularization strength cannot be interpreted independently of preprocessing, objective normalization, and which parameters receive the penalty. Intercepts are often excluded in classical regression; neural-network implementations may exclude bias or normalization parameters. Specify those choices before comparing 2 “weight decay” settings.
 
 Summed data loss and averaged data loss also imply different relative strengths. If the data term is multiplied by n while the penalty is unchanged, the same lambda becomes weaker relative to the observations. Copying a hyperparameter across implementations without checking reduction conventions can therefore produce a different model preference.
 
@@ -85,9 +87,20 @@ For squared-error regression, let m(x) be the true conditional mean of y given x
 
 Under the usual decomposition assumptions, expected squared prediction error separates into squared bias, estimator variance, and irreducible conditional noise. Regularization can increase bias while reducing variance, potentially lowering total prediction error. The irreducible noise term does not vanish merely because the model has more parameters.
 
-The constant-model example illustrates shrinkage bias. If the true mean is three, a penalty pulling the estimator toward zero makes its expected prediction smaller than three. If the sample mean is noisy, that same shrinkage can reduce variability. Which effect dominates depends on the signal, noise, sample size, and penalty strength.
+The constant-model example illustrates shrinkage bias. If the true mean is 3, a penalty pulling the estimator toward 0 makes its expected prediction smaller than 3. If the sample mean is noisy, that same shrinkage can reduce variability. Which effect dominates depends on the signal, noise, sample size, and penalty strength.
 
-This decomposition is specific to a loss and statistical setup. It is not a universal three-number explanation for every neural network or classification metric. Nor does it imply a single smooth tradeoff curve under all modern training regimes. Use it to understand a mechanism, then measure the task and loss actually relevant to the application.
+This decomposition is specific to a loss and statistical setup. It is not a universal 3-number explanation for every neural network or classification metric. Nor does it imply a single smooth tradeoff curve under all modern training regimes. Use it to understand a mechanism, then measure the task and loss actually relevant to the application.
+
+The scalar shrinkage example can quantify the bias-variance tradeoff instead of only naming it. Suppose independent targets have mean mu and variance sigma squared, and the estimator is the sample mean divided by 1 plus lambda:
+
+$$
+\operatorname{Bias}(\widehat w_\lambda)=-\frac{\lambda\mu}{1+\lambda},\qquad
+\operatorname{Var}(\widehat w_\lambda)=\frac{\sigma^2}{n(1+\lambda)^2}.
+$$
+
+For a new independent target, mean squared prediction error adds squared bias, estimator variance, and irreducible sigma squared. With mu equal to 1, sigma squared equal to 9, and n equal to 3, no penalty gives error 12. Choosing lambda equal to 1 gives squared bias 0.25 and estimator variance 0.75, so total error is 10. Shrinkage improves expected prediction error in this assumed population despite biasing the estimate.
+
+If the true mean were much farther from 0, the same penalty could hurt. That is the method's preference and its cost in explicit form. Use validation to choose lambda under the intended population rather than assuming the illustrative prior is appropriate. This derivation applies to a constant estimator with squared loss; it is not a universal quantitative model of neural-network generalization.
 
 ## Validation chooses; testing estimates after choosing
 

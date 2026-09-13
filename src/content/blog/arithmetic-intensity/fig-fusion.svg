@@ -50,9 +50,9 @@
   <!-- savings banner -->
   <rect x="150" y="850" width="900" height="90" rx="14" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
   <text x="600" y="888" text-anchor="middle" font-size="28" font-weight="bold" fill="#33362a">268 MB of HBM traffic eliminated</text>
-  <text x="600" y="924" text-anchor="middle" font-size="25" fill="#55584a">&#8776; 80 &#181;s saved at 3.35 TB/s, a 22% speedup</text>
+  <text x="600" y="924" text-anchor="middle" font-size="25" fill="#55584a">&#8776; 80 &#181;s saved at 3.35 TB/s, 22% less elapsed time</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; ktune-2</text>
-  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">write once, not five times</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">saved bytes = 4 × output bytes</text>
 </svg>

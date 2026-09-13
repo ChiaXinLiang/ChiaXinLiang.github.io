@@ -10,7 +10,7 @@
   <rect width="1200" height="1200" fill="#fdfbf4"/>
 
   <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Prefill vs Decode</text>
-  <text x="90" y="156" font-size="30" fill="#75786a">One request, two phases with opposite bottlenecks</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">1 request, 2 phases with opposite bottlenecks</text>
 
   <!-- Panel A: prefill -->
   <rect x="90" y="240" width="1020" height="330" rx="18" fill="#e7edd9"/>
@@ -43,7 +43,7 @@
 
   <!-- model box -->
   <rect x="250" y="448" width="450" height="64" rx="12" fill="#f4f1e6" stroke="#5b7c46" stroke-width="3"/>
-  <text x="475" y="489" font-size="27" fill="#33362a" text-anchor="middle">Model: one big parallel pass</text>
+  <text x="475" y="489" font-size="27" fill="#33362a" text-anchor="middle">Model: 1 big parallel pass</text>
 
   <!-- first token out -->
   <line x1="700" y1="480" x2="760" y2="480" stroke="#75786a" stroke-width="2" marker-end="url(#ah)"/>
@@ -51,7 +51,7 @@
   <text x="865" y="489" font-size="26" fill="#33362a" text-anchor="middle">"The"</text>
   <text x="865" y="544" font-size="24" fill="#75786a" text-anchor="middle">first output token</text>
 
-  <text x="120" y="546" font-size="24" fill="#55584a">all prompt tokens in one pass</text>
+  <text x="120" y="546" font-size="24" fill="#55584a">all prompt tokens in 1 pass</text>
 
   <!-- Panel B: decode -->
   <rect x="90" y="630" width="1020" height="330" rx="18" fill="#f0ddd0"/>
@@ -60,7 +60,7 @@
 
   <!-- model box -->
   <rect x="140" y="740" width="330" height="80" rx="12" fill="#f4f1e6" stroke="#b06a4e" stroke-width="3"/>
-  <text x="305" y="772" font-size="26" fill="#33362a" text-anchor="middle">Model: one full pass</text>
+  <text x="305" y="772" font-size="26" fill="#33362a" text-anchor="middle">Model: 1 full pass</text>
   <text x="305" y="804" font-size="24" fill="#55584a" text-anchor="middle">per generated token</text>
 
   <line x1="470" y1="780" x2="540" y2="780" stroke="#75786a" stroke-width="2" marker-end="url(#ah)"/>
@@ -86,5 +86,5 @@
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics · llm-3</text>
-  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">one token at a time</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">1 token at a time</text>
 </svg>

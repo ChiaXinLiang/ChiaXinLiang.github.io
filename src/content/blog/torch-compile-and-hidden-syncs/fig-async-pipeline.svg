@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">One .item(), one pipeline stall</text>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">1 .item(), 1 pipeline stall</text>
   <text x="90" y="156" font-size="30" fill="#75786a">CUDA is asynchronous — until Python asks for a value</text>
 
   <!-- Panel A -->

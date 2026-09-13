@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Where 7.6 Milliseconds Go</text>
-  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">One decode step: 7B FP16 model, A100-class GPU</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">1 decode step: 7B FP16 model, A100-class GPU</text>
 
   <!-- axis -->
   <line x1="420" y1="270" x2="420" y2="690" stroke="#d8d4c4" stroke-width="3"/>
@@ -28,8 +28,8 @@
 
   <!-- note -->
   <rect x="230" y="770" width="740" height="120" rx="12" fill="#f4f1e6" stroke="#e8e4d7" stroke-width="2"/>
-  <text x="600" y="820" text-anchor="middle" font-size="28" fill="#55584a">More than 99% of each decode step</text>
-  <text x="600" y="858" text-anchor="middle" font-size="28" fill="#55584a">is spent waiting on memory, not math</text>
+  <text x="600" y="820" text-anchor="middle" font-size="28" fill="#55584a">Illustrative serial budget; compute and memory</text>
+  <text x="600" y="858" text-anchor="middle" font-size="28" fill="#55584a">may overlap within a kernel; this is not measured time</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics &#183; llm-5</text>

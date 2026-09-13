@@ -57,4 +57,4 @@
   <text x="90" y="1078" font-size="24" fill="#a3a08f">Findings from Guo &amp; Zhang (2025) and KernelBench paper</text>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · cd-4</text>
   <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">search is not insight</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">P(solve task i in n tries) = 1 − (1 − pi)ⁿ</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">Independent, constant pi per task; averaging pi is not task coverage</text></g></svg>

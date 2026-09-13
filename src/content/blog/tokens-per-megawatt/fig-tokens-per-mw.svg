@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
 
-  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">One Megawatt, By Hand</text>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">1 Megawatt, By Hand</text>
   <text x="90" y="156" font-size="30" fill="#75786a">From grid meter to sellable tokens: GB300 NVL72 fleet</text>
 
   <!-- box 1 -->
@@ -43,4 +43,4 @@
 
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; econ-1</text>
   <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">efficiency is revenue</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">R = Pgrid × 72r / (PUE × Prack)</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">Grid watts → IT rack budget → compliant tokens/s; fleet average</text></g></svg>

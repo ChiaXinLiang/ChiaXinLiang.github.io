@@ -41,7 +41,7 @@
   <rect x="250" y="730" width="800" height="64" rx="8" fill="#5b7c46"/>
 
   <text x="650" y="862" font-size="26" fill="#55584a" text-anchor="middle">With enough ready warps, useful work can hide load latency</text>
-  <text x="650" y="906" font-size="26" fill="#55584a" text-anchor="middle">Zero-cost switch: every resident warp keeps its own registers</text>
+  <text x="650" y="906" font-size="26" fill="#55584a" text-anchor="middle">Resident warp switch: every resident warp keeps its own registers</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · exec-1</text>

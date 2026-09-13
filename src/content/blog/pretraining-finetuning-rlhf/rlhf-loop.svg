@@ -54,10 +54,10 @@
   <text x="90" y="748" font-size="26" fill="#55584a">1 · The policy answers a prompt; the reward model scores it</text>
   <text x="90" y="792" font-size="26" fill="#55584a">2 · PPO nudges the weights toward higher-scoring answers</text>
   <text x="90" y="836" font-size="26" fill="#55584a">3 · A KL penalty keeps the policy near its SFT starting</text>
-  <text x="122" y="880" font-size="26" fill="#55584a">point, so it cannot drift into reward-hacked nonsense</text>
+  <text x="122" y="880" font-size="26" fill="#55584a">point; reward hacking can still occur</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1078" font-size="24" fill="#a3a08f">Loop structure after Ouyang et al. (2022)</text>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics · llm-1</text>
   <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Preferences become weights</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Objective: expected reward − β × KL(policy || reference)</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">Reward favors preferred outputs; KL limits policy drift, not error</text></g></svg>

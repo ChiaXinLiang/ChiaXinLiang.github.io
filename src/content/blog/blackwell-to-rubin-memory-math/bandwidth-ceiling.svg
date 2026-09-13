@@ -13,7 +13,7 @@
     <rect x="120" y="330" width="300" height="220" rx="16" fill="#e7edd9" stroke="#5b7c46" stroke-width="5"/>
     <text x="270" y="420" text-anchor="middle" font-size="40" font-weight="700" fill="#33362a">~70 GB</text>
     <text x="270" y="470" text-anchor="middle" font-size="27" fill="#55584a">weights read</text>
-    <text x="270" y="505" text-anchor="middle" font-size="27" fill="#55584a">one stream, 70B @ 8-bit</text>
+    <text x="270" y="505" text-anchor="middle" font-size="27" fill="#55584a">1 stream, 70B @ 8-bit</text>
 
     <!-- pipe -->
     <line x1="420" y1="440" x2="540" y2="440" stroke="#55584a" stroke-width="5" marker-end="url(#ar)"/>
@@ -39,5 +39,5 @@
 
   <line x1="80" y1="1090" x2="1120" y2="1090" stroke="#e8e4d7" stroke-width="3"/>
   <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">Efficient AI · chip-1</text>
-  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">decode is a bandwidth story</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">time ≥ bytes / bandwidth</text>
 </svg>

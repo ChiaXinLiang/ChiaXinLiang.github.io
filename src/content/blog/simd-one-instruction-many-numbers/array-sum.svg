@@ -4,18 +4,18 @@
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Critical-path cycles at a 4-cycle add latency (4 GHz core)</text>
 
   <!-- bar 1: scalar -->
-  <text x="90" y="300" font-size="27" font-weight="bold" fill="#33362a">scalar, one accumulator</text>
+  <text x="90" y="300" font-size="27" font-weight="bold" fill="#33362a">scalar, 1 accumulator</text>
   <text x="1110" y="300" text-anchor="end" font-size="27" fill="#55584a">4,096 cycles ≈ 1.0 µs</text>
   <rect x="90" y="320" width="900" height="64" rx="6" fill="#b06a4e"/>
 
   <!-- bar 2: AVX-512 one accumulator -->
-  <text x="90" y="480" font-size="27" font-weight="bold" fill="#33362a">AVX-512, one accumulator</text>
+  <text x="90" y="480" font-size="27" font-weight="bold" fill="#33362a">AVX-512, 1 accumulator</text>
   <text x="1110" y="480" text-anchor="end" font-size="27" fill="#55584a">~280 cycles ≈ 70 ns</text>
   <rect x="90" y="500" width="62" height="64" rx="6" fill="#c9973b"/>
-  <text x="170" y="542" font-size="25" fill="#75786a">16 lanes shorten the chain 16×</text>
+  <text x="170" y="542" font-size="25" fill="#75786a">16 lanes shorten the dependency chain 16×</text>
 
   <!-- bar 3: AVX-512 eight accumulators -->
-  <text x="90" y="660" font-size="27" font-weight="bold" fill="#33362a">AVX-512, eight accumulators</text>
+  <text x="90" y="660" font-size="27" font-weight="bold" fill="#33362a">AVX-512, 8 accumulators</text>
   <text x="1110" y="660" text-anchor="end" font-size="27" fill="#55584a">~60 cycles ≈ 15 ns</text>
   <rect x="90" y="680" width="14" height="64" rx="3" fill="#5b7c46"/>
   <text x="122" y="722" font-size="25" fill="#75786a">8 independent chains hide the add latency</text>
@@ -28,5 +28,5 @@
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch · par-1</text>
-  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">shorten the chain</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">ready accumulators ≥ rate × latency</text>
 </svg>

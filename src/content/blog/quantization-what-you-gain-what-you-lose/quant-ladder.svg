@@ -7,13 +7,13 @@
   <text x="90" y="292" font-size="30" font-weight="bold" fill="#33362a">FP16 &#183; 2 bytes/weight</text>
   <text x="1110" y="292" text-anchor="end" font-size="28" fill="#55584a">&#8776; 47 tok/s on 2 GPUs</text>
   <rect x="90" y="310" width="1020" height="72" rx="8" fill="#b06a4e"/>
-  <text x="112" y="356" font-size="27" font-weight="bold" fill="#fdfbf4">141.2 GB &#8212; needs two 80 GB GPUs</text>
+  <text x="112" y="356" font-size="27" font-weight="bold" fill="#fdfbf4">141.2 GB &#8212; needs 2 80 GB GPUs</text>
 
   <!-- Row 2: FP8 -->
   <text x="90" y="482" font-size="30" font-weight="bold" fill="#33362a">FP8 &#183; 1 byte/weight</text>
   <text x="1110" y="482" text-anchor="end" font-size="28" fill="#55584a">&#8776; 47 tok/s on 1 GPU</text>
   <rect x="90" y="500" width="510" height="72" rx="8" fill="#c9973b"/>
-  <text x="112" y="546" font-size="27" font-weight="bold" fill="#fdfbf4">70.6 GB &#8212; fits one GPU</text>
+  <text x="112" y="546" font-size="27" font-weight="bold" fill="#fdfbf4">70.6 GB &#8212; fits 1 GPU</text>
 
   <!-- Row 3: INT4 -->
   <text x="90" y="672" font-size="30" font-weight="bold" fill="#33362a">INT4 &#183; 4.25 bits/weight</text>

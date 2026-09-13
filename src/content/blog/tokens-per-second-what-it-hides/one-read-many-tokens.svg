@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Weight Read, Many Tokens</text>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">1 Weight Read, Many Tokens</text>
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Llama-3-8B (FP16) on an H100: why batching multiplies throughput</text>
 
   <!-- panel headers -->
@@ -40,7 +40,7 @@
     <rect x="681" y="652" width="36" height="36"/><rect x="727" y="652" width="36" height="36"/><rect x="773" y="652" width="36" height="36"/><rect x="819" y="652" width="36" height="36"/><rect x="865" y="652" width="36" height="36"/><rect x="911" y="652" width="36" height="36"/><rect x="957" y="652" width="36" height="36"/><rect x="1003" y="652" width="36" height="36"/>
     <rect x="681" y="698" width="36" height="36"/><rect x="727" y="698" width="36" height="36"/><rect x="773" y="698" width="36" height="36"/><rect x="819" y="698" width="36" height="36"/><rect x="865" y="698" width="36" height="36"/><rect x="911" y="698" width="36" height="36"/><rect x="957" y="698" width="36" height="36"/><rect x="1003" y="698" width="36" height="36"/>
   </g>
-  <text x="860" y="780" text-anchor="middle" font-size="26" fill="#55584a">32 tokens per step, one per user</text>
+  <text x="860" y="780" text-anchor="middle" font-size="26" fill="#55584a">32 tokens per step, 1 per user</text>
 
   <!-- results -->
   <rect x="140" y="830" width="400" height="80" fill="#e7edd9" stroke="#a8bf92" stroke-width="2"/>
@@ -53,4 +53,4 @@
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">LLM Basics · llm-6</text>
   <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">same read, more tokens</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Aggregate rate = B / tstep;  per-user rate ≈ 1 / tstep</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">B users share a weight read; each still receives 1 output per step</text></g></svg>

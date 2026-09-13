@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The hidden barrier in stream 0</text>
-  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">One stream-0 call stalls all blocking streams</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">1 stream-0 call stalls all blocking streams</text>
 
   <!-- barrier band -->
   <rect x="640" y="252" width="150" height="478" fill="#e5b3a6" fill-opacity="0.30"/>
@@ -51,5 +51,5 @@
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; orch-1</text>
-  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">One queue stalls all</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">1 queue stalls all</text>
 </svg>

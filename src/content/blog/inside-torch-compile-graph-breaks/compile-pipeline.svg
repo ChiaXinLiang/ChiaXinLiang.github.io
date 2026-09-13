@@ -32,15 +32,15 @@
   <text x="600" y="450" text-anchor="middle" font-size="24" fill="#75786a">Guards checked on every call; cached code reruns when they pass</text>
 
   <!-- lower panel -->
-  <text x="600" y="560" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">What one graph break does to a forward pass</text>
+  <text x="600" y="560" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">What 1 graph break does to a forward pass</text>
 
   <!-- row 1: no breaks -->
   <text x="90" y="655" font-size="26" fill="#55584a">no breaks</text>
   <rect x="280" y="615" width="800" height="70" rx="8" fill="#a8bf92" stroke="#5b7c46" stroke-width="3"/>
-  <text x="680" y="658" text-anchor="middle" font-size="26" fill="#33362a">one compiled region &#183; fusion opportunities</text>
+  <text x="680" y="658" text-anchor="middle" font-size="26" fill="#33362a">1 compiled region &#183; fusion opportunities</text>
 
   <!-- row 2: one break -->
-  <text x="90" y="775" font-size="26" fill="#55584a">one break</text>
+  <text x="90" y="775" font-size="26" fill="#55584a">1 break</text>
   <rect x="280" y="735" width="310" height="70" rx="8" fill="#a8bf92" stroke="#5b7c46" stroke-width="3"/>
   <text x="435" y="778" text-anchor="middle" font-size="26" fill="#33362a">compiled #1</text>
   <rect x="600" y="735" width="160" height="70" rx="8" fill="#e5b3a6" stroke="#b04a3a" stroke-width="3"/>
@@ -50,7 +50,7 @@
   <text x="925" y="778" text-anchor="middle" font-size="26" fill="#33362a">compiled #2</text>
 
   <text x="600" y="880" text-anchor="middle" font-size="26" fill="#75786a">Boundary costs: lost fusion, resume; some operations also sync</text>
-  <text x="600" y="920" text-anchor="middle" font-size="26" fill="#75786a">Find every one: TORCH_LOGS="graph_breaks"</text>
+  <text x="600" y="920" text-anchor="middle" font-size="26" fill="#75786a">Find each break: TORCH_LOGS="graph_breaks"</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; pt-2</text>

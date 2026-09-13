@@ -22,7 +22,7 @@
   <text x="202" y="783" font-size="26" font-weight="bold" fill="#5b7c46" text-anchor="middle">ALU</text>
   <rect x="275" y="735" width="260" height="80" rx="6" fill="#f4f1e6" stroke="#a3a08f" stroke-width="2"/>
   <text x="405" y="783" font-size="24" fill="#75786a" text-anchor="middle">registers, TLB, misc</text>
-  <text x="340" y="866" font-size="24" fill="#75786a" text-anchor="middle">arithmetic: one small corner</text>
+  <text x="340" y="866" font-size="24" fill="#75786a" text-anchor="middle">arithmetic: 1 small corner</text>
 
   <!-- DSA die -->
   <rect x="650" y="330" width="420" height="500" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
@@ -50,7 +50,7 @@
   <line x1="665" y1="778" x2="1055" y2="778" stroke="#a8bf92" stroke-width="1.5"/>
   <rect x="750" y="618" width="220" height="56" rx="8" fill="#e7edd9"/>
   <text x="860" y="656" font-size="30" font-weight="bold" fill="#5b7c46" text-anchor="middle">65,536 MACs</text>
-  <text x="860" y="866" font-size="24" fill="#75786a" text-anchor="middle">arithmetic: most of the die</text>
+  <text x="860" y="866" font-size="24" fill="#75786a" text-anchor="middle">illustrative layout, not measured area fractions</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; par-4</text>

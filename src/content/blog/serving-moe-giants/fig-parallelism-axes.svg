@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Four Axes, One Deployment</text>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">4 Axes, 1 Deployment</text>
   <text x="90" y="156" font-size="30" fill="#75786a">What each parallelism splits, and what it costs</text>
 
   <!-- Row 1: TP -->
@@ -14,7 +14,7 @@
   <text x="390" y="307" font-size="22" fill="#33362a" text-anchor="middle">W1</text>
   <text x="450" y="307" font-size="22" fill="#33362a" text-anchor="middle">W2</text>
   <text x="510" y="307" font-size="22" fill="#33362a" text-anchor="middle">W3</text>
-  <text x="420" y="386" font-size="23" fill="#55584a" text-anchor="middle">one matmul, 4 shards + all-reduce</text>
+  <text x="420" y="386" font-size="23" fill="#55584a" text-anchor="middle">1 matmul, 4 shards + all-reduce</text>
   <text x="700" y="282" font-size="25" fill="#33362a">Splits every weight matrix.</text>
   <text x="700" y="316" font-size="25" fill="#55584a">Prefers fast links; often in-node.</text>
   <text x="700" y="350" font-size="25" fill="#55584a">Naive on MoE: sliver GEMMs.</text>

@@ -33,7 +33,7 @@
   <line x1="90" y1="750" x2="1110" y2="750" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="800" font-size="28" font-weight="bold" fill="#33362a">Crossover: attention overtakes linear at ≈107k tokens</text>
   <text x="90" y="842" font-size="26" fill="#55584a">S* = N / (d · layers) = 70e9 / (8192 · 80)</text>
-  <text x="90" y="902" font-size="28" font-weight="bold" fill="#33362a">One 8×H100 node, BF16, ~62% MFU:</text>
+  <text x="90" y="902" font-size="28" font-weight="bold" fill="#33362a">1 8×H100 node, BF16, ~62% MFU:</text>
   <text x="90" y="944" font-size="26" fill="#55584a">41 PFLOPs ÷ 4.9 PFLOPS sustained ≈ 8.4 seconds to first token</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>

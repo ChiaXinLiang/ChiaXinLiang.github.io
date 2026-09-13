@@ -1,6 +1,7 @@
 ---
 title: "Tokenization: Why LLMs Don't See Words"
-description: "Before a model reads anything, a tokenizer chops your text into fragments from a fixed menu — and that one design choice explains spelling fails, your API bill, and why Chinese costs more."
+description: 'How token vocabularies and segmentation affect sequence lengths, model inputs, and cost, with a checked byte-pair encoding example.'
+updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
 heroImage: './cover.png'
 code: 'llm-2'
@@ -10,7 +11,7 @@ topic: 'LLM Lifecycle'
 tags: ['tokenization', 'bpe', 'llm']
 ---
 
-GPT-4's tokenizer ships with a vocabulary of 100,277 entries, and it reads the question *how many r's are in "strawberry"?* without receiving a single letter of the fruit. The quoted word arrives as three fragments — `str`, `aw`, `berry` — encoded as the integers 496, 675, and 15717. That single fact explains one of the most mocked failures in LLM history: models that write flawless poetry yet miscount the r's in a ten-letter word.
+GPT-4's tokenizer ships with a vocabulary of 100,277 entries, and it reads the question *how many r's are in "strawberry"?* without receiving a single letter of the fruit. The quoted word arrives as 3 fragments — `str`, `aw`, `berry` — encoded as the integers 496, 675, and 15717. That single fact explains one of the most mocked failures in LLM history: models that write flawless poetry yet miscount the r's in a 10-letter word.
 
 This article is about the machinery that produces those fragments. Tokenization is the first step of the [LLM lifecycle](/blog/pretraining-finetuning-rlhf/) and the least glamorous, but it quietly decides what a model can perceive, how much your API call costs, and why the same paragraph is cheaper in English than in Burmese.
 
@@ -20,16 +21,16 @@ A neural network is arithmetic on vectors. Before any text reaches [the Transfor
 
 The obvious designs both fail:
 
-- **One token per character.** Tiny vocabulary (a few hundred symbols), but sequences get brutally long: "tokenization" alone becomes 12 steps. Attention cost grows with sequence length, and the model wastes capacity relearning that t-h-e spells a common word, over and over.
-- **One token per word.** Short sequences, but the vocabulary explodes. English alone has hundreds of thousands of word forms; add typos, names, code, and other languages, and no fixed list suffices. Anything missing becomes an unknown-word token, a black hole that deletes information.
+- **1 token per character.** Tiny vocabulary (a few hundred symbols), but sequences get brutally long: "tokenization" alone becomes 12 steps. Attention cost grows with sequence length, and the model wastes capacity relearning that t-h-e spells a common word, over and over.
+- **1 token per word.** Short sequences, but the vocabulary explodes. English alone has hundreds of thousands of word forms; add typos, names, code, and other languages, and no fixed list suffices. Anything missing becomes an unknown-word token, a black hole that deletes information.
 
-Every modern LLM lands in between: **subword tokenization**. Common words get one token each; rare words get built from reusable pieces. The dominant algorithm for choosing those pieces is **byte-pair encoding**, or BPE, adapted for NLP by Sennrich, Haddow, and Birch in 2016 from a 1994 compression trick.
+Every modern LLM lands in between: **subword tokenization**. Common words get 1 token each; rare words get built from reusable pieces. The dominant algorithm for choosing those pieces is **byte-pair encoding**, or BPE, adapted for NLP by Sennrich, Haddow, and Birch in 2016 from a 1994 compression trick.
 
 The idea is almost embarrassingly simple: start with characters, then repeatedly glue together the pair of adjacent symbols that occurs most often in your training corpus. Each glue operation is a **merge rule**, and it gets recorded in order. Run 50,000 merges and you have a vocabulary of 50,000-ish fragments that reflect the actual statistics of text: `the`, `ing`, `tion` earn their slots; `zqx` never does.
 
 ## A worked example you can follow by hand
 
-Here is BPE trained on a toy corpus, in the spirit of the example from Sennrich et al.'s original paper. Our corpus contains four words with counts:
+Here is BPE trained on a toy corpus, in the spirit of the example from Sennrich et al.'s original paper. Our corpus contains 4 words with counts:
 
 | word | count |
 |---|---|
@@ -51,19 +52,19 @@ Recount. The pair `(es, t)` occurs 9 times; the new symbol immediately participa
 **Merge 4:** `l o → lo` (count 7, from *low* and *lower*).
 **Merge 5:** `lo w → low` (count 7).
 
-Five merges, and the vocabulary already contains `low` and `est·` as single units. Now the payoff: tokenize **"lowest"**, a word that never appeared in the corpus. Start from characters `l o w e s t ·` and apply the merge rules in the order they were learned: `es`, then `est`, then `est·`, then `lo`, then `low`. Result: two tokens, `low` + `est·`.
+5 merges, and the vocabulary already contains `low` and `est·` as single units. Now the payoff: tokenize **"lowest"**, a word that never appeared in the corpus. Start from characters `l o w e s t ·` and apply the merge rules in the order they were learned: `es`, then `est`, then `est·`, then `lo`, then `low`. Result: 2 tokens, `low` + `est·`.
 
-The tokenizer composed a never-seen word from meaningful parts, no unknown-word token needed. That is the entire trick, and it scales: production tokenizers learn 50,000 to 200,000 merges from terabytes of text instead of five merges from four words.
+The tokenizer composed a never-seen word from meaningful parts, no unknown-word token needed. That is the entire trick, and it scales: production tokenizers learn 50,000 to 200,000 merges from terabytes of text instead of 5 merges from 4 words.
 
-![BPE worked example: four training words are split to characters, five merge rules are learned from pair counts, and the unseen word "lowest" tokenizes as low + est. Example follows Sennrich et al. (2016)](./bpe-merges.png)
+![BPE worked example: 4 training words are split to characters, 5 merge rules are learned from pair counts, and the unseen word "lowest" tokenizes as low + est. Example follows Sennrich et al. (2016)](./bpe-merges.png)
 
-## Why the model can't count the r's
+## Why character counting can be difficult
 
-Back to strawberry. After tokenization, the model receives three integer IDs, one per fragment. Each ID selects one row of the embedding matrix: a dense vector of a few thousand numbers that was *learned during training*. Nothing in that vector explicitly lists the letters inside the token. `berry` is not stored as b-e-r-r-y; it is stored as a point in meaning-space near `grape` and `jam`.
+Back to strawberry. After tokenization, the model receives 3 integer IDs, 1 per fragment. Each ID selects 1 row of the embedding matrix: a dense vector of a few thousand numbers that was *learned during training*. Nothing in that vector explicitly lists the letters inside the token. `berry` is not stored as b-e-r-r-y; it is stored as a point in meaning-space near `grape` and `jam`.
 
-![The strawberry pipeline: the word is split into the tokens str, aw, and berry, each mapped to an integer ID and then to a learned embedding vector — the individual letters are never part of the model's input](./strawberry-tokens.png)
+![The strawberry pipeline: the word is split into the tokens str, aw, and berry, each mapped to an integer ID and then to a learned embedding vector — the model receives token IDs rather than an explicit letter sequence](./strawberry-tokens.png)
 
-So when you ask "how many r's are in strawberry?", you are asking about characters the model literally was not given. It can only answer from statistical associations absorbed during training, and "berry has two r's" style trivia is thin in web text. Ask the same model to *spell the word out first* — s-t-r-a-w-b-e-r-r-y — and then count, and accuracy jumps, because spelling-out is a mapping it did see in training, and once each letter is its own token, counting becomes possible. The famous failure isn't a reasoning defect so much as an interface defect: we asked about pixels while the model sees compressed JPEG blocks.
+So when you ask "how many r's are in strawberry?", you are asking for a character-level operation through a token-level interface. Reversible token IDs preserve the text, and the model can learn spelling associations, and "berry has two r's" style trivia is thin in web text. Ask the same model to *spell the word out first* — s-t-r-a-w-b-e-r-r-y — and then count, and accuracy jumps, because spelling-out is a mapping it did see in training, and once each letter is its own token, counting can become easier. This is a learned capability problem influenced by representation; tokenization alone does not explain every counting failure.
 
 The same lens explains other odd behaviors. Arithmetic wobbles partly because numbers split into arbitrary chunks: GPT-4's tokenizer groups digits in threes from the left, so `1000` arrives as `100` + `0`, a split that cuts straight across place value. Reversing a string is hard for the same reason counting is. None of this is mysterious once you know what the model actually receives.
 
@@ -71,7 +72,7 @@ The same lens explains other odd behaviors. Arithmetic wobbles partly because nu
 
 Tokens aren't just the model's perceptual unit; they are the **billing and capacity unit** for the entire industry. API prices are quoted per million tokens, input and output separately. Context windows (128K, 200K, 1M) are token counts. Serving throughput is measured in [tokens per second](/blog/tokens-per-second-what-it-hides/), and the KV-cache memory that dominates [inference hardware planning](/blog/blackwell-to-rubin-memory-math/) grows with every token in the context.
 
-For English prose, a useful rule of thumb from OpenAI's documentation: one token is roughly 4 characters or about ¾ of a word, so 1,000 tokens is on the order of 750 words. This very article weighs in around 3,000 tokens.
+For English prose, a useful rule of thumb from OpenAI's documentation: 1 token is roughly 4 characters or about ¾ of a word, so 1,000 tokens is on the order of 750 words. This very article weighs in around 3,000 tokens.
 
 The rule of thumb collapses outside English. BPE vocabularies are learned from a training corpus, and those corpora are dominated by English. Frequent English fragments earn single tokens; text in less-represented languages gets shredded into smaller pieces, sometimes down to individual bytes. Petrov and colleagues measured this systematically in 2023: the *same content* can require up to **15× more tokens** in some languages than in English. Many non-Latin-script languages sit at 2-4×; a Chinese or Hindi sentence often costs double its English translation. Ahia and colleagues made the economic point bluntly in a paper titled "Do All Languages Cost the Same?": because APIs bill per token, speakers of tokenizer-unfriendly languages pay more money for the same request, get less effective context window, and wait longer for responses. A CJK character is 3 bytes in UTF-8; if it's rare enough to miss the vocabulary, it alone can consume 3 tokens.
 
@@ -79,27 +80,41 @@ Vendors have been closing the gap: OpenAI's o200k vocabulary and Llama 3's 128K-
 
 ## Going deeper: bytes, regex, and the vocabulary dial
 
-Three mechanisms below the surface are worth knowing.
+3 mechanisms below the surface are worth knowing.
 
-**Byte-level BPE.** GPT-2 introduced a neat closure trick: run BPE not on characters but on *bytes*. The base alphabet is exactly 256 symbols, so every possible input (emoji, Klingon, corrupted binary) is representable with zero unknown tokens. Merges then build multi-byte and multi-character tokens on top. This is what `tiktoken`, OpenAI's open-source tokenizer library, implements, and why nothing you paste into ChatGPT is ever "out of vocabulary."
+**Byte-level BPE.** GPT-2 introduced a neat closure trick: run BPE not on characters but on *bytes*. The base alphabet is exactly 256 symbols, so every possible input (emoji, Klingon, corrupted binary) is representable with 0 unknown tokens. Merges then build multi-byte and multi-character tokens on top. This is what `tiktoken`, OpenAI's open-source tokenizer library, implements, and why nothing you paste into ChatGPT is ever "out of vocabulary."
 
-**Pre-tokenization.** Before any merging, a regular expression splits raw text into chunks — roughly: word-like runs, number runs, punctuation, and leading spaces attached to the following word. Merges never cross chunk boundaries. This is why ` berry` (with a leading space) and `berry` are *different tokens* with different IDs, and why trailing whitespace at the end of a prompt can degrade completions: it strands the model on a token boundary it rarely saw during training. It also adds a twist to our headline example: ` strawberry` *with* its leading space is common enough to be a single vocabulary entry (ID 73700), so mid-sentence and unquoted, the fruit is one opaque block instead of three. The letters are hidden either way. Special tokens like end-of-text markers are injected outside this machinery entirely; they are control signals, not text. (Google's SentencePiece library reaches similar ends differently, treating spaces as ordinary symbols so that tokenization is fully reversible without language-specific rules.)
+**Pre-tokenization.** Before any merging, a regular expression splits raw text into chunks — roughly: word-like runs, number runs, punctuation, and leading spaces attached to the following word. Merges never cross chunk boundaries. This is why ` berry` (with a leading space) and `berry` are *different tokens* with different IDs, and why trailing whitespace at the end of a prompt can degrade completions: it strands the model on a token boundary it rarely saw during training. It also adds a twist to our headline example: ` strawberry` *with* its leading space is common enough to be a single vocabulary entry (ID 73700), so mid-sentence and unquoted, the fruit is 1 opaque block instead of 3. The letters are hidden either way. Special tokens like end-of-text markers are injected outside this machinery entirely; they are control signals, not text. (Google's SentencePiece library reaches similar ends differently, treating spaces as ordinary symbols so that tokenization is fully reversible without language-specific rules.)
 
-**The vocabulary-size dial.** Why did GPT-2 pick ~50K tokens, GPT-4 ~100K, GPT-4o and Llama 3 ~128-200K? It's a genuine trade-off. A bigger vocabulary compresses text into fewer tokens: cheaper attention, more effective context, faster generation per unit of text. But every token needs an embedding row, and (in the output layer) a score computed at every generation step. At Llama 3's scale (128,256 tokens × 4,096 embedding dimensions) the input table alone is about 525 million parameters, and with an untied output projection the pair costs over a billion, a meaningful slice of an 8-billion-parameter model. Push the vocabulary too far and you also mint tokens so rare they're barely seen in training, which is how GPT-2/3 ended up with "glitch tokens" like ` SolidGoldMagikarp` — vocabulary entries (that one traced back to a Reddit username) whose embeddings were nearly untrained and triggered bizarre outputs. Vocabulary size, like everything in this series, is an engineering compromise, not a law.
+**The vocabulary-size dial.** Why did GPT-2 pick ~50K tokens, GPT-4 ~100K, GPT-4o and Llama 3 ~128-200K? It's a genuine trade-off. A bigger vocabulary compresses text into fewer tokens: cheaper attention, more effective context, faster generation per unit of text. But every token needs an embedding row, and (in the output layer) a score computed at every generation step. At Llama 3's scale (128,256 tokens × 4,096 embedding dimensions) the input table alone is about 525 million parameters, and with an untied output projection the pair costs over 1 billion, a meaningful slice of an 8-billion-parameter model. Push the vocabulary too far and you also mint tokens so rare they're barely seen in training, which is how GPT-2/3 ended up with "glitch tokens" like ` SolidGoldMagikarp` — vocabulary entries (that 1 traced back to a Reddit username) whose embeddings were nearly untrained and triggered bizarre outputs. Vocabulary size, like everything in this series, is an engineering compromise, not a law.
 
 ![The vocabulary-size dial: small vocabularies give long sequences and tiny embedding tables, large vocabularies give short sequences and huge embedding tables, with real model vocabularies plotted between the extremes](./vocab-tradeoff.png)
 
+## Vocabulary size changes both compression and model cost
+
+For vocabulary size $$V$$ and embedding width $$d$$, the input table has
+
+$$
+P_{embed}=Vd,\qquad M_{embed}=Vds,
+$$
+
+where $$s$$ is bytes per stored weight. With 128,256 entries and width 4,096, that is 525,336,576 parameters, or about 1.051 GB in BF16. An untied output projection adds another table of that size; tying avoids duplicate weights but not the vocabulary scoring work.
+
+A tokenizer producing 15 percent fewer tokens has length ratio 0.85. In an ideal dense all-pairs attention calculation, its pair-work ratio is $$0.85^2=0.7225$$, a 27.75 percent reduction. Linear projections shrink by only 15 percent, while a larger vocabulary can increase embedding storage and final scoring. Actual attention kernels and batching determine wall-clock savings.
+
+The baseline tradeoff is therefore not simply words versus characters. Tokenization chooses an interface balancing sequence length, vocabulary cost, language coverage, and compositional learning. Reversible tokenization preserves the underlying text; it does not destroy letters. A model receiving token IDs can learn spelling associations, although character operations may be harder when boundaries hide convenient letter-level structure. Count errors are evidence of a learned capability limitation, not proof that recovering a token's characters is impossible. Evaluate multilingual compression and downstream tasks before choosing a vocabulary only by English token counts.
+
 ## Common misconceptions
 
-**"Tokens are basically words."** Only for common English words. `dog` is one token, but "indivisible" splits into several, `2027` may split after the third digit, and one rare Chinese character can cost three tokens. Whitespace and capitalization matter too: `berry`, ` berry`, and `Berry` are three distinct IDs. Budgeting a prompt by word count will misestimate by 30% in English and by multiples elsewhere.
+**"Tokens are basically words."** Only for common English words. `dog` is 1 token, but "indivisible" splits into several, `2027` may split after the third digit, and 1 rare Chinese character can cost 3 tokens. Whitespace and capitalization matter too: `berry`, ` berry`, and `Berry` are 3 distinct IDs. Budgeting a prompt by word count will misestimate by 30% in English and by multiples elsewhere.
 
 **"The strawberry fail proves LLMs can't reason."** It proves they can't *see letters*. Give the model the same question with the word pre-spelled into individual characters and the count usually comes out right; character-level models, and newer models trained with more spelling data and tool use, handle it too. A blind person failing a color-naming quiz tells you about their inputs, not their intelligence. There are real reasoning limits in LLMs, but letter-counting is a perception artifact, and treating it as a reasoning benchmark measures the tokenizer.
 
-**"A bigger vocabulary is always better — just make every word a token."** The embedding and output layers scale linearly with vocabulary size, so a million-entry vocabulary would spend billions of parameters on lookup tables while starving the layers that do the thinking. Worse, tail tokens appear so rarely that their embeddings stay half-trained (the glitch-token failure mode), and the softmax over the vocabulary at every decoding step gets more expensive. Doubling vocabulary size only shaves sequence lengths by a modest percentage once common words are covered — diminishing returns against linearly growing cost.
+**"A bigger vocabulary is always better — just make every word a token."** The embedding and output layers scale linearly with vocabulary size, so 1 million-entry vocabulary would spend billions of parameters on lookup tables while starving the layers that do the thinking. Worse, tail tokens appear so rarely that their embeddings stay half-trained (the glitch-token failure mode), and the softmax over the vocabulary at every decoding step gets more expensive. Doubling vocabulary size only shaves sequence lengths by a modest percentage once common words are covered — diminishing returns against linearly growing cost.
 
 ## The bigger picture
 
-Tokenization sits at the boundary between human text and everything else this series has covered. The token IDs it emits become embedding rows; those vectors flow through [attention](/blog/attention-in-plain-words/), where sequence length — set entirely by the tokenizer — determines the quadratic cost of every layer. Training, [gradient descent and backprop](/blog/how-models-learn/), never touches raw text at all; the tokenizer's output *is* the dataset. And when a trained model generates, it produces one token ID at a time, which is the subject of the next article.
+Tokenization sits at the boundary between human text and everything else this series has covered. The token IDs it emits become embedding rows; those vectors flow through [attention](/blog/attention-in-plain-words/), where sequence length — set entirely by the tokenizer — determines the quadratic cost of every layer. Training, [gradient descent and backprop](/blog/how-models-learn/), never touches raw text at all; the tokenizer's output *is* the dataset. And when a trained model generates, it produces 1 token ID at a time, which is the subject of the next article.
 
 It's also the part of the stack that is pure classical software (no learning at inference time, just a merge table and a regex), which makes it both refreshingly debuggable and dangerously easy to ignore. A surprising number of production LLM bugs (truncated context, doubled costs abroad, prompts that behave differently with a trailing space) are tokenizer bugs wearing a disguise.
 
@@ -120,4 +135,4 @@ It's also the part of the stack that is pure classical software (no learning at 
 
 ---
 
-*Part of the **Fundamental of LLM** series. Previous: [Pretraining, Fine-Tuning, RLHF](/blog/pretraining-finetuning-rlhf/). Next: how an LLM actually generates text, one token at a time.*
+*Part of the **Fundamental of LLM** series. Previous: [Pretraining, Fine-Tuning, RLHF](/blog/pretraining-finetuning-rlhf/). Next: how an LLM actually generates text, 1 token at a time.*

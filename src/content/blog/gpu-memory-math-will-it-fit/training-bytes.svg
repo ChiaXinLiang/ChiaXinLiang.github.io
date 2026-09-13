@@ -36,11 +36,11 @@
     <text x="675" y="727" fill="#33362a">Adam variance (FP32) &#8212; 4 B</text>
   </g>
 
-  <text x="90" y="890" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">Optimizer state alone is 12 B/param, six times the model itself.</text>
+  <text x="90" y="890" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">Optimizer state alone is 12 B/param, 6 times the model itself.</text>
   <text x="90" y="924" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#75786a">Activations come on top, scaling with batch &#215; sequence length.</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1078" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Following Rajbhandari et al. (2019), ZeRO</text>
   <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; gpumem-1</text>
-  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">training costs 8&#215; the bytes</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">2 + 2 + 4 + 4 + 4 = 16 B/parameter</text>
 </svg>

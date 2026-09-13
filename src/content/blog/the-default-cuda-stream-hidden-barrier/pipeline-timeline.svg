@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Three chunks: 18 ms &#8594; 10 ms</text>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">3 chunks: 18 ms &#8594; 10 ms</text>
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Pipelining hides 8 of the 12 copy milliseconds</text>
 
   <!-- serialized section -->
@@ -93,9 +93,9 @@
   <!-- annotation -->
   <text x="600" y="852" text-anchor="middle" font-size="26" fill="#55584a">12 ms of copy work; only the red-edged 4 ms</text>
   <text x="600" y="890" text-anchor="middle" font-size="26" fill="#55584a">(first H2D, last D2H) show up in the total.</text>
-  <text x="600" y="940" text-anchor="middle" font-size="26" fill="#75786a">One stream-0 call collapses this back to 18 ms.</text>
+  <text x="600" y="940" text-anchor="middle" font-size="26" fill="#75786a">Legacy barriers can remove intended overlap.</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; orch-1</text>
   <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">Overlap hides the copies</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Tpipe = h + k + d + (N − 1) × max(h, k, d)</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">3 chunks, 2 ms per stage → 10 ms; independent engines and buffers</text></g></svg>

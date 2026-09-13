@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"><rect width="1200" height="1200" fill="#fdfbf4"/><g transform="translate(102 0) scale(0.83)">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <g font-family="Helvetica Neue, Arial, sans-serif">
     <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Same GPU, Same Rent, 67x the Cost</text>
@@ -29,4 +29,4 @@
     <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-4</text>
     <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">throughput is money</text>
   </g>
-</svg>
+</g><rect x="60" y="996" width="1080" height="156" rx="12" fill="#e7edd9"/><text x="85" y="1033" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" font-weight="bold" fill="#33362a">Cost / million = 10⁶ × hourly cost / (3600 × G)</text><text x="85" y="1080" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" font-weight="normal" fill="#33362a">G: accepted output tokens/s over the billed period</text><text x="85" y="1122" font-family="Helvetica Neue, Arial, sans-serif" font-size="23" font-weight="normal" fill="#33362a">Idle capacity and SLO failures reduce G; price is hypothetical</text></svg>

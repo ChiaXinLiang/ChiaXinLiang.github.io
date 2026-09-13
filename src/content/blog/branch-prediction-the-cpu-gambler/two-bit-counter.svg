@@ -10,7 +10,7 @@
   </defs>
 
   <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">How a Predictor Learns</text>
-  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">The 2-bit saturating counter, one per branch</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">The 2-bit saturating counter, 1 per branch</text>
 
   <!-- prediction brackets -->
   <path d="M110 350 L110 325 L570 325 L570 350" fill="none" stroke="#b06a4e" stroke-width="2.5"/>
@@ -65,11 +65,11 @@
     <text x="780" y="831" font-size="27" fill="#55584a">branch was not taken</text>
   </g>
 
-  <text x="600" y="910" text-anchor="middle" font-size="27" fill="#75786a">One miss only weakens confidence &#8212;</text>
-  <text x="600" y="946" text-anchor="middle" font-size="27" fill="#75786a">it takes two misses in a row to flip the bet</text>
+  <text x="600" y="910" text-anchor="middle" font-size="27" fill="#75786a">1 miss only weakens confidence &#8212;</text>
+  <text x="600" y="946" text-anchor="middle" font-size="27" fill="#75786a">it takes 2 misses in a row to flip the bet</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Redrawn from J. E. Smith (1981), ISCA</text>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; arch-2</text>
-  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">two bits of memory</text>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">2 bits of memory</text>
 </svg>

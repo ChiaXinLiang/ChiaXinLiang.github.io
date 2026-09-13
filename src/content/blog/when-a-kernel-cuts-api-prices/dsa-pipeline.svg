@@ -71,11 +71,11 @@
     <text x="600" y="844" text-anchor="middle" font-size="30" font-weight="bold" fill="#8a5138">4 &#183; Full MLA attention over 2,048 tokens only</text>
     <text x="600" y="888" text-anchor="middle" font-size="25" fill="#55584a">64&#215; fewer KV reads per decode step at 128K context</text>
 
-    <text x="600" y="962" text-anchor="middle" font-size="26" fill="#75786a">Main attention: O(L&#183;k) instead of O(L&#178;), with k = 2,048</text>
+
 
     <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
     <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Mechanism from DeepSeek-V3.2-Exp report (2025)</text>
     <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; cd-2</text>
     <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">scan cheap, attend rarely</text>
   </g>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Nd = L(L+1)/2;  Ns = kL − k(k−1)/2</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">L = 131,072, k = 2,048: main pairs shrink 32.25×; indexer remains</text></g></svg>

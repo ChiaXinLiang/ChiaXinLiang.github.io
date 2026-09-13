@@ -2,7 +2,7 @@
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <g font-family="Helvetica Neue, Arial, sans-serif">
     <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">From MLA to DSA</text>
-    <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Two attacks on the same quadratic attention bill</text>
+    <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">2 attacks on the same quadratic attention bill</text>
 
     <!-- Box 1: MLA -->
     <rect x="140" y="248" width="920" height="156" rx="10" fill="#e7edd9" stroke="#a8bf92" stroke-width="2.5"/>

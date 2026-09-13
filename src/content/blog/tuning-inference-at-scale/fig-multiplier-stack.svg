@@ -2,7 +2,7 @@
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <g font-family="Helvetica Neue, Arial, sans-serif">
     <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The compounding stack</text>
-    <text x="90" y="156" font-size="30" fill="#75786a">Four modest gains multiply into 5.24x on one 8xH100 node</text>
+    <text x="90" y="156" font-size="30" fill="#75786a">4 modest gains multiply into 5.24x on 1 8xH100 node</text>
 
     <text x="1110" y="258" text-anchor="end" font-size="24" fill="#75786a">$/Mtok at $16/hr</text>
 
@@ -40,6 +40,6 @@
 
     <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
     <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · scale-4</text>
-    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">every gain is a cost cut</text>
+    <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">$/Mtok = 10⁶ × $/hour / (3,600 × tok/s)</text>
   </g>
 </svg>

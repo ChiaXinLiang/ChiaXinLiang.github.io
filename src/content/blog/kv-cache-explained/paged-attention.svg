@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">PagedAttention in One Picture</text>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">PagedAttention in 1 Picture</text>
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Virtual-memory-style block tables replace contiguous reservations</text>
 
   <!-- LEFT: logical blocks -->
@@ -74,7 +74,7 @@
   <text x="975" y="716" text-anchor="middle" font-size="24" fill="#a3a08f">free</text>
 
   <!-- bottom callouts -->
-  <text x="600" y="850" text-anchor="middle" font-size="27" font-weight="bold" fill="#5b7c46">A0 and B0 point at the same physical block: shared prefix, one copy.</text>
+  <text x="600" y="850" text-anchor="middle" font-size="27" font-weight="bold" fill="#5b7c46">A0 and B0 point at the same physical block: shared prefix, 1 copy.</text>
   <text x="600" y="900" text-anchor="middle" font-size="26" fill="#55584a">Blocks are allocated on demand, anywhere in HBM — waste falls</text>
   <text x="600" y="938" text-anchor="middle" font-size="26" fill="#55584a">from 60&#8211;80% to under 4% (Kwon et al., 2023).</text>
 

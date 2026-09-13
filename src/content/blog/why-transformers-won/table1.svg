@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The argument, in one table</text>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The argument, in 1 table</text>
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Layer-by-layer costs of the competing sequence designs</text>
 
   <!-- highlight cells -->
@@ -56,7 +56,7 @@
   <g font-size="26" fill="#55584a" text-anchor="middle">
     <text x="600" y="770">n = sequence length &#160;&#183;&#160; d = model width &#160;&#183;&#160; k = kernel size</text>
     <text x="600" y="818">sequential ops = the dependency chain the hardware must wait out</text>
-    <text x="600" y="866">path length = hops for information to travel between two tokens</text>
+    <text x="600" y="866">path length = hops for information to travel between 2 tokens</text>
   </g>
   <text x="600" y="935" text-anchor="middle" font-size="30" font-weight="bold" fill="#5b7c46">O(1) sequential operations is the whole revolution</text>
 

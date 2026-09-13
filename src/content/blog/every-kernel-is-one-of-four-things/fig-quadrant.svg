@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The four buckets</text>
+  <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The 4 buckets</text>
   <text x="90" y="156" font-size="30" fill="#75786a">Nsight Compute "Speed of Light": SM vs. memory throughput</text>
 
   <!-- plot area: x 240..1060, y 260..880 ; split at 60% -> x=732, y=508 -->

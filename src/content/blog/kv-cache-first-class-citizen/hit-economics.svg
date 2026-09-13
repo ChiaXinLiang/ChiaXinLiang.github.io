@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif"><rect width="1200" height="1200" fill="#fdfbf4"/><g transform="translate(102 0) scale(0.83)">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Prompt, Ten Thousand Requests</text>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">1 Prompt, 10000 Requests</text>
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">70B GQA model, 2,000-token shared prefix, H100-class GPU</text>
 
-  <text x="90" y="260" font-size="30" font-weight="bold" fill="#33362a">Time to make the prefix KV available (one request)</text>
+  <text x="90" y="260" font-size="30" font-weight="bold" fill="#33362a">Time to make the prefix KV available (1 request)</text>
 
   <text x="90" y="310" font-size="26" fill="#55584a">recompute prefill (280 TFLOPs)</text>
   <rect x="90" y="322" width="700" height="40" fill="#b04a3a"/>
@@ -33,5 +33,5 @@
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance &#183; scale-2</text>
-  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">stop paying twice</text>
-</svg>
+  <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">stop paying 2 times</text>
+</g><rect x="60" y="996" width="1080" height="156" rx="12" fill="#e7edd9"/><text x="85" y="1033" font-family="Helvetica Neue, Arial, sans-serif" font-size="29" font-weight="bold" fill="#33362a">Reload: a + mS/β; recompute: cS</text><text x="85" y="1080" font-family="Helvetica Neue, Arial, sans-serif" font-size="25" font-weight="normal" fill="#33362a">m = 327,680 B/token; c = 0.28 ms/token</text><text x="85" y="1122" font-family="Helvetica Neue, Arial, sans-serif" font-size="23" font-weight="normal" fill="#33362a">Ignoring startup a, break-even β &gt; m/c = 1.17 GB/s</text></svg>

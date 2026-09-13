@@ -2,7 +2,7 @@
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <g font-family="Helvetica Neue, Arial, sans-serif">
     <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Why Output Tokens Cost 3–5x More</text>
-    <text x="90" y="156" font-size="30" fill="#75786a">One prompt pass amortizes; every output token pays full freight</text>
+    <text x="90" y="156" font-size="30" fill="#75786a">1 prompt pass amortizes; every output token pays full freight</text>
 
     <!-- Model weights block -->
     <rect x="830" y="300" width="270" height="560" rx="10" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/>
@@ -22,7 +22,7 @@
     <rect x="482" y="318" width="46" height="46" rx="5" fill="#e7edd9" stroke="#5b7c46" stroke-width="2"/>
     <line x1="548" y1="341" x2="788" y2="341" stroke="#5b7c46" stroke-width="10"/>
     <polygon points="788,325 822,341 788,357" fill="#5b7c46"/>
-    <text x="90" y="430" font-size="27" fill="#33362a">All prompt tokens in one parallel pass over the weights</text>
+    <text x="90" y="430" font-size="27" fill="#33362a">All prompt tokens in 1 parallel pass over the weights</text>
     <text x="90" y="472" font-size="26" fill="#75786a">Compute-bound · ~10,000+ prompt tok/s per GPU</text>
 
     <line x1="90" y1="555" x2="780" y2="555" stroke="#e8e4d7" stroke-width="3"/>
@@ -46,8 +46,8 @@
     <line x1="150" y1="851" x2="796" y2="851" stroke="#b06a4e" stroke-width="4"/>
     <polygon points="796,841 822,851 796,861" fill="#b06a4e"/>
 
-    <text x="90" y="915" font-size="27" fill="#33362a">Each output token re-reads all the weights, one at a time</text>
-    <text x="90" y="950" font-size="26" fill="#75786a">Bandwidth-bound · ~45 tok/s per stream on one H100</text>
+    <text x="90" y="915" font-size="27" fill="#33362a">Each output token re-reads all the weights, 1 at a time</text>
+    <text x="90" y="950" font-size="26" fill="#75786a">Bandwidth-bound · ~45 tok/s per stream on 1 H100</text>
 
     <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
     <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-4</text>

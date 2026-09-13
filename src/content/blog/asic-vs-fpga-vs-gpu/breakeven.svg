@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
 <rect width="1200" height="1200" fill="#fdfbf4"/>
 <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">The $50M Break-Even</text>
-<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">10x perf/watt ASIC vs $25k GPUs, three-year total cost</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">10x perf/watt ASIC vs $25k GPUs, 3-year total cost</text>
 
 <text x="90" y="252" font-size="26" fill="#55584a">3-year total cost</text>
 
@@ -58,5 +58,5 @@
 <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
 <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Illustrative worked example, not market prices</text>
 <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Comp Arch &#183; asic-1</text>
-<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">volume times stability</text>
+<text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">N* = fixed cost / per-unit saving</text>
 </svg>

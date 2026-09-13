@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">Two Phases, Two Bottlenecks</text>
-  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">why an output token costs 5&#215; an input token</text>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="bold" fill="#33362a">2 Phases, 2 Bottlenecks</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">illustrative engineering pressures behind different tiers</text>
 
   <!-- Left panel: PREFILL -->
   <rect x="90" y="240" width="470" height="590" rx="16" fill="#e7edd9"/>
@@ -40,7 +40,7 @@
   <rect x="781" y="372" width="36" height="36" fill="#b06a4e"/>
   <rect x="827" y="372" width="36" height="36" fill="none" stroke="#b06a4e" stroke-width="2" stroke-dasharray="6,5"/>
   <rect x="873" y="372" width="36" height="36" fill="none" stroke="#b06a4e" stroke-width="2" stroke-dasharray="6,5"/>
-  <text x="850" y="448" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">one token per step, per sequence</text>
+  <text x="850" y="448" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" fill="#33362a">1 token per step, per sequence</text>
 
   <line x1="850" y1="466" x2="850" y2="504" stroke="#75786a" stroke-width="4"/>
   <polygon points="850,518 839,500 861,500" fill="#75786a"/>
@@ -54,7 +54,7 @@
 
   <text x="850" y="790" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="bold" fill="#8a5138">Output: $20 / 1M tokens</text>
 
-  <text x="600" y="912" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#33362a">$4 in, $20 out: the roofline as an invoice</text>
+  <text x="600" y="912" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#33362a">$4 in, $20 out: retail prices are not measured hardware costs</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; econ-2</text>

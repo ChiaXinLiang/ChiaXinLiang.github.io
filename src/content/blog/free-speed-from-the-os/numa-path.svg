@@ -9,7 +9,7 @@
     </marker>
   </defs>
 
-  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Server, Two Memory Domains</text>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">1 Server, 2 Memory Domains</text>
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Where your DataLoader lands decides your H2D bandwidth</text>
 
   <!-- Socket 0 -->

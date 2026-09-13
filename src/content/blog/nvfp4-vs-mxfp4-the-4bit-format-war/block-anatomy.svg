@@ -4,7 +4,7 @@
   <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Same 4-bit elements &#8212; different scaling machinery</text>
 
   <!-- NVFP4 -->
-  <text x="90" y="272" font-size="32" font-weight="bold" fill="#5b7c46">NVFP4 &#8212; blocks of 16, two-level scaling</text>
+  <text x="90" y="272" font-size="32" font-weight="bold" fill="#5b7c46">NVFP4 &#8212; blocks of 16, 2-level scaling</text>
 
   <g fill="#e7edd9" stroke="#5b7c46" stroke-width="1.5">
     <rect x="90" y="300" width="42" height="70"/><rect x="135" y="300" width="42" height="70"/>
@@ -23,12 +23,12 @@
   <text x="890" y="410" text-anchor="middle" font-size="24" fill="#55584a">8-bit scale</text>
 
   <rect x="90" y="450" width="860" height="56" rx="8" fill="#f0ddd0" stroke="#b06a4e" stroke-width="1.5"/>
-  <text x="520" y="487" text-anchor="middle" font-size="26" fill="#8a5138">Level 2: one FP32 scale for the entire tensor</text>
+  <text x="520" y="487" text-anchor="middle" font-size="26" fill="#8a5138">Level 2: 1 FP32 scale for the entire tensor</text>
 
   <text x="90" y="575" font-size="28" font-weight="bold" fill="#33362a">72 bits / 16 values = 4.5 bits per value</text>
 
   <!-- MXFP4 -->
-  <text x="90" y="662" font-size="32" font-weight="bold" fill="#8a5138">MXFP4 &#8212; blocks of 32, one power-of-two scale</text>
+  <text x="90" y="662" font-size="32" font-weight="bold" fill="#8a5138">MXFP4 &#8212; blocks of 32, 1 power-of-2 scale</text>
 
   <g fill="#f4f1e6" stroke="#b06a4e" stroke-width="1.2">
     <rect x="90" y="690" width="24" height="70"/><rect x="116" y="690" width="24" height="70"/>
@@ -61,4 +61,4 @@
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI &#183; fmt-1</text>
   <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">the scale is the story</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Effective bits/value = 4 + 8/g (+ tensor-scale overhead)</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">g = 16 → 4.5 bits; g = 32 → 4.25 bits; smaller blocks buy local range</text></g></svg>

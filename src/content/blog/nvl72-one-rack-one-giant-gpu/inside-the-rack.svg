@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
 <rect width="1200" height="1200" fill="#fdfbf4"/>
 <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">Inside the GB200 NVL72</text>
-<text x="90" y="156" font-size="30" fill="#75786a">18 compute trays + 9 NVLink switch trays, one cabinet</text>
+<text x="90" y="156" font-size="30" fill="#75786a">18 compute trays + 9 NVLink switch trays, 1 cabinet</text>
 
 <!-- rack outline -->
 <rect x="116" y="236" width="288" height="712" rx="10" fill="none" stroke="#d8d4c4" stroke-width="3"/>
@@ -49,7 +49,7 @@
 <text x="740" y="475" font-size="24" fill="#75786a">576 TB/s aggregate HBM b/w</text>
 
 <text x="740" y="570" font-size="36" font-weight="bold" fill="#33362a">130 TB/s NVLink</text>
-<text x="740" y="610" font-size="24" fill="#75786a">all-to-all, one switch hop</text>
+<text x="740" y="610" font-size="24" fill="#75786a">all-to-all, 1 switch hop</text>
 
 <text x="740" y="705" font-size="36" font-weight="bold" fill="#33362a">1.4 EF FP4</text>
 <text x="740" y="745" font-size="24" fill="#75786a">2:4 sparsity; dense is half</text>

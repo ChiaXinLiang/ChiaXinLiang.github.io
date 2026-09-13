@@ -2,7 +2,7 @@
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#55584a"/></marker></defs>
   <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="700" fill="#33362a">The magnifying glass</text>
-  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">one small filter, slid across the whole image</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">1 small filter, slid across the whole image</text>
 
   <g font-family="Helvetica Neue, Arial, sans-serif">
     <!-- image grid 8x8, cell 62, origin 130,260 -->
@@ -44,5 +44,5 @@
   <line x1="80" y1="1030" x2="1120" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="600" y="1078" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Concept follows the standard presentation in Stanford CS231n, "Convolutional Networks"</text>
   <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">LLM Basics · arch-1</text>
-  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">9 weights, a million positions</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">9 weights reused across spatial positions</text>
 </svg>

@@ -39,7 +39,7 @@
   <rect x="550" y="674" width="60" height="34" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
   <rect x="625" y="674" width="60" height="34" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
   <rect x="700" y="674" width="60" height="34" fill="#f0ddd0" stroke="#b06a4e" stroke-width="2"/>
-  <text x="580" y="748" text-anchor="middle" font-size="24" fill="#8a5138">async all-reduce, one 25 MB bucket at a time</text>
+  <text x="580" y="748" text-anchor="middle" font-size="24" fill="#8a5138">async all-reduce, 1 25 MB bucket at a time</text>
 
   <!-- summary -->
   <text x="600" y="872" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">5.5 s on the wire, ~0 s exposed</text>

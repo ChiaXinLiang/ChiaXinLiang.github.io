@@ -140,9 +140,9 @@
 <text x="830.0" y="858" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#33362a">b10</text>
 <text x="895" y="858" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="bold" fill="#5b7c46">conflict-free</text>
 <text x="90" y="925" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">Column 3 of the tile, first 8 of 32 rows shown &#8212; with width 33,</text>
-<text x="90" y="960" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">each row starts one bank later, so a column spans all 32 banks.</text>
+<text x="90" y="960" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#75786a">each row starts 1 bank later, so a column spans all 32 banks.</text>
 <text x="90" y="1078" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">After NVIDIA&#8217;s shared-memory transpose example</text>
 <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
 <text x="90" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · mem-1</text>
-<text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">one column buys 32x</text>
+<text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">1 column buys 32x</text>
 </svg>

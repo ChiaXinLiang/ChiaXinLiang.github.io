@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">TMA Multicast Across a Cluster</text>
-  <text x="90" y="156" font-size="30" fill="#75786a">One HBM fetch fills four SMs' shared memories</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">1 HBM fetch fills 4 SMs' shared memories</text>
 
   <defs>
     <marker id="arrT" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
@@ -19,7 +19,7 @@
 
   <!-- arrow to L2 -->
   <line x1="600" y1="340" x2="600" y2="425" stroke="#b06a4e" stroke-width="5" marker-end="url(#arrT)"/>
-  <text x="625" y="395" font-size="24" fill="#75786a">one 32 KB fetch</text>
+  <text x="625" y="395" font-size="24" fill="#75786a">1 32 KB fetch</text>
 
   <!-- L2 -->
   <rect x="440" y="435" width="320" height="80" rx="12" fill="#f4f1e6" stroke="#a3a08f" stroke-width="3"/>
@@ -75,7 +75,7 @@
   <text x="935" y="565" font-size="25" font-weight="bold" fill="#5b7c46" text-anchor="middle">4x less HBM traffic</text>
 
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
-  <text x="90" y="1078" font-size="24" fill="#a3a08f">Hopper thread block clusters, co-scheduled on one GPC</text>
+  <text x="90" y="1078" font-size="24" fill="#a3a08f">Hopper thread block clusters, co-scheduled on 1 GPC</text>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · ktune-3</text>
-  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">fetch once, feed four</text>
+  <text x="1120" y="1140" font-size="28" fill="#a3a08f" text-anchor="end">fetch once, feed 4</text>
 </svg>

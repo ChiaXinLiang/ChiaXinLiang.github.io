@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">One Decode Step Under nsys</text>
-  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Mock trace: 8B model, batch 32, one H100 — 20 ms wall clock</text>
+  <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">1 Decode Step Under nsys</text>
+  <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">Mock trace: 8B model, batch 32, 1 H100 — 20 ms wall clock</text>
 
   <!-- Legend -->
   <rect x="140" y="232" width="36" height="24" fill="#a8bf92" stroke="#5b7c46" stroke-width="2"/>
@@ -71,4 +71,4 @@
   <line x1="90" y1="1030" x2="1110" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">AI Performance · serve-1</text>
   <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">find the gaps first</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Speedup = 1 / [(1 − p) + p/s]</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">Remove 5 ms from 20 ms → 15 ms, 25% shorter; critical-path time</text></g></svg>

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
 <rect width="1200" height="1200" fill="#fdfbf4"/>
-<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">Six Variables Most Benchmarks Omit</text>
-<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">any one of them moves tokens/sec by 2-100x</text>
+<text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">6 Variables Most Benchmarks Omit</text>
+<text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">any 1 of them moves tokens/sec by 2-100x</text>
 
 <!-- row 1 -->
 <rect x="90" y="240" width="495" height="215" rx="14" fill="#e7edd9" stroke="#d8d4c4" stroke-width="2"/>

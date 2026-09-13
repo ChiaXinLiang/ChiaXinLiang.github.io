@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="Helvetica Neue, Arial, sans-serif">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
   <text x="90" y="100" font-size="52" font-weight="bold" fill="#33362a">The LLM Lifecycle</text>
-  <text x="90" y="156" font-size="30" fill="#75786a">From raw internet text to a helpful assistant, in three stages</text>
+  <text x="90" y="156" font-size="30" fill="#75786a">From raw internet text to a helpful assistant, in 3 stages</text>
 
   <!-- Stage 1: Pretraining -->
   <rect x="90" y="240" width="1020" height="170" rx="16" fill="#e7edd9" stroke="#a8bf92" stroke-width="3"/>

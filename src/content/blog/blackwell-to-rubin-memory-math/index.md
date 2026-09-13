@@ -21,7 +21,7 @@ Blackwell Ultra and MI355X both specify: **288GB of HBM3e at 8 TB/s** (NVIDIA GB
 
 NVIDIA's [official HGX specifications](https://www.nvidia.com/en-us/data-center/hgx/) list Rubin with 288 GB HBM4 and up to 22 TB/s bandwidth. AMD's [MI400 series specifications](https://www.amd.com/en/products/accelerators/instinct/mi400.html) list MI455X with 432 GB HBM4 and up to 23.3 TB/s. These are vendor peak specifications, not measured application results. This comparison was checked September 13, 2026.
 
-![Two generations of flagship GPUs: memory capacity nearly flat while bandwidth jumps ~2.75×](./capacity-vs-bandwidth.png)
+![2 generations of flagship GPUs: memory capacity nearly flat while bandwidth jumps ~2.75×](./capacity-vs-bandwidth.png)
 
 ## Why bandwidth is the axis that matters
 
@@ -37,13 +37,13 @@ That's the roadmap decoded: 288 GB fits many models or individual shards, but no
 
 The bandwidth jump has a physical cause: [HBM4 doubles the interface width to 2,048 pins per stack](https://news.skhynix.com/en/sk-hynix-completes-worlds-first-hbm4-development-and-readies-mass-production/), versus 1,024 since HBM2. SK hynix reports >40% better power efficiency alongside the 2× bandwidth per stack. Memory manufacturing and packaging are important supply constraints; specifications alone do not establish which component gates a particular product launch.
 
-There is a second-order signal in AMD's 432GB counter-bet. Bigger memory pools reduce how many GPUs a giant model must be sharded across, which cuts inter-GPU communication — a different efficiency lever aimed at the same bill. Two vendors, same physics, two positions on the capacity-bandwidth trade.
+There is a second-order signal in AMD's 432GB counter-bet. Bigger memory pools reduce how many GPUs a giant model must be sharded across, which cuts inter-GPU communication — a different efficiency lever aimed at the same bill. 2 vendors, same physics, 2 positions on the capacity-bandwidth trade.
 
 ![Why decode speed is a bandwidth division: model bytes ÷ TB/s = tokens/s ceiling](./bandwidth-ceiling.png)
 
 ## What this means for the ecosystem
 
-- **For serving economics**: bandwidth affects one decode limit, while utilization, batching, compute, power, and prices determine realized cost.
+- **For serving economics**: bandwidth affects 1 decode limit, while utilization, batching, compute, power, and prices determine realized cost.
 - **For model designers**: architectures that read fewer bytes per token — mixture-of-experts, latent attention, aggressive quantization — multiply with the hardware gain rather than merely riding it. (This co-evolution is the through-line of this whole series.)
 - **For buyers**: if your models already fit, a capacity-heavy SKU can enable consolidation or higher batching; benchmark whether those changes improve your target metric. Know which one your bill needs.
 
@@ -51,7 +51,7 @@ The specifications are now available from vendors. Their peak numbers still requ
 
 ## A ceiling is a model with assumptions
 
-The division above uses decimal units: one TB is one thousand GB. Let W denote weight bytes read during one decode step and B denote sustained memory bandwidth in bytes per second. If memory traffic dominates the step, the idealized token-rate ceiling for one sequence is
+The division above uses decimal units: 1 TB is 1 1000 GB. Let W denote weight bytes read during 1 decode step and B denote sustained memory bandwidth in bytes per second. If memory traffic dominates the step, the idealized token-rate ceiling for 1 sequence is
 
 $$
 r_{\mathrm{decode}}\leq\frac{B}{W}.
@@ -59,23 +59,23 @@ $$
 
 Substituting 8,000 GB/s and 70 GB gives approximately 114.3 tokens per second. Substituting 22,000 GB/s gives approximately 314.3. Their ratio is 2.75, exactly the ratio of the specified bandwidths. This is a consequence of holding the model and traffic assumptions fixed, not an observed speedup for a released inference engine.
 
-The estimate omits KV-cache reads, activations, quantization scales, temporary buffers, launch costs, collective communication, and imperfect bandwidth utilization. If achieved bandwidth is 60% of peak in a hypothetical experiment, the corresponding weight-only rates become 68.6 and 188.6. Actual efficiency need not remain equal across two hardware generations.
+The estimate omits KV-cache reads, activations, quantization scales, temporary buffers, launch costs, collective communication, and imperfect bandwidth utilization. If achieved bandwidth is 60% of peak in a hypothetical experiment, the corresponding weight-only rates become 68.6 and 188.6. Actual efficiency need not remain equal across 2 hardware generations.
 
 The inequality also assumes the relevant weights are read each step. On-chip cache can help sufficiently small models or repeated data. Sparse routing changes which experts are active, and implementation overhead can increase traffic above a clean parameter-byte calculation. A useful model states which bytes move rather than treating the headline parameter count as measured memory traffic.
 
 ## Why batching changes the interpretation
 
-If a decode batch contains b sequences, one streamed weight matrix can contribute to all b token predictions in a matrix multiplication. Ideally, the same weight bytes serve more useful arithmetic. The step produces b output tokens instead of one, so aggregate throughput can improve even when each sequence waits for one step at a time.
+If a decode batch contains b sequences, 1 streamed weight matrix can contribute to all b token predictions in a matrix multiplication. Ideally, the same weight bytes serve more useful arithmetic. The step produces b output tokens instead of 1, so aggregate throughput can improve even when each sequence waits for 1 step at a time.
 
-For a hypothetical batch of eight and a weight-only step time of 8.75 milliseconds, the aggregate ceiling is approximately 914 tokens per second, while each sequence's step rate is about 114 tokens per second. This idealization ignores the extra work and memory needed for eight distinct prefixes. It illustrates why aggregate tokens per second and per-user latency are different quantities.
+For a hypothetical batch of 8 and a weight-only step time of 8.75 milliseconds, the aggregate ceiling is approximately 914 tokens per second, while each sequence's step rate is about 114 tokens per second. This idealization ignores the extra work and memory needed for 8 distinct prefixes. It illustrates why aggregate tokens per second and per-user latency are different quantities.
 
-As batching increases, the matrix multiplication becomes more compute-intensive. The bottleneck can move from bandwidth toward compute throughput, KV attention, communication, or scheduling. A bandwidth ratio then ceases to predict the complete application speed ratio. The same hardware can be memory-bound for one batch size and compute-bound for another.
+As batching increases, the matrix multiplication becomes more compute-intensive. The bottleneck can move from bandwidth toward compute throughput, KV attention, communication, or scheduling. A bandwidth ratio then ceases to predict the complete application speed ratio. The same hardware can be memory-bound for 1 batch size and compute-bound for another.
 
 Capacity directly enters this story. More memory can accommodate more active requests and longer KV caches, enabling a different operating point. A comparison that says memory capacity never improves throughput overlooks that coupling. Separate the single-stream idealization from a production server's throughput under latency constraints.
 
 ## Budget memory beyond the weights
 
-Suppose a model has 70 billion stored parameters. At one byte per parameter, parameter data alone occupy 70 GB in decimal units. At two bytes, they occupy 140 GB. Packed lower-precision representations need scale metadata and supported kernels; “four-bit weights” does not mean every allocation is exactly half a byte per parameter.
+Suppose a model has 70 billion stored parameters. At 1 byte per parameter, parameter data alone occupy 70 GB in decimal units. At 2 bytes, they occupy 140 GB. Packed lower-precision representations need scale metadata and supported kernels; “4-bit weights” does not mean every allocation is exactly half a byte per parameter.
 
 KV memory adds a request-dependent term. For a conventional grouped-query attention stack, a rough uncompressed cache estimate is
 
@@ -83,11 +83,23 @@ $$
 M_{\mathrm{KV}}=2Lh_{\mathrm{KV}}d_hTs,
 $$
 
-where L is the number of cached attention layers, $$h_{\mathrm{KV}}$$ the number of KV heads, $$d_h$$ head width, T cached tokens across requests, and s bytes per cached scalar. The factor of two accounts for keys and values. Latent, recurrent, quantized, and cross-layer-sharing designs need their own formulas.
+where L is the number of cached attention layers, $$h_{\mathrm{KV}}$$ the number of KV heads, $$d_h$$ head width, T cached tokens across requests, and s bytes per cached scalar. The factor of 2 accounts for keys and values. Latent, recurrent, quantized, and cross-layer-sharing designs need their own formulas.
 
-Using an illustrative 80-layer stack, eight KV heads, width 128, and two-byte cache values gives 327,680 bytes per cached token. A total of 100,000 cached tokens uses about 32.8 GB before paging metadata and allocator overhead. That is enough to make capacity relevant even when the weights themselves fit comfortably.
+Using an illustrative 80-layer stack, 8 KV heads, width 128, and 2-byte cache values gives 327,680 bytes per cached token. A total of 100,000 cached tokens uses about 32.8 GB before paging metadata and allocator overhead. That is enough to make capacity relevant even when the weights themselves fit comfortably.
 
 Add activation workspaces, framework reservations, temporary buffers, and a safety margin. Then determine whether the intended batch and context lengths fit. A hardware specification lists total available memory, while a deployed process has a smaller usable budget. Measure the allocations that actually occur with your engine and numerical formats.
+
+
+Capacity and bandwidth interact through private state. Let $$W$$ be shared weight traffic per decode step, $$K$$ private KV traffic per request, $$b$$ batch size, and $$\beta$$ achieved bandwidth. Under a memory-dominated equal-context model,
+
+$$
+T_b\ge\frac{W+bK}{\beta},\qquad r_{\mathrm{aggregate}}\le\frac{b\beta}{W+bK}.
+$$
+
+For hypothetical $$W=70$$ GB, $$K=2$$ GB, and $$b=8$$, total traffic is 86 GB. At 8 TB/s the bandwidth floor is 10.75 ms and the aggregate ceiling approximately 744.2 tokens/s. At 22 TB/s it becomes 3.909 ms and approximately 2046.5 tokens/s, if achieved efficiency and all other constraints remain equal. The earlier weight-only batch ceiling of approximately 914 tokens/s is therefore optimistic when this private traffic is included.
+
+The engineering method is to identify which traffic is shared and which grows with requests before interpreting a hardware ratio. More capacity can permit a larger batch or fewer communication-heavy shards; more bandwidth accelerates a fixed traffic pattern. Neither automatically scales useful service output in proportion to a specification. When compute or communication becomes limiting, use its measured time alongside this traffic floor. Treat the roadmap as an interface budget, then compare equal model quality, concurrency, and tail-latency constraints. Strategic intent remains an inference from specifications rather than something established by this numerical example.
+
 
 ## HBM bandwidth is a physical interface budget
 
@@ -101,15 +113,15 @@ It is tempting to read a product specification as a unique statement of designer
 
 A practical comparison starts with a fixed model/checkpoint, precision, request distribution, context lengths, concurrency, and service-level objective. Record time to first token, per-token latency, accepted throughput, memory usage, and power under those conditions. A peak bandwidth number alone supplies none of those application measurements.
 
-Next compare system boundaries. A single GPU, an eight-GPU node, and a rack have different communication paths and capacity pools. Summed device memory is not automatically a uniform low-latency allocation space, and summed bandwidth is not automatically available to one kernel. State tensor, pipeline, and expert parallelism settings when they influence the result.
+Next compare system boundaries. A single GPU, an 8-GPU node, and a rack have different communication paths and capacity pools. Summed device memory is not automatically a uniform low-latency allocation space, and summed bandwidth is not automatically available to 1 kernel. State tensor, pipeline, and expert parallelism settings when they influence the result.
 
 Finally convert useful throughput into cost using the actual ownership or rental assumptions. Faster hardware can have a higher hourly cost and still reduce cost per useful token, or fail to do so at low utilization. Queueing and latency targets can prevent using the nominal maximum batch. Compute the economics from the measured operating point instead of equating a bandwidth uplift with a price reduction.
 
 ## A small decision worksheet
 
-Before comparing two accelerators, write down the model weight format, usable device memory, total cached tokens, expected batch size, and latency target. Estimate weight and KV allocations separately, then verify them with the inference engine. Measure sustained bandwidth and useful throughput on representative requests rather than synthetic traffic alone.
+Before comparing 2 accelerators, write down the model weight format, usable device memory, total cached tokens, expected batch size, and latency target. Estimate weight and KV allocations separately, then verify them with the inference engine. Measure sustained bandwidth and useful throughput on representative requests rather than synthetic traffic alone.
 
-If one configuration cannot meet the memory budget, determine whether quantization, shorter context, or additional shards changes that constraint. If both fit, inspect whether decode, prefill, communication, or idle capacity dominates the measured time. This worksheet makes the comparison reproducible and reveals which assumption would need to change before a different hardware choice becomes attractive.
+If 1 configuration cannot meet the memory budget, determine whether quantization, shorter context, or additional shards changes that constraint. If both fit, inspect whether decode, prefill, communication, or idle capacity dominates the measured time. This worksheet makes the comparison reproducible and reveals which assumption would need to change before a different hardware choice becomes attractive.
 
 ## Common misconceptions
 
@@ -123,7 +135,7 @@ If one configuration cannot meet the memory budget, determine whether quantizati
 
 - Generating a token means streaming the model's active weights through memory; for large models this makes decode bandwidth-bound, and memory bandwidth can set a ceiling under the stated unbatched dense-model assumptions.
 - The Blackwell→Rubin roadmap (288 GB flat, 8→up to 22 TB/s) is that physics written into product strategy; AMD's 432GB MI455X bets on the consolidation axis instead.
-- HBM4's 2,048-pin interface is the enabler — and one part of the manufacturing and packaging budget.
+- HBM4's 2,048-pin interface is the enabler — and 1 part of the manufacturing and packaging budget.
 
 ## Sources
 

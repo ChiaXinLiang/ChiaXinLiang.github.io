@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
   <rect width="1200" height="1200" fill="#fdfbf4"/>
-  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="700" fill="#33362a">The wall: one word at a time</text>
-  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">an RNN on parallel hardware wastes almost all of it</text>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="700" fill="#33362a">The wall: 1 word at a time</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">Recurrent state transitions limit parallelism across time</text>
 
   <g font-family="Helvetica Neue, Arial, sans-serif">
     <!-- RNN chain -->
@@ -17,7 +17,7 @@
     <text x="600" y="470" text-anchor="middle" font-size="26" fill="#55584a">step 50 cannot start — its input IS step 49's output</text>
 
     <!-- GPU lanes -->
-    <text x="140" y="600" font-size="30" font-weight="700" fill="#5b7c46">GPU: tens of thousands of parallel lanes</text>
+    <text x="140" y="600" font-size="30" font-weight="700" fill="#5b7c46">GPU: many parallel lanes inside each step</text>
     <g>
       <rect x="140" y="630" width="920" height="34" rx="8" fill="#5b7c46"/>
       <rect x="140" y="676" width="920" height="34" rx="8" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="2"/>
@@ -27,9 +27,9 @@
     </g>
     <text x="600" y="700" text-anchor="middle" font-size="24" fill="#75786a"></text>
     <text x="1075" y="655" text-anchor="start" font-size="24" fill="#5b7c46"></text>
-    <text x="600" y="900" text-anchor="middle" font-size="27" fill="#55584a">one lane busy, the rest idle — the dependency chain forbids parallelism</text>
+    <text x="600" y="900" text-anchor="middle" font-size="27" fill="#55584a">Successive states depend on earlier states; each step can run parallel work</text>
     <text x="600" y="945" text-anchor="middle" font-size="26" font-weight="700" fill="#b06a4e">just as scale became capability,</text>
-    <text x="600" y="985" text-anchor="middle" font-size="26" font-weight="700" fill="#b06a4e">language's best architecture couldn't absorb parallel compute</text>
+    <text x="600" y="985" text-anchor="middle" font-size="26" font-weight="700" fill="#b06a4e">Training retains a dependency between successive states</text>
   </g>
 
   <line x1="80" y1="1030" x2="1120" y2="1030" stroke="#e8e4d7" stroke-width="3"/>

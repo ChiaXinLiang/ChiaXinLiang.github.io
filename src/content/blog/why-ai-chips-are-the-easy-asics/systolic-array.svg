@@ -116,7 +116,7 @@
     <text x="1010" y="533">every cycle:</text>
     <text x="1010" y="573">multiply,</text>
     <text x="1010" y="606">add, pass on.</text>
-    <text x="1010" y="662">One tiny state</text>
+    <text x="1010" y="662">1 tiny state</text>
     <text x="1010" y="695">machine runs</text>
     <text x="1010" y="728">the whole grid</text>
   </g>

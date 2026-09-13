@@ -43,4 +43,4 @@
   <line x1="80" y1="1090" x2="1120" y2="1090" stroke="#e8e4d7" stroke-width="3"/>
   <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">AI Performance · intro-2</text>
   <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">illustration, not a measurement</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Retained goodput = durable tokens / complete elapsed time</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">24 million / 3,600 s = 6,667 tokens/s; retries count progress only once</text></g></svg>

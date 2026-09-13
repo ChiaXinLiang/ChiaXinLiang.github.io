@@ -55,4 +55,4 @@
   <text x="600" y="1078" text-anchor="middle" font-size="24" fill="#a3a08f">Specs from NVIDIA Rubin CPX announcement (2025)</text>
   <text x="90" y="1140" font-size="28" font-weight="bold" fill="#a3a08f">Efficient AI · cd-3</text>
   <text x="1120" y="1140" text-anchor="end" font-size="28" fill="#a3a08f">the cache learns to travel</text>
-</svg>
+<g id="equation-mechanism" font-family="Helvetica Neue, Arial, sans-serif"><rect x="75" y="958" width="1050" height="66" fill="#fdfbf4"/><text x="600" y="982" text-anchor="middle" font-size="24" font-weight="600" fill="#33362a">Exposed handoff ≈ setup + max(0, MKV / Blink − overlap)</text><text x="600" y="1013" text-anchor="middle" font-size="21" fill="#75786a">335 MB / 50 GB/s = 6.7 ms raw; overlap must be on the critical path</text></g></svg>

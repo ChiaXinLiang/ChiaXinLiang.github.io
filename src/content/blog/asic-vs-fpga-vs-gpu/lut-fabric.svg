@@ -3,7 +3,7 @@
 <text x="600" y="100" text-anchor="middle" font-size="52" font-weight="bold" fill="#33362a">What an FPGA Actually Is</text>
 <text x="600" y="156" text-anchor="middle" font-size="30" fill="#75786a">a grid of tiny memories pretending to be logic gates</text>
 
-<text x="325" y="262" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">one 4-input LUT</text>
+<text x="325" y="262" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">1 4-input LUT</text>
 <text x="875" y="262" text-anchor="middle" font-size="30" font-weight="bold" fill="#33362a">tiled into a fabric</text>
 
 <!-- left: input lines -->
@@ -45,7 +45,7 @@
 <polygon points="540,470 514,460 514,480" fill="#75786a"/>
 <text x="552" y="478" font-size="24" fill="#55584a">out</text>
 
-<text x="325" y="700" text-anchor="middle" font-size="24" fill="#55584a">the 4 inputs select one of 16 rows;</text>
+<text x="325" y="700" text-anchor="middle" font-size="24" fill="#55584a">the 4 inputs select 1 of 16 rows;</text>
 <text x="325" y="734" text-anchor="middle" font-size="24" fill="#55584a">the stored bit becomes the output</text>
 <text x="325" y="790" text-anchor="middle" font-size="24" fill="#5b7c46">store 0...0001, it is an AND gate</text>
 <text x="325" y="824" text-anchor="middle" font-size="24" fill="#5b7c46">store other bits, any 4-input gate</text>

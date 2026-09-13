@@ -67,7 +67,7 @@
     <text x="360" y="725">8 exponent — same as FP32</text>
     <text x="802" y="725">7 mantissa</text>
   </g>
-  <text x="90" y="780" font-size="26" fill="#5b7c46">range ≈ FP32 (~3.4e38) → no scaler, one less moving part</text>
+  <text x="90" y="780" font-size="26" fill="#5b7c46">range ≈ FP32 (~3.4e38) → no scaler, 1 less moving part</text>
 
   <text x="90" y="890" font-size="26" fill="#75786a">Ampere and later run both on Tensor Cores at equal throughput;</text>
   <text x="90" y="928" font-size="26" fill="#75786a">keep matmul dimensions multiples of 8 so they actually engage.</text>
