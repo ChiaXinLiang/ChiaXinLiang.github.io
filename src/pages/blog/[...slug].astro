@@ -27,6 +27,7 @@ const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : undefined;
 
 <BlogPost
 	{...post.data}
+	currentId={post.id}
 	readingMinutes={readingMinutes}
 	headings={headings}
 	prev={prev && { href: `/blog/${prev.id}/`, title: prev.data.title }}
