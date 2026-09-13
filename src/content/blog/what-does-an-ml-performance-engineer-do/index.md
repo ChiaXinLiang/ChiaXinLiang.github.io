@@ -2,8 +2,8 @@
 title: 'What Does an ML Performance Engineer Actually Do?'
 description: "Same model, same answers — delivered faster and cheaper. Inside the role that decides whether AI products make or lose money."
 pubDate: 'Sep 12 2026'
-linkedinDate: 'Sep 17 2026'
 heroImage: './cover.png'
+code: 'intro-1'
 series: 'ai-performance'
 topic: 'Foundations'
 tags: ['ml-performance', 'career', 'gpu']

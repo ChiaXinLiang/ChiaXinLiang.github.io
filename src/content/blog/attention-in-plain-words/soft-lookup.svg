@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#55584a"/></marker></defs>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="700" fill="#33362a">A lookup, softly blurred</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">query vs keys → scores → weighted blend of values</text>
+
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <!-- query -->
+    <rect x="100" y="300" width="240" height="110" rx="14" fill="#f0ddd0" stroke="#b06a4e" stroke-width="5"/>
+    <text x="220" y="348" text-anchor="middle" font-size="28" font-weight="700" fill="#b06a4e">query of "it"</text>
+    <text x="220" y="386" text-anchor="middle" font-size="23" fill="#8a5138">"looking for: a tired thing"</text>
+
+    <!-- keys column -->
+    <g font-size="26" text-anchor="middle">
+      <rect x="480" y="260" width="220" height="80" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="4"/><text x="590" y="308" fill="#33362a">key: animal</text>
+      <rect x="480" y="360" width="220" height="80" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/><text x="590" y="408" fill="#55584a">key: street</text>
+      <rect x="480" y="460" width="220" height="80" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/><text x="590" y="508" fill="#55584a">key: cross</text>
+    </g>
+    <line x1="340" y1="355" x2="470" y2="300" stroke="#55584a" stroke-width="4" marker-end="url(#a)"/>
+    <line x1="340" y1="360" x2="470" y2="400" stroke="#55584a" stroke-width="4" marker-end="url(#a)"/>
+    <line x1="340" y1="370" x2="470" y2="495" stroke="#55584a" stroke-width="4" marker-end="url(#a)"/>
+
+    <!-- scores -->
+    <g font-size="30" font-weight="700" text-anchor="middle">
+      <text x="790" y="310" fill="#5b7c46">0.86</text>
+      <text x="790" y="410" fill="#a3a08f">0.09</text>
+      <text x="790" y="510" fill="#a3a08f">0.05</text>
+    </g>
+    <text x="790" y="230" text-anchor="middle" font-size="25" fill="#75786a">scores (sum = 1)</text>
+
+    <!-- blend -->
+    <line x1="830" y1="400" x2="920" y2="400" stroke="#55584a" stroke-width="5" marker-end="url(#a)"/>
+    <rect x="930" y="320" width="200" height="160" rx="16" fill="#5b7c46"/>
+    <text x="1030" y="385" text-anchor="middle" font-size="27" font-weight="700" fill="#fdfbf4">blend of all</text>
+    <text x="1030" y="425" text-anchor="middle" font-size="27" font-weight="700" fill="#fdfbf4">the values</text>
+
+    <!-- explanation strip -->
+    <rect x="140" y="640" width="920" height="230" rx="16" fill="#f4f1e6"/>
+    <text x="600" y="705" text-anchor="middle" font-size="28" fill="#33362a">a database returns ONE entry. attention returns ALL entries,</text>
+    <text x="600" y="750" text-anchor="middle" font-size="28" fill="#33362a">mixed in proportion to relevance — mostly "animal", a dash of the rest.</text>
+    <text x="600" y="820" text-anchor="middle" font-size="26" font-weight="700" fill="#5b7c46">queries, keys, values are all produced by learned weights — nobody hand-writes the rules</text>
+  </g>
+
+  <line x1="80" y1="1030" x2="1120" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="600" y="1078" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Mechanism from Vaswani et al. (2017), "Attention Is All You Need"</text>
+  <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">LLM Basics · tf-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">retrieval, in proportion to relevance</text>
+</svg>

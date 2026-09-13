@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="700" fill="#33362a">Causal masking: no peeking ahead</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">each token may attend only to tokens before it</text>
+
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <!-- 5x5 attention matrix, cell 120, origin 330,280 -->
+    <g text-anchor="middle" font-size="26" fill="#55584a">
+      <text x="390" y="260">The</text><text x="510" y="260">cat</text><text x="630" y="260">sat</text><text x="750" y="260">on</text><text x="870" y="260">the</text>
+      <text x="295" y="348">The</text><text x="295" y="468">cat</text><text x="295" y="588">sat</text><text x="295" y="708">on</text><text x="295" y="828">the</text>
+    </g>
+    <text x="600" y="215" text-anchor="middle" font-size="24" fill="#a3a08f">↑ attends TO (columns)</text>
+    <g>
+      <!-- row 1 -->
+      <rect x="330" y="280" width="120" height="120" fill="#5b7c46"/><rect x="450" y="280" width="120" height="120" fill="#f4f1e6" stroke="#d8d4c4"/><rect x="570" y="280" width="120" height="120" fill="#f4f1e6" stroke="#d8d4c4"/><rect x="690" y="280" width="120" height="120" fill="#f4f1e6" stroke="#d8d4c4"/><rect x="810" y="280" width="120" height="120" fill="#f4f1e6" stroke="#d8d4c4"/>
+      <!-- row 2 -->
+      <rect x="330" y="400" width="120" height="120" fill="#86a56d"/><rect x="450" y="400" width="120" height="120" fill="#5b7c46"/><rect x="570" y="400" width="120" height="120" fill="#f4f1e6" stroke="#d8d4c4"/><rect x="690" y="400" width="120" height="120" fill="#f4f1e6" stroke="#d8d4c4"/><rect x="810" y="400" width="120" height="120" fill="#f4f1e6" stroke="#d8d4c4"/>
+      <!-- row 3 -->
+      <rect x="330" y="520" width="120" height="120" fill="#a8bf92"/><rect x="450" y="520" width="120" height="120" fill="#86a56d"/><rect x="570" y="520" width="120" height="120" fill="#5b7c46"/><rect x="690" y="520" width="120" height="120" fill="#f4f1e6" stroke="#d8d4c4"/><rect x="810" y="520" width="120" height="120" fill="#f4f1e6" stroke="#d8d4c4"/>
+      <!-- row 4 -->
+      <rect x="330" y="640" width="120" height="120" fill="#a8bf92"/><rect x="450" y="640" width="120" height="120" fill="#a8bf92"/><rect x="570" y="640" width="120" height="120" fill="#86a56d"/><rect x="690" y="640" width="120" height="120" fill="#5b7c46"/><rect x="810" y="640" width="120" height="120" fill="#f4f1e6" stroke="#d8d4c4"/>
+      <!-- row 5 -->
+      <rect x="330" y="760" width="120" height="120" fill="#a8bf92"/><rect x="450" y="760" width="120" height="120" fill="#a8bf92"/><rect x="570" y="760" width="120" height="120" fill="#a8bf92"/><rect x="690" y="760" width="120" height="120" fill="#86a56d"/><rect x="810" y="760" width="120" height="120" fill="#5b7c46"/>
+    </g>
+    <!-- X marks on masked upper triangle -->
+    <g font-size="40" fill="#b06a4e" text-anchor="middle" opacity="0.7">
+      <text x="510" y="355">✕</text><text x="630" y="355">✕</text><text x="750" y="355">✕</text><text x="870" y="355">✕</text>
+      <text x="630" y="475">✕</text><text x="750" y="475">✕</text><text x="870" y="475">✕</text>
+      <text x="750" y="595">✕</text><text x="870" y="595">✕</text>
+      <text x="870" y="715">✕</text>
+    </g>
+
+    <text x="600" y="965" text-anchor="middle" font-size="28" fill="#55584a">the future is masked out — so "predict the next word" is an honest exam</text>
+    <text x="600" y="1010" text-anchor="middle" font-size="26" font-weight="700" fill="#5b7c46">bonus: past columns never change → their work can be cached (the KV cache)</text>
+  </g>
+
+  <line x1="80" y1="1050" x2="1120" y2="1050" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="80" y="1150" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">LLM Basics · tf-2</text>
+  <text x="1120" y="1150" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">decoder-only = GPT-style</text>
+</svg>

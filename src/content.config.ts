@@ -16,6 +16,8 @@ const blog = defineCollection({
 			linkedinDate: z.coerce.date().optional(),
 			heroImage: z.optional(image()),
 			series: z.enum(['llm-basics', 'ai-performance', 'efficient-ai', 'comp-arch']).optional(),
+			// article code in content.db (e.g. 'nn-1') — lets `tools/content sync` auto-track status
+			code: z.string().optional(),
 			topic: z.string().optional(),
 			tags: z.array(z.string()).optional(),
 		}),

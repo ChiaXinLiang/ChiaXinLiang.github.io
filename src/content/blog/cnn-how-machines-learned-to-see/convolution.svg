@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#55584a"/></marker></defs>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="700" fill="#33362a">The magnifying glass</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">one small filter, slid across the whole image</text>
+
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <!-- image grid 8x8, cell 62, origin 130,260 -->
+    <g stroke="#d8d4c4" stroke-width="2" fill="#f4f1e6">
+      <rect x="130" y="260" width="496" height="496"/>
+    </g>
+    <g stroke="#d8d4c4" stroke-width="2">
+      <line x1="192" y1="260" x2="192" y2="756"/><line x1="254" y1="260" x2="254" y2="756"/><line x1="316" y1="260" x2="316" y2="756"/><line x1="378" y1="260" x2="378" y2="756"/><line x1="440" y1="260" x2="440" y2="756"/><line x1="502" y1="260" x2="502" y2="756"/><line x1="564" y1="260" x2="564" y2="756"/>
+      <line x1="130" y1="322" x2="626" y2="322"/><line x1="130" y1="384" x2="626" y2="384"/><line x1="130" y1="446" x2="626" y2="446"/><line x1="130" y1="508" x2="626" y2="508"/><line x1="130" y1="570" x2="626" y2="570"/><line x1="130" y1="632" x2="626" y2="632"/><line x1="130" y1="694" x2="626" y2="694"/>
+    </g>
+    <text x="378" y="810" text-anchor="middle" font-size="27" fill="#55584a">the image (pixels)</text>
+
+    <!-- filter 3x3 highlighted -->
+    <rect x="254" y="384" width="186" height="186" fill="none" stroke="#b06a4e" stroke-width="8"/>
+    <text x="347" y="360" text-anchor="middle" font-size="26" font-weight="700" fill="#b06a4e">3×3 filter = 9 weights</text>
+    <!-- slide arrows -->
+    <line x1="452" y1="477" x2="540" y2="477" stroke="#b06a4e" stroke-width="5" stroke-dasharray="10 8" marker-end="url(#a)"/>
+    <line x1="347" y1="582" x2="347" y2="660" stroke="#b06a4e" stroke-width="5" stroke-dasharray="10 8" marker-end="url(#a)"/>
+
+    <!-- arrow to map -->
+    <line x1="650" y1="508" x2="740" y2="508" stroke="#55584a" stroke-width="5" marker-end="url(#a)"/>
+
+    <!-- feature map 6x6 cell 52 origin 760,352 -->
+    <rect x="760" y="352" width="312" height="312" fill="#e7edd9" stroke="#5b7c46" stroke-width="3"/>
+    <g stroke="#a8bf92" stroke-width="2">
+      <line x1="812" y1="352" x2="812" y2="664"/><line x1="864" y1="352" x2="864" y2="664"/><line x1="916" y1="352" x2="916" y2="664"/><line x1="968" y1="352" x2="968" y2="664"/><line x1="1020" y1="352" x2="1020" y2="664"/>
+      <line x1="760" y1="404" x2="1072" y2="404"/><line x1="760" y1="456" x2="1072" y2="456"/><line x1="760" y1="508" x2="1072" y2="508"/><line x1="760" y1="560" x2="1072" y2="560"/><line x1="760" y1="612" x2="1072" y2="612"/>
+    </g>
+    <!-- hot cells -->
+    <rect x="812" y="404" width="52" height="52" fill="#5b7c46"/>
+    <rect x="864" y="456" width="52" height="52" fill="#5b7c46"/>
+    <rect x="916" y="508" width="52" height="52" fill="#86a56d"/>
+    <text x="916" y="710" text-anchor="middle" font-size="27" fill="#55584a">feature map:</text>
+    <text x="916" y="744" text-anchor="middle" font-size="27" fill="#55584a">"where does my pattern appear?"</text>
+
+    <text x="600" y="920" text-anchor="middle" font-size="29" fill="#55584a">same 9 weights reused at every position — learn once, detect anywhere</text>
+  </g>
+
+  <line x1="80" y1="1030" x2="1120" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="600" y="1078" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Concept follows the standard presentation in Stanford CS231n, "Convolutional Networks"</text>
+  <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">LLM Basics · arch-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">9 weights, a million positions</text>
+</svg>

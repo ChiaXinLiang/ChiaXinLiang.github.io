@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#fdfbf4"/>
+  <text x="600" y="100" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="52" font-weight="700" fill="#33362a">What does "it" refer to?</text>
+  <text x="600" y="156" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#75786a">attention: the word asks the whole sentence, directly</text>
+
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <!-- sentence words as boxes along a line, y=560 -->
+    <g text-anchor="middle" font-size="30">
+      <rect x="80" y="520" width="110" height="76" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/><text x="135" y="568" fill="#55584a">The</text>
+      <rect x="205" y="520" width="150" height="76" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="5"/><text x="280" y="568" font-weight="700" fill="#3f5a2f">animal</text>
+      <rect x="370" y="520" width="130" height="76" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/><text x="435" y="568" fill="#55584a">didn't</text>
+      <rect x="515" y="520" width="120" height="76" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/><text x="575" y="568" fill="#55584a">cross</text>
+      <rect x="650" y="520" width="150" height="76" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/><text x="725" y="568" fill="#55584a">street…</text>
+      <rect x="815" y="520" width="90" height="76" rx="12" fill="#b06a4e"/><text x="860" y="568" font-weight="800" fill="#fdfbf4">it</text>
+      <rect x="920" y="520" width="120" height="76" rx="12" fill="#f4f1e6" stroke="#d8d4c4" stroke-width="3"/><text x="980" y="568" fill="#55584a">was</text>
+      <rect x="1055" y="520" width="120" height="76" rx="12" fill="#e7edd9" stroke="#5b7c46" stroke-width="4"/><text x="1115" y="568" fill="#3f5a2f">tired</text>
+    </g>
+
+    <!-- attention arcs from "it" -->
+    <g fill="none" stroke-linecap="round">
+      <path d="M 860 515 C 800 330, 400 320, 285 512" stroke="#b06a4e" stroke-width="12" opacity="0.85"/>
+      <path d="M 870 515 C 940 400, 1050 410, 1110 512" stroke="#b06a4e" stroke-width="8" opacity="0.6"/>
+      <path d="M 855 515 C 800 430, 480 420, 437 512" stroke="#d8d4c4" stroke-width="4"/>
+      <path d="M 858 515 C 820 460, 620 450, 578 512" stroke="#d8d4c4" stroke-width="4"/>
+      <path d="M 862 515 C 850 470, 760 460, 728 512" stroke="#d8d4c4" stroke-width="4"/>
+    </g>
+    <text x="470" y="300" text-anchor="middle" font-size="28" font-weight="700" fill="#b06a4e">strong: "animal" (a thing that can be tired)</text>
+    <text x="1010" y="380" text-anchor="middle" font-size="26" fill="#b06a4e">strong: "tired"</text>
+    <text x="600" y="470" text-anchor="middle" font-size="24" fill="#a3a08f">weak links to everything else — line thickness = relevance score</text>
+
+    <text x="600" y="760" text-anchor="middle" font-size="29" fill="#55584a">no relay, no fading memory — word 1 and word 1,000 are equally close</text>
+    <text x="600" y="810" text-anchor="middle" font-size="27" fill="#75786a">swap "tired" → "too wide", and the thick line jumps to "street"</text>
+  </g>
+
+  <line x1="80" y1="1030" x2="1120" y2="1030" stroke="#e8e4d7" stroke-width="3"/>
+  <text x="600" y="1078" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" fill="#a3a08f">Example follows Alammar, "The Illustrated Transformer"; mechanism from Vaswani et al. (2017)</text>
+  <text x="80" y="1140" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600" fill="#a3a08f">LLM Basics · tf-1</text>
+  <text x="1120" y="1140" text-anchor="end" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#a3a08f">every token consults every token</text>
+</svg>

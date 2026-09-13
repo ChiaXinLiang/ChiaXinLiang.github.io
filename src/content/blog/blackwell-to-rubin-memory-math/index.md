@@ -2,8 +2,8 @@
 title: 'Blackwell to Rubin: Capacity Stays Flat, Bandwidth Nearly Triples'
 description: "NVIDIA's next GPU keeps the same 288GB of memory while bandwidth jumps from 8 to a reported 22 TB/s. That asymmetry tells you exactly what limits AI today."
 pubDate: 'Sep 12 2026'
-linkedinDate: 'Sep 19 2026'
 heroImage: './cover.png'
+code: 'chip-1'
 series: 'efficient-ai'
 topic: 'AI Chips'
 tags: ['nvidia', 'hbm', 'accelerators']
