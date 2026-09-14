@@ -1,6 +1,6 @@
 ---
 title: 'How Models Learn: Gradient Descent and Backprop in Plain Words'
-description: "Training a neural network is finding the bottom of a valley you can't see, 1 step at a time — and billing every weight for its exact share of every mistake."
+description: "Training a neural network is finding the bottom of a valley you can't see, 1 step at a time, and billing every weight for its exact share of every mistake."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './section-overview.png'
@@ -18,15 +18,15 @@ tags: ['neural-networks', 'training', 'backpropagation']
 
 GPT-3 has 175 billion adjustable weights. Nobody set a single one of them by hand.
 
-[Last article](/blog/what-is-a-neural-network/) established that a network's entire knowledge is its list of weight values. This 1 answers the obvious follow-up: how do those values get found? The answer is 2 ideas — one you can picture as walking downhill, one that is pure bookkeeping — and together they train everything from digit readers to ChatGPT.
+[Last article](/blog/what-is-a-neural-network/) established that a network's entire knowledge is its list of weight values. This 1 answers the obvious follow-up: how do those values get found? The answer is 2 ideas: one you can picture as walking downhill, one that is pure bookkeeping. Together they train everything from digit readers to ChatGPT.
 
 ## Deep dive
 
 ### First: give the network a score
 
-Training starts by defining failure numerically. Show the network an example whose answer you know, compare its output to the truth, and compute a **loss** — 1 number measuring how wrong it was. 0 means perfect; big means bad.
+Training starts by defining failure numerically. Show the network an example whose answer you know, compare its output to the truth, and compute a **loss**, 1 number measuring how wrong it was. 0 means perfect; big means bad.
 
-Now imagine a strange landscape. Each possible setting of the weights is a location; the loss at that setting is the altitude. Somewhere in this landscape are low valleys — weight settings where the network is usually right. Training is a search for them.
+Now imagine a strange landscape. Each possible setting of the weights is a location; the loss at that setting is the altitude. Somewhere in this landscape are low valleys, weight settings where the network is usually right. Training is a search for them.
 
 The catch: for a real model the landscape has billions of dimensions and you can't see any of it. You only know the altitude *where you're standing*.
 
@@ -35,7 +35,7 @@ The catch: for a real model the landscape has billions of dimensions and you can
 Here's what you *can* do while blind on a hillside: feel which way the ground slopes under your feet, and step downhill. Repeat.
 
 
-That is the entire algorithm, called **gradient descent**. The "slope under your feet" is the *gradient* — for each of the billions of weights, the answer to one question: *if I nudged this weight slightly, would the loss go up or down, and how steeply?* Take a small step for every weight in its downhill direction, and the loss decreases. Do it millions of times, and a network that started as random noise becomes a digit reader — or a language model.
+That is the entire algorithm, called **gradient descent**. The "slope under your feet" is the *gradient*. For each of the billions of weights it answers one question: *if I nudged this weight slightly, would the loss go up or down, and how steeply?* Take a small step for every weight in its downhill direction, and the loss decreases. Do it millions of times, and a network that started as random noise becomes a digit reader, or a language model.
 
 The step size (the *learning rate*) is a genuine tuning art: too small and training takes forever; too large and you overshoot valleys entirely. But the concept stays this simple.
 
@@ -43,14 +43,14 @@ The step size (the *learning rate*) is a genuine tuning art: too small and train
 
 1 important question remains: how do you *compute* that slope for a weight buried deep in the middle of the network? When the final answer is wrong, which of the 175 billion knobs is to blame, and by how much?
 
-The answer is **backpropagation** — popularized for multilayer neural networks in a [1986 paper by Rumelhart, Hinton, and Williams](https://doi.org/10.1038/323533a0). Strip the calculus away and it is an accounting procedure:
+The answer is **backpropagation**, popularized for multilayer neural networks in a [1986 paper by Rumelhart, Hinton, and Williams](https://doi.org/10.1038/323533a0). Strip the calculus away and it is an accounting procedure:
 
 
 1. Start at the output, where the error is directly measurable
 2. Split that error backward through the last layer: each contributing neuron receives blame in proportion to how strongly it pushed the wrong answer
 3. Repeat, layer by layer, until every weight in the network holds its exact share of the bill
 
-The mathematical engine is the chain rule from first-year calculus, applied systematically. The result is remarkable: **1 forward pass plus 1 backward pass prices every weight's blame simultaneously** — many parameter derivatives in a coordinated reverse pass, with cost determined by the operations and saved intermediates. Without this trick, you'd have to nudge weights 1 at a time to see what happens; at billions of weights, that's not a slow method, it's an impossible 1.
+The mathematical engine is the chain rule from first-year calculus, applied systematically. The result is remarkable: **1 forward pass plus 1 backward pass prices every weight's blame simultaneously**, many parameter derivatives in a coordinated reverse pass, with cost determined by the operations and saved intermediates. Without this trick, you'd have to nudge weights 1 at a time to see what happens; at billions of weights, that's not a slow method, it's an impossible 1.
 
 ### The loop, assembled
 
@@ -58,9 +58,9 @@ Put the pieces together and training is a 4-beat loop:
 
 > **guess** (forward pass) → **score** (loss) → **assign blame** (backward pass) → **nudge** (gradient step)
 
-Run it on 1 batch of examples, then the next, millions of times. That loop is what a "training run" is — and why training costs what it costs: every beat touches every weight, and frontier models run the loop over trillions of words. When headlines say a model took months on thousands of GPUs, they're describing this loop, executed at industrial scale.
+Run it on 1 batch of examples, then the next, millions of times. That loop is what a "training run" is, and why training costs what it costs: every beat touches every weight, and frontier models run the loop over trillions of words. When headlines say a model took months on thousands of GPUs, they're describing this loop, executed at industrial scale.
 
-It's also why the field cares so much about training *efficiency*: shave 20% off the loop's cost and you've shaved 20% off one of the largest compute bills in industry. That thread — same loop, run cheaper — is exactly where this blog's [performance series](/blog/what-does-an-ml-performance-engineer-do/) picks up.
+It's also why the field cares so much about training *efficiency*: shave 20% off the loop's cost and you've shaved 20% off one of the largest compute bills in industry. That thread (same loop, run cheaper) is exactly where this blog's [performance series](/blog/what-does-an-ml-performance-engineer-do/) picks up.
 
 ### Different losses encode different questions
 
@@ -157,7 +157,7 @@ It is also inaccurate to say that forward plus backward always costs exactly twi
 ## Conclusion
 
 - Training = minimizing a loss by walking downhill in weight-space: feel the slope, step, repeat. That's gradient descent.
-- Backprop is the accounting trick that computes every weight's slope in 1 backward pass — an efficient application of the chain rule that helped make multilayer networks practical to train.
+- Backprop is the accounting trick that computes every weight's slope in 1 backward pass, an efficient application of the chain rule that helped make multilayer networks practical to train.
 - Everything about a training run's cost follows from the loop: guess → score → blame → nudge, times every weight, times trillions of examples.
 
 
@@ -168,7 +168,7 @@ For a useful debugging exercise, freeze a tiny batch and run repeated optimizati
 - Goodfellow, Bengio, Courville, [Deep Learning, machine-learning basics](https://www.deeplearningbook.org/contents/ml.html) and [deep feedforward networks](https://www.deeplearningbook.org/contents/mlp.html).
 
 - Rumelhart, Hinton, Williams (1986). ["Learning representations by back-propagating errors"](https://doi.org/10.1038/323533a0), *Nature*
-- Michael Nielsen — [*Neural Networks and Deep Learning*](http://neuralnetworksanddeeplearning.com/chap1.html), ch. 1–2 (CC BY-NC 3.0; the gradient-descent figure is redrawn from it)
+- Michael Nielsen, [*Neural Networks and Deep Learning*](http://neuralnetworksanddeeplearning.com/chap1.html), ch. 1–2 (CC BY-NC 3.0; the gradient-descent figure is redrawn from it)
 - Kaplan et al. (2020). ["Scaling Laws for Neural Language Models"](https://arxiv.org/abs/2001.08361) (why the loop gets run at ever-larger scale)
 
 ---

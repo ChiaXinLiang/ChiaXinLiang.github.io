@@ -16,7 +16,7 @@ tags: ['simd', 'vectorization', 'parallelism']
 
 ![Concept overview: SIMD: 1 Instruction, Many Numbers](./section-overview.png)
 
-A single core in a modern server CPU can finish 64 single-precision floating-point operations every clock cycle. It gets there with just 2 instructions per cycle: each one is a fused multiply-add applied to 16 numbers at once, and a multiply-add counts as 2 operations. 16 lanes, times 2 operations, times 2 execution units. That is 64.
+A single core in a modern server CPU can finish 64 single-precision floating-point operations every clock cycle. It gets there with just 2 instructions per cycle. Each one is a fused multiply-add applied to 16 numbers at once, and a multiply-add counts as 2 operations. 16 lanes, times 2 operations, times 2 execution units. That is 64.
 
 This matters because the other route to speed closed 2 decades ago. Clock frequencies have been stuck between roughly 3 and 5 GHz since the mid-2000s, when power density made further scaling impractical. Nearly all the growth in per-core arithmetic since then has come from *width*: making each instruction touch more data. The technique is called **SIMD**, and it is the first rung on a ladder that leads, a few articles from now, to GPUs and TPUs.
 
@@ -27,10 +27,10 @@ This matters because the other route to speed closed 2 decades ago. Clock freque
 In 1966 Michael Flynn proposed a classification of computers so simple it still organizes the whole field. Ask 2 questions about a machine. How many *instruction streams* does it follow at once? And how many *data streams* do those instructions touch? 2 questions with 2 answers each gives 4 boxes.
 
 
-- **SISD** — single instruction, single data. 1 core running scalar code, exactly the fetch-decode-execute machine from [the first article in this series](/blog/what-a-cpu-actually-does/). Each instruction produces 1 result.
-- **SIMD** — single instruction, multiple data. 1 instruction stream, but each instruction operates on a whole batch of values at once. This article.
-- **MISD** — multiple instructions, single data. The odd 1 out; it shows up mainly in fault-tolerant designs where redundant units process the same input and vote.
-- **MIMD** — multiple instructions, multiple data. Independent cores each running their own code: every multicore CPU, every cluster.
+- **SISD**: single instruction, single data. 1 core running scalar code, exactly the fetch-decode-execute machine from [the first article in this series](/blog/what-a-cpu-actually-does/). Each instruction produces 1 result.
+- **SIMD**: single instruction, multiple data. 1 instruction stream, but each instruction operates on a whole batch of values at once. This article.
+- **MISD**: multiple instructions, single data. The odd 1 out; it shows up mainly in fault-tolerant designs where redundant units process the same input and vote.
+- **MIMD**: multiple instructions, multiple data. Independent cores each running their own code: every multicore CPU, every cluster.
 
 The taxonomy earns its keep because the boxes have very different economics. MIMD needs a full core per stream, with its own fetch, decode, branch predictor, and scheduler. SIMD pays for that expensive control machinery once and shares it across many arithmetic units. When the same operation applies to element after element of an array, which describes most of image processing, signal processing, and essentially all of deep learning, SIMD gets you more math per dollar and per watt than any other box.
 
@@ -38,12 +38,12 @@ The energy argument deserves a number. Fetching, decoding, and scheduling 1 inst
 
 ### Wider registers, not faster ones
 
-The hardware mechanism is the **vector register**. A normal general-purpose register on x86-64 holds 64 bits. AVX-512, the widest SIMD extension in mainstream x86 CPUs, adds 32 registers named `zmm0` through `zmm31`, each 512 bits wide. 1 such register holds 16 single-precision floats, or 8 doubles, or 64 bytes, and the register file alone is 2 KB of the hottest storage on the chip.
+The hardware mechanism is the **vector register**. A normal general-purpose register on x86-64 holds 64 bits. AVX-512, the widest SIMD extension in mainstream x86 CPUs, adds 32 registers named `zmm0` through `zmm31`, each 512 bits wide. 1 such register holds 16 single-precision floats, or 8 doubles, or 64 bytes. The register file alone is 2 KB of the hottest storage on the chip.
 
 A vector instruction names these registers just like scalar code names ordinary ones. The instruction `vaddps zmm2, zmm0, zmm1` reads 2 512-bit registers, adds them lane by lane, and writes 16 sums into a third. Behind it sit 16 floating-point adders physically side by side. The instruction is fetched once, decoded once, and scheduled once; the arithmetic fans out.
 
 
-The idea is old. The Cray-1 of 1976 built its legend on 8 vector registers of 64 elements each, and supercomputers were "vector machines" for 2 decades. The mainstream caught up in small steps: MMX in 1997 (64-bit), SSE in 1999 (128-bit, the first 4-float registers), AVX in 2011 (256-bit), and AVX-512 reaching servers in 2017. ARM took a parallel path with 128-bit NEON, now in every phone, and the newer SVE extension, which lets hardware choose any width from 128 to 2048 bits while the code stays the same. Fujitsu's A64FX, the chip inside the Fugaku supercomputer, runs SVE at 512 bits.
+The idea is old. The Cray-1 of 1976 built its legend on 8 vector registers of 64 elements each, and supercomputers were "vector machines" for 2 decades. The mainstream caught up in small steps: MMX in 1997 (64-bit), SSE in 1999 (128-bit, the first 4-float registers), AVX in 2011 (256-bit), and AVX-512 reaching servers in 2017. ARM took a parallel path with 128-bit NEON, now in every phone, and the newer SVE extension. SVE lets hardware choose any width from 128 to 2048 bits while the code stays the same. Fujitsu's A64FX, the chip inside the Fugaku supercomputer, runs SVE at 512 bits.
 
 1 phrase in the heading above is doing real work: wider, *not faster*. A vector add has about the same latency as a scalar add, roughly 4 cycles on recent Intel cores. SIMD is a pure throughput play, and that distinction is about to bite us in the worked example.
 
@@ -59,7 +59,7 @@ for (int i = 0; i < 1024; i++)
     sum += a[i];
 ```
 
-**Scalar version.** Compiled without vectorization, each iteration does about 4 instructions: load the element and add it to `sum` (1 fused instruction on x86), bump the index, compare, branch. Call it 4,096 instructions for the whole loop. But instruction count is not what dominates here. Every add reads the previous add's result, so the 1,024 additions form a *dependency chain*, and with a 4-cycle add latency the chain alone costs 1,024 × 4 = 4,096 cycles. At 4 GHz that is about 1 microsecond, and no amount of clever hardware can shorten it, because arithmetic number 513 legally cannot start before number 512 delivers.
+**Scalar version.** Compiled without vectorization, each iteration does about 4 instructions: load the element and add it to `sum` (1 fused instruction on x86), bump the index, compare, branch. Call it 4,096 instructions for the whole loop. But instruction count is not what dominates here. Every add reads the previous add's result, so the 1,024 additions form a *dependency chain*. With a 4-cycle add latency the chain alone costs 1,024 × 4 = 4,096 cycles. At 4 GHz that is about 1 microsecond, and no amount of clever hardware can shorten it. Arithmetic number 513 legally cannot start before number 512 delivers.
 
 **AVX-512 version.** Load 16 floats into a vector register per iteration and add them into a 16-lane vector accumulator: 1,024 ÷ 16 = 64 iterations. The dependency chain is now 64 vector adds, 64 × 4 = 256 cycles. At the end the accumulator holds 16 partial sums (lane 0 has the sum of elements 0, 16, 32, …), which a short *horizontal reduction* folds together: shuffle and add the 2 halves, 4 times, since 2⁴ = 16, costing maybe 25 more cycles. Total around 280 cycles, roughly 70 nanoseconds. That is a 15× speedup, achieved by shrinking the chain 16-fold and paying a small toll at the end.
 
@@ -69,12 +69,12 @@ Worth checking before celebrating: 1,024 floats is 4 KB, which sits comfortably 
 
 ![Deep dive: Going deeper: feeding 2 pipes with 8 chains](./deep-dive-component-01.png)
 
-The vectorized loop is still leaving most of the machine idle. The core can *start* 2 vector adds per cycle (2 execution ports), but each add takes 4 cycles to finish, and our single accumulator forces every add to wait for the previous one. One add begins every 4 cycles on hardware built to begin 8 in that time. The vector units sit idle 87% of the loop.
+The vectorized loop is still leaving most of the machine idle. The core can *start* 2 vector adds per cycle, since it has 2 execution ports, but each add takes 4 cycles to finish. Our single accumulator forces every add to wait for the previous one. One add begins every 4 cycles on hardware built to begin 8 in that time. The vector units sit idle 87% of the loop.
 
-The fix is to break the chain: keep **8 independent accumulators**, add every eighth vector into each, and fold the 8 together at the end. Now the scheduler always has independent work, the loop becomes throughput-bound at 64 adds ÷ 2 per cycle = 32 cycles, and with the wind-down reduction the whole sum lands around 60 cycles, about 15 nanoseconds. Nearly 70× the scalar baseline.
+The fix is to break the chain: keep **8 independent accumulators**, add every eighth vector into each, and fold the 8 together at the end. Now the scheduler always has independent work, and the loop becomes throughput-bound at 64 adds ÷ 2 per cycle = 32 cycles. With the wind-down reduction the whole sum lands around 60 cycles, about 15 nanoseconds. Nearly 70× the scalar baseline.
 
 
-2 honest footnotes. First, the accumulator trick is instruction-level parallelism, not SIMD; scalar code with 8 accumulators gains from it too. SIMD contributes the 16×, latency-hiding contributes the rest, and the 2 multiply because they attack different limits, exactly the latency-versus-throughput split from [the pipeline article](/blog/what-a-cpu-actually-does/). Second, both tricks quietly reorder the additions, and floating-point addition is not associative: summing in a different order can produce a slightly different rounding. The math is fine for almost every application, but the *compiler is not allowed to assume that*, which brings us to the practical question.
+2 honest footnotes. First, the accumulator trick is instruction-level parallelism, not SIMD; scalar code with 8 accumulators gains from it too. SIMD contributes the 16× while latency-hiding contributes the rest, and the 2 multiply because they attack different limits. That is exactly the latency-versus-throughput split from [the pipeline article](/blog/what-a-cpu-actually-does/). Second, both tricks quietly reorder the additions, and floating-point addition is not associative. Summing in a different order can produce a slightly different rounding. The math is fine for almost every application, but the *compiler is not allowed to assume that*, which brings us to the practical question.
 
 
 The accumulator choice follows a latency-throughput calculation. Let $$L$$ be vector-add latency in cycles, $$r$$ sustainable vector-add issue rate per cycle, and $$A$$ independent accumulator chains. Each chain supplies at most 1 add every $$L$$ cycles, so the combined rate is bounded by
@@ -95,11 +95,11 @@ The improvement over a single vector accumulator is software-created instruction
 You rarely write `vaddps` by hand. Modern compilers auto-vectorize loops at `-O2`/`-O3`, and for clean loops they do it well. The interesting question is when they refuse, because they refuse often and silently. The classic blockers:
 
 - **Possible aliasing.** If the compiler cannot prove that the output array does not overlap an input array, vectorizing could change the program's meaning, so it won't. The `restrict` keyword exists to make that promise.
-- **Loop-carried dependencies.** A prefix sum (`out[i] = out[i-1] + a[i]`) genuinely needs the previous result each step. No legal transformation makes independent lanes out of it (parallel prefix algorithms exist, but they restructure the computation, which a compiler will not do on its own).
+- **Loop-carried dependencies.** A prefix sum (`out[i] = out[i-1] + a[i]`) genuinely needs the previous result each step. No legal transformation makes independent lanes out of it. Parallel prefix algorithms exist, but they restructure the computation, which a compiler will not do on its own.
 - **Floating-point reductions.** Our running example! A freely reassociated tree reduction generally needs floating-point permission, such as fast-math flags or a reduction directive. Some targets support ordered vector reductions that preserve the source order; compiler diagnostics reveal which transformation was chosen.
-- **Branches and irregular access.** AVX-512 has per-lane mask registers (`k0`–`k7`) that let an instruction execute in some lanes and not others, plus gather and scatter instructions for non-contiguous addresses. They make vectorizing branchy or pointer-chasing code *possible*, not fast; a gather that touches 16 different cache lines does 16 cache accesses.
+- **Branches and irregular access.** AVX-512 has per-lane mask registers (`k0`–`k7`) that let an instruction execute in some lanes and not others. It also has gather and scatter instructions for non-contiguous addresses. They make vectorizing branchy or pointer-chasing code *possible*, not fast; a gather that touches 16 different cache lines does 16 cache accesses.
 
-2 more real-world cautions. Early AVX-512 chips (Skylake-SP, 2017) dropped their clock frequency under sustained 512-bit work, occasionally making vectorized code slower in mixed workloads; later generations largely fixed this, but it left a lasting folk memory. And the caveat pinned earlier: stream a 1 GB array from DRAM instead of 4 KB from L1 and a single core becomes memory-bandwidth-bound, at which point the sum runs at the speed of DRAM and the register width barely matters. Wide arithmetic only pays when the data can arrive fast enough, which is why [memory bandwidth, not FLOPs, is the number that decides modern accelerator designs](/blog/blackwell-to-rubin-memory-math/).
+2 more real-world cautions. Early AVX-512 chips (Skylake-SP, 2017) dropped their clock frequency under sustained 512-bit work, occasionally making vectorized code slower in mixed workloads. Later generations largely fixed this, but it left a lasting folk memory. And the caveat pinned earlier: stream a 1 GB array from DRAM instead of 4 KB from L1 and a single core becomes memory-bandwidth-bound, at which point the sum runs at the speed of DRAM and the register width barely matters. Wide arithmetic only pays when the data can arrive fast enough, which is why [memory bandwidth, not FLOPs, is the number that decides modern accelerator designs](/blog/blackwell-to-rubin-memory-math/).
 
 The pragmatic workflow: ask the compiler for its vectorization report (`-Rpass=loop-vectorize` in Clang, `-fopt-info-vec` in GCC), read what it refused and why, then either fix the loop or drop to intrinsics, the C functions in Intel's Intrinsics Guide that map 1-to-1 onto vector instructions. And always measure.
 
@@ -109,7 +109,7 @@ The pragmatic workflow: ask the compiler for its vectorization report (`-Rpass=l
 
 **"The compiler vectorizes automatically, so I get 16× for free."** Sometimes. But the most common loop in numerical code, a floating-point reduction, is skipped by default for correctness reasons, aliasing it cannot disprove blocks many others, and a loop that vectorizes cleanly but streams from DRAM speeds up hardly at all. Auto-vectorization is real and valuable, and it is also the layer where quiet 10× regressions hide. Check the report.
 
-**"SIMD and multithreading are the same kind of parallelism."** They are different Flynn boxes and they multiply, not compete. SIMD is data parallelism inside 1 instruction stream on 1 core; threads across cores are MIMD, independent streams. A 60-core server chip at 2.5 GHz doing 64 FP32 operations per core-cycle peaks near 9.6 TFLOPs precisely because the 2 axes stack, and leaving either 1 unused forfeits its full factor.
+**"SIMD and multithreading are the same kind of parallelism."** They are different Flynn boxes and they multiply, not compete. SIMD is data parallelism inside 1 instruction stream on 1 core; threads across cores are MIMD, independent streams. A 60-core server chip at 2.5 GHz doing 64 FP32 operations per core-cycle peaks near 9.6 TFLOPs, precisely because the 2 axes stack. Leaving either 1 unused forfeits its full factor.
 
 ### From 16 lanes to a warp
 
@@ -122,8 +122,8 @@ The price of the wide, simple machine is everything the CPU's control logic used
 ## Conclusion
 
 - SIMD amortizes the expensive part of an instruction (fetch, decode, schedule, roughly 10–100× the energy of the arithmetic itself) across many lanes: AVX-512 does 16 float operations per instruction, and per-core FLOP growth since the mid-2000s has come almost entirely from this width.
-- Width fixes throughput, not latency. Summing 1,024 floats fell from 4,096 cycles to about 280 by vectorizing, and to about 60 only after 8 independent accumulators broke the dependency chain; the 2 tricks multiply.
-- Auto-vectorization fails silently on FP reductions, possible aliasing, and irregular access, and helps little when DRAM is the bottleneck; read the compiler's vectorization report and measure. GPUs (SIMT) are this same idea with thousands of lanes and masks managed by hardware.
+- Width fixes throughput, not latency. Summing 1,024 floats fell from 4,096 cycles to about 280 by vectorizing, and to about 60 only after 8 independent accumulators broke the dependency chain. The 2 tricks multiply.
+- Auto-vectorization fails silently on FP reductions, possible aliasing, and irregular access, and helps little when DRAM is the bottleneck. Read the compiler's vectorization report and measure. GPUs (SIMT) are this same idea with thousands of lanes and masks managed by hardware.
 
 ### Sources
 

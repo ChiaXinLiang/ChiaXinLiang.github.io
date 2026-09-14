@@ -26,11 +26,11 @@ Start after [From FPGA to ASIC: Replace Device Primitives and Preserve Behavior]
 
 ![Deep dive: Synthesize RTL into standard cells](./deep-dive-component-01.png)
 
-The synthesis figure combines RTL, cell libraries and timing constraints into a gate-level netlist. Logic optimization maps arithmetic and registers to available cells. The resulting area/timing reports depend on the target library and constraints.
+The synthesis figure combines RTL, cell libraries and timing constraints into a gate-level netlist: logic optimization maps the arithmetic and the registers onto whatever cells the library offers, so the area and timing reports that come back describe that target library under those constraints rather than the design in the abstract.
 
 The supplied OpenROAD-flow-scripts configuration targets educational Nangate45. It is not a production foundry PDK or a fabrication-ready release. Pin the actual flow revision before running and retain its environment.
 
-RTL simulation is a prerequisite but does not establish cell timing. A synthesized netlist can also require equivalence or gate-level checks. Read warnings about unsupported constructs, missing libraries and unconnected signals before proceeding.
+RTL simulation under Icarus Verilog is a prerequisite, but it does not establish cell timing, and a synthesized netlist can also require equivalence or gate-level checks: read the warnings about unsupported constructs, missing libraries and unconnected signals before you go any further.
 
 ### Floorplan around memories and power
 
@@ -38,7 +38,7 @@ RTL simulation is a prerequisite but does not establish cell timing. A synthesiz
 
 The floorplan figure allocates core area, I/O and space for macros/power. Utilization leaves room for routing and physical repair; a maximum-density rectangle can be impossible to route or time.
 
-The released small top has behavioral banked storage rather than a placed SRAM macro. A larger accelerator needs real macro dimensions, placement, power pins and timing models. Reserve those only from documented target data.
+The released small top has behavioral banked storage rather than a placed SRAM macro, and a larger accelerator needs real macro dimensions, placement, power pins and timing models, all of which you should take only from documented target data.
 
 Power delivery belongs to physical integration, not the mathematical matrix diagram. Full-chip pads, package planning and production signoff are beyond this educational core configuration and must not be implied by a generated GDS file.
 
@@ -46,9 +46,9 @@ Power delivery belongs to physical integration, not the mathematical matrix diag
 
 ![Deep dive: Place and build the clock tree](./deep-dive-component-03.png)
 
-The placement figure locates standard cells and builds a clock distribution network. Data paths and clock arrival both affect setup/hold. A logically equivalent netlist can have very different wire delay under another placement.
+The placement figure locates standard cells and builds a clock distribution network, and because data paths and clock arrival both affect setup and hold, a netlist that is logically equivalent can show very different wire delay once another placement moves its cells apart.
 
-Clock-tree synthesis balances the implemented network under its constraints, not an ideal zero-skew assumption. Read clock latency/skew reports and resulting data-path slack. Excessive fanout or congestion can create new bottlenecks.
+Clock-tree synthesis balances the implemented network under its constraints rather than an ideal zero-skew assumption, so read the clock latency and skew reports beside the resulting data-path slack: excessive fanout or congestion can create new bottlenecks of its own.
 
 Do not fix timing by adding unsupported exceptions. If a path is functionally real, it needs a design, placement or target change. Maintain the verified latency/protocol contract when adding registers.
 
@@ -56,11 +56,11 @@ Do not fix timing by adding unsupported exceptions. If a path is functionally re
 
 ![Deep dive: Route and extract interconnect](./deep-dive-component-04.png)
 
-The routing figure connects placed cells with legal wires, then extraction models parasitic resistance/capacitance. Post-route timing uses those wire effects. A pre-route estimate and extracted final report are different evidence.
+The routing figure connects placed cells with legal wires, then extraction models the parasitic resistance and capacitance that post-route timing depends on, which is why a pre-route estimate and an extracted final report count as different evidence.
 
 DRC checks geometry under provided rules; LVS compares extracted layout connectivity against the expected netlist. Passing one does not establish the other. Missing macro views can prevent meaningful checks.
 
-The release has not run this physical flow and contains no generated layout or signoff results. The script/configuration is an exercise entry point whose outputs must be executed, inspected and retained.
+The release has not run this physical flow and contains no generated layout and no signoff reports from OpenROAD. The script and configuration are an exercise entry point whose outputs must be executed, inspected and retained.
 
 ### Inspect reports and layout reproducibly
 
@@ -70,7 +70,7 @@ The artifact figure packages netlists, constraints, layout and reports with tool
 
 From a supported checkout, run make -C flow DESIGN_CONFIG=/absolute/path/to/accelerator-lab/asic/config.mk. Inspect the actual output paths produced by that revision rather than assuming one universal report location.
 
-A successful educational run teaches implementation tradeoffs. Foundry fabrication also requires permitted PDK/models, full-chip integration, test strategy and appropriate signoff. The distinction is a learning milestone, not a reason to invent a completed chip.
+A successful educational run on Nangate45 teaches implementation tradeoffs, while foundry fabrication also requires permitted PDK models, full-chip integration, a test strategy and appropriate signoff, so treat the distinction as a learning milestone rather than a reason to invent a completed chip.
 
 ### Run this lesson
 
@@ -111,13 +111,13 @@ set_output_delay 2.0 -clock core_clk [get_ports {rd_data* busy done error}]
 
 ### Keep behavioral and physical evidence separate
 
-Portable RTL is an entry point to implementation, not a fabrication-ready package. The educational flow must combine it with a supported cell library, constraints and appropriate models. Larger memory structures need permitted macros with simulation, timing and physical views that agree on their behavior. FPGA initialization and primitive assumptions cannot be carried over silently.
+Portable RTL is an entry point to implementation, not a fabrication-ready package: the educational flow has to combine it with the Nangate45 cell library, its constraints and appropriate models. Larger memory structures need permitted macros whose simulation, timing and physical views agree on their behavior. FPGA initialization and primitive assumptions cannot be carried over silently.
 
-Inspect each stage's evidence: synthesis mapping, floorplan/placement, clock distribution, routed interconnect and extracted timing. A layout file is not a substitute for DRC, LVS or STA. Unconstrained paths and missing views can make an apparently successful report incomplete. Record the exact target and flow revision.
+Inspect each stage's evidence: synthesis mapping, floorplan and placement, clock distribution, routed interconnect and extracted timing. A layout file is no substitute for DRC, LVS or STA, and unconstrained paths or missing views can make an apparently successful report incomplete, so record the exact target and flow revision that produced it.
 
 The supplied configuration uses educational Nangate45 and has not been executed in this release. It is not a foundry signoff package. The small core also lacks a production pad ring, scan insertion and fabrication/board integration. Those are later target-specific milestones with distinct evidence, rather than properties inferred from a passing RTL test.
 
-Retain a manifest of sources, tests, constraints and tool/model versions. Numerical and protocol tests remain reproducible while new wrappers or physical stages are added. Before fabrication, close the actual full-chip electrical, physical and test requirements and prepare a bring-up plan. The learning result is a traceable transition from verified behavior to implementation, with unperformed checks left explicitly unclosed.
+Retain a manifest of sources, tests, constraints and tool or model versions, keep the numerical and protocol tests reproducible while new wrappers and physical stages arrive, and before fabrication close the actual full-chip electrical, physical and test requirements and prepare a bring-up plan. The learning result is a traceable transition from verified behavior to implementation, with unperformed checks left explicitly unclosed.
 
 ### A worked engineering decision
 
@@ -131,29 +131,29 @@ The SDC declares an illustrative 10-ns clock and 2-ns interface delays for the c
 
 #### Follow the artifacts through the implementation stages
 
-Synthesis maps behavior into cells under the selected logical library and constraints. Its netlist, cell totals and estimated timing provide an early implementation view. They do not include all final routing parasitics. Placement assigns cells to physical locations; floorplanning establishes core geometry, regions, pins and any macros. Resource legality and routability depend on the selected physical views and power structure.
+Synthesis maps behavior into cells under the selected Nangate45 logical library and its constraints. The netlist, cell totals and estimated timing it reports give an early implementation view, but they do not yet include all the final routing parasitics. Placement assigns cells to physical locations while floorplanning establishes core geometry, regions, pins and any macros, and resource legality and routability both depend on the selected physical views and power structure.
 
-Clock-tree synthesis inserts and routes a clock distribution to sequential sinks. Clock latency and skew affect setup and hold, while clock routing also consumes physical resources. A data-path diagram and a clock-tree diagram describe different nets. Connect clocks to register/resource clock pins, not to generic combinational blocks or data outputs. Retain the post-clock-tree checks before proceeding to detailed routing.
+Clock-tree synthesis inserts and routes a clock distribution to sequential sinks, where clock latency and skew affect setup and hold while the clock routing itself consumes physical resources, which is why a data-path diagram and a clock-tree diagram describe different nets. Connect clocks to register and resource clock pins, not to generic combinational blocks or data outputs. Retain the post-clock-tree checks before you proceed to detailed routing.
 
-Routing assigns interconnect and legal layers/vias. Extraction then models the selected parasitic resistance and capacitance used by post-route timing analysis. Wire delay can change which path is limiting and can expose hold as well as setup issues. Re-running optimization may alter cells or routes, so retain the final consistent artifact set rather than mixing an old netlist with a new extracted model.
+Routing assigns interconnect and legal layers and vias, extraction then models the parasitic resistance and capacitance that post-route timing analysis consumes, and the resulting wire delay can change which path is limiting and can expose hold problems as well as setup ones. Re-running optimization may alter cells or routes, so retain the final consistent artifact set rather than mixing an old netlist with a new extracted model.
 
 #### Read results as evidence at a specific milestone
 
-An educational run can produce complete artifacts for its learning scope without becoming production signoff. Conversely, using a foundry-qualified tool does not automatically make an incomplete input set ready. The chosen process rules, model corners, integration, verification and permissions determine the production milestone. Label each result with what was actually executed and approved.
+An educational run can produce complete artifacts for its learning scope without becoming production signoff, and using a foundry-qualified tool does not automatically make an incomplete input set ready: the chosen process rules, model corners, integration, verification and permissions are what determine the production milestone. Label each result with what was actually executed and approved.
 
-Inspect timing, area and congestion together. A smaller mapped area can create a denser layout with difficult routing; extra buffering can improve timing while increasing cells and power. A large wide result bus can be a physical cost even when its simulation interface is convenient. Keep the numerical operation and constraints fixed when comparing architectural variants so changes in reports have an interpretable cause.
+Inspect timing, area and congestion together. A smaller mapped area can create a denser layout that is harder to route, extra buffering can improve timing while it increases cells and power, and a wide result bus can cost physical resources even when its simulation interface is convenient. Keep the numerical operation and constraints fixed when comparing architectural variants so changes in the reports have an interpretable cause.
 
-Open the generated layout with its actual technology views and inspect pins, power structure, placement and routing. A generic clean floorplan drawing in an article is not a screenshot of a completed run. If publishing real screenshots later, retain artifact revision and identify the shown stage. A visually tidy layout cannot replace rule checks or timing reports.
+Open the generated layout with the actual Nangate45 technology views and inspect pins, power structure, placement and routing. A generic clean floorplan drawing in an article is not a screenshot of a completed run, so if you publish real screenshots later, retain the artifact revision and identify which stage is shown: a visually tidy layout cannot replace rule checks or timing reports.
 
 #### Extend the core toward a full chip deliberately
 
-A full-chip design may need SRAM macros, I/O cells, package-related interfaces, clock/reset integration, power planning, test access and a host/data transport. Each adds logical and physical obligations. A macro requires compatible functional/timing/physical views and permitted use; an I/O ring requires the selected process and electrical design. Those cannot be inferred from the small core's arithmetic source.
+A full-chip design may need SRAM macros, I/O cells, package-related interfaces, clock and reset integration, power planning, test access and a host data transport, and each of those adds its own logical and physical obligations. A macro requires compatible functional, timing and physical views plus permitted use, while an I/O ring requires the selected process and electrical design, and none of that can be inferred from the small core's arithmetic source.
 
-The current fixed operand storage can map into standard-cell structures in an educational flow. Replacing it with macros affects ports and latency and must preserve or explicitly adapt the buffer contract. Retain the same numerical and event-level regressions after the change. A macro that reduces area but returns the wrong reduction index is not a successful implementation optimization.
+The current fixed operand storage can map into standard-cell structures in an educational flow, and replacing it with macros affects ports and latency, so the change must preserve or explicitly adapt the buffer contract. Retain the same numerical and event-level regressions after the change. A macro that reduces area but returns the wrong reduction index is not a successful implementation optimization.
 
 A production signoff plan also covers more than post-route STA: process-specific DRC/LVS, power integrity, electromigration where required, testability, verification and approved model/constraint sets. The next lesson separates those checks. Do not rename an OpenROAD route output as a complete manufacturing release.
 
-This chapter supplies an implementation exercise that readers can execute and inspect, with its source and constraints packaged beside the verified RTL. Its present evidence remains software and circuit simulation. Physical results should be added only after running the pinned flow, keeping educational artifacts, board implementation and foundry release as distinct milestones in the path from an AI accelerator concept to silicon.
+This chapter supplies an implementation exercise that readers can execute and inspect, with its source and constraints packaged beside the verified RTL, and its present evidence remains software and circuit simulation. Physical results should be added only after running the pinned OpenROAD flow, keeping educational artifacts, board implementation and foundry release as distinct milestones in the path from an AI accelerator concept to silicon.
 
 ## Conclusion
 

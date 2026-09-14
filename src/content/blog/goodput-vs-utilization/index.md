@@ -26,7 +26,7 @@ Those 2 sentences can both be true at once, and understanding why is the single 
 
 "Utilization" answers 1 question: is the GPU doing *something* right now? It says nothing about whether that something moves your training run or your user's request forward.
 
-Goodput asks the better question: **of the work this hardware could theoretically deliver, how much became useful output?** For an LLM cluster, useful output is tokens actually processed toward training or inference — after subtracting everything else:
+Goodput asks the better question: **of the work this hardware could theoretically deliver, how much became useful output?** For an LLM cluster, useful output is tokens actually processed toward training or inference, after subtracting everything else:
 
 - GPUs stalled waiting for gradient synchronization over the network
 - GPUs starved because the data pipeline can't feed them fast enough
@@ -48,9 +48,9 @@ The following figure is an illustrative accounting schematic, not a reproduction
 
 Once you track goodput instead of utilization, priorities reorder themselves:
 
-**Utilization thinking** says: the GPUs are busy, buy more GPUs. **Goodput thinking** says: find out what the busy-ness is made of first. A caching layer for the data pipeline, overlapping communication with computation, or faster failure recovery can each be worth more than new hardware — at a fraction of the price.
+**Utilization thinking** says: the GPUs are busy, buy more GPUs. **Goodput thinking** says: find out what the busy-ness is made of first. A caching layer for the data pipeline, overlapping communication with computation, or faster failure recovery can each be worth more than new hardware, at a fraction of the price.
 
-This is also why the job I described in [the previous article](/blog/what-does-an-ml-performance-engineer-do/) exists at all. The gap between theoretical and useful throughput *is* the performance engineer's territory. Closing 20 points of it on a large cluster is worth millions of dollars a year — and unlike buying hardware, it compounds: every future job runs on the improved stack.
+This is also why the job I described in [the previous article](/blog/what-does-an-ml-performance-engineer-do/) exists at all. The gap between theoretical and useful throughput *is* the performance engineer's territory. Closing 20 points of it on a large cluster is worth millions of dollars a year, and unlike buying hardware it compounds: every future job runs on the improved stack.
 
 ### How to start measuring it
 
@@ -58,7 +58,7 @@ You don't need Meta's infrastructure to begin:
 
 1. Define a validated clean-run throughput baseline for the same model and workload; keep hardware-bound estimates separately labeled
 2. Measure tokens actually completed per wall-clock hour, *including* failures and restarts
-3. Divide. That ratio — not utilization — is the number to put on the team dashboard
+3. Divide. That ratio, not utilization, is the number to put on the team dashboard
 
 The first time a team runs this exercise, the result is usually uncomfortable. That discomfort is the point: you can't close a gap you haven't measured.
 
@@ -149,9 +149,9 @@ A goodput dashboard should expose the denominator as clearly as the numerator. S
 
 ### Sources
 
-- Meta — ["Revisiting Reliability in Large-Scale Machine Learning Research Clusters"](https://arxiv.org/abs/2410.21680) (effective training time / goodput measurements)
-- [MLPerf benchmark results](https://mlcommons.org/benchmarks/) — reference points for achievable throughput
-- [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437) — communication/computation overlap as a goodput lever
+- Meta, ["Revisiting Reliability in Large-Scale Machine Learning Research Clusters"](https://arxiv.org/abs/2410.21680) (effective training time / goodput measurements)
+- [MLPerf benchmark results](https://mlcommons.org/benchmarks/), reference points for achievable throughput
+- [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437), communication/computation overlap as a goodput lever
 
 ---
 

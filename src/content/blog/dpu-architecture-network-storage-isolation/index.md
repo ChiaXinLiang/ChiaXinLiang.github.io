@@ -14,7 +14,7 @@ tags: ["Computer Architecture", "dpu"]
 
 ![Concept overview: Trace a packet or storage request through queues, parsing, DMA, offload engines and embedded CPU control](./section-overview.png)
 
-A data processing unit, or DPU, is an infrastructure processor: it combines network-facing data paths, programmable control and offload engines, and its job is the data moving between machines, which means transforming packet and storage bytes, managing queues, and copying authorized bytes from one memory to another. None of that is a matrix multiply. A DPU can speed up an AI system without ever touching the neural network.
+A data processing unit, or DPU, is an infrastructure processor: it combines network-facing data paths, programmable control and offload engines, and its job is the data moving between machines, which means transforming packet and storage bytes, managing queues, and copying authorized bytes from one memory to another. None of that is a matrix multiply. NVIDIA's BlueField-4 is one product in this category. A DPU can speed up an AI system without ever touching the neural network.
 
 In the overview, solid arrows carry data and dashed ones carry management decisions. The host submits work and reads results back, the DPU's control software sets the rules, and the NIC and offload logic carry them out, though which features exist and which software owns them depends entirely on the product and the operating mode. "DPU" names a category, not an instruction set.
 
@@ -28,7 +28,7 @@ This article follows one packet and one storage transfer through the chip to sho
 
 The packet figure starts the moment a bit arrives on the wire, then walks through parsing, classification, queue selection and DMA. The parser picks out fields like protocol headers, a match/action stage applies the rules you configured, queue logic chooses the destination stream and manages descriptors, and DMA copies the payload into an authorized region before a completion record tells software what arrived.
 
-Each stage does a different kind of work: the parser reads fields at fixed offsets and checks the lengths make sense, then the classifier looks those fields up in a rule table, address generation adds an offset to the buffer address, and the scheduler picks which request goes next. Notice what is missing. Not one of these steps is a matrix multiply: the packet belongs to an AI job, but receiving it is lookups and arithmetic on a few bytes of header.
+Each stage does a different kind of work: the parser reads fields at fixed offsets and checks the lengths make sense, then the classifier looks those fields up in a rule table, address generation adds an offset to the buffer address, and the scheduler picks which request goes next. Notice what is missing. Not one of these steps is a matrix multiply: the packet belongs to an AI job, but receiving it is lookups and arithmetic on a few bytes of Ethernet header.
 
 A packet arriving does not mean the application can read a complete tensor. Software has to see the right completion first, plus whatever memory-ordering guarantees the platform requires, and truncated packets, malformed headers, unsupported encapsulation and exhausted queues all need documented error behavior. If the parser trusts a length field before checking its bounds, every address it computes downstream can be wrong.
 
@@ -42,7 +42,7 @@ Work a packet-rate budget. Take a 100-Gb/s stream and 1,500-byte payloads: divid
 
 The engine figure lists the transformations separately because their algorithms and costs differ. A checksum walks the bytes and accumulates a value under a protocol rule, the crypto engine implements a specific cipher or authentication primitive, and a compressor encodes repeated structure in a supported format. Address translation and access checks decide where a transfer may land.
 
-Some stages pipeline happily over streaming bytes. Others need message boundaries, state or metadata first: an encryption engine has to honor the algorithm's nonce, key and authentication rules, and a compressor is harder to budget still, because its output length depends on both the input and the format, so you cannot assume a payload shrinks by a constant factor. The controller has to handle incompressible data and reserve enough room at the destination.
+Some stages pipeline happily over streaming bytes. Others need message boundaries, state or metadata first: an encryption engine has to honor the algorithm's nonce, key and authentication rules, and a compressor is harder to budget still, because its output length depends on both the input and the format, so you cannot assume a payload shrinks by a constant factor. The 0.6 output bytes per input byte used below came from one dataset, not from the algorithm. The controller has to handle incompressible data and reserve enough room at the destination.
 
 Offload moves an operation to another engine. It does not remove the dependencies: someone still provisions the keys, manages the rules, and gets the applications to agree on formats, and an unsupported packet falls through to an exception path where embedded software or the host picks it up. Watch that exception rate, because it shapes the whole system even when the fast path stays efficient.
 
@@ -76,13 +76,13 @@ Keep the control plane separate from the data plane. The control plane decides r
 
 An IOMMU translates and constrains device memory access according to its configured mappings, and RDMA memory keys add another form of authorization inside the transport that uses them. Neither one alone gives you tenant isolation: their scopes differ, and the platform still has to stop an untrusted owner from editing the configuration.
 
-A useful review traces four questions. Who can install a rule? Who can reach the buffer? Who observes completion, and who can reset the device? Then test the failures: invalid descriptors, disallowed regions, queue exhaustion, recovery after reset. These checks let you explain infrastructure processing without assuming proprietary enforcement details, and they connect back to the FPGA project's [command validation](/blog/fpga-ai-control-1-command-registers-and-scheduling/) and DMA models, where address bounds and completion are explicit parts of correctness.
+A useful review traces 4 questions. Who can install a rule? Who can reach the buffer? Who observes completion, and who can reset the device? Then test the failures: invalid descriptors, disallowed regions, queue exhaustion, recovery after reset. These checks let you explain infrastructure processing without assuming proprietary enforcement details, and they connect back to the FPGA project's [command validation](/blog/fpga-ai-control-1-command-registers-and-scheduling/) and DMA models, where address bounds and completion are explicit parts of correctness.
 
 ### Build a complete service budget
 
 A service can have a fast packet path and still be limited by memory writes, descriptor updates or its exception handler, so budget the whole path in the same units. Say traffic arrives at 20 GB/s but the destination sustains only 12 GB/s of writes: a queue absorbs the difference, but only for a while, and a 1-GB free buffer fills in $$1/(20-12)=0.125$$ seconds under this simplified constant-rate model. Adding buffer changes when backpressure starts. It does not fix a steady-state mismatch.
 
-Record payload bytes separately from wire bytes and descriptor traffic, and remember that a multiport device's aggregate rate tells you nothing about one flow's usable rate. Some workloads send many small messages, where per-request processing dominates. Others send large contiguous transfers. Keep that distribution in the benchmark instead of collapsing it to one average size, and the result tells you where the bottleneck really is: packet rate, payload bandwidth, queue management or downstream storage.
+Record payload bytes separately from wire bytes and descriptor traffic, and remember that a multiport device's aggregate rate tells you nothing about one flow's usable rate. Some workloads send many small messages, where per-request processing dominates. Others send large contiguous transfers. Keep that distribution in the benchmark instead of collapsing it to one average size such as the 1,500-byte payload above, and the result tells you where the bottleneck really is: packet rate, payload bandwidth, queue management or downstream storage.
 
 ### A worked engineering decision
 
@@ -90,13 +90,13 @@ Follow a storage request from a remote client to a host application. Its path ma
 
 Then classify each stage. Header matching may use a lookup or a match/action pipeline, encryption may use a dedicated engine, and policy logic may run on the embedded cores, while tensor computation stays a separate question entirely. Lumping all of it together as "AI compute" hides which resource is actually busy, and a request rate and a cryptographic byte rate are different metrics resting on different packet-size and batching assumptions.
 
-For the experiment, hold the security policy and observable application behavior identical on both paths. Measure end-to-end latency and host resources, not just engine activity on the accelerator, and count the extra data movement, queue depth and completion processing. Setup cost dominates small requests. Large streams stress sustained byte processing instead. Failure and retry behavior must preserve the same correctness and isolation contract.
+For the experiment, hold the security policy and observable application behavior identical on both paths. Measure end-to-end latency and host resources, not just engine activity on the accelerator, and count the extra data movement, queue depth and completion processing. Setup cost dominates small requests. Large streams, like the 16 MiB transfer above, stress sustained byte processing instead. Failure and retry behavior must preserve the same correctness and isolation contract.
 
 Finally, ask whether removing infrastructure work from the host frees a resource the application can use. If the host already waits on another bottleneck, freeing CPU cycles may raise capacity or improve isolation without moving inference latency at all, so report that precisely. The DPU's value is where it puts the work: infrastructure processing sits at the data boundary, with capabilities and isolation rules set by the system around it.
 
 ## Conclusion
 
-A DPU computes on infrastructure data: headers, descriptors, bytes, addresses and queue state. Its architecture pairs regular offload pipelines with programmable control and memory movement, a role that complements the GPU and TPU instead of duplicating their matrix datapaths.
+A DPU computes on infrastructure data: headers, descriptors, bytes, addresses and queue state. Its architecture pairs regular offload pipelines with programmable control and memory movement, a role that complements the GPU and TPU instead of duplicating their matrix datapaths. The 120-ns average payload window from the packet budget above is why the regular stages belong in hardware and the exceptions belong in software.
 
 To judge a DPU, follow one representative request from submission, through the authorized transfer, to completion, identifying which operations really get offloaded and which software owns their configuration. Then measure delivered bytes, host work and completion latency under the failure behavior you intend to run. No processor label or nominal network rate substitutes for that trace.
 

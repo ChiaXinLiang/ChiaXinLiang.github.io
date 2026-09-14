@@ -18,13 +18,13 @@ tags: ['attention', 'transformer']
 
 "The animal didn't cross the street because **it** was too tired." What does *it* refer to?
 
-You resolved that instantly — *it* means the animal, because "tired" fits animals, not streets. Swap "tired" for "too wide" and *it* flips to the street. Whatever machinery lets a model make that call is the heart of language understanding, and since 2017 that machinery has 1 name: **attention**. This article builds the intuition, then checks the mechanism with equations.
+You resolved that instantly. *It* means the animal, because "tired" fits animals, not streets. Swap "tired" for "too wide" and *it* flips to the street. Whatever machinery lets a model make that call is the heart of language understanding, and since 2017 that machinery has 1 name: **attention**. This article builds the intuition, then checks the mechanism with equations.
 
 ## Deep dive
 
 ### The problem attention solves
 
-[Last article](/blog/rnn-lstm-and-the-wall/) ended with recurrent networks dying of 2 flaws: information faded as it was relayed word-by-word, and the relay forbade parallelism. The wish list for a successor was explicit — let every word connect to every other word *directly*, and let all of it happen *at once*.
+[Last article](/blog/rnn-lstm-and-the-wall/) ended with recurrent networks dying of 2 flaws: information faded as it was relayed word-by-word, and the relay forbade parallelism. The wish list for a successor was explicit: let every word connect to every other word *directly*, and let all of it happen *at once*.
 
 Attention is exactly that: a direct, all-pairs connection.
 
@@ -32,16 +32,16 @@ Attention is exactly that: a direct, all-pairs connection.
 
 ![Deep dive: The mechanism: a soft lookup](./deep-dive-component-01.png)
 
-Here is the whole idea in 1 metaphor. For each word, the model computes 3 things — think of them as 3 roles the word can play:
+Here is the whole idea in 1 metaphor. For each word, the model computes 3 things. Think of them as 3 roles the word can play:
 
 - a **query**: what am I looking for? (*it* is looking for: a thing that could be tired)
 - a **key**: what do I offer as a match? (*animal* offers: I'm a living thing)
 - a **value**: what information do I carry if you pick me? (the actual meaning-content of *animal*)
 
-Each word's query is compared against every word's key, producing a **relevance score** for every pair. The scores are normalized into weights that sum to 1, and each word's new representation is the **weighted average of all the values** — mostly *animal*'s content with a dash of everything else, in our example.
+Each word's query is compared against every word's key, producing a **relevance score** for every pair. The scores are normalized into weights that sum to 1. Each word's new representation is then the **weighted average of all the values**: mostly *animal*'s content with a dash of everything else, in our example.
 
 
-Read the diagram as 2 matrix multiplications with different jobs. Q multiplied by transposed K produces a score for each permitted query–key pairing. After scaling, masking, and normalization, those scores become weights. Multiplying the weight matrix by V produces the gathered vector. The key dimension controls the score scale; the value dimension controls the gathered vector’s width. These dimensions need not be equal in every implementation.
+Read the diagram as 2 matrix multiplications with different jobs. Q multiplied by transposed K produces a score for each permitted query-key pairing. After scaling, masking, and normalization, those scores become weights. Multiplying the weight matrix by V produces the gathered vector. The key dimension controls the score scale; the value dimension controls the gathered vector’s width. These dimensions need not be equal in every implementation.
 
 
 The numerical figure is a separate toy calculation, not measured attention from a trained model. Its final key has a matching dot product but belongs to a future position. The mask excludes it before softmax, so its value contributes 0. This shows why masking is an information rule rather than a judgment about semantic relevance. The remaining values form a weighted vector; attention does not directly select the next output token.
@@ -49,7 +49,7 @@ The numerical figure is a separate toy calculation, not measured attention from 
 
 That's it. Attention is a lookup table where, instead of retrieving 1 entry, you retrieve *all* entries blended in proportion to relevance. 3 details worth appending:
 
-- **All the queries, keys, and values are produced by weights** — learned by [the same gradient descent as ever](/blog/how-models-learn/). Nobody tells the model that "tired" relates to "animal"; that emerges from predicting text.
+- **All the queries, keys, and values are produced by weights**, learned by [the same gradient descent as ever](/blog/how-models-learn/). Nobody tells the model that "tired" relates to "animal". That emerges from predicting text.
 - **It runs several times in parallel** ("multi-head" attention): 1 head might track pronoun reference, another syntax, another nearby words. Each head is the same mechanism with its own learned weights.
 - **Direct connectivity replaces a relay.** Allowed distant tokens can exchange information without passing through every intervening hidden state; positional encoding and training still affect long-range behavior.
 
@@ -65,21 +65,21 @@ Abstract mechanisms stick better with numbers, so let's run a miniature attentio
 | sat | (0.1, 0.9) | "past action" |
 | down | (0.2, 0.8) | "direction" |
 
-Suppose *sat* is computing its new representation, and its **query** is (0.3, 1.0) — informally, "I'm a verb; who's my subject, and what modifies me?" Score each word by the dot product (multiply matching positions, add up):
+Suppose *sat* is computing its new representation, and its **query** is (0.3, 1.0), informally "I'm a verb; who's my subject, and what modifies me?" Score each word by the dot product (multiply matching positions, add up):
 
 - vs *cat*: 0.3×1.0 + 1.0×0.2 = **0.50**
 - vs *sat*: 0.3×0.1 + 1.0×0.9 = **0.93**
 - vs *down*: 0.3×0.2 + 1.0×0.8 = **0.86**
 
-Normalize those into weights that sum to 1 (the real model uses softmax, whose concentration depends on the score scale) — approximately 0.274 / 0.372 / 0.354 for scaled, unmasked softmax. *Sat*'s updated representation becomes 0.274×(cat's value) + 0.372×(its own) + 0.354×(down's): still mostly "a past action," now measurably flavored with *who* did it and *which way*. Every word in the sentence does this simultaneously; that's 1 attention layer. Real models do it with 128-number vectors and dozens of heads, but the arithmetic you just did is the whole mechanism.
+Normalize those into weights that sum to 1 (the real model uses softmax, whose concentration depends on the score scale): approximately 0.274 / 0.372 / 0.354 for scaled, unmasked softmax. *Sat*'s updated representation becomes 0.274×(cat's value) + 0.372×(its own) + 0.354×(down's): still mostly "a past action," now measurably flavored with *who* did it and *which way*. Every word in the sentence does this simultaneously. That is 1 attention layer. Real models do it with 128-number vectors and dozens of heads, but the arithmetic you just did is the whole mechanism.
 
-The engineering aside worth planting now: notice each word needed its key and value available for everyone else's lookup. During generation, models **cache** those keys and values instead of recomputing them per token — that's the KV cache whose memory appetite drives half the serving economics in [the performance series](/blog/goodput-vs-utilization/).
+The engineering aside worth planting now: notice each word needed its key and value available for everyone else's lookup. During generation, models **cache** those keys and values instead of recomputing them per token. That is the KV cache, whose memory appetite drives half the serving economics in [the performance series](/blog/goodput-vs-utilization/).
 
 ### Multi-head: several lenses at once
 
-A single attention pattern is 1 "lens" on the sentence. Real blocks run 8–128 heads in parallel, each with its own learned query/key/value weights, each free to specialize. Interpretability work on real models has found heads that track subject-verb agreement, heads that link closing brackets to opening ones, heads that follow coreference chains like our *it*→*animal* example, and many that defy tidy description. The outputs of all heads are concatenated and mixed — so each token's update draws on many relationship types simultaneously.
+A single attention pattern is 1 "lens" on the sentence. Real blocks run 8–128 heads in parallel, each with its own learned query/key/value weights, each free to specialize. Interpretability work on real models has found heads that track subject-verb agreement, heads that link closing brackets to opening ones, heads that follow coreference chains like our *it*→*animal* example, and many that defy tidy description. The outputs of all heads are concatenated and mixed, so each token's update draws on many relationship types simultaneously.
 
-Why not 1 big head with more capacity? Because 10 cheap specialists beat 1 expensive generalist here: different linguistic relationships want *differently shaped* similarity comparisons, and separate heads let each comparison be learned independently. It's the same "give the architecture the right structure" lesson as [CNN filters](/blog/cnn-how-machines-learned-to-see/) — many small pattern-matchers, reused everywhere.
+Why not 1 big head with more capacity? Because 10 cheap specialists beat 1 expensive generalist here. Different linguistic relationships want *differently shaped* similarity comparisons, and separate heads let each comparison be learned independently. It's the same "give the architecture the right structure" lesson as [CNN filters](/blog/cnn-how-machines-learned-to-see/): many small pattern-matchers, reused everywhere.
 
 ### Common misconceptions
 
@@ -87,15 +87,15 @@ Why not 1 big head with more capacity? Because 10 cheap specialists beat 1 expen
 
 **"Each word attends to a few relevant words."** In dense attention, each query scores every allowed key; causal and other masks restrict allowed pairs. The weights are merely concentrated on a few. The compute cost is paid for all pairs regardless of how peaked the distribution is; that's exactly why the quadratic cost is unavoidable in vanilla attention.
 
-**"Attention replaced neural networks."** Attention layers are *made of* the [same weighted sums](/blog/what-is-a-neural-network/) as everything else — the queries, keys, and values are produced by ordinary learned matrices, and attention alternates with plain feed-forward layers in the full architecture ([next article](/blog/transformer-architecture-in-one-picture/)). It's a new wiring diagram, not new physics.
+**"Attention replaced neural networks."** Attention layers are *made of* the [same weighted sums](/blog/what-is-a-neural-network/) as everything else. The queries, keys, and values are produced by ordinary learned matrices, and attention alternates with plain feed-forward layers in the full architecture ([next article](/blog/transformer-architecture-in-one-picture/)). It's a new wiring diagram, not new physics.
 
 ### Why this won: it fits the hardware
 
-Notice what the mechanism *doesn't* have: any dependence between positions during the computation. Every word's lookup can happen **simultaneously** — the whole thing is a few large matrix multiplications, which is precisely the operation GPUs are built to do in bulk.
+Notice what the mechanism *doesn't* have: any dependence between positions during the computation. Every word's lookup can happen **simultaneously**. The whole thing is a few large matrix multiplications, which is precisely the operation GPUs are built to do in bulk.
 
-This is the architecture-meets-hardware moment this series keeps circling. [CNNs](/blog/cnn-how-machines-learned-to-see/) encoded "images are local and repetitive." Attention encodes "any word may relate to any word" — and, crucially, does so in a *parallel-friendly* form. The 2017 paper that proposed building models from attention alone was titled, with earned confidence, ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762).
+This is the architecture-meets-hardware moment this series keeps circling. [CNNs](/blog/cnn-how-machines-learned-to-see/) encoded "images are local and repetitive." Attention encodes "any word may relate to any word", and, crucially, does so in a *parallel-friendly* form. The 2017 paper that proposed building models from attention alone was titled, with earned confidence, ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762).
 
-1 honest cost, which becomes a running theme in the performance series: all-pairs comparison means the work grows with the *square* of the sequence length. Double the document, quadruple the attention compute. Much of modern LLM engineering — from FlashAttention to sparse attention — is the industry negotiating with that square. ([The KV cache](/blog/goodput-vs-utilization/), a serving-side consequence, gets its own article later.)
+1 honest cost, which becomes a running theme in the performance series: all-pairs comparison means the work grows with the *square* of the sequence length. Double the document, quadruple the attention compute. Much of modern LLM engineering, from FlashAttention to sparse attention, is the industry negotiating with that square. ([The KV cache](/blog/goodput-vs-utilization/), a serving-side consequence, gets its own article later.)
 
 ### The square, priced in numbers
 
@@ -108,7 +108,7 @@ This is the architecture-meets-hardware moment this series keeps circling. [CNNs
 | 100,000 tokens | 10 billion | 10,000× |
 | 1M tokens (today's frontier claims) | 1 trillion | 1,000,000× |
 
-A 100× longer document costs 10,000× the attention compute — and the keys and values that must sit in GPU memory for the lookup grow linearly too, which is the [KV cache's memory bill](/blog/goodput-vs-utilization/). This single table explains an enormous amount of the modern landscape: why long-context pricing is premium, why papers on linear attention and state-space hybrids keep coming, why [DeepSeek's sparse attention triggered an API price cut](/blog/blackwell-to-rubin-memory-math/), and why "context window" is a marketing number with a very real cost function behind it. When you meet those topics later in this blog, this is the table they're all negotiating with.
+A 100× longer document costs 10,000× the attention compute. The keys and values that must sit in GPU memory for the lookup grow linearly too, which is the [KV cache's memory bill](/blog/goodput-vs-utilization/). This single table explains an enormous amount of the modern landscape: why long-context pricing is premium, why papers on linear attention and state-space hybrids keep coming, why [DeepSeek's sparse attention triggered an API price cut](/blog/blackwell-to-rubin-memory-math/), and why "context window" is a marketing number with a very real cost function behind it. When you meet those topics later in this blog, this is the table they're all negotiating with.
 
 ### The equation fixes the normalization
 
@@ -161,7 +161,7 @@ Attention visualizations require careful interpretation. A large weight shows th
 ### Sources
 
 - Vaswani et al. (2017). ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762)
-- Alammar — ["The Illustrated Transformer"](https://jalammar.github.io/illustrated-transformer/) (the canonical visual walkthrough; the "it" example follows its presentation)
+- Alammar. ["The Illustrated Transformer"](https://jalammar.github.io/illustrated-transformer/) (the canonical visual walkthrough; the "it" example follows its presentation)
 - Olah & Carter (2016). ["Attention and Augmented Recurrent Neural Networks"](https://distill.pub/2016/augmented-rnns/), *Distill*
 
 ---

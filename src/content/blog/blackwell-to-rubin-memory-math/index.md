@@ -16,7 +16,7 @@ tags: ['nvidia', 'hbm', 'accelerators']
 
 ![Concept overview: Blackwell to Rubin: Capacity Stays Flat, Bandwidth Nearly Triples](./section-overview.png)
 
-Here is the strangest number pair in the GPU roadmap: NVIDIA's current flagship carries 288GB of memory, and its 2026 successor is specified with 288 GB. Meanwhile bandwidth jumps from 8 TB/s to up to 22 TB/s — nearly 3×.
+Here is the strangest number pair in the GPU roadmap: NVIDIA's current flagship carries 288GB of memory, and its 2026 successor is specified with 288 GB. Meanwhile bandwidth jumps from 8 TB/s to up to 22 TB/s, nearly 3×.
 
 A generation where capacity freezes while bandwidth explodes is not an accident. It is the clearest public signal of what actually limits AI workloads. This article decodes it.
 
@@ -34,7 +34,7 @@ NVIDIA's [official HGX specifications](https://www.nvidia.com/en-us/data-center/
 
 To see why NVIDIA spends its transistor and packaging budget on bandwidth, follow what an LLM does when it generates text.
 
-An unbatched dense-model decode step commonly reads much of its active weight data from memory. Caching, routing, and kernel design affect actual traffic. A 70B-parameter model in 8-bit needs about 70 GB of weight traffic per decode step in an idealized unbatched dense-model example. The compute involved is comparatively light — multiply-accumulates the GPU finishes faster than the memory can feed it. Text generation is, in the standard framing, **memory-bandwidth-bound**: the GPU spends its time waiting for bytes, not crunching them.
+An unbatched dense-model decode step commonly reads much of its active weight data from memory. Caching, routing, and kernel design affect actual traffic. A 70B-parameter model in 8-bit needs about 70 GB of weight traffic per decode step in an idealized unbatched dense-model example. The compute involved is comparatively light, multiply-accumulates that the GPU finishes faster than the memory can feed it. Text generation is, in the standard framing, **memory-bandwidth-bound**: the GPU spends its time waiting for bytes, not crunching them.
 
 Run the division and the ceiling is stark: 8 TB/s ÷ 70GB ≈ **114 tokens/second** for a single stream, before any cleverness. Bandwidth is the speed limit; capacity just determines whether the model fits at all. Once weights fit, extra capacity may still allow longer contexts, larger batches, or fewer shards. Extra bandwidth raises a different ceiling.
 
@@ -44,12 +44,12 @@ That's the roadmap decoded: 288 GB fits many models or individual shards, but no
 
 The bandwidth jump has a physical cause: [HBM4 doubles the interface width to 2,048 pins per stack](https://news.skhynix.com/en/sk-hynix-completes-worlds-first-hbm4-development-and-readies-mass-production/), versus 1,024 since HBM2. SK hynix reports >40% better power efficiency alongside the 2× bandwidth per stack. Memory manufacturing and packaging are real supply constraints; specifications alone do not tell you which component gates a particular product launch.
 
-There is a second-order signal in AMD's 432GB counter-bet. Bigger memory pools reduce how many GPUs a giant model must be sharded across, which cuts inter-GPU communication — a different efficiency lever aimed at the same bill. 2 vendors, same physics, 2 positions on the capacity-bandwidth trade.
+There is a second-order signal in AMD's 432GB counter-bet. Bigger memory pools reduce how many GPUs a giant model must be sharded across, which cuts inter-GPU communication, a different efficiency lever aimed at the same bill. 2 vendors, same physics, 2 positions on the capacity-bandwidth trade.
 
 ### What this means for the ecosystem
 
 - **For serving economics**: bandwidth affects 1 decode limit, while utilization, batching, compute, power, and prices determine realized cost.
-- **For model designers**: architectures that read fewer bytes per token — mixture-of-experts, latent attention, aggressive quantization — multiply with the hardware gain rather than merely riding it. (This co-evolution is the through-line of this whole series.)
+- **For model designers**: architectures that read fewer bytes per token (mixture-of-experts, latent attention, aggressive quantization) multiply with the hardware gain rather than merely riding it. (This co-evolution is the through-line of this whole series.)
 - **For buyers**: if your models already fit, a capacity-heavy SKU can allow consolidation or higher batching; benchmark whether those changes improve your target metric. Know which one your bill needs.
 
 The specifications are now available from vendors. Their peak numbers still need workload measurements before you make speed or cost claims.
@@ -145,14 +145,14 @@ If 1 configuration cannot meet the memory budget, check whether quantization, sh
 
 - Generating a token means streaming the model's active weights through memory; for large models this makes decode bandwidth-bound, and memory bandwidth can set a ceiling under the stated unbatched dense-model assumptions.
 - The Blackwell→Rubin roadmap (288 GB flat, 8→up to 22 TB/s) is that physics written into product strategy; AMD's 432GB MI455X bets on the consolidation axis instead.
-- HBM4's 2,048-pin interface is the enabler — and 1 part of the manufacturing and packaging budget.
+- HBM4's 2,048-pin interface is the enabler, and 1 part of the manufacturing and packaging budget.
 
 ### Sources
 
-- NVIDIA — [Inside Blackwell Ultra](https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/) (GB300 specs, NVFP4)
-- NVIDIA — [HGX specifications](https://www.nvidia.com/en-us/data-center/hgx/) and [Rubin architecture](https://developer.nvidia.com/blog/inside-nvidia-rubin-gpu-architecture-powering-the-era-of-agentic-ai/) (official peak specifications)
-- SK hynix — [HBM4 development complete](https://news.skhynix.com/en/sk-hynix-completes-worlds-first-hbm4-development-and-readies-mass-production/)
-- AMD — [Instinct MI455X](https://www.amd.com/en/products/accelerators/instinct/mi400/mi455x.html)
+- NVIDIA, [Inside Blackwell Ultra](https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/) (GB300 specs, NVFP4)
+- NVIDIA, [HGX specifications](https://www.nvidia.com/en-us/data-center/hgx/) and [Rubin architecture](https://developer.nvidia.com/blog/inside-nvidia-rubin-gpu-architecture-powering-the-era-of-agentic-ai/) (official peak specifications)
+- SK hynix, [HBM4 development complete](https://news.skhynix.com/en/sk-hynix-completes-worlds-first-hbm4-development-and-readies-mass-production/)
+- AMD, [Instinct MI455X](https://www.amd.com/en/products/accelerators/instinct/mi400/mi455x.html)
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: 'What Does an ML Performance Engineer Actually Do?'
-description: "Same model, same answers — delivered faster and cheaper. Inside the role that decides whether AI products make or lose money."
+description: "Same model, same answers, delivered faster and cheaper. Inside the role that decides whether AI products make or lose money."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './section-overview.png'
@@ -18,7 +18,7 @@ tags: ['ml-performance', 'career', 'gpu']
 
 Imagine a company that has invested heavily in GPUs, yet its AI service still misses its latency and cost targets.
 
-Closing that gap is a job title now — ML Performance Engineer, AI Systems Performance Engineer, inference optimization engineer, the names vary. It is one of the most leveraged and least understood roles in AI. This article opens my AI Performance Engineering series by explaining what the job actually is.
+Closing that gap is a job title now: ML Performance Engineer, AI Systems Performance Engineer, inference optimization engineer, the names vary. It is one of the most leveraged and least understood roles in AI. This article opens my AI Performance Engineering series by explaining what the job actually is.
 
 ## Deep dive
 
@@ -33,11 +33,11 @@ That distinction matters because it defines the toolbox. Model quality is a rese
 Every decision in this job trades between 3 quantities:
 
 
-- **Latency** — how fast does 1 user get an answer?
-- **Throughput** — how many users can we serve at once?
-- **Cost** — what does each answer cost us?
+- **Latency**: how fast does 1 user get an answer?
+- **Throughput**: how many users can we serve at once?
+- **Cost**: what does each answer cost us?
 
-The cruel part: they fight each other. The single biggest throughput lever is batching — processing many users' requests together. Waiting to assemble a batch can increase latency, and larger batches can increase step time. Faster hardware can improve capacity, but its unit cost depends on achieved useful throughput. Optimize any corner carelessly and the other 2 bite back.
+The cruel part: they fight each other. The single biggest throughput lever is batching (processing many users' requests together). Waiting to assemble a batch can increase latency, and larger batches can increase step time. Faster hardware can improve capacity, but its unit cost depends on achieved useful throughput. Optimize any corner carelessly and the other 2 bite back.
 
 A performance engineer's actual job description is 1 sentence: *find the point on this triangle that your product needs, and get there with the least hardware possible.*
 
@@ -47,12 +47,12 @@ What does that look like concretely? Across a week, a performance engineer might
 
 - **Profile** a serving cluster with Nsight Systems and find GPUs idle 40% of the time, waiting for data
 - **Tune** a batching scheduler so p99 latency stops spiking during traffic bursts
-- **Quantize** a model from 16-bit to 8-bit weights, halving memory — then verify quality didn't move
+- **Quantize** a model from 16-bit to 8-bit weights, halving memory, then verify quality didn't move
 - **Rewrite** 1 CUDA kernel that profiling showed was reading memory in a pattern the hardware hates
 - **Do napkin math** on whether next quarter's model fits on current GPUs, or the company needs to buy more
 
 
-Notice the range: from chip-level memory access patterns to fleet-level capacity planning. That breadth — hardware, systems software, and algorithms in 1 head — is exactly why the role is scarce and well paid.
+Notice the range: from chip-level memory access patterns to fleet-level capacity planning. That breadth (hardware, systems software, and algorithms in 1 head) is exactly why the role is scarce and well paid.
 
 ### Why the money is real
 
@@ -60,7 +60,7 @@ Notice the range: from chip-level memory access patterns to fleet-level capacity
 
 The economics are blunt. Inference at scale is priced per token, and every efficiency gain drops straight to the margin. Public benchmarks make the stakes visible: [MLPerf](https://mlcommons.org/benchmarks/inference-datacenter/) publishes results under specified benchmark rules, models, and quality constraints. Those results illustrate achievable performance, but they do not establish a universal 2–3× software speedup over an unspecified baseline.
 
-DeepSeek made the sharpest case in recent memory: constrained to export-compliant GPUs with roughly half the interconnect bandwidth of the H100, their team [engineered around the limitation](https://arxiv.org/abs/2412.19437) with custom communication kernels and pipeline tricks — and reported an efficient training design. Its reported training computation cost is a scoped figure, not the full cost of research, development, data, or deployment.
+DeepSeek made the sharpest case in recent memory: constrained to export-compliant GPUs with roughly half the interconnect bandwidth of the H100, their team [engineered around the limitation](https://arxiv.org/abs/2412.19437) with custom communication kernels and pipeline tricks, and reported an efficient training design. Its reported training computation cost is a scoped figure, not the full cost of research, development, data, or deployment.
 
 For a company running thousands of GPUs, a performance engineer who improves cluster efficiency by 20% is worth millions of dollars a year. Few roles have a cleaner line from work to money.
 
@@ -68,12 +68,12 @@ For a company running thousands of GPUs, a performance engineer who improves clu
 
 Over the coming months, this series walks the whole stack in order, the way the problems actually nest:
 
-1. **Foundations** — the metrics that matter, and why "100% GPU utilization" can hide massive waste (that's the next article)
-2. **Hardware** — what a modern AI rack really is
-3. **Cluster infrastructure** — the OS, network, and storage layers that starve GPUs
-4. **CUDA kernels** — inside the GPU, where microseconds are won
-5. **PyTorch** — framework-level speed without writing CUDA
-6. **Inference** — batching, KV caches, quantization, and serving at planetary scale
+1. **Foundations**: the metrics that matter, and why "100% GPU utilization" can hide massive waste (that's the next article)
+2. **Hardware**: what a modern AI rack really is
+3. **Cluster infrastructure**: the OS, network, and storage layers that starve GPUs
+4. **CUDA kernels**: inside the GPU, where microseconds are won
+5. **PyTorch**: framework-level speed without writing CUDA
+6. **Inference**: batching, KV caches, quantization, and serving at planetary scale
 
 ### Define the promise before optimizing
 
@@ -144,14 +144,14 @@ A useful experiment also documents the rejected alternatives. If higher batching
 ## Conclusion
 
 - ML performance engineering delivers a defined quality level within latency, throughput, and cost objectives.
-- Every decision trades between latency, throughput, and cost — the job is choosing your point on that triangle deliberately.
+- Every decision trades between latency, throughput, and cost. The job is choosing your point on that triangle deliberately.
 - The value is measurable through accepted output, reproducible benchmarks, and an explicit cost boundary.
 
 ### Sources
 
-- [MLPerf Inference: Datacenter benchmark results](https://mlcommons.org/benchmarks/inference-datacenter/) — MLCommons
-- [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437) — the H800 engineering story
-- [NVIDIA Nsight Systems](https://developer.nvidia.com/nsight-systems) — the profiler referenced throughout this series
+- [MLPerf Inference: Datacenter benchmark results](https://mlcommons.org/benchmarks/inference-datacenter/), MLCommons
+- [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437), the H800 engineering story
+- [NVIDIA Nsight Systems](https://developer.nvidia.com/nsight-systems), the profiler referenced throughout this series
 
 ---
 

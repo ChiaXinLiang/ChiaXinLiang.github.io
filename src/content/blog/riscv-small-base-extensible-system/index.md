@@ -30,9 +30,9 @@ This article builds the programmer's model with an RV64I array sum. Read [the IS
 
 RV32I and RV64I are base integer instruction sets with 32-bit and 64-bit integer register widths respectively. The width is commonly called XLEN. It describes architectural register width, not a promise that every operation or memory access uses that many bits.
 
-The base includes integer arithmetic, logical operations, loads and stores, and control flow. A minimal integer program combines those operations to do more complicated work. Multiplication, floating point, vectors, and atomic operations are defined in extensions, not silently assumed in every base implementation.
+The base includes integer arithmetic, logical operations, loads and stores, and control flow. A minimal integer program combines those operations to do more complicated work. Multiplication, floating point, vectors, and atomic operations are defined in extensions, not silently assumed in every RV64I implementation.
 
-RISC-V's modular structure separates a small foundation from optional features. That helps implementations with different goals, but software must know its target. A binary that needs floating-point or vector instructions cannot run natively on a core that lacks them.
+RISC-V's modular structure separates a small foundation from optional features. That helps implementations with different goals, but software must know its target. A binary that needs floating-point or vector instructions cannot run natively on a base RV32I or RV64I core.
 
 The official unprivileged specifications define instruction semantics. Privileged specifications define the environment needed for protected operating systems and machine management. An instruction tutorial focused on user code covers only 1 part of the architecture.
 
@@ -56,7 +56,7 @@ add t0, t0, t1
 
 adds 2 source register values and writes the low XLEN bits to the destination. Immediate forms include a small constant encoded in the instruction, such as `addi t0, t0, 5`.
 
-Base arithmetic instructions do not set a condition-code register for later branches, so conditional branches compare their operands directly rather than consulting condition flags left by earlier arithmetic. This difference does not by itself determine branch prediction or execution speed.
+Unlike AArch64, base arithmetic instructions do not set a condition-code register for later branches, so conditional branches compare their operands directly rather than consulting condition flags left by earlier arithmetic. This difference does not by itself determine branch prediction or execution speed.
 
 The base immediate encoding has limits. A large constant may require several instructions, and assembler pseudoinstructions can expand accordingly. The text line `li` is convenient assembly syntax, not a guarantee of 1 machine instruction for every constant.
 

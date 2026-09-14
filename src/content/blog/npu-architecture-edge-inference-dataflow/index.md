@@ -14,11 +14,11 @@ tags: ["Computer Architecture", "npu"]
 
 ![Concept overview: Map quantized inference onto a local matrix engine, on-chip buffers, supported operators and CPU fallback](./section-overview.png)
 
-A neural processing unit, or NPU, is an accelerator designed around neural-network operators and the power, memory and scheduling constraints of its target system. Many are integrated into client or edge processors, where inference must coexist with CPU and GPU work. The overview shows arithmetic, local storage and graph compilation as connected pieces rather than one universal circuit.
+A neural processing unit, or NPU, is an accelerator designed around neural-network operators and the power, memory and scheduling constraints of its target system, and many are integrated into client or edge processors, where inference must coexist with CPU and GPU work, so the overview shows arithmetic, local storage and graph compilation as 3 connected pieces rather than one universal circuit.
 
 The architecture category does not guarantee a particular integer format, array shape or supported operator set. This article uses a generic quantized datapath to explain arithmetic and dataflow, then distinguishes that model from current Intel/OpenVINO documentation. A quantized model's storage type and the hardware's internal computation type can differ.
 
-The examples are independently calculated and illustrative. Hardware/software details are checked as of 2026-09-13. The goal is to explain how an inference layer gets useful work from an NPU, including the cases where transfer overhead, graph support or numerical conversion decides the result.
+The examples are independently calculated and illustrative, hardware/software details are checked as of 2026-09-13, and the goal is to explain how an inference layer gets useful work from an NPU, including the cases where transfer overhead, graph support or numerical conversion decides the result.
 
 ## Deep dive
 
@@ -44,23 +44,23 @@ The buffer figure shows weights and activations staged near the processing array
 
 For a 4×4 output tile with reduction length 8, signed INT8 inputs require 32 bytes from $$A$$ and 32 from $$B$$. INT32 output accumulators require 64 bytes. Useful work is 128 MACs, or 256 operations under a 2-operations-per-MAC convention. If inputs are each loaded once and outputs stored once, the illustrative external intensity is $$256/128=2$$ operations/byte. Intermediate rereads and epilogue traffic change that figure.
 
-Now reuse the same weight tile for 10 input tiles. Its 32-byte external load can be spread over all 10 if capacity and scheduling permit. Activation and output traffic still occur for every tile. So you cannot multiply the entire operator's arithmetic intensity by 10 just because weights are reused.
+Now reuse the same weight tile for 10 input tiles. Its 32-byte external load can be spread over all 10 if capacity and scheduling permit, but activation and output traffic still occur for every tile, so you cannot multiply the entire operator's arithmetic intensity by 10 just because weights are reused.
 
-On-chip capacity, memory ports and routing limit residency. Several arithmetic units can compete for one buffer bank. A bank conflict or refill stall leaves compute capacity unused even when the theoretical MAC count is high. A compiler must choose layouts and tile lifetimes that fit the actual architecture.
+On-chip capacity, memory ports and routing limit residency, several arithmetic units can compete for 1 buffer bank, and a bank conflict or refill stall leaves compute capacity unused even when the theoretical MAC count is high, so a compiler must choose layouts and tile lifetimes that fit the actual architecture.
 
-An edge system also shares external memory bandwidth with CPU, GPU and other agents. A sustained rate measured in isolation may not survive concurrent workloads. Explain local reuse and external transfers separately, then measure under the system's intended concurrency. Energy benefits depend on the complete movement and execution schedule, not just on using a lower-bit input.
+An edge system also shares external memory bandwidth with CPU, GPU and other agents, so a sustained rate measured in isolation may not survive concurrent workloads: explain local reuse and external transfers separately, then measure under the system's intended concurrency. Energy benefits depend on the complete movement and execution schedule, not just on using a lower-bit input.
 
 ### Graph compilation and supported operators
 
 ![Deep dive: Graph compilation and supported operators](./deep-dive-component-03.png)
 
-The graph figure marks supported accelerator operations and an operation placed elsewhere. Compilation converts a model's graph into executable scheduling, layouts and transfers. Operator names alone are not enough: support can depend on shapes, data types, parameter choices and the runtime/compiler version.
+The graph figure marks supported accelerator operations and 1 operation placed elsewhere, compilation converts a model's graph into executable scheduling, layouts and transfers, and operator names alone are not enough: support can depend on shapes, data types, parameter choices and the runtime/compiler version.
 
-If an activation or resize operation cannot run in the selected NPU path, compilation may reject the graph, choose another device, or partition supported work under a documented heterogeneous mode. Those are different behaviors. Configure and inspect the actual placement; do not assume automatic per-operation CPU fallback.
+If an activation or resize operation cannot run in the selected NPU path, compilation may reject the graph, choose another device, or partition supported work under a documented heterogeneous mode. Those are 3 different behaviors. Configure and inspect the actual placement; do not assume automatic per-operation CPU fallback.
 
 Suppose one NPU subgraph produces a 1-MiB tensor needed by a CPU operation and a later NPU subgraph consumes its result. Even if the tensor is physically in shared system memory, ownership transitions, synchronization and layout conversion can still cost time. If two explicit 1-MiB transfers each sustain 10 GB/s, their payload time alone is about 0.210 ms in total. Dispatch and CPU work add to that illustrative lower bound.
 
-A graph with a very fast matrix operator can therefore be slower end to end than a fully supported graph with a lower isolated arithmetic peak. Fusion may avoid an intermediate store, but it can increase live storage or impose new layout restrictions. Dynamic shapes may require recompilation, a supported bucketing policy or a different backend.
+A graph with a very fast matrix operator can therefore be slower end to end than a fully supported graph with a lower isolated arithmetic peak. Fusion may avoid an intermediate store, but it can increase live storage or impose new layout restrictions, and dynamic shapes may require recompilation, a supported bucketing policy or a different backend.
 
 As of the dated check, [OpenVINO's NPU page](https://docs.openvino.ai/2026/openvino-workflow/running-inference/inference-devices-and-modes/npu-device.html) documents static-shape limitations and only partial HETERO support for certain models. Those are software-version-specific constraints rather than universal properties of neural accelerators. Query supported devices, compile the real graph and record actual execution placement before attributing a result to the NPU.
 
@@ -68,19 +68,19 @@ As of the dated check, [OpenVINO's NPU page](https://docs.openvino.ai/2026/openv
 
 ![Deep dive: Batch size, power, and useful utilization](./deep-dive-component-04.png)
 
-The timeline figure separates setup, movement, useful arithmetic and completion. A small inference job can spend more time in dispatch and synchronization than in multiplication. Larger batches amortize fixed work and may expose weight reuse, but they can increase request waiting time and memory demand.
+The timeline figure separates setup, movement, useful arithmetic and completion, a small inference job can spend more time in dispatch and synchronization than in multiplication, and larger batches amortize fixed work and may expose weight reuse while increasing request waiting time and memory demand.
 
 Let an illustrative execution require 0.2 ms of setup and transfer plus 0.05 ms of compute per input. For one input, total time is 0.25 ms. If 8 inputs share that fixed work and compute scales linearly, total batch time is 0.6 ms, or 0.075 ms per input when averaged. An individual request may still wait for batching and complete only after the 0.6-ms job. Average per-input service cost is not the same as request latency.
 
 Concurrency can keep engines busy while other jobs wait on memory, but it also adds contention. The best queue depth depends on the application. A camera pipeline may require bounded per-frame latency; a background embedding task may prioritize throughput and power. A benchmark must state which objective it measures.
 
-Power claims need a measurement boundary. An NPU subsystem estimate, package power reading and wall-plug system measurement cover different components. An accelerator can reduce CPU work while total system power stays similar because another component becomes active. Report both elapsed time and the measured energy scope when comparing configurations.
+Power claims need a measurement boundary, and the 3 common ones, an NPU subsystem estimate, a package power reading and a wall-plug system measurement, cover different components. An accelerator can reduce CPU work while total system power stays similar because another component becomes active, so report both elapsed time and the measured energy scope when comparing configurations.
 
 The architecture's strength is specialization: it can run supported inference efficiently under its target constraints. Its limits include graph coverage, local storage, memory contention and scheduling overhead. A useful decision combines correctness, latency distribution, throughput and measured energy rather than treating a TOPS label as a complete answer.
 
 ### A practical placement experiment
 
-Start with a fixed-shape dense layer whose output can be checked against a reference. Record the input, weight and output types, scales and tolerances. Compile it directly for the intended device and save the compiler/runtime versions. Add an elementwise operation, then a reduction, checking each compiled graph rather than assuming support from the previous result.
+Start with a fixed-shape dense layer whose output can be checked against a reference, record the input, weight and output types, scales and tolerances, and compile it directly for the intended device, saving the compiler/runtime versions. Add an elementwise operation, then a reduction, checking each compiled graph rather than assuming support from the previous result.
 
 For each version, record cold compilation time separately from warm inference. Query the reported execution devices and inspect profiling information where supported. Compare output values before comparing timing. If placement changes, attribute the result to the new execution path instead of labeling the entire model “NPU performance.”
 
@@ -94,9 +94,9 @@ A useful NPU comparison starts with the complete deployed graph. Suppose most la
 
 Now consider changing INT8 quantization scales to avoid a fallback. That is a numerical-model change, not just a scheduling optimization. Keep the calibration method, rounding rule, zero-point convention and task-quality evaluation. The matrix example in this article is a generic arithmetic explanation; a specific runtime may accept quantized model representations while executing some stages in another internal precision. Inspect the current device documentation and compiler output rather than reading the diagram as a universal implementation claim.
 
-A second experiment compares operator fusion with separate dispatch. Keep shapes and numerics fixed, and identify which intermediate tensors disappear from a named memory boundary. A fused operation can reduce traffic and launch overhead, but may need more local storage or have fewer supported shape combinations. Static-shape restrictions can make a deployment with variable input lengths require preprocessing, padding or another placement strategy.
+A second experiment compares operator fusion with separate dispatch: keep shapes and numerics fixed, and identify which intermediate tensors disappear from a named memory boundary, since a fused operation can reduce traffic and launch overhead but may need more local storage or have fewer supported shape combinations. Static-shape restrictions can make a deployment with variable input lengths require preprocessing, padding or another placement strategy.
 
-For an edge device, keep latency distributions and sustained behavior, not just the first completed request. Power policy, thermal state and competing system work affect the usable result. The relevant engineering decision may be meeting a latency and quality target under a device budget rather than maximizing operations per second. The diagrams explain mechanisms; they do not assert a board power measurement or guarantee a particular heterogeneous placement.
+For an edge device, keep latency distributions and sustained behavior, not just the first completed request, because power policy, thermal state and competing system work affect the usable result, and the relevant engineering decision may be meeting a latency and quality target under a device budget rather than maximizing operations per second. The diagrams explain mechanisms; they do not assert a board power measurement or guarantee a particular heterogeneous placement.
 
 ## Conclusion
 

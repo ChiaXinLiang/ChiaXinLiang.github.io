@@ -28,7 +28,7 @@ Start after [Double Buffering: Overlap Transfers and Compute](/blog/fpga-ai-over
 
 The register-map figure names source pointers, destination, dimensions, start, status and error/completion. The exact offsets and access widths belong to a versioned interface. Our software Command records the fields without claiming a physical MMIO bus.
 
-A hardware register block must define read/write behavior, reserved fields and byte enables. START is an event or a command bit with explicit clearing semantics. DONE must remain observable long enough for the host policy.
+A hardware register block must define read/write behavior, reserved fields and byte enables, decide whether START is an event or a command bit with explicit clearing semantics, and keep DONE observable long enough for the host policy to see it.
 
 Use one command contract across simulation and a future board transport. That makes numerical packing and lifecycle tests reusable while keeping physical bus integration separate.
 
@@ -36,9 +36,9 @@ Use one command contract across simulation and a future board transport. That ma
 
 ![Deep dive: Validate and snapshot a command](./deep-dive-component-02.png)
 
-The snapshot figure validates and copies fields when start is accepted. Active execution uses that snapshot, so later host writes cannot change addresses halfway through a job. Invalid ranges, zero dimensions and output alignment fail before work.
+The snapshot figure validates and copies the fields when start is accepted, and active execution then uses that copy, so later host writes cannot change addresses halfway through a job: invalid ranges, zero dimensions and a misaligned output all fail before any work begins, which for the released top means rejecting M or N outside 1 through 4 and K outside 1 through 8.
 
-The functional model checks busy and rejects a second submission when already busy. Its synchronous execution makes busy duration short in software; an asynchronous hardware implementation needs explicit busy-write behavior and a realistic concurrency test.
+The functional model checks busy and rejects a second submission while a job is still running, and because its execution is synchronous the busy window stays short in software, so an asynchronous hardware implementation needs explicit busy-write behavior and a realistic concurrency test, of the kind the integrated regression drives as busy interference across its 20 signed matrix jobs.
 
 Define which configuration writes are accepted during execution and whether they configure the next command. Do not rely on the host never issuing an inconvenient transaction.
 
@@ -46,17 +46,17 @@ Define which configuration writes are accepted during execution and whether they
 
 ![Deep dive: Schedule load, compute, and store](./deep-dive-component-03.png)
 
-The scheduler figure orders CHECK, LOAD, COMPUTE, STORE and DONE, with an error path. Completion events, not arbitrary clock counts, cause stage transitions. A load can take longer because the bus stalls; compute can take longer because global step is blocked.
+The scheduler figure orders CHECK, LOAD, COMPUTE, STORE and DONE with an error path, and completion events rather than arbitrary clock counts drive the transitions between them, because a load can stretch when the bus stalls and compute can stretch when the 4×4 array's global step is held.
 
 The numerical oracle is still direct matrix multiplication. Control logic can be wrong even if each PE is correct, by skipping a tile or storing early. Compare complete matrices and check addressed byte ranges.
 
-For a first hardware implementation, use a sequential schedule before overlap. Its explicit stages provide a baseline trace. Double buffering adds concurrency only after the same command/result contract is verified.
+For a first hardware implementation, use a sequential schedule before you attempt overlap: its explicit stages give you a baseline trace, and double buffering should add concurrency only after the same command/result contract is verified.
 
 ### Completion ordering and visibility
 
 ![Deep dive: Completion ordering and visibility](./deep-dive-component-04.png)
 
-The visibility figure delays DONE until successful output completion. A store request issued locally may still be outstanding. The host must use the platform's required cache/barrier behavior before consuming the result.
+The visibility figure delays DONE until output completion actually succeeds, since a store request issued locally may still be outstanding, so the host must apply the platform's required cache and barrier behavior before it reads the 16 packed INT32 results.
 
 The functional model writes output bytes before setting done. It packs INT32 results little-endian. A real transport may need cache maintenance, coherent mappings or an explicit completion queue; shared physical memory does not remove ownership rules.
 
@@ -66,7 +66,7 @@ Time the usable completion boundary. Ending a benchmark when START is written or
 
 ![Deep dive: Test busy writes and failure recovery](./deep-dive-component-05.png)
 
-The recovery figure rejects invalid commands and preserves memory. Tests include a misaligned output pointer and byte-for-byte comparison of memory after failure. That checks a useful safety/correctness property independently of numerical output.
+The recovery figure rejects invalid commands and leaves memory intact, and the tests cover a misaligned output pointer as well as a dimension outside the legal M,N range of 1 through 4 and K range of 1 through 8, then compare memory byte for byte after the failure, which checks a useful safety and correctness property independently of numerical output.
 
 Hardware faults after partial stores require a policy: output may be invalid, retry may not be idempotent, and a reset may have outstanding transactions. Record error status and define which buffers can be reused.
 
@@ -150,13 +150,13 @@ endmodule
 
 ### Verify ownership and completion, not only payload
 
-A transfer request and a completed buffer are different states. Mark a tile READY only after the required bytes and response status are available. Keep a COMPUTE buffer owned until its last use, then permit refill. The two-buffer scheduler additionally prevents a load from overwriting the previous tile assigned to the same physical buffer.
+A transfer request and a completed buffer are different states. Mark a tile READY only after both the required bytes and the response status are available, keep a COMPUTE buffer owned until its last use and only then permit a refill, and let the two-buffer scheduler stop a load from overwriting the previous tile assigned to the same physical buffer.
 
 Address calculations use bytes throughout the interface. INT8 inputs and INT32 outputs have different element widths, so a correct index with the wrong multiplier still targets the wrong memory. Validate dimensions, range, alignment and relevant overlap before issuing work. The software model checks these preconditions and preserves memory when a command is rejected.
 
 The integrated RTL top implements fixed on-chip operand storage, validated dimensions and a globally stepped tile controller. Its host-load port is deliberately simple and is not AXI, MMIO or external DMA. The functional command/memory model teaches a broader transport contract. Connecting a real bus requires its own request/response and ordering verification.
 
-Completion means the declared output is usable under the selected interface. An issued store, a queue entry and a successful response may represent different milestones. Keep that event explicit in status and timing. Tests should cover delayed progress, invalid commands and reset/recovery as well as the uninterrupted numerical path.
+Completion means the declared output is usable under the selected interface, and because an issued store, a queue entry and a successful response can be three separate milestones, keep the one you mean explicit in both status and timing. Tests should cover delayed progress, invalid commands and reset/recovery as well as the uninterrupted numerical path.
 
 ### A worked engineering decision
 
@@ -172,23 +172,23 @@ Dimension validation permits M,N from 1 through 4 and K from 1 through 8. An inv
 
 After a legal job begins, change the live dimension inputs, assert another start and offer an operand write while the array is globally held. The accepted job must retain its original snapshot, and the offered busy write/start must be ignored under this top's policy. Continue the original logical steps and compare all 16 physical result fields with the independent expected matrix, including padded zeros. The released integrated regression executes this interference pattern across its random jobs.
 
-Ignoring busy events is a simple local interface choice. A physical bus wrapper might instead stall a write, return an error or queue another command. It must not pretend the current top accepted the event merely because a bus transaction arrived. Define the wrapper's acceptance and response separately, and test the bridge so a caller cannot mistake discarded input for a completed update.
+Ignoring busy events is a simple local interface choice. A physical bus wrapper might instead stall a write, return an error or queue another command, but it must not pretend the current top accepted the event merely because a bus transaction arrived, so define the wrapper's acceptance and response separately and test the bridge so that a caller cannot mistake discarded input for a completed update.
 
-DONE and ERROR lifetime also need a documented policy. The top's next accepted operation re-establishes its status and numerical state according to the source. A proposed MMIO DONE acknowledgement is not implemented simply because a figure contains a register named DONE. If a wrapper adds read-to-clear or write-one-to-clear status, it introduces new sequential behavior and races to verify.
+DONE and ERROR lifetime also need a documented policy. The top's next accepted operation re-establishes its status and numerical state according to the source, a proposed MMIO DONE acknowledgement is not implemented simply because a figure contains a register named DONE, and a wrapper that adds read-to-clear or write-one-to-clear status introduces new sequential behavior and new races to verify.
 
 #### Design a proposed external-memory command interface
 
-A broader command can include baseA, baseB, baseC, M, N, K and optional numerical metadata. Define each field's width, byte units and permitted layout. START should snapshot a complete validated command, protecting the active job from later register writes. Partial writes, byte enables, reserved fields and submission ordering depend on the chosen bus and belong in the interface specification before RTL is written.
+A broader command can include baseA, baseB, baseC, M, N, K and optional numerical metadata. Define each field's width, byte units and permitted layout, have START snapshot a complete validated command so that the active job is protected from later register writes, and settle partial writes, byte enables, reserved fields and submission ordering in the interface specification before any RTL is written, since all of those depend on the chosen bus.
 
 Validation should happen before memory operations that rely on dimensions and addresses. Check supported shape, overflow-safe byte ranges, output alignment and prohibited overlap. The functional Python command model executes these conditions with bounded memory. A hardware register/DMA controller needs its own request, response, outstanding-operation and recovery checks; the Python objects are not synthesized control RTL.
 
-A conceptual external sequence might CHECK, LOAD, COMPUTE, STORE and DONE. Those names explain stage dependencies but are not the actual state names of the released on-chip top. Transitions follow successful completion events, not fixed assumptions about bus latency. On load or store errors, recovery must prevent an incomplete region from becoming ready or a partial output from being reported as fully usable.
+A conceptual external sequence might CHECK, LOAD, COMPUTE, STORE and DONE. Those names explain stage dependencies but are not the actual state names of the released on-chip top, transitions follow successful completion events rather than fixed assumptions about bus latency, and on a load or store error the recovery path must stop an incomplete region from becoming ready and stop a partial output from being reported as fully usable.
 
 #### Make host-visible completion a real boundary
 
 In an external-memory design, issuing an output request is not the same as receiving a successful completion. DONE must follow the declared successful output boundary. The host then performs required platform-specific acquisition/cache handling before consuming the output. Drawing cache handling after the read is too late to establish visibility. The exact operations depend on the platform and should come from its documented memory model.
 
-A status poll needs a timeout and a distinguishable failure path. A timeout means the expected completion was not observed. It does not prove that hardware stopped or that memory is safe to reuse. A cancellation/reset operation must define what happens to outstanding requests and owned buffers. Production control complexity comes from those lifetimes as much as from the number of normal-operation states.
+A status poll needs a timeout and a distinguishable failure path. A timeout means the expected completion was not observed, which does not prove that the hardware stopped or that memory is safe to reuse, so a cancellation or reset operation must define what happens to outstanding requests and to owned buffers. Production control complexity comes from those lifetimes as much as from the number of normal-operation states.
 
 The current regression verifies 20 integrated signed matrix jobs, global holds, snapshot protection, busy interference and invalid dimensions in simulation. It does not execute a board driver, MMIO bus or external-memory DMA. Retain that report beside the source so future wrappers can add evidence without inflating the current scope.
 

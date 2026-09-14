@@ -16,7 +16,7 @@ tags: ['computer-architecture', 'isa', 'cpu']
 
 ![Concept overview: Arm, RISC-V, and x86-64: Comparing Architectures Without Myths](./section-overview.png)
 
-The same unsigned array sum can be written with 19 dynamically executed instructions in the teaching examples used across this subtopic. That coincidence does not make the processors equally fast. Instruction count describes 1 part of a translation; execution time depends on instruction meaning, dependencies, the memory hierarchy, and the actual implementation.
+The same unsigned array sum can be written with 19 dynamically executed instructions in the teaching examples used across this subtopic, and that coincidence does not make the processors equally fast, because instruction count describes 1 part of a translation while execution time depends on instruction meaning, dependencies, the memory hierarchy, and the actual implementation.
 
 Comparisons between Arm, RISC-V, and x86-64 often collapse those separate ideas into a slogan. “RISC is efficient,” “CISC does more per instruction,” or “an open ISA wins” can each hide the workload and system being compared. A useful comparison names the specific software target and processor, then measures the same useful task under the same constraints.
 
@@ -26,11 +26,11 @@ This article closes the ISA foundation with a worked cross-architecture example 
 
 ### Family labels are not benchmark configurations
 
-AArch64 is a software execution state using the A64 instruction set. RISC-V includes different base register widths and extension combinations. x86-64 is the 64-bit form of the x86 architecture with its own instruction and system rules. Each family contains many implementation possibilities.
+AArch64 is a software execution state using the A64 instruction set, RISC-V includes different base register widths and extension combinations, and x86-64 is the 64-bit form of the x86 architecture with its own instruction and system rules. Each family contains many implementation possibilities.
 
-A benchmark therefore needs more than those labels. Name the processor model, active core count, clock and power policy, memory configuration, compiler, target features, and operating system. Specify the program and dataset as well. A comparison can change when the workload moves from cache-resident arithmetic to streaming memory access.
+A benchmark therefore needs more than those labels: name the processor model, active core count, clock and power policy, memory configuration, compiler, target features, and operating system, and specify the program and dataset as well. A comparison can change when the workload moves from cache-resident arithmetic to streaming memory access.
 
-Compatibility is another dimension. Instruction availability, ABI, executable format, and libraries determine whether a binary can run. Performance tuning begins only after the software targets the correct environment.
+Compatibility is another dimension, since instruction availability, ABI, executable format, and libraries determine whether a binary can run, and performance tuning begins only after the software targets the correct environment.
 
 These requirements are ordinary experimental control, not a demand for an exhaustive product catalog. State the variables that could explain the result. If the report says only “Arm beat x86,” it leaves too many competing explanations open.
 
@@ -42,7 +42,7 @@ The worked task is to sum `n` unsigned 32-bit elements into an unsigned 64-bit r
 
 Both functions load 1 4-byte element per iteration, extend it correctly to the 64-bit accumulator, advance the pointer, decrease the count, and branch if work remains. The architectural result is the same despite different mnemonics and register conventions.
 
-For x86-64, choose the System V AMD64 function convention used by the intended teaching environment: the pointer enters in `rdi`, count in `rsi`, and the result returns in `rax`. Other x86-64 environments can use different ABIs, so these register roles are a platform choice rather than a universal ISA rule.
+For x86-64, choose the System V AMD64 function convention used by the intended teaching environment. The pointer enters in `rdi`, the count in `rsi`, and the result returns in `rax`. Other x86-64 environments can use different ABIs, so these register roles are a platform choice rather than a universal ISA rule.
 
 The following uses Intel-style assembly syntax and assumes valid readable normal memory for the array. It is intentionally scalar and simple, not a claim about the best compiler output.
 
@@ -71,7 +71,7 @@ For elements 3, 5, and 7, entry state has `rdi = 0x1000` and `rsi = 3`. The accu
 
 For 0 elements, the initial test and branch skip the memory access and return 0. For an element with bits `ffffffff`, the 32-bit load gives the unsigned value 4,294,967,295 in `rcx`. That is the same intended value as AArch64's W-register load and RV64I's `lwu`.
 
-Each example expresses the same useful computation. The instruction organizations differ, but architectural correctness can be checked with the same input cases. That shared reference behavior is a better foundation for comparison than a list of fashionable architecture adjectives.
+Each example expresses the same useful computation, the instruction organizations differ, but architectural correctness can be checked with the same input cases, and that shared reference behavior is a better foundation for comparison than a list of fashionable architecture adjectives.
 
 ### Dynamic count, static size, and internal work differ
 
@@ -81,9 +81,9 @@ For a nonzero 3-element input, the x86 example executes 3 setup instructions, 15
 
 A64 uses fixed 32-bit instruction encodings, so its 9 instructions occupy 36 bytes of instruction payload. The uncompressed base RISC-V example also uses 36 bytes. x86 instructions have variable lengths; find its size from actual assembled bytes, including selected encodings, rather than from line count.
 
-RISC-V compressed forms can reduce some encodings to 16 bits when the target and operand patterns permit. AArch64 can use an addressing mode that combines pointer update with a load. x86 can encode arithmetic with a memory operand in other computations. Different translations can therefore change counts and sizes without changing the useful task.
+RISC-V compressed forms can reduce some encodings to 16 bits when the target and operand patterns permit, AArch64 can use an addressing mode that combines pointer update with a load, and x86 can encode arithmetic with a memory operand in other computations. Different translations can therefore change counts and sizes without changing the useful task.
 
-Internal micro-operations add another layer. A processor may decode an architectural instruction into simpler internal work, fuse selected operations, or schedule stages separately. Micro-operation count is implementation-specific and is not interchangeable with source assembly count.
+Internal micro-operations add another layer: a processor may decode an architectural instruction into simpler internal work, fuse selected operations, or schedule stages separately, and micro-operation count is implementation-specific rather than interchangeable with source assembly count.
 
 ### A performance equation organizes the comparison
 
@@ -97,9 +97,9 @@ where $$f$$ is clock frequency and CPI is average cycles per retired instruction
 
 For an illustrative million-instruction workload at average CPI 1 and frequency 2 GHz, time is 0.5 ms. If another translation uses 800,000 instructions but averages CPI 1.5 at the same frequency, its time is 0.6 ms. Fewer instructions do not guarantee lower time.
 
-Modern superscalar cores can retire multiple instructions per cycle, so average CPI can be below 1. Memory stalls and dependency chains can push it much higher. CPI is workload- and implementation-dependent, not a constant belonging to an ISA family.
+Modern superscalar cores can retire multiple instructions per cycle, so average CPI can be below 1, memory stalls and dependency chains can push it much higher, and CPI is workload- and implementation-dependent rather than a constant belonging to an ISA family.
 
-Frequency also changes under power and thermal policies. A comparison using nominal clock labels can misinterpret the actual run. Measure elapsed time and, when useful, effective frequency and hardware counters rather than multiplying advertised specifications blindly.
+Frequency also changes under power and thermal policies, so a comparison using nominal clock labels can misinterpret the actual run: measure elapsed time and, when useful, effective frequency and hardware counters rather than multiplying advertised specifications blindly.
 
 ### Going deeper: dependencies limit the loop
 
@@ -107,7 +107,7 @@ Frequency also changes under power and thermal policies. A comparison using nomi
 
 The sum has a loop-carried dependency: each iteration's accumulator depends on the previous sum. Independent loads may overlap on an advanced core, but the additions still form a chain. Unrolling with several accumulators can reduce that chain's effect, followed by a final reduction.
 
-Pointer updates and branch conditions also create dependencies. A compiler can transform the loop to compare an end pointer, combine address updates, or choose a different branch pattern. Those choices interact with instruction forms and the implementation's execution resources.
+Pointer updates and branch conditions also create dependencies, a compiler can transform the loop to compare an end pointer, combine address updates, or choose a different branch pattern, and those choices interact with instruction forms and the implementation's execution resources.
 
 A vectorized sum performs several element operations per instruction and uses vector accumulators. It then reduces them to a scalar result. The exact code depends on available extensions, vector widths, and compiler cost models. Comparing a scalar implementation on 1 target with a tuned vector implementation on another mostly measures software preparation.
 
@@ -115,7 +115,7 @@ The correct comparison can include both portable baseline and tuned performance,
 
 ### Memory can dominate all 3
 
-A sum over a large array reads at least 4 input bytes per element. If the working set exceeds caches, memory bandwidth can become the main constraint. Increasing arithmetic throughput then has little effect once data cannot arrive faster.
+A sum over a large array reads at least 4 input bytes per element, and if the working set exceeds caches, memory bandwidth can become the main constraint, so increasing arithmetic throughput has little effect once data cannot arrive faster.
 
 An ideal bandwidth-only element rate is about $$\beta/4$$ for useful input bytes, ignoring extra traffic. Real memory behavior includes cache lines, prefetching, page mappings, and other system activity. The corresponding arithmetic work is small relative to data movement.
 
@@ -129,7 +129,7 @@ This connection leads directly to [the memory hierarchy articles](../the-memory-
 
 RISC traditions emphasize relatively regular instruction structures and register-oriented arithmetic. CISC traditions include richer instruction forms and, in x86, variable-length encodings. These are useful historical distinctions, but they are not complete descriptions of modern implementations.
 
-A regular instruction set can simplify some front-end tasks. Dense encoding can reduce instruction-fetch demand. Rich forms can express useful work compactly. Each choice creates tradeoffs in decoding, compiler selection, and execution rather than guaranteeing 1 outcome.
+A regular instruction set can simplify some front-end tasks, dense encoding can reduce instruction-fetch demand, and rich forms can express useful work compactly, so each choice creates tradeoffs in decoding, compiler selection, and execution rather than guaranteeing 1 outcome.
 
 Modern cores in multiple families use sophisticated prediction, speculation, and out-of-order scheduling. A simple ISA does not require a simple pipeline, and a complex ISA does not mean every instruction executes through slow microcode. Inspect the particular instruction and processor.
 
@@ -144,13 +144,13 @@ $$
 
 For 1 completed task, a hypothetical 20 W system taking 0.5 seconds uses 10 joules. Another drawing 12 W for 1 second uses 12 joules. Lower instantaneous power is therefore not necessarily lower energy per result. Include the same components in both power measurements: package-only readings cannot directly be compared with whole-server wall readings. Variable power requires integrating over the interval rather than multiplying unrelated peak and timing numbers.
 
-This improves the ISA-label baseline by evaluating a complete implementation running equivalent useful work. Hold compiler options, numerical semantics, working set, and output correctness constant before attributing a result to an instruction-set difference. Where a system finishes earlier and enters a lower-power state, include idle energy over an equal service interval if that is the operational question. If a larger batch improves energy per task while worsening response time, report both metrics under the latency objective. An ISA constrains visible behavior; energy depends on circuit design, memory, software, operating point, and what work was actually completed.
+This improves the ISA-label baseline by evaluating a complete implementation running equivalent useful work. Hold compiler options, numerical semantics, working set, and output correctness constant before attributing a result to an instruction-set difference. A system may finish earlier and enter a lower-power state. Include idle energy over an equal service interval if that is the operational question. If a larger batch improves energy per task while worsening response time, report both metrics under the latency objective. An ISA constrains visible behavior; energy depends on circuit design, memory, software, operating point, and what work was actually completed.
 
 ### Energy efficiency needs a system boundary
 
 Energy per useful task is power integrated over execution time. A lower-power processor can use more energy if it takes long enough; a higher-power processor can finish sooner. Idle power and the chosen measurement boundary matter too.
 
-Process technology, cache sizes, voltage/frequency settings, memory, and packaging all influence energy. Assigning an observed laptop-versus-server difference entirely to the ISA ignores those variables. Compare equivalent performance requirements and state which components are included.
+Process technology, cache sizes, voltage/frequency settings, memory, and packaging all influence energy, so assigning an observed laptop-versus-server difference entirely to the ISA ignores those variables: compare equivalent performance requirements and state which components are included.
 
 For an inference service, useful output under latency requirements is often a better denominator than a synthetic instruction rate. Host CPU, accelerator, memory, and networking can all consume energy while producing the final response. The CPU family is 1 system choice among several.
 
@@ -158,17 +158,17 @@ For an inference service, useful output under latency requirements is often a be
 
 RISC-V's openly specified architecture supports implementation freedom. Arm and x86 have different ownership and licensing structures. Those distinctions affect design strategy and business constraints, but do not directly supply a benchmark result.
 
-Software ecosystem maturity matters on its own: compilers, debugging tools, libraries, operating systems, and optimized kernels decide how easily useful applications run. A capable instruction can sit unused if software support is missing or immature for the target.
+Software ecosystem maturity matters on its own. Compilers, debugging tools, libraries, operating systems, and optimized kernels decide how easily useful applications run. A capable instruction can sit unused if software support is missing or immature for the target.
 
-Treat performance, compatibility, implementation rights, and ecosystem readiness as separate questions. A design can be attractive for customization while requiring extra software work. Another can offer readily available binaries while providing less freedom for a new processor implementation.
+Treat performance, compatibility, implementation rights, and ecosystem readiness as separate questions, because a design can be attractive for customization while requiring extra software work, while another can offer readily available binaries and less freedom for a new processor implementation.
 
 ### This matters for AI chips
 
 An AI system may use 1 ISA for its host CPU, another for an embedded controller, and a specialized accelerator execution model for matrix operations. Asking which family “runs the AI” can therefore be underspecified.
 
-For CPU inference, compare the actual vector or matrix extensions and optimized kernels, then inspect memory bandwidth and precision support. For GPU inference, host-side performance matters when tokenization, launch scheduling, or network handling limits the device's useful work.
+For CPU inference, compare the actual vector or matrix extensions and optimized kernels. Then inspect memory bandwidth and precision support. For GPU inference, host-side performance matters when tokenization, launch scheduling, or network handling limits the device's useful work.
 
-Custom instructions can accelerate a targeted operation, but their value depends on frequency of use and the remaining bottlenecks. Apply Amdahl's reasoning: improving a small fraction of total time cannot transform the whole application. This connects ISA design to the later domain-specific architecture and ASIC articles.
+Custom instructions can accelerate a targeted operation. Their value depends on frequency of use and the remaining bottlenecks. Apply Amdahl's reasoning: improving a small fraction of total time cannot transform the whole application. This connects ISA design to the later domain-specific architecture and ASIC articles.
 
 ### Common misconceptions
 

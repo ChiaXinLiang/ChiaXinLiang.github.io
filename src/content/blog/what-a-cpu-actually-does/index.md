@@ -1,6 +1,6 @@
 ---
-title: 'What a CPU Actually Does: Fetch, Decode, Execute — and the Pipeline'
-description: "Your laptop's CPU performs 1 conceptually simple loop billions of times per second. Understanding it is the foundation for understanding every chip — including the ones that run AI."
+title: 'What a CPU Actually Does: Fetch, Decode, Execute, and the Pipeline'
+description: "Your laptop's CPU performs 1 conceptually simple loop billions of times per second. Understanding it is the foundation for understanding every chip, including the ones that run AI."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './section-overview.png'
@@ -14,9 +14,9 @@ tags: ['computer-architecture', 'cpu', 'pipeline']
 
 ## Overview
 
-![Concept overview: What a CPU Actually Does: Fetch, Decode, Execute — and the Pipeline](./section-overview.png)
+![Concept overview: What a CPU Actually Does: Fetch, Decode, Execute, and the Pipeline](./section-overview.png)
 
-A modern CPU core completes instructions at a rate of several billion per second. The machinery behind that number is a loop simple enough to draw on a napkin — and a set of tricks for overlapping it that gets genuinely wild.
+A modern CPU core completes instructions at a rate of several billion per second. The machinery behind that number is a loop simple enough to draw on a napkin, and a set of tricks for overlapping it that gets genuinely wild.
 
 This article opens my Computer Architecture & ASIC series: a ground-up course, from how 1 instruction executes to how AI chips get designed. No electrical engineering background assumed. We start at the bottom.
 
@@ -26,20 +26,20 @@ This article opens my Computer Architecture & ASIC series: a ground-up course, f
 
 Strip away 60 years of refinement and every CPU still does exactly 3 things, forever:
 
-1. **Fetch** — read the next instruction from memory (instructions are just numbers, sitting at an address the *program counter* points to)
-2. **Decode** — figure out what that number means: "add these 2 registers," "load from this address," "jump if 0"
-3. **Execute** — do it, and store the result
+1. **Fetch**: read the next instruction from memory (instructions are just numbers, sitting at an address the *program counter* points to)
+2. **Decode**: figure out what that number means: "add these 2 registers," "load from this address," "jump if 0"
+3. **Execute**: do it, and store the result
 
 
 That's the whole model of computation your laptop implements. A program is a long list of such instructions; the CPU is a machine that eats the list. When people say a chip runs at "4 GHz," they mean this machinery is clocked 4 billion times per second.
 
-The natural next question: does 1 instruction really finish in a quarter of a nanosecond? No — and the way CPUs get *around* that is the first great idea of computer architecture.
+The natural next question: does 1 instruction really finish in a quarter of a nanosecond? No. The way CPUs get *around* that is the first great idea of computer architecture.
 
 ### The laundry insight
 
-Suppose each of the 3 steps takes 1 clock tick. Done naively — fetch, decode, execute, then start over — each instruction takes 3 ticks, and 2/3 of your hardware sits idle at any moment: the fetch circuitry rests while execute works, and vice versa.
+Suppose each of the 3 steps takes 1 clock tick. Done naively (fetch, decode, execute, then start over), each instruction takes 3 ticks, and 2/3 of your hardware sits idle at any moment: the fetch circuitry rests while execute works, and vice versa.
 
-Now think about laundry. Washing takes 30 minutes, drying 30, folding 30. You do *not* wait for load 1 to be folded before starting load 2's wash. While load 1 dries, load 2 washes. Every 30 minutes, a finished load comes out — even though each load still takes 90 minutes end to end.
+Now think about laundry. Washing takes 30 minutes, drying 30, folding 30. You do *not* wait for load 1 to be folded before starting load 2's wash. While load 1 dries, load 2 washes. Every 30 minutes, a finished load comes out, even though each load still takes 90 minutes end to end.
 
 CPUs do exactly this. It's called **pipelining**:
 
@@ -50,15 +50,15 @@ Hold onto the distinction that just appeared, because it rules everything in thi
 
 ### Where it breaks
 
-The laundry analogy hides a problem laundry doesn't have: instructions depend on each other. If instruction 2 needs the result of instruction 1, it can't execute until 1 is done — the pipeline stalls, and bubbles of idle hardware march through it. A *branch* — "if x, jump there" — and the pipeline can't fetch what comes next until it knows which way the branch went.
+The laundry analogy hides a problem laundry doesn't have: instructions depend on each other. If instruction 2 needs the result of instruction 1, it can't execute until 1 is done. The pipeline stalls, and bubbles of idle hardware march through it. Take a *branch*, "if x, jump there": the pipeline can't fetch what comes next until it knows which way the branch went.
 
-How CPUs fight back — by *predicting* branches and speculating on the outcome, with accuracy depending on the workload and predictor — is the next article. The point for now: nearly all the complexity of a modern core exists to keep the simple loop from ever having to wait.
+How CPUs fight back, by *predicting* branches and speculating on the outcome with accuracy that depends on the workload and predictor, is the next article. The point for now: nearly all the complexity of a modern core exists to keep the simple loop from ever having to wait.
 
 ### What this means for AI chips
 
 Here is why this matters for the rest of this blog. The pipeline is the smallest instance of the idea that dominates all high-performance hardware, including GPUs and TPUs: **hide latency by overlapping work**. A GPU serving an LLM overlaps memory loads with math; a training cluster overlaps gradient communication with computation; an inference server overlaps 1 user's prefill with another's decode. Same laundry insight, scaled from nanoseconds to datacenters.
 
-And the pipeline's enemy — dependencies that force waiting — is the same enemy at every scale. Much of AI systems engineering is, at heart, dependency-breaking so that pipelines of every size stay full.
+And the pipeline's enemy, dependencies that force waiting, is the same enemy at every scale. Much of AI systems engineering is, at heart, dependency-breaking so that pipelines of every size stay full.
 
 ### What an instruction can see
 
@@ -156,15 +156,15 @@ For now, use the loop to understand what an instruction requires, the pipeline t
 
 - A CPU is a fetch-decode-execute loop clocked billions of times per second; a program is just the list it consumes.
 - Pipelining overlaps the stages like laundry loads: per-instruction latency stays the same, but throughput approaches 1 instruction per tick. Actual depth and completion rate depend on the design and workload.
-- Latency vs throughput, and hiding latency by overlapping — the 2 ideas you just learned — govern every chip in this series, from CPUs to TPUs.
+- Latency vs throughput, and hiding latency by overlapping, the 2 ideas you just learned, govern every chip in this series, from CPUs to TPUs.
 
 ### Sources
 
-- Patterson & Hennessy — *Computer Organization and Design* (the standard pipeline treatment)
-- Onur Mutlu — [ETH Computer Architecture lectures](https://safari.ethz.ch/architecture/) (free, excellent)
-- [RISC-V ISA specifications](https://docs.riscv.org/reference/isa/) — the base ISA and extensions
-- [Arm A-profile architecture](https://www.arm.com/architecture/cpu/a-profile) — ISA and execution-state context
-- Agner Fog — [The microarchitecture of Intel, AMD and VIA CPUs](https://www.agner.org/optimize/) (real pipeline depths and timings)
+- Patterson & Hennessy, *Computer Organization and Design* (the standard pipeline treatment)
+- Onur Mutlu, [ETH Computer Architecture lectures](https://safari.ethz.ch/architecture/) (free, excellent)
+- [RISC-V ISA specifications](https://docs.riscv.org/reference/isa/), the base ISA and extensions
+- [Arm A-profile architecture](https://www.arm.com/architecture/cpu/a-profile), ISA and execution-state context
+- Agner Fog, [The microarchitecture of Intel, AMD and VIA CPUs](https://www.agner.org/optimize/) (real pipeline depths and timings)
 
 ---
 

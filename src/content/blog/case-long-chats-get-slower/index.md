@@ -16,7 +16,7 @@ tags: [troubleshooting, inference, performance]
 
 ![Concept overview: Case File: Long Chats Get Slower and Slower](./section-overview.png)
 
-A conversation streams quickly at its first turn and slowly at its twentieth. The model checkpoint, GPU, and decoding parameters are unchanged. Restarting the conversation restores the earlier speed. That pattern suggests context-dependent work, but it does not yet distinguish longer prompt prefill, larger decode attention, cache recomputation, or a client that repeatedly sends unnecessary history.
+A conversation streams quickly at its first turn and slowly at its 20th. The model checkpoint, GPU, and decoding parameters are unchanged. Restarting the conversation restores the earlier speed. That pattern suggests context-dependent work, but it does not yet distinguish longer prompt prefill, larger decode attention, cache recomputation, or a client that repeatedly sends unnecessary history.
 
 This case follows a hypothetical service whose contexts grow from 4096 to 32768 tokens. Its operators see both higher first-token latency on later turns and wider gaps between generated tokens. Treat those as separate symptoms. The first concerns processing a newly submitted prompt; the second concerns repeatedly consulting historical keys and values during decode. Both depend on context, but their costs and remedies differ.
 
@@ -47,7 +47,7 @@ $$
 
 The leading 2 accounts for keys and values. Use the KV-head count rather than the query-head count for grouped-query or multi-query attention. Using all query heads in the formula can overestimate the cache by the grouping ratio. Conversely, assuming every model uses grouped-query attention can severely underestimate capacity.
 
-This formula covers the raw tensors. A production allocation also includes block rounding, metadata, quantization scales when applicable, allocator overhead, and any implementation-specific cache layout. Reserved workspaces and activations belong in the total GPU memory budget even though they are not KV entries. Distinguish raw size from the serving engine's available block pool.
+This formula covers the raw tensors. A production allocation also includes block rounding, metadata, quantization scales when applicable, allocator overhead, and any implementation-specific cache layout. Reserved workspaces and activations belong in the total GPU memory budget even though they are not KV entries. Distinguish raw size from the serving engine's available block pool: in the budget below, 80 GiB of usable memory leaves 52 GiB for cache.
 
 For an illustrative model with 32 layers, 8 KV heads, dimension 128, and BF16 cache entries, each retained token uses 131072 bytes, exactly 128 KiB. At 4096 tokens, 1 sequence holds 512 MiB. At 32768 tokens, it holds 4 GiB. 16 such long-context sequences require 64 GiB of raw KV data before weights and overhead.
 
@@ -55,7 +55,7 @@ Suppose a GPU has 80 GiB usable in our hypothetical budget, weights and persiste
 
 ### Capacity and speed are different problems
 
-KV growth can slow a service before it runs out of memory. Full attention for the next generated token must compare its query with historical keys and combine the corresponding values. The per-token attention work and data consulted therefore grow with the retained context. Weight memory remains roughly fixed; the history does not.
+KV growth can slow a service before it runs out of memory. Full attention for the next generated token must compare its query with historical keys and combine the corresponding values. The per-token attention work and data consulted therefore grow with the retained context. Weight memory remains roughly fixed, 20 GiB of weights and persistent buffers in the budget below; the history does not.
 
 In a simple traffic approximation, each decode step reads the relevant KV tensors once. Let W be weight bytes streamed per batch and beta_eff the effective delivered bandwidth. Then:
 
@@ -82,7 +82,7 @@ $$
 \sum_{j=0}^{G-1}(C+j)=GC+\frac{G(G-1)}{2}.
 $$
 
-Multiplying that sum by cache bytes per token gives a crude total-history traffic model if every step reads the retained KV once. The GC term says a longer initial conversation makes every output token more expensive. The quadratic-in-G term says long generations add their own growing history.
+Multiplying that sum by the example's 128 KiB per token gives a crude total-history traffic model if every step reads the retained KV once. The GC term says a longer initial conversation makes every output token more expensive. The quadratic-in-G term says long generations add their own growing history.
 
 For C equal to 4096 and G equal to 1024, the sum is 4718080 token-history entries. At C equal to 32768 with the same G, it is 34078208, about 7.2 times larger. That is not a claim of a 7.2-times wall-clock slowdown: fixed weight work, attention kernels, batch sharing, and other costs remain. It shows why a constant-cost-per-output-token assumption eventually fails.
 
@@ -101,9 +101,9 @@ Fit that trend using several context lengths while holding batch, dtype, and ker
 
 ### Distinguish growth from memory-pressure amplification
 
-Plot inter-token latency against retained context at fixed batch size. A gradual increase without preemptions supports the attention-growth explanation. Abrupt jumps near a cache threshold suggest capacity effects layered on top. Correlate those jumps with available cache blocks, active requests, and preemption or recomputation events.
+Plot inter-token latency against retained context at fixed batch size, sweeping from 4096 to 32768 tokens. A gradual increase without preemptions supports the attention-growth explanation. Abrupt jumps near a cache threshold suggest capacity effects layered on top. Correlate those jumps with available cache blocks, active requests, and preemption or recomputation events.
 
-vLLM documents that insufficient KV capacity can cause requests to be preempted and later recomputed. This avoids simply failing all affected work, but recomputation can worsen end-to-end latency. A long conversation may cross the threshold that turns ordinary attention growth into repeated extra prefill work.
+vLLM documents that insufficient KV capacity can cause requests to be preempted and later recomputed. This avoids simply failing all affected work, but recomputation can worsen end-to-end latency. A conversation that grows from 4096 to 32768 tokens may cross the threshold that turns ordinary attention growth into repeated extra prefill work.
 
 Inspect prefix-cache hit behavior on later turns separately. A low hit rate can explain high first-token latency even when decode intervals match the context model. A high hit rate with slow decode is equally possible. Do not conclude that prefix caching is broken merely because long-chat streaming remains slower.
 
