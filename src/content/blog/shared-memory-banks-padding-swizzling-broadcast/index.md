@@ -16,9 +16,9 @@ tags: ["gpu-performance", "ai-infrastructure"]
 
 ![Concept overview: Shared-Memory Bank Conflicts: Padding, Swizzling, and Broadcast. Shared memory is drawn as parallel bank columns.](./section-overview.png)
 
-Shared memory is fast when the access pattern fits its bank organization. It is not one unlimited-bandwidth array. A warp can request distinct words that map to the same bank, forcing additional service work even though all addresses are valid and the mathematical operation is correct.
+Shared memory is fast when the access pattern fits its bank organization. It is not 1 unlimited-bandwidth array. A warp can request distinct words that map to the same bank, forcing additional service work even though all addresses are valid and the mathematical operation is correct.
 
-The useful method is to map lane addresses to banks, distinguish repeated reads of one word from requests for different words, and inspect the instruction the compiler actually generates. Padding or swizzling can change the physical layout while preserving the logical tensor.
+The useful method is to map lane addresses to banks, distinguish repeated reads of 1 word from requests for different words, and inspect the instruction the compiler actually generates. Padding or swizzling can change the physical layout while preserving the logical tensor.
 
 We will derive a simple FP32 mapping and work a transpose example. The arithmetic model uses 32 banks and successive 32-bit words, matching the stated CUDA guidance. Other element widths and generated instructions require their actual supported access behavior rather than a blind application of the simplified formula.
 
@@ -28,7 +28,7 @@ We will derive a simple FP32 mapping and work a transpose example. The arithmeti
 
 ![Deep-dive illustration: Begin with lane addresses, not array dimensions](./deep-dive.png)
 
-For a warp access, record which logical element each active lane requests and convert it to a physical shared-memory word address. Shape alone does not determine the access pattern. Threads reading a row and threads reading a column can use the same array with very different bank behavior.
+For a warp access, record which logical element each of the 32 active lanes requests, then convert it to a physical shared-memory word address. Shape alone does not determine the access pattern. Threads reading a row and threads reading a column can use the same array with very different bank behavior.
 
 In the simplified 32-bit-word model, let q_l be lane l's word index. Its bank is
 
@@ -38,7 +38,7 @@ $$
 
 The base address adds a constant offset to the mapping. That changes bank labels but not the collision pattern for a uniform stride. Actual alignment and instruction width still matter to the generated requests.
 
-Keep the active-lane mask and instruction scope explicit. A full-warp formula should not be applied unchanged to a partial request or an instruction that is split into multiple transactions. The model is a starting point for analysis, not a replacement for the compiled access.
+Keep the active-lane mask and instruction scope explicit. A 32-lane formula should not be applied unchanged to a partial request, or to an instruction that is split into multiple transactions. The model is a starting point for analysis, not a replacement for the compiled access.
 
 ### 2. Derive the stride conflict pattern
 
@@ -66,7 +66,7 @@ $$
 q_{r,c}=32r+c.
 $$
 
-A warp reading one row uses consecutive words and distinct banks. A warp reading one column with lane l assigned to row l has bank c for every lane, even though the words occupy different rows. The column access creates the classic 32-way pattern in this model.
+A warp reading 1 row uses consecutive words and distinct banks. A warp reading 1 column, with lane l assigned to row l, hits bank c for every lane even though the words occupy different rows. The column access creates the classic 32-way pattern in this model.
 
 A transpose kernel can use shared memory to make global reads and writes coalesced, yet still suffer this local column conflict. Improving global access is therefore not proof that the shared layout is efficient.
 
@@ -104,11 +104,11 @@ This is an explanatory software layout, not a universal hardware swizzle recipe.
 
 ### 6. Distinguish broadcast from different-word collisions
 
-When active lanes read exactly the same shared-memory word, supported broadcast behavior can serve that value to the requesting lanes. The address equality matters: equal bank identifiers alone do not establish that the requested words are the same.
+When active lanes read exactly the same shared-memory word, supported broadcast behavior can serve that value to the requesting lanes, but address equality is what matters here: equal bank identifiers alone do not establish that the requested words are the same.
 
 For the column example, lane 0 reads word c and lane 1 reads word 32+c. These words share a bank but are distinct locations. Calling that access a broadcast would erase the very conflict the model is supposed to explain.
 
-Writes require a separate ownership analysis. Multiple ordinary writes to one location should not be interpreted as a meaningful broadcast reduction. CUDA describes specific behavior for simultaneous same-location writes, and the application must use a supported combining mechanism when every contribution matters.
+Writes require a separate ownership analysis. Multiple ordinary writes to 1 location should not be read as a meaningful broadcast reduction. CUDA describes specific behavior for simultaneous same-location writes, and the application must use a supported combining mechanism when every contribution matters.
 
 Keep read and write patterns distinct in the diagram and tests. A layout that improves a read phase may not improve the write phase, and a performance counter does not prove that conflicting writers compute the required result.
 
@@ -144,7 +144,7 @@ For an illustrative kernel spending 20% of its baseline time in an affected shar
 
 Repeat across representative shapes and working sets. A microbenchmark designed to isolate bank service can reveal the access mechanism, while the full operation establishes whether that mechanism limits useful execution.
 
-Global-memory coalescing and shared-bank distribution are separate mappings. A producer can read consecutive global elements efficiently and then store them through a padded or swizzled shared layout. The consumer must recover the intended logical element before its global output mapping. Improving the shared layout should preserve those global access and value relationships, otherwise a local gain can introduce a different traffic cost or an incorrect transpose.
+Global-memory coalescing and shared-bank distribution are separate mappings. A producer can read consecutive global elements efficiently and then store them through a padded or swizzled shared layout, the consumer has to recover the intended logical element before its global output mapping, and improving the shared layout should preserve both of those relationships: otherwise a local gain buys a different traffic cost or an incorrect transpose.
 
 ### 10. Choose the simplest verified layout
 
@@ -154,7 +154,7 @@ Begin with a lane-to-address map and identify actual different-word collisions. 
 
 Keep the layout contract, deterministic recovery tests, supported synchronization, compiled resource usage, and timing evidence together. This record makes a later instruction or dtype change easier to evaluate without reusing an invalid bank assumption.
 
-A useful comparison can list the unpadded, padded, and swizzled versions with physical stride, storage bytes, observed requests, kernel duration, and correctness. If a layout reduces conflict evidence but leaves duration unchanged, another resource may dominate. If it improves duration while increasing storage enough to reduce concurrency on larger cases, the operating choice needs the full workload distribution rather than one isolated tile.
+A useful comparison lists the unpadded, padded, and swizzled versions with physical stride, storage bytes, observed requests, kernel duration, and correctness, so that if a layout reduces conflict evidence while leaving duration unchanged you know another resource dominates, and if it improves duration while increasing storage enough to cut concurrency on larger cases, the operating choice needs the full workload distribution rather than 1 isolated tile.
 
 ## Conclusion
 

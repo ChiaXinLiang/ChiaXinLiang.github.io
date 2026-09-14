@@ -34,7 +34,7 @@ $$
 \widehat x_i=s_g\,\operatorname{decode}_{\mathrm{E2M1}}(q_i),\qquad i\in g.
 $$
 
-This equation explains the role of scaling without prescribing a particular scale-selection algorithm. The model card's scale format does not by itself disclose clipping, rounding, handling of nonfinite values, or every layout detail. Do not invent those settings from the format name.
+This equation explains the role of scaling without prescribing a particular scale-selection algorithm. The DeepSeek card's scale format does not by itself disclose clipping, rounding, handling of nonfinite values, or every layout detail. Do not invent those settings from the format name.
 
 ### 2. Calculate scale overhead
 
@@ -45,13 +45,13 @@ B_{\mathrm{group}}=16\frac{4}{8}+1=9\ \mathrm{bytes},\qquad
 b_{\mathrm{effective}}=\frac{8B_{\mathrm{group}}}{16}=4.5.
 $$
 
-This is a representation calculation, not the complete model-cache figure. Alignment, padding, positional components, indexer state, and other metadata can add bytes. A statement that every cached element consumes exactly half a byte would omit the scale contribution.
+This is a representation calculation for one 16-channel group, not the complete model-cache figure. Alignment, padding, positional components, indexer state, and other metadata can add bytes. A statement that every cached element consumes exactly half a byte would omit the scale contribution.
 
 The reported 890-byte global figure must be treated as a release claim about its actual aggregate state. The overview alone does not provide enough complete tensor-layout information to independently derive that precise number from the group formula.
 
 ### 3. Explain grouped quantization error
 
-Values in one group share a scale. A large-magnitude value can influence the representable range for smaller values in that group. Scale selection therefore creates a tradeoff between clipping large values and preserving resolution for small ones.
+All 16 values in one group share a scale. A large-magnitude value can influence the representable range for smaller values in that group. Scale selection therefore creates a tradeoff between clipping large values and preserving resolution for small ones.
 
 Let the reconstruction error be delta x. A downstream linear projection transforms that error, and an attention score can amplify it depending on the query direction. Measuring code error alone is not enough to establish language-model behavior.
 
@@ -60,25 +60,25 @@ $$
 \|\Delta y\|\le\|W\|\,\|\Delta x\|.
 $$
 
-The norm bound is diagnostic and can be loose. It explains why projected error depends on both stored error and learned weights. Attention normalization, value reconstruction, and later layers introduce further effects. Evaluate the actual model path under its chosen cache representation.
+The norm bound is diagnostic and can be loose, but it explains why projected error depends on both stored error and learned weights, and because attention normalization, value reconstruction, and later layers introduce further effects, evaluate the actual DeepSeek-V4.1-Flash path under its chosen cache representation.
 
 ### 4. Separate weights and cache precision
 
 ![Deep dive: 4. Separate weights and cache precision](./deep-dive-component-03.png)
 
-Quantizing expert weights and quantizing key-value state are different changes. Weight values are learned and relatively fixed during inference. Cache values depend on each request and grow or evolve as tokens are processed.
+Quantizing DeepSeek-V4.1-Flash's expert weights and quantizing its key-value state are different changes. Weight values are learned and relatively fixed during inference. Cache values depend on each request and grow or evolve as tokens are processed.
 
-A format validated for weights does not automatically establish a suitable policy for request-dependent activations. Their distributions, outliers, reuse patterns, and quality sensitivity differ. Keep the cache precision attached to the cache metric instead of borrowing a weight-memory figure.
+A format validated for weights does not automatically establish a suitable policy for request-dependent activations, whose distributions, outliers, reuse patterns, and quality sensitivity differ, so keep the cache precision attached to the cache metric instead of borrowing a weight-memory figure.
 
 Likewise, an execution kernel may accumulate in a higher precision after decoding low-precision data. Stored precision and arithmetic precision should be reported separately. An FP4 cache does not imply that every attention operation uses FP4 accumulation.
 
 ### 5. Define sliding-window state
 
-Sliding-window attention retains or uses recent positions according to the model's window policy. Let the window contain w tokens. A local key-value state can therefore be bounded in length even when the full request history is much longer.
+Sliding-window attention retains or uses recent positions according to the window policy DeepSeek-V4.1-Flash defines. Let the window contain w tokens. A local key-value state can therefore be bounded in length even when the full request history is much longer.
 
 The card's bounded replay reconstructs missing sliding-window state by replaying only the recent n_win tokens, avoiding persistence of that local KV state to SSD. This relies on the released computation's reconstruction policy. It should not be generalized into a claim that any Transformer layer's state can be rebuilt from a short suffix without other retained information.
 
-Global state remains another category. A recent window cannot replace every long-range representation needed by the model. The replay strategy must retain or restore all other inputs required to reproduce the local state.
+Global state remains another category. A recent window cannot replace every long-range representation DeepSeek-V4.1-Flash needs. The replay strategy must retain or restore all other inputs required to reproduce the local state.
 
 ### 6. Derive persistence and restoration costs
 
@@ -96,21 +96,21 @@ The decision depends on inactivity duration, persistence bandwidth, expected res
 
 ### 7. Work through an inactive request
 
-Consider a request with a long history that pauses between agent actions. While active, it uses global memory and recent local state. On suspension, the serving system persists the designated global state and reconstruction inputs, while omitting local KV according to the supported policy.
+Consider a request with a long history that pauses between agent actions: while active it uses global memory and recent local state, and on suspension the serving system persists the designated global state and reconstruction inputs while omitting local KV according to the supported policy.
 
 On resumption, the system restores the retained state, replays the required recent tokens to rebuild local state, and only then proceeds with generation. The handoff must establish completion and compatibility before a decode step reads the rebuilt buffers.
 
-If the request never resumes, replay work is never paid. If it resumes frequently after short pauses, repeated reconstruction can become material. These cases explain why inactive-request memory and active-request throughput should be evaluated separately rather than reduced to one compression percentage.
+If the request never resumes, replay work is never paid, while a request that resumes frequently after short pauses can make repeated reconstruction material, and these cases explain why inactive-request memory and active-request throughput should be evaluated separately rather than reduced to one compression percentage.
 
 ### 8. Preserve reconstruction identity
 
-Replay must use compatible model weights, token sequence, multimodal representations where required, positions, and numerical settings. A changed checkpoint or preprocessing policy can make retained global state incompatible with rebuilt local state.
+Replay must use compatible DeepSeek-V4.1-Flash weights, token sequence, multimodal representations where required, positions, and numerical settings. A changed checkpoint or preprocessing policy can make retained global state incompatible with rebuilt local state.
 
 $$
 \mathrm{replayState}=F_{\mathrm{local}}(\mathrm{recentInputs},\mathrm{retainedContext},\mathrm{configuration}).
 $$
 
-This explanatory function makes the dependencies explicit without claiming that the release uses one simple isolated local function. The actual state-generation graph determines which inputs and retained context are required.
+This explanatory function makes the dependencies explicit without claiming that DeepSeek-V4.1-Flash uses one simple isolated local function. The actual state-generation graph determines which inputs and retained context are required.
 
 A cache entry should carry a versioned representation contract. Resuming with correctly sized but incompatible tensors is not safe. The serving system must invalidate or reconstruct from a valid earlier boundary when compatibility fails.
 
@@ -128,7 +128,7 @@ Measure allocated and reserved memory separately where the runtime exposes them.
 
 Compare the intended high-precision reference with the quantized cache path on defined workloads. Examine output differences, nonfinite behavior, long-context retrieval, and task quality. Tests should exercise the actual grouping, scale representation, packing, and decoding.
 
-Use values near scale boundaries, groups with outliers, small-magnitude values, and partial groups under the supported layout. A random average-error test can miss clipping or packing mistakes. Distinct channel patterns help expose nibble-order or group-association errors.
+Use values near scale boundaries, groups with outliers, small-magnitude values, and partial groups of fewer than 16 values under the supported layout. A random average-error test can miss clipping or packing mistakes. Distinct channel patterns help expose nibble-order or group-association errors.
 
 The format analysis here does not claim that a generic E2M1 implementation reproduces the released model. The trained checkpoint, cache policy, and backend together determine the supported behavior.
 
@@ -146,9 +146,9 @@ Also test failure during persistence or restoration. A partially written entry m
 
 Report persistent bytes, restore time, replay time, time to resumed first token, and subsequent decode latency separately. Include the distribution of pause durations and resumption rates. A memory optimization for agentic pauses may have little relevance to a continuous generation benchmark.
 
-For quantization, record the exact cache representation and backend. For replay, record window policy and reconstruction boundary where disclosed. Keep the release's reported ratios attached to their original baseline rather than presenting them as independently measured results.
+For quantization, record the exact cache representation and backend. For replay, record window policy and reconstruction boundary where disclosed. Keep the release's reported ratios attached to their DeepSeek-V4-Flash baseline rather than presenting them as independently measured results.
 
-No model execution or GPU benchmark was performed for this article. The worked equations describe mechanisms and accounting. Production decisions require phase-specific measurement and quality validation under the intended numerical path.
+No DeepSeek-V4.1-Flash execution or GPU benchmark was performed for this article. The worked equations describe mechanisms and accounting. Production decisions require phase-specific measurement and quality validation under the intended numerical path.
 
 ### 13. Interpret the 2 reductions together
 
@@ -164,7 +164,7 @@ A simple economic model compares retained-storage cost with expected resumption 
 
 This model requires a common unit before comparing terms. Device time, SSD bytes, and monetary cost are not directly interchangeable. A deployment can assign an explicit accounting rate or instead treat storage capacity and resume latency as separate constraints. The latter is often clearer when a latency objective is strict.
 
-The model explains the role of pause duration: longer inactivity makes retained-state reduction more valuable, while frequent resumption makes repeated replay more important. It does not establish an optimal threshold without measured costs and the actual request distribution. A scheduler can evaluate several inactivity thresholds and report both capacity and resumed-request tail latency.
+The model explains the role of pause duration, since longer inactivity makes retained-state reduction more valuable while frequent resumption makes repeated replay more important, but it does not establish an optimal threshold without measured costs and the actual request distribution, so a scheduler can evaluate several inactivity thresholds and report both capacity and resumed-request tail latency.
 
 Replay also uses resources shared with active requests. Its direct duration is only part of the effect if it delays unrelated decode work. Measure concurrent behavior and consider staggering restoration rather than assuming every suspended request can resume at once. Conversely, spare compute during a quiet period can make reconstruction less disruptive.
 

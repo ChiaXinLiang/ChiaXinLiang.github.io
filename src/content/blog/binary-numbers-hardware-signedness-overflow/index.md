@@ -66,7 +66,7 @@ Widening both operands before addition changes the contract. 5-bit 00111 plus 00
 
 Carry-out and signed overflow are different conditions. Unsigned 4-bit 7 plus 1 fits in the range 0 through 15. The resulting pattern 1000 is valid unsigned 8 and no unsigned carry is required. The same addition overflows the signed 4-bit range. Conversely, unsigned 15 plus 1 wraps to 0 with a carry, while the signed interpretation of 1111 plus 0001 is negative 1 plus 1, which produces 0 without signed overflow.
 
-For equal-width 2's-complement addition, a useful overflow check asks whether the operands have the same sign while the retained result has the opposite sign. This rule concerns addition under that representation; it should not be casually reused for subtraction or multiplication without deriving the relevant condition. The lab also compares the full reference sum against the permitted signed range, giving an independently understandable criterion.
+For equal-width 2's-complement addition, a useful overflow check asks whether the operands have the same sign while the retained result has the opposite sign, and because that rule concerns addition under that representation, it should not be casually reused for subtraction or multiplication without deriving the relevant condition, so the lab also compares the full reference sum against the permitted signed range, giving an independently understandable criterion.
 
 Enumerate every signed 4-bit operand pair to compare the 2 criteria. There are 16 patterns for each operand and therefore 256 pairs. For each pair, keep the wrapped result and record whether the unbounded mathematical sum falls outside the representable range. Boundary examples alone can miss a mistake in a sign test.
 
@@ -90,7 +90,7 @@ This reasoning becomes practical when a narrow tensor element enters a wider mul
 
 ## Conclusion
 
-A binary answer is meaningful only when its width and interpretation are stated. Positional weights decode unsigned values, two's complement changes the leading weight, and extension preserves a value only under the intended signedness. Overflow reports that a mathematical result does not fit the retained representation; it is not interchangeable with carry-out.
+A binary answer is meaningful only when its width and interpretation are stated: positional weights decode unsigned values, two's complement changes the leading weight, extension preserves a value only under the intended signedness, and overflow reports that a mathematical result does not fit the retained representation, which is not interchangeable with carry-out.
 
 Before writing an arithmetic interface, specify input widths, signedness, intermediate widths, destination range, and out-of-range behavior. Make the reference model use unbounded integers before applying the declared representation policy. Then compare the intended integer and the retained pattern separately when necessary. This is especially useful for tensor products and accumulations.
 

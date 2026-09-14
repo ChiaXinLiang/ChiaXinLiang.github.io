@@ -16,11 +16,11 @@ tags: ["gpu-performance", "ai-infrastructure"]
 
 ![Concept overview: Triton Fusion: A Reduction or Normalization Kernel From First Principles. A row of tensor values is processed inside one GPU program: reductions compute mean and variance, then the same resident row is normalized and scaled before output.](./section-overview.png)
 
-Fusion is valuable when it keeps useful intermediate state close to computation instead of writing it to memory and reading it back. Row normalization is a good example: mean, variance, normalization, and an affine transform all depend on the same input row. A kernel can load that row, calculate its statistics, and produce the output while retaining values on chip.
+Fusion is valuable when it keeps useful intermediate state close to computation instead of writing it to memory and reading it back. Row normalization is a good example, because 4 steps all depend on the same input row, mean, variance, normalization, and an affine transform, and a kernel can load that row, calculate its statistics, and produce the output while retaining values on chip.
 
-The challenge is that reductions introduce a population and numerical contract. Masks must exclude padding from both statistics. Accumulators need suitable precision. A larger row increases live state and can force a different schedule even when the source expression remains compact.
+The challenge is that reductions introduce a population and numerical contract: masks must exclude padding from 2 statistics, accumulators need suitable precision, and a larger row increases live state and can force a different schedule even when the source expression remains compact.
 
-We will derive a fused layer-normalization path, work its masked statistics, and compare a stable mergeable reduction. The code is illustrative and assumes the stated layout. Numerical examples are calculations rather than hardware measurements.
+We will do 3 things: derive a fused layer-normalization path, work its masked statistics, and compare a stable mergeable reduction. The code is illustrative and assumes the stated layout. Numerical examples are calculations rather than hardware measurements.
 
 ## Deep dive
 
@@ -46,15 +46,15 @@ Define supported row widths and layout. The example assumes contiguous columns w
 
 A simple Triton design gives program r ownership of row r and constructs a compile-time tile at least as wide as N. Logical columns are a range from 0 to BLOCK minus 1, with a mask for columns below N.
 
-The program loads valid input values and fills invalid tile positions with a neutral value for the first sum. It then reduces across the logical tile while dividing by the valid count N. Each valid output position has one writer in the row program.
+The program loads valid input values and fills invalid tile positions with a neutral value for the first sum, then it reduces across the logical tile while dividing by the valid count N, and each valid output position has 1 writer in the row program.
 
-This design exposes row-level parallelism. Many rows can provide many programs, while one very wide row may require a different partition. The best mapping depends on row count, width, hardware, and compiled resource use.
+This design exposes row-level parallelism. Many rows can provide many programs, while 1 very wide row may require a different partition. The best mapping depends on row count, width, hardware, and compiled resource use.
 
 Do not equate BLOCK with a CUDA thread count. The compiler maps logical tile values through supported layouts and execution resources. Increasing BLOCK can increase live values per execution unit even if launch parameters remain unchanged.
 
 ### 3. Mask variance after centering
 
-Replacing invalid input loads with zero makes them neutral for summation. After subtracting the mean, however, those positions become negative mu. Squaring them would incorrectly add mu squared to the variance.
+Replacing invalid input loads with 0 makes them neutral for summation, but after subtracting the mean those positions become negative mu, and squaring them would incorrectly add mu squared to the variance.
 
 The centered tile therefore needs its own validity rule:
 
@@ -84,7 +84,7 @@ y = centered * scale * gamma + beta
 tl.store(Y + row * stride_y + cols, y, mask=valid)
 ```
 
-A complete wrapper supplies a supported nonempty width, device pointers, row ownership, launch configuration, and lifetime dependencies. BLOCK is a supported compile-time tile shape. The snippet omits those surrounding interfaces to focus on the statistics and fusion.
+A complete wrapper supplies 5 things: a supported nonempty width, device pointers, row ownership, launch configuration, and lifetime dependencies. BLOCK is a supported compile-time tile shape. The snippet omits those surrounding interfaces to focus on the statistics and fusion.
 
 Input conversion to FP32 illustrates an accumulator choice, not a universal precision guarantee. Output conversion and affine arithmetic follow the required dtype contract. Verify behavior against a suitable reference for every supported representation.
 
@@ -112,13 +112,13 @@ $$
 \mu=\mu_A+\delta\frac{n_B}{n},\qquad M_2=M_{2,A}+M_{2,B}+\delta^2\frac{n_An_B}{n},\qquad v=M_2/n.
 $$
 
-The formula connects partial reductions without subtracting two large nearly equal global quantities. Finite-precision ordering still matters, so it does not promise bitwise equality across schedules.
+The formula connects partial reductions without subtracting 2 large nearly equal global quantities. Finite-precision ordering still matters, so it does not promise bitwise equality across schedules.
 
 For groups 1, 2 and 3, 4, means are 1.5 and 3.5, each M2 is 0.5, and counts are 2. The merge gives M2 equal to 5 and variance 1.25, matching the full-row calculation.
 
 ### 7. Derive the traffic benefit of retaining values
 
-A staged implementation can read input for mean, reread it for variance, and read it again for normalization, depending on how intermediates are organized. A fused row path can retain values and reduce those input rereads.
+A staged implementation can read the input 3 times, once for mean, once for variance, and once again for normalization, depending on how intermediates are organized. A fused row path can retain values and reduce those input rereads.
 
 A simplified input-output budget for one fused row is
 
@@ -140,17 +140,17 @@ Source-level arrays are not a precise register count. Inspect compiled resource 
 
 A very wide row can be partitioned into chunks with partial statistics, followed by a merge and output pass. That adds scratch state and dependencies but can provide more parallelism or fit on-chip limits. The stable merge formula supplies the mathematical connection.
 
-Choose between one-program and multi-stage designs using row count, width distribution, memory, and timing. There is no universal maximum row width at which fusion remains optimal across versions and hardware.
+Choose between 1-program and multi-stage designs using row count, width distribution, memory, and timing. There is no universal maximum row width at which fusion remains optimal across versions and hardware.
 
 ### 9. Training adds saved-state and backward requirements
 
-Inference forward performance does not establish training performance. Backward needs the information required by the derivative, which can include input, normalization statistics, and affine parameters under the selected implementation.
+Inference forward performance does not establish training performance. Backward needs the information required by the derivative, which can include 3 kinds, input, normalization statistics, and affine parameters, under the selected implementation.
 
 Saving statistics can reduce recomputation, while checkpointing or fusion can alter the lifetime of saved tensors. Their memory and execution costs belong in the training comparison. A forward-only microbenchmark excludes those effects.
 
 Validate gradients with a suitable reference on representative small cases and the supported dtype policy. A correct forward result does not prove that a custom backward preserves the derivative or accumulation semantics.
 
-Keep the distinction between layer normalization and RMS normalization in gradient comparisons too. They have different dependencies, so one derivative cannot be substituted for the other based on similar-looking forward expressions.
+Keep the distinction between layer normalization and RMS normalization in gradient comparisons too. They have different dependencies, so 1 derivative cannot be substituted for the other based on similar-looking forward expressions.
 
 ### 9-1. Derive the row input gradient
 
@@ -162,19 +162,19 @@ $$
 \frac{\partial L}{\partial x_i}=\frac rN\left(Ng_i-\sum_jg_j-q_i\sum_jg_jq_j\right).
 $$
 
-The first correction accounts for the dependency through the row mean. The second accounts for the variance dependency. A backward kernel therefore needs reductions of g and of g times q, not merely an elementwise multiplication by the forward scale. This is why a fused forward body is insufficient to establish a training implementation.
+The first correction accounts for the dependency through the row mean. The second accounts for the variance dependency. A backward kernel therefore needs 2 reductions, of g and of g times q, rather than merely an elementwise multiplication by the forward scale. This is why a fused forward body is insufficient to establish a training implementation.
 
 Affine-parameter gradients aggregate contributions across rows. Their ownership requires a supported reduction or combining mechanism; every row program cannot write an ordinary update to the same parameter location unsafely. A multi-stage partial reduction can preserve ownership while adding scratch state and another execution boundary.
 
-As a small check, if every g value in a row is the same, the input derivative is zero under the exact centered-row calculation. The sum of normalized values is zero, and the mean correction cancels the constant input direction. This invariant provides useful evidence alongside reference gradient comparisons, although finite precision can introduce small residuals.
+As a small check, if every g value in a row is the same, the input derivative is zero under the exact centered-row calculation. The sum of normalized values is 0, and the mean correction cancels the constant input direction. This invariant provides useful evidence alongside reference gradient comparisons, although finite precision can introduce small residuals.
 
 ### 10. Measure the actual fusion tradeoff
 
 ![Deep dive: 10. Measure the actual fusion tradeoff](./deep-dive-component-01.png)
 
-Compare the same shape population, dtype, epsilon, affine semantics, and output contract. Record compilation, launches, kernel time, physical traffic, resource use, and any saved-state memory. Keep warmup and cold behavior distinct.
+Compare the same shape population, dtype, epsilon, affine semantics, and output contract. Record 6 quantities: compilation, launches, kernel time, physical traffic, resource use, and any saved-state memory. Keep warmup and cold behavior distinct.
 
-Sweep row counts and widths, including partial tiles and large rows. A candidate can win on many narrow rows and lose on a few wide ones because available parallelism and register pressure differ. Weight the application distribution rather than one convenient maximum-throughput case.
+Sweep row counts and widths, including partial tiles and large rows, because a candidate can win on many narrow rows and lose on a few wide ones where available parallelism and register pressure differ, so weight the application distribution rather than 1 convenient maximum-throughput case.
 
 A useful diagnostic report can show that input traffic decreased while register spills increased, or that launch overhead fell while device execution stayed similar. Those observations explain the mechanism and guide the next change. A single overall speedup does not reveal why the design works or where it stops working.
 
@@ -182,7 +182,7 @@ Preserve deterministic statistic tests, layout tests, and the intended ownership
 
 ## Conclusion
 
-Fused normalization is a reuse algorithm with a statistical population and numerical contract. Valid masks define the population, stable reductions define the statistics, and on-chip lifetime defines the traffic opportunity. Optimize the schedule only after those meanings are preserved, then measure whether retained state fits the hardware balance.
+Fused normalization is a reuse algorithm with a statistical population and numerical contract. 3 meanings have to hold: valid masks define the population, stable reductions define the statistics, and on-chip lifetime defines the traffic opportunity. Optimize the schedule only after those meanings are preserved, then measure whether retained state fits the hardware balance.
 
 ### Sources
 

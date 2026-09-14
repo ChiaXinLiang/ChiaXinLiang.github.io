@@ -31,7 +31,7 @@ Nsight Compute's report opens with a section called *GPU Speed of Light Throughp
 - **Compute (SM) Throughput**: how busy the most-utilized compute pipeline was, as a fraction of its theoretical peak. If your FP32 units issued work 23% of the cycles they could have, this reads 23%.
 - **Memory Throughput**: the same idea for the memory system, taken over DRAM, L2, and L1/shared paths, reporting the most-saturated 1. If HBM moved 87% of the bytes it theoretically could have in that time window, this reads 87%.
 
-NVIDIA's kernel profiling guide gives the reading rule. A value above roughly 80% means that resource is the limiter. Both values below roughly 60% mean the kernel has a *latency* problem, not a throughput problem. The hardware had capacity to spare on both sides and the kernel failed to feed it.
+NVIDIA's kernel profiling guide gives the reading rule: a value above roughly 80% means that resource is the limiter, while both values below roughly 60% mean the kernel has a *latency* problem rather than a throughput problem, because the hardware had capacity to spare on both sides and the kernel failed to feed it.
 
 That rule already splits the world into 3 regions. The fourth bucket hides inside the "both low" region. Separating it out takes 1 extra number from the *Launch Statistics* section: **waves per SM**, the grid size divided by how many blocks the GPU can run at once. Here is the full decision procedure.
 
@@ -84,7 +84,7 @@ The latency-bound bucket deserves one more level of mechanism, because the stand
 
 Latency hiding is governed by Little's law: to sustain a throughput, you must keep *concurrency = throughput × latency* in flight. Put numbers on it for 1 H100 SM. The SM's fair share of HBM bandwidth is 3.35 TB/s ÷ 132 ≈ 25 GB/s. At a 1.8 GHz SM clock that is about 14 bytes per cycle. With an effective DRAM latency around 600 cycles, each SM must keep roughly 14 × 600 ≈ 8.5 KB of loads in flight at all times just to keep its share of the memory system busy.
 
-Now count what a warp contributes. A warp of 32 threads each issuing a 4-byte load puts 128 bytes in flight. If each warp has 1 load outstanding at a time, you need 8,500 ÷ 128 ≈ 66 warps per SM. An H100 SM tops out at 64 resident warps. You *cannot* hide DRAM latency this way even at 100% occupancy. That is why naive scalar-load kernels plateau well below peak bandwidth.
+Now count what a warp contributes. A warp of 32 threads each issuing a 4-byte load puts 128 bytes in flight, so if each warp has 1 load outstanding at a time you need 8,500 ÷ 128 ≈ 66 warps per SM, and an H100 SM tops out at 64 resident warps. You *cannot* hide DRAM latency this way even at 100% occupancy. That is why naive scalar-load kernels plateau well below peak bandwidth.
 
 2 levers fix it, and both raise bytes-in-flight *per warp* instead of raising warp count:
 
@@ -104,7 +104,7 @@ $$
 
 D is HBM bytes, t elapsed kernel time, F executed floating-point work, q bytes delivered by an independent load, and ell the assumed memory-return latency. The last relation is a concurrency estimate from Little's law, not a guarantee of saturation. In the RMSNorm example, 537 million bytes divided by 182 microseconds gives 2.95 trillion bytes per second. Fusion reduces the pair's traffic from 1342 to 805 MB, a theoretical reduction of 40.0% before new instruction or resource costs.
 
-At 25 GB/s per SM and 340 nanoseconds latency, approximately 8500 bytes must be outstanding. Loads delivering 128 bytes per warp need roughly 67 independent warp loads. Those delivering 512 bytes need 17. Vectorization changes the payload per issued load, while unrolling changes the number of independent loads. Check alignment, register growth, and spills after either change. If measured HBM traffic rises through spilling, the apparent latency-hiding improvement can defeat itself.
+At 25 GB/s per SM and 340 nanoseconds latency, approximately 8500 bytes must be outstanding. Loads delivering 128 bytes per warp need roughly 67 independent warp loads, while those delivering 512 bytes need 17, because vectorization changes the payload per issued load and unrolling changes the number of independent loads. Check alignment, register growth, and spills after either change. If measured HBM traffic rises through spilling, the apparent latency-hiding improvement can defeat itself.
 
 ### Common misconceptions
 

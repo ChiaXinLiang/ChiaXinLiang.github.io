@@ -113,11 +113,11 @@ The formula is the tool to keep. 6 numbers multiplied together tell you, before 
 
 ### Sources
 
-- Kwon et al., *Efficient Memory Management for Large Language Model Serving with PagedAttention* (vLLM), SOSP 2023 — [arxiv.org/abs/2309.06180](https://arxiv.org/abs/2309.06180)
-- Ainslie et al., *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*, 2023 — [arxiv.org/abs/2305.13245](https://arxiv.org/abs/2305.13245)
-- Shazeer, *Fast Transformer Decoding: One Write-Head Is All You Need* (MQA), 2019 — [arxiv.org/abs/1911.02150](https://arxiv.org/abs/1911.02150)
-- DeepSeek-AI, *DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model* (MLA), 2024 — [arxiv.org/abs/2405.04434](https://arxiv.org/abs/2405.04434)
-- Grattafiori et al., *The Llama 3 Herd of Models*, 2024 — [arxiv.org/abs/2407.21783](https://arxiv.org/abs/2407.21783)
-- vLLM documentation, automatic prefix caching and paged KV memory — [docs.vllm.ai](https://docs.vllm.ai)
+- Kwon et al., *Efficient Memory Management for Large Language Model Serving with PagedAttention* (vLLM), SOSP 2023. [arxiv.org/abs/2309.06180](https://arxiv.org/abs/2309.06180)
+- Ainslie et al., *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*, 2023. [arxiv.org/abs/2305.13245](https://arxiv.org/abs/2305.13245)
+- Shazeer, *Fast Transformer Decoding: One Write-Head Is All You Need* (MQA), 2019. [arxiv.org/abs/1911.02150](https://arxiv.org/abs/1911.02150)
+- DeepSeek-AI, *DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model* (MLA), 2024. [arxiv.org/abs/2405.04434](https://arxiv.org/abs/2405.04434)
+- Grattafiori et al., *The Llama 3 Herd of Models*, 2024. [arxiv.org/abs/2407.21783](https://arxiv.org/abs/2407.21783)
+- vLLM documentation, automatic prefix caching and paged KV memory. [docs.vllm.ai](https://docs.vllm.ai)
 
 *Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

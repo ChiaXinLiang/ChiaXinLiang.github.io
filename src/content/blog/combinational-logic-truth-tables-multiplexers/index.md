@@ -62,7 +62,7 @@ This is where software intuition can mislead a beginner. The simulator evaluates
 
 For a concrete network, compute an extended sum of 2 4-bit operands and compare the operands for equality. The sum needs 5 bits to retain unsigned carry. The equality result needs 1 bit. A selector that returns either the sum or a constant needs an output width appropriate to both choices. Drawing only unnamed boxes hides these width decisions; annotate the function and its port widths before writing the RTL.
 
-Propagation delay affects the completed network. An output may briefly change several times after the inputs change because paths have different delays. An ordinary 0-delay RTL simulation is useful for functional evaluation, but it cannot establish the waveform of a routed combinational network. If an output controls an asynchronous event or leaves the device directly, its transient behavior may require special attention beyond this lesson's synchronous use case.
+Propagation delay affects the completed network. An output may briefly change several times after the inputs change because paths have different delays, and an ordinary 0-delay RTL simulation is useful for functional evaluation but cannot establish the waveform of a routed combinational network, so if an output controls an asynchronous event or leaves the device directly, its transient behavior may require special attention beyond this lesson's synchronous use case.
 
 A dependency graph is a useful design tool. Write which inputs each intermediate result needs, then connect those results to their consumers. 2 branches with no mutual dependency can be computed concurrently in a spatial mapping. Sharing one arithmetic unit introduces selection, scheduling, and storage that do not appear in the pure combinational graph. That is an architectural change rather than a cosmetic rearrangement of the same diagram.
 
@@ -76,7 +76,7 @@ The contrast in this figure concerns an omitted assignment. In the complete bloc
 
 The relevant storage is an inferred latch under the appropriate synthesis interpretation, not an explicitly edge-triggered register. A latch's transparency and retention behavior differ from a flip-flop capturing on a clock edge. Replacing the latch icon with a clocked register would hide the actual problem. Some tools warn or reject incomplete assignments in an always_comb block; the beginner should fix the functional coverage rather than depend on a warning to make the output correct.
 
-Completeness applies to every output and to every branch through a procedure. A case statement missing an applicable input value can have the same problem. Nested conditionals can assign one field while leaving another uncovered. Providing defaults at the start of the block is often a readable way to cover these paths, as long as the chosen defaults actually match the specification.
+Completeness applies to every output and to every branch through a procedure: a case statement missing an applicable input value can have the same problem, and nested conditionals can assign one field while leaving another uncovered, so providing defaults at the start of the block is often a readable way to cover these paths, as long as the chosen defaults actually match the specification.
 
 The complete mux has an intentional default of a. For other functions, 0 is not automatically the right default. A default should represent defined behavior for the uncovered conditions. If an input combination is illegal, decide whether the design reports it, maps it to a safe value, or relies on an asserted external contract. Silently assigning 0 can hide a missing requirement even though it prevents a latch.
 
@@ -90,7 +90,7 @@ The next [digital-state lesson](/blog/fpga-ai-logic-1-digital-logic-for-ai-hardw
 
 The scoreboard figure splits stimulus into the DUT and the reference. The reference calculates the expected output from the input values and the mux contract. It does not use the observed output to decide what should have happened. Both outputs meet at the comparison, whose result determines pass or fail. Independence makes the comparison meaningful.
 
-For 2-bit a and b and 1-bit s, nested loops enumerate 4 times 4 times 2 cases. In each case, apply the input patterns, let the combinational simulation settle, compute the expected selection, and compare y. Stop with a diagnostic if any case differs. The diagnostic should contain a, b, s, expected y, and observed y, so you can reconstruct the selection error without rerunning an opaque test.
+For 2-bit a and b and 1-bit s, nested loops enumerate 4 times 4 times 2 cases, and in each case you apply the input patterns, let the combinational simulation settle, compute the expected selection, and compare y, stopping with a diagnostic if any case differs: the diagnostic should contain a, b, s, expected y, and observed y, so you can reconstruct the selection error without rerunning an opaque test.
 
 Use an integer reference or a simple conditional expression outside the DUT implementation. Copying a complex internal helper into the testbench can repeat the same error. Here the reference is intentionally small: b if s is 1, otherwise a. Its convention comes from the specification. The DUT may use a procedural block or a continuous assignment without changing that expectation.
 

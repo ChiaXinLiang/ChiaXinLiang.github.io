@@ -26,7 +26,7 @@ Consider an illustrative incident: a dense 13-billion-parameter model serves 8 i
 
 Decode usually advances each active sequence by 1 token per iteration. A batch of 8 sequences therefore produces 8 output tokens after 1 model forward pass. The weight matrices can be reused across those sequences, although that reuse depends on the actual kernels, cache behavior, and matrix shapes. Prefill is different: it processes many prompt positions together and often has enough arithmetic reuse to use tensor cores effectively.
 
-First isolate these phases. Record prompt lengths, generated lengths, active batch size, precision, parallelism, and the exact serving-engine version. A request with a long prompt can briefly make the GPU compute-bound; that does not establish that its later decode steps have the same bottleneck. Capture stable decode windows instead of averaging prefill and decode into 1 utilization number.
+First isolate these phases. Record prompt lengths, generated lengths, active batch size, precision, parallelism, and the exact serving-engine version. A request with a long prompt can briefly make the GPU compute-bound, which does not establish that its later decode steps have the same bottleneck, so capture stable decode windows instead of averaging prefill and decode into 1 utilization number.
 
 Also separate aggregate output throughput from per-request streaming speed. If 8 users each receive 40 tokens per second, aggregate throughput is 320 output tokens per second. Reporting only 40 makes the system look 8 times less productive; reporting only 320 hides whether the user experience is acceptable. Both metrics matter, and neither can be inferred from the activity gauge.
 
@@ -44,7 +44,7 @@ t_{\mathrm{step}} \gtrsim \frac{P s_w}{\beta_{\mathrm{eff}}},\qquad
 R_{\mathrm{out}} \lesssim \frac{B\beta_{\mathrm{eff}}}{P s_w}.
 $$
 
-The inequalities are conditional modeling bounds. They assume the weight stream dominates, sufficient reuse across B exists, and bandwidth is the limiting resource. They are not promises about a serving framework. With sharding, use the weights and traffic local to each GPU and include communication on the critical path.
+The inequalities are conditional modeling bounds, not promises about a serving framework, and they assume the weight stream dominates, sufficient reuse across B exists, and bandwidth is the limiting resource. With sharding, use the weights and traffic local to each GPU and include communication on the critical path.
 
 For 13 billion parameters stored in BF16, the raw weights occupy approximately 26 billion bytes, or 26 GB in decimal units. Suppose measured effective bandwidth for the decode kernels is 1.2 TB/s. Streaming those weights takes at least 26/1200 seconds, approximately 21.7 milliseconds. At batch 8, the weight-only throughput ceiling is about 369 output tokens per second, while each sequence advances at about 46 tokens per second.
 
@@ -60,7 +60,7 @@ The roofline compares this intensity with the ratio of peak compute throughput t
 
 Be consistent about the numbers. A sparse peak, an FP8 peak, and dense BF16 work are different quantities. Published memory bandwidth is also a theoretical interface rate, whereas beta_eff should come from an applicable measurement. Using the vendor maximum for one side and a measured rate for the other can produce a misleadingly precise roofline.
 
-The deeper lesson is that occupancy, utilization, arithmetic intensity, and bandwidth utilization answer different questions. High occupancy can help hide memory latency but cannot create additional memory bandwidth. A kernel can have enough resident warps, remain active continuously, and still finish at the rate allowed by its memory traffic.
+The deeper lesson is that occupancy, utilization, arithmetic intensity, and bandwidth utilization answer different questions, because high occupancy can help hide memory latency but cannot create additional memory bandwidth, so a kernel can have enough resident warps, remain active continuously, and still finish at the rate allowed by its memory traffic.
 
 ### Add the KV cache to the model
 
@@ -85,13 +85,13 @@ Measure the uninstrumented workload before and after profiling. Detailed kernel 
 
 Run a controlled batch-size sweep while holding prompt length, output length, precision, and engine settings constant. If increasing B raises aggregate throughput substantially while per-sequence step time rises only slightly, improved weight reuse is a credible explanation. If step time rises rapidly with context length at fixed B, attention traffic is probably becoming important. If neither change matters and the timeline contains large CPU gaps, revisit the launch path rather than insisting on the memory hypothesis.
 
-Add a short-context versus long-context comparison. It distinguishes the relatively fixed weight stream from a growing attention history. Also check power, clocks, thermal limits, and GPU-sharing conditions, because delivered bandwidth and compute can fall under throttling or contention. A clean memory model is useful only if its assumed resource is actually available.
+Add a short-context versus long-context comparison, which distinguishes the relatively fixed weight stream from a growing attention history, and also check power, clocks, thermal limits, and GPU-sharing conditions, because delivered bandwidth and compute can fall under throttling or contention. A clean memory model is useful only if its assumed resource is actually available.
 
 ### Choose the fix that matches the evidence
 
 ![Deep dive: Choose the fix that matches the evidence](./deep-dive-component-02.png)
 
-Batching improves aggregate throughput by amortizing weight reads over more output tokens. It does not automatically improve each user's streaming latency. A larger batch can take longer per iteration, consume more KV memory, and make queueing worse if the server waits to collect work. Continuous batching should be tuned against both an output-throughput target and a token-latency target.
+Batching improves aggregate throughput by amortizing weight reads over more output tokens, but it does not automatically improve each user's streaming latency, because a larger batch can take longer per iteration, consume more KV memory, and make queueing worse if the server waits to collect work. Continuous batching should be tuned against both an output-throughput target and a token-latency target.
 
 Quantization reduces weight bytes when compatible kernels can consume the compressed representation efficiently. A 4-bit storage format is not equivalent to a 4-times speedup: scales, metadata, packing, dequantization, and activation precision contribute overhead. Test the exact checkpoint and kernel path; connect this diagnosis with the separate case on [why a quantized model is not faster](/blog/case-quantized-model-isnt-faster/).
 
@@ -108,7 +108,7 @@ For example, suppose the baseline completes 3 hundred requests within the target
 
 ### Common misconceptions
 
-“100% utilization means maximum performance.” It means kernels were active through the sampling period under NVIDIA's definition. The useful throughput can still be limited by memory, poor shapes, or irrelevant work. A token metric and a resource-specific profile are needed to interpret that activity.
+“100% utilization means maximum performance.” It means kernels were active through the sampling period under NVIDIA's definition, the useful throughput can still be limited by memory, poor shapes, or irrelevant work, and interpreting that activity takes a token metric plus a resource-specific profile.
 
 “More batching makes every request faster.” Batching often increases aggregate outputs per second through reuse. The individual token interval can increase, and extra queueing may outweigh the reuse. Report aggregate throughput alongside per-request inter-token latency.
 

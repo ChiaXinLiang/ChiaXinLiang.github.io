@@ -60,7 +60,7 @@ Reset strategy also needs attention. Independently resetting source and destinat
 
 ![Deep dive: A handshake preserves an event and stable data](./deep-dive-component-03.png)
 
-The handshake figure keeps bundled data stable at the source while the request travels to the destination. The destination observes the synchronized request, captures the held data under the documented protocol, and returns an acknowledgement through a reverse-direction synchronization path. The source does not change or replace the data until the acknowledgement establishes that the transfer completed.
+The handshake figure keeps bundled data stable at the source while the request travels to the destination, where the destination observes the synchronized request, captures the held data under the documented protocol, and returns an acknowledgement through a reverse-direction synchronization path, and the source does not change or replace the data until that acknowledgement establishes that the transfer completed.
 
 The request travels source to destination, while acknowledgement travels destination to source. Reversing either arrow destroys the ownership story. Data does not need to pass through a separate 2-flop chain for every bit under this bundled-data contract; instead, the protocol and implementation must ensure that the complete word is stable when the destination captures it. The stability relationship needs appropriate design and physical consideration.
 
@@ -70,7 +70,7 @@ This mechanism trades throughput for explicit completion. A source may wait seve
 
 A digital protocol test can vary source and destination clock periods, insert delays, and verify that accepted words arrive once and in order. It should check data stability while busy and the legal request-acknowledgement sequence. Such a test is useful but does not quantify metastability or prove routed bundled-data timing. The foundations release teaches the contract and does not claim a physically signed-off implementation of this handshake.
 
-When integrating a crossing, write down which side owns the data at each phase and exactly which event permits reuse of the source register. This resembles a normal ownership protocol but adds independent observation delays. Clear ownership prevents a source from assuming that destination acceptance occurred just because it asserted request on its own clock.
+When integrating a crossing, write down which side owns the data at each phase and exactly which event permits reuse of the source register, a discipline that resembles a normal ownership protocol but adds independent observation delays, and that clear ownership prevents a source from assuming destination acceptance occurred just because it asserted request on its own clock.
 
 ### An asynchronous FIFO separates local ownership
 

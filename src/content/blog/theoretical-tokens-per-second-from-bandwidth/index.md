@@ -18,7 +18,7 @@ tags: ['gpu', 'inference', 'math']
 
 23.9 output tokens per second is the bandwidth-only ceiling for reading 140 GB of weights once per decode step through a 3.35 TB/s memory interface. That number is not a measured H100 result. It is the answer to a deliberately simplified question: how many complete weight reads can memory perform each second?
 
-The calculation is useful precisely because its assumptions are visible. It can reject an implausible claim, explain why batching changes aggregate throughput, and identify when cache traffic matters. It cannot describe a deployment that does not fit in memory, or replace a benchmark with the actual checkpoint, kernels, and request distribution.
+The calculation is useful precisely because its assumptions are visible: it can reject an implausible claim, explain why batching changes aggregate throughput, and identify when cache traffic matters, but it cannot describe a deployment that does not fit in memory, and it cannot replace a benchmark run with the actual checkpoint, kernels, and request distribution.
 
 We use NVIDIA's specified H100 SXM bandwidth as a hardware input and a rounded dense 70B model as the workload. Since its BF16 weights exceed 1 H100's memory, the 23.9 figure is a counterfactual bandwidth illustration. A practical 1-GPU example will instead use an illustrative 4-bit representation. Keep that distinction explicit when quoting any ceiling.
 
@@ -163,7 +163,7 @@ The final GPU Math article derives [the batch size at the compute-bound transiti
 
 Prefill processes many prompt tokens together, which creates large matrix multiplications with more weight reuse. Its arithmetic intensity can be far higher than 1-token decode. So you cannot infer a prompt ingestion rate by dividing bandwidth by model weight size.
 
-Attention work also grows with sequence length for ordinary full attention, though optimized algorithms avoid materializing a full score matrix in HBM. Long prompts may expose compute or workspace constraints that are absent in short decode. Separate input-token throughput, time to first token, output-token throughput, and time per output token in every report.
+Attention work also grows with sequence length for ordinary full attention, though optimized algorithms avoid materializing a full score matrix in HBM, so long prompts can expose compute or workspace constraints that short decode never touches, which is why every report should separate input-token throughput, time to first token, output-token throughput, and time per output token.
 
 A serving system combines those phases under a scheduler. Chunked prefill may share the GPU with decode, so a request's streaming delay depends on work admitted between its steps. A clean single-phase ceiling is valuable for diagnosis, but production latency includes scheduling interference.
 
@@ -190,7 +190,7 @@ Bandwidth divided by bytes per decode step gives a useful ceiling. To use it res
 For our illustrative quantized model, batch 8 at 8k histories has a peak-bandwidth ceiling near 457 aggregate output tokens per second, not the 721 suggested by weights alone. The difference is the KV cache, and longer histories increase it further.
 
 
-To validate the ceiling, collect a steady interval after warmup and separate generated tokens from prompt tokens. Record the number of simultaneously decoding sequences and their context lengths. Then compare observed memory traffic with the assumed weight traffic. If throughput changes while the estimated weight bytes stay fixed, investigate batching, cache reads, kernel efficiency, or scheduling overhead. A bandwidth formula is most useful when it leads to a testable hypothesis. It should explain which measurement would confirm the proposed bottleneck and which observation would require a different model of the workload.
+To validate the ceiling, collect a steady interval after warmup and separate generated tokens from prompt tokens. Record the number of simultaneously decoding sequences and their context lengths. Then compare observed memory traffic with the assumed weight traffic. If throughput changes while the estimated weight bytes stay fixed, investigate batching, cache reads, kernel efficiency, or scheduling overhead, because a bandwidth formula earns its keep when it leads to a testable hypothesis: it should say which measurement would confirm the proposed bottleneck and which observation would call for a different model of the workload.
 
 ### Sources
 

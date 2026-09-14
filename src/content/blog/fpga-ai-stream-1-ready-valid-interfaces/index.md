@@ -26,11 +26,11 @@ Start after [Pipeline the MAC: Latency, Throughput, and Timing](/blog/fpga-ai-pi
 
 ![Deep dive: A transfer happens on valid AND ready](./deep-dive-component-01.png)
 
-The handshake figure defines one transfer at a sampled edge when valid and ready are both true. Valid says the producer offers a payload; ready says the consumer can accept it. Either alone is not enough to count a transaction.
+The handshake figure defines 1 transfer at a sampled edge when valid and ready are both true. Valid says the producer offers a payload; ready says the consumer can accept it. Either alone is not enough to count a transaction.
 
 A producer may assert valid before the consumer is ready. While blocked, it must keep the offered payload stable under this stream contract. The consumer can change ready according to capacity, subject to the interface's timing rules.
 
-This turns arithmetic enable into a meaningful event: enable equals accepted work, not simply offered work. A counter and accumulator should advance only when their required transaction actually occurs. The distinction matters for memory stalls and later tile scheduling.
+This turns arithmetic enable into a meaningful event: enable equals accepted work, not simply offered work. A counter and INT32 accumulator should advance only when their required transaction actually occurs. The distinction matters for memory stalls and later tile scheduling.
 
 ### Hold payload under backpressure
 
@@ -46,7 +46,7 @@ Backpressure does not solve sustained rate mismatch. If a producer permanently o
 
 ![Deep dive: Build an elastic one-entry buffer](./deep-dive-component-03.png)
 
-The elastic-buffer figure stores one payload plus an occupancy bit. Input ready is true when the buffer is empty or the current output can depart. That allows simultaneous dequeue and enqueue: the departing item is replaced without a wasted bubble.
+The elastic-buffer figure stores 1 payload plus an occupancy bit. Input ready is true when the buffer is empty or the current output can depart. That allows simultaneous dequeue and enqueue: the departing item is replaced without a wasted bubble.
 
 In elastic.sv, output validity is the full/empty state. When input is ready, the next validity equals input valid, and accepted input data replaces the stored payload. When blocked, both state and payload hold. Reset clears validity.
 
@@ -60,7 +60,7 @@ The sequence figure compares accepted inputs with accepted outputs. The shared t
 
 The recorded run includes 500 cycles and 133 blocked-input cycles. The run exercises simultaneous replacement and final drain. Payloads are simple sequence numbers because they make an incorrect order visible; arithmetic modules use signed/random values separately.
 
-An elastic stream can surround a MAC or memory consumer, but the internal unit must obey the same advance conditions. A globally stalled systolic array is one distinct contract; independently stallable PEs require a more complex protocol and are not implied by this one-entry buffer.
+An elastic stream can surround a MAC or memory consumer, but the internal unit must obey the same advance conditions. A globally stalled 4×4 systolic array is one distinct contract; independently stallable PEs require a more complex protocol and are not implied by this one-entry buffer.
 
 ### Run this lesson
 
@@ -96,11 +96,11 @@ endmodule
 
 Write the accepted-work event for every boundary. For a ready/valid stream, it is valid AND ready at the sampled edge. For the released systolic core, it is a common global step. These are different protocols. Connecting them requires buffering or a scheduler that preserves matched operand pairs and advances every affected state consistently.
 
-Track data and validity together. A register can contain old bits while its valid flag is false; those bits must not become an output transaction. Clear/reset invalidates pending work according to the chosen contract. If a pipeline is stalled, its payload, validity and ownership must remain aligned. A consumer may not reuse a buffer before its producer/previous consumer completes the relevant stage.
+Track data and validity together. A register can contain old bits while its valid flag is false; those bits must not become an output transaction. Clear/reset invalidates pending work according to the chosen contract, a stalled pipeline must keep its payload, validity and ownership aligned, and a consumer may not reuse a buffer before its producer or previous consumer completes the relevant stage.
 
 Use a FIFO scoreboard to check sequence as well as values. A test that counts transactions alone can miss swapped payloads, while a test of a final sum alone can hide duplicated and missing items that cancel numerically. Directed reset/stall fixtures supplement reproducible random traffic.
 
-After a local block passes, connect one additional boundary at a time and keep the same oracle. A passing simulation supports the exercised contract, not physical timing or every possible sequence. Keep the released test report with the exact source revision so a later wrapper or pipeline change creates an explicit new verification step.
+After a local block passes, connect one additional boundary at a time and keep the same oracle, remembering that a passing simulation supports the exercised contract rather than physical timing or every possible sequence, and keep the released test report with the exact source revision so a later wrapper or pipeline change creates an explicit new verification step.
 
 ### A worked engineering decision
 
@@ -130,7 +130,7 @@ Also inspect the combinational ready path. The equation includes downstream read
 
 #### Connect elastic events to the systolic core carefully
 
-The systolic array uses a common global step rather than independent ready/valid movement at every PE. A front-end stream buffer can retain incoming operands, but it does not automatically establish matched A/B arrivals. A scheduler must advance the array only when the required boundary operands and masks are available, preserving the row/column skew. This is a protocol bridge, not a renaming of ready to step.
+The 4×4 systolic array uses a common global step rather than independent ready/valid movement at every PE, and a front-end stream buffer can retain incoming operands without automatically establishing matched A/B arrivals, so a scheduler must advance the array only when the required boundary operands and masks are available, preserving the row/column skew. This is a protocol bridge, not a renaming of ready to step.
 
 If only A is available, independently accepting and forwarding it into a globally stepped array can misalign it with B. Pair or schedule the operands according to the array contract, and retain their validity together with data. The simple PE has no independent input queues or done counter; those features belong in a wrapper or controller if needed. The stream lesson therefore supplies a building block, not a complete matrix front end.
 

@@ -40,13 +40,13 @@ The weight-stationary figure describes an alternative where weights remain resid
 
 A legal WS implementation must define how a partial sum reaches the right accumulator and how weights are loaded/replaced. Its ports, links and pipeline state can differ. Reusing a weight without accounting for partial-sum traffic produces an incomplete comparison.
 
-Compare both against the same mathematical oracle and workload. Then count traffic at the same boundaries. A future WS exercise should implement its own schedule and verification rather than use an OS simulation result as WS evidence.
+Compare both against the same mathematical oracle and the same 4×4 workload. Then count traffic at the same boundaries. A future WS exercise should implement its own schedule and verification rather than use an OS simulation result as WS evidence.
 
 ### Count memory traffic with the same workload
 
 ![Deep dive: Count memory traffic with the same workload](./deep-dive-component-03.png)
 
-The ledger figure distinguishes external bytes, local buffer reads and forwarded operands. For a 4×4 tile with K=8, inputs loaded once occupy 64 bytes and final INT32 output occupies 64. Naively reading two INT8 operands for every MAC creates 256 input payload bytes, before output storage.
+The ledger figure distinguishes external bytes, local buffer reads and forwarded operands, and for a 4×4 tile with K=8, inputs loaded once occupy 64 bytes while the final INT32 output occupies 64, so naively reading two INT8 operands for every MAC creates 256 input payload bytes before output storage.
 
 These are different access strategies for the same 128 useful products. A cache or local buffer may change which reads reach external memory, so source-code loads are not automatically HBM traffic. The ledger needs an explicit residency assumption.
 
@@ -68,7 +68,7 @@ Use irregular shapes to test every loop boundary. A loop ordering that works for
 
 The choice figure combines shape, capacity, port demand and routing. No dataflow name is best for every operator. A tall matrix, a wide matrix and a short reduction expose different reuse opportunities.
 
-Before selecting a mapping, estimate all simultaneously live storage and count accesses per bank per step. If the array requires four operands while one memory port supplies one, the mapping needs banking, staging or a slower step rate.
+Before selecting a mapping, estimate all simultaneously live storage and count accesses per bank per step. If the array requires 4 operands while one memory port supplies 1, the mapping needs banking, staging or a slower step rate.
 
 The practical result is an evidence-backed design choice. Keep the released OS baseline correct, implement an alternative separately, then compare useful work, traffic and timing under the same contract. Analytical ledgers guide the experiment but are not measured hardware results.
 
@@ -91,13 +91,13 @@ Initialize a new output reduction once, combine every required contribution, and
 
 Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create heavy local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
 
-The direct matrix oracle remains independent of the systolic timing trace. Use the trace to debug alignment and the oracle to verify the final result. Global stalls consume clocks without changing logical step; maintain that distinction in both the driver and the array. Once the complete tile contract is correct, measure its useful work and integration overhead separately.
+The direct matrix oracle remains independent of the systolic timing trace, so use the trace to debug alignment and the oracle to verify the final result, and maintain in both the driver and the array the distinction that global stalls consume clocks without changing logical step: once the complete tile contract is correct, measure its useful work and integration overhead separately.
 
 ### A worked engineering decision
 
 #### Compare 2 schedules without changing the operation
 
-Stationary names identify which values remain at a chosen local boundary while other work proceeds. In the released output-stationary array, C partial sums remain in PE registers while A and B move through forwarding paths. A weight-stationary alternative retains weights locally while activations and partial sums follow another schedule. The labels do not by themselves determine external traffic, because tiling and residency at larger memory boundaries still matter.
+Stationary names identify which values remain at a chosen local boundary while other work proceeds: in the released output-stationary array, C partial sums remain in PE registers while A and B move through forwarding paths, and a weight-stationary alternative retains weights locally while activations and partial sums follow another schedule. The labels do not by themselves determine external traffic, because tiling and residency at larger memory boundaries still matter.
 
 Use the same logical M, N and K and the same input/output types for a comparison. If 1 mapping computes a convolution and another computes a different matrix shape, you cannot credit the traffic difference to stationarity alone. Likewise, changing the accumulator width or applying activation earlier changes the numerical contract. Keep the complete operator and epilogue fixed before comparing storage and movement.
 
@@ -125,7 +125,7 @@ A useful cost model can weight external bytes, local reads/writes, register upda
 
 Inspect complete latency too. A schedule that minimizes bytes may serialize computation, require an extra reduction phase or increase command setup. Conversely, a schedule with more local movement may reduce expensive external traffic and improve overall completion. Compare the same correctness and timing boundaries and retain the assumptions beside the result.
 
-The architectural lesson is to make reuse concrete. Specify the value, its residence boundary, its consumers and the movement avoided. Then verify that the schedule has enough capacity and ports to deliver it. This turns a stationarity slogan into a design decision you can implement and test, while keeping the 4×4 OS engine as an unchanged numerical baseline.
+The architectural lesson is to make reuse concrete: specify the value, its residence boundary, its consumers and the movement avoided, then verify that the schedule has enough capacity and ports to deliver it, which turns a stationarity slogan into a design decision you can implement and test while keeping the 4×4 OS engine as an unchanged numerical baseline.
 
 ## Conclusion
 

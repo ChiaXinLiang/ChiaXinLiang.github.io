@@ -30,7 +30,7 @@ If goodput is a fuzzy term for you, [the goodput article](/blog/goodput-vs-utili
 
 An adaptive serving stack has, broadly, 4 families of actuators. They differ enormously in how fast they act and how much they cost to move.
 
-**Precision switching (FP8 ↔ FP4).** Decode is bandwidth-bound: every generated token requires streaming the weights and the active KV cache through HBM. Halving the weight bytes with NVFP4 roughly halves the weight-streaming floor. The trick is that you do not quantize at runtime; you keep 2 pre-quantized, pre-calibrated copies of the checkpoint, with the inactive 1 staged in host RAM, and swap the resident copy when load crosses a threshold. Quality deltas are measured offline on your evals; the runtime decision is a deliberate quality-for-capacity trade, taken only when the alternative is queueing or shedding requests. (The formats themselves are covered in [NVFP4 vs MXFP4](/blog/nvfp4-vs-mxfp4-the-4bit-format-war/).)
+**Precision switching (FP8 ↔ FP4).** Decode is bandwidth-bound: every generated token requires streaming the weights and the active KV cache through HBM. Halving the weight bytes with NVFP4 roughly halves the weight-streaming floor. The trick is that you do not quantize at runtime; you keep 2 pre-quantized, pre-calibrated copies of the checkpoint, with the inactive 1 staged in host RAM, and swap the resident copy when load crosses a threshold. Quality deltas are measured offline on your evals. The runtime decision is a deliberate quality-for-capacity trade, taken only when the alternative is queueing or shedding requests. (The formats themselves are covered in [NVFP4 vs MXFP4](/blog/nvfp4-vs-mxfp4-the-4bit-format-war/).)
 
 **Parallelism reshaping (TP ↔ PP, and the P/D ratio).** Tensor parallelism aggregates memory bandwidth across GPUs, which cuts per-token latency, but pays an all-reduce every layer. Pipeline parallelism communicates far less and yields better throughput per GPU, but adds pipeline latency and bubbles. Interactive daytime traffic wants TP; overnight batch backfill tolerates PP happily. In disaggregated stacks the analogous knob is the prefill-to-decode worker ratio: NVIDIA's Dynamo ships a Planner component that watches TTFT and inter-token latency against SLO targets and rebalances or scales prefill and decode workers accordingly. Reshaping is the slowest actuator, since it requires draining in-flight requests from the affected group.
 
@@ -64,13 +64,13 @@ This is a roofline-style bound; real engines land within about 1.3–2x of it on
 
 Once you draw the loop, classical control problems show up on schedule.
 
-**Sense.** The signal is per-SLO-class goodput plus leading indicators: queue depth, KV occupancy, prefill backlog. Utilization is explicitly not in the loop; a node can sit at 95% utilization while goodput collapses, and a controller that optimizes utilization will happily drive you there.
+**Sense.** The signal is per-SLO-class goodput plus leading indicators: queue depth, KV occupancy, prefill backlog. Utilization is explicitly not in the loop. A node can sit at 95% utilization while goodput collapses, and a controller that optimizes utilization will happily drive you there.
 
 **Decide.** In practice there is a maturity ladder. Rule-based thresholds with hysteresis come first. Then forecasting: diurnal traffic is highly predictable, so the controller can begin a 2-minute parallelism reshape *before* the ramp instead of reacting mid-ramp. Learned policies come last, and mostly for the cheap, reversible knobs.
 
 **Actuate, respecting cost.** The actuators form a hierarchy. Scheduler knobs move in milliseconds and are free. KV migration costs seconds of PCIe traffic. A precision swap costs seconds of weight streaming from host RAM. A TP↔PP reshape costs tens of seconds to minutes of drained capacity, which means the controller must forecast that the new shape will repay the transition before it commits. Cheap knobs absorb noise; expensive knobs follow trends.
 
-**Stay stable.** A controller that flips FP8→FP4 at 70% load and back at 69% will oscillate, and every oscillation costs a weight swap. Hysteresis bands, minimum dwell times, and rate limits on expensive actuators are not optional engineering polish; they are the difference between a control system and a self-inflicted incident generator.
+**Stay stable.** A controller that flips FP8→FP4 at 70% load and back at 69% will oscillate, and every oscillation costs a weight swap. Hysteresis bands, minimum dwell times, and rate limits on expensive actuators are not optional engineering polish. They are the difference between a control system and a self-inflicted incident generator.
 
 ### A controller must repay the transition
 
@@ -94,13 +94,13 @@ Use hysteresis and a minimum dwell time, include transition cost in the objectiv
 
 **"Dynamic precision means quantizing on the fly, so quality is unpredictable."** No production design re-quantizes at runtime. Both checkpoint copies are produced offline with proper calibration, evaluated on the team's quality suite, and the FP4 copy is only armed if that eval passes. The runtime component is a pointer swap plus a weight stream from host RAM. The quality difference is real but it is a known, measured constant, chosen deliberately over the alternative of shedding user requests at the peak.
 
-**"Our GPUs are at 100% utilization, so there is nothing left to retune."** High utilization tells you the SMs are busy, not that the work is useful or that SLOs are being met. The peak-hour example above goes from 16,400 to 37,000 tok/s at essentially the same utilization; the win comes from moving fewer bytes per token, not from filling idle cycles. If utilization is your control signal, you cannot even see this improvement, which is precisely [the goodput argument](/blog/goodput-vs-utilization/).
+**"Our GPUs are at 100% utilization, so there is nothing left to retune."** High utilization tells you the SMs are busy, not that the work is useful or that SLOs are being met. The peak-hour example above goes from 16,400 to 37,000 tok/s at essentially the same utilization. The win comes from moving fewer bytes per token, not from filling idle cycles. If utilization is your control signal, you cannot even see this improvement, which is precisely [the goodput argument](/blog/goodput-vs-utilization/).
 
 ### Where this sits, and an honest caveat
 
 Adaptive serving is the natural next step of a story this series has been tracking. Disaggregation split prefill from decode so each could be provisioned separately ([the disaggregation story](/blog/the-prefill-decode-disaggregation-story/)); once the split exists, the P/D ratio becomes a runtime variable, and Dynamo's Planner already treats it as 1. Hardware is moving the same direction, with prefill-specialized parts like [Rubin CPX](/blog/prefill-gets-its-own-chip-rubin-cpx/) making the fleet mix itself a tunable. The through-line is that every boundary that used to be fixed at deployment time is becoming a control variable.
 
-The caveat: most teams should not build any of this yet. If you have not exhausted static tuning, so a properly benchmarked TP degree, precision, and scheduler config for your *actual* traffic mix, plus plain replica autoscaling, you will capture the large majority of the available win with a fraction of the complexity. Every runtime actuator is also a new failure mode, and a buggy controller is an outage with a feedback loop. The adaptive frontier pays off where fleets are large enough that a recovered 20% is millions of dollars a year and where an infra team can own a control system as a product. Everyone else should read this as a preview of what their serving framework will eventually do for them; the vLLM, SGLang, and Dynamo roadmaps all point here.
+The caveat: most teams should not build any of this yet. If you have not exhausted static tuning, so a properly benchmarked TP degree, precision, and scheduler config for your *actual* traffic mix, plus plain replica autoscaling, you will capture the large majority of the available win with a fraction of the complexity. Every runtime actuator is also a new failure mode, and a buggy controller is an outage with a feedback loop. The adaptive frontier pays off where fleets are large enough that a recovered 20% is millions of dollars a year and where an infra team can own a control system as a product. Everyone else should read this as a preview of what their serving framework will eventually do for them. The vLLM, SGLang, and Dynamo roadmaps all point here.
 
 ## Conclusion
 
@@ -110,11 +110,11 @@ The caveat: most teams should not build any of this yet. If you have not exhaust
 
 ### Sources
 
-- Zhong et al., *DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving* (OSDI 2024) — https://arxiv.org/abs/2401.09670
-- Qin et al., *Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving* — https://arxiv.org/abs/2407.00079
-- NVIDIA Dynamo (Planner, KV block manager) — https://github.com/ai-dynamo/dynamo
-- vLLM (chunked prefill, preemption and CPU swap, prefix caching) — https://github.com/vllm-project/vllm
-- SGLang (radix cache, hierarchical KV caching) — https://github.com/sgl-project/sglang
-- CUDA C++ Programming Guide, unified memory and `cudaMemAdvise` — https://docs.nvidia.com/cuda/cuda-c-programming-guide/
+- Zhong et al., *DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving* (OSDI 2024). https://arxiv.org/abs/2401.09670
+- Qin et al., *Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving*. https://arxiv.org/abs/2407.00079
+- NVIDIA Dynamo (Planner, KV block manager). https://github.com/ai-dynamo/dynamo
+- vLLM (chunked prefill, preemption and CPU swap, prefix caching). https://github.com/vllm-project/vllm
+- SGLang (radix cache, hierarchical KV caching). https://github.com/sgl-project/sglang
+- CUDA C++ Programming Guide, unified memory and `cudaMemAdvise`. https://docs.nvidia.com/cuda/cuda-c-programming-guide/
 
 *Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

@@ -33,20 +33,20 @@ u_\ell=x_\ell+\operatorname{Attention}_\ell(\operatorname{RMSNorm}_\ell(x_\ell))
 x_{\ell+1}=u_\ell+\operatorname{MoE}_\ell(\operatorname{RMSNorm}'_\ell(u_\ell)).
 $$
 
-The expert branch therefore receives the state after attention's residual update. It is not evaluated on an unrelated copy of the original layer input. This ordering affects both the mathematical graph and live-value dependencies in an implementation.
+Because the notation above writes the 2 transitions separately, you can see that the expert branch receives the state after attention's residual update rather than an unrelated copy of the original layer input, and that ordering affects both the mathematical graph and the live-value dependencies in an implementation.
 
 The residual path preserves an additive route for information and gradients. It does not make a branch optional or establish that removing it leaves behavior unchanged. Trained branch outputs remain part of the computation.
 
 ### 2. Derive RMS normalization
 
-RMSNorm divides a representation by a root-mean-square statistic and applies learned per-coordinate scaling. Unlike ordinary mean-subtracting layer normalization, this formulation does not center the vector before scaling.
+Unlike ordinary mean-subtracting layer normalization, which centers the vector first, RMSNorm divides a representation by a root-mean-square statistic and applies learned per-coordinate scaling without centering it at all.
 
 $$
 r(x)=\sqrt{\frac{1}{d}\sum_{i=1}^{d}x_i^2+\epsilon},\qquad
 \operatorname{RMSNorm}(x)_i=\gamma_i\frac{x_i}{r(x)}.
 $$
 
-The epsilon term controls numerical behavior near zero. The learned gamma adjusts coordinate scales. Accumulation dtype and cast placement matter in low-precision execution, so use the implementation's actual numerical path when testing equivalence.
+The epsilon term controls numerical behavior near zero, and the learned gamma adjusts coordinate scales, one per hidden channel, so 2,880 of them at the reference's default width; accumulation dtype and cast placement matter in low-precision execution, so use the implementation's actual numerical path when testing equivalence.
 
 Normalization belongs to a branch's input transformation. The residual addition still uses the original stream for that branch. Saving or aliasing these values incorrectly can change the graph even if every individual normalization formula looks correct.
 
@@ -54,22 +54,22 @@ Normalization belongs to a branch's input transformation. The residual addition 
 
 The reference defaults list hidden width 2,880, attention head width 64, 64 query heads, and 8 key-value heads. The combined query-head width is therefore 4,096, which differs from hidden width. A projection can map between these dimensions; they need not be equal.
 
-This is a useful example of why head width should not be inferred by dividing hidden width by query heads. The released configuration explicitly provides both. Output projection brings the attention result back to the residual interface width.
+This is a useful example of why head width should not be inferred by dividing hidden width 2,880 by 64 query heads, because the released configuration explicitly provides both, and the output projection then brings the attention result back to the residual interface width.
 
-The next article examines grouped key-value heads, alternating windows, and sinks. Here the important interface is that the attention branch must return a vector compatible with the residual stream, regardless of its internal projection dimensions.
+The next article examines the 8 grouped key-value heads, alternating windows, and sinks. Here the important interface is that the attention branch must return a vector compatible with the residual stream, regardless of its internal projection dimensions.
 
 ### 4. Trace router selection
 
 ![Deep dive: 4. Trace router selection](./deep-dive-component-03.png)
 
-The expert branch normalizes its input and calculates router logits through a learned linear map. The reference uses top-k selection on those logits, then softmax over the selected values. This is more precise than saying it “uses router probabilities” without naming the normalization population.
+The expert branch normalizes its input and calculates router logits through a learned linear map, one logit per expert, and the reference then takes top-k selection over those 128 logits and applies softmax only to the selected values, which is more precise than saying it “uses router probabilities” without naming the normalization population.
 
 $$
 S(x)=\operatorname{TopK}(W_rx+b_r,4),\qquad
 a_e=\frac{\exp z_e}{\sum_{j\in S(x)}\exp z_j}\quad(e\in S(x)).
 $$
 
-The selected weights sum to unity within the chosen set. The reference retrieves the selected expert weight tensors and applies their functions. Other experts are not executed in that routed forward path.
+The selected weights sum to unity within the chosen set of 4. The reference retrieves the selected expert weight tensors and applies their functions. Other experts are not executed in that routed forward path.
 
 Top-k ties and numerical score differences can change selected indices. A reproduction should follow the supported selection behavior rather than expecting a smooth derivative through an arbitrary tie. Tests away from ties are useful for verifying the combine arithmetic separately.
 
@@ -92,7 +92,7 @@ Bias terms also matter. Removing them because another LLM family uses bias-free 
 
 ### 6. Combine expert outputs correctly
 
-The reference forms a weighted sum across selected experts and adds the result to the expert branch's residual input. The token-to-expert association must remain intact through any grouping or distributed execution.
+The reference forms a weighted sum across the 4 selected experts and adds the result to the expert branch's residual input. The token-to-expert association must remain intact through any grouping or distributed execution.
 
 $$
 \operatorname{MoE}(x)=\sum_{e\in S(x)}a_eF_e(x).
@@ -104,7 +104,7 @@ A selected expert should contribute once. Duplicated dispatch, lost output, or c
 
 ### 7. Distinguish expert and tensor parallelism
 
-The official reference supports a small amount of tensor parallelism inside its MoE implementation. It can partition expert intermediate work and use an all-reduce before adding the appropriate output bias. This is not the same thing as assigning disjoint complete experts to different devices.
+The official reference supports a small amount of tensor parallelism inside its MoE implementation. It can partition expert intermediate work and use an all-reduce before adding the appropriate output bias. This is not the same thing as assigning disjoint subsets of the 128 complete experts to different devices.
 
 Expert parallelism routes assignments to devices that own selected experts. Tensor parallelism divides arithmetic or weights within a function. A deployment can combine them, but their communication patterns and residency formulas differ.
 

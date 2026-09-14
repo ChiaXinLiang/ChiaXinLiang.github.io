@@ -26,14 +26,14 @@ This article follows the official reference code rather than inferring implement
 
 ![Deep-dive illustration: Derive the alternating mask](./deep-dive.png)
 
-The reference applies the local window on every other layer, using the layer index to choose local or unrestricted causal attention. For a local layer, query position t attends to the current position and preceding positions within the window. Global layers retain the ordinary causal eligibility rule.
+The reference applies the local window on every other layer, using the layer index to choose local or unrestricted causal attention, so on a local layer query position t attends to the current position and the preceding positions inside the 128-token window, while global layers retain the ordinary causal eligibility rule.
 
 $$
 \mathcal E_t^{\mathrm{global}}=\{i:0\le i\le t\},\qquad
 \mathcal E_t^{\mathrm{local}}=\{i:\max(0,t-w+1)\le i\le t\}.
 $$
 
-The window convention here includes the current token, matching the reference's mask boundary. Off-by-one definitions matter when comparing kernels. A backend using a different “window size” convention must translate it correctly.
+The window convention here includes the current token, matching the reference's mask boundary, so off-by-one definitions matter when comparing kernels: a backend that reads the default window of 128 under a different “window size” convention must translate it correctly.
 
 Alternating layers create different paths for recent and distant information. A local layer can receive a representation already influenced by a preceding global layer. It is therefore incorrect to say that every local layer makes the entire model unable to use older context.
 
@@ -41,27 +41,27 @@ Alternating layers create different paths for recent and distant information. A 
 
 ![Deep dive: 2. Calculate logical cache capacity](./deep-dive-component-01.png)
 
-If local layers retain only their necessary recent state, while global layers retain full history, a simple logical cache estimate separates them. Let L_G and L_W be their layer counts and let n be current sequence length.
+If local layers retain only their necessary recent state, while global layers retain full history, a simple logical cache estimate separates the 2 families. Let L_G and L_W be their layer counts and let n be current sequence length.
 
 $$
 M_{KV}\approx2BH_{KV}d_hs\left[L_Gn+L_W\min(n,w)\right].
 $$
 
-The formula assumes equal dimensions and stored dtype across those layers. It excludes allocator padding and other metadata. A backend can retain more history than mathematically required, so inspect actual allocation rather than assuming it exploits every local-storage opportunity.
+The formula assumes equal dimensions and stored dtype across those layers, the default head width 64 in every case, and it excludes allocator padding and other metadata. A backend can retain more history than mathematically required, so inspect actual allocation rather than assuming it exploits every local-storage opportunity.
 
-For short contexts below the window, both families retain similar lengths. For long contexts, global layers dominate the growing term. Alternating local attention reduces one component; it does not make the complete cache constant-size.
+For short contexts below the window of 128, both families retain similar lengths. For long contexts, global layers dominate the growing term. Alternating local attention reduces one component; it does not make the complete cache constant-size.
 
 ### 3. Explain grouped head mapping
 
 The reference's attention tensor arrangement explicitly expands key and value views across the query multiplicity. With 64 queries and 8 key-value heads, each KV head serves 8 query heads. Logical view expansion need not mean allocating a copied history in an optimized implementation.
 
-The query heads can produce different attention distributions over shared keys. Grouping shares representations, while each query still contributes its own compatibility scores. The output projection then maps combined head results into the residual width.
+The 8 query heads that share 1 key-value head can still produce different attention distributions over those same keys, because grouping shares the representations while each query contributes its own compatibility scores, and the output projection then maps the combined head results into the residual width.
 
-Test this mapping with distinct values for each KV head. An implementation using a wrong grouping order can preserve every tensor shape while pairing queries with unintended content. Shape validation alone is not a complete correctness check.
+Test this mapping with distinct values for each of the 8 KV heads. An implementation using a wrong grouping order can preserve every tensor shape while pairing queries with unintended content. Shape validation alone is not a complete correctness check.
 
 ### 4. Derive the attention sink
 
-The reference appends a learned per-head sink logit to the ordinary score row before softmax. It then discards the sink's probability when combining token values. The sink therefore participates in normalization without adding a value vector.
+The reference appends a learned per-head sink logit, 1 for each of the 64 query heads, to the ordinary score row before softmax. It then discards the sink's probability when combining token values. The sink therefore participates in normalization without adding a value vector.
 
 $$
 p_i=\frac{\exp z_i}{\exp s+\sum_{j\in\mathcal E_t}\exp z_j},\qquad
@@ -95,13 +95,13 @@ The model card reports MXFP4 quantization of MoE weights. Those weights are part
 
 Stored packed weights can be decoded or processed by kernels using another arithmetic precision. The straightforward PyTorch reference upcasts its weights to BF16. Its allocation and throughput therefore differ from optimized kernels that preserve packed representations.
 
-A resource report should list expert-weight storage, nonsparse-weight storage, cache dtype, accumulator dtype, and temporary buffers separately. One precision label for the entire model conceals the actual implementation.
+A resource report should list expert-weight storage, nonsparse-weight storage, cache dtype, accumulator dtype, and temporary buffers separately. A single precision label such as MXFP4 for the entire model conceals the actual implementation.
 
 ### 8. Include quantization metadata
 
 ![Deep dive: 8. Include quantization metadata](./deep-dive-component-04.png)
 
-Block-scaled low-precision weights include scale data alongside packed values. Their effective bytes per parameter exceed the nominal value-bit count when metadata is included. Padding, alignment, and nonquantized tensors add more storage.
+Block-scaled low-precision weights include scale data alongside packed values. Their effective bytes per parameter exceed the nominal 4-bit value count when metadata is included. Padding, alignment, and nonquantized tensors add more storage.
 
 For a generic block of b values with 4-bit payload and one 8-bit scale, the simple effective bit count is:
 
@@ -119,7 +119,7 @@ The official card states that gpt-oss-120b can run on an 80 GB GPU under its low
 
 An educational implementation that expands weights to BF16 can require more device memory. A serving implementation can also allocate cache and other buffers beyond the checkpoint. Use actual peak memory under the intended workload when deciding capacity.
 
-The architecture's alternating windows and grouped heads help determine logical cache growth, while quantized experts help determine weight bytes. These are complementary categories, not interchangeable explanations for one memory figure.
+The architecture's alternating windows and grouped heads help determine logical cache growth, while quantized experts help determine weight bytes. These are complementary categories, not interchangeable explanations for a single 80 GB memory figure.
 
 ### 10. Test local-global transitions
 
@@ -133,7 +133,7 @@ When a backend uses ring-buffer storage for local history, ensure physical wrapa
 
 ![Deep dive: 11. Benchmark each mechanism at its own boundary](./deep-dive-component-03.png)
 
-Measure prefill, decode, and memory separately. Local attention changes eligible positions, while grouped heads change retained representations and potential operand reuse. Sink handling adds a normalization term whose implementation cost depends on the kernel.
+Measure prefill, decode, and memory separately. Local attention changes eligible positions to the most recent 128, while grouped heads change retained representations and potential operand reuse. Sink handling adds a normalization term whose implementation cost depends on the kernel.
 
 Compare equivalent numerical paths and keep checkpoint, backend, cache dtype, batch distribution, and context lengths fixed. A speedup involving both a new quantized expert kernel and another attention implementation is a system result; it cannot isolate one architectural mechanism without further controls.
 
@@ -157,7 +157,7 @@ Record both sources in a deployment report. The architecture explains the comput
 
 ![Deep dive: 14. Relate the sink to online softmax statistics](./deep-dive-component-02.png)
 
-A tiled attention algorithm maintains a running maximum and a running exponential sum while processing score blocks. Including a sink means that its logit participates in those statistics. A conceptual initialization can begin with the sink as an already observed score and no value numerator. Subsequent token blocks update the denominator and weighted-value numerator under the same rescaling rule.
+A tiled attention algorithm maintains a running maximum and a running exponential sum while processing score blocks, and including a sink means its logit participates in those statistics, so a conceptual initialization can begin with the sink as an already observed score and no value numerator, after which subsequent token blocks update the denominator and weighted-value numerator under the same rescaling rule.
 
 This explanation does not prescribe the official optimized kernel's exact schedule. It shows why the sink cannot be added by scaling the output with an unrelated fixed constant. Its probability depends on the competing token scores, so the correct factor changes with each query. A fixed postprocessing multiplier would generally implement another function.
 

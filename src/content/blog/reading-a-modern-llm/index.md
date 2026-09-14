@@ -25,7 +25,7 @@ This article develops a practical reading method. We start with a deliberately s
 
 3 layers of description are easy to confuse. Architecture defines the operations and connections: layer types, widths, projections, routing, and state. A checkpoint supplies learned parameter values, often packaged with a particular numerical representation. Serving policy determines how requests are scheduled, batched, cached, or sampled. These layers interact, but changing a scheduler does not automatically change the underlying model architecture.
 
-A useful reading record therefore names the checkpoint and records the evidence used for each claim. A configuration can establish a layer count. An implementation can establish how a mask is applied. A model card can describe the intended design and training procedure. None of those alone proves that a particular deployment attains a stated latency. Separate documented structural facts from your own estimates and from measured performance.
+A useful reading record therefore names the checkpoint and records the evidence used for each claim. A configuration can establish a layer count, an implementation can establish how a mask is applied, and a model card can describe the intended design and training procedure, but none of those alone proves that a particular deployment attains a stated latency. Separate documented structural facts from your own estimates and from measured performance.
 
 Also distinguish a moving repository branch from a reproducible snapshot. Save the downloaded configuration and record a commit or revision when available. If you only inspected a current model card, say that explicitly. “Latest” is a date-dependent selection criterion, not a substitute for identifying the model you actually analyzed.
 
@@ -37,7 +37,7 @@ $$
 \begin{aligned} U&=X+A(N_1(X)),\\ Y&=U+F(N_2(U)). \end{aligned}
 $$
 
-Here N denotes normalization, A is causal attention, and F is a position-wise feed-forward transformation. Both sublayers return an output that fits the residual stream, so addition preserves its shape. This equation is a baseline, not a universal specification. Some models change normalization placement, use additional gates, replace feed-forward computation with experts, or interleave different sequence operators.
+Here N denotes normalization, A is causal attention, and F is a position-wise feed-forward transformation. Both sublayers return an output that fits the residual stream, so addition preserves its shape, and this equation is a baseline rather than a universal specification, because some models change normalization placement, use additional gates, replace feed-forward computation with experts, or interleave different sequence operators.
 
 The reading method is to trace shapes through each operation. Find the input width, the operator’s internal dimensions, and the projection returning to the residual width. This prevents an especially common mistake: assuming an attention head dimension must equal residual width divided by head count. Released implementations can use an attention projection width different from the residual width.
 
@@ -51,7 +51,7 @@ $$
 
 With r equal to 4, this becomes 12 d squared. A hypothetical width of 2,048 gives 50,331,648 parameters per block. 40 such blocks contain approximately 2.013 billion parameters before embeddings and other components. This is a checked accounting exercise, not an estimate for any named sparse model.
 
-The estimate fails if its assumptions fail. Grouped-query attention changes key and value projection sizes. A gated feed-forward network usually has 3 principal matrices rather than 2. Expert layers replicate feed-forward weights. An untied vocabulary output matrix adds another large parameter term. Write down these deviations before using a familiar rule of thumb. Understanding why an estimate changes is more valuable than memorizing its coefficient.
+The estimate fails if its assumptions fail. Grouped-query attention changes key and value projection sizes, a gated feed-forward network usually has 3 principal matrices rather than 2, expert layers replicate feed-forward weights, and an untied vocabulary output matrix adds another large parameter term. Write down these deviations before using a familiar rule of thumb. Understanding why an estimate changes is more valuable than memorizing its coefficient.
 
 ### Attention mixes positions under an explicit information rule
 
@@ -81,7 +81,7 @@ $$
 
 The factor 2 counts keys and values. Assume 1 sequence, uniform dimensions, and stored dense tensors. With L equal to 32, 8 key/value heads, head dimension 128, and 2-byte elements, each position consumes 131,072 bytes. At 16,384 positions, the payload is exactly 2 GiB.
 
-This excludes allocator overhead, metadata, padding, and other model state. Multiply by the actual number of independent cached sequences when estimating a batch. Prefix sharing or compression can change what is physically stored. Sliding-window layers may retain only a bounded recent segment. Hybrid recurrent layers maintain a different state altogether.
+This excludes allocator overhead, metadata, padding, and other model state. Multiply by the actual number of independent cached sequences when estimating a batch, and remember that prefix sharing or compression can change what is physically stored, sliding-window layers may retain only a bounded recent segment, and hybrid recurrent layers maintain a different state altogether.
 
 Consequently, applying this full-cache equation indiscriminately to every layer of a modern model can badly overestimate memory. The equation remains useful because its terms reveal what to inspect: which layers cache historical positions, what dimensions are stored, and whether sharing or quantization changes the byte count.
 
@@ -105,9 +105,9 @@ The methodological question is therefore precise: does an innovation increase st
 
 OpenAI’s disclosed gpt-oss-120b architecture has approximately 116.8 billion total parameters and 5.1 billion active parameters per token under its counting convention. It uses 128 experts with 4 selected per token. The disclosure describes alternating local and dense attention, grouped-query attention, and an attention mechanism with an additional denominator term that can leave attention weight unassigned to tokens.
 
-These facts show why the baseline equations require inspection. A conventional softmax over token scores has weights summing to 1 across those tokens. That is not a safe universal claim once the normalization includes an additional non-token term. Likewise, “every layer keeps the complete history” is incompatible with treating local and dense layers identically.
+These facts show why the baseline equations require inspection: a conventional softmax over token scores has weights summing to 1 across those tokens, but that is not a safe universal claim once the normalization includes an additional non-token term. Likewise, “every layer keeps the complete history” is incompatible with treating local and dense layers identically.
 
-The important innovation story is conditional computation combined with specific attention choices. The useful comparison keeps quality and workload explicit and asks which resource each choice changes. The parameter ratio alone establishes neither quality nor serving cost. This series’ dedicated model article will examine the disclosed operators and counting conventions in detail.
+The important innovation story is conditional computation combined with specific attention choices, so the useful comparison keeps quality and workload explicit and asks which resource each choice changes, because the parameter ratio alone establishes neither quality nor serving cost. This series’ dedicated model article will examine the disclosed operators and counting conventions in detail.
 
 ### Hybrid configurations demand a layer-by-layer inventory
 
@@ -131,7 +131,7 @@ Its causal encoder should also not be confused with the bidirectional encoder in
 
 A strong architecture explanation ends with a claim someone could evaluate. For example: sharing key/value heads reduces the conventional cache payload when other cache dimensions and precision are fixed. The equation predicts the reduction; a tensor inspection checks whether the implementation stores that payload; a serving experiment measures the actual effect on memory and throughput.
 
-Keep those 3 conclusions separate. Lower state bytes need not mean proportionally lower latency, because another operator may dominate execution. Lower selected arithmetic need not mean a smaller checkpoint. A longer advertised context need not mean equally strong retrieval at every position. Each innovation changes a mechanism under assumptions, and those assumptions determine which practical result follows.
+Keep those 3 conclusions separate. Lower state bytes need not mean proportionally lower latency, because another operator may dominate execution, lower selected arithmetic need not mean a smaller checkpoint, and a longer advertised context need not mean equally strong retrieval at every position. Each innovation changes a mechanism under assumptions, and those assumptions determine which practical result follows.
 
 ## Conclusion
 

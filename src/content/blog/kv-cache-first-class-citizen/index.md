@@ -16,7 +16,7 @@ tags: [inference, kv-cache, serving]
 
 ![Concept overview: The KV Cache Is a First-Class Citizen Now](./section-overview.png)
 
-Model-specific cached-input discounts on [public provider price sheets](https://developers.openai.com/api/docs/pricing) are a commercial signal of a systems shift. The KV cache stopped being a throwaway buffer inside a serving process and became infrastructure. It now has a global namespace, a storage hierarchy, and a network transfer layer. Attention kernels are designed around its on-disk-style layout, rather than the other way around.
+Model-specific cached-input discounts on [public provider price sheets](https://developers.openai.com/api/docs/pricing) are a commercial signal of a systems shift. The KV cache stopped being a throwaway buffer inside a serving process and became infrastructure: it now has a global namespace, a storage hierarchy, and a network transfer layer, and attention kernels are designed around its on-disk-style layout rather than the other way around.
 
 You may want a refresher on what the cache actually holds and why decode cannot live without it. Start with [The KV Cache, Explained for Engineers](/blog/kv-cache-explained/) and [How an LLM Generates Text](/blog/how-an-llm-generates-text/). This article is about what happened next. Serving systems noticed that the most expensive bytes in the datacenter were being computed, used once, and thrown away.
 
@@ -60,7 +60,7 @@ Your chatbot has a 2,000-token system prompt (persona, tools, policies, output f
 - from local NVMe (~6 GB/s): **~110 ms**
 - from HBM on the same GPU: effectively free; the kernel just reads it
 
-Even the cold NVMe tier beats recomputation by about 5x, and it avoids the projection FLOPs. Transfer and metadata handling still consume resources, but the compute units stay free for decode. The hot paths are roughly 40 to 55 times faster. Per hour, the fleet-level bill drops from 5,600 GPU-seconds to 1 prefill (0.56 s) plus 10,000 fetches. At 10 ms each, those fetches total about 100 transfer-seconds and 6.55 TB of traffic per hour. Overlap can hide some latency but does not remove bandwidth or capacity costs. In this hypothetical example, the prefix component of TTFT shrinks. Total TTFT still includes scheduling, the uncached suffix, and transfer overhead.
+Even the cold NVMe tier beats recomputation by about 5x and avoids the projection FLOPs, while the hot paths are roughly 40 to 55 times faster: transfer and metadata handling still consume resources, but the compute units stay free for decode. Per hour, the fleet-level bill drops from 5,600 GPU-seconds to 1 prefill (0.56 s) plus 10,000 fetches. At 10 ms each, those fetches total about 100 transfer-seconds and 6.55 TB of traffic per hour. Overlap can hide some latency but does not remove bandwidth or capacity costs. In this hypothetical example, the prefix component of TTFT shrinks. Total TTFT still includes scheduling, the uncached suffix, and transfer overhead.
 
 
 The general break-even rule falls out of the same arithmetic. Recompute costs ~0.28 ms per token at these rates. Reload costs (bytes per token) ÷ bandwidth. For this model, any tier faster than about **1.17 GB/s** wins. That threshold is why offload tiers keep getting colder: nearly every storage technology in the datacenter clears it.
@@ -76,7 +76,7 @@ $$
 
 The break-even exists only when cS exceeds startup a. Ignoring startup, m equal to 327680 bytes and c equal to 0.00028 seconds imply 1.17 GB/s. For 2000 tokens at 64 GB/s, payload transfer takes 10.24 milliseconds, compared with 560 milliseconds of recomputation. These are assumed delivered rates. Peak link speed and realized storage throughput differ.
 
-Reuse also requires matching weights, adapters, tokenizer, positional treatment, and prefix content. Paged allocation alone does not create content-addressed identity. The engine's hashing or radix index adds that layer. Admission and eviction should consider expected future hits against retained-byte cost. A large cold entry can displace many smaller hot prefixes. Hit count alone is an incomplete objective. Measure avoided GPU work, transfer traffic, tier occupancy, and actual first-token latency together before choosing a cache policy.
+Reuse also requires matching weights, adapters, tokenizer, positional treatment, and prefix content, because paged allocation alone does not create content-addressed identity: the engine's hashing or radix index adds that layer. Admission and eviction should consider expected future hits against retained-byte cost, since a large cold entry can displace many smaller hot prefixes and hit count alone is an incomplete objective. Measure avoided GPU work, transfer traffic, tier occupancy, and actual first-token latency together before choosing a cache policy.
 
 ### Going deeper: kernels shaped by the cache
 

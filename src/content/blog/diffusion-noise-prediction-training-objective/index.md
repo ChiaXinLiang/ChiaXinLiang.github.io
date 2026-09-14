@@ -16,7 +16,7 @@ heroImage: './section-overview.png'
 
 ![Concept overview: Diffusion Foundations: Noise, Reverse Prediction, and Training](./section-overview.png)
 
-A diffusion model learns to reverse a process that gradually corrupts data with noise. The training task often looks like noise prediction, while generation repeatedly applies a learned denoising rule. The probabilistic forward process and its reverse-time approximation connect those two phases.
+A diffusion model learns to reverse a process that gradually corrupts data with Gaussian noise, and the training task often looks like noise prediction while generation repeatedly applies a learned denoising rule, so the probabilistic forward process and its reverse-time approximation are what connect those two phases.
 
 This article derives the core Gaussian identities behind denoising diffusion probabilistic models. It explains why noise prediction is meaningful, how it relates to a variational objective, and which cost terms matter for efficient generation. The image examples are conceptual; no diffusion training or GPU benchmark is reported here.
 
@@ -37,7 +37,7 @@ $$
 
 The schedule sets how quickly the signal fades. Valid variance choices and timestep conventions belong in the model configuration.
 
-In the basic formulation here, the forward process is specified, not learned. It gives a known statistical relationship between clean and corrupted samples. That makes it possible to construct training examples and derive useful posterior distributions.
+In the basic formulation here, the forward process is specified rather than learned, so it gives a known statistical relationship between the clean sample x_0 and its corrupted versions, which makes it possible to construct training examples and derive useful posterior distributions.
 
 ### 2. Derive direct sampling at a timestep
 
@@ -49,9 +49,9 @@ $$
 x_t=\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\,\epsilon,\qquad \epsilon\sim\mathcal N(0,I).
 $$
 
-Training can therefore sample a timestep directly, without simulating every earlier corruption step. The resulting example has a clean signal component and a noise component with known coefficients.
+Training can therefore sample a timestep directly, without simulating every earlier corruption step, and the resulting example splits into a clean signal component scaled by sqrt(alpha_bar_t) and a noise component scaled by sqrt(1 - alpha_bar_t).
 
-As alpha_bar decreases, the signal contribution shrinks. This describes the chosen forward process. It does not mean a trained reverse model can perfectly reconstruct every sample after severe corruption; learning and generation add their own approximation.
+As alpha_bar decreases toward 0, the signal contribution shrinks, and that describes the chosen forward process rather than any guarantee that a trained reverse model can perfectly reconstruct every sample after severe corruption, because learning and generation add their own approximation.
 
 ### 3. Work through signal and noise
 
@@ -59,7 +59,7 @@ Suppose alpha_bar at one illustrative timestep is 0.64. The clean-signal coeffic
 
 If alpha_bar is instead 0.01, the clean coefficient is 0.1 and the noise coefficient is approximately 0.995. The same clean value contributes much less to the observation.
 
-These values explain the algebra; they are not images from a trained model. Across many samples, the Gaussian noise distribution stays essential to the probabilistic construction. One particular noise realization does not show the expected appearance or quality of every corrupted sample.
+These values explain the algebra; they are not images from a trained model, and while the Gaussian noise distribution across many samples stays central to the probabilistic construction, one particular noise realization does not show the expected appearance or quality of every corrupted sample.
 
 ### 4. Define the learned reverse transition
 
@@ -111,7 +111,7 @@ $$
 
 The reduction over dimensions and the sampling distribution over t affect loss scale and emphasis. State those choices; not every mean-squared-error implementation gives the same objective.
 
-Under squared error, the optimal predictor for a fixed corrupted input is a conditional expectation, not the exact noise behind every possible clean sample. Corruption can make the inverse problem ambiguous. That statistical reading is central to understanding what the network learns.
+Under squared error, the optimal predictor for a fixed corrupted input is a conditional expectation, not the exact noise behind every possible clean sample x_0. Corruption can make the inverse problem ambiguous. That statistical reading is central to understanding what the network learns.
 
 ### 8. Connect MSE to conditional estimation
 
@@ -123,11 +123,11 @@ $$
 
 The expectation reflects both the clean-data distribution and the forward noise process. A finite network and finite training procedure approximate that optimum.
 
-This is why noise prediction carries information about the data distribution instead of just outputting arbitrary Gaussian samples. The network must use the corrupted observation and timestep to infer a denoising direction. Change the training population and you change that inference task, and with it the learned generative behavior.
+This is why noise prediction carries information about the data distribution instead of just outputting arbitrary Gaussian samples: the network must use the corrupted observation and timestep to infer a denoising direction, so change the training population and you change that inference task, and with it the learned generative behavior.
 
 ### 9. Relate the loss to the variational bound
 
-The DDPM derivation breaks a variational objective into transition KL terms and endpoint contributions. With a specified reverse variance, a transition mean-matching term becomes a weighted noise-prediction error.
+The Denoising Diffusion Probabilistic Models derivation breaks a variational objective into transition KL terms and endpoint contributions. With a specified reverse variance, a transition mean-matching term becomes a weighted noise-prediction error.
 
 For an interior step, a representative coefficient under the stated parameterization is:
 
@@ -147,9 +147,9 @@ $$
 \widehat x_0=\frac{x_t-\sqrt{1-\bar\alpha_t}\,\epsilon_{\theta}(x_t,t)}{\sqrt{\bar\alpha_t}}.
 $$
 
-At high noise, a small alpha_bar denominator can amplify prediction error. Numerical policies such as clipping or thresholding must follow the trained model and sampler; do not insert them without evaluation.
+At high noise, a small alpha_bar denominator, 0.01 in the earlier example, can amplify prediction error. Numerical policies such as clipping or thresholding must follow the trained model and sampler; do not insert them without evaluation.
 
-The estimated clean sample is useful inside several samplers and predictor conversions. It is still an estimate conditioned on the noisy observation. It is not guaranteed recovery of the particular training example that would have produced that observation.
+The estimated clean sample is useful inside several samplers and predictor conversions, but it is still an estimate conditioned on the noisy observation, not guaranteed recovery of the particular training example that would have produced that observation.
 
 ### 11. Understand conditioning and guidance
 
@@ -165,7 +165,7 @@ $$
 
 The guidance scale g changes the prediction direction and can affect both quality and diversity. It also changes execution cost when the conditional and unconditional predictions require extra work.
 
-Record whether the two evaluations are batched, fused, or run separately. A nominal sampling-step count does not fully describe network evaluations under guidance. Fair resource comparisons need the same output budget and guidance policy.
+Record whether the 2 evaluations are batched, fused, or run separately. A nominal sampling-step count does not fully describe network evaluations under guidance. Fair resource comparisons need the same output budget and guidance policy.
 
 ### 12. Separate training and sampling schedules
 
@@ -197,7 +197,7 @@ Noise prediction turns a known corruption process into a learnable estimation ta
 
 Efficiency can come from fewer evaluations, a cheaper denoiser, reduced numerical storage, or a more efficient execution path. Each changes a different part of the system and can affect quality differently.
 
-Choose an intervention from the measured bottleneck and preserve the complete numerical contract. Understand the forward process, predictor type, and reverse update before comparing samplers or distilling generation into fewer steps. That mechanism is the foundation for the remaining articles in this series.
+Choose an intervention from the measured bottleneck and preserve the complete numerical contract, which means understanding the forward process, predictor type, and reverse update before comparing samplers or distilling generation into fewer steps, because that mechanism is the foundation for the remaining articles in this series.
 
 ### 16. Relate noise prediction to the score
 
@@ -209,7 +209,7 @@ $$
 \nabla_{x_t}\log q_t(x_t)=-\frac{\mathbb E[\epsilon\mid x_t,t]}{\sqrt{1-\bar\alpha_t}}.
 $$
 
-This identity uses the stated Gaussian corruption and the usual regularity conditions. A trained noise predictor can therefore parameterize an estimated score after applying the schedule coefficient. The scale matters: a noise prediction and a score are related quantities, not interchangeable arrays without conversion.
+This identity uses the stated Gaussian corruption and the usual regularity conditions, so a trained noise predictor can parameterize an estimated score once the schedule coefficient is applied, and the scale matters: a noise prediction and a score are related quantities, not interchangeable arrays without conversion.
 
 The connection pays off in continuous-time sampling, where score estimates enter a reverse stochastic differential equation or a probability-flow ordinary differential equation. It also explains why the predictor depends on noise level. Different corruption levels induce different marginal densities and gradients.
 

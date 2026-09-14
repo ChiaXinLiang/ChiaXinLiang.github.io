@@ -26,7 +26,7 @@ The official release card names 3 static modes: Full, Reindex, and Reuse. It say
 
 ![Deep-dive illustration: Separate representation, selection, and weighting](./deep-dive.png)
 
-Attention needs a representation of historical content, a policy describing which positions are eligible, and weights over those positions. Dense attention makes the full permitted history eligible. Sparse attention selects a smaller set according to another mechanism.
+Attention needs a representation of historical content, a policy describing which positions are eligible, and weights over those positions, and where dense attention makes the full permitted history eligible, sparse attention selects a smaller set according to another mechanism.
 
 $$
 S_{t,\ell}=\operatorname{Select}_{\ell}(q^{I}_{t,\ell},K^{I}),\qquad
@@ -35,7 +35,7 @@ $$
 
 The superscript I identifies indexer representations in this explanatory notation. Main attention representations need not be identical to indexer representations. Selecting an index and calculating its attention weight are different operations, even if both use learned projections.
 
-Reusing an index set therefore does not force identical outputs across layers. Layer-specific queries or other transformations can produce different weights over the same selected positions. Conversely, refreshing weights does not mean the layer refreshed the candidate search.
+Reusing an index set, which is what the Reuse mode does, therefore does not force identical outputs across layers, because layer-specific queries or other transformations can produce different weights over the same selected positions, and conversely refreshing weights does not mean the layer refreshed the candidate search.
 
 ### 2. Interpret mode names carefully
 
@@ -45,7 +45,7 @@ The Full-mode name should be treated as a name in the released design. It is not
 
 Reindex and Reuse indicate different treatment of sparse selection over shared state in the card's overview. Their exact ownership, operation order, and tensor boundaries require the released implementation or further documentation. Avoid filling those gaps from older CSA versions or similarly named mechanisms.
 
-An architecture review can still explain the fundamental separation: sharing cached representations saves repeated state, while reusing selections avoids repeated indexing work. These are independent savings that should not be multiplied blindly into a performance claim.
+An architecture review can still explain the fundamental separation behind the Full, Reindex, and Reuse names: sharing cached representations saves repeated state, while reusing selections avoids repeated indexing work, and these are independent savings that should not be multiplied blindly into a performance claim.
 
 ### 3. Derive cross-layer storage sharing
 
@@ -58,15 +58,15 @@ M_{\mathrm{independent}}=L n B_{\mathrm{tok}},\qquad
 M_{\mathrm{shared}}\approx\frac{L}{g}nB_{\mathrm{tok}}+M_{\mathrm{side}}.
 $$
 
-This is a hypothetical grouping model, not a disclosure of the release's group size. Side state can include indices, positional information, and layer-specific data. The exact cache figure must come from the actual released representation, not a guessed g.
+This is a hypothetical grouping model, not a disclosure of the group size in DeepSeek-V4.1-Flash. Side state can include indices, positional information, and layer-specific data. The exact cache figure must come from the actual released representation, not a guessed g.
 
 Sharing requires that the consuming layers are trained to use the common representation. Arbitrarily pointing several independent Transformer layers at the same cache does not preserve their original computation. The storage opportunity comes from the architecture's parameterization.
 
 ### 4. Separate main KV and indexer K
 
-The card explicitly distinguishes main KV from indexer K. Main state supplies the content used by attention; indexer state supports selecting relevant positions. Their dimensions, precision, and sharing policies can differ.
+The DeepSeek card explicitly distinguishes main KV from indexer K. Main state supplies the content used by attention; indexer state supports selecting relevant positions. Their dimensions, precision, and sharing policies can differ.
 
-A capacity estimate should count both when both remain stored. A statement about compressed main cache does not automatically cover all indexing metadata. Likewise, sparse selection indices can grow with active query positions or layers even when the underlying representation is shared.
+A capacity estimate should count both when both remain stored, because a statement about compressed main cache does not automatically cover all indexing metadata, and sparse selection indices can grow with active query positions or layers even when the underlying representation is shared.
 
 The execution system must preserve association between an index and its logical token position. Paging, eviction, or block compaction can change physical addresses without changing logical positions. Address translation and selection metadata must remain compatible.
 
@@ -78,21 +78,21 @@ $$
 T_{\mathrm{index}}\approx a n+R b C,
 $$
 
-where a and b represent per-candidate costs in a fixed setup. Compared with every indexer scanning n positions, deeper work can be bounded by C when the pool is bounded. The first selection still depends on the global history in this model.
+where a and b represent per-candidate costs in a fixed setup, and compared with every indexer scanning n positions, deeper work can be bounded by C when the pool the first Full-mode layer builds is bounded, while the first selection still depends on the global history in this model.
 
-This distinction prevents a false claim of completely context-independent indexing. The card's statement concerns deeper indexer cost. Overall request work still includes the initial selection, attention over chosen content, other layers, and phase-specific operations.
+This distinction prevents a false claim of completely context-independent indexing. The DeepSeek card's statement concerns deeper indexer cost. Overall request work still includes the initial selection, attention over chosen content, other layers, and phase-specific operations.
 
 ### 6. Work through candidate restriction
 
 For an illustrative history of 100,000 positions, suppose an initial indexer produces a pool of 1,024 candidates and 7 later indexers examine that pool. A naive candidate-count comparison is 100,000 plus 7 times 1,024 versus 8 times 100,000. These are hypothetical counts, not the model's published settings or hardware timings.
 
-The calculation explains how repeated global search can become repeated bounded search. It also exposes the quality tradeoff: a position missing from the initial pool cannot be recovered by a later indexer restricted to that pool. Candidate recall becomes a property of the hierarchy.
+The calculation explains how repeated global search can become repeated bounded search. It also exposes the quality tradeoff: a position missing from the initial pool cannot be recovered by a later indexer restricted to that pool. Candidate recall becomes a property of the hierarchy that the first Full-mode layer defines.
 
 Increasing pool size can improve opportunity for retrieval while increasing deeper work and metadata. The appropriate value requires training and evaluation evidence. A mathematical reduction in scanned candidates alone does not establish acceptable long-context behavior.
 
 ### 7. Distinguish candidate recall and final attention
 
-An indexer is a retrieval gate. Its pool needs to contain positions useful to later computations. The final attention weights then decide how strongly selected values contribute. A poor candidate pool can limit the result even if the attention kernel perfectly implements its weighted sum.
+An indexer is a retrieval gate whose pool needs to contain positions useful to later computations, and the final attention weights then decide how strongly selected values contribute, so a poor candidate pool can limit the result even if the attention kernel perfectly implements its weighted sum.
 
 One diagnostic measure is the fraction of a reference set retained by the candidate pool:
 
@@ -106,9 +106,9 @@ Measure retrieval properties across context lengths, distractor distributions, a
 
 ### 8. Explain index reuse across depth
 
-Index reuse means that a layer consumes an earlier selection instead of repeating the selection procedure. Its benefit depends on how often selection would otherwise be computed and how much that computation costs.
+Index reuse means that a layer consumes an earlier selection, the behavior the card labels Reuse, instead of repeating the selection procedure. Its benefit depends on how often selection would otherwise be computed and how much that computation costs.
 
-Reuse also constrains flexibility. A later layer cannot select a position outside the reused set unless another documented path permits it. The model must learn to use the available selection policy. Treat that constraint as part of the trained architecture rather than an execution-only optimization with guaranteed unchanged quality.
+Reuse also constrains flexibility. A later layer cannot select a position outside the reused set unless another documented path permits it. The model must learn to use the available selection policy. Treat that constraint as part of the trained DeepSeek-V4.1-Flash architecture rather than an execution-only optimization with guaranteed unchanged quality.
 
 Different weights over the reused positions still allow different outputs. This is analogous to several queries reading the same stored key-value basis: common eligible positions do not imply identical relevance distributions.
 
@@ -135,9 +135,9 @@ Test empty or very short histories, partial pages, repeated tokens, and phase tr
 
 ### 11. Measure the hierarchy directly
 
-Profile initial indexing, deeper indexing, sparse attention, and other substantial components separately. Compare candidate counts and bytes read with elapsed time. Reduced scan population can still encounter small-kernel overhead or poor memory locality.
+Profile initial Full-mode indexing, deeper indexing, sparse attention, and other substantial components separately. Compare candidate counts and bytes read with elapsed time. Reduced scan population can still encounter small-kernel overhead or poor memory locality.
 
-Use context sweeps and a defined batch distribution. If deeper cost is intended to remain bounded with context, examine its measured trend separately from the initial indexer. An aggregate time can conceal the intended bound because another component grows.
+Use context sweeps and a defined batch distribution. If deeper cost is intended to remain bounded with context, examine its measured trend separately from the initial Full-mode indexer. An aggregate time can conceal the intended bound because another component grows.
 
 Record the checkpoint, backend, cache representation, and any pool settings actually disclosed or configured. No timings in this article are presented as device measurements.
 
@@ -145,7 +145,7 @@ Record the checkpoint, backend, cache representation, and any pool settings actu
 
 A small reference can materialize selected positions, calculate their attention scores, and combine values. Compare it with the optimized gather and attention implementation. Use distinct values by logical position to expose incorrect translation or duplicated selections.
 
-Validate selection separately from attention arithmetic. A correct weighted sum over the wrong positions is still a model error. Test index reuse and reindex transitions according to the implementation's supported mode sequence.
+Validate selection separately from attention arithmetic. A correct weighted sum over the wrong positions is still a model error. Test Reuse and Reindex transitions according to the implementation's supported mode sequence.
 
 For end-to-end quality, use tasks requiring distant retrieval and combinations of facts. Candidate-count reduction is a system metric; language behavior establishes whether the trained hierarchy remains useful.
 
@@ -155,7 +155,7 @@ For end-to-end quality, use tasks requiring distant retrieval and combinations o
 
 The release card reports 890 bytes per token for global cache and a roughly 4-fold reduction relative to DeepSeek-V4-Flash. It separately discusses persistent-cache reduction through bounded replay. Do not attribute the latter ratio solely to CSA2 sharing or multiply the ratios as if they shared one denominator.
 
-This case study establishes the disclosed division of representation sharing, selection refresh, selection reuse, and hierarchical restriction. Missing dimensions or implementation details remain missing. The next article examines numerical cache representation and replay as distinct mechanisms.
+This case study establishes the division that Full, Reindex, and Reuse disclose: representation sharing, selection refresh, selection reuse, and hierarchical restriction. Missing dimensions or implementation details remain missing. The next article examines numerical cache representation and replay as distinct mechanisms.
 
 ### 14. Account for selection storage
 

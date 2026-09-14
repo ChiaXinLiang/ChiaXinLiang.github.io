@@ -48,7 +48,7 @@ Changing the stored table bits can change the function without manufacturing a d
 
 A LUT's configured table is not the same thing as arbitrary application memory addressed by a processor. The configured bits define the logic function. Some device resources support additional modes such as distributed memory, but those modes have their own documented capacity and access rules. Treating all FPGA storage as interchangeable hides practical constraints.
 
-A useful exercise is to write the 4 rows for OR and XOR, then check each input combination in the foundations lab. The resulting evidence proves the selected Boolean function for this small input space. It does not establish how many physical LUTs a synthesis tool uses, where it places them, or how quickly the routed function settles. Those later questions need tool reports for a selected device and constraint set.
+A useful exercise is to write the 4 rows for OR and XOR, then check each input combination in the foundations lab, because the resulting evidence proves the selected Boolean function for this small input space and nothing beyond it: it does not establish how many physical LUTs a synthesis tool uses, where it places them, or how quickly the routed function settles, and those later questions need tool reports for a selected device and constraint set.
 
 ### Registers make state explicit
 
@@ -76,7 +76,7 @@ Dedicated blocks do not remove design decisions. A particular multiplier width m
 
 The [device overview](https://docs.amd.com/api/khub/documents/2LByHkO~nSZXcei2D55fTg/content) is a starting point for identifying resource categories. Before implementing a design, consult the detailed documentation for the exact memory and arithmetic primitives and inspect synthesis reports. This lesson deliberately avoids a vendor floorplan or a promised mapping because neither has been produced for the foundations lab.
 
-As a first resource exercise, annotate a dot-product diagram with where inputs are held, where products are computed, and where the running sum is retained. Then count how many operands must arrive in 1 cycle. A design with 4 multipliers needs an operand delivery arrangement that supports those operations. Resource counting becomes useful when it is connected to an interface and a schedule; an isolated list of DSP and RAM totals cannot establish achievable throughput.
+As a first resource exercise, annotate a dot-product diagram with where inputs are held, where products are computed, and where the running sum is retained, then count how many operands must arrive in 1 cycle, because a design with 4 multipliers needs an operand delivery arrangement that supports those operations: resource counting becomes useful when it is connected to an interface and a schedule, and an isolated list of DSP and RAM totals cannot establish achievable throughput.
 
 ### From HDL to a configured device
 

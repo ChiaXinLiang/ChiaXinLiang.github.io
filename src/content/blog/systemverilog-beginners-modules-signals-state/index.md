@@ -61,7 +61,7 @@ Completeness is still required when the code looks mathematically simple. A cond
 
 Simulation also has 4-state values, including unknown X. A module's binary input contract should not be confused with a guarantee that all uninitialized simulation values are harmless. Reset and legal-input assertions belong in the surrounding design where appropriate. The lab's exhaustive adder and mux sweeps apply defined binary patterns; the claim is limited to that domain.
 
-To review a combinational block, write its corresponding function in plain language before examining the assignments. Determine which input each output depends on, check every branch, and confirm the intermediate widths. Then compare it against a small reference calculation. This practice catches missing coverage and unintended conversions while avoiding the mistaken idea that source statement count is a measure of hardware latency.
+To review a combinational block, write its corresponding function in plain language before examining the assignments, determine which input each output depends on, check every branch, confirm the intermediate widths, and then compare the block against a small reference calculation: this practice catches missing coverage and unintended conversions while avoiding the mistaken idea that source statement count is a measure of hardware latency.
 
 ### Nonblocking assignments preserve old-state transfer
 
@@ -83,7 +83,7 @@ end
 
 After reset establishes both registers as 0, apply d equal to 3 before the next edge. The post-edge state is q1 equal to 3 and q2 equal to 0. Apply d equal to 5 before another edge: q1 becomes 5 and q2 becomes 3. The simulation lesson uses this exact trace to demonstrate why a same-cycle expectation is wrong.
 
-The source order of these 2 nonblocking assignments does not make q2 capture a newly updated q1. A software-style reading that treats the first line as immediately modifying state would describe a different process. Keep the course convention consistent: blocking assignment for local combinational calculation, nonblocking assignment for these clocked state updates. More advanced scheduling topics can be introduced after the intended state transition is clear.
+The source order of these 2 nonblocking assignments does not make q2 capture a newly updated q1, and a software-style reading that treats the first line as immediately modifying state would describe a different process, so keep the course convention consistent, using blocking assignment for local combinational calculation and nonblocking assignment for these clocked state updates. More advanced scheduling topics can be introduced after the intended state transition is clear.
 
 Latency needs an interface definition. In this pipeline, input d captured by the first register reaches the second after another active edge. If the interface accepts 1 value each cycle, values can progress through successive stages concurrently. 2 stages do not imply that the design must wait 2 idle cycles between inputs. Validity and backpressure would require additional control in a practical stream interface.
 
@@ -126,7 +126,7 @@ A useful check has an expected result and a failure action. Merely generating a 
 
 Reproducibility requires naming the top-level testbench and compiling all its required modules. Save the command and execution transcript. A build that accidentally selects a different top or omits the checking process can finish successfully without testing the intended DUT. The supplied runner makes these choices explicit and records the resulting comparison counts.
 
-After functional simulation, synthesis and physical tools can answer additional questions about supported constructs, resource mapping, and constrained timing. Programming a board adds interface and operational evidence. The foundations release does not claim those later steps have run. This clear division lets readers use the checked RTL as a starting point while understanding exactly which work remains for a physical implementation.
+After functional simulation, synthesis and physical tools can answer additional questions about supported constructs, resource mapping, and constrained timing, and programming a board adds interface and operational evidence, but the foundations release does not claim those later steps have run: the division lets readers use the checked RTL as a starting point while understanding exactly which work remains for a physical implementation.
 
 ## Conclusion
 

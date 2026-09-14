@@ -51,7 +51,7 @@ The budget figure makes one tile concrete. A 4×4 output with K=8 needs 4×8=32 
 
 A 4×4 array has at most 16 active cells per global step, but fill/drain and invalid lanes reduce useful utilization. The ideal no-stall wavefront takes K+4+4-2=14 steps, giving 128 useful MACs out of 224 potential cell-step slots. This is an analytical model, not FPGA timing.
 
-Add buffers, scale metadata and temporary state to the storage ledger before choosing a device target. Double buffering adds another live input pair. The arithmetic count is independent of whether those buffers are in BRAM, ASIC SRAM or the software model.
+Add buffers, scale metadata and temporary state to the storage ledger before choosing a device target, remembering that double buffering adds another live input pair, and that the arithmetic count is independent of whether those buffers are in BRAM, ASIC SRAM or the software model.
 
 ### Create a reference and acceptance tests
 
@@ -78,9 +78,9 @@ The first command writes `reports/spec-1.json`. Inspect its scope and result tog
 
 Create a new working copy of the lab and keep the numerical contract beside its sources. The opening work uses Python to make the values and accepted events explicit before circuit optimization. A direct matrix loop is the independent reference; a cycle-stepped array model explains timing without being the only numerical oracle.
 
-Start with known signed values, not only random data. Distinct elements expose row/column swaps and misaligned reductions. Zero and the signed endpoints expose conversion and width mistakes. A stalled event exposes the difference between offered work, accepted work and elapsed clocks. Keep each fixture so you can compare later changes against the same contract.
+Start with known signed values, not only random data. Distinct elements expose row/column swaps and misaligned reductions, zero and the signed endpoints expose conversion and width mistakes, and a stalled event exposes the difference between offered work, accepted work and elapsed clocks. Keep each fixture so you can compare later changes against the same contract.
 
-When moving the operation into RTL, draw the register boundaries and define reset/clear priority. A value observed before an active edge belongs to the previous state; a value observed after nonblocking updates belongs to the new state. Record that convention in the harness. Otherwise a testbench race can look like a circuit defect.
+When moving the operation into RTL, draw the register boundaries and define reset/clear priority. A value observed before an active edge belongs to the previous state while a value observed after nonblocking updates belongs to the new state, so record that convention in the harness, because otherwise a testbench race can look like a circuit defect.
 
 The acceptance result is a defined behavior and an executed software/RTL check, not a physical clock achievement. Synthesis, board integration and measured performance belong to later milestones. This separation makes the early lesson useful without inventing a hardware result.
 
@@ -108,15 +108,15 @@ A command should snapshot the operation it accepts. Otherwise a host changing M,
 
 Define what happens to writes and additional starts during busy. This project ignores those events in the simple integrated interface. That policy is easy to simulate, but a production transport might return a backpressure or error response instead. Whichever policy you pick, callers must be able to tell accepted work from offered work. A software driver should not reuse an operand buffer just because it issued a write; it must follow the transport's actual acceptance and completion contract.
 
-DONE describes captured usable results in this interface. In a future external-memory system, DONE may also need successful write responses and platform visibility rules. You cannot assume the event carries unchanged across a new bus. Document reset and recovery too: does reset cancel the job, invalidate outputs and require operands to be reloaded? A timeout can tell the host that completion did not arrive, but it does not by itself make partially written memory safe.
+DONE describes captured usable results in this interface. In a future external-memory system, DONE may also need successful write responses and platform visibility rules, so you cannot assume the event carries unchanged across a new bus, and you should document reset and recovery too: does reset cancel the job, invalidate outputs and require operands to be reloaded? A timeout can tell the host that completion did not arrive, but it does not by itself make partially written memory safe.
 
 #### Review the specification as an independent artifact
 
-Before optimizing, ask another reader to predict the 2×2 fixture from the written contract alone. They should know shapes, signedness, row-major interpretation, result width and any epilogue order without consulting RTL. Then give them an invalid dimension and ask whether output memory changes. Ambiguous answers indicate missing behavior, not a need for more pipeline registers. The numerical reference and the interface checks should exercise those decisions independently.
+Before optimizing, ask another reader to predict the 2×2 fixture from the written contract alone. They should know shapes, signedness, row-major interpretation, result width and any epilogue order without consulting RTL. Then give them an invalid dimension and ask whether output memory changes, because ambiguous answers indicate missing behavior rather than a need for more pipeline registers, and the numerical reference and the interface checks should exercise those decisions independently.
 
 Keep a table of requirements and evidence. A Python result supports the mathematical and functional-memory behavior it executes. A simulator result supports the exercised RTL sequence. A timing report supports a constrained implementation in a specified target flow. A board measurement supports an actual integrated system and its test conditions. The progression from reference to circuit becomes reproducible when those records stay distinct.
 
-The first design decision is therefore modest but important: a small signed matrix operation with a precise output and command boundary. That leaves enough structure to build the MAC, PE, array, controller and host lessons without pretending to have designed a complete commercial AI processor. You can then judge later architectural choices against a stable operation instead of repeatedly changing what success means.
+The first design decision is therefore modest but important: a small signed matrix operation with a precise output and command boundary. That leaves enough structure to build the MAC, PE, array, controller and host lessons without pretending to have designed a complete commercial AI processor, and you can then judge later architectural choices against a stable operation instead of repeatedly changing what success means.
 
 ## Conclusion
 

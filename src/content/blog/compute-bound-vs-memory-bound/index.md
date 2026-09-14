@@ -24,7 +24,7 @@ This article is about that number and the question it answers: is this kernel co
 
 ### 2 budgets, 1 winner
 
-Every kernel spends from 2 budgets at once. It performs floating-point operations, drawn against the chip's compute budget. For an H100 SXM that budget is 989 TFLOPS of dense BF16 tensor-core throughput. And it moves bytes between HBM and the chip, drawn against the memory budget: 3.35 TB/s of HBM3 bandwidth. Both figures are from NVIDIA's H100 datasheet. The TFLOPS number is the dense figure, not the 2x sparsity headline.
+Every kernel spends from 2 budgets at once: it performs floating-point operations against the chip's compute budget, which for an H100 SXM is 989 TFLOPS of dense BF16 tensor-core throughput, and it moves bytes between HBM and the chip against the memory budget, 3.35 TB/s of HBM3 bandwidth. Both figures are from NVIDIA's H100 datasheet. The TFLOPS number is the dense figure, not the 2x sparsity headline.
 
 The hardware works through both budgets concurrently, so to a first approximation the kernel's runtime is whichever budget runs out last:
 
@@ -47,7 +47,7 @@ This ratio is not an H100 quirk. An A100 sits at about 153 FLOP/byte in BF16, fr
 Williams, Waterman, and Patterson packaged this max() into a single log-log plot in 2009. It remains the most useful diagram in performance engineering. Put arithmetic intensity on the x-axis and attainable FLOPS on the y-axis. Peak bandwidth draws a slanted line rising from the left (attainable FLOPS = intensity x bandwidth). Peak compute draws a horizontal roof. Where they meet is the ridge point, which is exactly the machine balance.
 
 
-Any kernel is a dot on this plot. Its x-position comes from counting FLOPs and bytes. The roof above that x-position is the best the hardware can do. The vertical gap between the dot and the roof is your remaining optimization headroom. The shape of the roof at that point tells you what kind of work will close the gap. Under the slanted section, only 2 things help: move fewer bytes, or move the dot right by raising intensity. Under the flat section, only better utilization of the compute units helps. Buying more of the wrong resource moves nothing.
+Any kernel is a dot on this plot: its x-position comes from counting FLOPs and bytes, the roof above that x-position is the best the hardware can do, and the vertical gap between the dot and that roof is your remaining optimization headroom. The shape of the roof at that point tells you what kind of work will close the gap. Under the slanted section, only 2 things help: move fewer bytes, or move the dot right by raising intensity. Under the flat section, only better utilization of the compute units helps. Buying more of the wrong resource moves nothing.
 
 The plot also makes an uncomfortable fact visible at a glance. A kernel at intensity 1 on an H100 cannot exceed 3.35 TFLOPS no matter how good the code is. That is not a quality ceiling, it is a physics ceiling, and reaching 90% of it is excellent engineering even though nvidia-smi will look embarrassing.
 
@@ -97,7 +97,7 @@ $$
 
 For the 4096-square GEMM, minimum traffic is 100663296 bytes and work is 137438953472 FLOPs, giving intensity 1365.33. The ideal compute and memory terms are 139 and 30 microseconds. The corresponding GEMV has intensity approximately 1, making memory the tighter ideal constraint. Actual performance may sit below either roof because of insufficient parallelism, dependencies, instruction issue, or extra traffic.
 
-Measure intensity at each relevant memory boundary before choosing a method. Tiling changes reuse. Fusion removes intermediate traffic. Wider precision can change both bytes and the applicable compute roof. An optimization can therefore move both coordinates and ceilings. Run a matched-shape comparison and inspect delivered bandwidth and compute-pipe activity. Faster memory can directly improve a memory-limited kernel even when the newer GPU's compute-to-bandwidth ratio grows. The ratio alone is not a statement that an upgrade cannot help.
+Measure intensity at each relevant memory boundary before choosing a method, because tiling changes reuse, fusion removes intermediate traffic, and wider precision changes both the byte count and the applicable compute roof, so 1 optimization can move both coordinates and both ceilings at once. Run a matched-shape comparison and inspect delivered bandwidth and compute-pipe activity. Faster memory can directly improve a memory-limited kernel even when the newer GPU's compute-to-bandwidth ratio grows. The ratio alone is not a statement that an upgrade cannot help.
 
 ### Common misconceptions
 

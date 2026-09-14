@@ -28,7 +28,7 @@ Start after [Finish the Operator: Bias, ReLU, and Requantization](/blog/fpga-ai-
 
 The RAM figure specifies a registered read and separate write/read addresses. Its behavioral model returns the previous value on a same-address read/write edge. This read-first policy is explicit; a selected FPGA primitive or ASIC macro may support a different behavior.
 
-Memory contents are not reset in operand_ram.sv. Control validity prevents reading an unfilled tile as valid data. Clearing an array sum does not initialize every operand address.
+Memory contents are not reset in operand_ram.sv, so its 64 addresses hold whatever they held before. Control validity prevents reading an unfilled tile as valid data. Clearing an array sum does not initialize every operand address.
 
 The registered output adds a latency that the operand scheduler must account for. A combinational Python list read is not a timing-equivalent RAM model, even when its values match.
 
@@ -38,15 +38,15 @@ The registered output adds a latency that the operand scheduler must account for
 
 The banking figure supplies separate operand lanes from independent banks or staged reads. A 4-row array can need several values each global step. One RAM port cannot produce an arbitrary number of distinct addresses at once.
 
-Choose a bank function and local address mapping, then count simultaneous accesses. Two requests mapping to the same bank may need serialization or another port. Padding a matrix can simplify indexing but changes storage/traffic.
+Choose a bank function and local address mapping, then count simultaneous accesses. 2 requests mapping to the same bank may need serialization or another port. Padding a matrix can simplify indexing but changes storage/traffic.
 
-Test pack/unpack mappings with distinct signed values. Repeated values can hide a swapped bank or row. Logical row-major storage and physical banked storage are separate layouts connected by explicit packing.
+Test pack/unpack mappings with distinct signed INT8 values. Repeated values can hide a swapped bank or row. Logical row-major storage and physical banked storage are separate layouts connected by explicit packing.
 
 ### Track valid buffer contents
 
 ![Deep dive: Track valid buffer contents](./deep-dive-component-03.png)
 
-The ownership figure moves a tile through FREE, LOAD, READY and COMPUTE. The load producer must finish before readers use the tile. The compute consumer must finish before the next load overwrites it.
+The ownership figure moves a tile through 4 states: FREE, LOAD, READY and COMPUTE. The load producer must finish before readers use the tile. The compute consumer must finish before the next load overwrites it.
 
 A valid bit is meaningful only with a lifetime contract. Set READY after successful fill completion, not after issuing the first write. Error/reset invalidates the tile so stale bytes are not consumed.
 
@@ -92,9 +92,9 @@ endmodule
 
 ### Verify ownership and completion, not only payload
 
-A transfer request and a completed buffer are different states. Mark a tile READY only after the required bytes and response status are available. Keep a COMPUTE buffer owned until its last use, then permit refill. The two-buffer scheduler additionally prevents a load from overwriting the previous tile assigned to the same physical buffer.
+A transfer request and a completed buffer are different states, so mark a tile READY only after the required bytes and response status are available, keep a COMPUTE buffer owned until its last use and only then permit refill, and note that the 2-buffer scheduler additionally prevents a load from overwriting the previous tile assigned to the same physical buffer.
 
-Address calculations use bytes throughout the interface. INT8 inputs and INT32 outputs have different element widths, so a correct index with the wrong multiplier still targets the wrong memory. Validate dimensions, range, alignment and relevant overlap before issuing work. The software model checks these preconditions and preserves memory when a command is rejected.
+Address calculations use bytes throughout the interface, and INT8 inputs and INT32 outputs have different element widths, so a correct index with the wrong multiplier still targets the wrong memory: validate dimensions, range, alignment and relevant overlap before issuing work, and the software model checks these preconditions and preserves memory when a command is rejected.
 
 The integrated RTL top implements fixed on-chip operand storage, validated dimensions and a globally stepped tile controller. Its host-load port is deliberately simple and is not AXI, MMIO or external DMA. The functional command/memory model teaches a broader transport contract. Connecting a real bus requires its own request/response and ordering verification.
 
@@ -112,7 +112,7 @@ Consider 4 addresses whose bank rule is index modulo 4. Consecutive indices 4,5,
 
 #### Align returned data with validity and control
 
-A registered read returns data after the declared edge latency. The address offered now and the data observed now need not describe the same request. Carry an appropriate validity/tag or maintain a schedule that associates the returned operand with its logical row, column and reduction index. Feeding a new address's mask beside an old address's returned data can create numerically wrong pairs despite individually correct memory and multiplier blocks.
+A registered read returns data after the declared edge latency, so the address offered now and the data observed now need not describe the same request, which means you must carry an appropriate validity/tag or maintain a schedule that associates the returned operand with its logical row, column and reduction index. Feeding a new address's mask beside an old address's returned data can create numerically wrong pairs despite individually correct memory and multiplier blocks.
 
 A directed fixture writes distinct values into several addresses, issues a known read sequence and compares after the defined latency. Include a same-address read/write edge to check the chosen read-first behavior. The old stored value is returned for that behavioral collision while the new value is written. Do not swap in a target macro with another collision policy without adapting or preserving the contract and checking the resulting timing.
 
@@ -134,7 +134,7 @@ For a macro substitution, drive identical accepted read/write events into the be
 
 The supplied regression verifies the behavioral registered read and read-first fixture. No FPGA resource mapping or ASIC SRAM macro integration was executed in this release. The useful deliverable is an executable local contract and a method for checking target substitutions. Later implementation reports can provide physical evidence without changing the numerical and ownership rules.
 
-Memory often determines whether a compute architecture can stay supplied. The concrete design question is therefore not just how many bytes fit, but whether the required owners can access the right values at the right events through available ports and latency. Writing that access ledger turns an on-chip buffer from a box in a figure into an implementable part of the accelerator.
+Memory often determines whether a compute architecture can stay supplied, so the concrete design question is not just how many bytes fit, but whether the required owners can access the right values at the right events through available ports and latency, and writing that access ledger turns an on-chip buffer from a box in a figure into an implementable part of the accelerator.
 
 ## Conclusion
 

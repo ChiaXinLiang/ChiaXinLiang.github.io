@@ -16,7 +16,7 @@ tags: ["llm-architectures", "ai-infrastructure"]
 
 ![Concept overview: Mixture of Experts 1: Routing and Selected Computation. A router receives a token embedding and selects a small subset from a bank of experts.](./section-overview.png)
 
-A mixture-of-experts language model increases its collection of learned functions while executing only a selected subset for each token. The central idea is conditional computation. A learned router chooses experts using the current token representation, and their outputs are combined to form a result. Infrastructure consequences follow from that choice, but they are not exhausted by an active-parameter count.
+A mixture-of-experts language model increases its collection of learned functions while executing only a selected subset for each token. The central idea is conditional computation. A learned router in the Transformer layer chooses experts using the current token representation, and their outputs are combined to form a result. Infrastructure consequences follow from that choice, but they are not exhausted by an active-parameter count.
 
 Sparse expert models can retain far more weights than they use in 1 token's arithmetic path. The unused weights may still need memory residency, storage, or a transfer policy. Distributed implementations must move token activations to the selected experts and return results. This article explains the model computation first; the second MoE article examines capacity and dispatch in more detail.
 
@@ -26,15 +26,15 @@ Sparse expert models can retain far more weights than they use in 1 token's arit
 
 In a common Transformer design, an MoE layer replaces an ordinary feed-forward sublayer. Attention still mixes information across positions according to its own rules. The expert functions typically operate independently on each token representation once routing is known.
 
-An expert can be a multilayer perceptron with gated activation, but “expert” does not prescribe one architecture. Its input and output widths must match the surrounding interface. Each expert usually has independent learned weights, while normalization or routing can be shared by the layer.
+An expert can be a multilayer perceptron with gated activation, but “expert” does not prescribe one architecture. Its input and output widths must match the surrounding Transformer interface. Each expert usually has independent learned weights, while normalization or routing can be shared by the layer.
 
-The residual stream carries the layer's result forward. Sparse expert selection therefore changes a feed-forward computation within a larger architecture; it does not mean the entire model is a collection of separately selected language models.
+The residual stream carries the layer's result forward. Sparse expert selection therefore changes a feed-forward computation within a larger Transformer architecture; it does not mean the entire model is a collection of separately selected language models.
 
 ### 2. Derive router scores
 
 ![Deep-dive illustration: Derive router scores](./deep-dive.png)
 
-Let x be a token vector and let there be E routed experts. A linear router produces logits, and a normalization can convert them to probabilities. The particular model may add bias corrections, another scoring function, or a different selection policy, so this is a representative formulation.
+Let x be a token vector and let there be E routed experts, where a linear router produces logits and a normalization can convert them to probabilities, though the particular model may add bias corrections, another scoring function, or a different selection policy, so this is a representative formulation.
 
 $$
 z=W_rx+b_r,\qquad
@@ -60,7 +60,7 @@ When k is greater than one, 1 token creates several expert assignments. Assignme
 
 ### 4. Separate shared and routed branches
 
-Some architectures execute shared experts for every token alongside selected routed experts. A shared branch can provide a common computation while routed branches offer conditional capacity. Its contribution must be included in active work.
+Some architectures execute shared experts for every token alongside selected routed experts, as DeepSeek-V4.1-Flash does, so a shared branch can provide a common computation while routed branches offer conditional capacity, and its contribution must be included in active work.
 
 $$
 y=F_{\mathrm{shared}}(x)+\sum_{e\in S(x)}a_eF_e(x).
@@ -87,11 +87,11 @@ For illustrative values of 64 equal experts with two selected, the routed-expert
 
 ### 6. Translate expert MLPs into arithmetic
 
-A gated expert commonly applies two input projections, multiplies a nonlinear gate with another projected branch, and applies an output projection. With input width d and intermediate width m, the leading matrix work scales with three products involving those widths, subject to the exact design and multiply-add counting convention.
+A gated expert commonly applies two input projections, multiplies a nonlinear gate with another projected branch, and applies an output projection, so with input width d and intermediate width m, the leading matrix work scales with three products involving those widths, subject to the exact design and multiply-add counting convention.
 
-For N tokens and k selected experts per token, a rough dense-matrix arithmetic estimate scales with N times k times d times m. Batch organization matters: many small per-expert groups can use hardware less efficiently than one large dense matrix multiplication, even if the total arithmetic is similar.
+For N tokens and k selected experts per token, a rough dense-matrix arithmetic estimate scales with N times k times d times m, but batch organization matters, because many small per-expert groups can use hardware less efficiently than one large dense matrix multiplication even if the total arithmetic is similar.
 
-An active-parameter count approximates selected weight involvement. It does not capture launch overhead, tile padding, expert-group size, memory traffic, or network transfers. Report actual throughput under the intended token and routing distribution.
+An active-parameter count like the one in the DeepSeek card approximates selected weight involvement. It does not capture launch overhead, tile padding, expert-group size, memory traffic, or network transfers. Report actual throughput under the intended token and routing distribution.
 
 ### 7. Explain why weights still occupy memory
 
@@ -101,7 +101,7 @@ Sparse execution selects a subset at runtime. Unless an offload or loading polic
 
 Quantization can reduce stored bytes, while scales, packing, and nonquantized components add overhead. An offload scheme substitutes transfers and scheduling complexity for residency. It needs a predictive or demand-driven policy that meets the workload's latency requirement.
 
-A model described as having a small active count can still require substantial aggregate device memory. Distinguish single-device residency, distributed residency, and per-step accessed weight bytes. These quantities answer different infrastructure questions.
+A model described as having a small active count, 6 routed experts out of 384 for example, can still require substantial aggregate device memory. Distinguish single-device residency, distributed residency, and per-step accessed weight bytes. These quantities answer different infrastructure questions.
 
 ### 8. Connect routing to distributed execution
 
@@ -115,7 +115,7 @@ Overlap can hide part of communication behind computation, but requires enough i
 
 A router favoring a few experts can overload their computation and leave others underused. Balancing methods encourage more useful distribution while trying to preserve model quality. The original Switch Transformer paper presents a simplified top-one routing design and an auxiliary balancing objective within its stated training setup.
 
-Uniform expert counts are not automatically optimal. Experts can differ in cost, devices can differ in capacity, and locality can matter. A balancing policy may optimize assignment frequency, probability mass, or another statistic. Read the loss and execution policy rather than interpreting every balancing coefficient as equivalent.
+Uniform expert counts are not automatically optimal. Experts can differ in cost, devices can differ in capacity, and locality can matter, so a balancing policy may optimize assignment frequency, probability mass, or another statistic, and the Switch Transformer auxiliary objective is one such choice. Read the loss and execution policy rather than interpreting every balancing coefficient as equivalent.
 
 Expert utilization is also not a direct quality measure. A perfectly balanced router can make poor choices. Evaluate both the model objective and the system distribution, and retain the distinction between training preferences and runtime capacity enforcement.
 
@@ -141,7 +141,7 @@ An infrastructure report should show capacity, prefill throughput, decode latenc
 
 Take 4 experts and select two. Suppose their selected router weights after normalization are 3/4 and 1/4. If the first selected expert produces a vector with first coordinate four and the second produces a first coordinate of eight, the combined first coordinate is five. Unselected experts contribute nothing through this routed branch even if their hypothetical outputs are large.
 
-If a shared branch contributes two in that coordinate under the additive design, the final coordinate becomes seven. This example distinguishes selected weighting from shared computation. It also shows why counting experts is insufficient to reconstruct a result: the indices, weights, expert functions, and combining rule all matter.
+If a shared branch contributes two in that coordinate under the additive design, the final coordinate becomes seven. This example distinguishes selected weighting, the 3/4 and 1/4 combination, from shared computation. It also shows why counting experts is insufficient to reconstruct a result: the indices, weights, expert functions, and combining rule all matter.
 
 For a batch, group assignments by expert, execute each group, and restore the token association before combining. The permutation is execution metadata; it must not change the mathematical pairing between a token and its outputs. Use unique token identifiers in tests to detect association mistakes.
 
@@ -149,7 +149,7 @@ For a batch, group assignments by expert, execute each group, and restore the to
 
 ![Deep dive: 13. Choose the right next question](./deep-dive-component-02.png)
 
-Once the sparse computation is clear, ask how assignments are batched, how much capacity each expert has, and what happens when routing exceeds that capacity. Those questions belong to the system protocol and are developed in the next article. They should not be answered by assuming a top-k equation also specifies a complete runtime.
+Once the sparse computation is clear, ask how assignments are batched, how much capacity each expert has, and what happens when routing exceeds that capacity, questions that belong to the system protocol and are developed in the next article, and they should not be answered by assuming a top-k equation also specifies a complete runtime.
 
 The derivations here are illustrative and no GPU benchmark was performed in this editing environment. The architectural result is conditional computation with retained learned capacity. Its practical value depends on training quality, weight representation, and an execution system that makes the selected work efficient.
 

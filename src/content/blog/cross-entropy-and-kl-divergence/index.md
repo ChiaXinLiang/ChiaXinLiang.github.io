@@ -89,7 +89,7 @@ When p is fixed, its entropy does not depend on the model parameters. Minimizing
 
 The decomposition does not say that we know p exactly. Training usually supplies samples from an unknown data process, so empirical negative log-likelihood estimates an expected objective. Finite samples, distribution shift, and model restrictions can prevent the fitted q from matching the relevant population distribution.
 
-Support matters. If p assigns positive mass to an outcome and q assigns exactly 0, its cross-entropy and KL contribution are infinite. We conventionally interpret 0 times log 0 as 0 for a target outcome with 0 mass. A model can avoid mathematical zeros through softmax, but finite-precision underflow still requires numerically stable computation.
+Support matters. If p assigns positive mass to an outcome and q assigns exactly 0, its cross-entropy and KL contribution are infinite, though we conventionally interpret 0 times log 0 as 0 for a target outcome with 0 mass, and a model can avoid mathematical zeros through softmax, while finite-precision underflow still requires numerically stable computation.
 
 KL is also not a distance metric: it is asymmetric and does not satisfy the triangle inequality in general. Calling it a “distribution distance” informally can be useful, but do not import geometric properties it does not have. Its direction identifies which mistakes receive high weight.
 
@@ -113,7 +113,7 @@ $$
 \frac{\partial\ell}{\partial z_k}=q_k-p_k.
 $$
 
-For a correct class predicted with probability 0.2, the derivative for its logit is minus 0.8. Gradient descent increases that logit relative to the others. An incorrect class assigned probability 0.6 has derivative plus 0.6, pushing its score downward. The compact gradient connects probability mismatch to the backpropagation signal.
+For a correct class predicted with probability 0.2, the derivative for its logit is minus 0.8, so gradient descent increases that logit relative to the others, while an incorrect class assigned probability 0.6 has derivative plus 0.6 and gets its score pushed downward: the compact gradient connects probability mismatch to the backpropagation signal.
 
 The derivation assumes the target p is fixed with respect to these logits. Training may also include masks, example weights, smoothing, or auxiliary objectives. Define those before comparing reported losses. A summed loss and an averaged loss produce different gradient scales, even if they have the same minimizer when used alone.
 
@@ -136,7 +136,7 @@ $$
 =-\sum_{t=1}^{T}\log q_\theta(x_t\mid x_{<t}).
 $$
 
-The notation x_{<t} means the prefix before position t. Training supplies that observed prefix, often described as teacher forcing. At generation time, the model may instead receive tokens selected from its own earlier predictions. That difference helps explain why a low training objective alone does not guarantee every generated sequence behaves well.
+The notation x_{<t} means the prefix before position t, and training supplies that observed prefix, often described as teacher forcing, while at generation time the model may instead receive tokens selected from its own earlier predictions: that difference helps explain why a low training objective alone does not guarantee every generated sequence behaves well.
 
 Padding and excluded tokens should not contribute to the numerator or denominator of a reported mean loss. Some instruction-tuning setups mask prompt positions and train only on assistant outputs. 2 runs can report different “loss per token” values because their masks or normalization differ, not because 1 predicts the same evaluated tokens better.
 
@@ -161,7 +161,7 @@ A small improvement in average log loss can be meaningful over many tokens. Beca
 
 Validation loss estimates performance on a chosen held-out distribution. If evaluation text overlaps training text, or if preprocessing leaks information, the estimate can be optimistic. If deployment inputs differ materially from the validation corpus, a well-estimated validation loss can still describe the wrong population. This is a generalization issue, developed in [regularization and generalization](/blog/generalization-and-regularization/).
 
-Calibration is another distinct question. A probabilistic classifier is calibrated when outcomes occur at frequencies matching its predicted probabilities under an appropriate evaluation. Log loss encourages useful probabilities in expectation, but limited data, optimization, model misspecification, and distribution shift can leave a fitted model miscalibrated. Do not use a low objective value as a substitute for measuring calibration.
+Calibration is another distinct question. A probabilistic classifier is calibrated when outcomes occur at frequencies matching its predicted probabilities under an appropriate evaluation, and log loss encourages useful probabilities in expectation, but limited data, optimization, model misspecification, and distribution shift can leave a fitted model miscalibrated, so do not use a low objective value as a substitute for measuring calibration.
 
 Normalization also determines whose mistakes receive more weight. Averaging the loss across all unmasked tokens gives a long sequence more total influence than a short sequence when they are pooled together. Averaging each sequence first and then averaging sequences gives every sequence equal weight instead. Neither convention is inherently the same objective, and neither should be hidden behind the phrase average loss. Choose the unit that matches the training design and disclose it when comparing results.
 

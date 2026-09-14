@@ -16,11 +16,11 @@ tags: ["gpu-performance", "ai-infrastructure"]
 
 ![Concept overview: Dynamic Shapes: Guards, Buckets, Padding, and Compilation Cost. Incoming sequences of different lengths enter shape buckets with padding visible.](./section-overview.png)
 
-A compiled model can be fast for one input shape and expensive across a changing workload. New sizes can trigger specialization, guard checks, compilation, or different kernels. Padding can improve reuse of a stable shape but adds work and memory. Symbolic shapes can widen a variant's validity while changing the optimizations available to it.
+A compiled model can be fast for 1 input shape and expensive across a changing workload. New sizes can trigger specialization, guard checks, compilation, or different kernels, padding can improve reuse of a stable shape while adding work and memory, and symbolic shapes can widen a variant's validity while changing the optimizations available to it.
 
-The useful question is not whether dynamic shapes are good or bad. It is which shape policy minimizes total useful cost for the actual input distribution while preserving semantics and service objectives. Compilation, execution, padding, and memory belong in the same comparison.
+The useful question is not whether dynamic shapes are good or bad. It is which shape policy minimizes total useful cost for the actual input distribution while preserving semantics and service objectives, and 4 costs belong in that comparison: compilation, execution, padding, and memory.
 
-We will derive these costs and explain guard behavior, bucketing, and measurement. Numerical examples are illustrative. Current PyTorch compiler documentation defines available controls and symbolic-shape behavior for the installed version.
+We will derive these costs and explain 3 further topics: guard behavior, bucketing, and measurement. Numerical examples are illustrative. Current PyTorch compiler documentation defines available controls and symbolic-shape behavior for the installed version.
 
 ## Deep dive
 
@@ -30,9 +30,9 @@ Record changing batch sizes, sequence lengths, feature widths, layouts, dtypes, 
 
 Preserve the frequency of each region of the population. A frequently reused shape can amortize compilation, while a rare shape can pay setup for little execution. Maximum shape alone does not reveal the operating cost.
 
-Different phases can have different populations. Prefill sees varying prompt lengths, while decode may use small query lengths with changing cache state and active batch. Training can vary packed sequence composition or microbatch structure. A single generic shape policy can fit one phase poorly.
+Different phases can have different populations. Prefill sees varying prompt lengths, while decode may use small query lengths with changing cache state and active batch. Training can vary packed sequence composition or microbatch structure. A single generic shape policy can fit 1 phase poorly.
 
-Keep the required output semantics explicit. Padding, packing, or changing a branch can alter masks, normalization, loss denominators, or sample coverage. Faster execution of a different population is not an equivalent implementation comparison.
+Keep the required output semantics explicit. Padding, packing, or changing a branch can alter 4 things: masks, normalization, loss denominators, or sample coverage. Faster execution of a different population is not an equivalent implementation comparison.
 
 Several specialization axes can combine. A simplified policy with 3 batch choices, 4 sequence buckets, and 2 layout cases has 24 possible combinations before dtype or branch differences. That is a potential space, not a claim that the compiler must create 24 independent variants. Symbolic reuse and shared paths can reduce it, while other assumptions can enlarge it. Record the combinations actually encountered and their frequencies. A policy that looks inexpensive when considering only sequence buckets can retain much more setup and memory when the full population is included.
 
@@ -40,7 +40,7 @@ Several specialization axes can combine. A simplified policy with 3 batch choice
 
 A compiled variant is valid under conditions represented by its guards and specialization. A guard can depend on shape, dtype, layout, object state, or other supported assumptions. When those assumptions do not hold, the system must follow its supported fallback or compilation behavior.
 
-A guard miss is different from a graph break. The former concerns reusing a compiled variant under changed conditions. The latter concerns a boundary where captured execution is separated or cannot continue as one graph under the integration's rules.
+A guard miss and a graph break are 2 different events: the former concerns reusing a compiled variant under changed conditions, while the latter concerns a boundary where captured execution is separated or cannot continue as one graph under the integration's rules.
 
 Inspect compiler diagnostics when investigating recompilation. Do not infer the cause solely from a changing dimension. A different stride, scalar condition, or surrounding Python object can invalidate reuse even when tensor sizes look similar.
 
@@ -66,7 +66,7 @@ A steady-state benchmark excludes this tradeoff unless compilation is measured s
 
 Symbolic dimensions let supported compiled execution represent a range of sizes instead of specializing every size independently. The compiler still needs valid relationships, bounds, and operations, and some optimizations depend on known dimensions.
 
-A wider validity range can reduce variant count and setup. It can also select a different kernel or retain runtime checks. Neither outcome is universally better; measure representative shapes and the total workload.
+A wider validity range can reduce variant count and setup. It can also select a different kernel or retain runtime checks. Neither of those 2 outcomes is universally better; measure representative shapes and the total workload.
 
 Use current public compiler controls and diagnostics rather than copying internal settings from another release. Default automatic behavior, explicit dynamic requests, and dimension annotations have their documented semantics. Preserve the exact configuration with results.
 
@@ -116,11 +116,11 @@ Choose using the observed distribution rather than only a worst-case bound. A wo
 
 ![Deep dive: 7. Preserve masks, positions, and statistics](./deep-dive-component-02.png)
 
-Padded tokens must not contribute where the original operation excludes them. Attention masks, position identifiers, loss masks, and normalization counts can each need adjustment. A kernel running a larger tensor does not automatically preserve the original result.
+Padded tokens must not contribute where the original operation excludes them, so 4 things can each need adjustment, attention masks, position identifiers, loss masks, and normalization counts, because a kernel running a larger tensor does not automatically preserve the original result.
 
 For a mean over valid elements, divide by the valid population rather than the padded width. For causal attention, logical positions must include any existing prefix or packed-sequence boundaries. A local padded row index is not always the correct sequence position.
 
-Packing multiple sequences can reduce padding but introduces boundaries and indexing. Tokens from different sequences must not attend to each other unless the method explicitly permits it. The performance comparison should include the layout and mask construction cost.
+Packing multiple sequences can reduce padding but introduces boundaries and indexing, tokens from different sequences must not attend to each other unless the method explicitly permits it, and the performance comparison should include the layout and mask construction cost.
 
 Verify outputs for several actual lengths within each bucket, including the boundaries. A test using only a length exactly equal to the bucket never exercises the padding semantics that the policy introduced.
 
@@ -128,7 +128,7 @@ Causal attention has about L times L plus 1 divided by 2 allowed pairs, and an o
 
 ### 8. Budget memory and graph lifetime
 
-Padding expands activations, temporary buffers, and sometimes cache reservations. Graph or variant-specific buffers can also retain capacity. A policy that minimizes compile time can increase memory enough to reduce feasible batch or concurrency.
+Padding expands 3 things: activations, temporary buffers, and sometimes cache reservations. Graph or variant-specific buffers can also retain capacity. A policy that minimizes compile time can increase memory enough to reduce feasible batch or concurrency.
 
 A simple retained-buffer budget is
 
@@ -144,11 +144,11 @@ Measure dynamic concurrency too. Several shape populations active together can r
 
 ### 9. Benchmark the distribution rather than one shape
 
-Replay representative shape frequencies with fixed useful work and output requirements. Record variant count, guard misses, compilation, kernel selection, memory, and latency. Include both cold and warmed deployment cases where relevant.
+Replay representative shape frequencies with fixed useful work and output requirements. Record 6 quantities: variant count, guard misses, compilation, kernel selection, memory, and latency. Include both cold and warmed deployment cases where relevant.
 
-Compare symbolic, specialized, and bucketed policies under the same population. A maximum-shape-only benchmark can overstate padding efficiency or miss rare-shape compile stalls. A fully warmed sweep can hide first-use costs clients encounter.
+Compare 3 policies under the same population: symbolic, specialized, and bucketed. A maximum-shape-only benchmark can overstate padding efficiency or miss rare-shape compile stalls. A fully warmed sweep can hide first-use costs clients encounter.
 
-Inspect why a candidate wins. It may reduce compilation, improve kernel efficiency, reduce padding, or change memory and concurrency. Keep these mechanisms separate in the report so the result can be reproduced after a workload shift.
+Inspect why a candidate wins, because 4 mechanisms are possible, reducing compilation, improving kernel efficiency, reducing padding, or changing memory and concurrency, and keep these mechanisms separate in the report so the result can be reproduced after a workload shift.
 
 For an illustrative workload with 90% of requests near length 512 and 10% spread broadly, a stable 512 bucket plus a wider reusable fallback may deserve comparison with a uniform policy. This is a candidate experiment, not a universal recommendation. The rare population's latency and compile behavior still need observation.
 
@@ -158,11 +158,11 @@ Record bucket boundaries, symbolic dimensions, compiler controls, cache lifetime
 
 A faster compute kernel can make compilation or routing more visible. A different attention architecture can change the padding model. A larger cache or batch requirement can make retained variant buffers infeasible. The policy should follow the current workload rather than an old benchmark winner.
 
-Preserve small semantic tests and representative performance cases for regression. They should detect changed guards, variant proliferation, incorrect padding, and useful workload slowdown without mirroring incidental compiler internals.
+Preserve small semantic tests and representative performance cases for regression. They should detect 4 failures, changed guards, variant proliferation, incorrect padding, and useful workload slowdown, without mirroring incidental compiler internals.
 
 ## Conclusion
 
-Dynamic-shape engineering is a balance between validity range, specialization, padding, and lifetime. Guards define reuse, buckets define added work, and compilation defines setup. Choose the policy that delivers correct useful execution across the actual distribution with a feasible memory and latency budget.
+Dynamic-shape engineering balances 4 concerns: validity range, specialization, padding, and lifetime. Guards define reuse, buckets define added work, and compilation defines setup. Choose the policy that delivers correct useful execution across the actual distribution with a feasible memory and latency budget.
 
 ### Sources
 

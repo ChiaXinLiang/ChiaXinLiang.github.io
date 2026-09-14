@@ -103,7 +103,7 @@ Let the residual width be d. In a standard full multi-head attention block, the 
 
 With d equal to 512, that estimate is 3,145,728 weights per block before biases and normalization parameters. 6 such blocks contribute about 18.9 million weights. Embeddings and output projections add their own terms, and tied input/output embeddings change that accounting. Gated feed-forward layers, grouped-query attention, and sparse experts require different formulas.
 
-This approximation explains why “two-thirds of weights in feed-forward” can be sensible for a specific conventional design. It is not a universal architectural law. A released model configuration provides widths, layer counts, head counts, expert settings, and vocabulary size. Use those facts rather than transferring the ratio to every model carrying the Transformer label.
+This approximation explains why “two-thirds of weights in feed-forward” can be sensible for a specific conventional design, but it is not a universal architectural law, and a released model configuration provides widths, layer counts, head counts, expert settings, and vocabulary size: use those facts rather than transferring the ratio to every model carrying the Transformer label.
 
 ### Write the simplified parameter budget
 
@@ -123,7 +123,7 @@ For the prefix “The keys to the cabinet,” the final hidden vector at the las
 
 Self-attention at a position normally includes that position and earlier positions, while excluding later ones. Training aligns each position's output with the next-token target. A 1-position shift error can leak the answer or train a different objective. The indexing convention therefore belongs in any runnable example.
 
-The final vocabulary projection converts a hidden vector into logits. Softmax then defines a probability distribution. Some models tie the projection to input embeddings and some do not. The selected output may come from greedy decoding, temperature sampling, or another policy. Those choices affect generated text without changing the learned block parameters.
+The final vocabulary projection converts a hidden vector into logits, softmax then defines a probability distribution, some models tie the projection to input embeddings while others do not, and the selected output may come from greedy decoding, temperature sampling, or another policy. Those choices affect generated text without changing the learned block parameters.
 
 ### The diagram is a family reference, not every current model
 

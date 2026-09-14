@@ -26,11 +26,11 @@ Start after [Command Registers and Scheduling: Make the Accelerator Programmable
 
 ![Deep dive: Map arithmetic to DSP and storage to BRAM](./deep-dive-component-01.png)
 
-The resource figure maps portable compute to a selected FPGA's synthesis resources. Multipliers may use DSPs, sums use arithmetic/state, and staged memories may map to BRAM or logic. The exact mapping is a report result, not a source-code promise.
+The resource figure maps portable compute to a selected FPGA's synthesis resources. Multipliers for the INT8 operands may use DSPs, sums use arithmetic/state, and staged memories may map to BRAM or logic. The exact mapping is a report result, not a source-code promise.
 
 The supplied Tcl targets xc7a35tcsg324-1 by default and allows FPGA_PART override. This is a generic part-level core exercise, not a recommended board purchase or an integrated pinout.
 
-Run synthesis and inspect DSP/LUT/FF counts. If an arithmetic operator maps unexpectedly, check width, signedness, pipelining and constraints before forcing a primitive. Preserve the verified numerical contract when changing mapping.
+Run Vivado synthesis and inspect DSP/LUT/FF counts. If an arithmetic operator maps unexpectedly, check width, signedness, pipelining and constraints before forcing a primitive. Preserve the verified numerical contract when changing mapping.
 
 ### Constrain clocks and interfaces
 
@@ -38,9 +38,9 @@ Run synthesis and inspect DSP/LUT/FF counts. If an arithmetic operator maps unex
 
 The constraint figure defines a clock and interface delays for timing analysis. The exercise uses an illustrative 10-ns clock with 2-ns input/output delays. Those numbers are target constraints, not an achieved frequency measurement.
 
-A board shell needs the actual oscillator, generated clocks, I/O timing and reset handling. Unconstrained paths invalidate a timing conclusion. False-path exceptions require a legitimate asynchronous or nonfunctional path, not a desire to hide failures.
+A board shell needs the actual oscillator rather than the illustrative 10-ns clock, plus generated clocks, I/O timing and reset handling. Unconstrained paths invalidate a timing conclusion. False-path exceptions require a legitimate asynchronous or nonfunctional path, not a desire to hide failures.
 
-The globally stepped core has one local clock. Connecting another domain requires a suitable CDC design. A single-bit synchronizer is not enough for an arbitrary changing multi-bit tensor bus.
+The globally stepped core has 1 local clock. Connecting another domain requires a suitable CDC design. A single-bit synchronizer is not enough for an arbitrary changing multi-bit tensor bus.
 
 ### Read implementation reports
 
@@ -60,7 +60,7 @@ The shell figure connects the core to board clocks/reset, memory and host I/O. A
 
 The released build is out-of-context and does not generate a board-ready bitstream. Adapt a documented shell and verify its clock/reset and transport separately. The functional host model is a reference for byte packing and commands, not a physical driver.
 
-Bring-up benefits from a staged plan: register access, transfer loopback, memory test, MAC fixture, array fixture and small inference. Each step has a known expected result.
+Bring-up benefits from a staged plan of 6 steps: register access, transfer loopback, memory test, MAC fixture, array fixture and small inference. Each step has a known expected result.
 
 ### Bring up progressively on hardware
 
@@ -109,7 +109,7 @@ write_checkpoint -force [file join $lab reports fpga accelerator_routed.dcp]
 
 ### Retain a reproducible integration boundary
 
-The released project verifies software and RTL simulation. Its FPGA Tcl is a core-only out-of-context implementation exercise, and the host transport is a functional model. A board-ready system additionally needs documented clock/reset, pins, memory and physical host I/O. Select those for a real target and retain their versions before claiming a working board application.
+The released project verifies software and RTL simulation. Its FPGA Tcl is a core-only out-of-context implementation exercise, and the host transport is a functional model, so a board-ready system additionally needs documented clock/reset, pins, memory and physical host I/O, which you select for a real target and whose versions you retain before claiming a working board application.
 
 Bring up the simplest observable path first. Check register or transport access, then a transfer loopback, memory behavior and a small known matrix. Compare raw bytes and wider signed results before running the tiny MLP. If a complete inference fails, intermediate values should identify the first wrong layer rather than leaving arithmetic, packing and clocks mixed together.
 
@@ -137,7 +137,7 @@ Resource totals alone are not timing closure. A design can fit all device resour
 
 #### Constrain clocked boundaries and review CDC separately
 
-Clock nets drive registers and supported clocked resources. Combinational logic lies on data paths between those boundaries; a figure that clocks a generic combinational block hides where setup and hold checks apply. Identify launch and capture clocks, input/output timing, generated clocks where actually present, and any deliberately reviewed exceptions. An exception is not a mechanism that makes an unsafe path correct.
+Clock nets drive registers and supported clocked resources. Combinational logic lies on data paths between those boundaries; a figure that clocks a generic combinational block hides where setup and hold checks apply, so identify launch and capture clocks, input/output timing, generated clocks where actually present, and any deliberately reviewed exceptions. An exception is not a mechanism that makes an unsafe path correct.
 
 A board host or memory interface can introduce another clock domain. Use a synchronization method appropriate to the signal and protocol: a stable single-bit level differs from a multi-bit payload or pulse. A multi-bit transfer often needs a handshake or asynchronous FIFO rather than independent bit synchronizers. Review the CDC structure and reset release for each domain, and apply targeted timing exceptions justified by that structure. Do not blanket-exclude asynchronous interfaces from analysis.
 
@@ -151,7 +151,7 @@ Use the fixed tile top's contract when loading operands: padded A stride 8, padd
 
 A generated bitstream is an implementation artifact, while programming a board and executing the fixture provides hardware evidence. Retain both milestones separately. A tool-estimated power report is another artifact; do not label it measured board power. Instrumented measurement needs a named boundary and test conditions.
 
-The chapter's outcome in this release is a concrete, inspectable core implementation script and a board-integration procedure. It supplies the source boundary and verification baseline needed to perform those steps, while reporting only the software/RTL checks already executed. The path to hardware is explicit and reproducible rather than implied by an FPGA-shaped illustration.
+The chapter's outcome in this release is a concrete, inspectable core implementation script and a board-integration procedure, and it supplies the source boundary and verification baseline needed to perform those steps while reporting only the software/RTL checks already executed, so the path to hardware is explicit and reproducible rather than implied by an FPGA-shaped illustration.
 
 ## Conclusion
 

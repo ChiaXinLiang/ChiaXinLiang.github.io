@@ -93,7 +93,7 @@ endmodule
 
 Create a new working copy of the lab and keep the numerical contract beside its sources. The opening work uses Python to make the values and accepted events explicit before circuit optimization. A direct matrix loop is the independent reference; a cycle-stepped array model explains timing without being the only numerical oracle.
 
-Start with known signed values, not only random data. Distinct elements expose row/column swaps and misaligned reductions. Zero and the signed endpoints expose conversion and width mistakes. A stalled event exposes the difference between offered work, accepted work and elapsed clocks. Retain each fixture so later changes can be compared against the same contract.
+Start with known signed values, not only random data. Distinct elements expose row/column swaps and misaligned reductions, zero and the signed endpoints expose conversion and width mistakes, and a stalled event exposes the difference between offered work, accepted work and elapsed clocks. Retain each fixture so later changes can be compared against the same contract.
 
 When moving the operation into RTL, draw the register boundaries and define reset/clear priority. A value observed before an active edge belongs to the previous state; a value observed after nonblocking updates belongs to the new state. Record that convention in the harness. Otherwise a testbench race can resemble a circuit defect.
 
@@ -103,7 +103,7 @@ The acceptance result is a defined behavior and an executed software/RTL check, 
 
 #### Reconstruct the MAC from its state equation
 
-The multiply-accumulate block has one persistent numerical state: its accumulator. On an enabled edge, it adds the signed product of the current input pair to the previous accumulator. Reset has the highest priority, clear follows, and enable follows both. With no reset, clear or enable, the accumulator retains its previous value. The multiplier itself is combinational in this baseline, so the complete product-plus-add path lies between input/state sources and the accumulator register.
+The multiply-accumulate block has one persistent numerical state: its accumulator. On an enabled edge, it adds the signed product of the current input pair to the previous accumulator, reset has the highest priority with clear next and enable last, and with no reset, clear or enable the accumulator retains its previous value. The multiplier itself is combinational in this baseline, so the complete product-plus-add path lies between input/state sources and the accumulator register.
 
 Begin with accumulator 0 and input pair (2,3). An enabled edge produces 6. The next enabled pair (-4,5) produces a product of -20 and a new accumulator of -14. A clock with enable 0 must retain -14 regardless of offered input bits. A final enabled pair (7,-2) produces -28. This short sequence checks signed products, feedback, accumulation and hold behavior in a way that one isolated multiplication cannot.
 
@@ -113,7 +113,7 @@ Clear with enable simultaneously high must produce 0, not the offered product. R
 
 For W=8, the product is signed 16-bit, while the accumulator is signed 32-bit. The source explicitly sign-extends the product into the accumulator domain. Calling the accumulator “2W” would describe a different circuit and would fail longer reductions. The parameter relationship therefore matters as much as the arithmetic expression: operands, product and accumulated result do not share one universal width.
 
-Parameterization is useful only within a supported range. If a reader changes W or ACC_W, they must ensure the extension remains valid and the required reduction fits. A generated part-select with a negative replication count is not a legal way to truncate a larger product. The educational default is intentionally simple; production-quality parameter guards and additional numerical configurations are follow-up work rather than assumed verified behavior.
+Parameterization is useful only within a supported range. If a reader changes W or ACC_W, they must ensure the extension remains valid and the required reduction fits, and a generated part-select with a negative replication count is not a legal way to truncate a larger product, so the educational default stays intentionally simple: production-quality parameter guards and additional numerical configurations are follow-up work rather than assumed verified behavior.
 
 The right-hand side of a nonblocking assignment uses the old accumulator at the active edge. The simulator then updates the register. A checker observing before that update sees the previous result; a checker observing afterward sees the new result. The verification script follows an explicit drive/edge/sample sequence. A waveform should use the same convention so a timing misunderstanding does not appear to be an arithmetic defect.
 

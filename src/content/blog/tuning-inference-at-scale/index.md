@@ -1,6 +1,6 @@
 ---
 title: 'Tuning Inference at Scale: Every Throughput Gain Is a Cost Cut'
-description: "4 serving optimizations, none worth more than 1.8x alone, multiply into a 5x throughput gain — and throughput is the denominator of every $/Mtok you pay."
+description: "4 serving optimizations, none worth more than 1.8x alone, multiply into a 5x throughput gain, and throughput is the denominator of every $/Mtok you pay."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
 heroImage: './section-overview.png'
@@ -64,7 +64,7 @@ Now apply a hypothetical stack with explicitly stipulated sequential gains:
 
 | Step | Gain | Cumulative | Node tok/s | $/Mtok |
 |---|---|---|---|---|
-| Baseline | — | 1.00x | 6,000 | $0.74 |
+| Baseline | n/a | 1.00x | 6,000 | $0.74 |
 | + Continuous batching | 1.8x | 1.80x | 10,800 | $0.41 |
 | + Chunked prefill | 1.4x | 2.52x | 15,120 | $0.29 |
 | + FP8 weights & KV | 1.6x | 4.03x | 24,190 | $0.18 |
@@ -123,11 +123,11 @@ The stack also keeps going above the single node. Prefill and decode want differ
 
 ### Sources
 
-- Yu et al., "Orca: A Distributed Serving System for Transformer-Based Generative Models," OSDI 2022 — https://www.usenix.org/conference/osdi22/presentation/yu
-- Agrawal et al., "Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve," OSDI 2024 — https://arxiv.org/abs/2403.02310
-- Agrawal et al., "SARATHI: Efficient LLM Inference by Piggybacking Decodes with Chunked Prefills" — https://arxiv.org/abs/2308.16369
-- Zhong et al., "DistServe: Disaggregating Prefill and Decoding for Goodput-Optimized LLM Serving," OSDI 2024 — https://arxiv.org/abs/2401.09670
-- Qin et al., "Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving" — https://arxiv.org/abs/2407.00079
-- vLLM documentation (automatic prefix caching, chunked prefill) — https://docs.vllm.ai/
+- Yu et al., "Orca: A Distributed Serving System for Transformer-Based Generative Models," OSDI 2022. https://www.usenix.org/conference/osdi22/presentation/yu
+- Agrawal et al., "Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve," OSDI 2024. https://arxiv.org/abs/2403.02310
+- Agrawal et al., "SARATHI: Efficient LLM Inference by Piggybacking Decodes with Chunked Prefills". https://arxiv.org/abs/2308.16369
+- Zhong et al., "DistServe: Disaggregating Prefill and Decoding for Goodput-Optimized LLM Serving," OSDI 2024. https://arxiv.org/abs/2401.09670
+- Qin et al., "Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving". https://arxiv.org/abs/2407.00079
+- vLLM documentation (automatic prefix caching, chunked prefill). https://docs.vllm.ai/
 
 *Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

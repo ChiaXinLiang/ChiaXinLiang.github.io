@@ -38,7 +38,7 @@ A manifest is useful only if it corresponds to the checked source. Recompute it 
 
 The gate figure separates numerical, protocol, implementation and physical evidence. The release's numerical/RTL gates are executed; Vivado, board deployment and ASIC physical checks are not. Those remain explicit milestones.
 
-Preserve raw reports and seed/version information rather than one “all tests passed” sentence. A small fixture verifies a limited contract; record its scope. A new memory wrapper or board transport creates new checks.
+Preserve raw reports and seed/version information rather than one “all tests passed” sentence, because a small fixture verifies only a limited contract whose scope you should record, and a new memory wrapper or board transport creates checks of its own.
 
 The release can be useful educational material before fabrication. Label what is implemented and what remains to be integrated so another reader can reproduce the same software/RTL results.
 
@@ -56,7 +56,7 @@ First-silicon validation also needs a documented package/board, test access and 
 
 ![Deep dive: Separate FPGA, layout, and fabricated silicon](./deep-dive-component-04.png)
 
-The milestone figure distinguishes verified RTL, implemented FPGA core, working FPGA system, educational ASIC layout and optional fabricated silicon. Each requires different evidence. One cannot be renamed into the next by changing a status field.
+The milestone figure distinguishes verified RTL, implemented FPGA core, working FPGA system, educational ASIC layout and optional fabricated silicon, each of which asks for different evidence, and none of them can be renamed into the next by changing a status field.
 
 The current deliverable is a tested educational RTL/project package plus implementation exercises. The integrated tile top provides host-loaded computation in simulation; a physical host interface, board shell and foundry implementation remain target-specific.
 
@@ -75,7 +75,7 @@ The first command writes `reports/release-1.json`. Inspect its scope and result 
 
 ### Keep behavioral and physical evidence separate
 
-Portable RTL is an entry point to implementation, not a fabrication-ready package. The educational flow must combine it with a supported cell library, constraints and appropriate models. Larger memory structures need permitted macros with simulation, timing and physical views that agree on their behavior. FPGA initialization and primitive assumptions cannot be carried over silently.
+Portable RTL is an entry point to implementation, not a fabrication-ready package: the educational flow has to combine it with a supported cell library, constraints and appropriate models, and larger memory structures need permitted macros whose simulation, timing and physical views agree on their behavior. FPGA initialization and primitive assumptions cannot be carried over silently.
 
 Inspect each stage's evidence: synthesis mapping, floorplan/placement, clock distribution, routed interconnect and extracted timing. A layout file is not a substitute for DRC, LVS or STA. Unconstrained paths and missing views can make an apparently successful report incomplete. Record the exact target and flow revision.
 
@@ -87,7 +87,7 @@ Retain a manifest of sources, tests, constraints and tool/model versions. Numeri
 
 #### Package the milestone that actually exists
 
-The current release is a verified educational software/RTL project: original source, independent numerical tests, deterministic exercises and simulator evidence. It includes a host-loaded tile controller and physical implementation scripts that readers can inspect and execute in appropriate environments. It does not contain an executed FPGA bitstream, measured board inference, educational GDS or fabricated silicon. The archive should say this plainly so another reader can reproduce the same result.
+The current release is a verified educational software/RTL project: original source, independent numerical tests, deterministic exercises, recorded Icarus Verilog evidence, a host-loaded tile controller, and physical implementation scripts that readers can inspect and execute in appropriate environments. What it does not contain is an executed FPGA bitstream, measured board inference, educational GDS or fabricated silicon, and the archive should say so plainly enough that another reader can reproduce the same result.
 
 A milestone table is more useful than checking every possible box. Verified RTL requires its functional evidence; an implemented FPGA core requires a constrained target run; a working board system requires physical interface and application results; educational ASIC layout requires executed flow artifacts; production silicon requires the selected full-chip and manufacturing obligations. A later milestone adds evidence rather than being created by editing a status label.
 
@@ -97,7 +97,7 @@ The code is original educational MIT-licensed material. Include LICENSE and reta
 
 List every included source, test, script, constraint and report with a checksum. The release exercise computes SHA-256 entries for reproducible project files. A checksum identifies bytes, not correctness; its value is connecting the tested revision to what another reader downloads. Retain the simulator version, seed and executed scope beside the source hashes.
 
-Reports should identify actual executed checks. The RTL evidence records MAC and pipeline vectors, stream clocks with backpressure, array cases with global stalls, registered RAM collision behavior and integrated tile jobs. The integrated tests also exercise dimension snapshot and ignored busy writes/starts. Python tests cover numerical, command/memory and scheduling behavior. Do not add physical reports with fabricated empty success fields to make the manifest look complete.
+Reports should identify actual executed checks. The RTL evidence records MAC and pipeline vectors, stream clocks with backpressure, array cases with global stalls, registered RAM collision behavior and integrated tile jobs, while the integrated tests also exercise dimension snapshot and ignored busy writes/starts, and Python tests cover numerical, command/memory and scheduling behavior. Do not add physical reports with fabricated empty success fields to make the manifest look complete.
 
 Exclude caches, simulator binaries and generated temporary testbench executables from the distributable archive. They are not needed to reproduce the source-based checks and may be platform-specific. Include a README with exact entry points and environment requirements. A clean extraction should not depend on hidden working-directory state from the author's machine.
 
@@ -111,7 +111,7 @@ Record tool differences if reproducing with another simulator or Python version.
 
 #### Prepare progressive bring-up without inventing results
 
-A board or first-silicon plan begins with safe documented power, clock and reset checks appropriate to the selected platform. Then establish test/transport access, memory behavior and a small signed MAC/matrix fixture. Complete inference follows only after those simpler boundaries work. The plan should contain expected values and timeout/error observations before hardware execution so failures can be classified.
+A board or first-silicon plan begins with safe documented power, clock and reset checks appropriate to the selected platform. Then establish test/transport access, memory behavior and the small signed 2×2 MAC/matrix fixture. Complete inference follows only after those simpler boundaries work. The plan should contain expected values and timeout/error observations before hardware execution so failures can be classified.
 
 Use the same 2×2 matrix fixture and distinguishable signed byte patterns from the series. Compare intermediate data and complete INT32 outputs rather than just an LED or class prediction. If a small matrix fails, inspect packing, accepted load events, snapshot, array step and result capture. A large network test is not a substitute for those localized checks.
 

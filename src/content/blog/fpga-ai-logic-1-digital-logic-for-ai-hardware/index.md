@@ -29,7 +29,7 @@ Start after [Define the AI Accelerator: Workload, Interfaces, and Success Criter
 
 ![Deep dive: Combinational logic and clocked state](./deep-dive-component-01.png)
 
-The register figure separates combinational calculation from stored state. Combinational logic reacts to its inputs; a clocked register changes at its specified edge. The logic computes a counter's next value from its current value, but the stored count updates only when the clocked process samples the enable.
+The register figure separates combinational calculation from stored state. Combinational logic reacts to its inputs; a clocked register changes at its specified edge. The logic computes a counter's next value, count plus 1, from its current value, but the stored count updates only when the clocked process samples the enable.
 
 In SystemVerilog, always_ff with nonblocking assignments expresses sequential state. All right-hand sides use the sampled pre-update state. Replacing a nonblocking assignment with a blocking assignment inside a multi-register pipeline can change simulation behavior and obscure the intended circuit.
 
@@ -49,7 +49,7 @@ Define priority when events coincide. Reset dominates ordinary progress; new com
 
 ![Deep dive: FPGA resources behind the RTL](./deep-dive-component-03.png)
 
-The FPGA resource figure maps circuit roles to LUTs, flip-flops, DSP blocks and block RAM. LUTs implement supported combinational functions, flip-flops retain state, DSP resources can implement arithmetic, and BRAM provides structured memory. Synthesis decides a legal mapping under device capabilities and constraints.
+The FPGA resource figure maps circuit roles to 4 resource families: LUTs, flip-flops, DSP blocks and block RAM. LUTs implement supported combinational functions, flip-flops retain state, DSP resources can implement arithmetic, and BRAM provides structured memory. Synthesis decides a legal mapping under device capabilities and constraints.
 
 An RTL multiply is not a guarantee of one DSP block. Operand width, signedness, pipeline placement and synthesis settings can change mapping. A small memory may become distributed logic, while another inference pattern maps to BRAM. Read the synthesis report rather than estimating resource use from source lines.
 
@@ -98,19 +98,19 @@ Reset policy needs equal precision. The released compute blocks use synchronous 
 
 A combinational multiplier maps differently from a state register, and a small memory with many simultaneous reads can map differently from a single-port RAM. FPGA LUTs, flip-flops, DSP blocks and BRAM are implementation resources with target-specific capabilities. Writing multiplication in RTL does not prove the mapper picked a DSP. Declaring an array does not prove the implementation uses BRAM. Inspect the actual synthesis report when that flow is executed.
 
-Control logic often includes comparisons, state selection and address generation. The counter width should follow its representable range, and the final-work comparison should use the intended pre-edge or post-edge convention. A counter that reaches 3 requires values 0 through 3; a controller that detects count==3 before incrementing may finish a clock later than one that detects the third accepted event. Draw the condition and test the event sequence rather than guessing from a familiar state name.
+Control logic often includes comparisons, state selection and address generation, so the counter width should follow its representable range and the final-work comparison should use the intended pre-edge or post-edge convention: a counter that reaches 3 requires values 0 through 3, while a controller that detects count==3 before incrementing may finish a clock later than one that detects the third accepted event, which is why you draw the condition and test the event sequence rather than guessing from a familiar state name.
 
 Nonblocking sequential assignments use old right-hand-side state within the same edge. If a clocked block assigns acc<=acc+product and memory[addr]<=acc, the stored memory value is the previous accumulator unless a separately computed next sum is used. That behavior is sometimes intentional, but do not mistake it for a new accumulated output. The later capture stage in the integrated top makes the distinction explicit by waiting until the array's sequential updates are available.
 
 #### Use a short event ledger to expose failures
 
-Write each edge as a row containing current state, start, accepted work, acknowledgement, reset, current count and expected next state/count. The uninterrupted case is only the first ledger. Add start while RUN, acknowledgement before DONE, a work stall, reset during RUN and a second complete job. These cases reveal whether control events have a defined priority and whether stale state can leak into a later operation.
+Write each edge as a row of 7 fields: current state, start, accepted work, acknowledgement, reset, current count and expected next state/count. The uninterrupted case is only the first ledger. Add start while RUN, acknowledgement before DONE, a work stall, reset during RUN and a second complete job. These cases reveal whether control events have a defined priority and whether stale state can leak into a later operation.
 
 Do not use a final counter alone as the checker. A wrong increment during a stall followed by a missed increment can cancel numerically. Compare every transition in the ledger and keep the accepted-work sequence. Likewise, a final IDLE state does not prove DONE was observable for the required interval. Check the lifetime of status events, not just the final state.
 
 For the supplied exercise, a passing report documents a small deterministic state-machine model. It is not a formally proven RTL controller. The integrated accelerator controller arrives in a later chapter and is tested with actual matrix jobs in simulation. The foundation here is the reasoning pattern: state, edge, accepted event, priority and observable output.
 
-Once that pattern is stable, every later register boundary becomes easier to explain. A product-valid bit is state; a ready/valid buffer's occupancy is state; an array's forwarded operand mask is state; a tile controller's completion counter is state. Each updates on a declared event and must hold when that event is absent. The circuit grows, but the basic question remains concrete: which stored values change at this edge, and why?
+Once that pattern is stable, every later register boundary becomes easier to explain, because a product-valid bit is state, a ready/valid buffer's occupancy is state, an array's forwarded operand mask is state, and a tile controller's completion counter is state, each updating on a declared event and holding when that event is absent, so the circuit grows while the basic question stays concrete: which stored values change at this edge, and why?
 
 ## Conclusion
 

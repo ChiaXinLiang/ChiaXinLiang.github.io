@@ -106,9 +106,9 @@ Keep logical dimensions separate from the physical array. The 4×4 engine comput
 
 Initialize a new output reduction once, combine every required contribution, and apply bias/activation/conversion only at the specified final stage. ReLU does not distribute over partial sums. A premature quantization can also change rounding and cancellation. Use mixed-sign fixtures so these mistakes cannot hide behind positive-only inputs.
 
-Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create a lot of local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
+Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities, reuse that avoids a host or external-memory load can still create a lot of local traffic, and a dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
 
-The direct matrix oracle remains independent of the systolic timing trace. Use the trace to debug alignment and the oracle to verify the final result. Global stalls consume clocks without changing logical step; keep that distinction in both the driver and the array. Once the complete tile contract is correct, measure its useful work and integration overhead separately.
+The direct matrix oracle remains independent of the systolic timing trace. Use the trace to debug alignment and the oracle to verify the final result, and because global stalls consume clocks without changing logical step, keep that distinction in both the driver and the array, then measure useful work and integration overhead separately once the complete tile contract is correct.
 
 ### A worked engineering decision
 
@@ -140,7 +140,7 @@ For output stores, generate addresses only where the logical row is below M and 
 
 Use 1×1×1, a full tile, the 5×6×7 fixture and dimensions immediately above a tile boundary. Distinct sizes reveal assumptions about divisibility and final chunk length. The released command model rejects nonpositive dimensions before any memory writes. This is matrix multiplication: K can be larger than M or N, and no convolution-kernel-fitting rule applies.
 
-A shape validation failure should preserve memory and produce the declared error behavior. Address validation should include element width, alignment and allocated range. The software model is functional, while an external bus would additionally need response and partial-write recovery rules. A valid numerical shape does not guarantee a valid memory command.
+A shape validation failure should preserve memory and produce the declared error behavior, address validation should include element width, alignment and allocated range, and the software model is functional while an external bus would additionally need response and partial-write recovery rules. A valid numerical shape does not guarantee a valid memory command.
 
 The main benefit of tiling is running a logical problem larger than the local array while exploiting a bounded working set. Its cost includes repeated loads, intermediate accumulation, masks and command overhead. Count those costs separately from useful MACs. The chapter supplies an executable software decomposition and a verified local engine, giving readers a precise boundary for implementing a larger hardware scheduler later.
 

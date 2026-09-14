@@ -216,7 +216,7 @@ Replace peak compute and bandwidth with measured effective rates for representat
 
 Do not assume 1 universal efficiency percentage. A short-context projection GEMM and a long-context attention kernel can have different rates and different limiting resources. Measure several batch sizes while keeping checkpoint, cache dtype, and retained lengths controlled.
 
-Plot step time, aggregate output rate, individual token interval, and memory occupancy together. A plateau in aggregate rate with rising step time is compatible with compute saturation, but profiling must exclude scheduler stalls or communication. A memory-capacity failure is not evidence of reaching the compute ceiling.
+Plot step time, aggregate output rate, individual token interval, and memory occupancy together, because a plateau in aggregate rate with rising step time is compatible with compute saturation but profiling still has to rule out scheduler stalls and communication, and a memory-capacity failure is not evidence of reaching the compute ceiling.
 
 ### Common misconceptions
 
@@ -228,13 +228,13 @@ Plot step time, aggregate output rate, individual token interval, and memory occ
 
 **Compute-bound means faster individual responses.** Aggregate throughput can plateau while each request waits longer between tokens. Optimize within latency requirements, not solely for total rate.
 
-Use the predicted crossing to choose measurement points on both sides, not to set a production batch directly. Include intermediate batches because tile and wave effects can make nearby shapes behave differently. If the crossing cannot fit within cache capacity, report that constraint explicitly rather than extrapolating an unattainable throughput plateau.
+Use the predicted crossing to choose measurement points on both sides rather than to set a production batch directly, and include intermediate batches, because tile and wave effects can make nearby shapes behave differently. If the crossing cannot fit inside cache capacity, report that constraint instead of extrapolating an unattainable throughput plateau.
 
 ## Conclusion
 
 Derive the weight-only crossing to understand reuse, then add cache bytes, attention work, and measured kernel efficiency. Reject crossings that lie outside memory capacity or service latency limits.
 
-For the illustrative H100 rates, BF16 weight-only arithmetic balances near batch 295. Long histories can eliminate that crossing, and quantized deployments can encounter cache capacity before reaching it. The most useful batch is the measured compliant operating point, whose cost can be calculated with [the preceding cost article](../cloud-gpu-price-to-cost-per-million-tokens/).
+For the illustrative H100 rates, BF16 weight-only arithmetic balances near batch 295, but long histories can erase that crossing and quantized deployments can hit cache capacity before reaching it, so the most useful batch is the measured compliant operating point, whose cost can be calculated with [the preceding cost article](../cloud-gpu-price-to-cost-per-million-tokens/).
 
 ### Sources
 

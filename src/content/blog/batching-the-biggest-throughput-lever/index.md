@@ -115,11 +115,11 @@ It also explains the shape of the whole optimization stack that follows in this 
 
 ### Sources
 
-- Yu et al., "Orca: A Distributed Serving System for Transformer-Based Generative Models," OSDI 2022 — https://www.usenix.org/conference/osdi22/presentation/yu
-- Kwon et al., "Efficient Memory Management for Large Language Model Serving with PagedAttention" (vLLM), SOSP 2023 — https://arxiv.org/abs/2309.06180
-- NVIDIA H100 Tensor Core GPU specifications — https://www.nvidia.com/en-us/data-center/h100/
-- vLLM project repository — https://github.com/vllm-project/vllm
-- SGLang project repository — https://github.com/sgl-project/sglang
+- Yu et al., "Orca: A Distributed Serving System for Transformer-Based Generative Models," OSDI 2022. https://www.usenix.org/conference/osdi22/presentation/yu
+- Kwon et al., "Efficient Memory Management for Large Language Model Serving with PagedAttention" (vLLM), SOSP 2023. https://arxiv.org/abs/2309.06180
+- NVIDIA H100 Tensor Core GPU specifications. https://www.nvidia.com/en-us/data-center/h100/
+- vLLM project repository. https://github.com/vllm-project/vllm
+- SGLang project repository. https://github.com/sgl-project/sglang
 - Anyscale engineering blog, "How continuous batching enables 23x throughput in LLM inference" (vendor-reported benchmark)
 
 *Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

@@ -26,7 +26,7 @@ This case uses an illustrative server with 16 active decode sequences and occasi
 
 End-to-end request latency combines queueing, prefill, generation, and delivery. A request can have an acceptable total duration while containing a conspicuous mid-generation pause. Capture inter-token intervals for every sequence and correlate them with server-side timestamps. If all streams stop together, look first for a shared execution or delivery interruption.
 
-Separate time spent computing a token from time spent making it visible. Reverse-proxy buffering, client-side batching, network congestion, and flush behavior can imitate a GPU stall. A GPU trace showing uninterrupted decode work during a client pause argues for a delivery-path investigation. Server-side token completion timestamps and client receipt timestamps make this distinction concrete.
+Separate time spent computing a token from time spent making it visible. Reverse-proxy buffering, client-side batching, network congestion, and flush behavior can all imitate a GPU stall, so a GPU trace showing uninterrupted decode work during a client pause argues for a delivery-path investigation, and server-side token completion timestamps next to client receipt timestamps make the distinction concrete.
 
 Do not summarize the problem only as mean time per output token. A mean of 30 milliseconds can hide hundreds of normal 25-millisecond intervals and 1 800-millisecond gap. Retain per-request interval distributions, maximum gaps, and a timeline around the event. An aggregate percentile over all tokens can also obscure which requests experience repeated interruptions.
 
@@ -41,7 +41,7 @@ At any scheduler iteration, the engine chooses which active sequences to advance
 
 This is related to head-of-line blocking, but the queue may be a GPU work schedule rather than a network queue. A large prompt and a 1-token decode step compete for the same critical path. The fact that both operations run fast relative to their own work does not establish that their combination provides smooth streaming.
 
-Continuous batching lets an engine add and retire requests as sequences finish. Chunked prefill adds another control: divide a long prompt into pieces that can be scheduled alongside decode. These are related but distinct mechanisms. An engine can use continuous batching and still have an unsuitable prefill budget for a latency-sensitive workload.
+Continuous batching lets an engine add and retire requests as sequences finish. Chunked prefill adds another control, dividing a long prompt into pieces that can be scheduled alongside decode, and the 2 mechanisms are related but distinct, because an engine can use continuous batching and still have an unsuitable prefill budget for a latency-sensitive workload.
 
 Current vLLM V1 documentation describes decode-prioritized scheduling with chunked prefill enabled whenever possible: pending decode requests are scheduled first, remaining token budget admits prefill work, and a prompt that does not fit is split. That describes a documented implementation, not a guarantee for every engine or version. Record the actual configuration and release before reasoning from it.
 
@@ -79,7 +79,7 @@ Chunking changes the longest admitted execution segment compared with monolithic
 
 ### Chunk size is a multi-objective decision
 
-A smaller chunk often protects streaming latency by limiting prompt work admitted at once. It can also delay time to first token for newly arriving requests and add scheduling or launch overhead. A larger chunk improves prompt processing opportunities but may lengthen iterations shared with decoding. The optimum depends on the model, accelerator, context lengths, and mix of incoming requests.
+A smaller chunk often protects streaming latency by limiting prompt work admitted at once, though it can also delay time to first token for newly arriving requests and add scheduling or launch overhead, while a larger chunk improves prompt processing opportunities but may lengthen iterations shared with decoding. The optimum depends on the model, accelerator, context lengths, and mix of incoming requests.
 
 The important variable is elapsed iteration time, not token count alone. 1000 prompt tokens in 1 kernel path may have a different cost from 1000 in another. Prefix-cache hits, padding, attention lengths, compiler choices, and batch composition all change the work represented by a nominal token budget.
 

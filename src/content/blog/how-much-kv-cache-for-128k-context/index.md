@@ -16,7 +16,7 @@ tags: ['gpu', 'inference', 'math']
 
 ![Concept overview: How Much KV Cache Does a 128k-Token Context Use?](./section-overview.png)
 
-40 GiB is the logical BF16 key-value cache for 1 131,072-token history in the 70B grouped-query geometry used throughout this subtopic. It is not a training activation estimate and not the model's weight footprint. It is persistent attention state for a single inference request.
+40 GiB is the logical BF16 key-value cache for 1 131,072-token history in the 70B grouped-query geometry used throughout this subtopic: not a training activation estimate and not the model's weight footprint, but persistent attention state for a single inference request.
 
 That distinction matters because the cache grows with the workload. Weight memory is largely fixed after loading; attention state grows as requests arrive and generate tokens. A server configured for short conversations can run out of memory on a small number of long documents even when its checkpoint has not changed.
 
@@ -30,7 +30,7 @@ Here we derive the capacity, explain which architecture choices affect it, and c
 
 In causal self-attention, a new token's query attends to keys and values from its retained history. Previous tokens' key and value projections do not need to be recomputed at every decode step, so the server stores them. The cache contains 2 collections of vectors per decoder layer: K and V.
 
-It does not normally store the full attention score matrix persistently. That matrix represents relationships between positions, while the cache represents projected token state. Confusing those objects leads to the false claim that persistent inference cache must grow quadratically with context length.
+It does not normally store the full attention score matrix persistently, because that matrix represents relationships between positions while the cache represents projected token state, and confusing those objects leads to the false claim that persistent inference cache must grow quadratically with context length.
 
 For ordinary full-context attention, persistent KV payload grows linearly with retained tokens. Computation over the history still grows with length, and prefill has its own attention complexity. Storage complexity and arithmetic complexity describe different objects.
 
@@ -42,7 +42,7 @@ $$
 M_{KV}=2BSLH_{kv}db.
 $$
 
-The factor 2 is K plus V. Every layer has its own attention projections, so multiply by layer count. Each retained token has 1 vector per KV head, so multiply by heads and head dimension. The dtype converts element count to byte count.
+The factor 2 is K plus V, every layer has its own attention projections so you multiply by layer count, each retained token has 1 vector per KV head so you multiply by heads and head dimension, and the dtype converts element count to byte count.
 
 For unequal request lengths, replace $$BS$$ with their sum:
 
@@ -76,7 +76,7 @@ The context counts prompt plus retained generated output. A 120,000-token prompt
 
 ### Grouped-query attention changes storage
 
-Multi-head attention gives each query head its own K and V head. Multi-query attention shares 1 K/V pair across all query heads. Grouped-query attention lies between those designs: several query heads share 1 KV head.
+Multi-head attention gives each query head its own K and V head, multi-query attention shares 1 K/V pair across all query heads, and grouped-query attention lies between those designs, with several query heads sharing 1 KV head.
 
 Our example has 64 query heads and 8 KV heads. Persistent storage uses 8. If the otherwise identical model used 64 KV heads, the 128k BF16 cache would be 8 times larger: 320 GiB instead of 40 GiB. With 1 KV head it would be 5 GiB.
 
@@ -86,7 +86,7 @@ The distinction also affects kernel implementation. Query heads sharing KV state
 
 ### Context and concurrency multiply
 
-At BF16, 1 8,192-token history uses 2.5 GiB. 1 32,768-token history uses 10 GiB. 1 full 131,072-token history uses 40 GiB. 4 32k histories therefore have the same logical cache payload as 1 128k history.
+At BF16, 1 8,192-token history uses 2.5 GiB, 1 32,768-token history uses 10 GiB, and 1 full 131,072-token history uses 40 GiB, so 4 32k histories have the same logical cache payload as 1 128k history.
 
 This equality is useful for capacity planning, but those workloads are not equivalent computationally. Their attention matrix shapes, scheduling behavior, and per-request latency differ. The number of output tokens emitted per decode step also differs: 4 requests can emit 4 tokens, while 1 request emits 1.
 

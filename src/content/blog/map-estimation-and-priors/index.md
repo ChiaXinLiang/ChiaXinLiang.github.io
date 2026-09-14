@@ -34,7 +34,7 @@ $$
 
 The likelihood $$p(D\mid\theta)$$ describes the observations under a candidate parameter. The prior $$p(\theta)$$ expresses a distribution over plausible parameter values before using this dataset. The posterior $$p(\theta\mid D)$$ is the updated distribution after combining those ingredients.
 
-The denominator, called the evidence or marginal likelihood, normalizes the posterior. It is obtained by integrating the product of likelihood and prior over the parameter space. For a fixed model and dataset, it does not depend on the candidate theta. We can therefore ignore it when locating the posterior's maximum, although we cannot ignore normalization when computing actual posterior probabilities or comparing different models through evidence.
+The denominator, called the evidence or marginal likelihood, normalizes the posterior, and you obtain it by integrating the product of likelihood and prior over the parameter space: for a fixed model and dataset it does not depend on the candidate theta, so we can ignore it when locating the posterior's maximum, although we cannot ignore normalization when computing actual posterior probabilities or comparing different models through evidence.
 
 A prior is part of the model. It can encode physical knowledge, previous measurements, constraints, or a deliberately weak default. Calling it a prior does not make it automatically trustworthy. Its suitability depends on how it was chosen and whether its assumptions match the application.
 
@@ -54,7 +54,7 @@ $$
 
 The first term rewards explaining the data. The second penalizes parameter settings the prior regards as implausible. This additive form is why MAP resembles regularized maximum likelihood.
 
-For a continuous parameter, the estimate maximizes a density, not the probability mass of a single point. Any exact point ordinarily has 0 probability mass. A posterior mode also need not equal a posterior mean or median. These summaries answer different questions, and the appropriate decision depends on the loss associated with the action we take.
+For a continuous parameter, the estimate maximizes a density rather than the probability mass of a single point, since any exact point ordinarily has 0 probability mass, and a posterior mode also need not equal a posterior mean or median: these summaries answer different questions, and the appropriate decision depends on the loss associated with the action we take.
 
 ### A Beta prior for a Bernoulli probability
 
@@ -144,7 +144,7 @@ $$
 -\log p(w)=\frac{1}{2\tau^2}\lVert w\rVert_2^2+C.
 $$
 
-The MAP objective therefore becomes summed data NLL plus a quadratic penalty. Larger weights are less plausible under this prior, and smaller prior variance makes the penalty stronger. A prior with nonzero mean penalizes distance from that mean rather than distance from 0. Correlated Gaussian components introduce a covariance-weighted quadratic form instead of a simple sum of squares.
+The MAP objective therefore becomes summed data NLL plus a quadratic penalty, where larger weights are less plausible under this prior and smaller prior variance makes the penalty stronger, while a prior with nonzero mean penalizes distance from that mean rather than distance from 0, and correlated Gaussian components introduce a covariance-weighted quadratic form instead of a simple sum of squares.
 
 This is a modeling interpretation of L2 regularization. It does not imply that every real training configuration exactly implements Bayesian inference. The optimizer, normalization conventions, excluded parameters, and implementation of weight decay all matter.
 

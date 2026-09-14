@@ -50,19 +50,19 @@ In the no-skew example, minimum clock-to-Q is 0.08 nanoseconds and minimum logic
 
 Making the clock period longer does not fix this same-edge comparison. The new data is still allowed to arrive too soon after the current capture event. Delaying the next edge addresses a different interval. Physical fixes can add data-path delay or change clock relationships, subject to the implementation tool and device constraints. The foundations lab does not perform such a fix.
 
-So a path can pass setup and fail hold, or the reverse. Optimizing only for a shorter data path may improve setup while reducing hold margin. Timing closure needs both analyses and any additional relevant checks. Reporting one favorable number without the other can misrepresent whether the implementation is acceptable.
+So a path can pass setup and fail hold, or the reverse. Optimizing only for a shorter data path may improve setup while reducing hold margin. Timing closure needs both of those 2 analyses and any additional relevant checks. Reporting one favorable number without the other can misrepresent whether the implementation is acceptable.
 
 Reset paths and independent-clock transfers raise other issues, so do not treat the teaching inequality as a complete signoff checklist. The [AMD constraints guide](https://docs.amd.com/r/en-US/ug903-vivado-using-constraints/Asynchronous-Clock-Domain-Crossings) explains why asynchronous crossings need appropriate handling rather than an ordinary synchronous relationship. The next foundations article introduces those crossing contracts.
 
-For a hand calculation, write the earliest data arrival and the required stable interval in separate columns, with their reference edge stated. Subtract the requirement from the arrival under the example's sign convention. A negative result means the new data may arrive too early. Keeping units and reference events visible prevents the common mistake of comparing a minimum path with a full cycle period and calling that a hold check.
+For a hand calculation, write the earliest data arrival and the required stable interval in separate columns, with their reference edge stated, then subtract the requirement from the arrival under the example's sign convention, where a negative result means the new data may arrive too early: keeping units and reference events visible prevents the common mistake of comparing a minimum path with a full cycle period and calling that a hold check.
 
 ### Skew affects setup and hold differently
 
 ![Deep dive: Skew affects setup and hold differently](./deep-dive-component-03.png)
 
-Clock skew is the difference between clock arrival times at the relevant registers. Here positive skew means the capture clock arrives later than the launch clock. With this definition, later capture gives data more time before the next setup deadline. The same later current capture event can require old data to remain stable longer relative to the source's newly launched data, worsening hold.
+Clock skew is the difference between clock arrival times at the 2 relevant registers. Here positive skew means the capture clock arrives later than the launch clock. With this definition, later capture gives data more time before the next setup deadline. The same later current capture event can require old data to remain stable longer relative to the source's newly launched data, worsening hold.
 
-Define the direction before using a sign. Different reports and explanations may express a relationship using different reference conventions. A statement that skew helps timing is incomplete unless it specifies which check and which direction. The figure deliberately separates setup and hold effects under one stated positive-skew definition.
+Define the direction before using a sign. Different reports and explanations may express a relationship using different reference conventions. A statement that skew helps timing is incomplete unless it specifies which check and which direction. The figure deliberately separates the 2 effects, setup and hold, under one stated positive-skew definition.
 
 For an illustrative setup calculation, adding 0.1 nanoseconds of positive capture-later skew to the earlier no-skew model increases the available setup interval by 0.1 nanoseconds. For the simplified hold comparison, it increases the required minimum data delay by that amount. These examples explain the direction; they are not predictions of a clock-tree implementation.
 
@@ -70,7 +70,7 @@ Skew is not a knob you can turn independently of everything else. Clock distribu
 
 Uncertainty also differs from skew. In a simplified teaching budget, uncertainty reserves margin for specified variations or modeling concerns. A physical timing flow defines how its uncertainty and clock effects are represented. Do not add a report's already accounted clock contribution again in a separate manual calculation without checking the definitions.
 
-When reading a path report, identify the launch clock, capture clock, related events, and sign convention. Then check whether the path is being evaluated as a maximum-delay setup path or a minimum-delay hold path. That reading method beats memorizing that a later edge is always good or always bad. The same physical relationship can have opposite consequences for 2 necessary timing checks.
+When reading a path report, identify the launch clock, capture clock, related events, and sign convention, then check whether the path is being evaluated as a maximum-delay setup path or a minimum-delay hold path, because that reading method beats memorizing that a later edge is always good or always bad: the same physical relationship can have opposite consequences for 2 necessary timing checks.
 
 ### Pipeline depth trades latency for path length
 

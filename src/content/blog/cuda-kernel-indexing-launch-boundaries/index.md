@@ -16,7 +16,7 @@ tags: ["gpu-performance", "ai-infrastructure"]
 
 ![Concept overview: CUDA Kernel Foundations: Indexing, Launch Geometry, and Boundary Masks. An output matrix is overlaid with CUDA blocks and threads.](./section-overview.png)
 
-Writing a CUDA kernel starts with an ownership question: which thread is responsible for which output element? Launching many threads is easy. Proving that every required element is written exactly once, with valid reads and supported synchronization, is the foundation that makes later optimization meaningful.
+Writing a CUDA kernel starts with an ownership question: which thread is responsible for which output element? Launching many threads is easy. Proving that every required element is written exactly once, by exactly 1 thread, with valid reads and supported synchronization, is the foundation that makes later optimization meaningful.
 
 A vector addition is a useful first example because the mathematical result is simple and the memory traffic is visible. It lets us separate indexing, launch geometry, boundary handling, buffer lifetime, and timing without hiding them inside a large model operation.
 
@@ -34,11 +34,11 @@ $$
 c_i=a_i+b_i,\qquad0\le i<N.
 $$
 
-Each valid output element needs one writer in this simple implementation. Every read must address a valid input element, and the input buffers must remain available until execution completes. These requirements are independent of whether the launch is fast.
+Each valid output element needs 1 writer in this simple implementation. Every read must address a valid input element, and the input buffers must remain available until execution completes. These requirements are independent of whether the launch is fast.
 
 Start with a deterministic reference and several lengths, including a size not divisible by the block width. Include N=0 and small lengths in the host-side contract. An empty vector needs a defined no-work path rather than an invalid launch configuration.
 
-Assume separate supported device buffers for the example unless aliasing is explicitly part of the interface. Pointer overlap changes the correctness analysis for more general operations, especially when one output can overwrite data another thread still needs. The simple result does not authorize arbitrary buffer aliasing.
+Assume separate supported device buffers for the example unless aliasing is explicitly part of the interface. Pointer overlap changes the correctness analysis for more general operations, especially when 1 output can overwrite data another thread still needs. The simple result does not authorize arbitrary buffer aliasing.
 
 ### 2. Derive one-dimensional thread indexing
 
@@ -58,7 +58,7 @@ CUDA's built-in indices and dimensions have specific types and limits. Casting b
 
 ![Deep dive: 3. Make the partial final block explicit](./deep-dive-component-03.png)
 
-When N is not divisible by D, the launch includes threads whose indices are beyond the vector. They must not read or write the arrays. A boundary condition protects those accesses:
+When N is not divisible by D, the launch includes threads whose indices are beyond the vector. They must not read or write the arrays. A boundary condition, 1 comparison per thread, protects those accesses:
 
 ```cpp
 __global__ void add_vectors(const float* a, const float* b,
@@ -69,17 +69,17 @@ __global__ void add_vectors(const float* a, const float* b,
 }
 ```
 
-This snippet illustrates kernel ownership and omits host allocation and transfer setup. The caller must provide valid device pointers, sufficient lengths, and the supported completion dependencies.
+This snippet illustrates kernel ownership and omits host allocation and transfer setup. The caller must provide 3 things: valid device pointers, sufficient lengths, and the supported completion dependencies.
 
 For N=1003 and D=256, 4 blocks launch 1024 threads. The last block starts at index 768 and has 235 valid elements; 21 threads do no array work. The whole launch has about 97.95% valid thread positions under this simple counting measure.
 
-That fraction is not a hardware-utilization measurement. Inactive lanes, memory transactions, occupancy, and scheduling determine actual execution efficiency. The mask is first a correctness requirement; its performance effect should be measured rather than inferred solely from the number of padded positions.
+That 97.95% figure is not a hardware-utilization measurement. Inactive lanes, memory transactions, occupancy, and scheduling determine actual execution efficiency. The mask is first a correctness requirement; its performance effect should be measured rather than inferred solely from the number of padded positions.
 
 ### 3-1. Separate matrix shape from storage stride
 
-For a matrix, a two-dimensional launch can assign a row and column to each thread. The logical bounds are the row count and column count, while the address uses the storage stride. In row-major storage with leading dimension L, element row r and column c is addressed at r times L plus c. L need not equal the logical column count when rows have padding.
+For a matrix, a 2-dimensional launch can assign a row and column to each thread, where the logical bounds are the row count and column count while the address uses the storage stride: in row-major storage with leading dimension L, element row r and column c is addressed at r times L plus c, and L need not equal the logical column count when rows have padding.
 
-A matrix with 3 rows and 5 columns stored with stride 8 has 15 logical elements but reserves 24 element positions. A kernel using 5 as the physical stride would address later rows incorrectly. Mask row and column bounds independently, and preserve the actual layout in the interface. This distinction becomes essential for tiled matrix operations and views into larger allocations.
+A matrix with 3 rows and 5 columns stored with stride 8 has 15 logical elements but reserves 24 element positions, and a kernel using 5 as the physical stride would address later rows incorrectly, so mask row and column bounds independently and preserve the actual layout in the interface: this distinction becomes essential for tiled matrix operations and views into larger allocations.
 
 ### 4. Extend ownership with a grid-stride loop
 
@@ -104,7 +104,7 @@ __global__ void add_grid_stride(const float* a, const float* b,
 }
 ```
 
-The arithmetic and loop contract must still fit the supported size range. A grid-stride loop provides flexibility in launch size; it is not automatically faster than a direct one-element mapping for every vector.
+The arithmetic and loop contract must still fit the supported size range. A grid-stride loop provides flexibility in launch size; it is not automatically faster than a direct 1-element mapping for every vector.
 
 For a small ownership example, launch 8 thread positions for 20 elements. The thread starting at index 3 handles indices 3, 11, and 19. The thread starting at index 4 handles 4 and 12, then stops before 20. Every element belongs to the thread identified by its remainder modulo 8. This makes coverage and uniqueness easy to verify independently of the GPU scheduler. The final increment also needs a supported arithmetic range; wide indexing should not be confused with permission to overflow the index type.
 
@@ -128,7 +128,7 @@ $$
 D_{\mathrm{logical}}=12N,\qquad I_{\mathrm{logical}}=1/12\text{ FLOP per byte}.
 $$
 
-This low arithmetic intensity makes large vector addition primarily a memory-traffic exercise on many GPUs. It is not a useful proxy for matrix-multiplication compute throughput or every model kernel.
+An intensity of 1/12 FLOP per byte makes large vector addition primarily a memory-traffic exercise on many GPUs. It is not a useful proxy for matrix-multiplication compute throughput or every model kernel.
 
 For N equal to 2 raised to 24, logical traffic is 201326592 bytes, or 192 MiB. At an illustrative achieved bandwidth of 500 GB/s, the payload-time component is about 0.403 milliseconds. Startup and actual memory behavior can increase elapsed time.
 
@@ -138,17 +138,17 @@ Effective logical bandwidth is logical bytes divided by measured kernel duration
 
 Correct array bounds do not establish that inputs are ready. Host-to-device copies and kernel launches can be asynchronous, and the consumer must follow the supported dependency ordering. The output also cannot be used or freed before its execution completes.
 
-A single-stream example can provide ordering among operations submitted to that stream under CUDA's contract. Multiple streams need explicit supported coordination when one produces data another consumes. Do not assume unrelated launches share the required order merely because the host posted them sequentially.
+A single-stream example can provide ordering among operations submitted to that stream under CUDA's contract. Multiple streams need explicit supported coordination when 1 stream produces data another consumes. Do not assume unrelated launches share the required order merely because the host posted them sequentially.
 
-Preserve host-buffer lifetime for outstanding asynchronous transfers. Likewise, preserve device allocation lifetime for kernels and transfers. A race caused by early reuse can appear as intermittent numerical corruption even though the kernel's index formula is correct.
+Preserve 2 lifetimes: host-buffer lifetime for outstanding asynchronous transfers, and device allocation lifetime for kernels and transfers. A race caused by early reuse can appear as intermittent numerical corruption even though the kernel's index formula is correct.
 
-Use a clear ownership timeline during debugging: allocation, producer completion, transfer, kernel consumption, output completion, and reuse. The relevant synchronization boundary is part of the interface, not a performance detail that can be removed without changing correctness.
+Use a clear 6-step ownership timeline during debugging: allocation, producer completion, transfer, kernel consumption, output completion, and reuse. The relevant synchronization boundary is part of the interface, not a performance detail that can be removed without changing correctness.
 
 ### 8. Check errors at informative boundaries
 
 Launch configuration and asynchronous execution failures can surface at different points. Use supported error checking around launch and completion so the first relevant failure is preserved. A later copy failure may be a consequence of an earlier invalid kernel access.
 
-Test boundary lengths and deterministic values against the reference. Include several block widths and the grid-stride path if both are supported. The test should establish coverage and uniqueness, not merely that one convenient aligned size returns plausible numbers.
+Test boundary lengths and deterministic values against the reference. Include several block widths and the grid-stride path if both are supported. The test should establish coverage and uniqueness, not merely that 1 convenient aligned size returns plausible numbers.
 
 Memory-checking tools can reveal invalid accesses that output comparisons miss. A masked tail is especially important to exercise because aligned lengths never test it. The separate correctness article develops races, barriers, and sanitizer methods in more depth.
 
@@ -158,9 +158,9 @@ For an illustrative small check, set a_i=i and b_i=2i. Every valid output should
 
 ![Deep dive: 9. Benchmark steady execution and useful work](./deep-dive-component-01.png)
 
-Separate allocation, transfers, warmup, and kernel execution unless the intended question measures the whole operation. Use timing that includes actual device completion, not only host posting. Preserve the boundary in comparisons.
+Separate the 4 phases, allocation, transfers, warmup, and kernel execution, unless the intended question measures the whole operation. Use timing that includes actual device completion, not only host posting. Preserve the boundary in comparisons.
 
-Sweep vector lengths and launch geometry. Tiny inputs expose startup; large inputs expose sustained movement; nonaligned inputs exercise partial work. For a small vector, dividing logical bytes by a duration dominated by launch overhead produces a low effective bandwidth even when the access pattern is efficient. That result does not establish poor large-array memory behavior. Report sample count and variation, and preserve cache state and working-set size.
+Sweep vector lengths and launch geometry. Tiny inputs expose startup, large inputs expose sustained movement, and nonaligned inputs exercise partial work, so for a small vector, dividing logical bytes by a duration dominated by launch overhead produces a low effective bandwidth even when the access pattern is efficient, which does not establish poor large-array memory behavior, and you should report sample count and variation while preserving cache state and working-set size.
 
 A faster kernel-local duration does not automatically improve a larger pipeline. If transfers or input preparation dominate, vector-add execution may be a small fraction of total time. Measure the enclosing useful workload when choosing an operational change.
 
@@ -168,13 +168,13 @@ Do not add complexity before the baseline is understood. Shared memory is not in
 
 ### 10. Build from a proved mapping
 
-The essential proof is simple: valid elements are covered, writers are unique, reads are in range, and ownership follows supported execution dependencies. Launch geometry and grid-stride iteration then become choices within that contract.
+The essential proof has 4 parts: valid elements are covered, writers are unique, reads are in range, and ownership follows supported execution dependencies. Launch geometry and grid-stride iteration then become choices within that contract.
 
 Preserve the reference, representative sizes, supported launch limits, timing method, and logical traffic model. Include both aligned and deliberately partial final blocks in the record. This record makes later tiling, fusion, or scheduling experiments easier to interpret because the original result and denominator remain clear.
 
 ## Conclusion
 
-CUDA kernel foundations are not about memorizing one block width. They are about translating an operation into a valid parallel ownership scheme and measuring the resources that scheme uses. Once indexing, boundaries, and lifetime are explicit, optimization can target a real bottleneck without changing the required computation.
+CUDA kernel foundations are not about memorizing 1 block width. They are about translating an operation into a valid parallel ownership scheme and measuring the resources that scheme uses. Once indexing, boundaries, and lifetime are explicit, optimization can target a real bottleneck without changing the required computation.
 
 ### Sources
 

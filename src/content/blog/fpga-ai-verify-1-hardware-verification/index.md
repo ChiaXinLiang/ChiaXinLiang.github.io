@@ -36,7 +36,7 @@ The shared harness uses Python to generate and evaluate deterministic RTL tests.
 
 ![Deep dive: Test signed extremes and reset](./deep-dive-component-02.png)
 
-The directed-case figure lists values and lifecycle events that random traffic can miss. Test the signed extrema, zero, negative products, reset, clear and pipeline drain. A reset must invalidate outstanding output expectations according to the module contract.
+The directed-case figure lists values and lifecycle events that random traffic can miss. Test the signed INT8 extrema, zero, negative products, reset, clear and pipeline drain. A reset must invalidate outstanding output expectations according to the module contract.
 
 Our MAC tests give clear priority over enable, while pipeline clear also flushes its registered product-valid state. The elastic buffer resets output validity so stale payload bits cannot be treated as a transaction. Do not assume memory contents clear just because control validity resets.
 
@@ -56,7 +56,7 @@ Use a reference with different structure from the implementation. Direct matrix 
 
 ![Deep dive: Read a failing waveform](./deep-dive-component-04.png)
 
-The waveform figure shows a one-cycle alignment error. Drive inputs before the active edge, then observe after sequential updates settle. A product pipeline delays the contribution relative to the unpipelined MAC. The testbench must compare the correct stage's result.
+The waveform figure shows a 1-cycle alignment error. Drive inputs before the active edge, then observe after sequential updates settle. A product pipeline delays the contribution relative to the unpipelined MAC. The testbench must compare the correct stage's result.
 
 When an output mismatch appears, locate the first wrong accepted item. Inspect input acceptance, valid propagation, operand register values and sum update. If every output is shifted by one cycle, investigate the harness's timing before changing arithmetic.
 
@@ -75,7 +75,7 @@ The first command writes `reports/verify-1.json`. Inspect its scope and result t
 
 ### Connect the block without changing its contract
 
-Write the accepted-work event for every boundary. For a ready/valid stream, it is valid AND ready at the sampled edge. For the released systolic core, it is a common global step. These are different protocols. Connecting them requires buffering or a scheduler that preserves matched operand pairs and advances every affected state consistently.
+Write the accepted-work event for every boundary. For a ready/valid stream, it is valid AND ready at the sampled edge. For the released 4×4 systolic core, it is a common global step. These are different protocols. Connecting them requires buffering or a scheduler that preserves matched operand pairs and advances every affected state consistently.
 
 Track data and validity together. A register can contain old bits while its valid flag is false; those bits must not become an output transaction. Clear/reset invalidates pending work according to the chosen contract. If a pipeline is stalled, its payload, validity and ownership must remain aligned. A consumer may not reuse a buffer before its producer/previous consumer completes the relevant stage.
 
@@ -89,13 +89,13 @@ After a local block passes, connect one additional boundary at a time and keep t
 
 A testbench is another program and can contain defects. Begin by deliberately corrupting 1 expected value in a temporary fixture, then confirm that the comparison fails at the corresponding transaction. Remove the corruption afterward. This experiment checks that the scoreboard actually consumes the oracle output, that mismatches reach the test result and that a passing report is not produced unconditionally. It does not prove the entire checker, but it exposes a common disconnected-check failure.
 
-The numerical oracle receives original accepted inputs independently of the DUT. For a MAC, it tracks its own accumulator and control priority. For a matrix array, it computes direct dot products without relying only on the same wavefront algorithm that drives hardware. Shared timing logic is useful for explaining arrivals, but it should not be the only mathematical reference. Otherwise an identical row/column mapping defect in driver and oracle can agree on a wrong answer.
+The numerical oracle receives original accepted inputs independently of the DUT. For a MAC, it tracks its own accumulator and control priority. For a matrix array, it computes direct dot products without relying only on the same wavefront algorithm that drives hardware, and while shared timing logic is useful for explaining arrivals, it should not be the only mathematical reference, because an identical row/column mapping defect in driver and oracle can otherwise agree on a wrong answer.
 
 Observe transactions at their declared interface. A ready/valid input is accepted when valid and ready are both high at the sampled edge. A globally stepped PE advances on step; its useful multiply additionally requires both operand-valid masks. These are different events. A test that increments its expected queue on every clock will misclassify intentional stalls, while one that increments only on a convenient output pulse can hide dropped input work.
 
 #### Track order, lifetime and numerical state
 
-An expected FIFO holds the results of accepted work in sequence. An output monitor removes the matching expectation when an output transaction is consumed. If the block is allowed to reorder, the checker needs declared identifiers and a different matching policy; the small educational stream is ordered. Never choose a convenient matching rule after observing a failing output, because that changes the protocol being checked.
+An expected FIFO holds the results of accepted work in sequence, an output monitor removes the matching expectation when an output transaction is consumed, and if the block is allowed to reorder, the checker needs declared identifiers and a different matching policy, though the small educational stream is ordered. Never choose a convenient matching rule after observing a failing output, because that changes the protocol being checked.
 
 For an accumulator, compare the running state as well as the final output. The sequence products [6,-20,-14] gives running sums [6,-14,-28]. Dropping the second product changes the intermediate and final state. A more complicated sequence could contain canceling terms, so checking only the total risks missing 2 defects. A forwarding check similarly compares each operand and mask, not just the local sum derived from them.
 
@@ -117,7 +117,7 @@ Sample timing matters. A waveform shows signals changing within simulator schedu
 
 The current harness compiles generated SystemVerilog testbenches with Icarus and compares executed outputs. The series also introduces cocotb as an alternative Python-based verification environment, but does not claim a cocotb regression was executed when the released script uses another harness. Tool names belong in evidence, not as interchangeable labels for any simulation.
 
-The release passes a bounded set of functional tests. It does not establish formal equivalence, exhaustive state coverage, clock-domain safety or physical timing closure. Those obligations grow with new interfaces and targets. The practical result of this chapter is a checker that has an independent oracle, explicit accepted events, reproducible stimuli and useful mismatch evidence—an infrastructure that can test the next circuit change without redefining correctness.
+The release passes a bounded set of functional tests. It does not establish formal equivalence, exhaustive state coverage, clock-domain safety or physical timing closure. Those obligations grow with new interfaces and targets. The practical result of this chapter is a checker that has an independent oracle, explicit accepted events, reproducible stimuli and useful mismatch evidence, an infrastructure that can test the next circuit change without redefining correctness.
 
 ## Conclusion
 

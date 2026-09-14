@@ -36,7 +36,7 @@ $$
 \widehat R_n(\theta)=\frac1n\sum_{i=1}^{n}\ell(f_\theta(x_i),y_i).
 $$
 
-The optimizer sees empirical risk, possibly plus other terms. Deployment cares about a relevant population risk. A model chosen to minimize the observed average may exploit accidental properties of the finite training sample. That is why the hats, averaging convention, and population definition matter.
+The optimizer sees empirical risk, possibly plus other terms, while deployment cares about a relevant population risk, and a model chosen to minimize the observed average may exploit accidental properties of the finite training sample: that is why the hats, averaging convention, and population definition matter.
 
 The familiar i.i.d. assumption says examples are independent draws from the same D. Real datasets can contain repeated documents, multiple measurements from 1 person, or temporally correlated incidents. Randomly splitting such examples may leave nearly identical information in both training and evaluation. The apparent held-out result then overstates performance on genuinely new cases.
 
@@ -80,7 +80,7 @@ Suppose a tiny illustrative validation set contains targets 1 and 2. Its mean sq
 
 ### The penalty expresses a preference with units
 
-L2 regularization penalizes squared parameter magnitude. For a vector w, the penalty uses the sum of squared coefficients. It prefers smaller weights relative to the chosen parameterization and feature scale. Multiplying an input feature by a large constant can permit a smaller coefficient for the same predictions, changing the effective penalty unless scaling is handled consistently.
+L2 regularization penalizes squared parameter magnitude. For a vector w the penalty uses the sum of squared coefficients, so it prefers smaller weights relative to the chosen parameterization and feature scale, and multiplying an input feature by a large constant can permit a smaller coefficient for the same predictions, changing the effective penalty unless scaling is handled consistently.
 
 That is why regularization strength cannot be interpreted independently of preprocessing, objective normalization, and which parameters receive the penalty. Intercepts are often excluded in classical regression; neural-network implementations may exclude bias or normalization parameters. Specify those choices before comparing 2 “weight decay” settings.
 
@@ -98,7 +98,7 @@ Under the usual decomposition assumptions, expected squared prediction error sep
 
 The constant-model example illustrates shrinkage bias. If the true mean is 3, a penalty pulling the estimator toward 0 makes its expected prediction smaller than 3. If the sample mean is noisy, that same shrinkage can reduce variability. Which effect dominates depends on the signal, noise, sample size, and penalty strength.
 
-This decomposition is specific to a loss and statistical setup. It is not a universal 3-number explanation for every neural network or classification metric. Nor does it imply a single smooth tradeoff curve under all modern training regimes. Use it to understand a mechanism, then measure the task and loss actually relevant to the application.
+This decomposition is specific to a loss and statistical setup, and it is not a universal 3-number explanation for every neural network or classification metric, nor does it imply a single smooth tradeoff curve under all modern training regimes: use it to understand a mechanism, then measure the task and loss actually relevant to the application.
 
 The scalar shrinkage example can quantify the bias-variance tradeoff instead of only naming it. Suppose independent targets have mean mu and variance sigma squared, and the estimator is the sample mean divided by 1 plus lambda:
 
@@ -113,7 +113,7 @@ If the true mean were much farther from 0, the same penalty could hurt. That is 
 
 ### Validation chooses; testing estimates after choosing
 
-Split data into training, validation, and test roles. Training fits parameters. Validation selects hyperparameters, checkpoints, preprocessing, and other modeling choices. A test set estimates performance after those choices are fixed. Repeatedly consulting test results to choose a model turns that set into another validation source.
+Split data into training, validation, and test roles. Training fits parameters, validation selects hyperparameters, checkpoints, preprocessing, and other modeling choices, and a test set estimates performance after those choices are fixed, so repeatedly consulting test results to choose a model turns that set into another validation source.
 
 Hyperparameter search can overfit a validation set too. Trying many settings and keeping the best exploits noise in their estimates. Use adequate validation data, restricted search where appropriate, or nested evaluation when estimating an entire selection procedure. Do not report the best validation score as an unbiased estimate of its selected model's future performance.
 
@@ -125,7 +125,7 @@ Preprocessing must follow the same boundary. Fit scalers, imputation rules, voca
 
 ![Deep dive: Early stopping, augmentation, and explicit penalties](./deep-dive-component-02.png)
 
-Early stopping selects a checkpoint before additional optimization harms validation performance. It constrains the optimization path and can act as regularization. It needs a selection rule, a representative validation set, and enough patience to distinguish meaningful changes from noise. Stopping at the lowest observed value across many checks still involves model selection.
+Early stopping selects a checkpoint before additional optimization harms validation performance, so it constrains the optimization path and can act as regularization, but it needs a selection rule, a representative validation set, and enough patience to distinguish meaningful changes from noise, because stopping at the lowest observed value across many checks still involves model selection.
 
 Data augmentation modifies training examples while intending to preserve their target relationship. An image translation may preserve a label, while altering a medical feature or changing the word “not” in text may not. The augmentation encodes an invariance assumption. Validate that assumption for the task rather than adopting a transformation merely because it helps another dataset.
 

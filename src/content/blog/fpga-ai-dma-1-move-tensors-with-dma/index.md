@@ -40,7 +40,7 @@ The burst figure divides one byte range into legal interface requests. The exerc
 
 The 4-KiB rule is AXI-specific, not a universal property of all DMA protocols. A real interface also constrains beat size, alignment, length encoding and responses. This simple splitter models byte coverage only.
 
-Verify that requests are contiguous, cover exactly the requested bytes and never cross the configured boundary. A correct total count can still hide a duplicated or skipped range if you do not check addresses.
+Verify that requests are contiguous, cover exactly the requested bytes and never cross the configured 4-KiB boundary. A correct total count can still hide a duplicated or skipped range if you do not check addresses.
 
 ### Responses and completion are state
 
@@ -85,13 +85,13 @@ The first command writes `reports/dma-1.json`. Inspect its scope and result toge
 
 ### Verify ownership and completion, not only payload
 
-A transfer request and a completed buffer are different states. Mark a tile READY only after the required bytes and response status are available. Keep a COMPUTE buffer owned until its last use, then permit refill. The two-buffer scheduler additionally prevents a load from overwriting the previous tile assigned to the same physical buffer.
+A transfer request and a completed buffer are different states. Mark a tile READY only after the required bytes and response status are available. Keep a COMPUTE buffer owned until its last use, then permit refill. The 2-buffer scheduler additionally prevents a load from overwriting the previous tile assigned to the same physical buffer.
 
 Address calculations use bytes throughout the interface. INT8 inputs and INT32 outputs have different element widths, so a correct index with the wrong multiplier still targets the wrong memory. Validate dimensions, range, alignment and relevant overlap before issuing work. The software model checks these preconditions and preserves memory when a command is rejected.
 
 The integrated RTL top implements fixed on-chip operand storage, validated dimensions and a globally stepped tile controller. Its host-load port is deliberately simple and is not AXI, MMIO or external DMA. The functional command/memory model teaches a broader transport contract. Connecting a real bus requires its own request/response and ordering verification.
 
-Completion means the declared output is usable under the selected interface. An issued store, a queue entry and a successful response may represent different milestones. Keep that event explicit in status and timing. Tests should cover delayed progress, invalid commands and reset/recovery as well as the uninterrupted numerical path.
+Completion means the declared output is usable under the selected interface, and an issued store, a queue entry and a successful response may represent different milestones, so keep that event explicit in status and timing and cover delayed progress, invalid commands and reset/recovery in tests as well as the uninterrupted numerical path.
 
 ### A worked engineering decision
 
@@ -109,7 +109,7 @@ Check positive length where required, alignment, supported dimensions and comple
 
 Output overlap restrictions protect required input values. If C writes overlap unread A or B bytes, a naive execution can change later operands. The released command model rejects its prohibited output overlap before writes. A design intentionally supporting in-place operations needs a schedule or staging that proves the original operands remain available. Calling an overlap “supported” without that lifetime proof changes correctness, not merely performance.
 
-Every access must pass the validator. A direct bypass from a raw request into memory defeats the range and alignment checks even if another arrow follows the validated path. In a diagram, show a single gated access branch and a rejection branch that performs no memory operation. In a test, preserve sentinel bytes and compare the entire relevant memory region after an invalid command, not just its error flag.
+Every access must pass the validator. A direct bypass from a raw request into memory defeats the range and alignment checks even if another arrow follows the validated path, so in a diagram, show a single gated access branch and a rejection branch that performs no memory operation. In a test, preserve sentinel bytes and compare the entire relevant memory region after an invalid command, not just its error flag.
 
 #### Distinguish issued, accepted and completed transfers
 
@@ -117,7 +117,7 @@ A request can be offered while the interface is blocked, accepted into an outsta
 
 Keep response status beside returned data. A short or errored fill cannot become a complete buffer merely because its last observed beat arrived. Assembly must account for expected bytes and the interface's declared response semantics. A future external-memory implementation needs recovery rules for partial writes and canceled commands; the functional model supplies deterministic behavior but not those physical bus details.
 
-A consumer waits for successful fill completion before reading operands. The producer owns LOAD storage until it marks READY. A separate buffer can be computed while the next fill is outstanding, but the corresponding live buffer cannot be overwritten. The upcoming double-buffer schedule shows the lifetime constraints without treating accepted requests as instantly usable data.
+A consumer waits for successful fill completion before reading operands, the producer owns LOAD storage until it marks READY, and a separate buffer can be computed while the next fill is outstanding, but the corresponding live buffer cannot be overwritten, which is why the upcoming double-buffer schedule shows the lifetime constraints without treating accepted requests as instantly usable data.
 
 #### Build a transport regression with explicit fault categories
 
@@ -127,7 +127,7 @@ Add range, alignment, length and prohibited-overlap rejection fixtures. Add resp
 
 Retain addresses, chunk lengths, accepted/completed event logs and raw payloads. A final matrix mismatch could arise from signed interpretation, stride, burst omission, duplicated bytes or arithmetic. A byte-level transfer ledger identifies the first wrong boundary before the array is blamed. That makes the memory path independently testable.
 
-The architectural benefit of DMA is moving data without requiring the host to execute every byte operation. Its cost includes descriptors, setup, queueing, bandwidth and completion handling. Measure those costs only with a concrete transport and timing boundary. This lesson supplies a bounded functional contract and a verified burst decomposition, preparing an RTL/board extension without reporting an unperformed hardware offload.
+The architectural benefit of DMA is moving data without requiring the host to execute every byte operation, and its cost includes descriptors, setup, queueing, bandwidth and completion handling, all of which should be measured only with a concrete transport and timing boundary, so this lesson supplies a bounded functional contract and a verified burst decomposition, preparing an RTL/board extension without reporting an unperformed hardware offload.
 
 ## Conclusion
 

@@ -115,7 +115,7 @@ INT8 has values from -128 through 127. Its most negative input has a larger magn
 
 For K=8, the largest positive sum of products is 8×16384=131072. A signed 18-bit number reaches only 131071, so it misses the required maximum by 1. At least 19 signed bits are needed for this un-biased reduction. The released accumulator uses INT32, leaving room for the supported tile contract; a broader reduction or bias still requires its own bound. Choosing a familiar width is not a substitute for proving that the complete operation fits.
 
-The distinction matters at exact powers of 2. A formula based on the logarithm of the largest magnitude can be off by 1 if it ignores the signed positive limit. Instead, compare the required minimum and maximum with [-2^(w-1),2^(w-1)-1] for a candidate width w. Add every contribution included in the contract, including bias, before accepting the width. If input ranges are restricted by calibration, record that assumption explicitly and test the unrestricted interface separately if it remains permitted.
+The distinction matters at exact powers of 2. A formula based on the logarithm of the largest magnitude can be off by 1 if it ignores the signed positive limit, so compare the required minimum and maximum with [-2^(w-1),2^(w-1)-1] for a candidate width w, and add every contribution included in the contract, including bias, before accepting that width. If input ranges are restricted by calibration, record that assumption explicitly and test the unrestricted interface separately if it remains permitted.
 
 #### Follow a negative product through representation
 
@@ -129,7 +129,7 @@ The Python reference uses arbitrary-precision integers, but it is not permission
 
 The lab defines division by powers of 2 with nearest rounding and ties away from zero. For a right shift of 1, positive 3 becomes 2 because 3/2=1.5, and negative -3 becomes -2 because -3/2=-1.5. Python's ordinary round uses a different tie convention, so it is not the oracle for this lesson. The supplied round_shift_away function defines the chosen integer behavior directly.
 
-An arithmetic right shift alone rounds negative values differently from nearest ties away. For example, -5 divided by 2 is -2.5; the chosen result is -3, whereas another rounding rule might select -2. For an exact -4 divided by 2, the result is -2 under either correct exact-division path. Test exact multiples, values just below and above thresholds, and positive and negative ties. A fixture only at 0 cannot distinguish these implementations.
+An arithmetic right shift alone rounds negative values differently from nearest ties away: -5 divided by 2 is -2.5 and the chosen result is -3, whereas another rounding rule might select -2, while for an exact -4 divided by 2 the result is -2 under either correct exact-division path, so test exact multiples, values just below and above thresholds, and positive and negative ties. A fixture only at 0 cannot distinguish these implementations.
 
 After scaling and rounding, clamp to the output range. A rounded 150 becomes 127 for signed INT8, while -150 becomes -128. Clamping is not wraparound. Casting an out-of-range wide integer directly to 8 bits may keep low bits and produce an unrelated signed value. Keep the clamp as an explicit operation and compare its boundary behavior. If ReLU is enabled earlier, some negative cases disappear, so test the rounding operator independently as well.
 

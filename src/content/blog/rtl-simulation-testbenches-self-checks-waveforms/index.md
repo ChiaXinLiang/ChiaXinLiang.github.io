@@ -30,7 +30,7 @@ Write the expected behavior before you build stimulus. A reference needs the sam
 
 The reference branch in the figure receives inputs from the stimulus, separately from the DUT. It calculates the expected result using the specification. The observed DUT output and expected reference output meet at the scoreboard. The scoreboard should catch a mismatch and end the test with a failure, not quietly display both values and leave judgment to a viewer.
 
-For the 4-bit unsigned adder, the reference can add the applied operand integers without first truncating the sum to 4 bits. The DUT output has 5 bits and should equal the full value from 0 through 30. If the reference incorrectly masks the sum to 4 bits, it can accept a DUT that discards carry. A reference is valuable because of its interpretation, not because it is written in a different file.
+For the 4-bit unsigned adder, the reference can add the applied operand integers without first truncating the sum to 4 bits, because the DUT output has 5 bits and should equal the full value from 0 through 30, and a reference that incorrectly masks the sum to 4 bits can accept a DUT that discards carry: a reference is valuable because of its interpretation, not because it is written in a different file.
 
 For the mux, the reference selects b when s is one and a otherwise. For a clocked pipeline, it keeps prior expected state on its own. These models are deliberately simpler than the implementation: the reference does not reconstruct gate structure or derive its answer from the observed q values. A comparison against the DUT's own output is circular and cannot catch a wrong result.
 
@@ -54,7 +54,7 @@ Combinational tests need settling between input assignment and comparison as wel
 
 Reset belongs in this sequence. The enabled register uses synchronous active-high reset, so the testbench must assert reset before an active edge and sample after that edge. Expecting reset to change q immediately between edges would test a different asynchronous contract. Apply reset and enable together to verify priority, then release reset in the documented simulation phase.
 
-When a failure occurs, first check whether the expectation refers to pre-edge or post-edge state. Then confirm which events changed the inputs and when the comparison ran. This method distinguishes a scheduling error in the testbench from a wrong state transition in the DUT. Both need fixing, but changing the hardware to satisfy a racing test hides the problem instead of solving it.
+When a failure occurs, first check whether the expectation refers to pre-edge or post-edge state, then confirm which events changed the inputs and when the comparison ran, because that order distinguishes a scheduling error in the testbench from a wrong state transition in the DUT: both need fixing, but changing the hardware to satisfy a racing test hides the problem instead of solving it.
 
 ### Coverage follows the input contract
 

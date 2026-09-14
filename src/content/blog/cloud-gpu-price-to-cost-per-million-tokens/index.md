@@ -38,7 +38,7 @@ $$
 C_{\mathrm{Mtok}}=\frac{10^6p}{3{,}600R}.
 $$
 
-The factor 3,600 converts seconds to hours; 1 million converts tokens to the reporting unit. Omitting either factor is a common spreadsheet error. Dimensionally, dollars/hour divided by tokens/hour gives dollars/token.
+The factor 3,600 converts seconds to hours and 1 million converts tokens to the reporting unit, and since dollars/hour divided by tokens/hour gives dollars/token, omitting either factor is a common spreadsheet error.
 
 For $$p=3$$ and $$R=450$$,
 
@@ -62,7 +62,7 @@ $$
 
 Variable costs, such as storage operations or traffic charges, can be added separately per request or per token. There is no universal list that every cloud bills the same way. The point is to make the chosen cost boundary explicit.
 
-GPU-only cost is a meaningful engineering metric if labeled. It is not the same as total operating cost or the retail price of an API. Staffing, support, availability reserves, and provider margins are outside a simple GPU-hour calculation.
+GPU-only cost is a meaningful engineering metric if labeled, but it is not the same as total operating cost or the retail price of an API: staffing, support, availability reserves, and provider margins all sit outside a simple GPU-hour calculation.
 
 ### Use useful aggregate output throughput
 
@@ -70,7 +70,7 @@ GPU-only cost is a meaningful engineering metric if labeled. It is not the same 
 
 A batch-8 server might stream 40 output tokens per second to each active request, producing 320 aggregate tokens per second. Insert 320 into the replica cost equation. Inserting 40 would charge all 8 users for the entire server separately.
 
-Conversely, do not multiply a benchmark's already aggregate throughput by batch size again. Read its metric definition. Input prompt tokens, generated output tokens, and total processed tokens are different denominators and have different computational costs.
+Conversely, do not multiply a benchmark's already aggregate throughput by batch size again: read its metric definition, because input prompt tokens, generated output tokens, and total processed tokens are different denominators and carry different computational costs.
 
 A benchmark that reports 2,000 total tokens per second while ingesting long prompts may have a much lower output rate. If your cost unit is per million generated tokens, use completed generated output. The prompt workload still consumes time and must be present in the benchmark, but it is not silently added to the output count.
 
@@ -127,7 +127,7 @@ If the 2 configurations have different occupancies, compare paid-interval cost r
 
 ![Deep dive: Going deeper: prompt and output work](./deep-dive-component-02.png)
 
-A request includes prefill and decode. Long prompts consume GPU time even when the service bills or reports only generated tokens. Holding output length fixed while increasing prompt length can raise cost per output token.
+A request includes prefill and decode, so long prompts consume GPU time even when the service bills or reports only generated tokens, and holding output length fixed while increasing prompt length can raise cost per output token.
 
 For a simple request-class model, let $$t_p$$ be prefill time and $$t_d$$ decode time for $$O$$ delivered outputs. A single sequential request's output productivity is
 
@@ -145,9 +145,9 @@ Prefix caching can save repeated prefill, but the hit rate and shared-prefix len
 
 [The bandwidth article](../theoretical-tokens-per-second-from-bandwidth/) derived a peak-bandwidth ceiling near 457 aggregate output tokens per second for an illustrative capacity-compatible quantized workload. Substituting that ceiling into a cost equation gives an optimistic lower-bound scenario, not a measured operating cost.
 
-Real kernels may achieve less bandwidth, and request scheduling adds overhead. Long histories increase cache traffic. Sampling, communication, and prefill interfere with decode. Every reduction in useful rate raises unit cost if hourly expense remains fixed.
+Real kernels may achieve less bandwidth, request scheduling adds overhead, long histories increase cache traffic, and sampling, communication, and prefill all interfere with decode, so every reduction in useful rate raises unit cost if hourly expense remains fixed.
 
-A useful report can include 3 columns: theoretical resource bound, measured active compliant rate, and paid-interval useful average. They explain hardware potential, implementation efficiency, and operational demand respectively. Presenting only the first column creates an unrealistically favorable price estimate.
+A useful report can include 3 columns, namely theoretical resource bound, measured active compliant rate, and paid-interval useful average, which explain hardware potential, implementation efficiency, and operational demand respectively; presenting only the first column creates an unrealistically favorable price estimate.
 
 ### Sensitivity and uncertainty
 
@@ -157,7 +157,7 @@ If price lies between $2.50 and $3.50 per hour and compliant active throughput b
 
 That interval is a scenario envelope, not a statistical confidence interval. A confidence interval requires a sampling model and observed variation. For measured workloads, repeat comparable intervals or use independent workload runs to quantify uncertainty rather than attaching “95%” to assumed limits.
 
-Correlations also matter. Higher demand may improve batching and occupancy while worsening tail latency. Treating all variables as independent can create combinations that the service never actually exhibits. Keep the traffic distribution in the experiment.
+Correlations also matter: higher demand may improve batching and occupancy while worsening tail latency, and treating all variables as independent can create combinations that the service never actually exhibits, so keep the traffic distribution in the experiment.
 
 ### Availability has an explicit price
 

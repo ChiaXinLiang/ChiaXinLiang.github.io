@@ -16,19 +16,19 @@ tags: ["gpu-performance", "ai-infrastructure"]
 
 ![Concept overview: Instruction-Level Parallelism: Dependency Chains, Registers, and Spills. Illustrated GPU execution lanes compare a chain of dependent arithmetic operations with independent operations that overlap.](./section-overview.png)
 
-A kernel can have plenty of arithmetic yet fail to keep an execution pipeline busy because its next instruction depends on an unfinished result. Adding more operations to the source does not solve that dependency. Instruction-level parallelism exposes independent work that a scheduler can issue while earlier operations complete.
+A kernel can have plenty of arithmetic and still leave an execution pipeline idle, because its next instruction depends on 1 result that has not arrived yet, and adding more operations to the source does nothing about that dependency. Instruction-level parallelism exposes independent work a scheduler can issue while earlier operations finish.
 
 The tradeoff is live state. Independent accumulators, prefetched operands, and unrolled iterations consume registers. Higher register use can reduce concurrent warps or cause spills. The fastest schedule balances instruction readiness with storage and other resource limits.
 
-We will derive a simple chain model, connect it to warp concurrency, and examine measured register pressure. Cycle counts and resource budgets below are illustrative, not claims about a particular GPU. Check actual instruction and scheduling behavior against current documentation and the compiled code.
+The sections below derive a simple chain model, connect it to warp concurrency, and then look at measured register pressure, but the cycle counts and resource budgets are illustrative rather than claims about a particular GPU, so check instruction and scheduling behavior against the current CUDA Programming Guide and against the compiled code.
 
 ## Deep dive
 
 ### 1. Draw a dependency graph rather than counting source lines
 
-Consider a dot-product loop updating one accumulator. Each update needs the previous accumulator value, so the updates form a chain. Input loads may have independent addresses, but the accumulation itself retains a dependency through every iteration.
+Consider a dot-product loop updating 1 accumulator. Each update needs the previous accumulator value, so the updates form a chain. Input loads may have independent addresses, but the accumulation itself keeps a dependency through every iteration.
 
-A compiler can transform or schedule operations, so the source graph is only the starting point. Inspect the generated path when a performance hypothesis depends on instruction order. A long source expression can become several independent instructions or one serialized sequence.
+A compiler can transform or reschedule operations, so the source graph is only a starting point, and 1 long source expression can become several independent instructions or 1 serialized sequence. Inspect the generated path whenever a performance hypothesis depends on instruction order.
 
 Distinguish data dependencies from ordering imposed by synchronization or memory semantics. A required barrier limits scheduling differently from a register dependency. Removing a semantic dependency is not an implementation optimization if it changes the result or ownership contract.
 
@@ -38,7 +38,7 @@ Keep useful work constant when you compare. A shorter loop, fewer reduction term
 
 ![Deep-dive illustration: Derive the single-chain latency bound](./deep-dive.png)
 
-Let an instruction chain have result latency L cycles, and let an execution resource accept an independent instruction every tau cycles. A single chain generally cannot issue its next update before the previous result arrives.
+Let an instruction chain have result latency L cycles, and let an execution resource accept 1 independent instruction every tau cycles. A single chain generally cannot issue its next update before the previous result arrives.
 
 For m independent comparable chains, an explanatory rate bound is
 
@@ -66,7 +66,7 @@ $$
 
 Each partial chain can progress independently of the others. You can also arrange loads and address calculations to expose independent work, subject to the compiler and the memory model.
 
-Floating-point ordering changes. Combining partial sums can differ from sequential accumulation, so validate the numerical contract with a suitable reference. The algebraic identity does not imply bitwise equality in finite precision.
+Floating-point ordering changes once you split the reduction into m chains instead of 1. Combining partial sums can differ from sequential accumulation, so validate the numerical contract against a suitable reference. The algebraic identity does not imply bitwise equality in finite precision.
 
 Handle the final terms correctly when the reduction length is not divisible by m. An unrolled loop needs supported boundary handling or a valid remainder path. Aligned benchmark lengths can hide a missing tail contribution.
 
@@ -74,7 +74,7 @@ Handle the final terms correctly when the reduction length is not divisible by m
 
 For products 1 through 8 and m=2, one partial sum contains 1, 3, 5, 7 and equals 16. The other contains 2, 4, 6, 8 and equals 20. Combining them gives 36, the same real-arithmetic result as the complete sum.
 
-This example proves term ownership and coverage, not hardware speed. The two chains can offer independent updates, but loads, compiler transformations, and other instructions still influence readiness.
+This example proves term ownership and coverage, not hardware speed. The 2 chains can offer independent updates, but loads, compiler transformations, and other instructions still decide readiness.
 
 A deterministic test should include a reduction length such as 7 as well as 8. The ownership rule then assigns 4 terms to one chain and 3 to the other. The final combination must include both correctly.
 
@@ -82,13 +82,13 @@ Use cancellation and scale variation to test rounding behavior. A change that im
 
 ### 5. Separate ILP from thread-level latency hiding
 
-Other ready warps can issue while one warp waits for a dependency. This thread-level concurrency complements independent work within a warp. A kernel can use both; ILP and occupancy are not mutually exclusive strategies.
+Other ready warps can issue while 1 warp waits on a dependency. This thread-level concurrency complements independent work within a warp. A kernel can use both; ILP and occupancy are not mutually exclusive strategies.
 
 You can sketch an aggregate readiness bound from W ready warps with m independent chains each, but the bound must respect the scheduler and execution-resource limits. Multiplying W and m does not predict unrestricted issue throughput.
 
-High occupancy is useful only when the additional warps supply relevant ready work and fit the limiting resources. A kernel with lower occupancy can still perform well if ILP, reuse, and instruction efficiency are strong. Conversely, a register-heavy design can lose enough concurrency to expose latency elsewhere.
+High occupancy is useful only when the extra warps supply relevant ready work and fit inside the limiting resources, so a kernel with lower occupancy can still perform well when ILP, reuse, and instruction efficiency are strong, while a register-heavy design can lose enough concurrency to expose latency somewhere else.
 
-Measure dependency stalls, issue activity, and kernel duration alongside occupancy. A single occupancy percentage does not identify the limiting mechanism or prove that raising it will improve useful work.
+Measure dependency stalls, issue activity, and kernel duration alongside occupancy. The 1 occupancy percentage Nsight Compute prints does not identify the limiting mechanism, and it does not prove that raising it will improve useful work.
 
 ### 6. Budget register-limited concurrency
 
@@ -102,15 +102,15 @@ Hardware allocation granularity and other limits also apply. Query the device pr
 
 For a hypothetical pool of 65536 registers and 256-thread blocks, 32 registers per thread gives a register-only limit of 8 blocks; 64 gives 4. These are arithmetic illustrations. Thread, block, shared-memory, and scheduling limits can lower either result.
 
-Independent chains add accumulators, but the complete liveness budget also includes operands, addresses, predicates, and temporary values. Source-level variable count is not the compiler's allocated register count.
+Independent chains add accumulators, but 1 accumulator is a small part of the liveness budget, which also holds operands, addresses, predicates, and temporary values. The source-level variable count is not the compiler's allocated register count.
 
 ### 7. Understand spills as memory traffic
 
-When values do not fit in the allocated registers, the compiler can spill them to local memory. Local in CUDA's terminology does not mean on-chip shared memory; the resulting accesses can involve the device memory hierarchy.
+When values do not fit in the allocated registers, the compiler can spill them to local memory, and local in CUDA's terminology does not mean on-chip shared memory: the resulting accesses can reach into the device memory hierarchy.
 
-Spills can add reads and writes to an operation that previously looked compute-focused. Caches can serve some of that traffic, but the cost does not disappear. Check the generated loads and stores and the profiler counters.
+Spills can add reads and writes to an operation that previously looked compute-focused. Caches can serve some of that traffic, but the cost does not disappear. Check the generated loads and stores next to the Nsight Compute counters.
 
-A forced register cap can raise apparent occupancy while increasing spills. The net kernel can become slower despite a favorable occupancy chart. Measure useful duration and actual traffic before adopting the cap.
+A forced register cap can raise apparent occupancy while increasing spills. The net kernel can become slower despite a favorable occupancy chart in Nsight Compute. Measure useful duration and actual traffic before adopting the cap.
 
 Likewise, more unrolling can expose independent arithmetic while lengthening live ranges. Compare several controlled levels and preserve correctness. The maximum source-level unroll factor is not an optimization objective by itself.
 
@@ -124,17 +124,17 @@ Do not assume that issuing many loads guarantees overlap or improved bandwidth. 
 
 For tiled kernels, asynchronous staging can provide a different movement path, but you must preserve its ownership and completion rules. Register prefetch and a supported shared-memory pipeline have different state and synchronization budgets.
 
-Use the traffic and readiness model to propose a small experiment. If arithmetic waits on operands, prefetch is a plausible hypothesis. If the kernel is already bandwidth-saturated, extra outstanding work may not improve sustained useful throughput.
+Use the traffic and readiness model to propose 1 small experiment. If arithmetic waits on operands, prefetch is a plausible hypothesis. If the kernel is already bandwidth-saturated, extra outstanding work may not improve sustained useful throughput.
 
 ### 9. Measure the compiled mechanism
 
 ![Deep dive: 9. Measure the compiled mechanism](./deep-dive-component-03.png)
 
-Keep input population, dtype, reduction terms, launch geometry, and output requirements fixed. Compare one relevant change at a time: independent accumulators, unrolling, operand scheduling, or register policy.
+Keep input population, dtype, reduction terms, launch geometry, and output requirements fixed. Compare 1 relevant change at a time: independent accumulators, unrolling, operand scheduling, or register policy.
 
-Record compiled registers, spills, occupancy, instruction mix, issue behavior, and elapsed execution. Profile only where you need evidence to separate mechanisms, and compare profiled runs against ordinary timing, because instrumentation can disturb execution.
+Record compiled registers, spills, occupancy, instruction mix, issue behavior, and elapsed execution. Profile only where you need evidence to separate mechanisms, and compare the Nsight Compute runs against ordinary timing, because instrumentation disturbs execution.
 
-Sweep representative sizes. A small kernel can be launch-sensitive, while a large reduction can expose sustained dependencies or storage pressure. A candidate that wins one aligned case may lose on partial or irregular work.
+Sweep representative sizes. A small kernel can be launch-sensitive, while a large reduction can expose sustained dependencies or storage pressure. A candidate that wins 1 aligned case may lose on partial or irregular work.
 
 A useful report can show that additional chains improved instruction readiness until register use caused spills, after which duration rose. That linked pattern supports a balanced choice. A report containing only an occupancy percentage and final speedup does not establish the same mechanism.
 
@@ -148,19 +148,19 @@ Revisit the balance after architecture, compiler, dtype, or surrounding fusion c
 
 For an illustrative tuning record, compare 1, 2, 4, and 8 chains with the same reduction population. Record numerical differences, registers, spills, and time for each. If 4 improves readiness without spills while 8 increases memory traffic and loses time, the evidence supports 4 for that tested case. It does not establish that another kernel with different operands or launch geometry should use the same value.
 
-Instruction-level parallelism is a readiness strategy constrained by live state. Draw the dependency graph, expose independent useful work, budget registers and concurrency, and measure the compiled result. The objective is a valid faster schedule, not maximum unrolling or maximum occupancy in isolation.
+Instruction-level parallelism is a readiness strategy constrained by live state. Draw the dependency graph, expose independent useful work, budget registers and concurrency, and measure the compiled result. The objective is 1 valid faster schedule, not maximum unrolling or maximum occupancy in isolation.
 
 ### 11. Distinguish latency from reciprocal throughput
 
 ![Deep dive: 11. Distinguish latency from reciprocal throughput](./deep-dive-component-02.png)
 
-An instruction can accept a new independent operation before an earlier operation finishes. Latency measures the delay until a dependent consumer may use a result. Reciprocal throughput measures the spacing between accepted operations under the relevant resource conditions. Substituting one for the other changes the predicted number of useful chains. A long latency does not mean the execution unit handles only one operation at a time.
+An instruction can accept a new independent operation before an earlier one finishes, so latency measures the delay until a dependent consumer may use a result while reciprocal throughput measures the spacing between accepted operations under the relevant resource conditions, and substituting 1 for the other changes the predicted number of useful chains. A long latency does not mean the execution unit handles only 1 operation at a time.
 
-Consider an illustrative unit accepting an operation every cycle with a dependent result available after four cycles. One accumulator supplies an operation, then waits for its result. Four independent accumulators can supply four successive operations before returning to the first. This sketch assumes adequate operands, compatible issue resources, and no other bottleneck; it is a dependency explanation rather than a statement about a particular GPU instruction.
+Consider an illustrative unit accepting an operation every cycle with a dependent result available after 4 cycles. One accumulator supplies an operation, then waits for its result. Four independent accumulators can supply 4 successive operations before returning to the first. This sketch assumes adequate operands, compatible issue resources, and no other bottleneck; it is a dependency explanation rather than a statement about a particular GPU instruction.
 
-Now assume the same unit accepts an operation only every two cycles. Two chains can already cover a four-cycle result latency. Adding two more chains cannot double the unit's acceptance rate. It may still affect surrounding loads or address arithmetic, but that is another mechanism that needs its own evidence. The simple diagram explains why latency alone cannot pick an unroll factor.
+Now assume the same unit accepts an operation only every 2 cycles. Two chains already cover a 4-cycle result latency. Adding 2 more chains cannot double the unit's acceptance rate. It may still affect surrounding loads or address arithmetic, but that is another mechanism that needs its own evidence. The simple diagram explains why latency alone cannot pick an unroll factor.
 
-The compiled loop may also contain shared address calculations. Several accumulators do not help if every useful update waits for one serial pointer recurrence or one sequential load. Draw edges for operands, addresses, and control, not only for floating-point accumulation. A compiler can transform these edges through strength reduction or scheduling, so it is worth inspecting the generated code.
+The compiled loop may also contain shared address calculations, and several accumulators do not help if every useful update waits on 1 serial pointer recurrence or 1 sequential load, so draw edges for operands, addresses, and control rather than for floating-point accumulation alone. A compiler can transform those edges through strength reduction or scheduling, which is why inspecting the generated code pays.
 
 ## Conclusion
 
