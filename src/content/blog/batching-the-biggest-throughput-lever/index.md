@@ -46,7 +46,7 @@ Take Llama-3-8B in FP16 on a single H100 SXM. The relevant numbers:
 - Weights: 8B parameters x 2 bytes = about **16 GB**.
 - HBM3 bandwidth: **3.35 TB/s** (NVIDIA's spec; sustained real-world is more like 80-90% of that, but the ratios below survive).
 - KV cache per token: the model has 32 layers, 8 KV heads (GQA), head dimension 128, so 2 x 32 x 8 x 128 x 2 bytes = **128 KiB per token**.
-- Assume each request sits at a context of 4,096 tokens: KV per request = 4,096 x 128 KB = **512 MiB, approximately 0.537 decimal GB**.
+- Assume each request sits at a context of 4,096 tokens: KV per request = 4,096 x 128 KiB = **512 MiB, approximately 0.537 decimal GB**.
 
 Each decode step must read the weights once, plus every active request's KV cache. Bytes per step at batch B: 16 GB + B x 0.5 GB. Step time is bytes divided by 3.35 TB/s. Aggregate throughput is B tokens per step time.
 
@@ -60,9 +60,9 @@ Each decode step must read the weights once, plus every active request's KV cach
 Read the batch-8 row carefully, because it is the punchline of this whole article. Batching 8 requests raised the step time by only 21% (4.93 ms to 5.97 ms) while multiplying token output by 8. Throughput went up 6.6x; each user paid 1 extra millisecond per token. That is why people call the first stretch of the batching curve "almost free."
 
 
-By batch 32 the trade is no longer free but still excellent: 16.5x the throughput for 1.9x the per-token latency. By batch 64 the KV traffic (32 GB) is twice the weight traffic (16 GB), and each doubling of the batch buys less. The curve bends because the amortized part (weights) is fixed while the unamortized part (each request's private KV reads) grows linearly with B. Long contexts bend it sooner: at 32K context, KV per request is 4 GB and even batch 4 is KV-dominated.
+By batch 32 the trade is no longer free but still excellent: 16.5x the throughput for 1.9x the per-token latency. By batch 64 the KV traffic (32 GB) is twice the weight traffic (16 GB), and each doubling of the batch buys less. The curve bends because the amortized part (weights) is fixed while the unamortized part (each request's private KV reads) grows linearly with B. Long contexts bend it sooner: at 32K context, KV per request is 4 GiB, so by batch 4 the KV reads already match the weight reads and past that they dominate.
 
-2 sanity checks worth doing. Compute: at batch 32 the step performs 32 x 16 GFLOP = 512 GFLOP, which the H100 could finish in 0.52 ms, against a 9.55 ms memory time. Still 95% memory-bound, so the "batch until compute-bound" ceiling is far away for this model; capacity binds first. Capacity: 80 GB of HBM minus 16 GB of weights leaves 64 GB, enough for about 125 concurrent 4K-context requests before accounting for activations and fragmentation. That fragmentation problem is exactly what vLLM's PagedAttention was built to fix, which is why vLLM's headline speedups came from fitting bigger batches, not from faster math.
+2 sanity checks worth doing. Compute: at batch 32 the step performs 32 x 16 GFLOP = 512 GFLOP, which the H100 could finish in 0.52 ms, against a 9.55 ms memory time. Still 95% memory-bound, so the "batch until compute-bound" ceiling is far away for this model; capacity binds first. Capacity: 80 GB of HBM minus 16 GB of weights leaves 64 GB, enough for about 119 concurrent 4K-context requests before accounting for activations and fragmentation. That fragmentation problem is exactly what vLLM's PagedAttention was built to fix, which is why vLLM's headline speedups came from fitting bigger batches, not from faster math.
 
 
 Write both ceilings before choosing a batch. Let $$W$$ be shared weight bytes per step, $$K$$ private KV bytes read per request, $$\beta$$ sustained bandwidth, $$F_t$$ useful arithmetic per generated token, and $$C$$ its compute throughput. A simplified step-time floor and aggregate rate ceiling are

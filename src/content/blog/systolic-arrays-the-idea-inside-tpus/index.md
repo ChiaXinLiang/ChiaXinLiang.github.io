@@ -34,7 +34,7 @@ Their proposal: lay out a grid of small, identical processing elements, each doi
 2. **No long wires.** Every connection is to a physical neighbor, millimeters away at most. Short wires switch fast and burn little energy. Reading a value from a neighboring cell costs far less energy than reading it from SRAM, and orders of magnitude less than DRAM.
 3. **Massive reuse.** A value entering the grid is used by every cell it passes through. Fetch once, compute many times, which is exactly Kung's prescription.
 
-### The machine in 1 picture
+### The machine in one picture
 
 The variant inside the TPU is called *weight-stationary*, and it is the easiest to hold in your head. Picture an N×N grid: before computation starts, the loader places 1 weight of the matrix W into each cell, where it sits unmoving, and then the input matrix streams in from the left edge, 1 row of cells per vector element, while partial sums flow downward through the columns.
 

@@ -47,7 +47,7 @@ Nobody designs the filters, by the way. They're weights: [gradient descent and b
 The real power is layering, and it's the "votes about votes" story again with a spatial twist. Layer 1's filters find edges. Layer 2's filters slide over *layer 1's maps*, finding combinations of edges: corners, textures, circles. Layer 3 finds combinations of those: an eye, a wheel, a beak. In between, **pooling** layers shrink the maps, so each successive filter effectively sees a wider patch of the original image.
 
 
-The figure above is (a redrawn version of) LeNet-5, [Yann LeCun's 1998 digit reader](http://yann.lecun.com/exdb/publis/pdf/lecun-98.pdf), the design that read bank checks in production when "neural network" was still a dirty word in grant applications. Fourteen years later, [AlexNet](https://proceedings.neurips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html) was recognizably the same recipe (convolution, pooling, stacking) with more layers, ReLU activations, GPUs to train on, and a million-image dataset. Same idea, more scale: 60 1000 weights to 60 million.
+The figure above is (a redrawn version of) LeNet-5, [Yann LeCun's 1998 digit reader](http://yann.lecun.com/exdb/publis/pdf/lecun-98.pdf), the design that read bank checks in production when "neural network" was still a dirty word in grant applications. Fourteen years later, [AlexNet](https://proceedings.neurips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html) was recognizably the same recipe (convolution, pooling, stacking) with more layers, ReLU activations, GPUs to train on, and a million-image dataset. Same idea, more scale: 60,000 weights to 60 million.
 
 ### A worked example: 9 weights detect an edge
 

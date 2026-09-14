@@ -42,7 +42,7 @@ Read that as a price. Every byte you pull from HBM must be amortized over roughl
 
 This ratio is not an H100 quirk. An A100 sits at about 153 FLOP/byte in BF16, from 312 TFLOPS over 2.0 TB/s. A B200 lands near 280, roughly 2.25 PFLOPS dense BF16 over 8 TB/s HBM3e. Compute has outgrown bandwidth for decades, which is the [memory wall](/blog/the-memory-wall-latency-numbers/) restated. The balance point keeps drifting right, and more and more kernels fall on the memory-bound side of it.
 
-### The roofline: the whole diagnosis in 1 picture
+### The roofline: the whole diagnosis in one picture
 
 Williams, Waterman, and Patterson packaged this max() into a single log-log plot in 2009. It remains the most useful diagram in performance engineering. Put arithmetic intensity on the x-axis and attainable FLOPS on the y-axis. Peak bandwidth draws a slanted line rising from the left (attainable FLOPS = intensity x bandwidth). Peak compute draws a horizontal roof. Where they meet is the ridge point, which is exactly the machine balance.
 

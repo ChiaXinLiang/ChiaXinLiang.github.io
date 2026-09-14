@@ -56,7 +56,7 @@ The specifications are now available from vendors. Their peak numbers still need
 
 ### A ceiling is a model with assumptions
 
-The division above uses decimal units: 1 TB is 1 1000 GB. Let W denote weight bytes read during 1 decode step and B denote sustained memory bandwidth in bytes per second. If memory traffic dominates the step, the idealized token-rate ceiling for 1 sequence is
+The division above uses decimal units: 1 TB is 1,000 GB. Let W denote weight bytes read during 1 decode step and B denote sustained memory bandwidth in bytes per second. If memory traffic dominates the step, the idealized token-rate ceiling for 1 sequence is
 
 $$
 r_{\mathrm{decode}}\leq\frac{B}{W}.

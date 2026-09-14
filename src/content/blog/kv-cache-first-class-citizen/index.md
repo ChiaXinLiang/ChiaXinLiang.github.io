@@ -37,9 +37,9 @@ Circa 2022, every serving engine treated KV state the same way: allocate a conti
 
 **A transfer layer.** Once KV blocks live on other machines, moving them must be cheap. For years every stack hand-rolled its own transport. NIXL, the transfer library underneath NVIDIA's Dynamo, gives 1 API across NVLink, InfiniBand and RoCE with GPUDirect RDMA, PCIe, and local SSD. It picks the fastest available path per transfer ([NIXL](https://github.com/ai-dynamo/nixl)). With GPUDirect RDMA, KV moves NIC-to-HBM without staging through host memory. A 400 Gb/s NIC sustains roughly 50 GB/s, so gigabyte-scale cache entries move in tens of milliseconds while the GPU keeps decoding other requests. This is the same plumbing that carries prefill-to-decode handoffs in disaggregated serving, and that is no accident. A cache with a wire format is what made [disaggregation](/blog/the-prefill-decode-disaggregation-story/) practical at all.
 
-### Worked example: 1 system prompt, 10 1000 requests
+### Worked example: 1 system prompt, 10,000 requests
 
-![Deep dive: Worked example: 1 system prompt, 10 1000 requests](./deep-dive-component-02.png)
+![Deep dive: Worked example: 1 system prompt, 10,000 requests](./deep-dive-component-02.png)
 
 Numbers make the case better than architecture diagrams. Take a 70B-parameter GQA model with Llama-3.1-70B's shape: 80 layers, 8 KV heads, head dimension 128, FP16 cache. KV bytes per token:
 

@@ -70,7 +70,7 @@ Now apply a hypothetical stack with explicitly stipulated sequential gains:
 | + FP8 weights & KV | 1.6x | 4.03x | 24,190 | $0.18 |
 | + Prefix caching (chat traffic) | 1.3x | 5.24x | 31,450 | $0.14 |
 
-Each row is unremarkable on its own. A 1.3x gain is the kind of thing that gets deprioritized in sprint planning. But 1.8 x 1.4 x 1.6 x 1.3 = 5.24, and the same $16 now buys 113 million tokens per hour instead of 21.6 million. Annualize it: at steady 50% load, this node serves about 496 billion tokens a year, and the stack just cut the bill for that traffic from roughly $367,000 to $70,000 per node-year. Multiply by a fleet of 2 100 nodes and the "small" optimizations are a $59M line item.
+Each row is unremarkable on its own. A 1.3x gain is the kind of thing that gets deprioritized in sprint planning. But 1.8 x 1.4 x 1.6 x 1.3 = 5.24, and the same $16 now buys 113 million tokens per hour instead of 21.6 million. Annualize it: at steady 50% load, this node serves about 496 billion tokens a year, and the stack just cut the bill for that traffic from roughly $367,000 to $70,000 per node-year. Multiply by a fleet of 200 nodes and the "small" optimizations are a $59M line item.
 
 
 The individual numbers are representative midpoints from the papers and engine benchmarks cited below, not guarantees. Your workload will land somewhere else on each 1. The structure, gains multiplying across independent levers, is the part that transfers.
