@@ -5,15 +5,41 @@ import { GITHUB_URL, LINKEDIN_URL } from '../consts';
 
 <Layout
 	title="About Me"
-	description="Marcus (Chia Xin Liang) — engineer writing about LLMs and AI systems performance."
+	description="Xin Liang Chia — engineer writing about LLMs and AI systems performance."
 	pubDate={new Date('September 12 2026')}
 >
 	<p>
-		Hi, I'm <strong>Marcus (Chia Xin Liang)</strong>. I'm an engineer focused on
+		Hi, I'm <strong>Xin Liang Chia</strong>. I'm an engineer focused on
 		large language models and the systems that make them fast: GPUs, CUDA,
-		inference serving, and everything in between.
+		inference serving, and everything in between. I write this blog to record
+		what I learn — explaining a concept in my own words, with real numbers, is
+		how I test whether I understand it.
 	</p>
 
+	<h2>Background</h2>
+	<p>
+		I worked for over six years as an AI engineer, building and operating
+		production systems end to end: real-time computer-vision platforms
+		processing 500+ concurrent camera streams on containerized microservices,
+		cross-camera multi-object tracking, and LLM-based assistants using
+		retrieval-augmented generation. I also optimized LLM training and inference
+		for production on multi-server, multi-GPU on-premise infrastructure —
+		fine-tuning, quantization, and serving.
+	</p>
+	<p>
+		I hold an M.S. in Applied Mathematics, and I'm currently pursuing a Master
+		of Electrical and Computer Engineering at Rice University.
+	</p>
+
+	<h2>Skills</h2>
+	<ul>
+		<li><strong>Languages</strong> — Python, C/C++, CUDA, SQL, JavaScript.</li>
+		<li><strong>ML &amp; LLMs</strong> — PyTorch, TensorFlow, computer vision (ViT, SAM, SLAM), multimodal LLMs, RAG.</li>
+		<li><strong>LLM optimization</strong> — fine-tuning (SFT, PEFT/LoRA), quantization, knowledge distillation, distributed training, inference serving (vLLM, SGLang, TensorRT).</li>
+		<li><strong>Systems &amp; cloud</strong> — Docker, Kubernetes, AWS, GCP, CI/CD, real-time systems.</li>
+	</ul>
+
+	<h2>What's on this site</h2>
 	<p>This site contains learning paths in 3 areas:</p>
 	<ul>
 		<li><strong>AI Infrastructure</strong> — measurement, hardware capacity, networking, kernels, distributed training, and LLM serving.</li>
@@ -28,8 +54,8 @@ import { GITHUB_URL, LINKEDIN_URL } from '../consts';
 	</p>
 
 	<p>
-		Find me on <a href={GITHUB_URL} target="_blank">GitHub</a> and
-		<a href={LINKEDIN_URL} target="_blank">LinkedIn</a>, or subscribe via
+		Find me on <a href={GITHUB_URL} target="_blank">GitHub</a> and{' '}
+		<a href={LINKEDIN_URL} target="_blank">LinkedIn</a>, or subscribe via{' '}
 		<a href="/rss.xml">RSS</a>.
 	</p>
 </Layout>

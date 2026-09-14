@@ -3,9 +3,8 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import { SITE_DESCRIPTION, SITE_TITLE, SERIES } from '../consts';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import { getCollection } from 'astro:content';
-import LearningHub from '../components/LearningHub.astro';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -33,6 +32,96 @@ const latest = posts.slice(0, 5);
 				font-weight: 600;
 			}
 
+			.about-brief {
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 12px;
+				padding: 1.25rem 1.5rem;
+				margin: 1.5rem 0 2.5rem;
+			}
+			.about-brief p {
+				margin: 0 0 0.75rem;
+				font-size: 0.95em;
+			}
+			.about-brief .more-link {
+				font-size: 0.9em;
+			}
+			.skills {
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+				margin: 1rem 0;
+			}
+			.skill-group {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: baseline;
+				gap: 0.35rem;
+			}
+			.skill-group .group-name {
+				font-size: 0.75em;
+				font-weight: 700;
+				color: rgb(var(--gray-dark));
+				margin-right: 0.25rem;
+				white-space: nowrap;
+			}
+			.skill-group .chip {
+				font-size: 0.7em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 20px;
+				padding: 0.15rem 0.55rem;
+				color: rgb(var(--gray));
+				white-space: nowrap;
+			}
+
+			.topics-intro {
+				color: rgb(var(--gray-dark));
+				margin-top: 0;
+			}
+			.topic-cards {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 1rem;
+				margin: 1.25rem 0;
+			}
+			.topic-card {
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 12px;
+				padding: 1rem 1.15rem;
+			}
+			.topic-card h3 {
+				font-size: 1.05em;
+				margin: 0 0 0.5rem;
+				color: var(--accent);
+			}
+			.topic-card p {
+				font-size: 0.8em;
+				color: rgb(var(--gray));
+				margin: 0;
+			}
+			.cta-row {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.75rem;
+				margin: 1.25rem 0 0.5rem;
+			}
+			.cta {
+				display: inline-block;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 8px;
+				padding: 0.6rem 1.1rem;
+				font-size: 0.9em;
+				text-decoration: none;
+			}
+			.cta.primary {
+				border-color: var(--accent);
+				font-weight: 700;
+			}
+			@media (max-width: 720px) {
+				.topic-cards {
+					grid-template-columns: 1fr;
+				}
+			}
+
 			.latest li {
 				margin-bottom: 0.6rem;
 			}
@@ -49,20 +138,79 @@ const latest = posts.slice(0, 5);
 			<section class="hero">
 				<h1>Notes on making AI work — and work fast</h1>
 				<p class="identity">
-					Hi, I'm Marcus. I document what I learn about LLMs and the systems that
-					run them — one concept at a time, with concrete numbers and original
-					diagrams.
+					Hi, I'm Xin Liang Chia. I write this blog to record what I learn about LLMs and
+					the systems that run them — one concept at a time, with concrete numbers
+					and original diagrams. Writing it down is how I make sure I actually
+					understand it.
 				</p>
 				<p>
-					Learning paths through AI infrastructure, model mathematics, and hardware
-					co-design. Search by topic and filter series by subject and level. Primary sources always
-					cited. Follow along via <a href="/rss.xml">RSS</a>.
+					Every article follows the same rules: one concept at a time, primary
+					sources cited. Follow along via <a href="/rss.xml">RSS</a>.
 				</p>
+				<div class="about-brief">
+					<p>
+						I've spent over six years as an AI engineer building production systems —
+						real-time computer vision across 500+ camera streams, LLM fine-tuning,
+						quantization, and inference serving on multi-GPU infrastructure. I hold an
+						M.S. in Applied Mathematics and am currently pursuing a Master's in
+						Electrical &amp; Computer Engineering at Rice University.
+					</p>
+					<div class="skills" aria-label="Skills">
+						<div class="skill-group">
+							<span class="group-name">Languages</span>
+							{['Python', 'C/C++', 'CUDA', 'SQL', 'JavaScript'].map((s) => <span class="chip">{s}</span>)}
+						</div>
+						<div class="skill-group">
+							<span class="group-name">ML &amp; LLMs</span>
+							{['PyTorch', 'TensorFlow', 'Computer Vision', 'Multimodal LLMs', 'RAG'].map((s) => <span class="chip">{s}</span>)}
+						</div>
+						<div class="skill-group">
+							<span class="group-name">LLM Optimization</span>
+							{['Fine-tuning (SFT, LoRA)', 'Quantization', 'Distillation', 'vLLM', 'SGLang', 'TensorRT'].map((s) => <span class="chip">{s}</span>)}
+						</div>
+						<div class="skill-group">
+							<span class="group-name">Systems</span>
+							{['Distributed Training', 'Inference Serving', 'Docker', 'Kubernetes', 'AWS / GCP'].map((s) => <span class="chip">{s}</span>)}
+						</div>
+					</div>
+					<a class="more-link" href="/about/">More about me →</a>
+				</div>
 			</section>
 
-			<section>
-				<h2>Series</h2>
-				<LearningHub posts={posts} />
+			<section class="topics">
+				<h2>What I write about</h2>
+				<p class="topics-intro">
+					The technology behind modern AI — from the algorithms, to the chips they
+					run on, to the infrastructure that trains and serves them. Long-form
+					series, one concept per article.
+				</p>
+				<div class="topic-cards">
+					<div class="topic-card">
+						<h3>Algorithms &amp; Models</h3>
+						<p>
+							How LLMs actually work: attention, training objectives, Transformer
+							and modern architectures, and the math underneath.
+						</p>
+					</div>
+					<div class="topic-card">
+						<h3>Chips &amp; Hardware</h3>
+						<p>
+							Computer architecture, GPUs, ASICs and accelerators, and
+							algorithm–hardware co-design for efficient AI.
+						</p>
+					</div>
+					<div class="topic-card">
+						<h3>Infrastructure &amp; Serving</h3>
+						<p>
+							Networking, distributed training, inference serving, and performance
+							engineering at cluster scale.
+						</p>
+					</div>
+				</div>
+				<div class="cta-row">
+					<a class="cta primary" href="/blog/">Browse all series →</a>
+					<a class="cta" href="/roadmap/">Follow the learning roadmap →</a>
+				</div>
 			</section>
 
 			<section class="latest">

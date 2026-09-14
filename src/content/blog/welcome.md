@@ -19,4 +19,4 @@ Each series carries a subject tag and a Beginner, Intermediate, or Advanced leve
 
 Every long-form article develops a focused question with concrete numbers, explained equations, original diagrams, and cited primary sources. New topics can become separate paths without turning the catalog into a wall of cards.
 
-Full write-ups live here; shorter introductions may appear on [my LinkedIn](https://www.linkedin.com/). Follow new articles through [RSS](/rss.xml).
+Full write-ups live here; shorter introductions may appear on [my LinkedIn](https://www.linkedin.com/in/xin-liang-chia-7126261a6/). Follow new articles through [RSS](/rss.xml).
