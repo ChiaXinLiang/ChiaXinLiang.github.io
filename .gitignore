@@ -22,3 +22,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# content database lives in the parent workspace, never in blog/.
+# sqlite3 silently creates an empty file if run from the wrong directory,
+# so ignore it here to keep a stray copy out of commits.
+content.db
