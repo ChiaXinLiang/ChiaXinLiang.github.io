@@ -929,7 +929,7 @@
   },
   {
     "article": "fpga-ai-logic-1-digital-logic-for-ai-hardware",
-    "series": "fpga-ai-chip",
+    "series": "fpga-fundamentals",
     "code": "logic-1",
     "file": "section-overview.png",
     "title": "Digital Logic for AI Hardware: Registers, Clocks, and State Machines \u2014 overview",
@@ -948,7 +948,7 @@
   },
   {
     "article": "fpga-ai-logic-1-digital-logic-for-ai-hardware",
-    "series": "fpga-ai-chip",
+    "series": "fpga-fundamentals",
     "code": "logic-1",
     "file": "deep-dive-component-01.png",
     "title": "Combinational logic and clocked state",
@@ -966,7 +966,7 @@
   },
   {
     "article": "fpga-ai-logic-1-digital-logic-for-ai-hardware",
-    "series": "fpga-ai-chip",
+    "series": "fpga-fundamentals",
     "code": "logic-1",
     "file": "deep-dive-component-02.png",
     "title": "Counters and state-machine control",
@@ -985,7 +985,7 @@
   },
   {
     "article": "fpga-ai-logic-1-digital-logic-for-ai-hardware",
-    "series": "fpga-ai-chip",
+    "series": "fpga-fundamentals",
     "code": "logic-1",
     "file": "deep-dive-component-03.png",
     "title": "FPGA resources behind the RTL",
@@ -1004,7 +1004,7 @@
   },
   {
     "article": "fpga-ai-number-1-int8-arithmetic",
-    "series": "fpga-ai-chip",
+    "series": "fpga-fundamentals",
     "code": "number-1",
     "file": "section-overview.png",
     "title": "INT8 Arithmetic: Quantization, Signed Products, and Accumulator Width \u2014 overview",
@@ -1022,7 +1022,7 @@
   },
   {
     "article": "fpga-ai-number-1-int8-arithmetic",
-    "series": "fpga-ai-chip",
+    "series": "fpga-fundamentals",
     "code": "number-1",
     "file": "deep-dive-component-01.png",
     "title": "Signed integer representation and products",
@@ -1040,7 +1040,7 @@
   },
   {
     "article": "fpga-ai-number-1-int8-arithmetic",
-    "series": "fpga-ai-chip",
+    "series": "fpga-fundamentals",
     "code": "number-1",
     "file": "deep-dive-component-02.png",
     "title": "Derive the accumulator width",
@@ -1059,7 +1059,7 @@
   },
   {
     "article": "fpga-ai-number-1-int8-arithmetic",
-    "series": "fpga-ai-chip",
+    "series": "fpga-fundamentals",
     "code": "number-1",
     "file": "deep-dive-component-03.png",
     "title": "Quantization scales and zero points",
@@ -1077,7 +1077,7 @@
   },
   {
     "article": "fpga-ai-number-1-int8-arithmetic",
-    "series": "fpga-ai-chip",
+    "series": "fpga-fundamentals",
     "code": "number-1",
     "file": "deep-dive-component-04.png",
     "title": "Rounding and saturation are operators",
@@ -1096,7 +1096,7 @@
   },
   {
     "article": "fpga-ai-number-1-int8-arithmetic",
-    "series": "fpga-ai-chip",
+    "series": "fpga-fundamentals",
     "code": "number-1",
     "file": "deep-dive-component-05.png",
     "title": "Bit-accurate reference testing",

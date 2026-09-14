@@ -2,6 +2,7 @@
 title: "Define the AI Accelerator: Workload, Interfaces, and Success Criteria"
 description: "Write a small INT8 inference specification, shapes, numerical contract, memory budget and test criteria."
 pubDate: "2026-09-13"
+updatedDate: "2026-09-14"
 heroImage: "./section-overview.png"
 series: "fpga-ai-chip"
 code: "spec-1"
@@ -13,6 +14,8 @@ tags: ["FPGA", "AI Accelerator", "RTL"]
 ## Overview
 
 ![Concept overview: Write a small INT8 inference specification, shapes, numerical contract, memory budget and test criteria](./section-overview.png)
+
+Start with [FPGA & Digital Hardware Fundamentals](/series/fpga-fundamentals/) for FPGA fabric, binary numbers, logic, SystemVerilog, simulation, timing, crossings, and AI arithmetic. This project series focuses on implementing the accelerator.
 
 This lesson extends one educational AI accelerator from its numerical specification toward verified RTL, FPGA integration and an ASIC implementation exercise. The overview shows this chapter's specific responsibility: Write a small INT8 inference specification, shapes, numerical contract, memory budget and test criteria.
 

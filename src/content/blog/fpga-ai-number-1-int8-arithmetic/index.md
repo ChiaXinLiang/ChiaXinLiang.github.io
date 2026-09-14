@@ -2,10 +2,11 @@
 title: "INT8 Arithmetic: Quantization, Signed Products, and Accumulator Width"
 description: "Build a bit-accurate Python model; derive overflow bounds, rounding and saturation."
 pubDate: "2026-09-13"
+updatedDate: "2026-09-14"
 heroImage: "./section-overview.png"
-series: "fpga-ai-chip"
+series: "fpga-fundamentals"
 code: "number-1"
-order: 3
+order: 10
 topic: "Digital foundations"
 tags: ["FPGA", "AI Accelerator", "RTL"]
 ---
@@ -13,6 +14,8 @@ tags: ["FPGA", "AI Accelerator", "RTL"]
 ## Overview
 
 ![Concept overview: Build a bit-accurate Python model; derive overflow bounds, rounding and saturation](./section-overview.png)
+
+This introductory lesson belongs to [FPGA & Digital Hardware Fundamentals](/series/fpga-fundamentals/). Read [dot products and matrix shapes](/blog/ai-arithmetic-dot-products-matrix-shapes-reuse/) first, then continue with the [accelerator project](/series/fpga-ai-chip/).
 
 This lesson extends one educational AI accelerator from its numerical specification toward verified RTL, FPGA integration and an ASIC implementation exercise. The overview shows this chapter's specific responsibility: Build a bit-accurate Python model; derive overflow bounds, rounding and saturation.
 

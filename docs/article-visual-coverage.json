@@ -1216,5 +1216,53 @@
     "overview_images": 1,
     "deep_dive_images": 4,
     "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/what-is-an-fpga-programmable-hardware/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/binary-numbers-hardware-signedness-overflow/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/combinational-logic-truth-tables-multiplexers/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/systemverilog-beginners-modules-signals-state/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/rtl-simulation-testbenches-self-checks-waveforms/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/digital-timing-setup-hold-latency-pipelining/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/clock-domain-crossings-synchronizers-safe-transfers/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/ai-arithmetic-dot-products-matrix-shapes-reuse/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 4
   }
 ]

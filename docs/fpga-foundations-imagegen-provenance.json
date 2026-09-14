@@ -1,0 +1,800 @@
+[
+  {
+    "article": "what-is-an-fpga-programmable-hardware",
+    "series": "fpga-fundamentals",
+    "code": "intro-1",
+    "file": "section-overview.png",
+    "title": "Concept overview",
+    "sha256": "15499bee094defb9f031f9d5c25e2bd17e54025aae364dde3b0451a682a879d1",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Concept overview. A concise overview of What Is an FPGA? Programmable Hardware, Fabric, and the Design Flow. Three or four main labeled blocks connecting the lesson’s mechanisms. No detailed equations, product specifications, decorative scenes, or implied board measurements. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with a sparse conceptual overview, four boxes Requirements and HDL -> Design tools -> Configurable FPGA fabric -> Application inputs/outputs. Configuration arrow from tools to fabric; separate application input arrow INTO fabric and output arrow OUT. No code, no bit widths, no numerical example. Do not send application operands into design tools.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "what-is-an-fpga-programmable-hardware",
+    "series": "fpga-fundamentals",
+    "code": "intro-1",
+    "file": "deep-dive-component-01.png",
+    "title": "Instructions versus spatial hardware",
+    "sha256": "3535b95232fd14f1547b1bcc0ebb5638fc6aeac0f7f89bd46460c19d9247ba94",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Instructions versus spatial hardware. Show CPU repeated instructions over an ALU versus FPGA configured parallel operators. Same algorithm can have different mappings. No speed ranking, no latest chip products. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with two conceptual mapping panels for z=(a+b)*(c+d). CPU panel repeated instructions using shared arithmetic resources; FPGA panel TWO independent adders a,b -> adder1 and c,d -> adder2, both sums into multiplier -> z. No widths, no assembly code, no performance ranking. Label conceptual mapping. Second pass: CPU hardware drawing replaced by sequential operation table with arithmetic reuse; FPGA retains two independent adders.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "what-is-an-fpga-programmable-hardware",
+    "series": "fpga-fundamentals",
+    "code": "intro-1",
+    "file": "deep-dive-component-02.png",
+    "title": "LUTs implement Boolean functions",
+    "sha256": "5a75935cd00a6ea65c1e231f50bc5acdde3496af9efd94c7db0b85d10ec768bf",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: LUTs implement Boolean functions. Illustrative 2-input LUT for AND. Inputs a,b select stored truth-table output. Exact rows 00->0,01->0,10->0,11->1. Modern devices can use larger LUTs; this is a small teaching example. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "what-is-an-fpga-programmable-hardware",
+    "series": "fpga-fundamentals",
+    "code": "intro-1",
+    "file": "deep-dive-component-03.png",
+    "title": "Registers make state explicit",
+    "sha256": "63e43564f71913526bc46e161248e0550486d2388b99d5b1404b3fc56ab68902",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Registers make state explicit. Show current state Q and input X -> next-state combinational function F -> register -> new Q; register output loops to F. Rising-edge clock updates state; no drawn timing waveforms. Hold between edges. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "what-is-an-fpga-programmable-hardware",
+    "series": "fpga-fundamentals",
+    "code": "intro-1",
+    "file": "deep-dive-component-04.png",
+    "title": "DSP blocks and memory serve different roles",
+    "sha256": "7830c81e2155af0961b9b7b7991f7dd0d5a65363953e69f9bd4cac87676b193f",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: DSP blocks and memory serve different roles. Two separate paths: operands -> DSP arithmetic -> product; address/control -> BRAM -> stored-data read. BRAM stores bits, DSP computes arithmetic. These are conceptual resources, not a vendor floorplan. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Keep two resource paths but REMOVE ALL numerical widths and bus ranges. Operands A,B -> DSP arithmetic -> product. Address/control -> BRAM storage -> read data. Conceptual resources, not a vendor floorplan; exact mapping depends on device. DSP computes, BRAM stores. No assertion DSP cannot retain state.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "what-is-an-fpga-programmable-hardware",
+    "series": "fpga-fundamentals",
+    "code": "intro-1",
+    "file": "deep-dive-component-05.png",
+    "title": "From HDL to a configured device",
+    "sha256": "24b9978b342c0115487ea51eee20bdf31a5782de60a2c84b48718613a6f2fb27",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: From HDL to a configured device. Requirements -> HDL -> simulation -> synthesis -> place and route -> timing checks -> bitstream -> configured FPGA. Timing failure returns to design. Label physical board execution not performed in this course release. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Keep the process flow but REMOVE requirements numerical arithmetic and ALL 8-bit labels. Requirements -> HDL -> Simulation -> Synthesis -> Place and route -> Timing checks -> Bitstream -> Configured FPGA. Timing failure back to HDL. Physical board execution not performed. Use readable large labels, minimal subtext.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "binary-numbers-hardware-signedness-overflow",
+    "series": "fpga-fundamentals",
+    "code": "bits-1",
+    "file": "section-overview.png",
+    "title": "Concept overview",
+    "sha256": "881483b40cae120037b1476b7b5e9e2ae7ae0fea742e724c0a3cb284aa96b1c3",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Concept overview. A concise overview of Binary Numbers for Hardware: Bit Vectors, Signedness, and Overflow. Three or four main labeled blocks connecting the lesson’s mechanisms. No detailed equations, product specifications, decorative scenes, or implied board measurements. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace overview with four conceptual boxes Bit pattern -> Width and interpretation -> Arithmetic result -> Range and conversion checks. No code, no N-bit-adder diagram and no claim that addition necessarily retains input width. Caption Explicit intermediate widths and overflow policy.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "binary-numbers-hardware-signedness-overflow",
+    "series": "fpga-fundamentals",
+    "code": "bits-1",
+    "file": "deep-dive-component-01.png",
+    "title": "A bit vector has positional weights",
+    "sha256": "e88c8581f0f13b2f81591e97ae4062d23b14e0aa5f7ccae709d62b3eb2af9176",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: A bit vector has positional weights. Unsigned 6-bit 101101 = 32+8+4+1 = 45. Show weights 32,16,8,4,2,1 and bits 1,0,1,1,0,1. Do not change number or sum. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "binary-numbers-hardware-signedness-overflow",
+    "series": "fpga-fundamentals",
+    "code": "bits-1",
+    "file": "deep-dive-component-02.png",
+    "title": "Two’s complement changes the leading weight",
+    "sha256": "43d32d43100e7926d445b65e758c5dcbb20917abfcd79156205322272c0385da",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Two’s complement changes the leading weight. Signed 6-bit 111101 uses weights -32,16,8,4,2,1 -> -32+16+8+4+0+1=-3. Same bit vector unsigned=61. Range 6-bit signed -32..31, unsigned 0..63. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "binary-numbers-hardware-signedness-overflow",
+    "series": "fpga-fundamentals",
+    "code": "bits-1",
+    "file": "deep-dive-component-03.png",
+    "title": "Overflow is a width-dependent result",
+    "sha256": "8cefae8aa471e502c5df5385ea514a243537525c421980aaae51fba628b8d5f1",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Overflow is a width-dependent result. 4-bit signed 0111 (7) + 0001 (1) -> 1000 (-8), signed overflow. Wider 5-bit 00111+00001=01000 (8). Unsigned 4-bit result8 is representable. Do not equate carry-out with signed overflow. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "binary-numbers-hardware-signedness-overflow",
+    "series": "fpga-fundamentals",
+    "code": "bits-1",
+    "file": "deep-dive-component-04.png",
+    "title": "Zero extension and sign extension differ",
+    "sha256": "74dc2f521f0324d4ac4ff47c77b641ff8a3fa9ea1c60b340e1427e1545a46b18",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Zero extension and sign extension differ. 4-bit 1101 unsigned13 -> zero extend 8-bit 00001101 unsigned13. Same4-bit1101 signed-3 -> sign extend8-bit11111101 signed-3. Preserve interpretation; label both paths. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "combinational-logic-truth-tables-multiplexers",
+    "series": "fpga-fundamentals",
+    "code": "comb-1",
+    "file": "section-overview.png",
+    "title": "Concept overview",
+    "sha256": "b01acf7ca73db82e6202c81755ce89d5d9850568878c6d00cdacd6fe728335bd",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Concept overview. A concise overview of Combinational Logic: Truth Tables, Multiplexers, and Complete RTL. Three or four main labeled blocks connecting the lesson’s mechanisms. No detailed equations, product specifications, decorative scenes, or implied board measurements. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "combinational-logic-truth-tables-multiplexers",
+    "series": "fpga-fundamentals",
+    "code": "comb-1",
+    "file": "deep-dive-component-01.png",
+    "title": "Specify a multiplexer as a function",
+    "sha256": "da7616b7fe87b51f3f332ef5acce1cb092161320dde5ed33a7c5631773e4dce4",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Specify a multiplexer as a function. 2-to-1 mux y = s ? b : a. Show a and b entering DATA ports, s entering SELECT. s=0 chooses a, s=1 chooses b. Pure function, no state. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "combinational-logic-truth-tables-multiplexers",
+    "series": "fpga-fundamentals",
+    "code": "comb-1",
+    "file": "deep-dive-component-02.png",
+    "title": "Parallel logic does not mean sequential statements",
+    "sha256": "b37bb75983709f191b2960dc5c725ba76bab4528302426caa35ac4ac80bc7649",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Parallel logic does not mean sequential statements. Inputs a,b feed independent adder and comparator, both outputs feed a selector. Draw fan-out correctly. Conceptual combinational network; all paths have propagation delay; no clock. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with clean function network. a,b (unsigned4-bit) fan into adder with output sum5-bit and equality comparator eq1-bit. Selector has DATA0 constant zero5-bit, DATA1 sum5-bit, and eq goes ONLY into its bottom SELECT port. Output y5-bit, y=eq ? sum : 0. All paths combinational with propagation delay, no clock. Ensure no shorted a/b wires; use grouped labeled input bundles if needed.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "combinational-logic-truth-tables-multiplexers",
+    "series": "fpga-fundamentals",
+    "code": "comb-1",
+    "file": "deep-dive-component-03.png",
+    "title": "Complete assignment prevents unintended storage",
+    "sha256": "489680d767cf7a096b70403a9a1d232a500b9b011ab8cfa474b1cbd5a5395890",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Complete assignment prevents unintended storage. Contrast complete combinational assignment: default y=a; if(s) y=b, versus incomplete if(s) y=b where s=0 leaves old y and infers storage. Do not show an always_ff register as this unintended latch. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "combinational-logic-truth-tables-multiplexers",
+    "series": "fpga-fundamentals",
+    "code": "comb-1",
+    "file": "deep-dive-component-04.png",
+    "title": "Exhaust the small input space",
+    "sha256": "e9ad574fc5b1a018ed0512cc7fa9da2cb87adb7a5a75fd5b33b5faa1796855a9",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Exhaust the small input space. Illustrative mux with a,b unsigned2-bit and s1-bit: 4*4*2=32 cases. Independent reference y=b ifs1 elsea compared to DUT output. Inputs branch to DUT and reference separately, outputs go to comparator. No feedback from DUT to reference. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace wiring with a single grouped stimulus box a,b unsigned2-bit; s1-bit -> a branching bundle carrying (a,b,s) separately to DUT mux and Reference y=b if s else a. DUT observed2-bit and reference expected2-bit -> Compare -> pass/fail. NO separate input wire crossings/junctions. 4*4*2=32 binary cases.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "systemverilog-beginners-modules-signals-state",
+    "series": "fpga-fundamentals",
+    "code": "hdl-1",
+    "file": "section-overview.png",
+    "title": "Concept overview",
+    "sha256": "6fa268c340ffb743d69f4a7c335b8bc3dc5d761d96e8f3a5e2929c20d8e6268a",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Concept overview. A concise overview of SystemVerilog for Beginners: Modules, Signals, and Clocked State. Three or four main labeled blocks connecting the lesson’s mechanisms. No detailed equations, product specifications, decorative scenes, or implied board measurements. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with conceptual module overview: Inputs -> Combinational function -> Clocked register -> Output. Separate clock arrow to register ONLY. Ports, signal widths, and update events define contract. No numeric widths, no valid signal, no arithmetic expression or code.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "systemverilog-beginners-modules-signals-state",
+    "series": "fpga-fundamentals",
+    "code": "hdl-1",
+    "file": "deep-dive-component-01.png",
+    "title": "Ports describe a hardware boundary",
+    "sha256": "2011528163a95ca41127eb6d73047edc0cc8b552ea8eab36161c8f948be6f4a1",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Ports describe a hardware boundary. Unsigned4-bit a,b -> combinational adder module -> unsigned5-bit y. Explicit operands widened before add. Example15+1=16, y10000. Do not label output4-bit. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Keep unsigned4-bit a,b -> unsigned5-bit adder output y and example15+1=16 binary10000. Replace formula with plain text Explicit zero extension before addition. Do not use unsized literal {0,a}; if code included exact {1'b0,a}+{1'b0,b}. Prefer no code.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "systemverilog-beginners-modules-signals-state",
+    "series": "fpga-fundamentals",
+    "code": "hdl-1",
+    "file": "deep-dive-component-02.png",
+    "title": "Combinational procedures describe a function",
+    "sha256": "0ed2ec2a2820bad721250bd25ce402350998138047ccfed2edb65c31a4940ae2",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Combinational procedures describe a function. always_comb input changes -> evaluate total function -> combinational output. Blocking assignments are local procedural ordering, not a new physical clock. Each output driven in all paths. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "systemverilog-beginners-modules-signals-state",
+    "series": "fpga-fundamentals",
+    "code": "hdl-1",
+    "file": "deep-dive-component-03.png",
+    "title": "Nonblocking assignments preserve old-state transfer",
+    "sha256": "1fca7b762e075d7331e74a6c4f06cf89813d84f7b778d61df23a8d5e173c57d2",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Nonblocking assignments preserve old-state transfer. Two registers q1,q2 updated on same rising edge: q1<=d; q2<=q1. q2 takes OLD q1, not new d. Show d->q1->q2, shared clock; no waveforms. Pipeline stages each1cycle. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "systemverilog-beginners-modules-signals-state",
+    "series": "fpga-fundamentals",
+    "code": "hdl-1",
+    "file": "deep-dive-component-04.png",
+    "title": "Reset and enables specify priority",
+    "sha256": "476481bd84951eb09bf2eda636c5fa48e17da26c0dfae4f6a6f82c074bab7536",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Reset and enables specify priority. Clocked register decision: reset? yes q=0; no enable? yes q=d; no q holds. Reset synchronous active-high in teaching module. No asynchronous reset claim. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "systemverilog-beginners-modules-signals-state",
+    "series": "fpga-fundamentals",
+    "code": "hdl-1",
+    "file": "deep-dive-component-05.png",
+    "title": "Testbench constructs are not physical hardware",
+    "sha256": "b179dfd8b5a97959c3ecb84a8f616fe269d569b103f36729e5a5f65d5475848f",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Testbench constructs are not physical hardware. Separate synthesizable DUT ports/logic/registers from simulation testbench clock stimulus, delay, assertions, VCD. Testbench drives DUT and checks outputs. Simulation passing does not prove routed timing or programmed board. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with three coarse boxes Simulation testbench -> Synthesizable DUT -> Output checks. Testbench provides stimulus/clock and writes VCD; checks compare observed with expected. No internal adder/register drawing, no numeric code assertions, no widths, no clock waveform. Simulation delays and VCD are not physical hardware. Passing simulation does not prove routed timing or board operation.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "rtl-simulation-testbenches-self-checks-waveforms",
+    "series": "fpga-fundamentals",
+    "code": "sim-1",
+    "file": "section-overview.png",
+    "title": "Concept overview",
+    "sha256": "2798f14e30c80d73bf4569a557503f0c42d6fa004186acaef242effd1c4bd8a8",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Concept overview. A concise overview of RTL Simulation: Testbenches, Self-Checks, and Useful Waveforms. Three or four main labeled blocks connecting the lesson’s mechanisms. No detailed equations, product specifications, decorative scenes, or implied board measurements. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with conceptual verification overview: Stimulus branches separately to DUT and Independent reference; observed and expected -> Self-check; diagnostic trace linked from DUT and self-check. No adder widths, no arithmetic code, NO generated waveforms. Functional RTL evidence, not physical timing.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "rtl-simulation-testbenches-self-checks-waveforms",
+    "series": "fpga-fundamentals",
+    "code": "sim-1",
+    "file": "deep-dive-component-01.png",
+    "title": "Keep the reference independent",
+    "sha256": "24f584e7205953d4265087893a463e411a4c8850ac625f80391ce29c4b72c81f",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Keep the reference independent. Stimulus inputs branch separately into DUT and reference calculation. DUT observed output and reference expected output -> scoreboard -> pass/fail. Reference must not use DUT output. Plain clean diagram. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with clean independent reference diagram for unsigned4-bit a,b, DUT unsigned5-bit sum, independent unbounded integer reference a+b, both -> scoreboard. Group a,b as labeled bundle to avoid wire shorts. 15+15=30 and y11110. Reference does not use DUT output. No8-bit labels anywhere.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "rtl-simulation-testbenches-self-checks-waveforms",
+    "series": "fpga-fundamentals",
+    "code": "sim-1",
+    "file": "deep-dive-component-02.png",
+    "title": "Drive and sample in defined phases",
+    "sha256": "b47cdda0b7a4ef740ad61d913c10cc1f4b9f4c1bf58edfdef986d9fe404a916e",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Drive and sample in defined phases. Clocked test protocol: drive inputs away from active edge -> rising edge updates sequential state -> wait for nonblocking updates -> sample output -> compare. Abstract event blocks, no ambiguous clock waveforms. #1 delay exists only in testbench, not synthesizable timing. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "rtl-simulation-testbenches-self-checks-waveforms",
+    "series": "fpga-fundamentals",
+    "code": "sim-1",
+    "file": "deep-dive-component-03.png",
+    "title": "Coverage follows the input contract",
+    "sha256": "5a86c0afb466018f40c2a4d41d5d26dc0d7c1e94ecc297324580ca60d2cb79c4",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Coverage follows the input contract. Unsigned4-bit adder has16a*16b=256 inputpairs; 5-bit output retains carry. Full sweep input pairs plus self-check y=a+b; 15+15=30 ->11110. Separate sequential tests reset/enable/hold. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Keep exhaustive unsigned4-bit adder256pairs, output5-bit, 15+15=30=11110. REMOVE reset enable hold arrows into adder. Separate lower box CLOCKED enabled register has reset/enable/hold tests, d/q4-bit; not part of combinational adder. No claim sequential tests use5-bit adderoutput. Second pass: removed invented hold input port; hold occurs with reset and enable deasserted.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "rtl-simulation-testbenches-self-checks-waveforms",
+    "series": "fpga-fundamentals",
+    "code": "sim-1",
+    "file": "deep-dive-component-04.png",
+    "title": "Waveforms explain a failed expectation",
+    "sha256": "d0df0a928be058d8808578e693fcf808d73ddf1203ef909a3eb10f6dbc428c90",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Waveforms explain a failed expectation. Two-register pipeline illustrative trace: initialq1=0,q2=0; edge1 d3 ->q1=3,q2=0; edge2 d5 ->q1=5,q2=3. Table post-edge values; independent expected q2 uses preceding q1. Not same-cycle d passthrough. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Remove ALL drawn waveforms and replace with large post-edge table ONLY: Initial q1=0 q2=0; edge1 d=3 q1=3 q2=0; edge2 d=5 q1=5 q2=3. Include two-register d ->q1->q2 shared clock diagram. q2 takes OLD q1. Inputs driven before active edge. No numeric signal timeline.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "digital-timing-setup-hold-latency-pipelining",
+    "series": "fpga-fundamentals",
+    "code": "timing-1",
+    "file": "section-overview.png",
+    "title": "Concept overview",
+    "sha256": "b4df68c9682db9cc2a5b4968bb3bcdbfce77cd01c935c1603c3593fb0709f750",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Concept overview. A concise overview of Digital Timing Fundamentals: Setup, Hold, Latency, and Pipelining. Three or four main labeled blocks connecting the lesson’s mechanisms. No detailed equations, product specifications, decorative scenes, or implied board measurements. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "digital-timing-setup-hold-latency-pipelining",
+    "series": "fpga-fundamentals",
+    "code": "timing-1",
+    "file": "deep-dive-component-01.png",
+    "title": "Setup budgets the longest data path",
+    "sha256": "29b437b7ce61b0d2bcb200c340ff5cbfd70dbdc9f3460518c99578d0bbdbbf8b",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Setup budgets the longest data path. Launch register -> logic -> capture register. Illustrative no-skew budget tCQmax0.4ns+logic3.2ns+setup0.3ns+uncertainty0.2ns=4.1ns required period. Analytical example, not measured device result. No performance ranking. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "digital-timing-setup-hold-latency-pipelining",
+    "series": "fpga-fundamentals",
+    "code": "timing-1",
+    "file": "deep-dive-component-02.png",
+    "title": "Hold checks the shortest path",
+    "sha256": "8dc317eabdec2f76d2782b2ad3619486173e131959a64b61a2bbd43e98eb670c",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Hold checks the shortest path. Min path0.08nsclock-to-Q+0.04nslogic=0.12ns versus hold requirement0.18ns, shortfall0.06ns. Hold relates to same capture edge; slowing clock does not solve this example. Abstract timing windows with reference event, NO clock waveform. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace timing axis with a simple budget table, no event axis/no waveform. Minimum clock-to-Q0.08ns + minimum logic0.04ns = earliest new data0.12ns. No-skew hold requirement0.18ns; shortfall0.06ns. Same capture edge, slowing clock period does not fix this model. Analytical example, not measured.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "digital-timing-setup-hold-latency-pipelining",
+    "series": "fpga-fundamentals",
+    "code": "timing-1",
+    "file": "deep-dive-component-03.png",
+    "title": "Skew affects setup and hold differently",
+    "sha256": "6d6bda9c8f1be497f2726daefaeb51f520a78bf4a7a0dd08d318435ba16643f2",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Skew affects setup and hold differently. Define positive skew: capture clock arrives later than launch. Helps setup available time, worsens hold requirement. Two separate labeled budget arrows or text, no waveform. No universal frequency claim. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Keep qualitative capture-later definition but REMOVE ALL invented numeric0.3ns and formulas with unspecified base. Positive skew=capture clock arrives later than launch. Setup: more available time. Hold: larger minimum delay requirement. No numeric waveform/axis. Conceptual relationship, sign convention explicit.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "digital-timing-setup-hold-latency-pipelining",
+    "series": "fpga-fundamentals",
+    "code": "timing-1",
+    "file": "deep-dive-component-04.png",
+    "title": "Pipeline depth trades latency for path length",
+    "sha256": "af886c34fec391e06dc870bddf84e74d21050ffa9e0602926b7dbf648a1aef1c",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Pipeline depth trades latency for path length. Baseline combinational4.8ns, overhead0.9ns -> required5.7ns. Two balanced stages logic2.4ns each+0.9ns overhead -> required3.3ns illustrative. Baseline latency1cycle, pipelined2cycles; both can accept1input/cycle in ideal feed-forward design. Not measured implementation. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with explicit registered paths: launch register -> logic4.8ns -> capture register; requiredperiod5.7ns overhead0.9ns, latency1cycle. Second: launchregister -> logic2.4ns -> intermediate register -> logic2.4ns -> capture register; perstageperiod3.3ns overhead0.9ns, latency2cycles. Both ideal feedforward1input/cycle. All clocks shown as coarse shared-clock annotation, no waveform. Illustrative not measured. No unregistered combinational path labeled1cycle.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "digital-timing-setup-hold-latency-pipelining",
+    "series": "fpga-fundamentals",
+    "code": "timing-1",
+    "file": "deep-dive-component-05.png",
+    "title": "A constraint is not a measured result",
+    "sha256": "fc42fab3f09537005d6c462cf2c38093e75f983861f652bead746be2f0e292c0",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: A constraint is not a measured result. Requirements -> clocks/IO constraints -> physical timing analysis -> report -> acceptance or redesign. Distinguish simulation function, constrained STA, physical board measurements. Do not hide unknown CDC paths with blanket false-path exceptions. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": " Second pass: separated functional simulation, physical STA model, board observation, and CDC evidence; removed invented widths and code.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "clock-domain-crossings-synchronizers-safe-transfers",
+    "series": "fpga-fundamentals",
+    "code": "cdc-1",
+    "file": "section-overview.png",
+    "title": "Concept overview",
+    "sha256": "b1357943b59099bc436406eed8f95901b5febd857e133f3213b35a091114f134",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Concept overview. A concise overview of Clock-Domain Crossings: Metastability, Synchronizers, and Safe Transfers. Three or four main labeled blocks connecting the lesson’s mechanisms. No detailed equations, product specifications, decorative scenes, or implied board measurements. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with three conceptual boxes Source domain -> Transfer protocol -> Destination domain. Below list stable1-bit level: synchronizer; event/heldword: handshake; stream: asyncFIFO. No widths, no waveform, no generic multi-bit two-flop chain, no metastability cloud. Protocol depends on information type. Analog metastability not reproduced by RTL simulation.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "clock-domain-crossings-synchronizers-safe-transfers",
+    "series": "fpga-fundamentals",
+    "code": "cdc-1",
+    "file": "deep-dive-component-01.png",
+    "title": "Independent clocks have no fixed sampling relationship",
+    "sha256": "6e610759ac7d7513b5ae675c4f18059b71f12adaf01446b188a7fb934ff84c78",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Independent clocks have no fixed sampling relationship. Source domain produces asynchronous-to-destination input -> receiving flip-flop. Transition near capture event may violate setup/hold. Analog metastability is NOT reproduced by ordinary RTL simulation. No clock waveform or numeric MTBF. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "clock-domain-crossings-synchronizers-safe-transfers",
+    "series": "fpga-fundamentals",
+    "code": "cdc-1",
+    "file": "deep-dive-component-02.png",
+    "title": "A level synchronizer has a limited contract",
+    "sha256": "24547a180b60eea8d61e667f7e4cad0f7dc17f0a11aa6fdde4f1111d00de6ae5",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: A level synchronizer has a limited contract. Asynchronous stable LEVEL -> FF1 -> FF2 -> destination logic. Both FFs use same destination clock. Destination uses ONLY FF2. No logic between flops. Reduces risk, does not guarantee capture of short pulses or coherence of multi-bit buses. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "clock-domain-crossings-synchronizers-safe-transfers",
+    "series": "fpga-fundamentals",
+    "code": "cdc-1",
+    "file": "deep-dive-component-03.png",
+    "title": "A handshake preserves an event and stable data",
+    "sha256": "9d720ae641bcbafd4ee7fae8abd28b5e78b9f975f420dc34f6365f6018ef1a42",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: A handshake preserves an event and stable data. Source holds request and bundled data until acknowledgement returns. Request synchronized to destination; destination captures held data then acknowledgement synchronized back to source. Label source/destination ownership and request/ack directions. Do not independently synchronize every data bit. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "clock-domain-crossings-synchronizers-safe-transfers",
+    "series": "fpga-fundamentals",
+    "code": "cdc-1",
+    "file": "deep-dive-component-04.png",
+    "title": "An asynchronous FIFO separates local ownership",
+    "sha256": "35a1a64338bebed8b0abc32afec791c9a24ff571cab326dd6a97ba9b2b9d71ca",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: An asynchronous FIFO separates local ownership. Conceptual power-of-two-depth FIFO with dual-port storage; source clock writes, destination clock reads. Each side maintains local binary pointer; Gray-coded pointer crosses via synchronizers to opposite side for full/empty decisions. Data stays in storage, not passed through pointer synchronizer. No claim physical timing constraints proven. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with clean conceptual asyncFIFO: central Dual-port payload storage; source Write logic writes to storage, destination Read logic reads from storage. Bottom TWO SEPARATE crossing arrows: Source local writepointer -> Gray encode -> synchronizer IN DESTINATION -> destination empty logic. Destination local readpointer -> Gray encode -> synchronizer IN SOURCE -> source full logic. Do NOT connect the two synchronizer paths together or feed remote Graypointer into local binarypointer state. No bus widths, no detailed full-comparison formulas. Power-of-two-depth conceptual FIFO; physical constraints not verified.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "ai-arithmetic-dot-products-matrix-shapes-reuse",
+    "series": "fpga-fundamentals",
+    "code": "dot-1",
+    "file": "section-overview.png",
+    "title": "Concept overview",
+    "sha256": "0844c7a02491a89f2f52bb13a99aa930eea365a469f9463e8771ad736f8e31ad",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Concept overview. A concise overview of AI Arithmetic Before Accelerators: Dot Products, Matrix Shapes, and Reuse. Three or four main labeled blocks connecting the lesson’s mechanisms. No detailed equations, product specifications, decorative scenes, or implied board measurements. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with conceptual arithmetic overview: Input vectors/matrices -> Pair matching indices -> Products and reduction -> Output with checked shape. No int8/int32 annotations, no alternate transposed weight convention, no row-weight-specific claim. Mathematical contract first, implementation schedule second.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "ai-arithmetic-dot-products-matrix-shapes-reuse",
+    "series": "fpga-fundamentals",
+    "code": "dot-1",
+    "file": "deep-dive-component-01.png",
+    "title": "A dot product multiplies matching elements",
+    "sha256": "421d2f9dc5c40edacbb3eb090552b568efe6c8e4745c226d2a86a41bc18ea90f",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: A dot product multiplies matching elements. x=[2,-1,3], w=[4,5,-2]. Products [8,-5,-6]; sum -3. Signedinteger illustration. Elements align by same index, no outer-product matrix. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "ai-arithmetic-dot-products-matrix-shapes-reuse",
+    "series": "fpga-fundamentals",
+    "code": "dot-1",
+    "file": "deep-dive-component-02.png",
+    "title": "Matrix multiplication repeats a row-column reduction",
+    "sha256": "fd36b15601aad48fad771ece9912f2982069050abd4f7e0127c14fb1b33a0bcb",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: Matrix multiplication repeats a row-column reduction. X=[[1,2],[3,4]],W=[[5,6],[7,8]], C=[[19,22],[43,50]]. Shapes2x2 times2x2 ->2x2; Cij sums overk. 8MACs,16operations using2operations/MAC convention. Exact values, no transpose error. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": null,
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  },
+  {
+    "article": "ai-arithmetic-dot-products-matrix-shapes-reuse",
+    "series": "fpga-fundamentals",
+    "code": "dot-1",
+    "file": "deep-dive-component-03.png",
+    "title": "A schedule changes resources and reuse",
+    "sha256": "a4b252e5a3acc0a544ab1c5a27728de2216abe9b2ce74184a6c103dd619c6b26",
+    "generator": "OpenAI ImageGen",
+    "generated_date": "2026-09-14",
+    "style": "Opaque white, restrained research-paper technical diagrams",
+    "prompt": "Original educational research-paper technical diagram on an OPAQUE PURE WHITE #ffffff background. Dark readable English sans-serif labels, flat blocks, clean arrows, restrained blue/green/purple/orange accents and generous margins. Landscape composition, focused learning objective. Title: A schedule changes resources and reuse. Same illustrative2x2 product: one reused MAC with1MAC/cycle requires8ideal compute cycles; four independent MAC lanes computing4outputs require2ideal compute cycles. Ignore transfers and pipeline overhead explicitly. Local accumulators keep4C sums, A/B reused. This is conceptual independent lanes, NOT a released systolic-array timing claim. Use exactly the stated arithmetic and signal widths. No invented numbers or extra mechanisms. Avoid dramatic metaphors, robots, boxes of memories, valves, cartoons, photorealistic props and benchmark charts. Keep concise; do not add unrelated ownership or bypass panels. This is an independent factual explanatory illustration, not a copied vendor figure.",
+    "correction": "Replace with ideal schedule TABLE, avoid input wire distribution diagram. One reusedMAC: four outputs * two contributions each =8idealcomputecycles. Four independentMAC lanes: each owns one output and processes k0 thenk1 ->2idealcomputecycles. SAME8MACs. Local accumulators retain partials; operand bank/broadcast delivers correct indexed pairs. No8-bit/16-bit widths or connected A/B arrows. Exclude IO/pipeline overhead, not measured and not released systolic-array timing. Second pass: removed repeated operand-update formulas; schedule table records only output ownership and reduction index.",
+    "review": [
+      "Final figure visually inspected at readable contact-sheet scale",
+      "Mechanism, port roles, arrow directions, numeric widths and worked arithmetic checked",
+      "Opaque white canvas and readable dark labels",
+      "Illustrative calculations distinguished from measured hardware evidence"
+    ]
+  }
+]

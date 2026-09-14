@@ -2,10 +2,11 @@
 title: "Digital Logic for AI Hardware: Registers, Clocks, and State Machines"
 description: "Build counters, synchronous registers and an FSM; trace their behavior cycle by cycle."
 pubDate: "2026-09-13"
+updatedDate: "2026-09-14"
 heroImage: "./section-overview.png"
-series: "fpga-ai-chip"
+series: "fpga-fundamentals"
 code: "logic-1"
-order: 2
+order: 4
 topic: "Digital foundations"
 tags: ["FPGA", "AI Accelerator", "RTL"]
 ---
@@ -13,6 +14,8 @@ tags: ["FPGA", "AI Accelerator", "RTL"]
 ## Overview
 
 ![Concept overview: Build counters, synchronous registers and an FSM; trace their behavior cycle by cycle](./section-overview.png)
+
+This introductory lesson belongs to [FPGA & Digital Hardware Fundamentals](/series/fpga-fundamentals/). Read [combinational logic](/blog/combinational-logic-truth-tables-multiplexers/) first, then continue with [SystemVerilog](/blog/systemverilog-beginners-modules-signals-state/).
 
 This lesson extends one educational AI accelerator from its numerical specification toward verified RTL, FPGA integration and an ASIC implementation exercise. The overview shows this chapter's specific responsibility: Build counters, synchronous registers and an FSM; trace their behavior cycle by cycle.
 
