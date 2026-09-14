@@ -23,7 +23,7 @@ const steps = [
 ].map(step => ({...step, ...SERIES.find(s => s.id === step.id)!, articles:publishedSeriesOrder(posts.filter(p=>p.data.series===step.id)).map(p=>({id:p.id,title:p.data.title,href:`/blog/${p.id}/`}))})).filter(s=>s.articles.length);
 const paths = {all:steps.map(s=>s.id),infra:['comp-arch','llm-basics','ai-performance','ai-networking','gpu-performance','distributed-training','llm-serving'],models:['llm-basics','llm-architectures','efficient-ml','efficient-vision','llm-serving'].filter(id=>steps.some(s=>s.id===id)),hardware:['fpga-fundamentals','comp-arch','ai-performance','gpu-performance','llm-architectures','efficient-ai','fpga-ai-chip']};
 const stages = [
- {title: 'Stage 1 · Start here', hint: 'No background needed. Pick the side that interests you — models or hardware.', ids: ['llm-basics', 'comp-arch', 'fpga-fundamentals']},
+ {title: 'Stage 1 · Start here', hint: 'No background needed. Pick the side that interests you: models or hardware.', ids: ['llm-basics', 'comp-arch', 'fpga-fundamentals']},
  {title: 'Stage 2 · Core concepts', hint: 'Performance thinking and how modern models are put together.', ids: ['ai-performance', 'llm-architectures']},
  {title: 'Stage 3 · Systems deep dives', hint: 'How data moves between machines and how GPUs execute work.', ids: ['ai-networking', 'gpu-performance']},
  {title: 'Stage 4 · Training & serving at scale', hint: 'Combine everything to train and serve large models in production.', ids: ['distributed-training', 'llm-serving']},
@@ -32,7 +32,7 @@ const stages = [
 ].map(stage => ({...stage, steps: stage.ids.map(id => steps.findIndex(s => s.id === id)).filter(i => i >= 0)})).filter(stage => stage.steps.length);
 ---
 <!doctype html><html lang="en"><head><BaseHead title="Learning Roadmap" description="An interactive learning map through published AI infrastructure articles." /></head><body><Header /><main>
-<h1>Learning roadmap</h1><p>Work through the stages from top to bottom. Steps in the same stage are independent — start with either. Select a step to see how it connects: dashed arrows come from recommended background, solid arrows point to what you can learn next.</p>
+<h1>Learning roadmap</h1><p>Work through the stages from top to bottom. Steps in the same stage are independent, so start with either. Select a step to see how it connects: dashed arrows come from recommended background, solid arrows point to what you can learn next.</p>
 <section class="roadmap" aria-label="Interactive learning roadmap">
 <div class="controls"><label for="learning-path">Your learning goal</label><select id="learning-path"><option value="all">Explore everything</option><option value="models">I want to understand how LLMs work</option><option value="infra">I want to train & serve models at scale</option><option value="hardware">I want to go deep on GPUs & chips</option></select></div>
 <p class="path-order" aria-live="polite"></p>
