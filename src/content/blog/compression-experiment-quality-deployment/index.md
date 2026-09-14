@@ -9,8 +9,12 @@ order: 14
 topic: "Experiments"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: './deep-dive.png'
+heroImage: './section-overview.png'
 ---
+
+## Overview
+
+![Concept overview: A Reproducible Compression Experiment: Quality and Deployment](./section-overview.png)
 
 A compression experiment should answer a deployment question. Can a smaller or lower-precision artifact preserve required quality while improving capacity, latency, throughput, or preparation cost under a defined workload? Without that question, a collection of compressed checkpoints can produce numbers that are difficult to compare or use.
 
@@ -19,7 +23,9 @@ This guide connects the methods in this series through a controlled evaluation p
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
-## 1. State the decision before choosing methods
+## Deep dive
+
+### 1. State the decision before choosing methods
 
 Define the baseline checkpoint and the deployment requirement. A capacity problem might require fitting a documented context and concurrency into a device-memory budget. A latency problem might require meeting a request deadline while preserving a task-quality threshold.
 
@@ -27,7 +33,7 @@ Write the workload precisely: input distribution, lengths or resolutions, batch,
 
 Then choose candidate methods that address the suspected resource term. Weight quantization targets stored representation, structured pruning can change executable dimensions, and distillation can recover quality for an efficient student. Mixing them without a baseline bottleneck makes the experiment harder to interpret.
 
-## 2. Preserve a complete baseline
+### 2. Preserve a complete baseline
 
 The baseline includes weights, tokenizer or preprocessing, generation settings, quality implementation, and backend configuration. Record the artifact revision rather than only a model family name.
 
@@ -35,7 +41,7 @@ Evaluate the baseline before preparing candidates. This confirms that the refere
 
 Separate initialization or compilation from steady-state inference unless startup is part of the requirement. Preserve the exact measured path. Comparing a warmed candidate with a cold baseline can create an apparent benefit unrelated to compression, while changing backend kernels can confound an algorithm comparison.
 
-## 3. Design the candidate matrix
+### 3. Design the candidate matrix
 
 Choose a small set of interpretable configurations. For example, compare a supported weight-only quantizer, a structured student trained without distillation, and the same student with distillation. Add combinations only when they answer a specific question.
 
@@ -43,7 +49,9 @@ An ablation isolates a component's contribution by controlling surrounding choic
 
 Record every changed variable: groups, codebook, calibration, retained high-precision layers, rank, module selection, target data, and recovery budget. A method name is not sufficient metadata. The candidate matrix should identify actual artifacts, not merely acronyms that can hide different numerical policies.
 
-## 4. Separate data roles
+### 4. Separate data roles
+
+![Deep dive: 4. Separate data roles](./deep-dive-component-04.png)
 
 Use calibration data for quantizer preparation, training data for adaptation or recovery, selection data for choosing configurations, and held-out evaluation for final quality evidence. These roles can be implemented differently, but their information flow should be explicit.
 
@@ -51,7 +59,7 @@ Repeatedly choosing compression settings against the final benchmark can overfit
 
 Match calibration preprocessing to the intended task. A numerical format selected using a narrow population can be correct yet unsuitable for another distribution. Include relevant held-out slices rather than assuming one aggregate score covers every operating condition.
 
-## 5. Check numerical correctness first
+### 5. Check numerical correctness first
 
 Verify packing, scales, axes, and reconstruction on tiny known examples. For feature scaling, compare the transformed unquantized function with the original. For adapters, compare the separate branch with the effective matrix under the selected scale.
 
@@ -59,7 +67,9 @@ These checks detect implementation mistakes before expensive quality evaluation.
 
 Use tolerances appropriate to the numerical policy and reference computation. Include partial groups, nonuniform values, zero-range blocks, and incompatible shape cases under the supported contract. Uniform random tensors alone can miss swapped axes and metadata errors.
 
-## 6. Account for the full memory envelope
+### 6. Account for the full memory envelope
+
+![Deep-dive illustration: Account for the full memory envelope](./deep-dive.png)
 
 Report serialized bytes, resident model allocation, and peak runtime allocation separately. A resource model can organize the runtime categories.
 
@@ -71,10 +81,9 @@ The expression assumes these categories are counted at the relevant peak and avo
 
 Quantization scales, sparse indices, padding, and retained wider tensors belong in weight representation accounting. Cache state and temporary buffers can dominate another workload. Measure the intended maximum operating case rather than extrapolating from a short, low-concurrency demonstration.
 
+### 7. Measure time under a fair workload
 
-![Deep-dive illustration: Account for the full memory envelope](./deep-dive.png)
-
-## 7. Measure time under a fair workload
+![Deep dive: 7. Measure time under a fair workload](./deep-dive-component-01.png)
 
 Record latency and throughput with the same inputs, outputs, concurrency, and generation policy. For language serving, report prefill and decode behavior separately where useful. End-to-end timing should include relevant scheduling and data movement.
 
@@ -82,7 +91,7 @@ Warm up the intended path, repeat measurements, and summarize variability. The r
 
 Inspect fallback operations and compilation. A nominal low-bit checkpoint using wider or generic kernels can have correct outputs without the expected acceleration. Report the actual backend path instead of inferring execution from file size or payload bits.
 
-## 8. Relate local speedup to total speedup
+### 8. Relate local speedup to total speedup
 
 If a fraction f of baseline time is improved by a factor s while the rest is unchanged, Amdahl's model gives an optimistic total speedup under those assumptions.
 
@@ -94,7 +103,7 @@ For an illustrative fraction of 0.6 and local improvement of 2, the total is app
 
 Compression can also change scheduling, memory, and capacity, so the assumptions should be checked. The formula explains why a faster isolated matrix multiplication cannot be copied directly into an end-to-end claim. Measure the complete path and identify changed resource mechanisms.
 
-## 9. Evaluate quality at the same operating point
+### 9. Evaluate quality at the same operating point
 
 Keep prompts, input processing, decoding, output length limits, and evaluation implementation consistent. A candidate producing shorter answers or fewer samples may use fewer resources while answering a different quality question.
 
@@ -102,7 +111,7 @@ Use the task's required metrics and inspect diagnostic slices. Aggregate quality
 
 Report absolute baseline and candidate values along with differences. Include sample counts and uncertainty where the evaluation supports it. Teacher agreement, layer reconstruction, and task quality answer different questions; none should be substituted for another without a stated rationale.
 
-## 10. Quantify observed quality uncertainty
+### 10. Quantify observed quality uncertainty
 
 For independent binary outcomes, an estimated success proportion p_hat has an approximate standard error determined by the sample count n.
 
@@ -114,7 +123,7 @@ At an illustrative proportion of 0.8 over 1,000 independent cases, the standard 
 
 When baseline and candidate answer the same cases, paired analysis can be more informative than treating them as unrelated samples. Inspect disagreements and use an uncertainty method matching the metric and data structure. More repetitions do not fix a biased evaluation population.
 
-## 11. Build a quality-resource frontier
+### 11. Build a quality-resource frontier
 
 Plot candidate quality against the resource relevant to the decision. A Pareto-dominated candidate is worse or equal on every considered objective and strictly worse on at least one within the measured set.
 
@@ -126,7 +135,7 @@ Attach the workload, device, backend, and uncertainty to the frontier. It repres
 
 If memory and latency are both important, retain both rather than collapsing them into an unexplained efficiency score. A memory-saving candidate can enable a larger workload even when single-request latency improves little. That is a distinct and potentially useful operating-point change.
 
-## 12. Work through an acceptance decision
+### 12. Work through an acceptance decision
 
 Suppose a service requires quality of at least 0.79, peak allocation below 20 GB, and latency below 100 milliseconds under a defined workload. A candidate with quality 0.82, 18 GB, and 95 milliseconds passes the point estimates.
 
@@ -134,7 +143,7 @@ Another candidate with quality 0.80 and 16 GB but latency 110 milliseconds fails
 
 These are invented values, not benchmark results. A real decision must consider measurement uncertainty and the exact acceptance statistic. A candidate barely meeting a point estimate can require more evidence or operating margin before its configuration supports the service requirement.
 
-## 13. Include preparation amortization
+### 13. Include preparation amortization
 
 Preparation consumes calibration, teacher inference, recovery training, search, and export resources. Let C_p be added preparation cost and delta c the per-request savings in the same cost unit.
 
@@ -146,7 +155,7 @@ This accounting model assumes stable per-request savings and excludes changes in
 
 Keep memory-capacity benefits and monetary savings distinct. A deployment that otherwise cannot fit can justify preparation for feasibility even without a simple request-cost calculation. State which benefit supports the decision rather than forcing every outcome into one amortization number.
 
-## 14. Preserve the reproducibility record
+### 14. Preserve the reproducibility record
 
 Store artifact hashes or revisions, preparation settings, data provenance, numerical policy, exported graph, backend identity, and measurement summary. Include failed candidates when they explain constraints or prevent repeating an unsupported configuration.
 
@@ -154,7 +163,9 @@ The record should allow another engineer to evaluate the selected artifact witho
 
 No compression training run or GPU benchmark was executed for this guide. Its calculations and acceptance example are illustrative. The protocol is intended to produce the evidence needed for a real decision, while the primary method articles explain the mechanisms behind each candidate.
 
-## 15. Interpret unexpected results mechanistically
+### 15. Interpret unexpected results mechanistically
+
+![Deep dive: 15. Interpret unexpected results mechanistically](./deep-dive-component-03.png)
 
 If payload shrinks but latency does not, inspect whether the workload was limited by weights, dispatch, cache traffic, or unsupported kernels. If a local kernel improves but end-to-end time barely changes, examine the accelerated fraction and the remaining path.
 
@@ -162,7 +173,9 @@ If quality falls despite low reconstruction error, inspect calibration coverage,
 
 Unexpected results are useful when they update the resource or quality model. Avoid replacing an unfavorable measurement with a theoretical operation count. The experiment should connect the method's mechanism to actual artifact behavior, including cases where the hypothesized benefit does not materialize.
 
-## 16. Conclude with a concrete operating envelope
+### 16. Conclude with a concrete operating envelope
+
+![Deep dive: 16. Conclude with a concrete operating envelope](./deep-dive-component-02.png)
 
 The final report should name the accepted artifact and the conditions under which it was evaluated. Include quality requirements, context or resolution limits, concurrency, numerical representation, and resource measurements.
 
@@ -170,12 +183,11 @@ If no candidate passes, record that result and identify the limiting term. The n
 
 This connects the whole series: theory proposes a useful change, preparation creates an artifact, correctness verifies its numerical contract, and complete evaluation determines whether it improves the intended deployment.
 
+## Conclusion
+
 Keep the decision record alongside the artifact rather than only in a temporary notebook. A later backend change, new workload, or revised quality requirement can invalidate the previous operating point without changing the compressed weights. Repeating the relevant measurements under those new conditions is then a targeted verification task, supported by the existing configuration and evidence.
 
-![Deep dive: 16. Conclude with a concrete operating envelope](./deep-dive-component-02.png)
-
-
-## Sources
+### Sources
 
 - [Amdahl's original paper](https://doi.org/10.1145/1465482.1465560).
 - [Roofline performance model](https://doi.org/10.1145/1498765.1498785).

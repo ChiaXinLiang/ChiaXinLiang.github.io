@@ -3,7 +3,7 @@ title: "RISC-V: A Small Base ISA with an Extensible System"
 description: "Read an RV64I array-sum example and understand base instructions, extensions, privilege, profiles, and implementation freedom."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'isa-3'
 order: 8
 series: "comp-arch"
@@ -12,13 +12,21 @@ topic: "CPU Fundamentals"
 tags: ['computer-architecture', 'isa', 'cpu']
 ---
 
+## Overview
+
+![Concept overview: RISC-V: A Small Base ISA with an Extensible System](./section-overview.png)
+
 32 integer register names and a compact base instruction set are enough to express ordinary integer computation in RISC-V. Register 0 always reads as 0; the other architectural registers hold program state. Around that base, extensions and privileged architecture build a much broader system.
 
 That structure makes RISC-V useful for learning and for designing specialized processors. It also creates a compatibility question: which base width and extensions does a particular binary require, and which does a particular processor implement? “RISC-V” alone does not answer either question.
 
 This article develops the programmer's model using an RV64I array sum. Read [the ISA contract](../instruction-sets-software-hardware-contract/) and [the AArch64 example](../arm-aarch64-registers-and-ecosystem/) first. We will reuse the same useful computation so the differences remain concrete.
 
-## The base ISA is the foundation
+## Deep dive
+
+### The base ISA is the foundation
+
+![Deep dive: The base ISA is the foundation](./deep-dive-component-04.png)
 
 RV32I and RV64I are base integer instruction sets with 32-bit and 64-bit integer register widths respectively. The width is commonly called XLEN. It describes architectural register width, not a promise that every operation or memory access uses that many bits.
 
@@ -28,8 +36,7 @@ RISC-V's modular structure separates a relatively small foundation from optional
 
 The official unprivileged specifications define instruction semantics. Privileged specifications define the environment needed for protected operating systems and machine management. An instruction tutorial focused on user code is only 1 portion of the architecture.
 
-
-## Registers and their assembly names
+### Registers and their assembly names
 
 The base programmer's model includes `x0` through `x31`. `x0` is hardwired to 0, so writing it discards the result. The remaining registers are software-visible integer state. A program counter supplies control-flow state.
 
@@ -39,7 +46,7 @@ For example, `a0` corresponds to `x10`, `a1` to `x11`, and `ra` to `x1`. The ABI
 
 As with AArch64, a modern out-of-order implementation may have many more physical registers internally. RISC-V's visible count is the contract, not a count of every storage cell in the execution engine.
 
-## Arithmetic uses explicit register operands
+### Arithmetic uses explicit register operands
 
 An instruction such as
 
@@ -55,7 +62,9 @@ The base immediate encoding has limits. A large constant may require several ins
 
 Instruction semantics also distinguish signed and unsigned comparisons and loads. The bits in a register do not carry an inherent source-language type. The selected operation interprets them as required by its definition.
 
-## A worked RV64I array sum
+### A worked RV64I array sum
+
+![Deep dive: A worked RV64I array sum](./deep-dive-component-03.png)
 
 Reuse the previous article's computation: sum `n` unsigned 32-bit array elements into an unsigned 64-bit result. Under the standard RV64 integer ABI, the pointer enters in `a0`, the count in `a1`, and the result returns in `a0`.
 
@@ -80,8 +89,9 @@ The final `jalr` transfers control through the return-address register while dis
 
 Assume valid readable normal memory for the array and the selected ABI. The function uses temporary and argument registers without calling another function, so it does not need a stack frame in this pedagogical leaf example.
 
+### Trace the result and test signedness
 
-## Trace the result and test signedness
+![Deep dive: Trace the result and test signedness](./deep-dive-component-01.png)
 
 With elements 3, 5, and 7 at `0x1000`, entry pointer is `a0 = 0x1000` and count is `a1 = 3`. After initialization, `t0 = 0`. The loop updates the sum to 3, then 8, then 15 while the pointer advances 4 bytes per iteration.
 
@@ -103,10 +113,7 @@ The signed value is encoded in a 64-bit register by sign extension. For `0xfffff
 
 This illustrates the small-base method: make data width and extension behavior explicit, then build the algorithm from those guarantees. It improves predictability over assuming every load has the same numeric interpretation. Extensions can introduce vectorized versions that process multiple elements, but a correct vector rewrite still needs matching element signedness, accumulator width, remainder handling, and overflow semantics. A compiler and ABI determine how the source program maps onto those features. An open ISA makes these rules inspectable; it does not make a vendor core's throughput or power consumption follow from this algebra. Keep correctness proofs and benchmark claims separate when evaluating an extension.
 
-![Deep dive: Trace the result and test signedness](./deep-dive-component-01.png)
-
-
-## Instruction size and compressed forms
+### Instruction size and compressed forms
 
 The ordinary base instructions shown above have 32-bit encodings. 9 static instructions therefore occupy 36 bytes of instruction payload before alignment and surrounding object-file information. For a nonzero 3-element input, the source executes 2 setup instructions, 15 loop instructions, and 2 completion instructions: 19 dynamic instructions.
 
@@ -116,7 +123,9 @@ Compressed code can reduce instruction-fetch traffic and code footprint. The per
 
 When comparing code size, specify target extensions and inspect actual assembled bytes. Counting assembly lines while ignoring pseudoinstruction expansion or compressed encodings is not a valid byte-count method.
 
-## Extensions provide capabilities beyond the base
+### Extensions provide capabilities beyond the base
+
+![Deep dive: Extensions provide capabilities beyond the base](./deep-dive-component-02.png)
 
 The M extension adds integer multiplication and division operations. Atomic extensions provide defined synchronization operations. Floating-point extensions define particular numerical formats and operations. The vector extension supplies a vector programming model with its own registers and configuration rules.
 
@@ -126,10 +135,7 @@ Extension names and versions matter. Do not treat a short string copied from a p
 
 A custom instruction can provide specialized functionality, but a binary using it requires the matching implementation or software support. Customization does not eliminate the need for a stable compiler, assembler, debugger, and library path.
 
-![Deep dive: Extensions provide capabilities beyond the base](./deep-dive-component-02.png)
-
-
-## Going deeper: ISA, ABI, and profile
+### Going deeper: ISA, ABI, and profile
 
 The ISA defines instructions. The ABI defines how separately compiled code passes values and preserves state. A profile specifies a standardized collection of architectural features for a class of software target. These solve different compatibility problems.
 
@@ -139,7 +145,7 @@ Profiles reduce the burden of selecting an arbitrary feature combination for bro
 
 Operating-system support, executable format, and library availability add further requirements. A Linux-targeted RV64 executable does not become a bare-metal program just because both environments use the same integer instructions. Startup and system interfaces remain part of the deployment.
 
-## Privileged architecture makes a system
+### Privileged architecture makes a system
 
 A processor running a protected operating system needs more than user-level arithmetic. Privileged architecture defines execution modes, traps, interrupts, control/status registers, and address-translation facilities. Machine mode is fundamental, while other modes and features serve different system goals under their specified requirements.
 
@@ -149,7 +155,7 @@ Memory protection and virtual memory are not interchangeable concepts. A small s
 
 These distinctions matter for firmware and kernel work. An application developer may mostly see loads, stores, and calls, while platform software establishes the mappings and permissions that make them valid.
 
-## Openness does not mean a complete free chip
+### Openness does not mean a complete free chip
 
 RISC-V publishes an openly specified architecture under its applicable terms. That allows compatible implementation without turning the ISA into a proprietary instruction contract tied to 1 core design. The specification is valuable, but it is not a finished RTL implementation or a manufacturing process.
 
@@ -159,7 +165,7 @@ Likewise, architectural openness does not guarantee that every extension is stan
 
 For the ASIC portion of this course, the useful connection is implementation freedom. Designers can build very different processors around a common instruction interface, then face the same verification and physical constraints as other silicon projects.
 
-## This matters for AI chips
+### This matters for AI chips
 
 A RISC-V core can serve as a controller inside an accelerator, handling command processing and system tasks. That role does not imply the accelerator's matrix engine executes ordinary scalar RISC-V instructions for every multiply. The device can have specialized execution machinery with its own software interface.
 
@@ -167,7 +173,7 @@ Vector instructions and custom accelerators can also support numerical workloads
 
 When evaluating an AI system, ask which part uses the ISA: host CPU, embedded controller, vector processor, or accelerator command path. Then compare that component's useful work and software support. The family label alone does not identify the bottleneck.
 
-## Common misconceptions
+### Common misconceptions
 
 **RISC-V is 1 identical processor.** It is an architecture family implemented by many designs. Base width, extensions, system features, and microarchitecture vary.
 
@@ -177,14 +183,13 @@ When evaluating an AI system, ask which part uses the ISA: host CPU, embedded co
 
 **RV64 makes every load 64 bits.** `lwu` in our function loads 4 bytes and extends them to the 64-bit register. Access width remains instruction-specific.
 
-
-## Takeaway
+## Conclusion
 
 Start with the base programmer's model, then name the extensions and environment needed by the software. The worked sum shows the same useful computation as AArch64 with different register and branch forms.
 
 Continue with [the Arm, RISC-V, and x86-64 comparison](../arm-riscv-x86-comparing-without-myths/). The goal is to compare explicit contracts and actual implementations, not to rank family labels.
 
-## Sources
+### Sources
 
 - [RISC-V RV32I specification](https://docs.riscv.org/reference/isa/unpriv/rv32.html): programmer's model, encodings, integer operations, and branches.
 - [RISC-V RV64I specification](https://docs.riscv.org/reference/isa/unpriv/rv64.html): 64-bit operations and load-extension rules.

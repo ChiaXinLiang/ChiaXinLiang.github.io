@@ -3,7 +3,7 @@ title: 'ASIC vs FPGA vs GPU: What Custom Silicon Actually Means'
 description: "Every step from CPU to ASIC removes machinery that decides what to do next. Here is the flexibility-efficiency spectrum, what an FPGA really is, and the arithmetic that tells you when $50M of custom silicon pays off."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'asic-1'
 order: 15
 series: "comp-arch"
@@ -12,11 +12,17 @@ topic: "ASIC Design"
 tags: [asic, fpga, gpu]
 ---
 
+## Overview
+
+![Concept overview: ASIC vs FPGA vs GPU: What Custom Silicon Actually Means](./section-overview.png)
+
 When Google published the details of its first Tensor Processing Unit in 2017, the headline number was 30 to 80 times better performance per watt than the contemporary CPUs and GPUs it was benchmarked against. Those are Google's own measurements, on Google's own workloads, against 2015-era competition, so apply the usual discount for vendor-reported numbers. But even a discounted version of that gap explains why every large cloud company now designs its own chips, and why "we should build an ASIC" comes up in every serious conversation about AI infrastructure cost.
 
 This article is about what that sentence actually means. What is an ASIC, physically? What is an FPGA, and why does it sit between a GPU and an ASIC? And when does spending tens of millions of dollars on a chip that can only do 1 thing beat buying chips that can do anything?
 
-## The flexibility-efficiency spectrum
+## Deep dive
+
+### The flexibility-efficiency spectrum
 
 Line up the 4 big compute substrates and you get a spectrum. At 1 end, maximum flexibility. At the other, maximum efficiency for 1 fixed job.
 
@@ -31,7 +37,9 @@ Line up the 4 big compute substrates and you get a spectrum. At 1 end, maximum f
 
 Why does moving right on this spectrum buy efficiency? Because generality has a measurable energy price. Mark Horowitz's widely cited ISSCC 2014 numbers make it concrete: in 45 nm silicon, an 8-bit integer addition costs about 0.03 picojoules. The overhead of *being a processor* (fetching the instruction, decoding it, reading the register file, managing the pipeline) costs on the order of 70 pJ per instruction. The useful work is a rounding error, less than a thousandth of the energy spent deciding to do it. Specialized hardware wins not by doing arithmetic faster but by deleting the overhead around the arithmetic.
 
-## What an FPGA actually is
+### What an FPGA actually is
+
+![Deep dive: What an FPGA actually is](./deep-dive-component-03.png)
 
 "Reconfigurable hardware" sounds like magic, but the core trick is almost embarrassingly simple: a lookup table, or LUT.
 
@@ -44,13 +52,15 @@ The price of this trick is well quantified. Kuon and Rose's classic measurement 
 
 So the FPGA occupies a genuine middle point: it eliminates the instruction-machinery tax (no 70 pJ fetch-decode overhead) but pays a fabric tax an ASIC does not.
 
-## Where the money goes: NRE
+### Where the money goes: NRE
 
 The efficiency ordering would make ASICs the answer to everything if chips were free to design. They are not, and the cost structure has a name: **NRE**, non-recurring engineering. It is everything you pay once, before the first sellable chip exists: the design team's salaries, EDA tool licenses (commercial digital-design tooling runs hundreds of thousands of dollars per seat per year), licensed IP blocks (memory controllers, SerDes, PCIe), verification (typically the single largest engineering line item, often more than half the effort), and finally the mask set, the quartz photolithography plates that pattern each layer, which costs a few million to roughly $20M at advanced nodes.
 
 The scary numbers you see in the press (IBS's often-quoted estimate of around $540M for a full 5 nm chip design, and SemiAnalysis's breakdowns pointing the same direction) describe flagship SoCs including software, and they are estimates, not invoices. A focused accelerator on a mature node is orders of magnitude cheaper: a competent 28 nm ASIC can be done for $5–15M, and at the extreme low end, Tiny Tapeout will put your hobby design on a shared 130 nm shuttle wafer for a few 100 dollars. NRE is not 1 number. It scales with node, complexity, and ambition. But for a leading-edge AI accelerator with the software to make it usable, $50M is a polite lower bound, which makes it a good round number for the exercise that actually decides these projects.
 
-## A worked example: when 10x efficiency justifies $50M
+### A worked example: when 10x efficiency justifies $50M
+
+![Deep dive: A worked example: when 10x efficiency justifies $50M](./deep-dive-component-01.png)
 
 Say you run a stable inference workload and you need the equivalent of **N** GPUs' worth of sustained compute for 3 years. 2 options:
 
@@ -85,10 +95,9 @@ Using the hypothetical values above gives $$N_*\approx50{,}000{,}000/25{,}856\ap
 
 What changes relative to buying GPUs is both the marginal work cost and who owns workload risk. The assumed 10-to-1 replacement must be established on complete supported models, including memory stalls and software overhead—not inferred from peak MAC density. Test a workload portfolio against a GPU baseline and include the cost of bridging the development interval. A programmable ASIC can retain operator and scheduling flexibility, while fixing arithmetic formats and memory interfaces. The right design freezes stable expensive mechanisms and keeps likely-changing decisions programmable; it does not need to freeze 1 entire model forever.
 
-![Deep dive: A worked example: when 10x efficiency justifies $50M](./deep-dive-component-01.png)
+### Going deeper: what specialization actually deletes
 
-
-## Going deeper: what specialization actually deletes
+![Deep dive: Going deeper: what specialization actually deletes](./deep-dive-component-02.png)
 
 "10x performance per watt" is not 1 trick. It is the sum of several deletions, each traceable to machinery a general-purpose chip carries and a specialized one does not.
 
@@ -102,10 +111,7 @@ What changes relative to buying GPUs is both the marginal work cost and who owns
 
 A GPU, note, has been sprinting along this same path: tensor cores, FP8 and FP4 datapaths, and transformer-specific units are specialization *inside* a programmable envelope. The line between "GPU" and "AI ASIC" is blurrier every generation, which is precisely why the decision framework is economic rather than religious.
 
-![Deep dive: Going deeper: what specialization actually deletes](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"An ASIC is always faster than a GPU."** Raw speed is not the reliable win; efficiency and unit cost are. A modern GPU is itself a highly specialized chip fabbed on the best available node, and its matrix units are ASIC-grade at matrix math. A first-generation custom ASIC on a trailing node, with an immature compiler, can easily deliver fewer useful FLOPs than a well-tuned GPU kernel. Potential ASIC advantages are performance per watt and per dollar at sufficient volume on supported workloads; they must be demonstrated rather than assumed.
 
@@ -113,7 +119,7 @@ A GPU, note, has been sprinting along this same path: tensor cores, FP8 and FP4 
 
 **"NRE is mostly the mask cost."** Masks are the famous line item, but even at an advanced node they are single-digit to low-double-digit millions, a fraction of a serious budget. The bulk goes to people: design, and above all verification, because a bug that ships in silicon cannot be patched, plus the software stack (compilers, kernels, frameworks) without which an accelerator is a very expensive heater. This is also why NRE is not a fixed toll: choose a mature node, reuse IP, ride a shuttle run, and the entry price drops by orders of magnitude.
 
-## The bigger picture
+### The bigger picture
 
 The spectrum exists because the free ride ended. When Dennard scaling delivered faster, cooler transistors every 2 years, general-purpose CPUs absorbed every workload and specialization rarely paid. With that engine sputtering, specialization is the main lever left, what Hennessy and Patterson's Turing lecture called the new golden age for computer architecture. The consequences are visible across this series: the GPU itself was the first mainstream act of specialization ([latency machines vs throughput machines](/blog/cpu-vs-gpu-latency-vs-throughput-machines/)), and the machinery an ASIC deletes is exactly the machinery we spent the early articles admiring ([fetch, decode, execute and the pipeline](/blog/what-a-cpu-actually-does/)).
 
@@ -121,13 +127,13 @@ The spectrum exists because the free ride ended. When Dennard scaling delivered 
 
 Next in this series: what "designing a chip" actually involves, the RTL-to-GDSII flow that turns Verilog into a file a fab can manufacture.
 
-## Takeaway
+## Conclusion
 
 - CPU, GPU, FPGA, ASIC form a spectrum where each step to the right deletes decision-making machinery (fetch, decode, schedule, route) and converts the saved energy into useful work; control and data movement can cost substantially more than narrow arithmetic, with ratios dependent on the implementation and measurement boundary.
 - An FPGA is a grid of tiny truth-table memories plus programmable routing: no instruction overhead, but roughly 35x area and 14x dynamic power versus the same circuit as an ASIC, the quantified price of staying reconfigurable.
 - The ASIC decision is arithmetic, not ideology: break-even volume ≈ NRE / per-unit saving (about 1,930 GPU-equivalents in our $50M, 10x example), and the answer only holds if the workload stays stable for the chip's whole life.
 
-## Sources
+### Sources
 
 - N. Jouppi et al., "In-Datacenter Performance Analysis of a Tensor Processing Unit," ISCA 2017 — https://arxiv.org/abs/1704.04760
 - I. Kuon and J. Rose, "Measuring the Gap Between FPGAs and ASICs," IEEE Transactions on Computer-Aided Design, 2007.

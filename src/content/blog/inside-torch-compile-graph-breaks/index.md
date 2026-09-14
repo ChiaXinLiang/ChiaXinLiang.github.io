@@ -3,7 +3,7 @@ title: 'Inside torch.compile: Graph Breaks Are Where Your Speed Leaks'
 description: "TorchDynamo captures your model into graphs and TorchInductor turns them into Triton kernels, but 1 data-dependent if-statement splits the graph, stalls the GPU, and quietly eats the 2.27x speedup you were promised."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'pt-2'
 order: 20
 series: "gpu-performance"
@@ -12,9 +12,17 @@ topic: "PyTorch and Compilers"
 tags: [pytorch, compilers, triton]
 ---
 
+## Overview
+
+![Concept overview: Inside torch.compile: Graph Breaks Are Where Your Speed Leaks](./section-overview.png)
+
 Across 180+ real-world models in the PyTorch benchmark suites, `torch.compile` posts a 2.27x geometric-mean inference speedup on an A100, and 1.41x for training. Those are the headline numbers from the PyTorch 2 paper at ASPLOS 2024, and they hold up. They are also conditional: they assume the compiler gets to see your model as a small number of large graphs. 1 `print(f"loss={loss.item()}")` in the training step, or a single `if` that branches on a tensor value, splits the captured graph in 2, forces a round trip through the Python interpreter, and can stall the GPU on every iteration. These splits are called graph breaks, and the distance between "we turned on torch.compile" and "we got the paper numbers" is usually measured in them.
 
-## The stack: Dynamo captures, Inductor generates
+## Deep dive
+
+### The stack: Dynamo captures, Inductor generates
+
+![Deep dive: The stack: Dynamo captures, Inductor generates](./deep-dive-component-03.png)
 
 `torch.compile` is not 1 compiler. It is a pipeline of 3 components, and knowing which one does what tells you where breaks come from and where speed comes from.
 
@@ -26,8 +34,7 @@ Across 180+ real-world models in the PyTorch benchmark suites, `torch.compile` p
 
 The design decision that makes all of this practical is also the one that bites you: when Dynamo hits Python it cannot trace, it does not give up. It compiles the graph it has so far, hands control back to the regular interpreter for the untraceable part, then starts capturing a fresh graph afterward (the continuation is compiled as a "resume function"). Supported execution can continue through eager fragments, but compilation and backend errors still require correctness checks. It just runs as compiled fragments stitched together with eager Python. Each stitch point is a graph break.
 
-
-## What actually breaks a graph
+### What actually breaks a graph
 
 The common causes, roughly in order of how often I see them in real codebases:
 
@@ -45,7 +52,9 @@ And what a break costs, beyond "some code stays eager":
 
 Finding breaks is mercifully easy. Run your job with `TORCH_LOGS="graph_breaks"` and PyTorch prints each break with the Python line and the reason. `torch._dynamo.explain(fn)(*args)` gives a summary count. And for code you control end to end, `torch.compile(model, fullgraph=True)` turns any break into a hard error, which is the right setting for a serving path: you want to *know*.
 
-## Worked example: 1 if-statement
+### Worked example: 1 if-statement
+
+![Deep dive: Worked example: 1 if-statement](./deep-dive-component-01.png)
 
 Here is a gated residual block, the kind of thing that looks completely innocent in review:
 
@@ -90,10 +99,9 @@ All terms are elapsed-time contributions on the measured critical path, not the 
 
 This explains the method choice: `where` trades host control for device selection when both expressions are cheap and valid to evaluate. It may be inappropriate for expensive branches or expressions with side effects and invalid intermediate values. Structured conditional control can preserve branch selection, subject to supported operators and version constraints. Verify outputs and gradients as well as graph capture. A graph break alone does not imply synchronization; the expensive synchronization in this example comes from a Python decision requiring a device value. Warmup and recompilation are separate costs and should be measured separately from steady-state boundary overhead.
 
-![Deep dive: Worked example: 1 if-statement](./deep-dive-component-01.png)
+### Going deeper: guards, recompiles, and caches
 
-
-## Going deeper: guards, recompiles, and caches
+![Deep dive: Going deeper: guards, recompiles, and caches](./deep-dive-component-02.png)
 
 Removing breaks is half the discipline. The other half is recompiles.
 
@@ -107,10 +115,7 @@ The operating rules that follow:
 
 1 more depth level on the capture itself: Dynamo is a *symbolic bytecode interpreter*. It executes your function's bytecode against fake tensors that carry shape and dtype but no data, which is how it can trace through arbitrary Python (loops, dict tricks, closures) that `torch.jit.trace` never could, and why anything requiring real *values* (a bool, an `.item()`) is precisely where symbolic execution must stop. The graph break is not a bug or a missing feature; it is the boundary of what can be known without running your data.
 
-![Deep dive: Going deeper: guards, recompiles, and caches](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"A graph break means torch.compile failed."** No. Every fragment on both sides of the break is still compiled and still fused internally, and a model with a handful of breaks often keeps most of its speedup. The failure mode is quantitative, not binary: each break adds boundary overhead, and a break that syncs adds a pipeline stall per call. Count them with `torch._dynamo.explain`, then decide which ones sit on the hot path and are worth fixing. 10 breaks in a once-per-epoch validation function: irrelevant. 1 sync per layer per decode step: emergency.
 
@@ -118,19 +123,19 @@ The operating rules that follow:
 
 **"My compiled model is still slow, time to hand-write Triton."** Inductor already emits Triton; a hand-written kernel starts from the same language and the same hardware limits. Before writing 1, check the cheaper explanations in order: graph breaks on the hot path, recompiles in steady state, and whether the time is actually in matmuls that no elementwise fusion will touch. Hand-written kernels earn their maintenance cost only for a bottleneck the profiler has convicted and the compiler demonstrably handles badly, the FlashAttention-and-friends tier. That is the same bar DeepSeek cleared when [a custom kernel cut their API prices](/blog/when-a-kernel-cuts-api-prices/), and it is a high bar; the [KernelBench results](/blog/a-year-of-kernelbench/) show even frontier models struggle to beat well-compiled baselines on most kernels.
 
-## The bigger picture
+### The bigger picture
 
 Graph breaks are a specific instance of the trade that defines [ML performance engineering](/blog/what-does-an-ml-performance-engineer-do/): moving work from run time to ahead of time. Eager PyTorch decides everything per op at run time and pays dispatch and memory traffic for the flexibility; `torch.compile` freezes the decidable parts into fused kernels and guards, and the graph break marks exactly where your code forced a run-time decision back into the picture. Once you see it that way, the optimization is not "make the compiler happy," it is "stop asking questions mid-flight that you could answer ahead of time, and keep the ones you must ask on the GPU."
 
 That lens also explains why this matters more every hardware generation. Compute grows faster than memory bandwidth, so the fraction of a model that is memory-bound (and therefore fusion-hungry) keeps growing, and the CPU-side overhead a break reintroduces gets relatively more expensive as GPU kernels get shorter. The compiled path is becoming the default assumption of the whole serving stack; the models that hit paper numbers are the ones whose authors treated `fullgraph=True` passing as a merge requirement.
 
-## Takeaway
+## Conclusion
 
 - `torch.compile`'s speedup comes from large unbroken graphs that Inductor can fuse; every graph break re-enters eager Python and leaks part of the win. Hunt them with `TORCH_LOGS="graph_breaks"` and enforce `fullgraph=True` on paths you own.
 - Data-dependent Python branches and value reads (`.item()`, prints) are the expensive breaks because they also sync the device; rewrite with `torch.where` for cheap branches and `torch.cond` for expensive ones, and move logging off the hot path.
 - Steady state means 0 recompiles: verify with `TORCH_LOGS="recompiles"`, mark dynamic dims explicitly, persist compile caches across restarts, and reserve hand-written Triton for bottlenecks the profiler has convicted.
 
-## Sources
+### Sources
 
 - [PyTorch official common graph breaks, data-dependent operations and supported alternatives](https://docs.pytorch.org/docs/stable/torch.compiler_troubleshooting.html)
 

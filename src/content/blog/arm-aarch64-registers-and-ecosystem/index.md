@@ -3,7 +3,7 @@ title: "Arm and AArch64: Registers, Instructions, and the Processor Ecosystem"
 description: "Read AArch64 assembly through a worked array sum, and distinguish the architecture, ABI, CPU core, and system."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'isa-2'
 order: 7
 series: "comp-arch"
@@ -12,13 +12,21 @@ topic: "CPU Fundamentals"
 tags: ['computer-architecture', 'isa', 'cpu']
 ---
 
+## Overview
+
+![Concept overview: Arm and AArch64: Registers, Instructions, and the Processor Ecosystem](./section-overview.png)
+
 31 general-purpose integer registers form the visible working set of AArch64 assembly. Their names are familiar enough to read a short function: `x0` through `x30` for 64-bit operands, with corresponding `w` names for 32-bit operands. The processor ecosystem built around that model ranges from compact devices to servers, but the register names do not tell you how fast a particular core will run.
 
 This article introduces Arm through the AArch64 programmer's model rather than through product rankings. We will read a small array-sum function, trace its state, and explain how Arm architecture, implementation, and software conventions fit together.
 
 Read [the ISA contract article](../instruction-sets-software-hardware-contract/) first. Its architecture-versus-microarchitecture distinction is essential here: AArch64 specifies software-visible behavior, while a particular CPU core supplies the pipeline and execution machinery.
 
-## Arm, AArch64, and A64 name different things
+## Deep dive
+
+### Arm, AArch64, and A64 name different things
+
+![Deep dive: Arm, AArch64, and A64 name different things](./deep-dive-component-04.png)
 
 Arm is the organization and architecture ecosystem. AArch64 is the 64-bit execution state introduced in the Armv8 architecture family. A64 is the instruction set used in that execution state. The terms often appear together, but they are not interchangeable with a specific processor model.
 
@@ -31,7 +39,7 @@ For a deployment, name the relevant architecture features and the actual CPU imp
 
 *Redrawn from [Arm A64 ISA Guide, register model](https://documentation-service.arm.com/static/674d8b61c7fc0d1f211dc776).*
 
-## X and W are views of the same register
+### X and W are views of the same register
 
 `x0` and `w0` refer to the same architectural register, with different operand widths. `x0` names its full 64-bit value. `w0` names the lower 32 bits. They are not 2 independently stored software values.
 
@@ -41,7 +49,7 @@ This rule is useful when translating unsigned 32-bit computations or loading nar
 
 Signed extension requires an operation that supplies it. A 32-bit value representing minus 1 has lower bits `ffffffff`; simply zero-extending that bit pattern to 64 bits gives 4,294,967,295. Sign extension instead gives the full 64-bit 2's-complement pattern for minus 1.
 
-## SP and the 0 register need context
+### SP and the 0 register need context
 
 The stack pointer, `sp`, is architectural state with restricted instruction uses. The 0 register reads as 0 and discards written results. Its 64-bit assembly name is `xzr`; its 32-bit name is `wzr`.
 
@@ -51,7 +59,9 @@ The 0 register makes some operations convenient without requiring a stored const
 
 The program counter is not another freely interchangeable X register. Branches control instruction flow through their defined operations. The link register convention uses `x30` to hold a return address for ordinary function calls, but architectural control flow and ABI conventions still deserve separate explanations.
 
-## Loads and stores make memory access explicit
+### Loads and stores make memory access explicit
+
+![Deep dive: Loads and stores make memory access explicit](./deep-dive-component-03.png)
 
 A64 is commonly described as a load/store instruction set because ordinary integer arithmetic operates on registers while dedicated instructions move data to and from memory. For example:
 
@@ -67,7 +77,7 @@ Addressing modes can include offsets or update a base pointer. We will use expli
 
 A load does not state where the bytes physically reside. They may come from a cache, system memory, or a permitted device mapping. The same instruction can therefore have very different latency depending on the address and memory hierarchy.
 
-## A complete small array-sum function
+### A complete small array-sum function
 
 Consider summing `n` unsigned 32-bit integers into an unsigned 64-bit result. Under the ordinary AAPCS64 integer/pointer convention, our function receives the array pointer in `x0` and count in `x1`, and returns its result in `x0`.
 
@@ -92,8 +102,9 @@ Assume the pointer addresses a valid readable array of `n` elements and the envi
 
 The function is pedagogical rather than performance-tuned. Its scalar dependency chain and branch per element make it a useful foundation for later discussions of SIMD, branch prediction, and loop transformations.
 
+### Trace 3 elements by hand
 
-## Trace 3 elements by hand
+![Deep dive: Trace 3 elements by hand](./deep-dive-component-01.png)
 
 Suppose memory at `0x1000` contains the little-endian 32-bit values 3, 5, and 7. Entry state is `x0 = 0x1000`, `x1 = 3`, and `x30` contains the caller's return address.
 
@@ -115,10 +126,7 @@ Assume valid readable memory for all elements, no concurrent modifications, and 
 
 The method is to verify initialization, preservation across the load/add/pointer/count sequence, and termination at 0. Post-indexed addressing can combine memory access and pointer update in another encoding, reducing architectural instruction count, but that does not establish a cycle saving on every implementation. The core may decompose that instruction into internal operations, and the accumulated sum retains a true dependency. This separates an ISA-level correctness improvement in expression from a microarchitecture-dependent performance claim. Benchmark both versions with equal alignment, memory residency, and calling convention before choosing 1.
 
-![Deep dive: Trace 3 elements by hand](./deep-dive-component-01.png)
-
-
-## Count instructions without confusing count and speed
+### Count instructions without confusing count and speed
 
 On the nonzero path, this source has 2 setup instructions, 5 loop instructions per element, and 2 completion instructions. For 3 elements, that is 19 dynamically executed assembly instructions, assuming each shown line maps to 1 instruction in the assembled example.
 
@@ -128,7 +136,9 @@ Neither quantity directly gives execution time. Loads may miss cache, branches m
 
 The next original CPU-basics articles explain [branch prediction](../branch-prediction-the-cpu-gambler/) and [out-of-order execution](../out-of-order-execution/). This loop gives those mechanisms concrete instructions to operate on.
 
-## Going deeper: the calling convention
+### Going deeper: the calling convention
+
+![Deep dive: Going deeper: the calling convention](./deep-dive-component-02.png)
 
 Arm's AAPCS64 assigns ordinary parameter and result roles to `x0` through `x7`, with detailed rules for types and register allocation. It also defines callee-saved registers, stack alignment, and SIMD/floating-point argument behavior. An actual compiler follows those rules rather than choosing arbitrary registers independently for every function.
 
@@ -138,10 +148,7 @@ The stack must satisfy the required alignment rules when used. A function callin
 
 Operating systems can impose additional conventions, and the platform register role of `x18` deserves attention in portable handwritten assembly. Avoid treating every general-purpose register as universally free merely because arithmetic instructions accept it.
 
-![Deep dive: Going deeper: the calling convention](./deep-dive-component-02.png)
-
-
-## SIMD and scalable features are additional capabilities
+### SIMD and scalable features are additional capabilities
 
 AArch64 also has SIMD/floating-point registers, used by the relevant instruction sets and calling-convention rules. Vector operations can process several array elements per instruction, allowing a sum loop to perform more useful work than its scalar version.
 
@@ -151,7 +158,7 @@ Do not assume every AArch64 processor has identical vector throughput. Instructi
 
 For this introductory sequence, learn the scalar register and memory model first. Then [SIMD](../simd-one-instruction-many-numbers/) becomes a natural extension: 1 instruction performs related operations on multiple values while preserving a defined architectural contract.
 
-## The ecosystem includes multiple implementation paths
+### The ecosystem includes multiple implementation paths
 
 Arm provides architectures and also CPU core designs that other organizations can integrate under applicable arrangements. Organizations can build systems around licensed cores, while some develop their own compatible CPU implementations under the relevant architecture rights.
 
@@ -159,7 +166,7 @@ That distinction explains why an Arm-based system is not necessarily built aroun
 
 Licensing terms and particular products change over time, so the useful foundation here is the structural distinction rather than a catalog of current agreements. For engineering comparisons, name the processor and system instead of using Arm as a synonym for 1 vendor's laptop or server.
 
-## This matters for AI systems
+### This matters for AI systems
 
 An AArch64 CPU can run the host side of an inference service: networking, tokenization, scheduling, memory management, and accelerator launches. Those tasks have their own instruction and memory behavior and can become bottlenecks even when the GPU is underused.
 
@@ -167,7 +174,7 @@ CPU-only inference relies more directly on vector and arithmetic capabilities. T
 
 When moving an application from x86-64 to AArch64, check native dependencies and binary artifacts. Source can often be recompiled, while existing machine-code libraries require compatible builds. Accelerator software adds another compatibility layer. Keep the host architecture and device execution model explicit in deployment records.
 
-## Common misconceptions
+### Common misconceptions
 
 **AArch64 means every instruction processes 64 bits.** W operands perform 32-bit operations, and memory accesses have specified widths. The execution state does not force every source value to be 64 bits.
 
@@ -177,14 +184,13 @@ When moving an application from x86-64 to AArch64, check native dependencies and
 
 **RISC guarantees 1-cycle execution.** Instruction encoding and register-oriented design do not make a DRAM load complete in 1 cycle. Measure the implementation and workload.
 
-
-## Takeaway
+## Conclusion
 
 Read the register width, memory access width, and branch condition before reasoning about an AArch64 function. Then apply the ABI to understand how that function cooperates with its caller.
 
 The scalar array sum provides a concrete bridge from fetch/decode/execute to the rest of the architecture course. Continue with [RISC-V's base ISA and extensions](../riscv-small-base-extensible-system/), then compare the families using the same useful-work model.
 
-## Sources
+### Sources
 
 - [Arm A64 Instruction Set Architecture Guide](https://documentation-service.arm.com/static/674d8b61c7fc0d1f211dc776): A64 instruction encodings, register widths, and load/store forms.
 - [Arm AAPCS64 specification](https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst): architectural registers, argument roles, preservation, and stack rules.

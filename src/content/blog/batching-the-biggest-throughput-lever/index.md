@@ -3,7 +3,7 @@ title: 'Batching: The Single Biggest Throughput Lever'
 description: "Why serving 1 request at a time wastes 99.7% of your GPU's compute, and how batching decode turns a GEMV into a GEMM for nearly free throughput."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'opt-1'
 order: 1
 series: "llm-serving"
@@ -12,13 +12,21 @@ topic: "Inference Methods"
 tags: [batching, inference, throughput]
 ---
 
+## Overview
+
+![Concept overview: Batching: The Single Biggest Throughput Lever](./section-overview.png)
+
 Serve Llama-3-8B on an H100 1 request at a time and the GPU's matrix units run at about 0.33% of their rated speed. That is not a typo: 3.2 TFLOPS delivered out of 989 TFLOPS available, on hardware that costs roughly $30,000. This comparison concerns peak tensor arithmetic, not the fraction of physical silicon that is idle, and the fix requires no new kernels, no quantization, no exotic hardware. You just stop serving 1 request at a time.
 
 Batching is the first optimization every inference stack applies, and by a wide margin the largest. Before speculative decoding, before FP8, before any kernel fusion, batching alone can multiply throughput by 10 to 20x on the same GPU. This article works through exactly why, with numbers you can check by hand, and then looks at the scheduling insight (from the Orca paper) that made batching practical for real traffic.
 
 If you want the gentle version of the throughput-versus-latency trade first, start with [Latency vs. Throughput](/blog/latency-vs-throughput/); this article assumes that vocabulary and goes to the machine level.
 
-## Decode is a GEMV, and GEMVs starve GPUs
+## Deep dive
+
+### Decode is a GEMV, and GEMVs starve GPUs
+
+![Deep dive: Decode is a GEMV, and GEMVs starve GPUs](./deep-dive-component-03.png)
 
 Recall the 2 phases of generation from [How an LLM Generates Text](/blog/how-an-llm-generates-text/): prefill processes the whole prompt in 1 pass, decode produces 1 token per step. During decode, the model's input at each step is a single activation vector, 1 token's hidden state. Every weight matrix multiplication in the model is therefore a matrix-vector product, a GEMV: a big matrix W times 1 skinny vector x.
 
@@ -29,7 +37,9 @@ Now put a second request on the GPU. Its decode step needs the same weight matri
 
 That is the entire trick. Batching does not make any single request faster. It makes the expensive part, streaming weights, serve many requests at once. Throughput scales almost linearly with batch size, and it keeps scaling until you hit one of 2 walls: the compute units finally saturate, or the KV cache runs out of room. For decode-heavy workloads on modern GPUs, the KV wall almost always arrives first, as the worked example will show.
 
-## A worked example you can check by hand
+### A worked example you can check by hand
+
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
 
 Take Llama-3-8B in FP16 on a single H100 SXM. The relevant numbers:
 
@@ -66,10 +76,9 @@ The table uses rounded decimal budgets $$W=16$$ GB and $$K=0.5$$ GB. Exact Llama
 
 The scheduling innovation keeps useful requests occupying those amortization opportunities, while admission protects the separate capacity bound. Larger batches can increase aggregate output while slowing each stream. At long context, private cache reads dominate and the bandwidth-model rate approaches $$\beta/K$$ instead of growing without limit. An engine may reuse cache data differently or pay additional collective and launch costs, so validate actual bytes and latency. Continuous batching removes empty cohort slots; it does not guarantee that every incoming request can join immediately when prefill or KV capacity is unavailable.
 
-![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
+### Going deeper: the scheduling problem Orca solved
 
-
-## Going deeper: the scheduling problem Orca solved
+![Deep dive: Going deeper: the scheduling problem Orca solved](./deep-dive-component-02.png)
 
 The bandwidth math above assumes you can actually keep B requests decoding together. Real traffic makes that hard, and the way serving systems handled it changed in 2022.
 
@@ -84,10 +93,7 @@ Note what continuous batching does not do: it does not change the per-step arith
 
 The remaining tension is prefill. A joining request's prompt must be processed, and a 4,000-token prefill injected into a decode step makes that step compute-heavy and slow, which every other user feels as a latency spike in their [TPOT](/blog/ttft-and-tpot/). Engines mitigate this with chunked prefill (split the prompt across several steps) or by moving prefill to separate hardware entirely, the disaggregation story covered in [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/).
 
-![Deep dive: Going deeper: the scheduling problem Orca solved](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"Batching helps prefill the same way it helps decode."** No. Prefill is already a GEMM: a 2,000-token prompt gives the weight-streaming loop 2,000 vectors to multiply, and arithmetic intensity is high enough to be compute-bound on its own. Batching prefills mostly just queues them behind each other and inflates time-to-first-token. The near-free amortization is specific to decode, where each request contributes only 1 vector. This asymmetry is the entire reason prefill and decode are increasingly scheduled, and even built, differently.
 
@@ -95,19 +101,19 @@ The remaining tension is prefill. A joining request's prompt must be processed, 
 
 **"Continuous batching makes each token faster."** It does not touch per-step time; a full batch costs the same milliseconds under any scheduler. What it eliminates is dead slots: iterations where the GPU runs a half-empty batch because finished requests are stuck waiting for their cohort. The speedup is entirely occupancy. This distinction matters when you profile: if your steps are slow, look at kernels and KV layout; if your steps are fast but throughput is low, look at your scheduler's effective batch size over time.
 
-## Why this is the hinge of inference economics
+### Why this is the hinge of inference economics
 
 Every per-token API price you have ever seen is a bet on batch size. The provider's cost per token is roughly (GPU-seconds per step x GPU price) / (tokens per step), and the denominator is the batch. At batch 1 our H100 produces 203 tok/s; at batch 64, 4,468. That is a 22x difference in cost per token on identical hardware, which is why serving economics conversations are really batching conversations wearing a suit.
 
 It also explains the shape of the whole optimization stack that follows in this series. Quantization shrinks the weight bytes (the shared term) and the KV bytes (the private term), moving both walls. KV cache tricks (GQA, paging, compression) exist almost entirely to let B grow. Speculative decoding attacks the case batching cannot help, the latency of a single stream. Each of those is a future article; all of them are downstream of the GEMV-to-GEMM observation you just worked through.
 
-## Takeaway
+## Conclusion
 
 - Decode at batch 1 is a GEMV that reads all 16 GB of weights to make 1 token, using well under 1% of an H100's compute; batching B requests reuses those same weight bytes B times, so early batching multiplies throughput at almost no latency cost (6.6x throughput for 21% more step latency in the rounded worked example).
 - The curve bends where private KV traffic overtakes shared weight traffic, and it stops where KV capacity runs out; batch size and context length are the 2 numbers that any throughput claim must state to mean anything.
 - Continuous batching (Orca's iteration-level scheduling, now standard in vLLM and SGLang) doesn't speed up any step; it keeps every step's batch full under real traffic, which is where the 10-20x over naive serving actually comes from.
 
-## Sources
+### Sources
 
 - Yu et al., "Orca: A Distributed Serving System for Transformer-Based Generative Models," OSDI 2022 — https://www.usenix.org/conference/osdi22/presentation/yu
 - Kwon et al., "Efficient Memory Management for Large Language Model Serving with PagedAttention" (vLLM), SOSP 2023 — https://arxiv.org/abs/2309.06180

@@ -3,7 +3,7 @@ title: 'RNN and LSTM: How Machines Learned Sequences — and Why They Hit a Wall
 description: "Recurrent networks read text the way you do: 1 word at a time, carrying a memory. That design worked — until its 2 flaws collided with the age of scale."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'arch-2'
 order: 7
 series: "llm-basics"
@@ -12,11 +12,17 @@ topic: "Neural Networks"
 tags: ['rnn', 'lstm', 'sequences']
 ---
 
+## Overview
+
+![Concept overview: RNN and LSTM: How Machines Learned Sequences — and Why They Hit a Wall](./section-overview.png)
+
 Before 2017, the state of the art in machine translation read a sentence the same way you do: left to right, 1 word at a time, updating a running memory. Attention-based models later became prominent for large-scale translation and language modeling.
 
 This article covers recurrent networks: the architecture that first made machines competent at language, the clever patch (LSTM) that kept it alive for 20 years, and the structural limitations that motivated highly parallel alternatives. Understanding these limitations is the setup for understanding why the Transformer looks the way it does.
 
-## Sequences need memory
+## Deep dive
+
+### Sequences need memory
 
 [CNNs](/blog/cnn-how-machines-learned-to-see/) exploit the structure of images: local, repetitive patterns. Text has a different structure — it's a *sequence*, where meaning accumulates. "The keys to the cabinet **are** on the table": choosing *are* over *is* requires remembering "keys" from 5 words back.
 
@@ -25,7 +31,7 @@ The recurrent neural network (RNN) handles this with 1 elegant move: process tok
 
 1 cell, 1 set of weights, reused at every time step — the same weight-sharing trick as a CNN's filter, applied across *time* instead of space.
 
-## The fading memory problem
+### The fading memory problem
 
 Now the flaw. That hidden state is the *only* channel connecting the past to the present. Information from word 3 reaches word 50 only by surviving 47 consecutive rewrites of the summary — and during training, blame for a mistake at word 50 must flow backward through all 47 steps to reach word 3's weights.
 
@@ -33,7 +39,9 @@ At each backward step the gradient gets multiplied by roughly the same factors; 
 
 The famous fix is the **LSTM** ([Hochreiter & Schmidhuber, 1997](https://www.bioinf.jku.at/publications/older/2604.pdf)): give the cell an express lane — a separate "cell state" that flows through mostly untouched, plus learned *gates* that decide what to write into it, what to erase, and what to read out. Think of it as upgrading a game of telephone with a shared notepad. LSTMs genuinely worked: they powered Google Translate's 2016 system and most speech recognition of that era.
 
-## A worked example: watching the signal die
+### A worked example: watching the signal die
+
+![Deep dive: A worked example: watching the signal die](./deep-dive-component-03.png)
 
 The vanishing gradient deserves numbers, because the brutality is in the arithmetic. During training, the blame signal flowing backward gets multiplied by a factor at every step — call it the "survival rate" per hop. Suppose that factor is a healthy-sounding 0.9:
 
@@ -46,7 +54,9 @@ The vanishing gradient deserves numbers, because the brutality is in the arithme
 
 At 47 steps — our "keys … are" sentence stretched to paragraph length — the teaching signal arrives at word 3 carrying under 1 percent of its strength. The network *physically receives almost no instruction* about long-range structure, so learning that dependency can be difficult. And 0.9 is generous; the factor varies per step, and when it drifts above 1 you get the mirror-image disaster, **exploding gradients**, where the signal blows up into numeric overflow instead. Recurrent training walks a knife edge between fading and exploding — which is why pre-LSTM RNNs rarely handled dependencies beyond ~10 tokens.
 
-## Going deeper: what the LSTM's gates actually do
+### Going deeper: what the LSTM's gates actually do
+
+![Deep dive: Going deeper: what the LSTM's gates actually do](./deep-dive-component-01.png)
 
 The LSTM's fix is worth 1 level more detail, because "gates" sounds more mysterious than it is. A gate is just a learned valve: a small [weighted-sum-and-squash](/blog/what-is-a-neural-network/) whose output lands between 0 (closed) and 1 (open), multiplied against a signal. Each LSTM cell runs 3 of them, every step:
 
@@ -68,10 +78,7 @@ Here $$f_t$$ is the forget gate, $$i_t$$ the input gate, $$\widetilde c_t$$ prop
 
 This is the mechanism improved over a simple recurrent hidden-state update. It does not guarantee that optimization learns the right gate values, nor that the compressed state retains every detail. Independent sequences, batched matrix products, and work inside each transition still exploit GPU parallelism; the dependency is between successive states of the same ordinary recurrence. Evaluate state size, quality, and streaming latency alongside training throughput. Truncated backpropagation reduces the number of direct gradient transitions, trading training cost against long-range optimization signals even when hidden state continues across segments.
 
-![Deep dive: Going deeper: what the LSTM's gates actually do](./deep-dive-component-01.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"Transformers killed RNNs because RNNs were inaccurate."** At short range, LSTMs were excellent — they held state-of-the-art in translation, speech, and handwriting for years. They lost on *scalability*: a Transformer soaks up 1,000 GPUs; an LSTM chokes on its own sequential chain. The kill was economic, not qualitative — an important pattern, because hardware fit decides architecture winners more often than accuracy does.
 
@@ -79,7 +86,7 @@ This is the mechanism improved over a simple recurrent hidden-state update. It d
 
 **"RNNs are gone."** Their descendants are staging a comeback. Modern state-space models (Mamba and its hybrids) are recurrent at heart — constant memory per step, no quadratic attention bill — and are being blended into production LLMs precisely because [attention's costs](/blog/attention-in-plain-words/) hurt at long context. The relay idea wasn't wrong; it was waiting for a formulation that trains in parallel.
 
-## The wall: 1 word at a time
+### The wall: 1 word at a time
 
 But the second flaw had no patch. An RNN — LSTM included — is **inherently sequential**: step 50 cannot begin until step 49 finishes, because its input *is* step 49's output.
 
@@ -90,7 +97,7 @@ By 2017, both flaws were biting at once: memory still degraded over long ranges 
 
 That architecture is the next article. It's called attention.
 
-## The bridge era: attention was born inside RNNs
+### The bridge era: attention was born inside RNNs
 
 1 historical beat usually gets skipped, and it makes the next article land better: **attention was invented as a patch for RNNs**, 3 years before it replaced them.
 
@@ -98,7 +105,9 @@ The setting was 2014 translation systems, which worked by having 1 LSTM squeeze 
 
 For 3 years the field ran hybrids: recurrence for the backbone, attention for the long-range lookups. The 2017 insight was noticing which half was pulling the weight. If attention handles the relationships, what exactly is the recurrence *for*? Delete it, keep attention, and the sequential wall goes with it — the title "Attention Is All You Need" is literally a verdict on this question. Architecture history rarely moves in clean breaks; the revolution shipped as a bug-fix first.
 
-## Write the recurrence and see the dependency
+### Write the recurrence and see the dependency
+
+![Deep dive: Write the recurrence and see the dependency](./deep-dive-component-02.png)
 
 A simple recurrent layer computes
 
@@ -114,10 +123,7 @@ During training, gradients connecting distant positions contain products of loca
 
 Recurrent models did not disappear. They remain useful for streaming workloads and appear in newer state-space and hybrid designs. The relevant comparison is which dependencies and state representations fit a task and hardware budget, rather than declaring 1 architecture permanently dead.
 
-![Deep dive: Write the recurrence and see the dependency](./deep-dive-component-02.png)
-
-
-## Match state to the streaming task
+### Match state to the streaming task
 
 For an online sensor model, a fixed-size recurrent state can be an advantage: each new measurement updates a bounded vector rather than retaining every earlier activation for inference. Training through an entire sequence still has a separate memory cost because gradient computation may need intermediate states.
 
@@ -125,7 +131,7 @@ Truncated backpropagation limits how many time steps gradients traverse in 1 tra
 
 For a fair comparison with cached attention, specify state size, sequence length, batch size, and the exact task. An RNN's fixed-dimensional state compresses the history; a conventional attention cache keeps more token-specific state and grows with context. Neither representation guarantees that all relevant information is retained. The tradeoff is between state budget, access mechanism, trainability, and useful predictions under the deployment constraints.
 
-## Takeaway
+## Conclusion
 
 - RNNs read sequences with a running memory (hidden state) — 1 cell, reused across time. It made machines competent at language for 2 decades.
 - Flaw 1: long-range information and gradients fade over many steps (vanishing gradients); LSTM's gated express lane patched this well enough for translation-era systems.
@@ -134,7 +140,7 @@ For a fair comparison with cached attention, specify state size, sequence length
 
 A practical comparison should measure the complete task rather than only the recurrent cell. Hold the input representation, quality target, and evaluation split constant. Then report memory, latency, and accuracy separately. A compact streaming classifier and a general conversational model have different requirements, so a result on one does not establish superiority on the other. For streaming work, also test state resets and unusually long sequences. A system can look accurate on independent examples while drifting when hidden state carries across a continuous stream. Reset policy is therefore part of the model specification and its deployment contract.
 
-## Sources
+### Sources
 
 - [Dive into Deep Learning: Long Short-Term Memory](https://d2l.ai/chapter_recurrent-modern/lstm.html): gated additive cell-state update.
 

@@ -3,7 +3,7 @@ title: "Probability for Machine Learning: Distributions, Expectation, and Uncert
 description: "Build the probability foundation for MLE, MAP, and language-model log loss with discrete and continuous distributions, conditional probability, and numerical examples."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 series: "llm-basics"
 level: beginner
 code: 'stat-1'
@@ -11,11 +11,18 @@ order: 6
 topic: "Statistical Learning"
 tags: [statistics, theory, learning]
 ---
+
+## Overview
+
+![Concept overview: Probability for Machine Learning: Distributions, Expectation, and Uncertainty](./section-overview.png)
+
 A model that assigns a 70% probability to an event has not observed 70 percent of that event. It has assigned a number to an uncertain outcome under a model. That distinction sits beneath classification, regression, and next-token prediction. Before deriving a training objective, we need to know what those numbers mean, what must sum to 1, and which assumptions connect 1 observation to another.
 
 Probability provides a language for uncertainty. It does not automatically tell us whether a model is trustworthy, whether its assumptions fit the data, or whether a generated answer is true. This article builds the small set of concepts needed for the following articles on maximum likelihood estimation and maximum a posteriori estimation. Each equation is attached to an example you can calculate by hand.
 
-## Events and random variables are different objects
+## Deep dive
+
+### Events and random variables are different objects
 
 An outcome is 1 possible result of an experiment. An event is a set of outcomes: for example, the event that a request succeeds. A probability measure assigns numbers between 0 and 1 to events, assigns 1 to the complete outcome space, and adds the probabilities of disjoint events. “Success” and “failure” are disjoint if our experiment permits exactly one of them.
 
@@ -32,7 +39,7 @@ For a classifier with several exclusive labels, a categorical distribution repla
 
 *Original worked-example diagram illustrating probability normalization; no source figure is reproduced.*
 
-## A worked distribution over 3 outcomes
+### A worked distribution over 3 outcomes
 
 Suppose the next event has 3 labels: success, timeout, and other failure. Our illustrative model assigns probabilities 0.7, 0.2, and 0.1. They sum to 1. The probability of any failure is 0.2 plus 0.1, or 0.3, because the 2 failure events are disjoint.
 
@@ -48,7 +55,7 @@ The most probable outcome is success, with cost 0. The expected cost is 0.9. Tho
 
 A practical classifier may choose the most probable label, while a decision system may minimize expected cost over available actions. If missing a serious failure costs much more than raising a false alarm, the decision threshold can differ from 0.5. The probabilities and the action rule are separate parts of the system.
 
-## Variance describes spread around the expectation
+### Variance describes spread around the expectation
 
 Let mu denote E[X]. Variance is the expected squared deviation from that mean:
 
@@ -64,7 +71,9 @@ For a Bernoulli random variable, E[Y] equals theta and variance equals theta tim
 
 If n independent Bernoulli trials share the same theta, the sample average has variance theta times 1 minus theta divided by n. More independent observations make the average more stable. If trials are correlated, that division is no longer generally correct: 10 requests during the same outage may provide less independent information than 10 requests across unrelated operating periods.
 
-## Conditional probability introduces information
+### Conditional probability introduces information
+
+![Deep dive: Conditional probability introduces information](./deep-dive-component-01.png)
 
 Conditional probability describes an event after restricting attention to another event known to have occurred. For events A and B with P(B) greater than 0:
 
@@ -84,10 +93,7 @@ Here x_t denotes a token at position t and T the sequence length. The chain rule
 
 A useful distinction is independence versus conditional independence. Independent events do not change one another's probabilities. Conditionally independent observations may become independent only after specifying a shared parameter or context. Many statistical models use conditional independence to simplify likelihoods; that is an assumption to inspect, not an automatic property of a dataset.
 
-![Deep dive: Conditional probability introduces information](./deep-dive-component-01.png)
-
-
-## Bayes' rule reverses the conditioning direction
+### Bayes' rule reverses the conditioning direction
 
 Bayes' rule connects 2 conditional probabilities:
 
@@ -104,7 +110,9 @@ This is a base-rate example, not a claim about a real monitoring system. It show
 
 *Original numerical Bayes-rule example. Rates are illustrative assumptions, not monitoring measurements.*
 
-## Continuous variables use densities, not point probabilities
+### Continuous variables use densities, not point probabilities
+
+![Deep dive: Continuous variables use densities, not point probabilities](./deep-dive-component-02.png)
 
 A latency value is naturally modeled as continuous, at least before measurement rounds it. A probability density f(x) describes how probability accumulates over intervals. The integral of the density over an interval gives its probability, and the integral over the full domain equals 1.
 
@@ -131,10 +139,9 @@ For a false alarm cost of 1 and missed-failure cost of 9, the threshold is 0.1. 
 
 This method improves a majority-label baseline by minimizing modeled expected consequences rather than maximizing the frequency of correct labels. It assumes binary actions, the stated loss table, and probabilities calibrated for the deployment population. If prevalence changes, the earlier posterior calculation may change even when an alarm's detection behavior stays constant. Estimate probabilities on held-out representative data and assess decision losses separately from classification accuracy. A threshold tuned after repeatedly inspecting the test set can overstate performance. Uncertainty in costs and rates is reason to compare sensitivity scenarios, not to treat an uncalibrated softmax score as a guaranteed posterior.
 
-![Deep dive: Continuous variables use densities, not point probabilities](./deep-dive-component-02.png)
+### Going deeper: uncertainty about outcomes and parameters
 
-
-## Going deeper: uncertainty about outcomes and parameters
+![Deep dive: Going deeper: uncertainty about outcomes and parameters](./deep-dive-component-03.png)
 
 Outcome uncertainty remains even when a model parameter is known. A coin with known theta equal to 0.5 still has an uncertain next result. Parameter uncertainty concerns not knowing theta because the observations are limited or the model is uncertain. These are different questions and can change differently as data arrives.
 
@@ -147,7 +154,7 @@ For example, a language model can confidently predict a common continuation that
 
 *Original conceptual comparison; these categories do not imply that a softmax score measures them all.*
 
-## Common misconceptions and a usable checklist
+### Common misconceptions and a usable checklist
 
 “Expected value is the most likely result.” Our 3-outcome example has most likely cost 0 and expected cost 0.9. The mean includes the entire weighted distribution and need not be an observable result.
 
@@ -157,7 +164,7 @@ For example, a language model can confidently predict a common continuation that
 
 Before using a probabilistic prediction, state the random variable, its possible values, the conditioning information, and the population represented by the data. Check normalization and distinguish a parameter estimate from an outcome probability. Then identify the decision loss: an accurate probability can support different actions when their costs differ.
 
-## Takeaway
+## Conclusion
 
 - Distributions assign probability mass or density; expectation and variance summarize different aspects of them.
 - Conditional probability and the chain rule express dependence, while Bayes' rule updates conditioning using base rates.
@@ -165,7 +172,7 @@ Before using a probabilistic prediction, state the random variable, its possible
 
 Continue to [MLE](/blog/maximum-likelihood-estimation/) to turn observations into an objective, then [MAP](/blog/map-estimation-and-priors/) to see how a prior changes that objective.
 
-## Sources
+### Sources
 
 - [Dive into Deep Learning: Probability and Statistics](https://d2l.ai/chapter_preliminaries/probability.html), probability rules, expectations, and sampling assumptions.
 - [Dive into Deep Learning: Softmax Regression](https://d2l.ai/chapter_linear-classification/softmax-regression.html), categorical predictions and normalized class probabilities.

@@ -12,16 +12,17 @@ topic: "Precision"
 tags: ['quantization', 'fp4', 'numerics']
 ---
 
+## Overview
+
+![Concept overview: NVFP4 vs MXFP4: Inside the 4-Bit Format War. A magnified row of packed 4-bit values attached to scaling metadata.](./section-overview.png)
+
 16. That is the complete vocabulary of a 4-bit floating-point number: 16 encodings, including signed zero, and once you account for the sign bit, just 8 magnitudes: 0, 0.5, 1, 1.5, 2, 3, 4, and 6. Every weight in a 4-bit large language model must be expressed as one of those 8 numbers, positive or negative. Nothing between 4 and 6 exists. Nothing above 6 exists at all.
 
 On its face this is a ridiculous way to store the parameters of 1 trillion-dollar industry's flagship products. Yet in 2026, 4-bit is rapidly becoming the default precision for serving big models, OpenAI ships its gpt-oss open-weight models natively in a 4-bit format, and NVIDIA built dedicated silicon for a competing 1. The 2 formats — **NVFP4** and **MXFP4** — agree on the 16 values. They disagree, sharply, on everything wrapped around them. That disagreement is worth understanding in detail, because it is one of the cleanest live examples of hardware and software co-design pulling in different directions: 1 format optimized for numerics, the other for openness and simplicity, with GPU silicon acting as the tiebreaker.
 
-## 8 magnitudes and a sign bit
+## Deep dive
 
-![Concept overview: NVFP4 vs MXFP4: Inside the 4-Bit Format War. A magnified row of packed 4-bit values attached to scaling metadata.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 8 magnitudes and a sign bit
 
 Start with the raw material. Both formats store each individual value in **FP4 E2M1**: 1 sign bit, 2 exponent bits, 1 mantissa bit. 2 exponent bits give you 4 exponent settings; 1 mantissa bit gives you 2 mantissa steps per exponent. Work through the encoding and you get exactly the 8 magnitudes listed above, from 0 to 6.
 
@@ -30,7 +31,7 @@ Notice 2 things about this tiny number system. First, like all floating-point fo
 
 So 4-bit formats are never used raw. Every practical scheme pairs the 4-bit codes with **scale factors**: multipliers, stored at higher precision, that stretch the little [0, 6] ruler to fit the data. The entire NVFP4-versus-MXFP4 war is about how many values share 1 scale factor, and what number format the scale factor itself uses.
 
-## Block scaling: renting precision where you need it
+### Block scaling: renting precision where you need it
 
 A single scale for the whole tensor (the classic approach from the 8-bit era) fails at 4 bits because 1 outlier sets the scale for millions of values. The fix is **block scaling** (also called microscaling): chop the tensor into small blocks, and give each block its own scale. An outlier now only ruins the precision of its immediate neighbors, not the entire tensor.
 
@@ -44,7 +45,9 @@ Do the bookkeeping and the storage cost is nearly identical. An MXFP4 block cost
 
 So NVFP4 pays about 6% more storage for 2 upgrades: blocks half the size (outliers poison 16 neighbors instead of 32) and scales that can take fractional values instead of only powers of 2. How much do those upgrades actually buy? Let's quantize a block by hand and find out.
 
-## A worked example you can follow with a pencil
+### A worked example you can follow with a pencil
+
+![Deep dive: A worked example you can follow with a pencil](./deep-dive-component-01.png)
 
 Take 8 weights from a block (real blocks hold 16 or 32; 8 is enough to see the mechanics). Ignore signs, which travel in the sign bit:
 
@@ -76,10 +79,7 @@ Value by value the comparison is messy — MXFP4 actually wins on 5 of the 8, be
 
 That is the entire numerical case for NVFP4, compressed into 1 block: finer outlier containment from block-16, and a scale that fits the data instead of rounding to the nearest power of 2.
 
-![Deep dive: A worked example you can follow with a pencil](./deep-dive-component-01.png)
-
-
-## Count scale bytes before counting bandwidth savings
+### Count scale bytes before counting bandwidth savings
 
 With 4 payload bits and 1 8-bit scale per group of $$g$$ values, the effective storage is
 
@@ -93,7 +93,9 @@ Relative to BF16's 16 bits, the payload-plus-block-scale compression ratios are 
 
 The pencil example should be understood as a quantizer with its stated scale choice, rounding rule, grouping, and tensor scale, not a universal implementation mandate. Compare reconstruction error on identical blocks, then evaluate model quality and actual kernels. Reduced error can justify extra scale traffic, but a conversion-heavy execution path may erase the theoretical bandwidth advantage. 4-bit E2M1 has 16 bit patterns with signed 0, rather than 16 distinct real values. Format precision, storage efficiency, and native hardware support are separate properties.
 
-## Going deeper: why E8M0 exists at all
+### Going deeper: why E8M0 exists at all
+
+![Deep dive: Going deeper: why E8M0 exists at all](./deep-dive-component-02.png)
 
 If power-of-2 scales lose accuracy, why did an industry consortium standardize them? Because E8M0 buys 3 things that matter enormously in silicon and software.
 
@@ -107,10 +109,7 @@ Meanwhile, making 4-bit work for **training**, not just inference, took a recipe
 
 And the deployment scoreboard? OpenAI shipped gpt-oss with its MoE weights, roughly 90% of all parameters, natively in **MXFP4**, which is what lets the 117B-parameter gpt-oss-120b fit on a single 80GB GPU. Crucially, the models were trained with quantization in the loop, so the format's numerical handicap was absorbed during training rather than bolted on afterward. AMD backs the OCP MX formats in its MI355X generation. Blackwell's tensor cores accelerate both formats; Hopper accelerates neither, so gpt-oss runs there through a Triton software path. AWS went a third way entirely, putting a W4A8 weight-decompression path directly into Trainium3 hardware. Everyone agrees on 4-bit weights; nobody agrees on the wrapper.
 
-![Deep dive: Going deeper: why E8M0 exists at all](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"A 4-bit model uses 4 bits per weight."** It uses 4.25 (MXFP4) or 4.5 (NVFP4) bits per weight once you count the shared scales — and that is just the weights. Activations, KV cache, and accumulators typically run at FP8 or BF16, and accumulation inside the tensor cores happens at higher precision still (FP32 in the NVFP4 training recipe). The headline "4-bit" names the narrowest tensor in the pipeline, not the whole pipeline. Budgeting memory for serving with the naive 0.5 bytes per parameter will leave you short.
 
@@ -118,7 +117,9 @@ And the deployment scoreboard? OpenAI shipped gpt-oss with its MoE weights, roug
 
 **"4-bit is an inference trick; training still needs high precision."** True in 2024, false now. The NVFP4 pretraining result (12B parameters, 10T tokens, loss curve tracking FP8) moved 4-bit from a post-training compression step to a first-class training precision, with the caveat that it required the full recipe of Hadamard transforms, consistent 2D scaling, and stochastic rounding, plus keeping some sensitive layers at higher precision. "4-bit training" does not mean every tensor everywhere is 4-bit; it means the expensive matrix multiplies are.
 
-## The bigger picture: formats are co-design artifacts
+### The bigger picture: formats are co-design artifacts
+
+![Deep dive: The bigger picture: formats are co-design artifacts](./deep-dive-component-03.png)
 
 Step back and this whole war is downstream of 1 fact about modern inference: generating a token means streaming the model's active weights through the compute units, so **weight bytes are the bill**. That is the same arithmetic that explains why [GPU roadmaps triple bandwidth while holding capacity flat](/blog/blackwell-to-rubin-memory-math/): if the format war halves your bytes per weight, it does for the numerator what HBM4 does for the denominator. A 4-bit format is a bandwidth upgrade you download.
 
@@ -126,13 +127,13 @@ It also explains why the deciding vote belongs to hardware. A format without ten
 
 My prediction, for what it is worth: both formats live. NVFP4 wins where NVIDIA's training stack and serving stack are the whole story; MXFP4 wins as the interchange format — the thing open-weight models ship in, because it runs acceptably everywhere. The war ends the way most format wars end, with a boring truce and a conversion tool.
 
-## Takeaway
+## Conclusion
 
 - **Block scaling is what makes 4-bit usable at all**: FP4 has only 16 values spanning a 12× dynamic range, so small blocks (16 or 32 values) each rent a higher-precision scale factor that stretches the grid to fit the local data.
 - **The formats differ in 1 design choice with cascading consequences**: NVFP4's fractional E4M3 scales over blocks of 16 track the data tightly (needing a second FP32 level for range); MXFP4's power-of-2 E8M0 scales over blocks of 32 are cheaper and simpler in hardware but can clip or waste up to 2× of their coverage — in our hand-worked block, 36% worse RMS error.
 - **Numerics propose, hardware disposes**: NVFP4 claims under 1% loss versus FP8 at ~1.8× less memory (vendor-reported, MLPerf-corroborated), yet MXFP4 is the format inside gpt-oss — because it is an open standard with multi-vendor silicon, and quantization-aware training absorbs most of its handicap.
 
-## Sources
+### Sources
 
 - NVIDIA, "Inside NVIDIA Blackwell Ultra: The Chip Powering the AI Factory Era" — NVFP4 format details and the ~1.8×/<1% claims: https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/
 - NVIDIA et al., "Pretraining Large Language Models with NVFP4" (12B / 10T-token 4-bit pretraining): https://arxiv.org/abs/2509.25149

@@ -12,18 +12,19 @@ level: "intermediate"
 tags: ["distributed-training", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Activation Checkpointing: Selective Recomputation and the Memory–Time Tradeoff. A neural network drawn as layers with activations: one branch stores every intermediate feature, another stores selected checkpoint anchors and recomputes intervening layers on backward traversal.](./section-overview.png)
+
 During forward training, automatic differentiation saves intermediate values that backward will need. These saved activations can become the largest variable term in device memory, especially with long sequences and large microbatches. Activation checkpointing reduces that retained state by recomputing selected intermediate values when backward reaches them.
 
 The mechanism exchanges storage for additional computation. It does not compress model weights, partition optimizer state, or make every temporary allocation disappear. The useful engineering question is which forward values are expensive to keep, which operations are affordable to replay, and whether the resulting schedule improves feasible training throughput.
 
 We will derive a simple checkpoint-spacing model, connect it to selective checkpoint policies, and examine correctness requirements involving randomness and side effects. The memory and timing examples are illustrative. Actual savings depend on the backward rules, fused kernels, sharding schedule, and allocator behavior of the implementation.
 
-## 1. Understand what backward needs
+## Deep dive
 
-![Concept overview: Activation Checkpointing: Selective Recomputation and the Memory–Time Tradeoff. A neural network drawn as layers with activations: one branch stores every intermediate feature, another stores selected checkpoint anchors and recomputes intervening layers on backward traversal.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Understand what backward needs
 
 For a function y equal to f(x, w), its backward rule may need x, w, y, or other intermediate values to compute derivatives. A matrix multiplication needs operands to form its input and weight gradients. An activation function may need its input or output. A fused operation can choose a different saved representation than several separately executed operations.
 
@@ -33,7 +34,9 @@ Checkpointing a region retains enough information to rerun that region and obtai
 
 A memory-efficient attention kernel already avoids retaining a full attention-score matrix in high-bandwidth memory. Checkpointing that kernel can still save other state, but a capacity estimate based on a materialized quadratic score tensor will exaggerate its benefit. Match the saved-state model to the algorithm actually executing.
 
-## 2. Derive a simple chain model
+### 2. Derive a simple chain model
+
+![Deep-dive illustration: Derive a simple chain model](./deep-dive.png)
 
 Consider a sequential chain of N layers. Suppose each layer’s retained activation has size A bytes, and ignore unequal sizes, parameter state, and workspaces. Without recomputation, a simple saved-activation estimate is N times A.
 
@@ -47,10 +50,7 @@ Treating k as continuous gives a minimum near the square root of N. At that poin
 
 For N equal to 64 and A equal to 64 MiB, the uncheckpointed estimate is 4096 MiB. Choosing k equal to 8 gives about 16A, or 1024 MiB, under the simplified model. The estimated reduction concerns the saved-activation component only. A model with many additional gigabytes of weights and optimizer state does not receive the same reduction in total memory.
 
-
-![Deep-dive illustration: Derive a simple chain model](./deep-dive.png)
-
-## 3. Count the additional work
+### 3. Count the additional work
 
 Let F be the baseline forward compute time and B the baseline backward compute time for a fixed microbatch. If checkpointing replays a fraction r of forward-like work, an elementary sequential timing approximation is
 
@@ -65,7 +65,9 @@ If forward takes 20 milliseconds and backward takes 40 milliseconds, replaying h
 
 The memory saving can nevertheless enable a larger microbatch, a longer supported sequence, or a smaller sharding group. Those changes may improve useful throughput or make an otherwise impossible training configuration feasible. Compare complete feasible configurations rather than judging checkpointing only by the replay penalty at an artificially fixed capacity-unconstrained microbatch.
 
-## 4. Select operations by saved bytes and replay cost
+### 4. Select operations by saved bytes and replay cost
+
+![Deep dive: 4. Select operations by saved bytes and replay cost](./deep-dive-component-02.png)
 
 Uniform layer checkpointing is a useful baseline, but layers contain operations with very different compute-to-storage ratios. A large matrix multiplication can be expensive to replay. A simple elementwise transformation can retain a large tensor while requiring relatively little arithmetic to rebuild.
 
@@ -81,10 +83,9 @@ Selective activation checkpointing can preserve expensive intermediate results w
 
 Measure actual avoided live bytes and actual replayed kernels. A theoretical list of tensor sizes is insufficient when the allocator reuses storage or a fused kernel changes the saved state. The goal is to reduce the largest concurrent allocation while introducing the least harmful additional work.
 
-![Deep dive: 4. Select operations by saved bytes and replay cost](./deep-dive-component-02.png)
+### 5. Randomness must be part of the replay contract
 
-
-## 5. Randomness must be part of the replay contract
+![Deep dive: 5. Randomness must be part of the replay contract](./deep-dive-component-01.png)
 
 A checkpointed region containing dropout uses random numbers during forward. Recomputing with unrelated random values changes the function whose gradient is being evaluated. Framework checkpointing mechanisms commonly preserve and restore random-number state to match the original forward behavior within their supported device scope.
 
@@ -94,7 +95,7 @@ PyTorch documents reentrant and non-reentrant checkpoint variants and recommends
 
 Correctness also involves side effects. A function that increments a counter, mutates a cache, performs logging with operational consequences, or updates state during forward can execute those effects again during replay. Design checkpointed regions around computations whose repeat execution is valid, or explicitly manage their stateful behavior.
 
-## 6. Replay can interact with parameter sharding
+### 6. Replay can interact with parameter sharding
 
 A fully sharded model materializes parameters according to its execution schedule. Replaying forward-like work during backward may require those parameter values to be available again. Whether this triggers another gather, reuses an existing materialization, or extends a lifetime depends on how checkpoint regions align with sharding units.
 
@@ -104,7 +105,7 @@ Record checkpoint-region boundaries and sharding-unit boundaries together. Inspe
 
 The same principle applies to pipeline schedules. A stage holding activations for several in-flight microbatches may gain more from checkpointing than a stage with only one live microbatch. Stage imbalance and replay placement can then change the pipeline bubble. Treat activation savings as a property of the full schedule, not just of an individual layer.
 
-## 7. Build a meaningful measurement interval
+### 7. Build a meaningful measurement interval
 
 Initialize the optimizer, warm up compilation, and execute representative microbatches before recording memory. Reset peak statistics around a complete optimizer step or another explicitly defined interval. Include all accumulation microsteps if the production step uses accumulation.
 
@@ -114,7 +115,7 @@ Capture a timeline to confirm that the expected operations are replayed. Compare
 
 Use a fixed supported workload for an initial comparison. Then test a second comparison at the larger feasible microbatch enabled by the saving. Clearly label the difference between a method’s cost at fixed work and the throughput benefit of a changed feasible configuration. Both results are useful when their assumptions are visible.
 
-## 8. Validate numerical and training behavior
+### 8. Validate numerical and training behavior
 
 Begin with a small deterministic model and compare outputs, gradients, and parameter updates with and without checkpointing. Include operations using randomness when the real model uses them. Use numerical tolerances appropriate to precision and changed execution order rather than requiring bitwise equality without justification.
 
@@ -124,7 +125,7 @@ After the local correctness check, evaluate a short representative training run.
 
 Checkpointing is not a substitute for a correct model implementation. It can change when a bug becomes visible, or mask a lifetime assumption that only fails under one replay variant. Use the smallest reproducer that includes the relevant operation and state behavior when diagnosing a discrepancy.
 
-## 9. Choose a policy under an explicit constraint
+### 9. Choose a policy under an explicit constraint
 
 A practical policy search begins with the capacity target: maximum supported sequence length, microbatch, accumulation factor, and headroom. Identify the tensors contributing to the peak, then compare a small number of checkpoint regions or selective policies that target them.
 
@@ -134,13 +135,13 @@ Prefer understandable region boundaries initially. A slightly less aggressive po
 
 The final policy should be versioned with the model and training configuration. Compiler behavior, fused kernels, backward rules, and framework checkpoint semantics can evolve. A regression check on memory and step time helps preserve the benefit after changes to those underlying components.
 
-## Takeaway
+## Conclusion
 
 Activation checkpointing saves selected boundaries and rebuilds omitted intermediates during backward. Its benefit is a reduction in saved-activation lifetime; its cost is replayed computation and potentially changed communication scheduling.
 
 Use the chain model to understand the tradeoff, then inspect real saved tensors and allocation peaks. Preserve replay correctness, tune region and sharding boundaries together, and compare feasible training configurations using useful throughput rather than memory savings alone.
 
-## Sources
+### Sources
 
 - [PyTorch checkpoint documentation](https://docs.pytorch.org/docs/stable/checkpoint.html): replay semantics, random-number state, and variant differences.
 - [PyTorch activation checkpointing techniques](https://pytorch.org/blog/activation-checkpointing-techniques/): selective checkpointing and speed–memory tradeoffs.

@@ -3,7 +3,7 @@ title: 'The Economics of a Tapeout: Why a Chip Costs $100M Before Unit 1'
 description: "The fixed-cost anatomy of an advanced-node chip: design teams, EDA seats, IP licenses, a $15M mask set, and why volume is the only thing that saves you."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'asic-3'
 order: 17
 series: "comp-arch"
@@ -12,11 +12,17 @@ topic: "ASIC Design"
 tags: [asic, economics, silicon]
 ---
 
+## Overview
+
+![Concept overview: The Economics of a Tapeout: Why a Chip Costs $100M Before Unit 1](./section-overview.png)
+
 $542 million. That is the figure International Business Strategies (IBS) attached to designing a single 5nm chip back in 2018, and by 2023 the same firm was quoting $725 million for 2nm. Those numbers are estimates, they are contested, and analysts have argued a disciplined team can come in far lower. But even the skeptics' numbers sit north of $100 million, and every dollar of it is spent before the first working chip exists.
 
 This is the strangest economic fact about the semiconductor industry: the product costs a fortune to create and almost nothing to copy. Once the design is done and the masks are made, each additional good chip adds wafer, yield-loss, packaging, and test expense; that recurring cost can be substantial for large accelerators. Everything interesting about the business — who can afford to build chips, why old process nodes never die, why hyperscalers design their own accelerators while everyone else buys — falls out of that 1 asymmetry.
 
-## The vocabulary of spending money on nothing
+## Deep dive
+
+### The vocabulary of spending money on nothing
 
 A quick tour of the terms, because the cost structure lives in them.
 
@@ -34,7 +40,9 @@ A **respin** is what happens when the silicon comes back broken in a way softwar
 
 With the vocabulary in place, we can build a budget.
 
-## A worked example: budgeting a 5nm accelerator
+### A worked example: budgeting a 5nm accelerator
+
+![Deep dive: A worked example: budgeting a 5nm accelerator](./deep-dive-component-01.png)
 
 Suppose you are a well-funded startup building an AI inference accelerator on a 5nm-class process. Nothing exotic, 1 die, aiming for a 2-year schedule from architecture to tapeout. Let's price it line by line.
 
@@ -69,10 +77,7 @@ Total: **$103 million**, and not 1 sellable chip yet. The number is deliberately
 
 Notice what the chart says: the mask set, famous as it is, is only about 15% of the bill. The dominant cost is people, and the second biggest is licensed IP. Chip design is a payroll problem with a photolithography deposit attached.
 
-![Deep dive: A worked example: budgeting a 5nm accelerator](./deep-dive-component-01.png)
-
-
-## The escalation curve
+### The escalation curve
 
 The scary part is not the level, it is the slope. IBS's per-node estimates, quoted everywhere in the industry (and worth flagging: they are 1 firm's model, published at different times, and other analysts such as Gartner have produced figures roughly half as large for the same nodes), run like this: about $51M to design a 28nm chip, $106M at 16nm, $298M at 7nm, $542M at 5nm, and $725M at 2nm.
 
@@ -81,7 +86,9 @@ Why does each node cost more? 3 compounding reasons. Transistor budgets grow, so
 
 The consequence is a brutal filter. If your chip cannot justify 9 figures of NRE, the leading edge is not for you, no matter how much you would enjoy the transistors.
 
-## Volume: the only exit
+### Volume: the only exit
+
+![Deep dive: Volume: the only exit](./deep-dive-component-02.png)
 
 Here is where the asymmetry pays off. NRE is fixed; wafers are marginal. Per-unit cost is:
 
@@ -109,10 +116,9 @@ Here subscripts $$a$$ and $$m$$ mean advanced and mature alternatives. The cross
 
 This is a decision method, not a foundry price quotation. Reuse existing IP and derivative verification to lower the fixed term, then estimate realistic lifetime shipments rather than peak annual demand. If the mature part needs more power or chips per workload, replace unit cost with cost per delivered function. Packaging and yield can make recurring cost large, particularly for big accelerators, so “almost nothing to copy” is an inadequate production budget. Delay risk changes the denominator: a respin that misses a market window may reduce shipments as well as add cash expense. Compare scenarios rather than assuming all cost uncertainty lives in the mask invoice.
 
-![Deep dive: Volume: the only exit](./deep-dive-component-02.png)
+### Going deeper: why a respin hurts more than its invoice
 
-
-## Going deeper: why a respin hurts more than its invoice
+![Deep dive: Going deeper: why a respin hurts more than its invoice](./deep-dive-component-03.png)
 
 The respin reserve deserves a closer look, because its true cost is not the mask set.
 
@@ -122,7 +128,7 @@ The invoice might read $20M. The real damage is the schedule. 6 months late into
 
 It is also why the fabless model exists at all. TSMC spends roughly $30 billion a year on capital equipment, an NRE-like fixed cost so vast that no single product could carry it. The foundry amortizes fabs across hundreds of customers exactly the way each customer amortizes masks across millions of units. It is fixed-cost sharing, stacked 2 levels deep.
 
-## The counterpoint that proves the rule: a $75 tapeout
+### The counterpoint that proves the rule: a $75 tapeout
 
 If the fixed-cost story is right, there should be a cheat: share the fixed costs widely enough and tapeout becomes cheap. It exists, and it is called Tiny Tapeout.
 
@@ -130,7 +136,7 @@ Matt Venn's project books a slot on a multi-project wafer shuttle, splits 1 mask
 
 Nothing about the physics got cheaper. The mask set for that shuttle still cost what mask sets cost; the wafer still ran through the same fab. What changed is the denominator: hundreds of designs sharing 1 set of fixed costs, on a mature node where those fixed costs are thousands of times lower than at 2nm. Tiny Tapeout is the amortization equation run in reverse, and the fact that it lands at pizza-money prices is the cleanest demonstration that chip cost was never really about the silicon.
 
-## Common misconceptions
+### Common misconceptions
 
 **"The silicon is the expensive part."** Marginal silicon is startlingly cheap. Even a leading-edge wafer priced around $20,000 yields hundreds of mobile-sized dies, putting raw silicon in the tens of dollars per chip. The $100M+ is design labor, verification, IP, tools, and masks, spent before wafer 1. If silicon itself were the cost, Tiny Tapeout's €70 tile could not exist.
 
@@ -138,19 +144,19 @@ Nothing about the physics got cheaper. The mask set for that shuttle still cost 
 
 **"Newer node always wins, so old nodes are dying."** The overwhelming majority of chip designs each year tape out on mature nodes, and foundries keep 28nm, 40nm, and even 180nm lines busy for decades. For a microcontroller shipping 500K units, a 28nm-class NRE in the tens of millions divides down to sane numbers where a 3nm NRE never would, and the older node may also win on analog behavior, voltage tolerance, and cost per wafer. Nodes don't die; they retire into the volume business.
 
-## Where this sits in the bigger picture
+### Where this sits in the bigger picture
 
 This cost structure is the invisible hand behind topics we've covered elsewhere in this series. The reason an [ML performance engineer](/blog/what-does-an-ml-performance-engineer-do/) exists as a job is that the chips they optimize embody hundreds of millions in NRE, so squeezing 20% more [goodput](/blog/goodput-vs-utilization/) from deployed silicon is worth serious salary. The generational cadence we traced in the [Blackwell-to-Rubin memory math](/blog/blackwell-to-rubin-memory-math/) is paced partly by these economics: each generation must ship in volumes and at margins that clear a growing NRE bar, which is why new GPUs launch at the prices they do. And the microarchitectural richness inside [a modern CPU](/blog/what-a-cpu-actually-does/) is only affordable because CPUs amortize their design cost across hundreds of millions of sockets.
 
 Next in this thread: why AI workloads, with their regular, dense, predictable computation, are the best-case customer for this whole cost structure, and why every hyperscaler concluded the NRE was worth paying.
 
-## Takeaway
+## Conclusion
 
 - A leading-edge chip's cost is almost entirely fixed and prepaid: roughly 40% people, with IP, EDA, masks ($15-20M at 5nm-class nodes), and respin reserves making up the rest, before any unit ships.
 - Per-unit cost is NRE ÷ volume + marginal cost, so the same $100M design is a $10,000 prototype at 10K units and a $60 commodity at 10M units; volume (or margin) is the only exit.
 - Per-node design costs roughly double every generation by IBS's much-quoted estimates ($51M at 28nm to $725M at 2nm), which is why the leading edge belongs to giant-volume or giant-margin products, and why shared shuttles like Tiny Tapeout can sell a real tapeout for the price of dinner.
 
-## Sources
+### Sources
 
 - SemiEngineering, "What Will That Chip Cost?" (IBS vs. Gartner design-cost estimates per node): https://semiengineering.com/what-will-that-chip-cost/
 - SemiAnalysis, "The Dark Side of the Semiconductor Design Renaissance" (mask set and fixed-cost escalation): https://newsletter.semianalysis.com/p/the-dark-side-of-the-semiconductor

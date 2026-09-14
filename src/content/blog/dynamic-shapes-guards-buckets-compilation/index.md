@@ -12,18 +12,19 @@ level: "intermediate"
 tags: ["gpu-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Dynamic Shapes: Guards, Buckets, Padding, and Compilation Cost. Incoming sequences of different lengths enter shape buckets with padding visible.](./section-overview.png)
+
 A compiled model can be fast for one input shape and expensive across a changing workload. New sizes can trigger specialization, guard checks, compilation, or different kernels. Padding can improve reuse of a stable shape but adds work and memory. Symbolic shapes can widen a variant's validity while changing the optimizations available to it.
 
 The useful question is not whether dynamic shapes are good or bad. It is which shape policy minimizes total useful cost for the actual input distribution while preserving semantics and service objectives. Compilation, execution, padding, and memory belong in the same comparison.
 
 We will derive these costs and explain guard behavior, bucketing, and measurement. Numerical examples are illustrative. Current PyTorch compiler documentation defines available controls and symbolic-shape behavior for the installed version.
 
-## 1. Describe the whole specialization population
+## Deep dive
 
-![Concept overview: Dynamic Shapes: Guards, Buckets, Padding, and Compilation Cost. Incoming sequences of different lengths enter shape buckets with padding visible.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Describe the whole specialization population
 
 Record changing batch sizes, sequence lengths, feature widths, layouts, dtypes, and relevant branch behavior. A workload that varies only sequence length differs from one that also changes tensor strides and Python control state.
 
@@ -35,7 +36,7 @@ Keep the required output semantics explicit. Padding, packing, or changing a bra
 
 Several specialization axes can combine. A simplified policy with 3 batch choices, 4 sequence buckets, and 2 layout cases has 24 possible combinations before dtype or branch differences. That is a potential space, not a claim that the compiler must create 24 independent variants. Symbolic reuse and shared paths can reduce it, while other assumptions can enlarge it. Record the combinations actually encountered and their frequencies. A policy that looks inexpensive when considering only sequence buckets can retain much more setup and memory when the full population is included.
 
-## 2. Understand guards as validity conditions
+### 2. Understand guards as validity conditions
 
 A compiled variant is valid under conditions represented by its guards and specialization. A guard can depend on shape, dtype, layout, object state, or other supported assumptions. When those assumptions do not hold, the system must follow its supported fallback or compilation behavior.
 
@@ -45,7 +46,9 @@ Inspect compiler diagnostics when investigating recompilation. Do not infer the 
 
 Record the actual variants and why they are used. A configuration requesting dynamic execution does not establish that every relevant assumption became symbolic or that no specialization remains. Current supported behavior determines the executed result.
 
-## 3. Model total compilation and execution cost
+### 3. Model total compilation and execution cost
+
+![Deep-dive illustration: Model total compilation and execution cost](./deep-dive.png)
 
 Let V be compiled variants, C_v their setup costs, and T(x_i,v_i) the execution time for input i using its selected variant. A simplified workload budget is
 
@@ -59,10 +62,7 @@ For an illustrative variant costing 2 seconds to compile and saving 1 millisecon
 
 A steady-state benchmark excludes this tradeoff unless compilation is measured separately. Keep cold-start, first-use, and reused-execution populations distinct. The deployment's lifetime and cache behavior determine which result matters.
 
-
-![Deep-dive illustration: Model total compilation and execution cost](./deep-dive.png)
-
-## 4. Symbolic shapes widen reuse but do not promise identical kernels
+### 4. Symbolic shapes widen reuse but do not promise identical kernels
 
 Symbolic dimensions let supported compiled execution represent a range of sizes instead of specializing every size independently. The compiler still needs valid relationships, bounds, and operations, and some optimizations depend on known dimensions.
 
@@ -72,7 +72,9 @@ Use current public compiler controls and diagnostics rather than copying interna
 
 Data-dependent control flow is a separate issue from symbolic tensor dimensions. A branch determined by tensor values can require different support from a branch determined by size. Do not expect dynamic shape handling alone to make arbitrary Python logic one reusable graph.
 
-## 5. Bucketing trades more stable variants for padding
+### 5. Bucketing trades more stable variants for padding
+
+![Deep dive: 5. Bucketing trades more stable variants for padding](./deep-dive-component-03.png)
 
 A bucket policy maps actual length L to a supported padded length B(L) at least as large as L. It can make kernels, graph replay, and memory plans more regular, but padded positions must be masked correctly and still can consume resources.
 
@@ -92,7 +94,9 @@ These ratios are logical work estimates, not exact runtime predictions. Kernel e
 
 For illustrative L=410 and bucket 512, linear work grows by about 24.9%, while the dense pair count grows by about 55.9%. A modest length increase can therefore have a larger attention cost than a linear-layer estimate suggests.
 
-## 6. Derive a geometric-bucket tradeoff
+### 6. Derive a geometric-bucket tradeoff
+
+![Deep dive: 6. Derive a geometric-bucket tradeoff](./deep-dive-component-01.png)
 
 If successive bucket boundaries grow by ratio r, a length just above the lower boundary can be padded by almost r. The corresponding dense-attention pair overhead can approach r squared.
 
@@ -108,7 +112,9 @@ The approximate number of geometric intervals covering lengths from L_min to L_m
 
 Choose using the observed distribution rather than only a worst-case bound. A workload concentrated near a few lengths may prefer explicit buckets, while a broad distribution may benefit from more symbolic reuse. Count memory and compile lifetime alongside padding work.
 
-## 7. Preserve masks, positions, and statistics
+### 7. Preserve masks, positions, and statistics
+
+![Deep dive: 7. Preserve masks, positions, and statistics](./deep-dive-component-02.png)
 
 Padded tokens must not contribute where the original operation excludes them. Attention masks, position identifiers, loss masks, and normalization counts can each need adjustment. A kernel running a larger tensor does not automatically preserve the original result.
 
@@ -120,10 +126,7 @@ Verify outputs for several actual lengths within each bucket, including the boun
 
 Causal attention has about L times L plus 1 divided by 2 allowed pairs, and an optimized kernel may avoid some masked tiles. Padding therefore does not necessarily execute the full dense square implied by a simple tensor shape. Decode has a different query population again. Keep the pair-count estimate as a logical bound or approximation and identify the actual backend work. Cache reservations should also distinguish true logical sequence positions from unused physical capacity, so a bucketed allocation does not accidentally make invalid positions visible to attention.
 
-![Deep dive: 7. Preserve masks, positions, and statistics](./deep-dive-component-02.png)
-
-
-## 8. Budget memory and graph lifetime
+### 8. Budget memory and graph lifetime
 
 Padding expands activations, temporary buffers, and sometimes cache reservations. Graph or variant-specific buffers can also retain capacity. A policy that minimizes compile time can increase memory enough to reduce feasible batch or concurrency.
 
@@ -139,7 +142,7 @@ For an illustrative 8 variants each retaining 200 MiB independently, the total i
 
 Measure dynamic concurrency too. Several shape populations active together can raise lifetime overlap and pressure differently from a sequential sweep. Preserve the admitted workload when comparing policies.
 
-## 9. Benchmark the distribution rather than one shape
+### 9. Benchmark the distribution rather than one shape
 
 Replay representative shape frequencies with fixed useful work and output requirements. Record variant count, guard misses, compilation, kernel selection, memory, and latency. Include both cold and warmed deployment cases where relevant.
 
@@ -149,7 +152,7 @@ Inspect why a candidate wins. It may reduce compilation, improve kernel efficien
 
 For an illustrative workload with 90% of requests near length 512 and 10% spread broadly, a stable 512 bucket plus a wider reusable fallback may deserve comparison with a uniform policy. This is a candidate experiment, not a universal recommendation. The rare population's latency and compile behavior still need observation.
 
-## 10. Keep the shape policy versioned
+### 10. Keep the shape policy versioned
 
 Record bucket boundaries, symbolic dimensions, compiler controls, cache lifetime, supported layouts, masks, and workload frequencies. Include first-use timestamps so compile stalls can be correlated with the requests that actually encountered them. Revisit after model or kernel changes because the execution and memory tradeoff can shift.
 
@@ -157,9 +160,11 @@ A faster compute kernel can make compilation or routing more visible. A differen
 
 Preserve small semantic tests and representative performance cases for regression. They should detect changed guards, variant proliferation, incorrect padding, and useful workload slowdown without mirroring incidental compiler internals.
 
+## Conclusion
+
 Dynamic-shape engineering is a balance between validity range, specialization, padding, and lifetime. Guards define reuse, buckets define added work, and compilation defines setup. Choose the policy that delivers correct useful execution across the actual distribution with a feasible memory and latency budget.
 
-## Sources
+### Sources
 
 - [PyTorch dynamic shapes documentation](https://docs.pytorch.org/docs/stable/torch.compiler_dynamic_shapes.html).
 - [PyTorch compiler documentation](https://docs.pytorch.org/docs/stable/torch.compiler.html).

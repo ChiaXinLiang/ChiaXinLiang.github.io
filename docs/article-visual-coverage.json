@@ -1,0 +1,1028 @@
+[
+  {
+    "content_path": "src/content/blog/bandwidth-latency-communication-cost-model/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/batching-the-biggest-throughput-lever/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/blackwell-to-rubin-memory-math/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/efficiency-objectives-pareto-deployment/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/reading-a-modern-llm/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/training-memory-and-step-time/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/vision-transformer-patches-position-cost/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 16
+  },
+  {
+    "content_path": "src/content/blog/what-a-cpu-actually-does/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/what-does-an-ml-performance-engineer-do/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/what-is-a-neural-network/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/why-gpus-sit-idle/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/ai-cluster-topology-local-and-scale-out/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/attention-state-mha-mqa-gqa/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 13
+  },
+  {
+    "content_path": "src/content/blog/compute-bound-vs-memory-bound/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/ddp-gradient-buckets-backward-timeline/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/efficient-vision-token-reduction-resolution/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 16
+  },
+  {
+    "content_path": "src/content/blog/goodput-vs-utilization/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/how-models-learn/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/instruction-sets-software-hardware-contract/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/kv-cache-explained/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/nvfp4-vs-mxfp4-the-4bit-format-war/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/pruning-saliency-magnitude-recovery/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 13
+  },
+  {
+    "content_path": "src/content/blog/cnn-how-machines-learned-to-see/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/diffusion-noise-prediction-training-objective/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 16
+  },
+  {
+    "content_path": "src/content/blog/ethernet-infiniband-rdma-data-path-guarantees/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fsdp-zero-sharding-materialization/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/gpu-memory-math-will-it-fit/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/memory-coalescing/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/mixture-of-experts-routing-selected-computation/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 13
+  },
+  {
+    "content_path": "src/content/blog/quantization-what-you-gain-what-you-lose/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/structured-sparsity-hardware-speedups/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 14
+  },
+  {
+    "content_path": "src/content/blog/the-memory-wall-latency-numbers/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/tokens-per-megawatt/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/activation-checkpointing-selective-recomputation/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/caches-how-locality-rescues-speed/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/collectives-ring-tree-reduce-scatter-all-gather/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/diffusion-sampling-solvers-ode-sde/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 17
+  },
+  {
+    "content_path": "src/content/blog/hybrid-attention-recurrent-state-token-history/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/prefill-gets-its-own-chip-rubin-cpx/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/profiling-basics-where-time-goes/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/quantization-scales-clipping-calibration/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 14
+  },
+  {
+    "content_path": "src/content/blog/theoretical-tokens-per-second-from-bandwidth/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/tokenization-why-llms-dont-see-words/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/vllm-tensorrt-llm-sglang-compared/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/cost-per-million-tokens/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/cuda-kernel-indexing-launch-boundaries/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/diffusion-distillation-fewer-generation-steps/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 17
+  },
+  {
+    "content_path": "src/content/blog/does-llama-70b-fit-on-one-h100/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/gpudirect-rdma-locality-transport-verification/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/how-an-llm-generates-text/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/hyperscaler-inference-silicon/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/multimodal-llms-image-audio-language-representations/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/ptq-qat-fake-quantization-training/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 14
+  },
+  {
+    "content_path": "src/content/blog/simd-one-instruction-many-numbers/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/tensor-pipeline-parallelism-partitions-bubbles/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/attention-state-mla-latent-cache-reconstruction/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 14
+  },
+  {
+    "content_path": "src/content/blog/cpu-vs-gpu-latency-vs-throughput-machines/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/expert-context-sequence-parallel-process-mesh/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/gptq-awq-smoothquant-mechanisms/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/network-benchmarking-latency-bus-bandwidth-scaling/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/performance-experiments-warmup-variance-reproduction/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/probability-for-machine-learning/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/stop-serving-prefill-and-decode-together/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/the-wafer-scale-bet-cerebras/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/triton-programs-masks-layout-correctness/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/vision-generation-deployment-experiment/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 17
+  },
+  {
+    "content_path": "src/content/blog/arm-aarch64-registers-and-ecosystem/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 12
+  },
+  {
+    "content_path": "src/content/blog/comparing-llm-architectures-evidence-tradeoffs/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 16
+  },
+  {
+    "content_path": "src/content/blog/debugging-nccl-rdma-verify-path-before-tuning/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/kv-cache-first-class-citizen/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/mixed-precision-layer-sensitivity-budget/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/nvl72-one-rack-one-giant-gpu/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/occupancy-and-the-roofline/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/rnn-lstm-and-the-wall/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/training-in-4-bit/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/training-offload-cpu-nvme-critical-path/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/attention-in-plain-words/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/deepseek-v41-flash-causal-encoder-decoder/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 14
+  },
+  {
+    "content_path": "src/content/blog/distillation-temperature-teacher-student/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/distributed-checkpoints-recovery-goodput/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/every-kernel-is-one-of-four-things/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/free-speed-from-the-os/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/gpu-economics-from-openais-price-sheet/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/hide-the-network-overlap-communication/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/riscv-small-base-extensible-system/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 12
+  },
+  {
+    "content_path": "src/content/blog/tuning-inference-at-scale/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/arithmetic-intensity/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/arm-riscv-x86-comparing-without-myths/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 12
+  },
+  {
+    "content_path": "src/content/blog/deepseek-v41-flash-csa2-hierarchical-indexing/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 14
+  },
+  {
+    "content_path": "src/content/blog/distillation-features-data-deployment/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/gpus-waiting-on-storage/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/how-much-kv-cache-for-128k-context/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/roce-congestion-ecn-pfc-tail-latency/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/the-9-percent-model-qwen3-next/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/transformer-architecture-in-one-picture/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/benchmarking-pitfalls/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/branch-prediction-the-cpu-gambler/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/deepseek-v41-flash-fp4-cache-bounded-replay/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 14
+  },
+  {
+    "content_path": "src/content/blog/flashattention-online-softmax-io-model/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/lora-low-rank-updates-memory/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/moe-all-to-all-dispatch-imbalance-cost/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/the-default-cuda-stream-hidden-barrier/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/when-a-kernel-cuts-api-prices/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/why-transformers-won/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/mixture-of-experts-capacity-load-balance-dispatch/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 14
+  },
+  {
+    "content_path": "src/content/blog/network-failures-stragglers-distributed-stalls/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/out-of-order-execution/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/pretraining-finetuning-rlhf/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/qlora-quantized-base-adapter-numerics/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 16
+  },
+  {
+    "content_path": "src/content/blog/structured-output-grammar-masks-throughput/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/the-prefill-decode-disaggregation-story/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/torch-compile-and-hidden-syncs/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/training-input-pipeline-workers-pinned-memory-gds/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/a-year-of-kernelbench/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/cuda-correctness-memory-races-barriers-sanitizer/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/from-dram-to-hbm/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/gpt-oss-residual-structure-sparse-experts/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 13
+  },
+  {
+    "content_path": "src/content/blog/hardware-aware-model-design-latency/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/latency-vs-throughput/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/numa-cpu-memory-irq-locality/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/serving-observability-traces-counters-capacity/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/gpt-oss-attention-patterns-sinks-representation/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 14
+  },
+  {
+    "content_path": "src/content/blog/gpu-containers-compatibility-libraries-io-paths/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/neural-architecture-search-cost-evidence/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/speculative-decoding-in-one-picture/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/systolic-arrays-the-idea-inside-tpus/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/tiled-gemm-correctness-measured-memory-model/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/ttft-and-tpot/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/compression-experiment-quality-deployment/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/kubernetes-slurm-topology-resource-guarantees/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/qwen36-hybrid-multimodal-configuration/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/serving-moe-giants/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/shared-memory-banks-padding-swizzling-broadcast/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/the-golden-age-of-domain-specific-chips/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/tokens-per-second-what-it-hides/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/asic-vs-fpga-vs-gpu/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/inference-engines-that-retune-themselves/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/maximum-likelihood-estimation/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/performance-regression-ci-reproducible-speedups/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/reasoning-models-post-training-inference-compute/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 15
+  },
+  {
+    "content_path": "src/content/blog/stream-ordered-allocation-pools-events-reuse/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/ai-optimizing-ai/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/dynamic-shapes-guards-buckets-compilation/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/map-estimation-and-priors/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 12
+  },
+  {
+    "content_path": "src/content/blog/rtl-to-gdsii-in-plain-words/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/state-space-models-dynamics-discretization/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 17
+  },
+  {
+    "content_path": "src/content/blog/case-first-token-takes-8-seconds/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/cross-entropy-and-kl-divergence/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/state-space-execution-scans-recurrence-hybrids/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 17
+  },
+  {
+    "content_path": "src/content/blog/the-economics-of-a-tapeout/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/triton-fused-normalization-reduction-first-principles/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/case-throughput-collapses-at-30-users/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/generalization-and-regularization/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/warp-specialization/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 5
+  },
+  {
+    "content_path": "src/content/blog/why-ai-chips-are-the-easy-asics/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/case-gpu-busy-tokens-low/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/cuda-graphs-record-once-replay-forever/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/case-slower-on-the-bigger-gpu/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/inside-torch-compile-graph-breaks/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/case-latency-spikes-batch-scheduler/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/how-big-a-batch-before-compute-bound/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/case-quantized-model-isnt-faster/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/instruction-level-parallelism-registers-spills/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/asynchronous-tile-loading-tma-buffer-ownership/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/case-long-chats-get-slower/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/case-p50-great-p99-terrible/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/persistent-kernels-atomic-queues-irregular-work/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/cloud-gpu-price-to-cost-per-million-tokens/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/compiled-training-aotautograd-saved-tensors-fusion/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 12
+  },
+  {
+    "content_path": "src/content/blog/energy-useful-token-power-clocks-slos/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/admission-control-qos-deadlines-fairness/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 8
+  }
+]

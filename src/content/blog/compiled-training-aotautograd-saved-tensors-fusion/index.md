@@ -12,16 +12,19 @@ level: "advanced"
 tags: ["gpu-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Compiled Training: AOTAutograd, Saved Tensors, and Fusion Boundaries. A forward computation graph and backward graph share saved activation tensors.](./section-overview.png)
+
 Compiling a training program is more involved than compiling its forward pass. The program must produce a valid loss, compute gradients with the intended differentiation rules, preserve state updates, and respect tensor lifetimes across forward and backward execution. A fast inference graph can still leave the expensive training path unchanged or introduce a costly saved-tensor boundary.
 
 AOTAutograd provides a way to trace differentiable computation and expose forward and backward graphs to compilation. The name refers to preparing those graphs before their compiled execution, not to a promise that the entire application has become one permanent ahead-of-time binary. Actual integration, graph capture, and supported behavior depend on the PyTorch version and backend.
 
-## 1. Write the differentiation contract
+## Deep dive
 
-![Concept overview: Compiled Training: AOTAutograd, Saved Tensors, and Fusion Boundaries. A forward computation graph and backward graph share saved activation tensors.](./section-overview.png)
+### 1. Write the differentiation contract
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Write the differentiation contract](./deep-dive.png)
 
 Consider a function producing a scalar loss from parameters and input data. The training step needs both the loss and its derivatives with respect to the intended parameter population. Frozen parameters, detached tensors, and nondifferentiable operations alter that population. The compiler must preserve those semantics rather than differentiating every available tensor.
 
@@ -34,10 +37,7 @@ The update function also depends on optimizer state s. Momentum, adaptive moment
 
 Establish which operations belong to the compiled region. The loss can be compiled while the optimizer remains outside it, or a larger step can be captured under supported conditions. State the actual boundary in the benchmark. “Compiled training” is otherwise too broad to interpret.
 
-
-![Deep-dive illustration: Write the differentiation contract](./deep-dive.png)
-
-## 2. Trace the joint computation
+### 2. Trace the joint computation
 
 A differentiation system can expose a joint representation of forward operations and the operations needed to calculate gradients. AOTAutograd tracing makes that computation available for partitioning and backend compilation. The resulting representations need not resemble the handwritten Python function line by line.
 
@@ -45,7 +45,9 @@ Tracing observes tensor operations under particular assumptions about inputs, sh
 
 The joint graph gives a compiler visibility into relationships that separate forward and backward optimization would miss. For example, a cheap forward intermediate might be recomputed in backward instead of saved. Conversely, an expensive operation may justify retaining its result even if that increases memory use.
 
-## 3. Derive a saved-tensor decision
+### 3. Derive a saved-tensor decision
+
+![Deep dive: 3. Derive a saved-tensor decision](./deep-dive-component-01.png)
 
 Suppose a backward operation needs an intermediate z produced by an earlier forward operation. Saving z consumes memory over its live interval. Recomputing z avoids that saved allocation but repeats work and may require saving some of its inputs. The comparison must include the entire dependency closure, not just z's own size.
 
@@ -59,7 +61,7 @@ The coefficient is a modeling device, not a universal compiler setting. Real sys
 
 For an illustrative intermediate of sixteen megabytes whose producer is inexpensive element-wise arithmetic, recomputation may be attractive if its inputs already remain live. If producing the same-size intermediate requires a large matrix multiplication and retaining its inputs adds substantial memory, the tradeoff changes. Equal output size does not imply equal recomputation cost.
 
-## 4. Understand graph partitioning
+### 4. Understand graph partitioning
 
 A partitioner divides the joint graph into forward and backward execution regions and determines values crossing their boundary. Saved tensors are part of this interface. Their placement affects memory lifetime, transfer cost where relevant, and opportunities to fuse surrounding operations.
 
@@ -67,7 +69,7 @@ The official AOTAutograd optimization tutorial discusses partitioning strategies
 
 A useful inspection asks which values are outputs of the compiled forward graph for backward use, which backward operations recompute values, and which inputs must survive. Do not infer those decisions from the source code alone. Generated graphs and memory observations provide the relevant evidence.
 
-## 5. Work through a small derivative
+### 5. Work through a small derivative
 
 Let an element-wise forward computation multiply a parameter by an input, apply a sigmoid, and sum the resulting values. The backward gradient depends on the sigmoid output and the input. It need not save the product if the chosen differentiation path has sufficient other values.
 
@@ -81,7 +83,7 @@ One partition can save y and x. Another can retain the required inputs and recom
 
 This example explains the boundary without suggesting that the compiler always selects one policy. Measure the actual graphs. A numerical test should compare the gradient as well as the scalar loss, using a tolerance appropriate to precision and expected operation reordering.
 
-## 6. Explain fusion boundaries
+### 6. Explain fusion boundaries
 
 Fusion combines compatible operations into fewer kernels and can avoid writing intermediate tensors to device memory. It can also reduce launch overhead. Compatibility depends on iteration domains, layouts, reduction structure, numerical behavior, and backend capabilities.
 
@@ -89,7 +91,7 @@ A saved value can force an intermediate to remain available after the forward re
 
 Larger fused regions can increase register pressure and live state. They may constrain scheduling around reductions or matrix operations. A kernel-count reduction is evidence about launches, not a sufficient performance result. Record elapsed time and resource use for the complete relevant step.
 
-## 7. Preserve mutations and aliasing
+### 7. Preserve mutations and aliasing
 
 Training code often changes parameters, optimizer buffers, counters, or accumulated gradients. Tensor views can share storage even when their Python objects differ. A compiler must represent those dependencies correctly, including mutations that become observable outside the captured region.
 
@@ -97,7 +99,7 @@ Functionalization can transform supported mutations and view behavior into a rep
 
 An in-place operation can also violate autograd's own saved-value requirements independently of compilation. Establish a correct eager baseline first. A compiler failure caused by an invalid differentiation program should not be addressed by silently changing the mathematical training objective.
 
-## 8. Include randomness and precision
+### 8. Include randomness and precision
 
 Dropout and other stochastic operations influence both forward values and gradients. Recomputing them requires a valid relationship to the intended random-number state. Activation checkpointing, graph partitioning, and backend lowering must be examined under their documented behavior rather than assumed to redraw equivalent masks.
 
@@ -105,7 +107,7 @@ Mixed precision introduces cast placement, accumulator precision, loss scaling, 
 
 Control random seeds and initial state for comparisons, but do not assume every compiled implementation reproduces the eager random sequence bit for bit. State whether the test requires exact reproducibility, numerical closeness under matched randomness, or a statistical property. Those are different validation contracts.
 
-## 9. Measure compilation separately
+### 9. Measure compilation separately
 
 The first execution can include tracing, graph transformation, code generation, autotuning, and initialization. Report cold-start cost separately from warmed steady-state step time. Recompilation under changed shapes or guards belongs in a workload measurement when the real input distribution triggers it.
 
@@ -113,7 +115,9 @@ Use a consistent timing boundary covering forward, backward, and whichever optim
 
 Record peak allocated memory and, when useful, reserved memory separately. The allocator's reserved pool is not the same as simultaneously live tensors. A reduction in saved tensors can change peak allocation without immediately reducing reserved capacity. Explain the measured quantity instead of presenting one memory number as universal.
 
-## 10. Validate gradients and trajectories
+### 10. Validate gradients and trajectories
+
+![Deep dive: 10. Validate gradients and trajectories](./deep-dive-component-03.png)
 
 Compare eager and compiled runs from identical parameters and optimizer state. Test loss, selected intermediate outputs, gradients, and updated parameters. Exercise accumulation, zeroing behavior, supported shapes, and noncontiguous layouts if they belong to the input contract.
 
@@ -128,7 +132,7 @@ Choose the perturbation with floating-point error in mind; making it arbitrarily
 
 A few successful steps establish local agreement. A longer trajectory can reveal accumulating state or precision differences, although exact trajectories may diverge under allowed floating-point reordering. Define acceptable evidence for the use case and keep the eager reference reproducible.
 
-## 11. Build a useful regression record
+### 11. Build a useful regression record
 
 Store the PyTorch version, backend, compile options, shape distribution, dtype, initial state, and timing method. Include graph breaks and recompilation behavior when they materially affect the result. A performance regression can originate in partitioning, generated kernels, saved-value lifetime, or a changed workload boundary.
 
@@ -136,7 +140,9 @@ Compare one change at a time when diagnosing. If peak memory rises, inspect new 
 
 The methods and derivative examples here have not been benchmarked on a GPU in this editing environment. They explain how to assess compiled training: preserve the differentiation and update contract, inspect the forward-backward boundary, and measure the complete supported step.
 
-## 12. Distinguish live intervals from tensor totals
+### 12. Distinguish live intervals from tensor totals
+
+![Deep dive: 12. Distinguish live intervals from tensor totals](./deep-dive-component-02.png)
 
 Suppose the forward pass creates three intermediate tensors, each occupying ten megabytes. Adding their sizes gives thirty megabytes, but that is not necessarily the peak. If the first tensor dies before the third is created, only two may coexist. Conversely, saving the first tensor for backward can extend its lifetime until all three coexist. The saved-value decision changes the overlap of intervals rather than merely the number of tensors created.
 
@@ -144,12 +150,11 @@ Backward execution can create its own temporaries while saved forward values are
 
 Recomputation has a similar subtlety. Recomputing a ten-megabyte tensor avoids its long saved interval, but briefly materializing it beside a large backward temporary can still contribute to peak memory. Fusion may avoid that materialization, whereas a backend boundary may preserve it. The partition and lowering decisions interact, which is why a simple sum of saved tensor sizes is only a diagnostic quantity.
 
+## Conclusion
+
 For a concrete review, draw each important value's lifetime from creation to last use on a forward-backward timeline. Mark the tensors crossing the partition boundary and the temporaries introduced by backward. Then compare the timeline with measured peak allocation. An unexplained discrepancy identifies missing state, aliasing, allocator behavior, or an incorrect assumption about generated execution. This exercise makes a memory claim reviewable without pretending the source-level graph determines every runtime allocation.
 
-![Deep dive: 12. Distinguish live intervals from tensor totals](./deep-dive-component-02.png)
-
-
-## Sources
+### Sources
 
 - [Official AOTAutograd optimization tutorial](https://docs.pytorch.org/functorch/stable/notebooks/aot_autograd_optimizations.html).
 - [PyTorch torch.compile tutorial](https://docs.pytorch.org/tutorials/intermediate/torch_compile_tutorial.html).

@@ -3,7 +3,7 @@ title: 'Case File: Throughput Collapses at 30 Concurrent Users'
 description: "A serving cluster that hums at 25 users falls off a cliff at 30 — the culprit is a 32 GB KV cache pool, and the fix is arithmetic, not hardware."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'case-2'
 order: 18
 series: "llm-serving"
@@ -12,11 +12,17 @@ topic: "Production Serving"
 tags: [kv-cache, inference, troubleshooting]
 ---
 
+## Overview
+
+![Concept overview: Case File: Throughput Collapses at 30 Concurrent Users](./section-overview.png)
+
 At 25 concurrent users the deployment served 1,420 tokens per second. At 30 users it served 650. 20 percent more load, 54 percent less throughput, and p99 time-to-first-token went from 900 ms to 41 seconds. Nothing crashed. No OOM error, no restart, no alert beyond the latency dashboard turning red.
 
 This illustrative reconstruction is the second case file in the troubleshooting series, and it is the most common production incident I know of in LLM serving. The failure mode has a specific shape: performance is not merely flat past some load level, it is dramatically *worse* than at lower load. A queue that saturates degrades gracefully. This system fell off a cliff. Cliffs mean the server is doing something pathological under pressure, and in this case the pathology has a name: KV cache preemption thrash.
 
-## The symptom, precisely
+## Deep dive
+
+### The symptom, precisely
 
 The setup: a 70B-parameter model, weights quantized to 4-bit, serving on a single 80 GB GPU with a popular inference engine (the numbers below use vLLM's vocabulary, but SGLang and TensorRT-LLM have the same machinery under different names). Requests average about 4,000 tokens of context. Load testing showed beautiful scaling from 1 to 25 concurrent users: aggregate tokens per second climbed almost linearly, per-user latency crept up only mildly. Classic continuous-batching behavior, exactly what the [batching lever](/blog/batching-the-biggest-throughput-lever/) is supposed to buy you.
 
@@ -28,7 +34,7 @@ Then, between 27 and 30 users, 3 things happened at once:
 
 That third observation is the tell. If the GPU were compute-starved, utilization would be pinned at 100% and throughput would plateau. Utilization dropping while load rises means the GPU is spending its time on something other than useful token generation. The bottleneck is not FLOPs. It is memory capacity.
 
-## What actually runs out
+### What actually runs out
 
 During decode, every live request holds its attention history in the KV cache: 1 key vector and 1 value vector per token, per layer. The engine pre-allocates a fixed pool for this at startup, which is why `nvidia-smi` shows ~78 GB used even with 2 users connected. PagedAttention manages that pool the way an OS manages RAM: it is carved into fixed-size blocks (16 tokens each by default), and sequences are given blocks on demand, so almost no memory is wasted on fragmentation. The paper that introduced this (Kwon et al., 2023) measured 60-80% of KV memory wasted in pre-PagedAttention engines; modern engines waste under 4%.
 
@@ -38,8 +44,9 @@ vLLM's scheduler handles this by preempting a low-priority sequence, in one of 2
 
 Except time is exactly the thing being measured. A preempted 4,000-token request that gets recomputed costs the GPU a full second-scale prefill that produces 0 new output tokens. Do that continuously and the cliff appears.
 
+### The worked example: finding the cliff by hand
 
-## The worked example: finding the cliff by hand
+![Deep dive: The worked example: finding the cliff by hand](./deep-dive-component-01.png)
 
 Let's predict the exact user count where this deployment runs out, using a Llama-3.3-70B-shaped model. Its attention geometry, from the Llama 3 technical report: 80 layers, 64 query heads, but only **8 KV heads** thanks to grouped-query attention (GQA), each with dimension 128.
 
@@ -80,10 +87,9 @@ Assume no shared prefixes and a uniform uncompressed cache layout. For $$k=32768
 
 This improves the baseline policy by anticipating cache growth before admission instead of discarding completed prefill after exhausting capacity. The reservation can be intentionally conservative; smaller allowances improve occupancy but require explicit queuing or preemption policy when requests exceed them. Shared prefixes can reduce physical allocations, but must be counted through actual ownership and reference tracking. The 24-request arithmetic bound and a stipulated 30-user collapse are not an exact match: variable lengths and scheduler behavior can explain a range, but require measurements. Treat this case as an illustrative reconstruction. Recomputed values should preserve model semantics within expected numerical tolerance; bit-identical results are not guaranteed across kernel schedules.
 
-![Deep dive: The worked example: finding the cliff by hand](./deep-dive-component-01.png)
+### Going deeper: why a cliff and not a slope
 
-
-## Going deeper: why a cliff and not a slope
+![Deep dive: Going deeper: why a cliff and not a slope](./deep-dive-component-02.png)
 
 Queueing systems normally degrade gracefully: past saturation, throughput holds at capacity and waiting time grows. The KV-exhausted system does something worse because preemption-by-recompute makes the server *destroy completed work* under overload.
 
@@ -93,10 +99,9 @@ This is also why p99 diverges while p50 barely moves. Preemption victims are not
 
 The observability fix is knowing which counters tell the truth. `nvidia-smi` memory usage is useless here (it reads ~78 GB at every load level, because the pool is pre-allocated). The counters that matter in vLLM: `vllm:num_preemptions_total` (any sustained nonzero rate is this incident), `vllm:gpu_cache_usage_perc` (pinned at ~100% during the cliff), and the scheduler's running-vs-waiting queue depths. The engine even logs a warning the first time it preempts, citing reduced performance. In my experience that log line is the single highest-value grep in LLM serving.
 
-![Deep dive: Going deeper: why a cliff and not a slope](./deep-dive-component-02.png)
+### The fixes, in the order I'd try them
 
-
-## The fixes, in the order I'd try them
+![Deep dive: The fixes, in the order I'd try them](./deep-dive-component-03.png)
 
 **1. Quantize the KV cache to FP8.** 1 flag in vLLM (`kv_cache_dtype="fp8"`) and supported natively in TensorRT-LLM. Halves per-token cost, roughly doubles the user count at the cliff, and measured quality deltas on modern models are small (validate on your own evals; vendor accuracy claims are self-reported). This is the highest leverage-to-effort ratio available.
 
@@ -108,8 +113,7 @@ The observability fix is knowing which counters tell the truth. `nvidia-smi` mem
 
 **5. Route prefill elsewhere.** At larger scale, the reason this incident happens at all is that prefill and decode fight for 1 pool. [Disaggregating them](/blog/the-prefill-decode-disaggregation-story/) gives decode nodes a KV budget that prefill bursts can't invade.
 
-
-## Common misconceptions
+### Common misconceptions
 
 **"Throughput collapsed, so we need more compute."** No. Compute-bound saturation produces a plateau at 100% utilization, not a collapse with falling utilization. This GPU had FLOPs to spare; it had no free KV blocks. Buying a faster card with the same 80 GB moves the cliff almost nowhere, whereas an FP8 cache flag doubles it for free. Diagnose the resource before spending on 1.
 
@@ -117,19 +121,19 @@ The observability fix is knowing which counters tell the truth. `nvidia-smi` mem
 
 **"Continuous batching means overload degrades gracefully."** Continuous batching degrades gracefully only while the pool has room. Past exhaustion, recompute-mode preemption makes marginal load *subtract* capacity, since every admitted-then-evicted request converts finished prefill work into future rework. Graceful degradation under overload is a property you must engineer with admission control; no scheduler gives it to you for free once memory runs out.
 
-## The bigger picture
+### The bigger picture
 
 This case is the KV cache's revenge for being invisible. Weights are static and easy to budget; the cache is dynamic, proportional to live traffic, and the first thing to run out in production. That is why the industry's last 2 years of serving work is mostly KV-cache work: GQA and MLA shrink it at the architecture level, FP8 and paged layouts shrink it at the systems level, offload tiers and disaggregation give it a memory hierarchy of its own. If the mechanics of prefill versus decode underlying all of this are fuzzy, the [generation basics article](/blog/how-an-llm-generates-text/) is the foundation; the economic framing of why every one of these fixes is really a cost lever lives in the [goodput piece](/blog/goodput-vs-utilization/).
 
 The meta-lesson for troubleshooting: a performance *cliff* is a fingerprint. Plateaus point at saturated compute or bandwidth. Cliffs point at a resource with hard admission semantics, where crossing the limit triggers expensive corrective machinery, page thrash in an OS, retry storms in an RPC mesh, preemption in an LLM scheduler. When you see 1, ask what the scheduler does when it runs out, not what it does when it's busy.
 
-## Takeaway
+## Conclusion
 
 - KV capacity, not compute, sets the concurrency ceiling: for a GQA 70B at 4k context on 1 80 GB card, ~320 KiB/token × 4,096 tokens ≈ 1.34 GB per request against a ~32 GB pool, so the cliff sits near 24 users, and the back-of-envelope predicts the load test.
 - The collapse mechanism is preemption thrash: recompute-mode eviction re-runs whole prefills, so past exhaustion each extra user subtracts throughput and p99 TTFT diverges while p50 looks fine. Watch preemption counters and cache occupancy, not `nvidia-smi`.
 - Cheapest fixes first: FP8 KV cache (~2× capacity), admission control at the computed limit (queue, don't thrash), then GQA-aware sizing, CPU offload tiers, and prefill/decode disaggregation as scale grows.
 
-## Sources
+### Sources
 
 - Kwon et al., *Efficient Memory Management for Large Language Model Serving with PagedAttention* (SOSP 2023) — https://arxiv.org/abs/2309.06180
 - Ainslie et al., *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints* — https://arxiv.org/abs/2305.13245

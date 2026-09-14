@@ -9,8 +9,12 @@ order: 4
 topic: "Diffusion Models"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: './deep-dive.png'
+heroImage: './section-overview.png'
 ---
+
+## Overview
+
+![Concept overview: Efficient Diffusion Sampling: Solvers, ODEs, and SDEs](./section-overview.png)
 
 A diffusion sampler turns a learned prediction into a numerical trajectory from noise toward data. Fewer updates can reduce generation work, but the chosen solver must remain compatible with the model's noise schedule and prediction type. Counting steps without counting network evaluations or evaluating quality gives an incomplete efficiency claim.
 
@@ -19,7 +23,11 @@ This article connects discrete denoising to stochastic and ordinary differential
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
-## 1. Define the continuous forward process
+## Deep dive
+
+### 1. Define the continuous forward process
+
+![Deep-dive illustration: Define the continuous forward process](./deep-dive.png)
 
 A broad continuous-time formulation describes a state x_t with drift f and scalar diffusion scale g. Brownian motion W_t introduces stochastic noise.
 
@@ -31,10 +39,7 @@ The drift and diffusion define how the data distribution evolves toward a noise 
 
 The coefficient convention matters. A discrete checkpoint can be used through an appropriate continuous noise-level interface, but an arbitrary time mapping can change the numerical problem. Preserve the scheduler's definitions and model conditioning rather than identifying timestep indices with continuous time without conversion.
 
-
-![Deep-dive illustration: Define the continuous forward process](./deep-dive.png)
-
-## 2. Introduce the reverse-time SDE
+### 2. Introduce the reverse-time SDE
 
 Under the standard regularity conditions, the reverse stochastic equation uses the score of the time-dependent marginal density p_t. Written with time integrated backward, its drift contains the score correction:
 
@@ -46,7 +51,9 @@ The backward-time Brownian term follows the reverse process convention. Sign han
 
 A trained network estimates the score directly or through a converted noise prediction. That estimate is not exact, so the sampler combines statistical model error with numerical integration error. Reducing integration error alone cannot repair every limitation of the learned predictor.
 
-## 3. Define the probability-flow ODE
+### 3. Define the probability-flow ODE
+
+![Deep dive: 3. Define the probability-flow ODE](./deep-dive-component-03.png)
 
 The associated probability-flow ordinary differential equation uses half the stochastic score correction and removes the Brownian term.
 
@@ -58,7 +65,7 @@ With the exact score and the stated assumptions, this ODE shares the time-depend
 
 Generation can integrate the ODE backward from a noise sample. Deterministic here means no additional Brownian sampling during the trajectory under a fixed initial state and condition. Different initial noise still produces different outputs, and finite-precision execution can introduce implementation variability.
 
-## 4. Convert predictor types correctly
+### 4. Convert predictor types correctly
 
 For a variance-preserving Gaussian corruption, a noise predictor maps to a score after division by the appropriate noise standard deviation and a negative sign.
 
@@ -70,7 +77,7 @@ This expression uses the discrete marginal notation established in the previous 
 
 A solver expecting clean-sample prediction cannot consume noise prediction unchanged. Likewise, guidance expressed in one parameterization must be translated consistently. Verify conversions on tiny known examples before attributing poor generation to the solver's order or step count.
 
-## 5. Derive an Euler update
+### 5. Derive an Euler update
 
 Write the ODE drift as F(x,t). A first-order Euler update advances the state by the current drift multiplied by a signed timestep h.
 
@@ -82,7 +89,7 @@ When integrating backward, h is negative under this time convention. An implemen
 
 Euler is easy to understand and uses one drift evaluation per update. Its accuracy depends on step size and smoothness. A coarse update can depart substantially from the intended trajectory, especially where the drift changes rapidly. The simple rule is a baseline for understanding more specialized samplers.
 
-## 6. Explain higher-order evaluation cost
+### 6. Explain higher-order evaluation cost
 
 A second-order explicit trapezoidal method first predicts an endpoint with Euler, then evaluates the drift there and averages the two slopes.
 
@@ -94,7 +101,7 @@ This generic method illustrates how higher order can require more network evalua
 
 Under suitable assumptions, improved local accuracy can justify larger steps. But fewer steps do not automatically mean fewer evaluations or lower wall time. Report network evaluations and complete runtime alongside the integration rule and timestep schedule.
 
-## 7. Work through a scalar trajectory
+### 7. Work through a scalar trajectory
 
 Consider the illustrative ODE dx/dt equal to negative x, starting at 1. Its exact forward solution at time 1 is approximately 0.3679. Two Euler steps of size 0.5 produce 0.25.
 
@@ -102,7 +109,9 @@ Two explicit trapezoidal steps with that size produce approximately 0.3906, usin
 
 It does not establish the same ordering for a learned diffusion drift under guidance and a particular schedule. Use the scalar problem to verify numerical implementation and error behavior, then evaluate trained-model generation under the intended conditions.
 
-## 8. Distinguish DDIM's deterministic path
+### 8. Distinguish DDIM's deterministic path
+
+![Deep dive: 8. Distinguish DDIM's deterministic path](./deep-dive-component-04.png)
 
 DDIM introduces a family of sampling processes compatible with the studied diffusion training formulation. Its deterministic setting follows an update using estimated clean content and noise at selected levels.
 
@@ -110,7 +119,7 @@ The key point is that changing the inference trajectory need not require retrain
 
 Do not equate every deterministic sampler with DDIM, or assume any arbitrary skipping pattern preserves quality. A deterministic initial-noise-to-output mapping describes one property of execution, while integration accuracy and task quality describe different properties. Preserve the exact update and stochasticity parameter in experiment metadata.
 
-## 9. Explain DPM-Solver's structural innovation
+### 9. Explain DPM-Solver's structural innovation
 
 DPM-Solver examines the semilinear structure of the diffusion ODE. It handles the linear component analytically and approximates a transformed integral involving the neural prediction, rather than applying only a generic black-box integrator.
 
@@ -118,7 +127,7 @@ That separation can reduce discretization error in the known linear part and foc
 
 The innovation is structural, not merely a larger order label. Implement the paper or a verified scheduler's exact coefficients, time variable, and predictor assumptions. A generic Runge-Kutta update does not reproduce DPM-Solver simply because both solve an ODE.
 
-## 10. Understand log signal-to-noise coordinates
+### 10. Understand log signal-to-noise coordinates
 
 For a marginal x_t equal to alpha(t) times clean data plus sigma(t) times noise, a useful coordinate is the logarithm of the signal-to-noise amplitude ratio.
 
@@ -130,7 +139,7 @@ This differs by a factor of 2 from the log ratio of signal and noise variances. 
 
 A solver can organize steps in this coordinate because the noise schedule's geometry matters to approximation. Uniform steps in an index, continuous time, or log ratio are different choices. Compare them under the actual model rather than assuming a uniform grid is uniform in every meaningful noise quantity.
 
-## 11. Count function evaluations explicitly
+### 11. Count function evaluations explicitly
 
 Let NFE denote neural predictor evaluations. A generation cost model separates their cost from fixed pipeline stages and scheduler overhead.
 
@@ -142,7 +151,9 @@ Network time can vary with numerical path, batch, or conditioning. A multistep m
 
 Classifier-free guidance can add conditional and unconditional work. Batched evaluation changes wall time without changing the number of conceptual predictions. Report the convention used for NFE and the complete runtime so that comparisons remain interpretable.
 
-## 12. Include adaptive-step limitations
+### 12. Include adaptive-step limitations
+
+![Deep dive: 12. Include adaptive-step limitations](./deep-dive-component-01.png)
 
 Adaptive solvers use error estimates to choose steps under a tolerance. They can spend more work where the trajectory is difficult and less where it is smooth.
 
@@ -150,7 +161,9 @@ The estimated error usually concerns numerical integration under the learned dri
 
 Adaptive counts can also vary across samples and interact with batching. Measure the intended execution policy rather than extrapolating from one easy trajectory. Record tolerance, minimum steps, maximum evaluations, and any fallback behavior when those settings define the operating envelope.
 
-## 13. Compare stochastic and deterministic sampling fairly
+### 13. Compare stochastic and deterministic sampling fairly
+
+![Deep dive: 13. Compare stochastic and deterministic sampling fairly](./deep-dive-component-05.png)
 
 A stochastic trajectory and a deterministic probability-flow trajectory can generate different individual outputs from related starting conditions. Their distributional quality should be assessed with the task's appropriate evidence.
 
@@ -158,7 +171,7 @@ Keep conditioning, guidance, resolution, initial-noise policy, and output count 
 
 Measure diversity and condition fidelity when they matter. A speed comparison that silently changes guidance or evaluates only selected attractive outputs can confound the solver's contribution. The full generation population and selection policy belong in the experiment record.
 
-## 14. Separate solver order from practical quality
+### 14. Separate solver order from practical quality
 
 Convergence order describes how numerical error scales with step size under specified assumptions. A learned drift, discrete training schedule, guidance, thresholding, and very few steps can affect whether the asymptotic regime is relevant.
 
@@ -166,7 +179,7 @@ Higher order can therefore be valuable without always winning at every budget. A
 
 Evaluate several supported operating points rather than declaring a universal winner from one order number. Plot quality against evaluations and measured runtime, preserving the backend and pipeline. The useful outcome is a frontier under the intended task, not a ranking detached from its workload.
 
-## 15. Verify the sampler interface
+### 15. Verify the sampler interface
 
 Use a simple analytic ODE to check time direction, evaluation count, and numerical error. Test predictor conversion with known clean data and noise under the scheduler's coefficients.
 
@@ -174,7 +187,7 @@ Inspect endpoint handling and any thresholding. Verify the model receives the no
 
 No trained diffusion artifact was executed for this article. Its scalar trajectory and equations are explanatory. The primary sources provide their own sampling experiments; a new deployment requires quality and runtime evidence from its actual model, scheduler, and numerical configuration.
 
-## 16. Choose from the whole cost-quality frontier
+### 16. Choose from the whole cost-quality frontier
 
 Sampling efficiency is a numerical and systems problem. A specialized solver can reduce required evaluations, while a faster kernel reduces each evaluation's cost. Fixed encoding and decoding stages remain, and guidance can alter the repeated work.
 
@@ -182,18 +195,19 @@ Begin with a verified scheduler and a clear quality target. Compare supported st
 
 This distinguishes training-free solver changes from step-distilled models discussed next. Both can reduce generation work, but they modify different parts of the statistical and numerical system and need different preparation accounting.
 
-## 17. Separate predictor error from integration error
+### 17. Separate predictor error from integration error
+
+![Deep dive: 17. Separate predictor error from integration error](./deep-dive-component-02.png)
 
 Suppose the implemented drift differs from an ideal drift by a bounded perturbation, and the ideal drift is Lipschitz in the state over the region being integrated. A trajectory-error bound then depends on both that perturbation and the interval length, with amplification controlled by the Lipschitz behavior. Smaller solver steps address discretization error but leave the drift perturbation itself.
 
 This explains a practical plateau: increasing evaluations can eventually produce little quality improvement if the learned predictor or conditioning is the main limitation. Conversely, a strong predictor can still suffer under an incompatible coarse integration rule.
 
+## Conclusion
+
 Inspect quality across several evaluation budgets and compare supported solvers. The shape of that curve helps identify whether more numerical work is useful. It is not a formal guarantee for a neural image generator, but it gives a mechanistic explanation for why solver accuracy and learned-model quality should be reported as distinct sources of approximation.
 
-![Deep dive: 17. Separate predictor error from integration error](./deep-dive-component-02.png)
-
-
-## Sources
+### Sources
 
 - [Score-Based Generative Modeling through Stochastic Differential Equations](https://arxiv.org/abs/2011.13456).
 - [Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502).

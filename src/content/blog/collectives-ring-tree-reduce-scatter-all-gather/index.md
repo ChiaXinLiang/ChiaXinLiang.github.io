@@ -12,18 +12,21 @@ level: "intermediate"
 tags: ["ai-networking", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Collective Communication: Ring, Tree, Reduce-Scatter, and All-Gather. A ring of GPU ranks moves colored chunks for reduce-scatter then all-gather, with a separate tree connecting ranks for reduction.](./section-overview.png)
+
 A collective is a distributed operation with a precise result, not merely a command to move a tensor quickly. All-reduce combines corresponding values and returns the result to every participant. All-gather collects distinct contributions. Reduce-scatter combines values but leaves different reduced shards on different ranks. Confusing these semantics can produce a communication plan that is fast but computes the wrong training update.
 
 The implementation then chooses an execution schedule: chunks travel around rings, values move through trees, or local and cross-node phases are combined hierarchically. The schedule determines startup count, traffic, reduction work, and exposure to slow participants.
 
 This article connects the mathematical result to those schedules and explains how to compare them. Performance calculations are simplified models with illustrative parameters. Actual algorithm selection depends on the communication library, topology, message size, and configuration.
 
-## 1. Write the collective result before counting bytes
+## Deep dive
 
-![Concept overview: Collective Communication: Ring, Tree, Reduce-Scatter, and All-Gather. A ring of GPU ranks moves colored chunks for reduce-scatter then all-gather, with a separate tree connecting ranks for reduction.](./section-overview.png)
+### 1. Write the collective result before counting bytes
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Write the collective result before counting bytes](./deep-dive.png)
 
 Suppose p ranks each hold a vector x_r of n elements. For a sum all-reduce, every rank receives y with
 
@@ -37,10 +40,7 @@ All-gather instead produces a concatenation or equivalent layout of the original
 
 The participants must agree on group membership, data types, counts, and operation ordering. A rank entering a different collective can stall the group or violate the protocol. A collective's semantic contract therefore includes distributed participation, not only the output tensor formula.
 
-
-![Deep-dive illustration: Write the collective result before counting bytes](./deep-dive.png)
-
-## 2. Decompose all-reduce into ownership-changing phases
+### 2. Decompose all-reduce into ownership-changing phases
 
 Divide the reduced vector into p equal shards for a simple model. After reduce-scatter, rank r owns reduced shard y_r. An all-gather can then distribute those reduced shards so every rank reconstructs the complete y.
 
@@ -58,7 +58,7 @@ Sharded training can stop after reduce-scatter when the next consumer needs only
 
 A deterministic ownership test can give rank r the vector whose element i equals 10r plus i. Across 4 ranks, the sum at element i is 60 plus 4i. The expected shards are therefore easy to calculate, and all-gather should reconstruct those same reduced values in the specified order. This pattern distinguishes summation from concatenation and catches many layout mistakes. Repeat with uneven supported partitions only if the API explicitly permits them; the equal-shard identity does not authorize unsupported input counts.
 
-## 3. Derive the ring traffic budget
+### 3. Derive the ring traffic budget
 
 In a simplified ring, each rank exchanges chunks with neighbors. Reduce-scatter takes p minus 1 rounds, and all-gather takes another p minus 1 rounds. Each phase transfers roughly n_bytes times p minus 1 divided by p bytes per rank.
 
@@ -74,7 +74,9 @@ For p=8 and a 256 MiB logical input, per-rank transferred payload is about 448 M
 
 For tiny messages, startup can dominate; for large messages, the transferred-byte slope becomes more important. A ring's near-constant large-p byte factor does not mean its latency is independent of rank count. The number of rounds still grows in this model.
 
-## 4. Trees trade a different schedule against payload distribution
+### 4. Trees trade a different schedule against payload distribution
+
+![Deep dive: 4. Trees trade a different schedule against payload distribution](./deep-dive-component-01.png)
 
 A reduction tree combines contributions along a hierarchy, then a distribution phase returns the result. An ideal balanced tree has a logarithmic number of levels, making it attractive when startup dominates. The detailed byte movement and concurrency depend on how the implementation divides and pipelines the payload.
 
@@ -90,7 +92,7 @@ At p=8, the idealized level count is 3 for reduction and 3 for distribution. Tha
 
 Actual libraries can select among algorithms and protocols based on measured or configured behavior. Inspect the executed path and benchmark the relevant size range before attributing performance to a schedule inferred from the operation name.
 
-## 5. Hierarchical collectives fit physical locality
+### 5. Hierarchical collectives fit physical locality
 
 A hierarchical operation can first combine data within a strong local accelerator domain, then exchange information across servers, and finally distribute results locally. The logical result remains the same, but fewer or differently organized messages cross expensive physical boundaries.
 
@@ -100,7 +102,7 @@ Count the actual local and remote work rather than assuming hierarchy always red
 
 Process placement is part of this comparison. Preserve rank-to-device and adapter mappings across runs. If the launcher changes placement, the same collective configuration can stress different shared resources and produce results that look like an algorithm regression.
 
-## 6. Reduction order introduces numerical considerations
+### 6. Reduction order introduces numerical considerations
 
 Floating-point addition is not associative. Different ring, tree, and hierarchical schedules can combine values in different orders, changing rounding even when each implementation computes the same mathematical reduction. Exact bitwise agreement is therefore a stronger requirement than ordinary numerical correctness.
 
@@ -110,7 +112,7 @@ Choose tolerances appropriate to dtype and application behavior. Compare small d
 
 User-defined reduction operators require additional semantic care. An operation that is not compatible with the implementation's ordering assumptions can invalidate the result. Follow the communication API's supported operator contract rather than assuming any local function can be distributed arbitrarily.
 
-## 7. Rank readiness can dominate an otherwise fast collective
+### 7. Rank readiness can dominate an otherwise fast collective
 
 A collective waits on participation and data readiness, not just network transfer. If one rank reaches the operation late because of a long kernel, delayed input, or previous synchronization, the other ranks can appear to spend time in communication while the real cause is upstream.
 
@@ -126,7 +128,9 @@ Collect traces around the preceding computation and the collective. If all ranks
 
 For overlapped gradient synchronization, bucket readiness and operation ordering matter. Early work can be hidden behind backward computation, while the final bucket determines an exposed tail. An isolated all-reduce benchmark cannot measure that application scheduling effect.
 
-## 8. Interpret benchmark bandwidth using its definition
+### 8. Interpret benchmark bandwidth using its definition
+
+![Deep dive: 8. Interpret benchmark bandwidth using its definition](./deep-dive-component-02.png)
 
 Algorithm bandwidth typically divides the logical input size by elapsed time. NCCL tests additionally define bus-bandwidth factors for particular collectives to reflect associated traffic. An all-reduce factor differs from all-gather and reduce-scatter factors, so column values across operations are not identical link measurements.
 
@@ -138,10 +142,7 @@ Test correctness before ranking performance. Fill inputs with patterns that reve
 
 When comparing a forced algorithm with the library default, preserve the diagnostic output showing what was selected and whether fallback occurred. A configuration request is not evidence that every tested size used that path. Some combinations are unsupported, and protocols can change independently of the algorithm. Report those transitions alongside the size sweep. If a setting improves one large-message point but regresses the many smaller messages used by the job, its peak bandwidth result is insufficient justification for adopting it.
 
-![Deep dive: 8. Interpret benchmark bandwidth using its definition](./deep-dive-component-02.png)
-
-
-## 9. Choose the operation and schedule from the consumer's needs
+### 9. Choose the operation and schedule from the consumer's needs
 
 Begin with the result and ownership required by the next computation. Use reduce-scatter when consumers need distinct reduced shards, all-gather when they need the distributed contributions reconstructed, and all-reduce when every participant needs the complete reduced tensor.
 
@@ -149,9 +150,11 @@ Then count startup rounds and payload demand under candidate schedules. Map that
 
 A useful comparison report names the semantic operation, the executed algorithm or observed configuration, the bytes and rank population, the timing boundary, and the downstream effect. These details make a speedup reproducible and prevent a change in ownership or workload from being mistaken for an implementation improvement.
 
+## Conclusion
+
 Collectives are valuable because they express distributed computation compactly. Their performance becomes understandable when that compact expression is expanded into ownership, rounds, paths, and readiness. The fastest useful collective is the one that computes the required result and delivers it to the required consumers with the least exposed cost.
 
-## Sources
+### Sources
 
 - [NCCL collective semantics](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html).
 - [NCCL tests performance definitions](https://github.com/NVIDIA/nccl-tests/blob/master/doc/PERFORMANCE.md).

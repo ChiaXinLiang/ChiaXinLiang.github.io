@@ -3,7 +3,7 @@ title: 'The New Golden Age: Why Chips Went Domain-Specific'
 description: "General-purpose CPU performance now grows about 3% a year. Hennessy and Patterson's answer, the domain-specific architecture, is reshaping every chip you own."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'par-4'
 order: 14
 series: "comp-arch"
@@ -12,11 +12,19 @@ topic: "Parallel Architectures"
 tags: ['asic', 'accelerators', 'hardware']
 ---
 
+## Overview
+
+![Concept overview: The New Golden Age: Why Chips Went Domain-Specific](./section-overview.png)
+
 Between 1986 and 2003, single-threaded CPU performance improved about 52% per year. By the mid-2010s, John Hennessy and David Patterson measured the rate at roughly 3.5% per year. At that pace, the doubling that used to arrive every eighteen months now takes 2 decades.
 
 That collapse is the subject of their 2018 Turing Award lecture, "A New Golden Age for Computer Architecture," and it explains almost everything strange about modern silicon: why Google builds its own chips, why your phone has a "neural engine," why NVIDIA's biggest jumps come from new number formats rather than new clocks. When the general-purpose escalator stops, the only way up is to build a staircase for 1 specific workload. The industry's name for that staircase is the **domain-specific architecture**, or DSA.
 
-## 2 laws carried computing, and one of them died
+## Deep dive
+
+### 2 laws carried computing, and one of them died
+
+![Deep dive: 2 laws carried computing, and one of them died](./deep-dive-component-03.png)
 
 For 4 decades, 2 empirical laws did the heavy lifting. **Moore's Law** said the number of transistors you could buy for a dollar doubled roughly every 2 years. **Dennard scaling**, described by Robert Dennard and colleagues in 1974, said something subtler and arguably more important: as transistors shrink, their voltage and current shrink proportionally, so the *power per square millimeter of silicon stays constant*. Shrink the transistor and you get a faster switch that costs no extra power. Chip designers could raise clock frequencies every generation essentially for free.
 
@@ -27,7 +35,7 @@ Multicore bought about a decade, but it runs into **Amdahl's Law**: speedup is c
 
 Moore's Law, meanwhile, is not dead but it is limping: transistor counts still rise, more slowly, and the cost per transistor no longer falls the way it used to. So the modern designer's situation is peculiar. You can still *get* billions of transistors. What you cannot do is power them all as general-purpose logic, and you cannot expect next year's process node to bail you out. The question becomes: what is the highest-value way to spend transistors you can no longer afford to waste?
 
-## Where the energy actually goes
+### Where the energy actually goes
 
 The answer starts with an uncomfortable accounting exercise. Mark Horowitz's ISSCC 2014 numbers for a 45 nm chip are the standard reference. An 8-bit integer addition costs about 0.03 picojoules. A 32-bit addition, 0.1 pJ. A 32-bit floating-point multiply, 3.7 pJ. Reading 32 bits from a small 8 KB SRAM, about 10 pJ. Fetching those bits from DRAM instead: 1,300 to 2,600 pJ.
 
@@ -36,7 +44,9 @@ And here is the killer: on a big out-of-order CPU core, the full cost of executi
 
 Flexibility was a fantastic deal while Dennard scaling paid the power bill. Now it is the single biggest line item, which suggests a blunt strategy: for a workload you understand deeply, strip the flexibility out and spend the recovered energy on arithmetic. That is the entire intellectual content of the DSA movement. The rest is engineering.
 
-## A worked example: the TPU's arithmetic, by hand
+### A worked example: the TPU's arithmetic, by hand
+
+![Deep dive: A worked example: the TPU's arithmetic, by hand](./deep-dive-component-01.png)
 
 Google's first Tensor Processing Unit, described by Norman Jouppi and colleagues at ISCA 2017, is the canonical DSA, and its headline numbers can be reproduced on the back of an envelope.
 
@@ -63,10 +73,7 @@ At an illustrative 40 watts and 92 trillion useful operations per second, the ra
 
 The DSA method changes several terms together: instruction granularity amortizes control, smaller formats reduce arithmetic and traffic, and local storage reduces expensive movement. To identify an architectural improvement, compare the same workload and numerical requirements on the baseline, measuring total joules to completion. Operation-energy estimates from 1 process cannot be divided into whole-chip measurements from another as if all conditions matched. Precision changes also require an accuracy check. Specialization buys an efficient supported operating envelope; poor tile utilization or unsupported operators can erase the apparent arithmetic advantage.
 
-![Deep dive: A worked example: the TPU's arithmetic, by hand](./deep-dive-component-01.png)
-
-
-## Going deeper: the 5 moves every DSA makes
+### Going deeper: the 5 moves every DSA makes
 
 Hennessy and Patterson distill the DSA recipe into 5 guidelines, and once you know them you will see them in every accelerator datasheet.
 
@@ -83,13 +90,13 @@ Hennessy and Patterson distill the DSA recipe into 5 guidelines, and once you kn
 
 The common thread is that every guideline trades *generality you were paying for but not using* for throughput and energy. A DSA is not a better CPU. It is a machine that refuses to be a CPU.
 
-## The DSAs already in your pocket
+### The DSAs already in your pocket
 
 This is not a datacenter-only story. A modern phone SoC is a museum of the same idea. There is an NPU for neural inference (Apple quotes 35 TOPS for the A17 Pro's Neural Engine; treat that as a vendor self-reported figure). There is a fixed-function video block, the only reason 4K decode sips milliwatts instead of draining your battery in an hour of software decoding. There is an image signal processor for the camera pipeline, and dedicated AES hardware encrypting storage at line rate. Die-shot analyses of recent Apple SoCs count dozens of accelerator blocks around a shrinking share of general-purpose core area.
 
 The same pattern scaled up: YouTube transcodes video on Google's custom VCU chips (the Argos project), for which Google reported 20 to 33 times better performance per total cost of ownership than its CPU baseline, again a self-reported number, but directionally consistent with everything above. Networking has P4 switch ASICs. Bitcoin mining went CPU to GPU to FPGA to full ASIC in 5 years, a speedrun of the entire argument.
 
-## Common misconceptions
+### Common misconceptions
 
 **"Chips went specialized because Moore's Law died."** Not quite, and the distinction matters. Transistor counts are still growing; what died is Dennard scaling, the guarantee that you could *power* those transistors at full generality. If Moore's Law alone had failed, we would just have stagnation; because it half-survives while Dennard is gone, we get billions of transistors looking for an energy-efficient job. Specialization is that job.
 
@@ -97,7 +104,9 @@ The same pattern scaled up: YouTube transcodes video on Google's custom VCU chip
 
 **"Everything will get its own chip now."** Specialization has a steep entry fee. You need a workload big enough to justify tens of millions of dollars of design cost, stable enough to survive the 2-to-3-year gap between architectural freeze and silicon, and a software stack to make the chip usable. Video encoding qualifies. Your niche simulation probably does not, which is why FPGAs and GPUs (semi-specialized, reprogrammable) occupy the huge middle ground. And stability is the trap: TPU v1's design was frozen before transformers existed. It did fine because matrix multiply stayed the universal currency, but that was partly luck.
 
-## The lottery, and the bigger picture
+### The lottery, and the bigger picture
+
+![Deep dive: The lottery, and the bigger picture](./deep-dive-component-02.png)
 
 That last point deserves its own paragraph, because Sara Hooker gave it a name: **the hardware lottery**. Her argument is that research ideas succeed or fail partly on how well they fit the hardware of their day, not on merit alone. Deep learning itself languished for 2 decades until GPUs, built for an entirely different domain, happened to be a good fit; we traced that accident in [CNN: How Machines Learned to See](/blog/cnn-how-machines-learned-to-see/). The catch is that DSAs sharpen the lottery. When the world's compute is optimized for dense matrix multiplication, algorithms that need sparsity, dynamic control flow, or irregular memory access start every race 20 meters behind, and it was no coincidence that the architecture which conquered NLP, the [transformer](/blog/transformer-architecture-in-one-picture/), is the one that is almost pure matmul. Specialization is a ratchet: hardware chases the winning algorithm, and the algorithm wins harder because the hardware chases it.
 
@@ -105,16 +114,13 @@ For this series, the DSA is where all the parallel-architecture threads meet. SI
 
 Hennessy and Patterson call this a *golden age* without irony. Architecture stagnated for years because the general-purpose CPU was unbeatable; now that it grows 3% a year, wild ideas get funded again. Next in this series we follow the logic to its endpoint: what it actually takes to design and ship an ASIC.
 
-![Deep dive: The lottery, and the bigger picture](./deep-dive-component-02.png)
-
-
-## Takeaway
+## Conclusion
 
 - Dennard scaling ended around 2004 and the cited historical single-thread performance chart had slowed to roughly 3.5% annual improvement by the mid-2010s, so the era of free speedups from process shrinks is over; specialization is the remaining path.
 - A DSA wins on energy accounting: a CPU spends ~70 pJ of control overhead per ~0.03-3.7 pJ operation, while the TPU amortizes 1 instruction over millions of MACs, landing within 3-4x of the raw cost of its arithmetic.
 - The 5 DSA moves are scratchpads over caches, no speculation, domain-matched parallelism, small data types, and hardware-software co-design; their cost is the hardware lottery, where silicon frozen years in advance decides which algorithms get to be cheap.
 
-## Sources
+### Sources
 
 - Hennessy, J. & Patterson, D., "A New Golden Age for Computer Architecture," Communications of the ACM, 2019. https://cacm.acm.org/research/a-new-golden-age-for-computer-architecture/
 - Jouppi, N. et al., "In-Datacenter Performance Analysis of a Tensor Processing Unit," ISCA 2017. https://arxiv.org/abs/1704.04760

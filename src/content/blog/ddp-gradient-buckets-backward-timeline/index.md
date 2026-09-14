@@ -12,18 +12,19 @@ level: "intermediate"
 tags: ["distributed-training", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: DDP: Gradient Buckets and the Backward Communication Timeline. Multiple GPU ranks compute backward layers.](./section-overview.png)
+
 Adding a second GPU to a training script does not automatically halve its step time. DistributedDataParallel, usually abbreviated DDP, replicates the model, assigns different inputs to participating ranks, and synchronizes gradients before each optimizer update. The useful extra work is parallel computation over those inputs. The cost is coordination and communication needed to keep the replicas consistent.
 
 DDP is especially instructive because its optimization rests on the structure of backpropagation. Gradients for later layers become ready before gradients for earlier layers. The framework can therefore begin reducing completed portions while the remaining backward computation continues. Understanding that timeline explains why bucket size, rank imbalance, loss normalization, and accumulation settings matter more than an isolated network bandwidth number.
 
 We will derive the average-gradient objective, model bucket completion times, and work a small overlap example. The timings are hypothetical and use a simplified serialized communication model. They are a tool for reasoning about a trace, not a prediction that every NCCL implementation follows the same exact execution schedule.
 
-## 1. Replication defines what must remain consistent
+## Deep dive
 
-![Concept overview: DDP: Gradient Buckets and the Backward Communication Timeline. Multiple GPU ranks compute backward layers.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Replication defines what must remain consistent
 
 A DDP rank normally keeps a full model replica and its optimizer state. Each rank runs forward and backward on a local batch. If every rank starts with the same parameter values, receives the same synchronized gradient, and applies the same optimizer update, the replicas remain consistent. Synchronization does not require broadcasting every updated parameter on every step in this basic model.
 
@@ -31,7 +32,9 @@ The ranks must also agree on the distributed program. Collectives need compatibl
 
 DDP does not itself divide an arbitrary input batch among devices. The data pipeline must arrange which samples each rank processes. Distributed sampling, deterministic epoch handling, and a consistent stopping policy are part of the correctness story. Accidentally feeding identical examples to all ranks can make the reported device throughput rise without increasing the useful distinct training data processed.
 
-## 2. Derive the synchronized gradient
+### 2. Derive the synchronized gradient
+
+![Deep-dive illustration: Derive the synchronized gradient](./deep-dive.png)
 
 Let D be the number of ranks, and suppose rank d has B local examples. Let the local loss be the average of per-example losses. With equal local batch sizes and consistent reduction conventions, the global objective is
 
@@ -47,10 +50,9 @@ Unequal numbers of valid tokens require more care. Suppose rank d has n_d valid 
 
 Loss weighting can correct the difference if counts and reduction factors are handled consistently. State whether the objective averages examples, valid tokens, sequences, or ranks. A faster distributed configuration is not an equivalent baseline when it silently changes these weights. Numerical equality should be assessed with sensible floating-point tolerances rather than requiring identical accumulation order.
 
+### 3. Why gradients travel in buckets
 
-![Deep-dive illustration: Derive the synchronized gradient](./deep-dive.png)
-
-## 3. Why gradients travel in buckets
+![Deep dive: 3. Why gradients travel in buckets](./deep-dive-component-01.png)
 
 An all-reduce for every small parameter tensor would incur many launches and message startup costs. Waiting until the entire backward pass finishes would instead lose most overlap opportunities. Buckets balance these extremes by grouping gradients into larger communication units.
 
@@ -60,7 +62,7 @@ Parameter registration order and the framework’s bucket organization influence
 
 A bucket is also a memory object. Some configurations let gradients refer directly to bucket storage, reducing copies and memory usage. Such options can affect assumptions about gradient views and supported operations. Consult the installed framework version before applying code that expects independently allocated gradient tensors.
 
-## 4. Derive the exposed tail
+### 4. Derive the exposed tail
 
 Let r_j be the readiness time of bucket j measured from the beginning of backward, and let t_j be its communication duration. In a simplified model with one serialized communication stream, the completion recurrence is
 
@@ -78,7 +80,7 @@ The example also shows why total communication time being shorter than backward 
 
 For unequal ranks, the effective start of a collective depends on participation by the other ranks. A local readiness timestamp is therefore incomplete evidence. One slow input pipeline or expensive layer on one rank can delay the useful reduction even when another rank has already enqueued it.
 
-## 5. Bucket size changes both startup and readiness
+### 5. Bucket size changes both startup and readiness
 
 Larger buckets reduce the number of collectives and amortize launch and message startup overhead. They also take longer to become ready if they include gradients produced at different points in backward. Smaller buckets can begin earlier but increase the number of operations and may use the network less efficiently.
 
@@ -92,7 +94,7 @@ This is an analytical approximation for a logical ring, not a complete NCCL perf
 
 A useful tuning experiment sweeps several bucket capacities while keeping the model, rank placement, sequence lengths, accumulation factor, and numerical policy fixed. Record step time, bucket readiness, communication tail, and compute slowdown. Selecting the capacity with the shortest isolated all-reduce time can be inferior to selecting the capacity with the best complete-step timeline.
 
-## 6. Gradient accumulation changes synchronization frequency
+### 6. Gradient accumulation changes synchronization frequency
 
 If an optimizer step contains A local microsteps, accumulating gradients can defer synchronization until the final microstep. PyTorch exposes a no_sync context for this purpose. The forward pass must also occur inside the context for the intended behavior; wrapping only backward is an easy mistake.
 
@@ -102,7 +104,7 @@ The accumulation schedule exchanges communication frequency for memory and compu
 
 Use a minimal correctness comparison against a reference update with an equivalent global batch. Compare parameter deltas or gradients for a small deterministic model, then repeat with the actual mixed-precision policy. Random-number streams, dropout, and floating-point reduction ordering can create expected differences; distinguish those from incorrect loss scaling or missing synchronization.
 
-## 7. Compilation can reshape the overlap opportunity
+### 7. Compilation can reshape the overlap opportunity
 
 A compiler that fuses a large backward graph can change when reducer hooks become observable and when collectives launch. Compilation benefits and communication overlap must therefore be assessed together. PyTorch’s DDP design documentation describes bucket-aware compiler behavior intended to retain useful overlap opportunities.
 
@@ -110,7 +112,9 @@ Do not assume a faster single-rank compiled model produces the same proportional
 
 The correct experiment includes eager and compiled variants under the same rank topology and workload. Warm up compilation before timing steady-state iterations, but report compilation cost separately if the job is short enough for that cost to matter. Record graph breaks and guard behavior when variable shapes can trigger additional work.
 
-## 8. Diagnose a slow DDP step in layers
+### 8. Diagnose a slow DDP step in layers
+
+![Deep dive: 8. Diagnose a slow DDP step in layers](./deep-dive-component-02.png)
 
 Start with a reproducible workload and a synchronized understanding of the timing boundary. Observe several ranks, not just rank 0. Separate data loading, forward compute, backward compute, gradient communication, and update work. Look for the earliest point where ranks diverge rather than treating the final waiting collective as the original cause.
 
@@ -120,10 +124,7 @@ Then inspect bucket readiness and exposed tails. A long final bucket suggests a 
 
 Finally, validate useful work and numerical behavior. Count distinct valid training tokens, confirm sample distribution, and compare the resulting update convention. A job that runs without hanging can still train on the wrong effective objective or repeated data. Distributed correctness and performance require evidence about both the communication program and the learning program.
 
-![Deep dive: 8. Diagnose a slow DDP step in layers](./deep-dive-component-02.png)
-
-
-## 9. Know when replication is the wrong baseline
+### 9. Know when replication is the wrong baseline
 
 DDP is attractive when the complete model, gradients, optimizer state, and activation peak fit on each rank. It provides a comparatively simple ownership model and can achieve strong scaling when local computation is large enough to amortize synchronization.
 
@@ -131,13 +132,13 @@ When persistent training state does not fit, tuning gradient buckets cannot solv
 
 The transition is also a measurement transition. A DDP all-reduce timeline does not directly predict FSDP all-gather peaks or expert-parallel dispatch. Carry forward the principles of readiness, consistent ordering, critical paths, and useful work, but rebuild the byte and dependency model for the new algorithm.
 
-## Takeaway
+## Conclusion
 
 DDP turns different local gradients into a consistent global update. Buckets make that synchronization efficient by balancing communication startup against gradient readiness. The exposed tail depends on the schedule, not just total network time.
 
 Tune complete steps with representative ranks and inputs. Preserve the intended loss weighting, verify accumulation behavior, and use traces to distinguish bandwidth limitations, late gradients, stragglers, and resource contention. Replication is a useful foundation precisely because its assumptions can be written down and checked.
 
-## Sources
+### Sources
 
 - [PyTorch DDP design note](https://docs.pytorch.org/docs/stable/notes/ddp.html): reducer hooks, bucket ordering, and communication overlap; the note identifies its historical implementation baseline.
 - [DistributedDataParallel API](https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html): current configuration and no_sync behavior.

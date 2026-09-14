@@ -3,7 +3,7 @@ title: "Generalization and Regularization: Fitting the Data Without Memorizing I
 description: "Separate training error from expected deployment loss, calculate an L2-regularized estimator, and explain validation, early stopping, and the limits of simple bias\u2013variance stories."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 series: "llm-basics"
 level: advanced
 code: 'stat-5'
@@ -12,11 +12,17 @@ topic: "Statistical Learning"
 tags: [statistics, theory, learning]
 ---
 
+## Overview
+
+![Concept overview: Generalization and Regularization: Fitting the Data Without Memorizing It](./section-overview.png)
+
 A model can make almost no mistakes on its training examples and still fail on new inputs. Training asks an optimizer to fit observed data; generalization asks whether the resulting rule performs well on another draw from the relevant population. The second question cannot be answered by the training loss alone.
 
 Regularization changes which fitted solutions are preferred. It can discourage large coefficients, constrain a hypothesis class, or stop optimization before it fits unstable patterns. Those mechanisms can improve held-out performance, but none guarantees that a model will work under arbitrary distribution shift. This article connects the statistical objective to a numerical example and a practical evaluation design.
 
-## Define population risk and empirical risk
+## Deep dive
+
+### Define population risk and empirical risk
 
 Let D denote the population distribution over inputs x and targets y. A model f_theta uses parameters theta to make a prediction, and a loss function ell measures its error on 1 input-target pair. Population risk is the expected loss on a new pair drawn from D:
 
@@ -34,7 +40,7 @@ The optimizer sees empirical risk, possibly plus other terms. Deployment cares a
 
 The familiar i.i.d. assumption says examples are independent draws from the same D. Real datasets can contain repeated documents, multiple measurements from 1 person, or temporally correlated incidents. Randomly splitting such examples may leave nearly identical information in both training and evaluation. The apparent held-out result then overstates performance on genuinely new cases.
 
-## Overfitting is a comparison, not a coefficient count
+### Overfitting is a comparison, not a coefficient count
 
 Overfitting occurs when further fitting to the observed data worsens performance on relevant unseen data, or when a flexible fitted rule captures sample-specific patterns that do not transfer. Underfitting occurs when the available model or training process cannot capture important patterns even in the observed sample.
 
@@ -47,7 +53,9 @@ The loss being compared must also match. Training can use augmentation, dropout,
 
 *Original conceptual summary based on the empirical-risk distinction; this figure contains no measured learning curve.*
 
-## Work an L2-regularized estimator by hand
+### Work an L2-regularized estimator by hand
+
+![Deep dive: Work an L2-regularized estimator by hand](./deep-dive-component-03.png)
 
 Consider the simplest regression model: every prediction is the same scalar parameter w. Our 3 illustrative targets are 1, 2, and 6. Use mean squared error with a factor 1 half, plus an L2 penalty with strength lambda greater than or equal to 0:
 
@@ -70,7 +78,7 @@ Suppose a tiny illustrative validation set contains targets 1 and 2. Its mean sq
 
 *Original numerical example. Training and validation targets are illustrative and all errors are calculated in the article.*
 
-## The penalty expresses a preference with units
+### The penalty expresses a preference with units
 
 L2 regularization penalizes squared parameter magnitude. For a vector w, the penalty uses the sum of squared coefficients. It prefers smaller weights relative to the chosen parameterization and feature scale. Multiplying an input feature by a large constant can permit a smaller coefficient for the same predictions, changing the effective penalty unless scaling is handled consistently.
 
@@ -80,7 +88,9 @@ Summed data loss and averaged data loss also imply different relative strengths.
 
 A Gaussian parameter prior yields an L2-type term in a MAP objective, as derived in [MAP estimation](/blog/map-estimation-and-priors/). The coefficient depends on prior variance, observation-noise variance for Gaussian regression, and whether the likelihood loss is summed or averaged. “L2 is a Gaussian prior” is a useful connection only after those conventions are stated.
 
-## Going deeper: bias and variance under squared error
+### Going deeper: bias and variance under squared error
+
+![Deep dive: Going deeper: bias and variance under squared error](./deep-dive-component-01.png)
 
 For squared-error regression, let m(x) be the true conditional mean of y given x. Imagine repeatedly drawing training datasets and fitting a prediction function to each. At a fixed x, the average prediction across those datasets can differ from m(x); that difference is bias. Predictions can also vary across datasets; that spread is estimator variance.
 
@@ -101,10 +111,7 @@ For a new independent target, mean squared prediction error adds squared bias, e
 
 If the true mean were much farther from 0, the same penalty could hurt. That is the method's preference and its cost in explicit form. Use validation to choose lambda under the intended population rather than assuming the illustrative prior is appropriate. This derivation applies to a constant estimator with squared loss; it is not a universal quantitative model of neural-network generalization.
 
-![Deep dive: Going deeper: bias and variance under squared error](./deep-dive-component-01.png)
-
-
-## Validation chooses; testing estimates after choosing
+### Validation chooses; testing estimates after choosing
 
 Split data into training, validation, and test roles. Training fits parameters. Validation selects hyperparameters, checkpoints, preprocessing, and other modeling choices. A test set estimates performance after those choices are fixed. Repeatedly consulting test results to choose a model turns that set into another validation source.
 
@@ -114,7 +121,9 @@ Group-aware and time-aware splits often matter more than the split fractions. If
 
 Preprocessing must follow the same boundary. Fit scalers, imputation rules, vocabulary choices when data-dependent, and feature selection on training data, then apply them to held-out data. Using all examples to select predictive features before splitting leaks target information even if the final parameter fit uses only the training partition.
 
-## Early stopping, augmentation, and explicit penalties
+### Early stopping, augmentation, and explicit penalties
+
+![Deep dive: Early stopping, augmentation, and explicit penalties](./deep-dive-component-02.png)
 
 Early stopping selects a checkpoint before additional optimization harms validation performance. It constrains the optimization path and can act as regularization. It needs a selection rule, a representative validation set, and enough patience to distinguish meaningful changes from noise. Stopping at the lowest observed value across many checks still involves model selection.
 
@@ -124,10 +133,7 @@ Dropout injects randomness into selected activations during training and changes
 
 Weight decay and L2 penalties deserve careful naming. With ordinary gradient descent on a simple parameter vector, adding an L2 gradient produces multiplicative shrinkage alongside the data-gradient update. With adaptive optimizers, decoupled weight decay and adding an L2 term are generally different operations. Check the optimizer documentation and algorithm rather than treating their hyperparameters as interchangeable.
 
-![Deep dive: Early stopping, augmentation, and explicit penalties](./deep-dive-component-02.png)
-
-
-## Generalization is limited by distribution change
+### Generalization is limited by distribution change
 
 A well-regularized model can fail if the deployment distribution differs from the training and validation population. New terminology, different measurement devices, changing user behavior, and adversarial inputs can alter relevant relationships. Regularization helps manage fitting under assumptions; it does not certify robustness to every future change.
 
@@ -140,7 +146,7 @@ For an operational connection, the serving system's performance benchmark also n
 
 *Redrawn from [Dive into Deep Learning, Fig. 3.6.1](https://d2l.ai/chapter_linear-regression/generalization.html#fig-capacity-vs-error). This is classical schematic intuition, not measured data or a universal law for neural networks.*
 
-## Common misconceptions
+### Common misconceptions
 
 “Regularization always improves accuracy.” It changes the fitting preference. An excessive penalty underfits, and a poorly chosen prior or invariance can hurt the relevant task. Select it using a sound validation process.
 
@@ -148,7 +154,7 @@ For an operational connection, the serving system's performance benchmark also n
 
 “More data automatically fixes shift.” More examples from the wrong population can make the wrong relationship easier to learn. Data relevance and coverage matter alongside quantity.
 
-## Takeaway
+## Conclusion
 
 - Empirical risk fits observed data; population risk describes a specified unseen-data process.
 - Regularization trades fit against a stated preference whose scale and parameterization matter.
@@ -156,7 +162,7 @@ For an operational connection, the serving system's performance benchmark also n
 
 Connect the objective back to [MLE](/blog/maximum-likelihood-estimation/), [MAP](/blog/map-estimation-and-priors/), and [cross-entropy](/blog/cross-entropy-and-kl-divergence/), then follow its role in [pretraining and adaptation](/blog/pretraining-finetuning-rlhf/).
 
-## Sources
+### Sources
 
 - [Dive into Deep Learning: Generalization](https://d2l.ai/chapter_linear-regression/generalization.html), empirical versus generalization error, model selection, and validation.
 - [Dive into Deep Learning: Weight Decay](https://d2l.ai/chapter_linear-regression/weight-decay.html), L2 penalties, shrinkage, and feature-scale considerations.

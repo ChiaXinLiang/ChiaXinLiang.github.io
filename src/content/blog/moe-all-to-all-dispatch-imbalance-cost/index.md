@@ -12,18 +12,21 @@ level: "advanced"
 tags: ["ai-networking", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: All-to-All for MoE: Expert Dispatch, Imbalance, and Communication Cost. Multiple GPU servers each contain expert blocks.](./section-overview.png)
+
 Mixture-of-experts models select a small set of expert networks for each token. When those experts live on different devices, the token representations must move to their owners and the expert outputs must return to the original token positions. The resulting communication is often described as all-to-all, but its traffic is determined by routing decisions rather than a fixed uniform matrix.
 
 That distinction matters. A model can use few experts per token while still moving many bytes, and balanced expert selection can still stress a shared network cut. Packing and inverse permutation add memory work around the exchange. A hot expert can delay the entire group even when aggregate fabric bandwidth looks healthy.
 
 We will derive the dispatch budget and follow the complete execution program. The examples are illustrative and use simplified equal-width expert inputs and outputs. Actual dispatchers, routing rules, and capacity policies depend on the model and implementation.
 
-## 1. Begin with the routed mathematical result
+## Deep dive
 
-![Concept overview: All-to-All for MoE: Expert Dispatch, Imbalance, and Communication Cost. Multiple GPU servers each contain expert blocks.](./section-overview.png)
+### 1. Begin with the routed mathematical result
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Begin with the routed mathematical result](./deep-dive.png)
 
 Let x_i be token i's hidden representation. The router selects a set E_i of k experts and supplies combining weights w_i,e. With expert function f_e, the routed contribution is
 
@@ -37,10 +40,7 @@ The router can make nonuniform choices across tokens, layers, and batches. Top-k
 
 Keep token identity and expert identity explicit. Preserve the same identities through every intermediate layout conversion. One token selected for 2 experts creates 2 assignments, and those outputs later combine into one token result. Treating assignments as unique original tokens can break output counts, routing weights, or inverse ordering.
 
-
-![Deep-dive illustration: Begin with the routed mathematical result](./deep-dive.png)
-
-## 2. Construct the source-to-destination traffic matrix
+### 2. Construct the source-to-destination traffic matrix
 
 Suppose p devices participate in an expert group. Let A_r,s be the number of assignments originating on device r and targeting experts owned by device s. The matrix describes dispatch demand before counting bytes.
 
@@ -56,7 +56,9 @@ If each representation has width H and b bytes per element, a simplified remote 
 
 The diagonal assignments are local to an expert owner and need not cross the network, although they still require layout and compute work. A uniformly balanced expert distribution does not by itself determine the remote fraction; token placement and expert placement both matter.
 
-## 3. Derive a complete payload example
+### 3. Derive a complete payload example
+
+![Deep dive: 3. Derive a complete payload example](./deep-dive-component-01.png)
 
 For N=8192 tokens, k=2 selected experts, H=4096, and b=2 bytes, the one-way assignment payload across all destinations is
 
@@ -70,7 +72,7 @@ The calculation shows why sparse expert computation can still produce substantia
 
 Measure physical traffic as well as logical payload. A dispatcher can use intermediate gathering, padding, or different process groups that increase transferred bytes. Quantized communication can reduce payload but add scale metadata and conversion work. Identify the actual representation on the wire rather than assuming it matches stored activations.
 
-## 4. Packing is a memory and indexing computation
+### 4. Packing is a memory and indexing computation
 
 The dispatcher groups assignments by destination and expert so the receiving device can execute suitable expert batches. It preserves enough indices to map returned outputs to original token positions and selected-expert slots. Combining weights must follow the same ordering.
 
@@ -80,7 +82,7 @@ Variable destination counts require a supported exchange protocol. Participants 
 
 Test the permutation independently with small deterministic inputs. Give each token a recognizable identifier and use simple expert outputs whose expected combination is obvious. An output checksum on random data can miss an incorrect pairing between values and routing weights.
 
-## 5. Expert imbalance and network imbalance are distinct
+### 5. Expert imbalance and network imbalance are distinct
 
 Let N_e be assignments to expert e. A simple expert-load ratio is
 
@@ -96,7 +98,7 @@ For an illustrative 8-owner group with 8192 assignments, equal owner load is 102
 
 Record expert counts, owner counts, source-destination counts, and per-rank timing separately. These observations distinguish router imbalance from placement-induced congestion and from a slow expert kernel operating on an otherwise balanced population.
 
-## 6. Capacity policy changes semantics as well as performance
+### 6. Capacity policy changes semantics as well as performance
 
 A capacity factor can define how many assignments an expert is allowed to process relative to an average-load estimate. A simplified fixed capacity is
 
@@ -112,7 +114,7 @@ Do not present dropping or reduced k as an implementation-only speedup. They can
 
 Capacity limits can protect memory while creating different tails and failure modes. Observe overflow, padding, allocation growth, and expert timing. A low average load does not establish that a bursty destination will remain within its supported buffer budget.
 
-## 7. Model the complete dispatch-compute-combine timeline
+### 7. Model the complete dispatch-compute-combine timeline
 
 The execution program includes routing, packing, count coordination where required, outbound exchange, expert computation, return exchange, inverse permutation, and weighted combination. A benchmark of the exchange alone excludes several potentially important costs.
 
@@ -128,7 +130,7 @@ Trace each stage with per-rank context and assignment counts. If packing dominat
 
 Measure useful token progress and preserve numerical output. A dispatcher that appears faster because it omits assignments or misapplies weights is not an optimization of the same computation.
 
-## 8. Account for topology and process-group layout
+### 8. Account for topology and process-group layout
 
 Expert ownership can be distributed within a server, across servers, or through hierarchical groups. Tensor parallelism can interact with expert dispatch, changing which representations or shards each participant exchanges. Define the process mesh before counting world-size factors.
 
@@ -138,7 +140,9 @@ Placement can reduce remote demand or distribute destination pressure, but it al
 
 Compare representative routing populations, not only a perfectly uniform synthetic matrix. Include realistic imbalance and concurrency when selecting a dispatcher or placement. A benchmark that balances every destination by construction can miss the model's actual communication pattern.
 
-## 9. Test and diagnose the inverse path
+### 9. Test and diagnose the inverse path
+
+![Deep dive: 9. Test and diagnose the inverse path](./deep-dive-component-02.png)
 
 The return exchange must preserve the relation between source token, selected expert, and output representation. The inverse permutation then restores the original token ordering, and the weighted combination produces the required routed result.
 
@@ -150,18 +154,17 @@ For instance, a scalar input 10 routed to experts 1 and 3 with weights 0.25 and 
 
 Exercise repeated buffer reuse and varying assignment counts. A dispatcher can pass one fixed-size test while failing when a destination grows or becomes empty. Preserve counts and offsets around the first failure to distinguish indexing errors from transport or visibility problems.
 
-![Deep dive: 9. Test and diagnose the inverse path](./deep-dive-component-02.png)
-
-
-## 10. Report useful sparse execution rather than one exchange rate
+### 10. Report useful sparse execution rather than one exchange rate
 
 A useful report contains model routing semantics, token population, representation width, expert ownership, assignment matrix summaries, capacity policy, actual traffic, stage timing, and end-to-end useful throughput. Label illustrative estimates separately from measured results.
 
 Keep the full program stable when comparing alternatives. A change in k, padding, communication representation, or routing balance can explain a speedup independently of the dispatcher implementation. Identify such changes and evaluate correctness and quality where they alter the method.
 
+## Conclusion
+
 MoE all-to-all is a movement of sparse assignments through a physical topology and back into the original computation. Its cost is determined by bytes, load distribution, layout work, and dependencies. Understanding the complete dispatch-compute-combine program makes it possible to optimize the actual bottleneck while preserving every selected contribution.
 
-## Sources
+### Sources
 
 - [Megatron official MoE implementation guide](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/core/transformer/moe/README.md).
 - [Megatron token dispatcher API](https://docs.nvidia.com/megatron-core/developer-guide/latest/apidocs/core/core.transformer.moe.token_dispatcher.html).

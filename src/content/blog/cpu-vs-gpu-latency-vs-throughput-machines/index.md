@@ -3,7 +3,7 @@ title: 'CPU vs GPU: Latency Machines and Throughput Machines'
 description: "Why a chip with 24 cores beats 1 with 16,896 at some jobs and loses by 100x at others — the design philosophy split, with the die-area budget and Amdahl's law worked by hand."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'par-2'
 order: 6
 series: "comp-arch"
@@ -12,11 +12,19 @@ topic: "Parallel Architectures"
 tags: [gpu, cpu, parallelism]
 ---
 
+## Overview
+
+![Concept overview: CPU vs GPU: Latency Machines and Throughput Machines](./section-overview.png)
+
 An NVIDIA H100 has 16,896 FP32 lanes. AMD's flagship desktop CPU has 16 cores. That is a ratio of roughly 1,000 to 1, and yet the CPU will finish plenty of real programs first. Neither chip is "better." They are answers to 2 different questions, and once you see the questions clearly, almost everything about modern hardware design falls into place.
 
 The CPU's question: *how fast can I finish 1 task?* The GPU's question: *how many tasks can I finish per second?* The first is a latency problem, the second a throughput problem, and they pull silicon design in opposite directions.
 
-## The latency machine
+## Deep dive
+
+### The latency machine
+
+![Deep dive: The latency machine](./deep-dive-component-03.png)
 
 A CPU is built around an uncomfortable fact: main memory is slow. A load from DRAM takes on the order of 100 nanoseconds. At 5 GHz, that is roughly 500 clock cycles of potential idleness for a single miss. Programs also branch every 5 or 6 instructions on average, and each branch threatens to stall the pipeline while the machine figures out where to go next.
 
@@ -29,7 +37,7 @@ So the CPU spends most of its transistor budget not on arithmetic but on *avoidi
 
 All of this exists to serve 1 thread. If you covered an annotated die photo of a modern high-performance core, the actual arithmetic units would be a modest sliver; the predictors, schedulers, load/store machinery, and cache hierarchy dominate. That imbalance is deliberate. For a single dependent chain of instructions, the only thing that matters is time-to-result, and time-to-result is mostly determined by how rarely you stall.
 
-## The throughput machine
+### The throughput machine
 
 A GPU makes the opposite bet. Its native workload — originally shading millions of pixels, now multiplying enormous matrices — consists of huge numbers of near-identical, mostly independent operations. When work is abundant and independent, *stalling doesn't matter as long as something else is ready to run.* So the GPU rips out nearly everything the CPU added.
 
@@ -40,7 +48,9 @@ The famous first figure of the CUDA Programming Guide makes the point in 1 glanc
 
 Slowly and stall often — that sounds bad. The trick is what the GPU does about it.
 
-## Worked example: the 1% that eats your speedup
+### Worked example: the 1% that eats your speedup
+
+![Deep dive: Worked example: the 1% that eats your speedup](./deep-dive-component-01.png)
 
 Before looking at how the GPU stays busy, it's worth asking how much parallel hardware can help *at all*. Gene Amdahl answered this in 1967 with an argument you can do on a napkin.
 
@@ -78,10 +88,9 @@ For $$T_1=100$$ seconds, $$s=0.01$$, and $$N=99$$, the predicted time is 2 secon
 
 This identifies the method behind the CPU/GPU division: accelerate the parallel region and shorten or overlap its surrounding serial path. Compare full-job time before and after offload, including transfers, rather than comparing isolated arithmetic peaks. A faster kernel can lose overall when its launch and data movement exceed the saved compute time. Conversely, keeping data resident across several kernels amortizes those costs. The relevant threshold is useful parallel work per offload, not a universal lane-count ratio.
 
-![Deep dive: Worked example: the 1% that eats your speedup](./deep-dive-component-01.png)
+### Going deeper: how a GPU hides 500 cycles
 
-
-## Going deeper: how a GPU hides 500 cycles
+![Deep dive: Going deeper: how a GPU hides 500 cycles](./deep-dive-component-02.png)
 
 Amdahl tells you how much parallelism helps. It doesn't tell you how the GPU survives memory latency with no OoO engine and barely any cache. The answer is **latency hiding through massive multithreading**, and the mechanism is worth knowing precisely.
 
@@ -94,10 +103,7 @@ The scheme has a knob and a failure mode. The knob is **occupancy**: how many wa
 
 So when does each win? The CPU wins when the working set fits in cache, when control flow is irregular, when the dependency chain is long, or when there simply isn't enough parallel work to fill 16,896 lanes (kernel launch can cost microseconds, which is material for very small tasks). The GPU wins when you have tens of thousands of independent work items and arithmetic or bandwidth is the bottleneck: dense linear algebra, image pipelines, transformer training. Real systems use both, in the roles Amdahl assigned: CPU for the serial 1%, GPU for the parallel 99%.
 
-![Deep dive: Going deeper: how a GPU hides 500 cycles](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"A CUDA core is like a CPU core, just smaller."** A CUDA "core" is a single FP32 arithmetic lane, roughly comparable to 1 lane of a CPU's vector unit. The honest structural analogy is SM ≈ CPU core: both fetch instructions, schedule them, and drive wide SIMD lanes. On that count the comparison is 132 SMs versus 16 cores — about 8x, not 1,000x — with each SM being far simpler and slower per thread. The 1,000x framing compares lanes to cores and mostly generates confusion.
 
@@ -105,7 +111,7 @@ So when does each win? The CPU wins when the working set fits in cache, when con
 
 **"Amdahl's law makes massive parallelism pointless."** The 100x ceiling assumes the problem size stays fixed while lanes grow. In practice, people with 10,000 lanes don't run 1985-sized problems on them; they scale the work to the machine. John Gustafson's 1988 reformulation makes this precise: if the parallel portion grows with the machine while the serial portion stays roughly constant, effective speedup grows nearly linearly with N. Training runs illustrate this: nobody trains a 1990s-sized network on 10,000 GPUs; they train models 10,000 GPUs make possible. Amdahl caps fixed problems, not scaled ones.
 
-## The bigger picture
+### The bigger picture
 
 This split is 1 instance of a theme that runs through the whole series: hardware performance now comes from *specializing the machine to the shape of the work*, because the free lunch of faster general-purpose cores ended when Dennard scaling died. Hennessy and Patterson's Turing Lecture calls the resulting era a new golden age for architecture, and the CPU/GPU pair is its first and largest fossil record: 2 mature answers, coexisting because neither question went away.
 
@@ -113,13 +119,13 @@ If you want the latency machine's internals in detail — pipelines, hazards, an
 
 The next stop in this series pushes specialization 1 step further: if lockstep lanes beat general cores for parallel work, what beats lockstep lanes for *1 specific computation*? That is the systolic array, the design at the heart of Google's TPU.
 
-## Takeaway
+## Conclusion
 
 - CPUs and GPUs answer different questions: the CPU minimizes the latency of 1 task using caches, branch prediction, and out-of-order execution; the GPU maximizes aggregate throughput by filling the die with simple lanes and keeping thousands of threads resident to hide stalls.
 - Amdahl's law is the hard budget on parallel speedup: with a 1% serial fraction, 99 lanes give 50x and infinite lanes give only 100x, which is why every GPU system still needs a fast host CPU for the serial part.
 - The GPU's core mechanism is 0-cost warp switching out of a giant register file (about 33 MB on an H100 — larger than most desktop L3 caches); it fails on branchy, divergent, low-parallelism code, which is exactly where the CPU's machinery earns its area.
 
-## Sources
+### Sources
 
 - J. Hennessy and D. Patterson, "A New Golden Age for Computer Architecture," Communications of the ACM, 2019. https://cacm.acm.org/research/a-new-golden-age-for-computer-architecture/
 - NVIDIA, CUDA C++ Programming Guide (design-philosophy chapter and Fig. 1). https://docs.nvidia.com/cuda/cuda-c-programming-guide/

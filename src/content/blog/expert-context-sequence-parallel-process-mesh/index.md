@@ -12,18 +12,19 @@ level: "advanced"
 tags: ["distributed-training", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Expert, Context, and Sequence Parallelism: Choosing a Process Mesh. Draw a labeled multidimensional GPU process mesh, with different colored axes for expert, context, and sequence partitions.](./section-overview.png)
+
 Large-model training uses several parallelism techniques that sound similar because all of them distribute tensors across GPUs. Expert parallelism distributes sparse expert computation. Context parallelism distributes long sequences while preserving the attention computation. Sequence parallelism reduces replicated activation work and storage around selected tensor-parallel operations.
 
 These techniques address different bottlenecks. Adding them to a training configuration without specifying process groups can double-count resources, create unsupported combinations, or move communication onto expensive links. The right starting point is not a list of parallelism degrees. It is a description of which logical values each rank owns and which other values each operation needs.
 
 This article connects the 3 mechanisms to memory, arithmetic, and communication models. Implementation terminology varies, so we will distinguish the underlying partition from a framework option with a similar name. Worked layouts are illustrative and should be checked against the constraints of the training stack being used.
 
-## 1. Treat the process mesh as an ownership map
+## Deep dive
 
-![Concept overview: Expert, Context, and Sequence Parallelism: Choosing a Process Mesh. Draw a labeled multidimensional GPU process mesh, with different colored axes for expert, context, and sequence partitions.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Treat the process mesh as an ownership map
 
 A process mesh organizes ranks along dimensions corresponding to parts of the computation. Data parallelism assigns different examples to groups. Tensor parallelism partitions operations. Pipeline parallelism assigns layer ranges. Context parallelism can assign sequence positions. Expert parallelism assigns expert ownership and routes token states to the appropriate owners.
 
@@ -33,7 +34,9 @@ Write a table for each tensor: its logical shape, partitioned axes, replicated a
 
 This ownership table also helps diagnose correctness. A local result is not necessarily the complete logical result. A reduction across an already replicated axis can count values multiple times. A missing gather can supply a downstream operation with only part of the sequence or feature dimension it expects.
 
-## 2. Expert parallelism follows sparse routing
+### 2. Expert parallelism follows sparse routing
+
+![Deep-dive illustration: Expert parallelism follows sparse routing](./deep-dive.png)
 
 A mixture-of-experts layer usually routes each token to a selected subset of experts. The router chooses expert identities and weights, token states move to ranks owning those experts, and the resulting outputs are combined for the original token positions. Sparse activation reduces the expert arithmetic performed per token relative to evaluating every expert.
 
@@ -47,10 +50,9 @@ $$
 
 This counts duplicated token payload sent for selected experts before accounting for local routes, packing, metadata, compression, and implementation reuse. The return path can create another comparable state transfer. Actual inter-rank bytes depend on which selected experts are local and how tokens are aggregated.
 
+### 3. Work an expert-dispatch example
 
-![Deep-dive illustration: Expert parallelism follows sparse routing](./deep-dive.png)
-
-## 3. Work an expert-dispatch example
+![Deep dive: 3. Work an expert-dispatch example](./deep-dive-component-01.png)
 
 Suppose a microbatch contains 8192 token states with H equal to 4096, k equal to 2, and 2-byte elements. The raw selected-expert payload is 134,217,728 bytes, or 128 MiB. If half the routes are local in a particular placement, the remote payload under that simplified assumption falls to about 64 MiB.
 
@@ -60,7 +62,7 @@ A diagnostic imbalance ratio is maximum assigned work divided by average assigne
 
 Capacity limits and routing policies can constrain how many assignments an expert processes. Dropping or rerouting overflow changes the model computation and training behavior. Load-balancing objectives also influence routing. Performance analysis must state those choices rather than presenting a capacity cap as a communication-only optimization.
 
-## 4. Context parallelism partitions a long sequence
+### 4. Context parallelism partitions a long sequence
 
 Full attention for each query position depends on the relevant key and value positions across the sequence. Partitioning query positions among context ranks reduces the local query set, but the mathematical operation still requires remote K/V information when attention spans those positions.
 
@@ -70,7 +72,9 @@ For batch B, sequence length L, and hidden width H, splitting positions over c c
 
 Attention arithmetic can partition across queries, but load balance depends on masking and the assignment of positions. A naive causal partition can give later-query ranks more permitted key positions than earlier-query ranks. Framework schedules can distribute positions to mitigate such imbalance; inspect the actual sequence mapping rather than assuming equal token counts guarantee equal work.
 
-## 5. Preserve attention normalization across blocks
+### 5. Preserve attention normalization across blocks
+
+![Deep dive: 5. Preserve attention normalization across blocks](./deep-dive-component-02.png)
 
 A query processing several key blocks cannot independently normalize each block and then simply add their outputs. Softmax normalization must refer to the complete permitted key set. An online attention calculation maintains a running maximum, exponential sum, and weighted-value accumulator.
 
@@ -88,10 +92,7 @@ The formula assumes block statistics are computed over the allowed keys with the
 
 This normalization story is an excellent correctness test. Compare a small partitioned attention example against a full reference with the same mask and representation. Include causal boundaries, unequal sequence lengths, and queries whose allowed key sets span several owners.
 
-![Deep dive: 5. Preserve attention normalization across blocks](./deep-dive-component-02.png)
-
-
-## 6. Sequence parallelism targets selected replicated operations
+### 6. Sequence parallelism targets selected replicated operations
 
 In tensor-parallel training, some operations naturally partition feature dimensions while other operations such as normalization or dropout can retain replicated activation work. Sequence parallelism can partition those token-axis operations and connect layouts with collectives such as reduce-scatter and all-gather.
 
@@ -101,7 +102,7 @@ A local normalization operation over hidden features needs the complete feature 
 
 The benefit is therefore selective. It can reduce particular activations and associated work, but it does not automatically shard all saved tensors or total training state. Use the ownership table to count which objects actually change and which collectives supply the next layout.
 
-## 7. Work a consistent independent-dimension layout
+### 7. Work a consistent independent-dimension layout
 
 Suppose a training layout uses data degree d equal to 2, tensor degree t equal to 4, pipeline degree p equal to 4, and context degree c equal to 2, with these dimensions independent. The total rank count is
 
@@ -115,7 +116,7 @@ If an expert group is factored from an existing dimension, adding an expert degr
 
 Check divisibility constraints for hidden widths, head counts, expert counts, sequence partitions, and stage assignments. A mathematically plausible group factorization can still be unsupported by an implementation. Validate the selected mesh with the exact model configuration and installed software versions.
 
-## 8. Place traffic according to frequency and size
+### 8. Place traffic according to frequency and size
 
 Tensor and sequence-layout collectives can occur repeatedly within blocks. Expert dispatch and combine can involve large all-to-all traffic and irregular destination load. Context schedules exchange attention state. Pipeline boundaries move activations and gradients between layer stages. These traffic types can share physical links.
 
@@ -125,7 +126,7 @@ Benchmark groups with representative message sizes and rank maps. Record not onl
 
 Profile compute and communication together. Extra buffering used for overlap can increase the activation peak. A communication kernel can consume execution or memory resources also needed by expert computation. The complete step time and useful-token throughput remain the primary performance outcomes.
 
-## 9. Validate the mesh before a long training run
+### 9. Validate the mesh before a long training run
 
 Start with a manageable reference model and one update whose objective is understood. Compare partitioned outputs, gradients, and parameter updates under supported numerical tolerances. Verify masking, routing assignments, loss weighting, and accumulation counts independently where possible.
 
@@ -135,13 +136,13 @@ Then measure per-rank peak memory, stage imbalance, expert assignment distributi
 
 Treat the chosen process mesh as a versioned part of the training method. Changing a model’s head count, expert count, sequence policy, or kernel implementation can change both valid partitions and their best physical placement. A mesh is an execution design with explicit assumptions, not merely a convenient arrangement of rank numbers.
 
-## Takeaway
+## Conclusion
 
 Expert parallelism routes sparse computation to expert owners. Context parallelism partitions long-sequence attention while exchanging the state needed for the complete result. Sequence parallelism shards selected token-axis activation operations around compatible layouts.
 
 Define ownership, layout conversions, and process groups before counting memory or ranks. Then verify the mathematical result and measure the simultaneous communication program. Clear distinctions between these mechanisms prevent misleading batch counts, impossible meshes, and performance diagnoses based on the wrong collective.
 
-## Sources
+### Sources
 
 - [Megatron Core context parallelism](https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/features/context_parallel.html): long-sequence partitioning and communication.
 - [Megatron Core MoE documentation](https://docs.nvidia.com/megatron-core/developer-guide/latest/apidocs/core/core.transformer.moe.token_dispatcher.html): expert groups, dispatch, and supported parallel configurations.

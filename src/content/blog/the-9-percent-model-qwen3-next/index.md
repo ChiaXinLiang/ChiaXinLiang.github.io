@@ -3,7 +3,7 @@ title: 'The 9.3% Model: Qwen3-Next Reports 32B Quality at Lower Training Cost'
 description: "Qwen3-Next pairs linear attention with extreme MoE sparsity to hit 32B-class quality on 9.3% of the reported training cost — here is the arithmetic behind both levers."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'cd-1'
 order: 9
 series: "efficient-ai"
@@ -12,11 +12,19 @@ topic: "Co-Design Cases"
 tags: [moe, attention, efficiency]
 ---
 
+## Overview
+
+![Concept overview: The 9.3% Model: Qwen3-Next Reports 32B Quality at Lower Training Cost](./section-overview.png)
+
 9.3%. That is the share of Qwen3-32B's training cost in GPU-hours the Qwen team says it took to train Qwen3-Next-80B-A3B, a model they report as matching or beating the dense 32B model across their benchmark suite. Under 10% of the reported GPU-hours, for the same class of quality — with more than 10x the inference throughput once the context grows past 32K tokens.
 
 Those are vendor numbers, published on Qwen's own blog, and we should treat them that way: self-reported, on benchmarks the vendor selected. But the claim is not magic, and that is exactly why it is worth unpacking. The reported efficiency reflects architectural and training choices, including 2 prominent mechanisms that anyone can reason about with pencil and paper. This article does that arithmetic.
 
-## Where the compute actually goes
+## Deep dive
+
+### Where the compute actually goes
+
+![Deep dive: Where the compute actually goes](./deep-dive-component-03.png)
 
 Start with what a training bill is made of. For a transformer trained on D tokens with N parameters touched per token, the standard approximation for training compute is:
 
@@ -38,7 +46,9 @@ Qwen3-Next attacks both knobs at once. That is the whole trick.
 
 Neither lever is new on its own. MoE dates to the 1990s and returned at scale with Google's sparsely-gated LSTM work in 2017. Linear attention has a 5-year paper trail. What Qwen3-Next demonstrates is that stacking both, aggressively, holds up at frontier quality — and that the savings can combine, subject to memory and routing overhead.
 
-## The worked example: an equal-token FLOP comparison
+### The worked example: an equal-token FLOP comparison
+
+![Deep dive: The worked example: an equal-token FLOP comparison](./deep-dive-component-01.png)
 
 Take the 6ND approximation and compare the 2 models on the same token budget D.
 
@@ -67,10 +77,9 @@ Qwen reports 9.3% of training cost in GPU-hours. The equal-token FLOP estimate h
 
 Now the second lever, which the 6ND formula hides. At 32K context and beyond, standard attention's quadratic term stops being a rounding error. For inference the pain shows up as the KV cache: a standard attention layer must keep keys and values for every past token. Try illustrative numbers: a 48-layer model storing 2 KB of KV per token per layer (in FP16) needs 96 KB per token across a fully standard stack, which at a 128K context is about 12.6 GB per sequence, before you serve a second user. Cut standard attention to 12 of 48 layers and the cache drops to about 3.1 GB; the 36 DeltaNet layers hold small fixed-size states whose memory does not grow with context at all. That is where the reported >10x long-context prefill and decode throughput comes from, and it compounds with the MoE savings: fewer FLOPs per token, and each token drags far less memory traffic behind it. If you want the mechanical intuition for why the KV cache exists in the first place, [Attention in Plain Words](/blog/attention-in-plain-words/) builds it from scratch.
 
-![Deep dive: The worked example: an equal-token FLOP comparison](./deep-dive-component-01.png)
+### Going deeper: why keep any full attention at all?
 
-
-## Going deeper: why keep any full attention at all?
+![Deep dive: Going deeper: why keep any full attention at all?](./deep-dive-component-02.png)
 
 If linear attention is so cheap, why not use it everywhere? Because the fixed-size state is a lossy summary. Standard attention retains an explicit route to token 17 from token 50,000, though successful verbatim recall is learned rather than guaranteed, which is what you need for copying a serial number out of a document, matching a bracket 40K tokens back, or needle-in-a-haystack recall. Linear attention compresses history into a state matrix of constant size, and information theory is unforgiving about what a constant-size state can hold from an unbounded stream. Pure linear-attention models score well on perplexity and fall over on exact-recall tasks.
 
@@ -95,10 +104,7 @@ Here S maps keys to values, k, v, and q are current vectors, alpha is a decay ga
 
 This bounded state changes historical storage compared with full KV attention, but it can lose distinctions that explicit retained keys preserve. Periodic full-attention layers add another retrieval path. Test exact recall and long-context quality as well as throughput. The 3/32 parameter ratio predicts 9.375% only under equal token budgets and the simplified 6ND accounting; matching Qwen's reported 9.3% closely does not constitute an independent derivation of the real training bill.
 
-![Deep dive: Going deeper: why keep any full attention at all?](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"3B active means it's basically a 3B model."** No. Per-token compute matches a 3B dense model; capacity does not. Different tokens route to different experts, so across a document the model draws on far more than 3B distinct parameters. Benchmarks bear this out: 3B-class dense models do not touch Qwen3-32B, while Qwen3-Next reportedly does. The correct mental model is a library with 80B books and a rule that any single question may consult only 3B of them. The library's usefulness is set by the collection, not the per-question quota.
 
@@ -106,7 +112,7 @@ This bounded state changes historical storage compared with full KV attention, b
 
 **"9.3% training cost means ~10x cheaper for users, verified."** 2 errors in 1 sentence. Training savings and inference savings are different quantities; the inference win here comes mostly from the KV-cache and throughput side, is context-length dependent, and total-parameter memory (80B weights must live somewhere, [and memory is the scarce resource](/blog/blackwell-to-rubin-memory-math/)) partially offsets it. And "verified" overstates things: the 9.3% figure, the benchmark parity, and the >10x throughput are all Qwen's own measurements. They are plausible and consistent with the arithmetic above, corroborated in direction by independent labs, but no neutral party has audited them.
 
-## What this does to the scaling narrative
+### What this does to the scaling narrative
 
 For a few years the field's working assumption was that capability tracked training FLOPs along smooth power laws, so the leaderboard belonged to whoever bought the most compute. Qwen3-Next and its cohort complicate that story in a specific way: these results show that architecture and training design can shift empirical efficiency; they do not establish a universal scaling law. A 10x improvement in capability-per-FLOP is worth the same, on the leaderboard, as a 10x bigger cluster, and 2025-26 delivered it through model design rather than procurement: extreme sparsity, hybrid attention, and (per Kimi K2) optimizers that eliminate wasted restarts. DeepSeek's V3.2-Exp closed the economic loop publicly by shipping sparse attention and a same-day 50%+ API price cut.
 
@@ -114,13 +120,13 @@ This matters most because the industry is running into a wall that money cannot 
 
 The 9.3% model is not the end state. It is 1 clean, public data point on a curve the whole field is now racing down: how little of a model can you light up, and how little of the past can you store exactly, before quality notices?
 
-## Takeaway
+## Conclusion
 
 - Training compute tracks **active** parameters, not total: 6ND with N = 3B versus 32B predicts 9.375% at equal token budgets. Qwen's 9.3% measures reported GPU-hour cost, which this division cannot independently establish.
 - The 2 levers multiply: MoE sparsity cuts FLOPs per token, hybrid linear attention cuts the context-dependent cost and shrinks the KV cache roughly 4x at a 3:1 ratio, driving the reported >10x long-context throughput.
 - Every headline number here is vendor-reported; the trend, though, is corroborated across independent labs (Kimi K2 at 3.2% activation, Granite 4.0's 9:1 hybrid, DeepSeek's DSA price cut), and it points at capability-per-FLOP as the metric that now moves the frontier.
 
-## Sources
+### Sources
 
 - Qwen team, "Qwen3-Next: Towards Ultimate Training & Inference Efficiency" — [qwen.ai blog](https://qwen.ai/blog?id=4074cca80393150c248e508aa62983f9cb7d27cd&from=research.latest-advancements-list)
 - Kimi Team, "Kimi K2: Open Agentic Intelligence" — [arXiv:2507.20534](https://arxiv.org/abs/2507.20534)

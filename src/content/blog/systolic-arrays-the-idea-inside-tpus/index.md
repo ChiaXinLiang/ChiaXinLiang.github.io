@@ -3,7 +3,7 @@ title: 'Systolic Arrays: The 1978 Idea Inside Every TPU'
 description: "How a 40-year-old paper about data pulsing through a grid of multipliers became the engine of modern AI accelerators."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'par-3'
 order: 13
 series: "comp-arch"
@@ -12,9 +12,17 @@ topic: "Parallel Architectures"
 tags: [tpu, hardware, matmul]
 ---
 
+## Overview
+
+![Concept overview: Systolic Arrays: The 1978 Idea Inside Every TPU](./section-overview.png)
+
 92 trillion operations per second, from a chip clocked at 700 MHz. That was Google's first Tensor Processing Unit, deployed in 2015 and described at ISCA 2017, and the architecture at its heart was published in 1978, the same year Intel's brand-new 8086 shipped with 29,000 transistors. H.T. Kung and Charles Leiserson called the idea a *systolic array*, and for most of the intervening decades it sat in textbooks as a historical curiosity. Then deep learning made matrix multiplication the most economically important computation on Earth, and the curiosity became the blueprint.
 
-## A heartbeat, drawn on paper
+## Deep dive
+
+### A heartbeat, drawn on paper
+
+![Deep dive: A heartbeat, drawn on paper](./deep-dive-component-01.png)
 
 In the late 1970s, Kung and Leiserson were at Carnegie Mellon watching VLSI (very-large-scale integration, the then-new ability to put tens of thousands of transistors on 1 chip) change the economics of hardware. Multipliers, once cabinet-sized, were about to become cheap enough to stamp out by the hundreds. Memory bandwidth was not getting cheaper at anything like the same rate. Kung later distilled the problem in his 1982 paper "Why Systolic Architectures?": if a processor fetches 2 operands from memory for every arithmetic operation it performs, the memory system, not the arithmetic, sets the speed limit. The fix is to arrange the hardware so each value fetched from memory gets used many times before anything goes back.
 
@@ -26,10 +34,7 @@ Their proposal: lay out a grid of small, identical processing elements, each doi
 2. **No long wires.** Every connection is to a physical neighbor, millimeters away at most. Short wires switch fast and burn little energy. Reading a value from a neighboring cell costs far less energy than reading it from SRAM, and orders of magnitude less than DRAM.
 3. **Massive reuse.** A value entering the grid is used by every cell it passes through. Fetch once, compute many times, which is exactly Kung's prescription.
 
-![Deep dive: A heartbeat, drawn on paper](./deep-dive-component-01.png)
-
-
-## The machine in 1 picture
+### The machine in 1 picture
 
 The variant inside the TPU is called *weight-stationary*, and it is the easiest to hold in your head. Picture an N×N grid. Before computation starts, 1 weight of the matrix W is loaded into each cell, where it sits unmoving. Then the input matrix streams in from the left edge, 1 row of cells per vector element, and partial sums flow downward through the columns.
 
@@ -38,7 +43,7 @@ Each cell does the same 3 things every cycle: multiply the input arriving from t
 
 Notice what never happens: no cell ever reads a weight from memory during computation, no partial sum is ever written to memory until it is final, and no input is fetched more than once. The memory system only touches the edges of the array.
 
-## A 2×2 multiply by hand
+### A 2×2 multiply by hand
 
 Small enough to trace on paper, and the mechanics scale unchanged to 256×256. Take
 
@@ -56,7 +61,9 @@ Small enough to trace on paper, and the mechanics scale unchanged to 256×256. T
 
 Collect the outputs: [[19, 22], [43, 50]]. Check it the slow way: (1, 2)·(5, 7) = 19, (1, 2)·(6, 8) = 22, (3, 4)·(5, 7) = 43, (3, 4)·(6, 8) = 50. The grid computed a full matrix product with 8 multiplies, and each of the 8 input and weight values was loaded from memory exactly once.
 
-## The arithmetic of reuse
+### The arithmetic of reuse
+
+![Deep dive: The arithmetic of reuse](./deep-dive-component-03.png)
 
 Now scale the example and count memory traffic, because this is where the systolic array stops being cute and starts being a 92-teraop machine.
 
@@ -77,8 +84,9 @@ For $$n=256$$, 1-byte inputs, and 4-byte accumulated outputs, intensity is about
 
 The architectural innovation is local forwarding and predictable operand alignment. In the teaching weight-stationary array, with weights already loaded, $$B$$ streamed vectors produce their last result after roughly $$B+2n-2$$ cycles. For the 2-by-2 example with 2 vectors, that is 4 cycles, matching the trace. Longer streams amortize fill/drain time; weight reloads and output bandwidth add separate costs. Measure useful MACs per occupied array cycle across representative shapes, then compare equal-precision tiled baselines. This separates locality gains from lower precision and from peak throughput claims.
 
+### Going deeper: skew, fill, and flavors of stationary
 
-## Going deeper: skew, fill, and flavors of stationary
+![Deep dive: Going deeper: skew, fill, and flavors of stationary](./deep-dive-component-02.png)
 
 A few mechanisms hide inside the clean picture.
 
@@ -90,10 +98,7 @@ A few mechanisms hide inside the clean picture.
 
 **Where the bottleneck moved.** Kung's logic is recursive: kill 1 bottleneck and the next appears. TPU v1's array was so effective that its 34 GB/s DDR3 became the limiting factor for memory-bound layers, and the paper's own roofline analysis shows several production workloads stuck against the bandwidth ceiling, not the compute 1. Successors moved to HBM largely for this reason, the same bandwidth arms race traced in [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/).
 
-![Deep dive: Going deeper: skew, fill, and flavors of stationary](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"A systolic array is just SIMD with more units."** SIMD (1 instruction applied to many data elements at once) still fetches its operands from a register file every cycle and writes results back every cycle; making the vector wider multiplies that register traffic. In a systolic array, operands come from the neighboring cell's output latch, not from a shared register file, and intermediate results never leave the grid. SIMD parallelizes an instruction across space; a systolic array pipelines data *through* space. The energy profiles are completely different, and that difference is most of the TPU's efficiency story.
 
@@ -101,7 +106,7 @@ A few mechanisms hide inside the clean picture.
 
 **"A 256×256 array can only multiply 256×256 matrices."** Large matrices are tiled: a 1024×1024 multiply becomes a sequence of 256-sized blocks, with the accumulators carrying partial sums between tiles, and utilization stays high. The genuine failure mode is the opposite direction. Multiply matrices with an inner dimension of 100 and only 100 of the 256 rows hold useful weights; peak throughput drops by the ratio, no matter how clever the compiler is. This is why accelerator-era model designers pad dimensions to multiples of the array size, and why odd layer shapes quietly waste silicon.
 
-## The idea that waited
+### The idea that waited
 
 Systolic arrays did not vanish after 1978 so much as lose an economic race. CMU built the Warp machine in the 1980s and Intel productized its successor, iWarp, but general-purpose CPUs were doubling in speed every couple of years for free, and a special-purpose grid could not out-run that treadmill long enough to build an ecosystem. Sara Hooker's "The Hardware Lottery" names the general phenomenon: ideas win or lose on their fit to the hardware, and the tooling of their era, as much as on their merits. Systolic arrays lost the 1980s lottery.
 
@@ -109,13 +114,13 @@ Systolic arrays did not vanish after 1978 so much as lose an economic race. CMU 
 
 Kung and Leiserson designed for a world of 29,000-transistor chips and got the fundamentals so right that the design carried, essentially intact, to chips with billions.
 
-## Takeaway
+## Conclusion
 
 - A systolic array is a clocked grid of multiply-accumulate cells passing operands neighbor to neighbor: no instruction fetch, no long wires, and every value fetched from memory is reused N times.
 - The worked math is the argument: a 256×256 multiply needs 33.5M operand fetches naively but only 131K through the array, which explains its local reuse; reaching the 92 TOPS peak also requires sufficient end-to-end arithmetic intensity.
 - The idea sat dormant for decades because general-purpose CPUs kept winning on Moore's law; the end of Dennard scaling plus matmul-dominated workloads made 1978's answer the 2015 blueprint, and it remains the core of AI accelerators today.
 
-## Sources
+### Sources
 
 - H. T. Kung and C. E. Leiserson, "Systolic Arrays (for VLSI)," *Sparse Matrix Proceedings*, 1978.
 - H. T. Kung, "Why Systolic Architectures?", *IEEE Computer*, vol. 15, no. 1, 1982.

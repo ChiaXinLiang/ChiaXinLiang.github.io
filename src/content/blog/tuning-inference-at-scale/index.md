@@ -3,7 +3,7 @@ title: 'Tuning Inference at Scale: Every Throughput Gain Is a Cost Cut'
 description: "4 serving optimizations, none worth more than 1.8x alone, multiply into a 5x throughput gain — and throughput is the denominator of every $/Mtok you pay."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'scale-4'
 order: 8
 series: "llm-serving"
@@ -12,11 +12,17 @@ topic: "Production Serving"
 tags: [inference, throughput, cost]
 ---
 
+## Overview
+
+![Concept overview: Tuning Inference at Scale: Every Throughput Gain Is a Cost Cut](./section-overview.png)
+
 4 serving optimizations, none of them worth more than 1.8x on its own, multiply into a 5.2x throughput gain on unchanged hardware. On a rented 8xH100 node that turns $0.74 per million output tokens into $0.14. No new silicon, no smaller model, no quality cliff. Just configuration and scheduling work that most teams ship half of and then stop.
 
 This post is about the arithmetic that makes such work worth doing: serving cost is a fraction with dollars on top and tokens on the bottom, and every optimization in the modern inference stack attacks the bottom. Because the optimizations touch mostly independent resources, their gains multiply rather than add. That multiplication is the entire economic story of inference tuning.
 
-## Cost is throughput, inverted
+## Deep dive
+
+### Cost is throughput, inverted
 
 Fix a deployment: 1 8xH100 node, rented at $2.00 per GPU-hour, so $16/hour for the node. The node's cost per million output tokens is
 
@@ -28,7 +34,9 @@ The numerator is set by your cloud contract or your datacenter's amortization sc
 
 1 refinement before the knobs: the denominator should count only *useful* tokens, delivered within your latency objective. A tuning change that raises raw tokens/s while pushing p99 inter-token latency past the SLO has not made anything cheaper; it has produced tokens you can't sell. That distinction between raw throughput and goodput is the subject of [an earlier post](/blog/goodput-vs-utilization/), and it matters here because the second optimization below exists precisely to buy throughput without spending SLO.
 
-## The 4 multipliers
+### The 4 multipliers
+
+![Deep dive: The 4 multipliers](./deep-dive-component-03.png)
 
 **Continuous batching.** Static batching launches a batch of requests and waits for the slowest 1 to finish before admitting new work. Since output lengths vary wildly, the batch drains as short requests complete, and the GPU spends the tail of every batch mostly idle. Continuous batching, introduced as iteration-level scheduling in the Orca paper (OSDI 2022), re-forms the batch at every decode step: a request that finishes leaves immediately and a queued request takes its slot in the very next iteration. Batch occupancy stays near the configured maximum instead of sawtoothing toward 1. Orca reported over an order of magnitude gain versus the static-batching baseline of its day; against a competently configured static server, 1.5–2x is the realistic range, and every major engine (vLLM, SGLang, TensorRT-LLM) now does this by default.
 
@@ -41,7 +49,9 @@ The numerator is set by your cloud contract or your datacenter's amortization sc
 
 A fifth lever sits above the engine: prompt and context compression, trimming retrieval results, deduplicating context, and summarizing stale turns so fewer tokens need serving at all. It's application-layer work, so it doesn't appear in the engine benchmark, but it multiplies against everything below it in exactly the same way.
 
-## A worked example: the stack, multiplied out
+### A worked example: the stack, multiplied out
+
+![Deep dive: A worked example: the stack, multiplied out](./deep-dive-component-01.png)
 
 Take the $16/hour node serving a 70B-class dense model in BF16 with a static-ish baseline configuration at 6,000 aggregate output tokens/s. Baseline cost:
 
@@ -77,10 +87,9 @@ The product is an identity when each ratio is measured sequentially on the alrea
 
 The improvement method is a controlled sequence of bottleneck changes. Replay equivalent requests after each change and record accepted throughput, tail latency, quality, and memory high-water marks. A setting that improves raw output but breaches latency is excluded from this denominator. Run interaction experiments when 2 changes target the same work, particularly prefix caching and chunked prefill. At low arrival rates, a faster server may mostly gain idle time rather than additional sold tokens; realized savings require consolidation, fewer replicas, or a lower ownership cost. These examples are scenario arithmetic, not promised benchmark gains or rental quotes.
 
-![Deep dive: A worked example: the stack, multiplied out](./deep-dive-component-01.png)
+### Going deeper: why they multiply, and when they don't
 
-
-## Going deeper: why they multiply, and when they don't
+![Deep dive: Going deeper: why they multiply, and when they don't](./deep-dive-component-02.png)
 
 The multiplication works because each lever attacks a different resource. Continuous batching attacks *idle slots*: it raises average batch occupancy. Chunked prefill attacks *interference*: it converts latency spikes into throughput headroom under a fixed SLO. FP8 attacks *bytes per token*: it moves less data per step through a bandwidth-bound loop. Prefix caching attacks *redundant work*: it deletes compute per request. 4 different denominators inside the denominator, largely orthogonal, so the gains compose.
 
@@ -92,10 +101,7 @@ Second, some pairs overlap. Chunked prefill and prefix caching both attack the p
 
 There is also a genuine cost inside chunked prefill worth naming. Each chunk's attention must read the KV cache of all previous chunks from HBM again, so total prefill FLOPs and bytes go *up* slightly as chunks shrink. Sarathi-Serve picks the token budget to balance this against TPOT: too large and decode stalls return, too small and prefill overhead grows. Engines expose this as a tunable (vLLM's `max_num_batched_tokens`), and it is one of the few single parameters that visibly moves both your p99 TPOT and your $/Mtok.
 
-![Deep dive: Going deeper: why they multiply, and when they don't](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"The model already fits in memory, so quantization won't help."** Fitting was never the main prize. Decode reads every weight byte per token per batch; FP8 halves that traffic, and the freed HBM becomes KV cache, which raises the batch ceiling. The end-to-end serving gain from FP8 on a model that comfortably fit in BF16 is routinely 1.5x or more, precisely because the bottleneck is bytes per step and KV capacity, not whether the weights load.
 
@@ -103,19 +109,19 @@ There is also a genuine cost inside chunked prefill worth naming. Each chunk's a
 
 **"5.2x throughput means users get responses 5.2x faster."** Almost none of this stack reduces the latency of a single request; most of it raises concurrency. Continuous batching and FP8-enabled bigger batches serve more streams at similar or slightly worse per-stream speed, and chunked prefill deliberately trades a small TPOT increase for smoothness. Throughput tuning and latency tuning are different problems with different knobs, which is why [TTFT and TPOT](/blog/ttft-and-tpot/) deserve their own dashboards. If a vendor quotes 1 big tokens/s number, ask which 1 it is.
 
-## The bigger picture: power is the next denominator
+### The bigger picture: power is the next denominator
 
 Everything above assumed the numerator, $/GPU-hour, was fixed. At fleet scale that assumption gets interesting, because the binding constraint on new capacity is increasingly megawatts, not GPUs. When your datacenter is power-limited, a 5.24x throughput gain is not just a cost cut; it is 5.24x more product shipped through the same grid connection, capacity you could not have bought at any price. That reframing, tokens per megawatt as the fleet-level metric, is [its own post](/blog/tokens-per-megawatt/).
 
 The stack also keeps going above the single node. Prefill and decode want different hardware configurations, and splitting them across machines (DistServe, arXiv:2401.09670; Mooncake; NVIDIA Dynamo) is the cluster-scale continuation of the same denominator-attacking logic. And below the engine sits the kernel layer, where the same multiplication holds: [DeepSeek's FlashMLA-class kernel work](/blog/when-a-kernel-cuts-api-prices/) stacked onto architecture and scheduling gains to support API prices competitors initially couldn't match. Every layer of the stack, from attention kernel to datacenter substation, is multiplying into the same fraction.
 
-## Takeaway
+## Conclusion
 
 - Serving cost is dollars over tokens, and only the denominator is yours to move: a 1.4x throughput gain **is** a 29% price cut, by identity, on the same hardware.
 - The core stack (continuous batching, chunked prefill, FP8/FP4, prefix caching) attacks 4 different resources, so gains multiply: modest 1.3–1.8x levers compose into 5x and turn $0.74/Mtok into $0.14.
 - Multiply carefully: some pairs compound (FP8 frees KV that batching converts to occupancy), some overlap (caching shrinks the prefill that chunking smooths), so benchmark the stack jointly on replayed production traffic.
 
-## Sources
+### Sources
 
 - Yu et al., "Orca: A Distributed Serving System for Transformer-Based Generative Models," OSDI 2022 — https://www.usenix.org/conference/osdi22/presentation/yu
 - Agrawal et al., "Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve," OSDI 2024 — https://arxiv.org/abs/2403.02310

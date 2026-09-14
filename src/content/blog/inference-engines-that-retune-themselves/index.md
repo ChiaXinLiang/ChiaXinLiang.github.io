@@ -3,7 +3,7 @@ title: 'Inference Engines That Retune Themselves at Runtime'
 description: "Traffic moves 5x in a day while your serving config stands still: how adaptive engines switch precision, reshape parallelism, and migrate KV cache on the fly."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'scale-5'
 order: 15
 series: "llm-serving"
@@ -12,13 +12,21 @@ topic: "Production Serving"
 tags: [inference, serving, adaptive]
 ---
 
+## Overview
+
+![Concept overview: Inference Engines That Retune Themselves at Runtime](./section-overview.png)
+
 The same 8 H100s serving the same 70B model can decode roughly 16,000 tokens per second under 1 configuration and 37,000 under another. Nothing about the hardware changes between those 2 numbers; what changes is the weight precision, the KV cache format, and the concurrency cap, and which configuration is *right* depends on what the traffic looks like at that hour. Traffic refuses to hold still. Production LLM APIs routinely swing 5x between the 4 a.m. trough and the lunchtime peak, and the prompt mix shifts underneath the volume curve: short chat turns in the morning, long RAG contexts at midday, agent sessions with 30k-token histories in the evening.
 
 Most serving stacks handle this the way we handled it in 2023: benchmark once, pick a tensor-parallel degree, a precision, a scheduler budget, and ship that config for months. The config is correct for exactly the traffic snapshot it was benchmarked on. Every other hour of the day it is leaving something on the table, and on a large fleet "something" is measured in millions of dollars. The frontier of inference at scale is treating the serving stack as a control system: measure goodput continuously, compare it to the SLO, and actuate the knobs that close the gap.
 
 If goodput is a fuzzy term for you, [the goodput article](/blog/goodput-vs-utilization/) covers it; the one-line version is *throughput that actually meets the latency SLO*, typically defined over TTFT and TPOT targets ([basics here](/blog/ttft-and-tpot/)). Adaptive engines optimize goodput per dollar, not utilization, and that distinction drives everything below.
 
-## The 4 knob families
+## Deep dive
+
+### The 4 knob families
+
+![Deep dive: The 4 knob families](./deep-dive-component-01.png)
 
 An adaptive serving stack has, broadly, 4 families of actuators. They differ enormously in how fast they act and how much they cost to move.
 
@@ -30,11 +38,9 @@ An adaptive serving stack has, broadly, 4 families of actuators. They differ eno
 
 **KV cache placement.** HBM is the scarcest resource in the box, and a lot of KV cache sitting in it is cold. An agent session waiting 20 seconds on a tool call parks gigabytes of KV in HBM doing nothing. Adaptive engines tier KV across HBM, CPU DRAM, and NVMe: vLLM can swap preempted sequences to CPU, SGLang layers a hierarchical cache under its radix tree, and Mooncake (the engine behind Kimi) is built around a disaggregated KV pool spanning the DRAM and SSD of the whole cluster. On systems using CUDA managed memory, `cudaMemAdvise` hints (`SetPreferredLocation`, `SetAccessedBy`) let the engine steer cold pages toward host RAM without hard-failing when they are touched, so an offload mistake costs a page migration rather than a crash.
 
+### A worked example: 1 day, 1 node
 
-![Deep dive: The 4 knob families](./deep-dive-component-01.png)
-
-
-## A worked example: 1 day, 1 node
+![Deep dive: A worked example: 1 day, 1 node](./deep-dive-component-02.png)
 
 Numbers make this concrete. Take a dense 70B model on 1 8×H100 node, TP8. The relevant hardware constants: 8 × 80 GB = 640 GB of HBM, and 8 × 3.35 TB/s = 26.8 TB/s of aggregate bandwidth. FP8 weights are 70 GB; NVFP4 weights are 35 GB. With 80 layers, 8 KV heads, and head dimension 128, the KV cache costs 80 × 8 × 128 × 2 × 2 bytes = 320 KB per token at FP16, or 160 KB at FP8.
 
@@ -54,11 +60,7 @@ This is a roofline-style bound; real engines land within about 1.3–2x of it on
 
 **20:00, the agents.** Volume is moderate but contexts are long and bursty. A single agent session with a 30k-token history holds 30,000 × 320 KB ≈ 9.6 GB of FP16 KV, and it spends much of its wall-clock time idle, waiting on tool calls. 60 such sessions would be 576 GB, nearly the whole node's HBM, mostly cold. The engine offloads idle-session KV to CPU DRAM over PCIe Gen5 (~64 GB/s per direction): about 0.15 s out and 0.15 s back for that 9.6 GB, invisible next to a multi-second tool call, and it frees HBM for streams that are actually decoding. Hot shared prefixes stay pinned; see [the KV cache article](/blog/kv-cache-explained/) for why prefix reuse is worth protecting.
 
-
-![Deep dive: A worked example: 1 day, 1 node](./deep-dive-component-02.png)
-
-
-## Going deeper: it really is a control system
+### Going deeper: it really is a control system
 
 Once you draw the loop, classical control problems show up on schedule.
 
@@ -70,8 +72,7 @@ Once you draw the loop, classical control problems show up on schedule.
 
 **Stay stable.** A controller that flips FP8→FP4 at 70% load and back at 69% will oscillate, and every oscillation costs a weight swap. Hysteresis bands, minimum dwell times, and rate limits on expensive actuators are not optional engineering polish; they are the difference between a control system and a self-inflicted incident generator.
 
-
-## A controller must repay the transition
+### A controller must repay the transition
 
 Let a new configuration improve acceptable output rate by $$\Delta G$$ tokens per second, remain useful for $$t_d$$ seconds, and lose $$C_t$$ acceptable tokens while draining or converting state. A necessary transition test is
 
@@ -85,7 +86,9 @@ Compared with a static configuration, adaptation exploits changing load, but it 
 
 Use hysteresis and a minimum dwell time, include transition cost in the objective, and constrain the decision by quality and tail latency. Compare the controller against a stable baseline on replayed load, then verify actual recovery after a wrong prediction. More knobs can increase flexibility while making control slower, noisier, and less reliable.
 
-## Common misconceptions
+### Common misconceptions
+
+![Deep dive: Common misconceptions](./deep-dive-component-03.png)
 
 **"This is just autoscaling with extra steps."** Autoscaling adds or removes replicas on a timescale of minutes, gated by provisioning and multi-minute weight loads, and it cannot change what any individual replica *is*. The knobs above act inside a fixed hardware footprint, in milliseconds to seconds, and they change the shape of the service: its precision, its parallel layout, its memory tiering. You need both; they are different layers of the same control stack, operating at different frequencies.
 
@@ -93,19 +96,19 @@ Use hysteresis and a minimum dwell time, include transition cost in the objectiv
 
 **"Our GPUs are at 100% utilization, so there is nothing left to retune."** High utilization tells you the SMs are busy, not that the work is useful or that SLOs are being met. The peak-hour example above goes from 16,400 to 37,000 tok/s at essentially the same utilization; the win comes from moving fewer bytes per token, not from filling idle cycles. If utilization is your control signal, you cannot even see this improvement, which is precisely [the goodput argument](/blog/goodput-vs-utilization/).
 
-## Where this sits, and an honest caveat
+### Where this sits, and an honest caveat
 
 Adaptive serving is the natural next step of a story this series has been tracking. Disaggregation split prefill from decode so each could be provisioned separately ([the disaggregation story](/blog/the-prefill-decode-disaggregation-story/)); once the split exists, the P/D ratio becomes a runtime variable, and Dynamo's Planner already treats it as 1. Hardware is moving the same direction, with prefill-specialized parts like [Rubin CPX](/blog/prefill-gets-its-own-chip-rubin-cpx/) making the fleet mix itself a tunable. The through-line is that every boundary that used to be fixed at deployment time is becoming a control variable.
 
 The caveat: most teams should not build any of this yet. If you have not exhausted static tuning, so a properly benchmarked TP degree, precision, and scheduler config for your *actual* traffic mix, plus plain replica autoscaling, you will capture the large majority of the available win with a fraction of the complexity. Every runtime actuator is also a new failure mode, and a buggy controller is an outage with a feedback loop. The adaptive frontier pays off where fleets are large enough that a recovered 20% is millions of dollars a year and where an infra team can own a control system as a product. Everyone else should read this as a preview of what their serving framework will eventually do for them; the vLLM, SGLang, and Dynamo roadmaps all point here.
 
-## Takeaway
+## Conclusion
 
 - Traffic swings 5x daily and shifts its prompt mix underneath; a static config is correct for one snapshot of that curve and wasteful for the rest. The fix is a control loop: measure goodput against SLOs, then actuate.
 - The actuators form a cost hierarchy, from scheduler knobs (milliseconds, free) through KV migration and precision swaps (seconds) up to parallelism reshapes (minutes, requires draining), and a well-designed controller absorbs noise with cheap knobs while committing expensive ones only on forecasted trends.
 - The byte math is what makes runtime precision switching powerful: at a 200-stream peak, moving from FP8 weights + FP16 KV to FP4 + FP8 KV cuts per-step traffic from 326 GB to 163 GB, letting the same node hold its TPOT SLO at double the concurrency.
 
-## Sources
+### Sources
 
 - Zhong et al., *DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving* (OSDI 2024) — https://arxiv.org/abs/2401.09670
 - Qin et al., *Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving* — https://arxiv.org/abs/2407.00079

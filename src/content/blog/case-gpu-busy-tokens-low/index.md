@@ -3,7 +3,7 @@ title: "Case File: GPU at 100%, but Tokens per Second Are Low"
 description: "Distinguish kernel activity from useful work, model the bandwidth limit of decode, and test whether batching or memory traffic explains low throughput."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'case-3'
 order: 19
 series: "llm-serving"
@@ -11,11 +11,18 @@ level: advanced
 topic: "Inference Methods"
 tags: [troubleshooting, inference, performance]
 ---
+
+## Overview
+
+![Concept overview: Case File: GPU at 100%, but Tokens per Second Are Low](./section-overview.png)
+
 100% GPU utilization can coexist with disappointing token throughput. NVIDIA defines that utilization field as the fraction of a sampling interval during which at least 1 kernel executes. It does not mean that every compute unit is occupied, that tensor cores run at peak speed, or that useful tokens meet their latency target. A kernel waiting on memory can keep the utilization gauge high.
 
 Consider an illustrative incident: a dense 13-billion-parameter model serves 8 independent conversations. The dashboard reports 99–100% utilization, yet each conversation streams at roughly 40 tokens per second. An engineer proposes a GPU with more tensor FLOPS. Before changing hardware, ask what 1 decode iteration reads, how many tokens it produces, and which resource actually limits that iteration. All measurements below are hypothetical; they demonstrate a diagnostic method rather than claim a benchmark result.
 
-## Establish the workload behind the gauge
+## Deep dive
+
+### Establish the workload behind the gauge
 
 Decode usually advances each active sequence by 1 token per iteration. A batch of 8 sequences therefore produces 8 output tokens after 1 model forward pass. The weight matrices can be reused across those sequences, although that reuse depends on the actual kernels, cache behavior, and matrix shapes. Prefill is different: it processes many prompt positions together and often has enough arithmetic reuse to use tensor cores effectively.
 
@@ -26,7 +33,9 @@ Also separate aggregate output throughput from per-request streaming speed. If 8
 
 *Original explanatory diagram based on NVIDIA's documented utilization definition; it is not a reproduction of a source figure.*
 
-## Build a lower-bound model for one step
+### Build a lower-bound model for one step
+
+![Deep dive: Build a lower-bound model for one step](./deep-dive-component-01.png)
 
 Let P be the parameter count, s_w the stored bytes per weight, B the number of active sequences, and beta_eff the effective memory bandwidth available to the relevant kernels. For a dense model whose weights are streamed once per batch step, the simplest weight-traffic estimate is P times s_w. Ignoring attention and other overhead for the moment:
 
@@ -41,10 +50,9 @@ For 13 billion parameters stored in BF16, the raw weights occupy approximately 2
 
 A measured 25-millisecond iteration gives 320 aggregate tokens per second and 40 tokens per second per sequence. That is plausible relative to the simplified memory bound. It is evidence against the idea that low tensor-core utilization alone reveals a broken server. The remaining 3.3 milliseconds may include attention traffic, launch overhead, synchronization, and inefficient matrix shapes; a trace must determine their contributions.
 
-![Deep dive: Build a lower-bound model for one step](./deep-dive-component-01.png)
+### Arithmetic intensity explains why FLOPS can mislead
 
-
-## Arithmetic intensity explains why FLOPS can mislead
+![Deep dive: Arithmetic intensity explains why FLOPS can mislead](./deep-dive-component-03.png)
 
 A linear layer with a B-row input approximately performs 2BP floating-point operations across the dense parameter stream. Dividing by P s_w bytes gives a weight-only arithmetic intensity of roughly 2B/s_w. For BF16, that simplifies to B FLOPs per byte. Batch 8 gives about 8 FLOPs per byte, before counting activations and the KV cache.
 
@@ -54,7 +62,7 @@ Be consistent about the numbers. A sparse peak, an FP8 peak, and dense BF16 work
 
 The deeper lesson is that occupancy, utilization, arithmetic intensity, and bandwidth utilization answer different questions. High occupancy can help hide memory latency but cannot create additional memory bandwidth. A kernel can have enough resident warps, remain active continuously, and still finish at the rate allowed by its memory traffic.
 
-## Add the KV cache to the model
+### Add the KV cache to the model
 
 Weights are not the entire decode budget. Full attention reads historical keys and values for each sequence. Let L be the layer count, H_kv the number of key/value heads, d the head dimension, s_kv the stored bytes per cache element, and C_i the current context length of sequence i. The raw cache size is:
 
@@ -69,7 +77,7 @@ If we use a deliberately simple 1-read traffic estimate, weights plus KV amount 
 
 *Original worked-example figure. Numbers are assumptions used in this article, not measured hardware results.*
 
-## Collect evidence that can falsify the hypothesis
+### Collect evidence that can falsify the hypothesis
 
 Start with a timeline profiler to identify the dominant kernels and gaps. Use a kernel profiler on representative decode kernels to inspect achieved DRAM throughput, arithmetic intensity, memory stalls, and relevant tensor-core activity. NVIDIA Nsight Compute exposes memory and compute analysis, but metric names and availability vary by architecture and tool release.
 
@@ -79,7 +87,9 @@ Run a controlled batch-size sweep while holding prompt length, output length, pr
 
 Add a short-context versus long-context comparison. It distinguishes the relatively fixed weight stream from a growing attention history. Also check power, clocks, thermal limits, and GPU-sharing conditions, because delivered bandwidth and compute can fall under throttling or contention. A clean memory model is useful only if its assumed resource is actually available.
 
-## Choose the fix that matches the evidence
+### Choose the fix that matches the evidence
+
+![Deep dive: Choose the fix that matches the evidence](./deep-dive-component-02.png)
 
 Batching improves aggregate throughput by amortizing weight reads over more output tokens. It does not automatically improve each user's streaming latency. A larger batch can take longer per iteration, consume more KV memory, and make queueing worse if the server waits to collect work. Continuous batching should be tuned against both an output-throughput target and a token-latency target.
 
@@ -96,10 +106,7 @@ A useful production experiment also holds the arrival pattern constant. If 1 con
 
 For example, suppose the baseline completes 3 hundred requests within the target during a measurement interval and a larger batch completes 3 hundred and 50, but only 2 hundred and 80 satisfy the token-latency target. Raw completion throughput improved while goodput fell. The larger batch should not be accepted for an interactive pool on those observations alone. It may still be useful for an offline pool with a different latency contract. State that contract before deciding whether the extra aggregate tokens are useful.
 
-![Deep dive: Choose the fix that matches the evidence](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 “100% utilization means maximum performance.” It means kernels were active through the sampling period under NVIDIA's definition. The useful throughput can still be limited by memory, poor shapes, or irrelevant work. A token metric and a resource-specific profile are needed to interpret that activity.
 
@@ -107,19 +114,19 @@ For example, suppose the baseline completes 3 hundred requests within the target
 
 “Decode is always memory-bound.” That is a useful low-batch intuition, not a universal law. Large batches, different model architectures, long-context attention, parallel communication, and kernel overhead can move the bottleneck. The roofline is a workload-specific model, and the profiler is how you test it.
 
-## Make the result operational
+### Make the result operational
 
 The incident is resolved when the observed output rate matches a defensible resource model and a tested change improves the metric users care about. Retain the batch sweep, context sweep, and representative trace as a regression baseline. Track effective bandwidth on stable decode windows instead of treating the activity gauge as a capacity-planning metric.
 
 For further mechanism, read [compute-bound versus memory-bound](/blog/compute-bound-vs-memory-bound/), [occupancy and the roofline](/blog/occupancy-and-the-roofline/), and [batching as a throughput lever](/blog/batching-the-biggest-throughput-lever/). Those concepts explain the case; the case supplies a reproducible way to decide which one matters in a running service.
 
-## Takeaway
+## Conclusion
 
 - Interpret utilization as activity, then measure useful tokens and latency separately.
 - Estimate weight and KV traffic before buying additional tensor FLOPS.
 - Confirm the bandwidth hypothesis with controlled batch/context sweeps and representative kernel profiles.
 
-## Sources
+### Sources
 
 - [NVIDIA System Management Interface documentation](https://docs.nvidia.com/deploy/nvidia-smi/index.html), definition of GPU and memory utilization.
 - [NVIDIA Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html), roofline analysis and profiling behavior.

@@ -3,7 +3,7 @@ title: 'Occupancy and the Roofline: Why 100% Occupancy Isn''t the Goal'
 description: "Why the fastest GPU kernels often run at 25-50% occupancy, and how the roofline model tells you when chasing more warps is a waste of time."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'exec-3'
 order: 7
 series: "gpu-performance"
@@ -12,11 +12,19 @@ topic: "GPU Execution and Memory"
 tags: [cuda, gpu, kernels]
 ---
 
+## Overview
+
+![Concept overview: Occupancy and the Roofline: Why 100% Occupancy Isn't the Goal](./section-overview.png)
+
 The register file on a modern NVIDIA SM holds 65,536 32-bit registers, which is 256 KB, larger than the 228 KB of shared memory sitting right next to it on a Blackwell SM. That single number explains more about kernel performance than almost any other spec, because how a kernel spends its register budget decides how many warps can live on the SM at once. That warp count has a name, occupancy, and it is probably the most misread metric in GPU profiling.
 
 Nsight Compute will happily print "Occupancy: 25%" in a worried shade of amber, and the reflex is to treat it like CPU utilization: a quarter of the machine working, 3 quarters idle. That reading is wrong. Some of the fastest kernels ever written, including the GEMMs inside cuBLAS and CUTLASS that power every large model, deliberately run at 25-50% occupancy. This article covers what occupancy actually measures, when it matters, and how the roofline model tells you whether to care.
 
-## What occupancy actually measures
+## Deep dive
+
+### What occupancy actually measures
+
+![Deep dive: What occupancy actually measures](./deep-dive-component-01.png)
 
 An SM (streaming multiprocessor) on Hopper or Blackwell can keep at most 64 warps resident at once: 2,048 threads whose registers and scheduling state physically live on the SM. Occupancy is simply:
 
@@ -34,10 +42,7 @@ Residency is limited by whichever on-chip resource runs out first:
 
 The compiler decides register usage when it compiles the kernel, so occupancy is largely determined at build time. Nsight Compute reports this as *theoretical occupancy*, and separately measures *achieved occupancy*, the average number of warps actually resident while the kernel ran. A big gap between the 2 usually means too few blocks in the grid or a load imbalance in the tail, not a resource limit.
 
-![Deep dive: What occupancy actually measures](./deep-dive-component-01.png)
-
-
-## Why occupancy exists: latency hiding
+### Why occupancy exists: latency hiding
 
 GPUs tolerate latency instead of avoiding it. A CPU core spends enormous silicon on caches and out-of-order machinery so that 1 thread rarely waits; a GPU spends that silicon on registers so that *many* threads can wait cheaply. When a warp issues a global memory load, the load takes on the order of hundreds of cycles to return. The warp scheduler doesn't stall, it just issues instructions from a different resident warp on the next cycle. Switching costs nothing because every warp's state is already in the register file, which is exactly why that file is 256 KB.
 
@@ -48,7 +53,9 @@ So more resident warps means more latency-hiding capacity. That part of the folk
 
 Vasily Volkov made this argument famous in his GTC 2010 talk "Better Performance at Lower Occupancy," and formalized it in his 2016 Berkeley dissertation on latency hiding. The needed concurrency can come from 2 sources: **thread-level parallelism** (more warps) or **instruction-level parallelism** (more independent operations per thread). A thread that issues 4 independent loads before using any of them keeps 4 memory transactions in flight by itself, doing the latency-hiding work of 4 single-load threads. ILP substitutes for occupancy, and ILP is often cheaper because it doesn't shrink your register budget per thread. It grows with it.
 
-## Worked example: how 128 registers per thread caps occupancy
+### Worked example: how 128 registers per thread caps occupancy
+
+![Deep dive: Worked example: how 128 registers per thread caps occupancy](./deep-dive-component-03.png)
 
 Take a kernel compiled to 128 registers per thread, launched in blocks of 256 threads, no shared memory. Numbers you can check by hand on a Blackwell or Hopper SM:
 
@@ -72,7 +79,7 @@ The 100% row is the one to stare at. Full occupancy allows just 32 registers per
 
 You can force the compiler's hand with `-maxrregcount` or `__launch_bounds__`, and sometimes that's the right call. But squeeze too hard and the compiler *spills*: values that no longer fit in registers get stored to "local" memory, which physically lives in L1 and beyond. You traded a residency statistic for real memory traffic in your inner loop. Occupancy goes up, performance goes down. Nsight Compute reports spills as `LDL`/`STL` instructions; if forcing occupancy up makes those appear, you almost certainly made the kernel slower.
 
-## The roofline: deciding whether occupancy even matters
+### The roofline: deciding whether occupancy even matters
 
 The roofline model, introduced by Williams, Waterman, and Patterson in 2009, is the tool that tells you whether to spend another day on occupancy at all. Plot attainable throughput against **arithmetic intensity**, the FLOPs a kernel performs per byte it moves from memory. 2 ceilings bound every kernel: a slanted 1 set by memory bandwidth (throughput = bandwidth × intensity) and a flat 1 set by peak compute. They cross at the *ridge point*.
 
@@ -81,7 +88,9 @@ Put numbers on it for an H100 SXM: 3.35 TB/s of HBM3 bandwidth and roughly 990 d
 
 Here's the connection to occupancy. For a memory-bound kernel, occupancy has exactly 1 job: keep enough loads in flight to saturate the memory system. Once bandwidth is saturated, the roofline says you are done; the ceiling is physical, and 64 resident warps will not raise it. For a compute-bound kernel, the job is keeping the tensor core pipes fed, which modern kernels achieve with few warps and huge register tiles. In neither regime is "more occupancy" the objective. Occupancy is a means; the roofline names the actual constraint.
 
-## Going deeper: Little's law puts a number on "enough"
+### Going deeper: Little's law puts a number on "enough"
+
+![Deep dive: Going deeper: Little's law puts a number on "enough"](./deep-dive-component-02.png)
 
 How much concurrency does saturation actually take? Little's law from queueing theory: concurrency in flight = latency × throughput.
 
@@ -103,10 +112,7 @@ B_hardware and T_hardware are the block and thread residency limits, and W_max t
 
 With 65536 registers, 256 threads, and 128 registers per thread, the register term allows 2 blocks. They contain 16 warps, giving 25% against a 64-warp limit. Cutting to 60-4 registers could allow 4 blocks, but only if shared memory and other limits permit it. Unrolling to improve independent work may raise r instead. Benchmark both versions and inspect spills: higher occupancy that adds local-memory traffic can lose to a lower-occupancy pipeline with better reuse.
 
-![Deep dive: Going deeper: Little's law puts a number on "enough"](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"100% occupancy means the GPU is fully utilized."** Occupancy counts warps that are resident, not warps that are issuing. A memory-bound kernel at 100% occupancy can have every 1 of its 64 warps stalled on HBM simultaneously, with issue-slot utilization in the single digits. The honest utilization metrics are elsewhere in the profile: DRAM bandwidth as a fraction of peak, or pipe-active percentages. This is the same trap as cluster-level "GPU utilization," which I picked apart in [Goodput vs Utilization](/blog/goodput-vs-utilization/): a residency number masquerading as a work number.
 
@@ -114,17 +120,17 @@ With 65536 registers, 256 threads, and 128 registers per thread, the register te
 
 **"Low occupancy means the kernel is bad."** Occupancy is a budget statement, not a verdict. A 12.5%-occupancy kernel saturating 90% of HBM bandwidth on a memory-bound problem is finished; the roofline says there is nothing left to win. The profile that should worry you is low occupancy *combined with* low bandwidth utilization and low pipe utilization, because then nothing is hiding latency and nothing else is the bottleneck. Diagnose with the roofline chart Nsight Compute draws for you, not with the occupancy percentage alone.
 
-## Where this sits in the bigger picture
+### Where this sits in the bigger picture
 
 Occupancy and the roofline are the 2 mental models that turn kernel profiling from ritual into reasoning, and they compose: the roofline tells you which ceiling binds the kernel, and occupancy analysis tells you whether you have enough concurrency to reach that ceiling. Everything upstream in this series rests on them. The [memory wall numbers](/blog/the-memory-wall-latency-numbers/) explain why latency hiding is necessary at all; the [prefill/decode split](/blog/the-prefill-decode-disaggregation-story/) is the roofline drawn at datacenter scale, separating the compute-bound phase from the memory-bound 1 onto different hardware. And when NVIDIA sizes the register file and shared memory of the next SM generation, it is negotiating exactly the residency budgets this article walked through, 1 worked example per architecture.
 
-## Takeaway
+## Conclusion
 
 - Occupancy is resident warps over the 64-warp maximum, set by whichever runs out first: the 65,536-register file, 228 KB of shared memory, or block slots. At 128 registers per thread it caps at 25%, and full occupancy leaves threads a starvation ration of 32 registers.
 - Latency hiding needs a fixed amount of in-flight work (Little's law: latency × bandwidth, about 13 KB per SM to saturate an H100's HBM), and ILP within a thread supplies it as well as extra warps do. That's why register-fat kernels at 25-50% occupancy win.
 - Read occupancy only next to the roofline: first determine whether the kernel is bandwidth-bound or compute-bound, then check whether it is saturating that ceiling. If it is, the occupancy number is trivia.
 
-## Sources
+### Sources
 
 - Williams, Waterman, Patterson, "Roofline: An Insightful Visual Performance Model for Multicore Architectures," CACM 2009. https://doi.org/10.1145/1498765.1498785
 - Volkov, "Better Performance at Lower Occupancy," NVIDIA GTC 2010. https://www.nvidia.com/content/GTC-2010/pdfs/2238_GTC2010.pdf

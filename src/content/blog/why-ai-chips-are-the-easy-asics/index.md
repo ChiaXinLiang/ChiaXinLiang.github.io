@@ -3,7 +3,7 @@ title: 'Why AI Chips Are the Easy ASICs, and Where They Get Hard'
 description: "A matrix multiplier is the friendliest circuit a chip designer will ever meet. The memory system, the number formats, and above all the software are another story."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'asic-4'
 order: 18
 series: "comp-arch"
@@ -12,11 +12,19 @@ topic: "ASIC Design"
 tags: ['asic', 'tpu', 'accelerators']
 ---
 
+## Overview
+
+![Concept overview: Why AI Chips Are the Easy ASICs, and Where They Get Hard](./section-overview.png)
+
 Google's first TPU went from design start to serving production traffic in 15 months. That is a startlingly short schedule for a custom chip, and the chip itself explains it: 65,536 8-bit multipliers arranged in a square, fed by control logic so simple that the [ISCA 2017 paper](https://arxiv.org/abs/1704.04760) describing it lists the features it *lacks* as a selling point. No caches. No branch prediction. No out-of-order execution. No multithreading.
 
 If custom silicon is so notoriously expensive and slow to build, how did 1 team ship a competitive datacenter chip on roughly the timeline of a software project? Because AI accelerators are, by the standards of the ASIC world, the easy case. The workload hands the architect a gift no other domain offers. This article is about that gift, and about the 3 places where the easiness abruptly stops.
 
-## The gift: a workload that is almost all 1 operation
+## Deep dive
+
+### The gift: a workload that is almost all 1 operation
+
+![Deep dive: The gift: a workload that is almost all 1 operation](./deep-dive-component-03.png)
 
 Deep learning is dominated by dense linear algebra, and mostly by 1 kernel: matrix multiplication. Convolutions lower to matrix multiplies. The attention mechanism is a chain of them. The feed-forward blocks that hold most of a [transformer's](/blog/transformer-architecture-in-one-picture/) parameters are literally nothing else. Profile a training step and the bulk of the floating-point work lands in matmul, with a thin tail of element-wise operations and normalizations around it.
 
@@ -33,7 +41,9 @@ The architecture that exploits all 3 at once is the **systolic array**, an idea 
 
 The payoff is enormous. Intermediate values travel micrometers to a neighboring cell instead of round-tripping through register files and caches, which is where most of a general-purpose chip's energy per operation goes. 1 small state machine sequences the whole array, so control overhead amortizes across tens of thousands of multipliers. The hard problems that make CPUs take hundreds of engineer-years simply are not present.
 
-## A worked example: the TPU v1 by hand
+### A worked example: the TPU v1 by hand
+
+![Deep dive: A worked example: the TPU v1 by hand](./deep-dive-component-01.png)
 
 The numbers from the 2017 paper are worth redoing yourself, because they contain both the easy part and the first hard part.
 
@@ -65,10 +75,7 @@ Using the rounded historical TPU v1 figures, $$C=92\times10^{12}$$ operations pe
 
 The innovation is to co-design reuse, storage, and arithmetic instead of multiplying the number of MAC cells alone. A larger local buffer or better tile schedule can reduce external bytes per result; HBM increases the byte service rate. Those are distinct interventions. Check the compiler's transferred bytes and achieved throughput for representative matrix shapes, then compare with the same workload on the baseline. Larger arrays can lose utilization on narrow matrices, and more buffering consumes area that could hold arithmetic. The design problem is a balanced operating envelope, not “the multiplier array is never the problem.”
 
-![Deep dive: A worked example: the TPU v1 by hand](./deep-dive-component-01.png)
-
-
-## Hard part 1: the memory system
+### Hard part 1: the memory system
 
 That correction generalizes into the first law of accelerator design: **the multiplier array and its data supply must be designed together.**
 
@@ -78,7 +85,7 @@ Above the DRAM sits the on-chip memory hierarchy, and here the ASIC diverges fro
 
 I covered where this arms race stands today, with capacity flat and bandwidth nearly tripling between generations, in [Blackwell to Rubin: memory math](/blog/blackwell-to-rubin-memory-math/).
 
-## Hard part 2: choosing your numbers
+### Hard part 2: choosing your numbers
 
 A CPU designer inherits number formats from standards. An AI ASIC designer must *bet* on them, years ahead, in frozen silicon.
 
@@ -86,7 +93,9 @@ The stakes are quadratic: a multiplier's area grows roughly with the square of m
 
 The bet is dangerous in both directions. Too conservative, and a rival with a narrower format ships twice your effective throughput on the same silicon. Too aggressive, and models fail to train or quantize accurately on your hardware, and no discount saves you. The 15-month TPU was possible partly because 8-bit inference was a well-understood target in 2015. Guessing what precision frontier training needs in 2028 is a research problem, and you must tape out your answer.
 
-## Going deeper: the software cliff
+### Going deeper: the software cliff
+
+![Deep dive: Going deeper: the software cliff](./deep-dive-component-02.png)
 
 Now the hardest part, the one that fills the graveyard.
 
@@ -99,16 +108,13 @@ A startup has neither advantage, and the record shows what happens next. Nervana
 
 The honest budgeting rule that follows: if you are planning an AI chip and your software team is not at least as large as your hardware team, you are planning half a product.
 
-![Deep dive: Going deeper: the software cliff](./deep-dive-component-02.png)
-
-
-## The bigger picture, and closing the series
+### The bigger picture, and closing the series
 
 This series began with the machinery of general-purpose computing: pipelines, branch predictors, out-of-order engines, all of it silicon spent coping with *not knowing* what the program will do. The AI accelerator is the limiting case in the other direction: a workload so regular that nearly all of that machinery can be traded back for raw arithmetic. That trade is what "the easy ASIC" means. The TPU's authors could skip 40 years of CPU tricks because matmul never branches.
 
 The product side of this story, what today's accelerators actually ship and how models are bending to meet them, is the territory of the Efficient-AI series, which picks up exactly where this article stops.
 
-## Common misconceptions
+### Common misconceptions
 
 **"More TOPS means a faster chip."** Peak TOPS describes the multiplier array; delivered performance describes the memory system and the compiler. The TPU v1's own paper shows its dominant workloads reaching roughly a tenth of peak because 34 GB/s of DDR3 could not feed 92 TOPS. Do the ridge-point division before trusting any headline number.
 
@@ -116,13 +122,13 @@ The product side of this story, what today's accelerators actually ship and how 
 
 **"If the silicon comes back working, the hard part is over."** Nervana, Wave Computing, and Graphcore all had working silicon, respectable architectures, honest benchmarks on hand-picked kernels. What they lacked was a compiler and kernel ecosystem that made *arbitrary customer models* fast without heroics. First silicon that boots is roughly the halfway mark of an AI chip program, and the second half has killed more companies than the first.
 
-## Takeaway
+## Conclusion
 
 - Dense linear algebra is the friendliest workload in the ASIC world: regular, massively parallel, and reuse-rich, so a systolic array of tens of thousands of MACs with minimal control logic gets you to spectacular peak numbers fast. The TPU v1's 15-month schedule is the proof.
 - The genuine difficulties are conserved, not eliminated: feeding the array (HBM, packaging, software-managed buffers), betting on number formats years ahead (bf16 to FP8 to FP4), and above all building the compiler and kernel stack that turns peak into goodput.
 - Judge an AI chip program by its software team and its ridge point, not its TOPS. History's shortest summary: working silicon is necessary, while software coverage and commercial execution determine whether it becomes a useful product.
 
-## Sources
+### Sources
 
 - N. Jouppi et al., "In-Datacenter Performance Analysis of a Tensor Processing Unit," ISCA 2017 — [arxiv.org/abs/1704.04760](https://arxiv.org/abs/1704.04760)
 - S. Williams, A. Waterman, D. Patterson, "Roofline: An Insightful Visual Performance Model for Multicore Architectures," Communications of the ACM, 2009

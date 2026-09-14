@@ -12,18 +12,19 @@ level: "intermediate"
 tags: ["gpu-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: CUDA Correctness: Memory Errors, Races, Barriers, and Compute Sanitizer. GPU thread lanes write and read a shared-memory tile.](./section-overview.png)
+
 A GPU kernel can produce plausible output while reading invalid memory, racing on a shared buffer, or violating a synchronization rule that happens not to fail on the tested input. Numerical comparison is necessary evidence, but it is not a complete memory and concurrency analysis.
 
 Correctness should be decomposed into address validity, ownership, synchronization, initialization, and numerical behavior. Each component has explicit invariants and appropriate tests. Compute Sanitizer provides complementary tools with documented scopes; using them well requires understanding what they check and what they do not establish.
 
 We will build that method around common kernel failures and a small shared-buffer example. This article describes diagnostic procedures rather than reporting executed GPU tests. Hardware-dependent examples must be exercised on a supported CUDA system, and current tool documentation defines available capabilities.
 
-## 1. Define the claimed interface and supported inputs
+## Deep dive
 
-![Concept overview: CUDA Correctness: Memory Errors, Races, Barriers, and Compute Sanitizer. GPU thread lanes write and read a shared-memory tile.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Define the claimed interface and supported inputs
 
 Record shapes, strides, dtypes, pointer relationships, alignment assumptions, launch geometry, and allowed stream dependencies. A contiguous-input kernel does not automatically support every view with the same logical shape. An aligned-load implementation needs its alignment contract preserved.
 
@@ -33,7 +34,9 @@ Keep aliasing explicit. If output overlaps input, one thread can overwrite a val
 
 Use a reference that computes the same operation and ownership semantics. A reference with different masking, reduction, or layout can make a correct kernel look wrong or an incorrect kernel look acceptable.
 
-## 2. Prove physical address validity
+### 2. Prove physical address validity
+
+![Deep-dive illustration: Prove physical address validity](./deep-dive.png)
 
 For an allocation containing A elements and an access offset o, a basic requirement is
 
@@ -49,10 +52,7 @@ A mask should guard every potentially invalid access. Masking stores while leavi
 
 Alignment is another invariant for operations that require it. The relevant pointer and offset must satisfy the supported alignment rule. A tensor shape being divisible by a vector width does not establish that its base pointer or view offset is suitably aligned.
 
-
-![Deep-dive illustration: Prove physical address validity](./deep-dive.png)
-
-## 3. Separate coverage from absence of invalid accesses
+### 3. Separate coverage from absence of invalid accesses
 
 A kernel can stay in bounds and still omit outputs or write them more than once. Prove that the ownership mapping covers the required population and gives each ordinary output the intended writer or supported reduction mechanism.
 
@@ -62,7 +62,7 @@ Test with recognizable output patterns that reveal missing writes. Uniform zeros
 
 For scatter or reduction, duplicate destinations can be intentional. The implementation then needs a supported combining and ordering mechanism. A many-to-one mathematical reduction does not authorize unsynchronized ordinary writes to the same location.
 
-## 4. Analyze conflicting operations through ordering
+### 4. Analyze conflicting operations through ordering
 
 Two accesses to the same location can conflict when at least one writes and their execution lacks the required ordering. A conceptual race condition is
 
@@ -76,7 +76,9 @@ Draw producer and consumer events for shared tiles, queues, and reused buffers. 
 
 Atomics make particular operations indivisible under their supported semantics. They do not turn every surrounding non-atomic access into a safe protocol. Publication and reclamation still need the appropriate order and scope.
 
-## 5. Match block-barrier participation
+### 5. Match block-barrier participation
+
+![Deep dive: 5. Match block-barrier participation](./deep-dive-component-02.png)
 
 A block-wide synchronization operation requires supported participation and control flow. Returning some threads before a barrier used by the remaining threads can invalidate the program. Tail handling is a common source of this mistake.
 
@@ -97,10 +99,9 @@ A conditional barrier is valid only under the operation's documented control-flo
 
 A loop reusing the same shared tile can require another dependency after consumption. The first barrier establishes that filling is complete before readers begin. It does not necessarily establish that every reader has finished before a fast thread starts filling the next tile. The algorithm therefore needs a supported consume-to-reuse boundary as well as a fill-to-consume boundary. A single successful iteration never exercises this transition, which is why repeated-tile tests are important. Place synchronization according to the actual readers and writers instead of inserting one barrier mechanically.
 
-![Deep dive: 5. Match block-barrier participation](./deep-dive-component-02.png)
+### 6. Track asynchronous buffer ownership
 
-
-## 6. Track asynchronous buffer ownership
+![Deep dive: 6. Track asynchronous buffer ownership](./deep-dive-component-03.png)
 
 Asynchronous copies and device instructions can separate issuing work from completing it. A consumer must wait through the supported completion mechanism before reading a produced tile. A producer must not overwrite the buffer while a consumer still uses it.
 
@@ -116,7 +117,9 @@ This expresses a required dependency, not a particular API. CUDA's supported asy
 
 A diagnostic global synchronization can make a race disappear by serializing work. That observation helps locate an ordering problem, but it is not the final asynchronous repair. Restore the intended concurrency after implementing the correct ownership boundary and test again.
 
-## 7. Use each sanitizer for its documented scope
+### 7. Use each sanitizer for its documented scope
+
+![Deep dive: 7. Use each sanitizer for its documented scope](./deep-dive-component-01.png)
 
 Memcheck detects supported memory-access and related errors. Racecheck targets supported data-access hazards, particularly shared-memory hazards described in the documentation. Initcheck and synccheck address their documented initialization and synchronization checks.
 
@@ -137,7 +140,7 @@ An initialization failure also needs a population-aware interpretation. A buffer
 
 Keep tool limitations visible in the test record. Detection support can vary with memory space, operation, architecture, and version. The appropriate conclusion is evidence within the exercised scope, complemented by ownership analysis and other tests.
 
-## 8. Distinguish numerical error from memory corruption
+### 8. Distinguish numerical error from memory corruption
 
 Floating-point reduction order and accumulator precision can change rounding. A tiled sum can differ from a sequential reference while computing the same mathematical operation within a valid numerical contract.
 
@@ -153,7 +156,7 @@ For reductions, compare against a suitable higher-precision reference and test c
 
 Do not increase tolerance until a failing test passes without explaining the difference. A wrong stride or missing contribution can produce plausible small errors on one input and severe errors on another.
 
-## 9. Build cases around invariants and transitions
+### 9. Build cases around invariants and transitions
 
 Include aligned and partial tiles, small and large dimensions, supported strides, dtype variants, repeated buffer reuse, and the intended concurrency. Each case should exercise a claimed contract or a known risky transition.
 
@@ -163,7 +166,7 @@ Vary outstanding depth and buffer roles for asynchronous pipelines. A bug can ap
 
 Keep reference comparisons and sanitizer runs focused but complementary. Exhaustive random testing cannot replace a proof of address bounds and ownership, while a proof based on an incorrect interface cannot replace testing the real wrapper.
 
-## 10. Verify the production path after the repair
+### 10. Verify the production path after the repair
 
 A debugging configuration can change code generation, launch geometry, or timing. After fixing the cause, exercise the supported production path with the same relevant boundary and concurrency cases. Preserve numerical and useful-work outcomes.
 
@@ -171,9 +174,11 @@ Measure performance only after correctness is established. A required barrier or
 
 Record the invariant that failed, causal evidence, repair, and verification scope. The resulting test should detect recurrence of the mechanism rather than mirror incidental source structure.
 
+## Conclusion
+
 CUDA correctness joins mathematical semantics to valid memory and concurrency behavior. Address proofs, unique ownership, supported barriers, initialization, and lifetime define the program. Reference outputs and sanitizer tools then provide targeted evidence that the implemented path respects those contracts on the exercised inputs.
 
-## Sources
+### Sources
 
 - [NVIDIA Compute Sanitizer guide](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/).
 - [Current CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/).

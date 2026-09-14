@@ -9,8 +9,12 @@ order: 8
 topic: "Distillation and Adaptation"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: './deep-dive.png'
+heroImage: './section-overview.png'
 ---
+
+## Overview
+
+![Concept overview: Distillation 1: Teacher–Student Objectives and Temperature](./section-overview.png)
 
 Knowledge distillation trains a student using information produced by a teacher. Its efficiency benefit comes from changing the deployed model or its behavior, while moving additional work into preparation. The student is not automatically faster because its training objective mentions a teacher. It needs an architecture and execution path that actually cost less under the target workload.
 
@@ -19,7 +23,11 @@ The classical formulation uses softened class probabilities. This article derive
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
-## 1. Begin with supervised learning
+## Deep dive
+
+### 1. Begin with supervised learning
+
+![Deep-dive illustration: Begin with supervised learning](./deep-dive.png)
 
 For a classification example x, a student produces logits z_i for K classes. Softmax transforms them into a probability distribution. A one-hot label y gives the standard cross-entropy objective.
 
@@ -31,10 +39,7 @@ For one observed label, the target puts all probability mass on that class. This
 
 The hard objective remains useful during distillation. Teacher predictions can be wrong or poorly calibrated. Ground-truth supervision provides another source of information when labels are available, and its weight should be chosen through validation rather than discarded by default.
 
-
-![Deep-dive illustration: Begin with supervised learning](./deep-dive.png)
-
-## 2. Define teacher and student distributions
+### 2. Define teacher and student distributions
 
 Let a_i denote teacher logits and z_i student logits. A positive temperature T softens both distributions by dividing logits before applying softmax.
 
@@ -46,7 +51,7 @@ Increasing temperature makes a finite logit vector's distribution less concentra
 
 The teacher is normally fixed for the student-training procedure considered here. Store its checkpoint, preprocessing, inference precision, and target-generation policy. Those settings define the supervision and are necessary to interpret the resulting student.
 
-## 3. Interpret information beyond the top label
+### 3. Interpret information beyond the top label
 
 Suppose the correct class is a dog breed. A teacher might assign its remaining mass mostly to similar breeds, while assigning much less to unrelated vehicles. The one-hot target does not contain that pattern, whereas the soft target represents a learned relationship among alternatives for this input.
 
@@ -54,7 +59,9 @@ This information is conditional on the teacher and data population. It can refle
 
 Inspect examples where the teacher is uncertain and where it conflicts with labels. A student with limited capacity may benefit from some distinctions while failing to reproduce others. Distillation is a constrained learning problem, not a lossless transfer of the teacher's internal computation.
 
-## 4. Write the distillation objective
+### 4. Write the distillation objective
+
+![Deep dive: 4. Write the distillation objective](./deep-dive-component-03.png)
 
 A standard soft-target loss minimizes teacher-to-student KL divergence. The teacher entropy is constant with respect to student parameters, so minimizing it has the same student gradient as soft-target cross entropy.
 
@@ -66,7 +73,7 @@ The direction matters. Teacher-to-student KL weights errors by teacher probabili
 
 Both distributions must share the class interface. In classification that usually means the same label set and ordering. Language-model distillation requires additional attention to vocabulary, tokenizer, and sequence conditioning. Probability vectors with different semantics cannot be matched directly merely because they have similar lengths.
 
-## 5. Derive the logit gradient
+### 5. Derive the logit gradient
 
 Differentiating soft-target cross entropy through temperature-scaled softmax introduces a factor of one over T. Including the customary T squared multiplier gives the gradient below.
 
@@ -78,7 +85,7 @@ At high temperature, the probability difference itself scales approximately as o
 
 This is an asymptotic explanation, not a claim that every temperature produces identical optimization. Softmax is nonlinear, and the probability structure changes with T. Validate temperature and the mixture weight together under the actual training setup.
 
-## 6. Connect high temperature to logit matching
+### 6. Connect high temperature to logit matching
 
 Softmax is invariant to adding the same constant to every logit. Center teacher and student logits by subtracting their respective means. If their centered magnitudes are small compared with T, a first-order expansion gives:
 
@@ -90,7 +97,9 @@ The scaled gradient then approximately tracks differences between centered logit
 
 The approximation has a regime of validity. It should not be applied to a sharply concentrated distribution simply because a paper discusses temperature. Inspect logit magnitudes and use the exact softmax objective in the implementation. The expansion explains behavior; it does not replace the numerical calculation.
 
-## 7. Combine soft and hard supervision
+### 7. Combine soft and hard supervision
+
+![Deep dive: 7. Combine soft and hard supervision](./deep-dive-component-01.png)
 
 A common training objective mixes soft-target distillation with ordinary labeled cross entropy. The hard loss uses the usual temperature of 1, while the soft loss compares teacher and student at the chosen distillation temperature.
 
@@ -102,7 +111,7 @@ The weight lambda determines how much the training follows each information sour
 
 If labels are unavailable, training can use teacher supervision alone, but that changes the evidence and failure risks. Evaluate against an independent target population. A student that reproduces a teacher's calibration-set answers has demonstrated imitation on those examples, not necessarily generalization.
 
-## 8. Work through soft targets
+### 8. Work through soft targets
 
 Consider an illustrative 3-class teacher distribution at a selected temperature: 0.7, 0.2, and 0.1. Suppose the student predicts 0.5, 0.3, and 0.2 at the same temperature. The soft-target cross entropy is approximately 0.958 nats.
 
@@ -110,7 +119,7 @@ The one-hot loss for class 1 would instead be approximately 0.693 nats. These nu
 
 With temperature 2 and the T squared convention, the logit-gradient components are approximately negative 0.4, positive 0.2, and positive 0.2. Gradient descent raises the first logit relative to the others. The example illustrates the derivative; it contains no measured model performance.
 
-## 9. Keep temperature separate from calibration
+### 9. Keep temperature separate from calibration
 
 Temperature used to soften distillation targets is a training-design choice. Temperature scaling used to calibrate a classifier is fitted to improve the relationship between confidence and observed correctness. Their algebra can look similar while their objectives and data roles differ.
 
@@ -118,7 +127,7 @@ A teacher's softened target does not automatically become calibrated. Nor does m
 
 Use a held-out calibration population and appropriate metrics. Reliability diagrams can reveal structured errors that a single summary obscures. Preserve the task context: confidence about a classification label differs from probabilities over language tokens or correctness of a complete generated answer.
 
-## 10. Choose the student architecture deliberately
+### 10. Choose the student architecture deliberately
 
 A student can reduce depth, width, token count, or another expensive component. Each change creates a capacity and execution tradeoff. Parameter count alone does not determine runtime because matrix shapes, memory traffic, and backend support also matter.
 
@@ -126,7 +135,7 @@ The teacher's computational strategy need not fit the student architecture. A sm
 
 Start with a student that already has a plausible efficient execution path. Distillation should improve its quality under that design. It cannot turn unsupported operations or unfavorable kernel shapes into an efficient deployment merely by transferring more supervision.
 
-## 11. Account for teacher preparation cost
+### 11. Account for teacher preparation cost
 
 Generating soft targets costs teacher inference, storage, and data processing. Online targets avoid storing every distribution but add teacher computation during training. Offline targets can be reused but consume space and tie the dataset to a specific teacher configuration.
 
@@ -134,7 +143,7 @@ For a large vocabulary, storing a full probability vector per token can be expen
 
 Report the target representation and its precision. Quantizing stored probabilities or logits can introduce another approximation. Teacher evaluation, student training, and deployed student inference belong to different cost phases and should be accounted for separately.
 
-## 12. Understand token-level imitation
+### 12. Understand token-level imitation
 
 For an autoregressive model, token-level distillation compares conditional distributions under a context. The loss aggregates over positions, using the same conditioning policy for teacher and student when direct matching is intended.
 
@@ -142,7 +151,7 @@ Training under teacher-generated or ground-truth prefixes differs from evaluatin
 
 Vocabulary compatibility matters. Different tokenizations can require sequence-level objectives or a documented mapping instead of direct vector KL. Also preserve context truncation and special-token handling. Otherwise an apparently simple probability-matching implementation can compare different prediction tasks at the same array index.
 
-## 13. Evaluate beyond teacher agreement
+### 13. Evaluate beyond teacher agreement
 
 Measure student quality against the intended task and compare with a student trained without distillation under a fair budget. Teacher agreement is a diagnostic, but it is not the deployment objective when the teacher can make mistakes.
 
@@ -150,7 +159,9 @@ Hold generation settings and evaluation implementation fixed. A comparison with 
 
 Measure the exported student on the target backend. Report preparation cost, resident bytes, latency, throughput, and task quality with their workloads. No training run or GPU timing was performed for this article; the numerical examples explain the objective rather than establish acceleration.
 
-## 14. Relate distillation to other compression methods
+### 14. Relate distillation to other compression methods
+
+![Deep dive: 14. Relate distillation to other compression methods](./deep-dive-component-04.png)
 
 Distillation can accompany pruning or quantization because those methods change different parts of the problem. Pruning changes the retained structure; quantization changes numerical representation; distillation changes supervision for recovering or learning useful behavior.
 
@@ -158,7 +169,9 @@ A combined experiment needs an ablation that separates those contributions. Comp
 
 The resulting improvement belongs to the whole preparation and deployment configuration. Avoid attributing every gain to the teacher when architecture, data volume, and optimization also changed. Mechanistic explanations and controlled comparisons make the efficiency claim more informative than a label such as distilled model alone.
 
-## 15. Diagnose an overly confident teacher
+### 15. Diagnose an overly confident teacher
+
+![Deep dive: 15. Diagnose an overly confident teacher](./deep-dive-component-02.png)
 
 A teacher that assigns nearly all mass to one class at the selected temperature supplies little information beyond the hard label. Raising temperature can expose relative logits, but it cannot recover distinctions the teacher never learned. Inspect the target entropy and its variation across the training population before assuming that soft supervision is rich.
 
@@ -166,12 +179,11 @@ Conversely, extremely diffuse targets can provide weak task discrimination for a
 
 A useful diagnostic compares hard-label training, teacher argmax targets, and full soft targets on the same student design and data budget. The comparison asks whether the distribution beyond the top class contributes measurable value. It also distinguishes that contribution from simply obtaining additional labeled examples through teacher predictions.
 
+## Conclusion
+
 Maintain reproducible target generation and report the chosen mixture, temperature, and teacher checkpoint. Those concrete settings connect the theoretical gradient to the student artifact that will eventually be evaluated and deployed.
 
-![Deep dive: 15. Diagnose an overly confident teacher](./deep-dive-component-02.png)
-
-
-## Sources
+### Sources
 
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531).
 - [On Calibration of Modern Neural Networks](https://arxiv.org/abs/1706.04599).

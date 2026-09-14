@@ -3,7 +3,7 @@ title: '1 Line of PyTorch and the Hidden Syncs That Limit It'
 description: "torch.compile bought a 1.41x geomean training speedup across 180+ models. A single loss.item() in your loop can quietly hand it back."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'pt-1'
 order: 11
 series: "gpu-performance"
@@ -12,13 +12,21 @@ topic: "PyTorch and Compilers"
 tags: ['pytorch', 'torch-compile', 'cuda']
 ---
 
+## Overview
+
+![Concept overview: 1 Line of PyTorch and the Hidden Syncs That Limit It](./section-overview.png)
+
 Across 180+ real-world models, adding 1 line, `model = torch.compile(model)`, produced a geomean speedup of 2.27x for inference and 1.41x for training on an NVIDIA A100. Those are the headline numbers from the PyTorch 2 paper (Ansel et al., ASPLOS 2024), measured on TorchBench, HuggingFace, and TIMM suites, not on cherry-picked kernels.
 
 Here is the part that doesn't make the headline: the same afternoon you add that line, a single `loss.item()` in your logging code can hand a large slice of the win right back. Not by making any kernel slower. By making the GPU *wait*.
 
 This article is about both halves: why 1 line of Python can be worth 1.4x, and why 3 innocent-looking lines elsewhere in your training loop can quietly serialize the whole machine.
 
-## Why 1 line works at all
+## Deep dive
+
+### Why 1 line works at all
+
+![Deep dive: Why 1 line works at all](./deep-dive-component-03.png)
 
 In eager mode, PyTorch is an interpreter. Many operations in eager Python code (`matmul`, `add`, `layer_norm`, `gelu`) dispatch separate kernels, although views can require no kernel and libraries may combine operations. Each launch costs a few microseconds of CPU-side work: Python dispatch, argument checking, driver call. A single transformer training step can easily issue a couple thousand launches.
 
@@ -28,7 +36,7 @@ In eager mode, PyTorch is an interpreter. Many operations in eager Python code (
 
 But compilation only optimizes the work *inside* the captured graph. It cannot save you from what your Python does between graphs. That's where the hidden synchronizations live.
 
-## The contract you signed without reading
+### The contract you signed without reading
 
 CUDA execution is asynchronous by default. When Python executes `y = x @ w`, PyTorch does not compute anything; it *enqueues* a kernel onto a CUDA stream and returns immediately, usually microseconds later. The GPU consumes the queue at its own pace. A healthy training loop looks like a 2-lane pipeline: the CPU lane runs ahead, keeping the queue full; the GPU lane never starves.
 
@@ -42,7 +50,9 @@ Certain operations break the contract because they need an answer *now*, and the
 
 The damage from a sync is not the sync call itself. It's the pipeline state afterward: the CPU waited for the queue to drain, so now the queue is empty, and the GPU sits idle while Python shuffles along re-enqueuing work. Every sync converts your run-ahead pipeline back into lockstep, 1 bubble at a time.
 
-## Worked example: 3 syncs, found and fixed
+### Worked example: 3 syncs, found and fixed
+
+![Deep dive: Worked example: 3 syncs, found and fixed](./deep-dive-component-01.png)
 
 Take a fine-tuning loop of a mid-size transformer on 1 A100. Forward, backward, and optimizer together enqueue about 2,000 kernels per step; at ~5 µs per launch that's 10 ms of CPU dispatch. The GPU needs 80 ms of compute per step. Since 10 ms < 80 ms, the CPU should run comfortably ahead and the wall-clock step should be ~80 ms.
 
@@ -80,10 +90,9 @@ Here c_sync is a measured logging synchronization cost and K the number of steps
 
 Compilation changes dispatch and generated kernels. Removing a synchronization changes dependency placement. Test them independently with the same numerical algorithm, then together. Inspect graph breaks and recompilation counters as well as GPU gaps. Keep the eager reference for output and gradient comparisons. Data-dependent control flow, changing shapes, and alternative compiler backends can prevent the expected fusion; compilation is not evidence that every operation joined 1 graph.
 
-![Deep dive: Worked example: 3 syncs, found and fixed](./deep-dive-component-01.png)
+### Going deeper: the same line breaks the graph 2 times
 
-
-## Going deeper: the same line breaks the graph 2 times
+![Deep dive: Going deeper: the same line breaks the graph 2 times](./deep-dive-component-02.png)
 
 Here is the cruel symmetry: `loss.item()` doesn't just stall the pipeline at runtime. At *compile* time, it's also a *graph break*. TorchDynamo cannot trace a value flowing from a CUDA tensor into Python-land, so it splits your program into 2 smaller graphs with an eager-mode hop between them. Each fragment is fused separately; cross-fragment fusion opportunities are gone. 1 line, 2 penalties.
 
@@ -101,10 +110,7 @@ While you're auditing the loop, 2 more checks pay for themselves:
 
 **Verify Tensor Cores actually engage.** Half-precision alone doesn't guarantee it. NVIDIA's matmul performance guide recommends matrix dimensions that are multiples of 8 for FP16/BF16 (16 for INT8) so tiles align cleanly; misaligned shapes fall into tail-effect territory or slower kernels. This is why practitioners pad a 50,257-entry vocabulary to 50,304 (a multiple of 64) and see the output projection speed up. Confirm in the profiler: Tensor Core GEMMs carry kernel names with `hmma`/`s16816`-style fragments, and the profiler's "Tensor Cores Used" column should say yes for your big matmuls.
 
-![Deep dive: Going deeper: the same line breaks the graph 2 times](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"torch.compile removes launch overhead, so a few `.item()` calls no longer matter."** Compile reduces the *number* of launches; it does nothing about a drained queue. Worse, each `.item()` inside the compiled region is a graph break, so you pay in fragmentation at compile time and in bubbles at runtime. The 2 problems compound; neither fixes the other.
 
@@ -112,19 +118,19 @@ While you're auditing the loop, 2 more checks pay for themselves:
 
 **"`non_blocking=True` makes my transfer async."** The flag removes a framework-side wait where supported; pageable staging may still block. Pinned host memory and a separate copy stream enable the usual overlap pattern, provided the compute stream waits for copy completion before using the data. The reverse direction has the opposite trap: a `non_blocking` device-to-host copy into pinned memory returns *before* the data has landed, so reading the buffer without a sync gives you stale bytes. The flag is a contract, not a magic word.
 
-## The bigger picture
+### The bigger picture
 
 Hidden syncs are a miniature of the theme running through this whole series: peak hardware numbers mean nothing if the pipeline feeding the hardware stalls. A GPU that idles 15% of every step while Python formats a progress bar looks exactly like the waste [goodput](/blog/goodput-vs-utilization/) measures at cluster scale, only here the fix is 1 line, not a resilience strategy. And hunting for `cudaStreamSynchronize` slices in a profiler trace is precisely the day-to-day craft described in [What Does an ML Performance Engineer Actually Do?](/blog/what-does-an-ml-performance-engineer-do/) The tools change; the job, keeping the expensive unit busy, does not. When you benchmark the result, remember that a single throughput number can hide these bubbles entirely, a point [Tokens per Second: What It Hides](/blog/tokens-per-second-what-it-hides/) makes for inference.
 
 The dependency also runs forward: stream discipline and sync-free inner loops are prerequisites for CUDA graph capture and for clean `reduce-overhead` compilation. Cheap hygiene now unlocks the expensive machinery later.
 
-## Takeaway
+## Conclusion
 
 - `torch.compile` is real: 2.27x inference / 1.41x training geomean across 180+ models, from fusing kernels and cutting launches. But it optimizes only what it captures; syncs and graph breaks live in your Python, outside its reach.
 - The big 4 hidden syncs: `.item()`/`.cpu()` in the loop, tensor-valued `if` statements, pageable host transfers, and `time.time()` "measurements" that misattribute cost. Find them with `torch.profiler`, `TORCH_LOGS="graph_breaks"`, and `set_sync_debug_mode`.
 - Default to BF16 (FP32's range, no GradScaler) and verify Tensor Cores engage: half-precision dtype plus dimension multiples of 8, confirmed by kernel names in the profiler, not assumed.
 
-## Sources
+### Sources
 
 - Ansel et al., "PyTorch 2: Faster Machine Learning Through Dynamic Python Bytecode Transformation and Graph Compilation," ASPLOS 2024. https://dl.acm.org/doi/10.1145/3620665.3640366
 - PyTorch documentation, "CUDA semantics" (asynchronous execution, pinned memory, sync debug mode). https://pytorch.org/docs/stable/notes/cuda.html

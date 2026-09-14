@@ -3,7 +3,7 @@ title: 'Does Llama-70B Fit on 1 H100? Weights, KV Cache, and Headroom'
 description: "Derive a complete inference memory budget for a 70B model, including quantization metadata, grouped-query attention, and usable context capacity."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'math-1'
 order: 5
 series: "ai-performance"
@@ -12,13 +12,19 @@ topic: "Hardware and Capacity"
 tags: ['gpu', 'inference', 'math']
 ---
 
+## Overview
+
+![Concept overview: Does Llama-70B Fit on 1 H100? Weights, KV Cache, and Headroom](./section-overview.png)
+
 140 billion bytes is the approximate weight footprint of a 70-billion-parameter model stored in BF16. An H100 SXM is specified with 80 GB of GPU memory. Before considering a single prompt, the unquantized model already exceeds 1 GPU's capacity.
 
 The interesting question begins after that obvious comparison. 4-bit weights appear to reduce the footprint to 35 billion bytes, leaving room for inference. Does that mean a long-context server will run comfortably? Only if the remaining memory covers the key-value cache, quantization metadata, temporary workspaces, and the serving engine's reservations. A model that loads successfully can still fail when the first large request arrives.
 
 This article builds an explicit memory model rather than treating parameter count as a deployment specification. We use a Llama-3.1-70B-like dense decoder and distinguish rounded estimates from exact allocation measurements. Meta's model card identifies the 70B model as a grouped-query-attention model with a 128k context window; its public SKU registry gives the dimensions needed for the cache calculation. NVIDIA's H100 specification supplies the hardware capacity. The arithmetic below is an engineering estimate, not a benchmark or a guarantee for a particular checkpoint.
 
-## Define the deployment before counting bytes
+## Deep dive
+
+### Define the deployment before counting bytes
 
 Specify the checkpoint, weight representation, cache representation, GPU variant, and maximum concurrent requests. “70B on H100” omits almost every variable that controls the answer. H100 SXM and H100 NVL have different capacities. A 4-bit checkpoint with BF16 cache has a very different budget from a BF16 checkpoint with an 8-bit cache.
 
@@ -26,7 +32,7 @@ We will use 70 billion parameters as a rounded count, 80 decoder layers, 8 key-v
 
 For transparent arithmetic, define 1 GB as $$10^9$$ bytes and 1 GiB as $$2^{30}$$ bytes. We conservatively model the advertised 80 GB as $$80\times10^9$$ bytes; inspect your actual device's reported allocation capacity before deploying. Frameworks often print binary units while product specifications use a GB label. Mixing those conventions can make several gigabytes seem to appear or disappear.
 
-## The complete budget
+### The complete budget
 
 A useful first-order inequality is
 
@@ -38,8 +44,9 @@ Each term represents a different mechanism. Weights hold learned parameters. KV 
 
 Do not sum allocated memory and reserved memory blindly. A caching allocator can reserve a block containing already allocated tensors; counting both duplicates the same bytes. Similarly, a serving engine may preallocate its cache pool during startup, so the apparent “free memory” after loading is not necessarily available for unrelated tensors.
 
+### Weight precision gives a lower bound
 
-## Weight precision gives a lower bound
+![Deep dive: Weight precision gives a lower bound](./deep-dive-component-01.png)
 
 For $$P$$ parameters and $$b_w$$ bytes per parameter,
 
@@ -59,10 +66,9 @@ The effective storage becomes $$0.53125$$ bytes per weight, or $$4.25$$ bits, be
 
 At 8 bits, the rounded 70 GB payload leaves only 10 GB under our conservative capacity convention. Even if the weights load, that is a small pool for cache and peak workspace. At 4 bits, the illustrative 37.1875 GB payload-plus-metadata leaves much more room. Memory feasibility improves, but quality and kernel performance still require validation.
 
-![Deep dive: Weight precision gives a lower bound](./deep-dive-component-01.png)
+### Derive KV bytes per token
 
-
-## Derive KV bytes per token
+![Deep dive: Derive KV bytes per token](./deep-dive-component-03.png)
 
 For each decoder layer, a cached token stores a key vector and a value vector for every KV head. If $$L$$ is the layer count, $$H_{kv}$$ the KV-head count, $$d$$ the head dimension, and $$b_{kv}$$ the bytes per cached element,
 
@@ -89,8 +95,9 @@ $$
 
 Shared-prefix caching can reduce physical duplication, but it must actually be supported and active. Merely receiving similar prompts does not entitle a capacity calculator to subtract their prefixes.
 
+### A worked 1-GPU budget
 
-## A worked 1-GPU budget
+![Deep dive: A worked 1-GPU budget](./deep-dive-component-04.png)
 
 Assume our illustrative 4-bit format uses 37.1875 GB for weights and metadata. Reserve 8 GB for runtime, workspace, and safety margin. That reservation is a planning assumption, not a universal engine requirement. Measure it with representative prefill and decode workloads.
 
@@ -111,7 +118,9 @@ That pool can hold about 12 independent 8,192-token histories, because 12 requir
 
 Thus “the model fits” and “the maximum advertised context fits” produce different answers. The 4-bit model fits under these assumptions, but a full 128k request with BF16 cache does not. An 8-bit cache would halve the logical payload, provided the engine and hardware support the chosen representation and quality remains acceptable. That is a separate design decision, not an automatic consequence of quantizing weights.
 
-## Going deeper: peak memory differs from steady memory
+### Going deeper: peak memory differs from steady memory
+
+![Deep dive: Going deeper: peak memory differs from steady memory](./deep-dive-component-02.png)
 
 Prefill evaluates many prompt positions together. Depending on attention implementation, chunk size, and graph policy, its transient tensors may be much larger than those needed by 1 decode step. A startup memory estimate that exercises only short prompts can miss the true peak. Chunked prefill may reduce temporary allocation requirements while introducing scheduling tradeoffs.
 
@@ -131,10 +140,7 @@ The equation assumes all allowed output tokens remain in full attention and does
 
 A static output allowance protects accepted requests but can leave unused cache capacity when outputs finish early. Dynamic admission can improve packing, at the cost of handling growth and preemption explicitly. Document that policy alongside the precision and context envelope. The innovation in paging is allocating state incrementally and predictably; the remaining responsibility is ensuring simultaneously accepted requests do not grow into an impossible budget.
 
-![Deep dive: Going deeper: peak memory differs from steady memory](./deep-dive-component-02.png)
-
-
-## What multiple GPUs change
+### What multiple GPUs change
 
 Tensor parallelism can distribute weight matrices across devices. With 2 GPUs, an idealized BF16 weight shard is 70 GB per GPU, but that leaves little room on an 80 GB device. 4 GPUs produce 35 GB weight shards before metadata and replicated tensors, leaving a more useful cache budget.
 
@@ -142,7 +148,7 @@ KV state does not always shard in precisely the same ratio as weights. With 8 KV
 
 Communication buffers also consume memory, and collectives introduce time. CPU offload can make a workload addressable without keeping all parameters in HBM, but it changes the bandwidth path. A capacity success achieved through a much slower link can become a latency failure. “Runs without an allocation error” is a weaker criterion than “serves the required traffic.”
 
-## Measure the budget systematically
+### Measure the budget systematically
 
 Begin with exact checkpoint tensor sizes and quantization metadata. Record GPU memory before engine initialization, after loading, after graph capture, and during the largest planned prefill. Avoid interpreting a single framework metric as total device usage; compare allocator statistics with device-level readings.
 
@@ -150,7 +156,7 @@ Exercise at least a long single request, the maximum concurrent short-request ba
 
 Then repeat with the actual production cache dtype, graph settings, and memory-utilization configuration. A changed engine flag can alter reservations without changing the mathematical model. Keep the estimate alongside the measurement so discrepancies identify a missing term rather than becoming an unexplained safety percentage.
 
-## Common misconceptions
+### Common misconceptions
 
 **4-bit weights imply a 4-bit cache.** Weight tensors and attention state have independent representations. Our example deliberately combines 4-bit weights with a 2-byte cache, a common kind of mixed budget. Verify both settings separately.
 
@@ -160,7 +166,7 @@ Then repeat with the actual production cache dtype, graph settings, and memory-u
 
 **The advertised context window is a memory guarantee.** It describes supported positional length and model behavior. It does not promise that every precision, device, and concurrency configuration can hold that length.
 
-## Reproduce the arithmetic
+### Reproduce the arithmetic
 
 ```python
 parameters = 70_000_000_000
@@ -177,8 +183,7 @@ print(131072 * kv_bytes_per_token / 2**30)  # 40 GiB
 
 Replace the rounded parameter count with the checkpoint's actual tensor count. Replace the illustrative metadata term with the format's exact layout. Replace capacity and headroom with measurements. The script's value is its explicit assumptions, not the apparent precision of the final integer.
 
-
-## Takeaway
+## Conclusion
 
 A BF16 70B model cannot fit its approximate 140 GB weights on 1 80 GB H100 SXM. 4-bit storage can make 1-GPU inference feasible, but the cache determines which workloads remain feasible. In our worked budget, 12 8k histories fit while 1 full 128k BF16-cache history does not.
 
@@ -187,7 +192,7 @@ Use this budget before provisioning, then validate peak memory under the actual 
 
 After estimating capacity, validate the intended engine rather than loading a bare checkpoint alone. Warmup can allocate additional buffers, and captured execution paths may reserve memory for several shapes. Increase concurrency gradually while recording both allocated and reserved memory. Test the largest admitted prompt and output budget together, since separate tests can miss their combined footprint. If the system only fits by removing all operating margin, lower the request budget or change the configuration before production use. The useful result is a documented stable envelope: precision, context limit, concurrency, engine version, and the memory observed under that envelope.
 
-## Sources
+### Sources
 
 - [NVIDIA H100 specifications](https://www.nvidia.com/en-us/data-center/h100/): capacity and variant distinctions.
 - [Meta Llama 3.1 model card](https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct): model family, context window, and grouped-query attention.

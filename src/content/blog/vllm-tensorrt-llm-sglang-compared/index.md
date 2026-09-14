@@ -3,7 +3,7 @@ title: 'Serving Frameworks Compared: vLLM, TensorRT-LLM, SGLang'
 description: 'Compare 3 LLM serving engines through cache management, scheduling, execution paths, and a workload-matched measurement method.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'serve-2'
 order: 4
 series: "llm-serving"
@@ -12,11 +12,19 @@ topic: "Production Serving"
 tags: [inference, serving, vllm]
 ---
 
+## Overview
+
+![Concept overview: Serving Frameworks Compared: vLLM, TensorRT-LLM, SGLang](./section-overview.png)
+
 When the vLLM team profiled the LLM serving systems of 2023, they found that only 20-38% of KV-cache memory actually held token states. The other 60-80% was lost to fragmentation and over-reservation, which meant the largest single lever in serving performance at the time was not a faster kernel. It was a memory allocator. That finding, published as PagedAttention at SOSP 2023, kicked off 3 years of serving-framework competition that has now settled into 3 main camps: vLLM, TensorRT-LLM, and SGLang.
 
 If you run inference in production, you have probably been asked "which one is fastest?" at least once this quarter. The honest answer is that the question is underspecified. The 3 frameworks started from genuinely different design bets, then spent 2024 and 2025 copying each other's best ideas, so the remaining differences are narrower than the benchmark-war blog posts suggest, and the differences that do remain depend almost entirely on the shape of your traffic. This article walks through what each framework actually is, works 1 memory example by hand so the design bets become concrete, and ends with guidance that does not require you to trust anyone's marketing numbers.
 
-## 3 design bets
+## Deep dive
+
+### 3 design bets
+
+![Deep dive: 3 design bets](./deep-dive-component-01.png)
 
 A serving framework does 3 jobs: schedule requests into batches, manage the KV cache, and launch GPU kernels. (If prefill, decode, and KV cache are fuzzy, start with [how an LLM generates text](/blog/how-an-llm-generates-text/).) Each framework made a different first bet on which job mattered most.
 
@@ -26,11 +34,9 @@ A serving framework does 3 jobs: schedule requests into batches, manage the KV c
 
 **SGLang** bet on redundancy across requests. Its signature mechanism, RadixAttention, keeps the KV cache of completed requests in a radix tree keyed by token prefix, so any new request that shares a prefix with anything recently served reuses those KV blocks instead of recomputing prefill. Multi-turn chat (every turn resends the conversation), agent loops (same system prompt and tools thousands of times), and few-shot evaluation are all prefix-heavy, and on such workloads the SGLang paper reported up to 6.4x throughput gains over the systems of the time (self-reported, as always). The second bet was structured output: SGLang compresses the finite-state machine that constrains JSON or grammar-guided decoding so that deterministic stretches of the output (braces, key names, whitespace) are emitted in 1 jump-forward step instead of 1 token per forward pass. Fast, schema-exact JSON became something of a calling card.
 
+### A worked example: where the KV memory goes
 
-![Deep dive: 3 design bets](./deep-dive-component-01.png)
-
-
-## A worked example: where the KV memory goes
+![Deep dive: A worked example: where the KV memory goes](./deep-dive-component-03.png)
 
 Numbers make the bets concrete. Take Llama-3-8B with FP16 KV cache: 32 layers, 8 KV heads (grouped-query attention), head dimension 128.
 
@@ -49,7 +55,9 @@ Now serve a request that ends at 700 tokens (prompt plus output) on a system wit
 
 Notice what the example does not depend on: which framework's kernels are 7% faster on some microbenchmark. The memory math dominates, and all 3 frameworks now implement all 3 techniques.
 
-## Going deeper: compile time versus run time
+### Going deeper: compile time versus run time
+
+![Deep dive: Going deeper: compile time versus run time](./deep-dive-component-02.png)
 
 The durable philosophical difference among the 3 is not any single feature. It is *when decisions get made*.
 
@@ -71,10 +79,7 @@ This counts payload before metadata and excludes shared blocks. A 700-token requ
 
 Sharing requires identical tokenized prefixes under the same model, positions, adapters, and relevant execution contract. A 2-thousand-token prefix is 250 MiB in this example. 64 independent copies use 15.625 GiB; 1 shared copy uses about 0.244 GiB, saving 15.381 GiB when all blocks remain reusable. These binary-unit values clarify the rounded GB labels in the illustration. Include cold-cache runs, partially overlapping prefixes, and eviction in an engine comparison. Cache isolation and admission determine whether a repeated prompt actually becomes a hit; a theoretical shared-byte count is not a measured hit rate.
 
-![Deep dive: Going deeper: compile time versus run time](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"TensorRT-LLM is always fastest on NVIDIA GPUs."** Only when its specialization has something to specialize against. In decode-heavy serving at scale, throughput is governed by HBM bandwidth for weights and KV reads; every framework's attention and GEMM kernels sit near the same bandwidth roofline, so the compiled engine's advantage compresses toward 0. Where TRT-LLM reliably shines is the latency-critical, shape-stable regime. Published head-to-heads regularly show different winners as concurrency, prompt length, and output length shift, and each project's own benchmark posts (all self-reported) pick the regime that flatters them.
 
@@ -82,19 +87,19 @@ Sharing requires identical tokenized prefixes under the same model, positions, a
 
 **"The benchmark in the announcement blog will transfer to my workload."** The single biggest determinant of serving throughput is the prompt/output length mix, and vendor benchmarks choose theirs. A 2,000-in/100-out RAG mix is prefill-dominated and rewards compute and prefix caching; a 100-in/1,000-out generation mix is decode-dominated and rewards memory bandwidth and scheduling; ShareGPT-style mixed traffic rewards batching flexibility. A framework can legitimately win 1 mix by 40% and lose another. If the benchmark's length distribution, hit-rate assumptions, and SLO definition do not match your traffic, the number is trivia.
 
-## The bigger picture
+### The bigger picture
 
 The framework layer is where all the ideas from the rest of this series get operationalized. The prefill/decode asymmetry that these schedulers juggle is the same 1 that drove [prefill/decode disaggregation](/blog/the-prefill-decode-disaggregation-story/) from paper to silicon, and all 3 frameworks now slot into disaggregated deployments (NVIDIA's Dynamo orchestrates TRT-LLM, vLLM, or SGLang workers interchangeably, which is itself evidence of convergence). And the reason scheduler quality matters more than kernel micro-wins is the same reason [goodput beats utilization](/blog/goodput-vs-utilization/) as a metric: tokens served within SLO per GPU is what you are actually buying, and a smarter batching policy moves that number more than a faster GEMM.
 
 Practical guidance, then. Shortlist by constraints first: hardware fleet, model lineup, ops tolerance for engine builds, need for schema-exact output. Then benchmark the shortlist on *your* traffic: your length distribution, your prefix hit rate, your SLO, at the concurrency you actually run. All 3 projects ship load-testing tools that replay real traces. A 1-day bake-off answers the question for your workload permanently; a blog post answers it for someone else's workload temporarily.
 
-## Takeaway
+## Conclusion
 
 - The 3 frameworks encode 3 bets: vLLM on memory management and breadth, TensorRT-LLM on ahead-of-time kernel specialization, SGLang on cross-request prefix reuse and structured output. Core features (continuous batching, paged KV, prefix caching, quantization, speculative decoding) have converged across all 3.
 - Do the KV math for your own service: at 128 KB/token for an 8B model, paging turned 1 GB reservations into 88 MB actuals, and sharing 1 2,000-token prefix across 64 requests freed 15.75 GB. Memory arithmetic, not kernel speed, usually decides capacity.
 - "Which is fastest" has no general answer because the prompt/output mix decides the winner. Trust no benchmark whose traffic shape you can't map to your own; run a 1-day bake-off instead.
 
-## Sources
+### Sources
 
 - Kwon et al., "Efficient Memory Management for Large Language Model Serving with PagedAttention," SOSP 2023 — https://arxiv.org/abs/2309.06180
 - Zheng et al., "SGLang: Efficient Execution of Structured Language Model Programs" — https://arxiv.org/abs/2312.07104

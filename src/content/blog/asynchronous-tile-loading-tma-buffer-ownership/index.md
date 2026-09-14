@@ -12,16 +12,17 @@ level: "advanced"
 tags: ["gpu-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Asynchronous Tile Loading: TMA, Barriers, and Buffer Ownership. GPU tile buffers alternate between producer loading and consumer computation.](./section-overview.png)
+
 A matrix kernel often needs the next tile before its current arithmetic finishes. Synchronous loading can place memory latency directly on the critical path. Asynchronous loading offers a different schedule: initiate movement, compute with an earlier tile, and wait only when the next tile becomes necessary. The difficult part is proving that a buffer is ready to read and safe to overwrite.
 
 This article develops that proof before discussing performance. CUDA exposes multiple asynchronous mechanisms, including element-wise global-to-shared transfers and Tensor Memory Accelerator bulk transfers. Their capabilities and required synchronization differ. Consult the current programming guide for the target architecture instead of treating every asynchronous-copy interface as interchangeable.
 
-## 1. Separate the three events
+## Deep dive
 
-![Concept overview: Asynchronous Tile Loading: TMA, Barriers, and Buffer Ownership. GPU tile buffers alternate between producer loading and consumer computation.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Separate the three events
 
 Issuing a transfer means that the operation has been requested. Completing a transfer means that its data movement has finished according to the mechanism's contract. Finishing consumption means that every reader has stopped accessing the destination. These events create two distinct handoffs: producer to consumer, then consumer back to producer.
 
@@ -29,7 +30,9 @@ A thread returning from an asynchronous issue call has not automatically establi
 
 Represent a stage as empty, filling, ready, or reading. Only the owner of an empty stage may start filling it. Only consumers that have observed readiness may read it. The stage becomes empty again after the last required consumer finishes. This state model is useful even when an implementation encodes the states through barrier phases rather than explicit flags.
 
-## 2. Derive the pipeline's ideal schedule
+### 2. Derive the pipeline's ideal schedule
+
+![Deep-dive illustration: Derive the pipeline's ideal schedule](./deep-dive.png)
 
 Let there be N equally sized tiles. A transfer requires time C and the associated computation requires time K. A purely serial implementation takes approximately N times the sum of those durations. An ideal two-stage pipeline has a startup copy, overlapped interior work, and a final computation:
 
@@ -42,10 +45,9 @@ The approximation assumes independent copy and compute resources, adequate buffe
 
 The speedup approaches the sum of copy and compute time divided by their maximum for a long stream. It cannot eliminate both costs. If transfers and computation compete for the same limiting memory path, their overlapped durations may increase. Measure the overlap rather than inferring it from the presence of asynchronous instructions.
 
+### 3. Determine the number of stages
 
-![Deep-dive illustration: Derive the pipeline's ideal schedule](./deep-dive.png)
-
-## 3. Determine the number of stages
+![Deep dive: 3. Determine the number of stages](./deep-dive-component-01.png)
 
 A useful first approximation compares the latency of an issued transfer with the interval between tile consumptions. Let L be the latency to make a tile ready and I the interval at which consumers need another tile. Enough lookahead requires a stage count on the order of the latency divided by that interval, with an additional allowance for the actively consumed stage depending on the chosen convention.
 
@@ -58,7 +60,9 @@ Here q in the memory equation counts all allocated stages, tile storage is the b
 
 More stages consume shared memory and may reduce resident blocks. They can also increase work issued ahead of actual demand. Test a small set of stage counts while recording allocated shared memory, occupancy constraints, elapsed time, and correctness. Maximum buffering is not a general objective.
 
-## 4. Understand element-wise copies and TMA
+### 4. Understand element-wise copies and TMA
+
+![Deep dive: 4. Understand element-wise copies and TMA](./deep-dive-component-03.png)
 
 The current CUDA guide distinguishes LDGSTS-style global-to-shared copies from TMA bulk operations. Element-wise interfaces have alignment and supported-size requirements. The compiler can select different paths when their prerequisites are not established. An aligned-size assertion is a promise that the caller must actually satisfy, including offsets and tail sizes.
 
@@ -66,7 +70,7 @@ TMA supports bulk movement described by the documented operation and, for multid
 
 TMA's benefit is not simply a larger instruction. It can move tile-addressing and transfer work away from a conventional sequence of per-thread loads, subject to architecture support and transfer details. Evaluate whether that change helps the actual kernel. Small or irregular tiles can have different setup and utilization tradeoffs from large regular matrix tiles.
 
-## 5. Match completion to the operation
+### 5. Match completion to the operation
 
 A barrier can track participating-thread arrivals and, for supported asynchronous operations, transfer completion. These are separate obligations. When a mechanism uses expected transaction bytes, the expected amount must correspond to the operations associated with the phase. Incorrect accounting can cause an early handoff or a wait that never finishes.
 
@@ -74,7 +78,7 @@ A phase or generation distinguishes successive uses of the same barrier. Waiting
 
 The operation's documentation determines which memory-ordering and proxy synchronization steps are required. A plain block barrier is not a universal substitute for asynchronous completion. Conversely, copy completion alone does not necessarily synchronize every consumer's later reuse of a stage. Use the documented primitive for each edge in the ownership graph.
 
-## 6. Prove double-buffer reuse
+### 6. Prove double-buffer reuse
 
 Assign tile t to stage t modulo q. Before tile t plus q writes that stage, all reads of tile t must have finished. The producer therefore waits for a free-stage handoff in addition to the consumer's ready-stage wait. These two conditions establish a cyclic buffer without overlapping incompatible generations.
 
@@ -88,7 +92,7 @@ The ordering symbol denotes a required happens-before relation, not merely an ob
 
 A useful proof labels each shared-memory element by the tile generation that owns it. At a consumer read, show that the generation matches the requested tile. At a producer write, show that no reader retains the previous generation. This catches bugs that ordinary random numerical tests may miss because adjacent tiles contain similar values.
 
-## 7. Handle startup, tails, and drain
+### 7. Handle startup, tails, and drain
 
 The first few iterations have fewer ready tiles than the steady-state loop assumes. Issue only valid transfers and initialize the synchronization state consistently. A consumer must not wait for a tile that was never scheduled. Likewise, the final iterations must consume the already issued tiles without launching nonexistent future work.
 
@@ -96,7 +100,7 @@ Tail tiles require explicit bounds or a documented out-of-bounds behavior for th
 
 For a matrix product, padded reduction elements may be zero, whereas an unrelated operation can require another neutral value. The neutral value is a mathematical property of the computation. Copying uninitialized bytes into a tail and hoping they cancel is not a valid substitute.
 
-## 8. Keep participation consistent
+### 8. Keep participation consistent
 
 A barrier's expected participants must match the threads that actually arrive. A branch that skips an arrival can prevent progress. A branch that admits an extra arrival can complete the wrong phase. Tail handling is particularly dangerous when it changes participation rather than only changing which elements a participating thread moves or computes.
 
@@ -104,7 +108,7 @@ Warp specialization assigns some warps to producing and others to consuming. Tha
 
 A block may also participate in wider synchronization or distributed shared-memory mechanisms on supported hardware. Those features introduce their own scope and lifetime conditions. Start with the simplest correct block-local pipeline before extending ownership across a cluster.
 
-## 9. Measure the resource tradeoff
+### 9. Measure the resource tradeoff
 
 Compare a synchronous baseline, an asynchronous implementation with the same tile geometry, and a small stage-count sweep. Keep useful work, precision, layout, and output tolerance fixed. Otherwise a changed tile or precision can obscure whether asynchronous scheduling explains the improvement.
 
@@ -112,7 +116,7 @@ Measure kernel time with the documented device timing boundary, warm up compilat
 
 Record shared memory, registers, resident-block constraints, and numerical differences. If another stage improves copy readiness but reduces concurrency enough to slow the kernel, the report should connect both effects. The minimum time among valid configurations is more informative than a single occupancy percentage.
 
-## 10. Validate ownership adversarially
+### 10. Validate ownership adversarially
 
 Use dimensions producing partial tiles, different stage counts, and both short and long tile streams. Short streams stress startup and drain; long streams exercise repeated barrier generations. Fill input tiles with distinct patterns so accidental generation reuse produces visible errors.
 
@@ -120,7 +124,9 @@ Check supported strides, alignment, descriptor lifetime, and host-side construct
 
 The examples here describe scheduling and ownership; they have not been executed on a CUDA GPU in this editing environment. A production implementation needs compilation and target-device tests. The transferable method is to establish both handoffs, budget stages, and then measure the overlap under the actual resource constraints.
 
-## 11. Work through a three-tile ownership trace
+### 11. Work through a three-tile ownership trace
+
+![Deep dive: 11. Work through a three-tile ownership trace](./deep-dive-component-02.png)
 
 Consider two buffers and three logical tiles labeled A, B, and C. Initially both buffers are empty. The producer reserves buffer zero for A and buffer one for B. Issuing both copies changes their state to filling; it does not permit either consumer to read yet. Once A's completion handoff is observed, the consumer may read buffer zero while B continues transferring.
 
@@ -128,12 +134,11 @@ After all A consumers release buffer zero, the producer may reserve that buffer 
 
 When the consumer advances to B, it waits on B's generation and reads buffer one. It then advances to C and waits on the new generation of buffer zero. Reading the completion token associated with A would be an error even though the physical buffer address is identical. Generation identity connects the abstract tile sequence to the reusable storage.
 
+## Conclusion
+
 At the drain, the producer has no fourth tile to issue. The consumer still must finish C and release its stage if the surrounding abstraction requires it. The control flow must avoid waiting for a nonexistent future copy. This trace can be encoded in a small host-side state-machine test without claiming it exercises GPU memory ordering; the device tests remain responsible for validating the concrete synchronization implementation.
 
-![Deep dive: 11. Work through a three-tile ownership trace](./deep-dive-component-02.png)
-
-
-## Sources
+### Sources
 
 - [CUDA asynchronous copies, including LDGSTS and TMA](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html).
 - [CUDA asynchronous barriers](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-barriers.html).

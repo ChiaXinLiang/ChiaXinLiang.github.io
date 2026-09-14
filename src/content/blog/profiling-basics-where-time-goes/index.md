@@ -12,18 +12,21 @@ topic: "Performance Methodology"
 tags: [profiling, inference, gpu]
 ---
 
+## Overview
+
+![Concept overview: Profiling Basics: Finding Where the Time Actually Goes. An illustrated workstation connected to GPU server beside a magnified CPU/GPU timeline.](./section-overview.png)
+
 An H100 SXM can stream a 16 GB model through its compute units in roughly 5 milliseconds. Yet the first Nsight Systems trace of a typical homegrown inference server often shows the GPU doing nothing for 30 to 40 percent of wall-clock time. Not slow kernels. Nothing. Empty stretches on the timeline where the most expensive component in the rack waits for a Python thread to catch up.
 
 This is why the first rule of performance engineering is boring and non-negotiable: never optimize what you haven't profiled. Intuition about where time goes in an LLM serving stack is wrong often enough that acting on it is a coin flip, and the expensive failure mode is real: engineers spend 3 weeks making a matmul 15% faster while the GPU idles 40% of every decode step. The matmul win moves end-to-end latency by a few percent. Closing the idle gap would have moved it by a third.
 
 Profiling is how you find out which situation you're in. This article covers the workflow: which tool answers which question, in what order, and how to read the answer.
 
-## 3 tools, 3 questions, 1 order
+## Deep dive
 
-![Concept overview: Profiling Basics: Finding Where the Time Actually Goes. An illustrated workstation connected to GPU server beside a magnified CPU/GPU timeline.](./section-overview.png)
+### 3 tools, 3 questions, 1 order
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep dive: 3 tools, 3 questions, 1 order](./deep-dive-component-01.png)
 
 Profiling an inference stack is a top-down exercise with 3 layers, and the order matters more than the tools.
 
@@ -36,10 +39,9 @@ Profiling an inference stack is a top-down exercise with 3 layers, and the order
 
 The order is the discipline. Timeline first, to find out whether the time is even on the GPU. Kernel counters second, only for kernels the timeline convicted. Framework attribution whenever you need to map either view back to code.
 
-![Deep dive: 3 tools, 3 questions, 1 order](./deep-dive-component-01.png)
+### A worked example: the 40% idle GPU
 
-
-## A worked example: the 40% idle GPU
+![Deep dive: A worked example: the 40% idle GPU](./deep-dive-component-02.png)
 
 Here is a mock trace, simplified from a pattern that appears in real serving stacks constantly. The setup: an 8B-parameter model in BF16, batch of 32 decode requests, 1 H100. You measure 100 decode iterations and get 2.0 seconds of wall clock, so 20 ms per step, which is your observed TPOT. Then you open the `nsys` trace and sum the GPU busy time: 1.2 seconds. The GPU worked for 12 ms of every 20 ms step and sat idle for 8. 40 percent of your latency is not computation.
 
@@ -54,10 +56,7 @@ Zoom into 1 step and the 8 ms of idle time resolves into 3 distinct gaps, each w
 
 Now the arithmetic that makes profiling worth it. The 12 ms of GPU busy time is itself worth checking against a roofline floor: 16 GB of weights over the H100's ~3.35 TB/s of HBM bandwidth is about 4.8 ms per step just to read the weights once, plus KV-cache reads on top, so 12 ms is plausibly within a factor of 3 of the memory-bound floor. Meanwhile the 3 gaps are worth 8 ms and none of them require touching a kernel. Fix the sync and the launch gaps and the step drops toward 15 ms, a 25% TPOT reduction, before you have written a line of CUDA. Had you started at layer 2 with the biggest matmul, a 30% reduction in kernel duration on a kernel that is 40% of GPU time would have saved 1.4 ms of the 20: a 7% win, less than the 5 ms available from the identified gaps.
 
-![Deep dive: A worked example: the 40% idle GPU](./deep-dive-component-02.png)
-
-
-## Amdahl applies to critical-path fractions
+### Amdahl applies to critical-path fractions
 
 If fraction $$p$$ of measured elapsed time is accelerated by factor $$s$$ while the remainder is unchanged, speedup is
 
@@ -71,7 +70,9 @@ This model assumes the durations are on 1 serial critical path. Do not sum overl
 
 Compared with choosing the visually largest kernel, this method ranks recoverable wall-clock time. Profile to identify dependencies, make 1 intervention, and measure unprofiled requests under the same workload. CUDA graphs can reduce launch overhead but restrict captured shapes and retain memory; asynchronous scheduling can hide bookkeeping but complicates buffer lifetime. The equation narrows the expected benefit before those engineering costs are paid.
 
-## Going deeper: why gaps form at all
+### Going deeper: why gaps form at all
+
+![Deep dive: Going deeper: why gaps form at all](./deep-dive-component-03.png)
 
 The mechanism underneath all 3 gaps is the same: CUDA's execution model is asynchronous. The CPU enqueues work into a stream and continues; the GPU consumes the queue at its own pace. This is a feature. It means a fast CPU can run *ahead*, stacking up enough queued kernels that the GPU never starves even while Python does bookkeeping. A healthy trace shows the CUDA API row (launches) leading the GPU row (execution) by several milliseconds.
 
@@ -79,7 +80,7 @@ Gaps form when that pipeline drains. 3 drains cover most cases. First, hard sync
 
 This is also why "profile end-to-end first" is not just tool etiquette. The visible symptom (idle GPU) and the root cause (a blocking call in Python, 3 frames up from the framework) live in different layers of the stack, and only a whole-system timeline shows both at once with a shared clock.
 
-## Metrics that survive contact with production
+### Metrics that survive contact with production
 
 Profiling tells you where time goes; metrics tell you whether users feel it. 2 habits keep the metrics honest.
 
@@ -87,7 +88,7 @@ Track TTFT and TPOT separately, at percentiles, never as a blended average. Time
 
 And treat per-GPU throughput as a component metric, not a system metric. A microbenchmark that shows 1 GPU sustaining 12,000 tokens/s says little about an 8-GPU server with tensor parallelism, a scheduler, and real traffic; MLPerf, the most carefully policed benchmark in the field, measures whole systems under a load generator precisely because per-accelerator numbers derived by division are not valid results under its own rules. If a single-GPU number and a production dashboard disagree, the dashboard is the measurement and the benchmark is a hypothesis.
 
-## Common misconceptions
+### Common misconceptions
 
 **"nvidia-smi says 95% utilization, so the GPU is busy."** GPU utilization in `nvidia-smi` measures the percentage of time during the sample period in which at least 1 kernel was executing, per NVIDIA's NVML documentation. It does not measure how fully that kernel occupies compute units. A decode loop with the picket-fence pattern above can report 90%+ utilization while the SMs do useful work a fraction of that time. Only a timeline, or SM-activity counters via DCGM, shows the difference.
 
@@ -95,19 +96,19 @@ And treat per-GPU throughput as a component metric, not a system metric. A micro
 
 **"Our average latency is fine, so latency is fine."** Averages are the one statistic that no user ever experiences. Queueing under load makes latency distributions heavy-tailed, so p99 routinely sits 5 to 20x above p50, and the users in the tail are disproportionately the ones with long prompts, which often means your most engaged users. If a number is going into an SLO or a launch decision, it needs a percentile attached and a load level at which it was measured.
 
-## Where this sits in the bigger picture
+### Where this sits in the bigger picture
 
 This article opens the serving chapter of the series, and it is deliberately about method rather than machinery, because every optimization the chapter covers begins with a trace. The gaps in the worked example each have their own deep dive: the implicit-barrier behavior behind sync stalls is the subject of [the default CUDA stream's hidden barrier](/blog/the-default-cuda-stream-hidden-barrier/), and the launch-gap fix gets a full treatment in [CUDA graphs: record once, replay forever](/blog/cuda-graphs-record-once-replay-forever/). The metric discipline connects upward too: the difference between a busy GPU and a useful 1 is the theme of [goodput vs. utilization](/blog/goodput-vs-utilization/), and if TTFT and TPOT are new vocabulary, the basics-series explainer on [TTFT and TPOT](/blog/ttft-and-tpot/) covers why 1 stream of tokens hides 2 different latencies.
 
 The deeper point is cultural. The illustrative trace gives a 25% reduction from removing the 5 ms launch and synchronization gaps. Other workloads can have different limiting resources, so prioritize measured recoverable time rather than assuming a recurring percentage. The trace settles arguments that would otherwise run for weeks.
 
-## Takeaway
+## Conclusion
 
 - Profile top-down: Nsight Systems for the wall-clock timeline first, Nsight Compute only for kernels the timeline convicts, torch.profiler to map either back to code. Gaps in the GPU row are CPU and synchronization problems, and they are frequently worth more than any kernel fix.
 - Do the arithmetic before choosing work: in the worked example, closing the 5 ms launch and synchronization gaps saved more time than the illustrated 1.4 ms kernel improvement, and the roofline floor showed the busy time was already close to honest.
 - Report TTFT and TPOT separately at p50/p95/p99 under stated load, and treat per-GPU benchmark numbers as component metrics; whole-system measurement is the only number that predicts what users experience.
 
-## Sources
+### Sources
 
 - NVIDIA, *Nsight Systems User Guide* — https://docs.nvidia.com/nsight-systems/
 - NVIDIA, *Nsight Compute Documentation* — https://docs.nvidia.com/nsight-compute/

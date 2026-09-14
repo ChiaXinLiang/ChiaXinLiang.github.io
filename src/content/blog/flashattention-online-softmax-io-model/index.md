@@ -12,18 +12,21 @@ level: "intermediate"
 tags: ["llm-serving", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: FlashAttention: Online Softmax, Exact Tiling, and the I/O Model. Cutaway GPU memory hierarchy shows large Q,K,V blocks in HBM and small attention tiles in SRAM.](./section-overview.png)
+
 An attention layer can spend substantial time moving a matrix that the rest of the model never needs to retain. The score matrix exists to connect queries to keys, normalize their weights, and combine values. Once the output is available, the full matrix is normally disposable. FlashAttention changes the execution schedule so this temporary object does not have to travel repeatedly through GPU high-bandwidth memory.
 
 The mathematical attention function remains the reference. The innovation is an algorithm that respects the memory hierarchy: compute small blocks, preserve sufficient normalization statistics, and carry a partial output forward. This article derives those statistics, connects them to memory traffic, and explains how to evaluate the resulting kernel in a serving workload.
 
 All numerical examples are capacity calculations or illustrative timing scenarios. They are not benchmark results for a particular GPU. Exact attention here means the same mathematical operation, subject to floating-point rounding, rather than guaranteed bitwise equality with every reference implementation.
 
-## 1. Start with the objects that attention actually produces
+## Deep dive
 
-![Concept overview: FlashAttention: Online Softmax, Exact Tiling, and the I/O Model. Cutaway GPU memory hierarchy shows large Q,K,V blocks in HBM and small attention tiles in SRAM.](./section-overview.png)
+### 1. Start with the objects that attention actually produces
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Start with the objects that attention actually produces](./deep-dive.png)
 
 For one attention head, let Q contain N_q query vectors, K contain N_k key vectors, and V contain N_k value vectors. Query and key width is d; value width is d_v. A conventional formulation is
 
@@ -37,10 +40,7 @@ Consider N_q=N_k=8192 and a 2-byte stored score representation. One dense matrix
 
 The two matrix products perform useful arithmetic, but storing their connecting matrix introduces a separate cost. A kernel that improves arithmetic throughput while still writing and reading huge intermediates can leave the main bottleneck intact. Begin performance analysis by identifying which tensors are persistent model state, required outputs, and temporary execution artifacts.
 
-
-![Deep-dive illustration: Start with the objects that attention actually produces](./deep-dive.png)
-
-## 2. Stable softmax creates a dependency across key blocks
+### 2. Stable softmax creates a dependency across key blocks
 
 For a single query row, write its allowed scores as s_j. Numerically stable softmax subtracts the largest score before exponentiation. Its weighted value result is
 
@@ -54,7 +54,7 @@ A straightforward tiled implementation encounters a problem: after processing th
 
 The dependency is manageable because the complete history can be summarized by only m, l, and u. We do not need to retain every old probability. We need a rule for changing the scale of the historical sum and output accumulator when the reference maximum changes.
 
-## 3. Derive the online update rather than memorizing it
+### 3. Derive the online update rather than memorizing it
 
 Suppose the processed blocks have statistics m, l, and u. A new block has scores t_j and values w_j. Compute its local maximum b, local exponential sum z, and local weighted sum r using b as the reference. The combined statistics are
 
@@ -73,7 +73,7 @@ For a small scalar-value example, let the first block contain score 0 with value
 
 A query tile performs this update independently for each of its rows. Vectorized matrix operations calculate many scores and weighted sums together, while per-row maxima and sums maintain normalization. The implementation can store a normalized partial output instead of u, but then its rescaling formula must include the old and new denominators consistently.
 
-## 4. Map sufficient statistics onto the GPU memory hierarchy
+### 4. Map sufficient statistics onto the GPU memory hierarchy
 
 A tiled kernel loads a query block, streams key and value blocks, and computes each score tile in on-chip storage. It updates the row statistics and output accumulator before moving to the next key block. The temporary score tile is consumed where it is produced rather than becoming a full HBM allocation.
 
@@ -83,7 +83,9 @@ The original FlashAttention work formalizes attention as an I/O-aware computatio
 
 For training, avoiding a stored probability matrix changes backward execution too. The backward pass can reconstruct needed blocks from inputs and saved normalization information. This exchanges additional arithmetic for lower intermediate storage and traffic. A forward-only serving benchmark cannot establish the training benefit of that tradeoff.
 
-## 5. Keep masks, precision, and empty rows in the correctness contract
+### 5. Keep masks, precision, and empty rows in the correctness contract
+
+![Deep dive: 5. Keep masks, precision, and empty rows in the correctness contract](./deep-dive-component-02.png)
 
 Causal attention admits only keys at or before the query's logical position. During chunked prefill, query indices may start after an existing cache prefix, so local row number alone does not define the correct boundary. Padding, sliding windows, and packed sequences introduce additional distinctions between physical tensor position and logical sequence membership.
 
@@ -93,10 +95,7 @@ Floating-point reduction order changes with tiling. Test outputs using suitable 
 
 If dropout is part of training attention, recomputation must preserve the appropriate random decisions. Grouped-query attention also requires the correct mapping from query heads to shared key and value heads. These are semantic requirements around the kernel, not optional details that disappear because the central online-softmax equation is correct.
 
-![Deep dive: 5. Keep masks, precision, and empty rows in the correctness contract](./deep-dive-component-02.png)
-
-
-## 6. Distinguish prefill from decode before predicting speed
+### 6. Distinguish prefill from decode before predicting speed
 
 Prefill processes many query positions at once. It can expose large matrix products and substantial score-matrix traffic. Decode often processes one new query position per sequence against an existing key-value cache. Its arithmetic shape and opportunities for reuse are different, even when the underlying attention equation is unchanged.
 
@@ -110,7 +109,7 @@ The factor 2 accounts for keys and values. The estimate assumes equal key and va
 
 A decode kernel may need to split a long sequence across execution units and combine partial softmax states afterward. The same merge rule enables this reduction, but extra partial-output storage and launch overhead affect performance. Conversely, a small sequence can provide too little work to occupy a large GPU. A prefill speedup should therefore never be copied directly into an inter-token-latency forecast.
 
-## 7. Build an experiment that can explain its result
+### 7. Build an experiment that can explain its result
 
 Record query length, key length, batch size, query-head count, key-value-head count, head width, dtype, mask, and cache layout. Also record which backend actually executed. A high-level attention API can dispatch to different implementations depending on supported shapes and options, so an API name alone is insufficient evidence.
 
@@ -120,7 +119,7 @@ Use profiling to inspect actual memory traffic, matrix-unit activity, occupancy,
 
 For serving, repeat the experiment under realistic concurrency and mixed prompt lengths. Measure time to first token, inter-token latency, total request latency, and useful throughput. Kernel measurements explain a mechanism; request measurements establish whether that mechanism matters to the service objective.
 
-## 8. Translate the kernel improvement into a request budget
+### 8. Translate the kernel improvement into a request budget
 
 If attention consumes fraction f of a request's original execution time and its implementation becomes s times faster, the simplest fixed-workload speedup model is
 
@@ -134,7 +133,9 @@ Real services can gain additional capacity when lower memory usage allows larger
 
 Document both the direct kernel result and the resulting operating point. Readers should be able to distinguish saved attention time, reduced peak memory, increased batch capacity, and altered queueing. Combining them into a single unexplained speedup hides the method that an operator needs to reproduce.
 
-## 9. Understand what later implementations are optimizing
+### 9. Understand what later implementations are optimizing
+
+![Deep dive: 9. Understand what later implementations are optimizing](./deep-dive-component-01.png)
 
 After eliminating the large intermediate, execution scheduling still matters. Work partitioning across thread blocks and warps, non-matrix arithmetic, synchronization, and overlap between data movement and computation can limit performance. These constraints explain why improved implementations of the same attention function can outperform an earlier tiled kernel.
 
@@ -142,9 +143,11 @@ Hardware-specific asynchronous movement and matrix instructions introduce owners
 
 Choose an implementation based on supported semantics and measured performance on the target system. Keep a reproducible reference path for debugging. Architecture names and library defaults are useful starting points, but the decisive evidence is the executed kernel, its correctness, and its contribution to the intended workload.
 
+## Conclusion
+
 The central idea is reusable beyond attention: when an intermediate is large, ask whether a compact sufficient state can replace its materialization. Here a maximum, a denominator, and a weighted accumulator make that possible. Understanding their rescaling rule connects the mathematical method directly to the hardware behavior.
 
-## Sources
+### Sources
 
 - [FlashAttention: the original paper](https://arxiv.org/abs/2205.14135).
 - [FlashAttention official implementation and supported features](https://github.com/Dao-AILab/flash-attention).

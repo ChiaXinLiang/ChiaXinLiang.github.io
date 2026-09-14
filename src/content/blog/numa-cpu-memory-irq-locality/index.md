@@ -12,18 +12,19 @@ level: "intermediate"
 tags: ["ai-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: NUMA Tuning: CPU Affinity, Memory Placement, and IRQ Locality. Cutaway dual-socket server shows each CPU socket with local RAM and attached GPU/NIC.](./section-overview.png)
+
 On a multi-socket server, a CPU can access memory attached to another NUMA domain, but the path and available bandwidth can differ from local memory. AI workloads encounter this distinction in data preprocessing, pinned buffers, communication progress, optimizer offload, and storage or network handling. The GPU's own HBM is a different memory domain and should not be confused with host NUMA placement.
 
 NUMA tuning is therefore a coordination problem. CPU affinity determines where threads execute. Memory policy influences where host pages are allocated. Device topology determines which workers and buffers feed GPUs and adapters. A configuration that controls only one of these can leave the expensive path unchanged.
 
 We will derive simple remote-access costs and build a placement experiment that verifies actual state. Numerical values are illustrative. Linux policy semantics, managed interrupts, and container restrictions should be checked for the deployed kernel and runtime.
 
-## 1. Discover the topology and the allowed resources
+## Deep dive
 
-![Concept overview: NUMA Tuning: CPU Affinity, Memory Placement, and IRQ Locality. Cutaway dual-socket server shows each CPU socket with local RAM and attached GPU/NIC.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Discover the topology and the allowed resources
 
 Map CPU NUMA nodes, host-memory domains, GPU and NIC PCI identities, and relevant interconnect relationships. Also inspect the CPU and memory-node masks the process is actually allowed to use. A container or scheduler can restrict resources even when the host exposes a larger topology.
 
@@ -33,7 +34,9 @@ Identify which workload stages use host memory. Data decoding, collation, optimi
 
 Record the current placement before applying changes. Include page distribution and allowed resource masks after initialization, because those observations can differ from the configuration requested before allocation. If the baseline already has local buffers and appropriate workers, a new affinity setting may make no difference. If the baseline varies between runs, reproducible placement can reduce variability even without changing the best observed throughput.
 
-## 2. Separate thread affinity from page placement
+### 2. Separate thread affinity from page placement
+
+![Deep dive: 2. Separate thread affinity from page placement](./deep-dive-component-02.png)
 
 CPU affinity limits or selects the CPUs on which a thread can execute. It does not generally move already allocated memory pages to the same node. Memory placement depends on allocation policy and when pages are physically established, along with the operating system's supported behavior.
 
@@ -43,10 +46,9 @@ First-touch behavior is a useful concept under common default allocation conditi
 
 Changing affinity after allocation can therefore leave remote pages in place. A meaningful experiment controls initialization and allocation as well as execution, or uses an explicitly supported migration method when that is part of the design. Verify the resulting placement rather than assuming the requested policy relocated existing state.
 
-![Deep dive: 2. Separate thread affinity from page placement](./deep-dive-component-02.png)
+### 3. Derive a simple remote-latency model
 
-
-## 3. Derive a simple remote-latency model
+![Deep-dive illustration: Derive a simple remote-latency model](./deep-dive.png)
 
 Suppose a fraction r of relevant accesses use a remote path with latency ell_remote, while the remainder use local latency ell_local. A simplified average-access model is
 
@@ -60,10 +62,7 @@ Application time does not scale directly with this average. Caches, memory-level
 
 Measure useful stage time and access behavior together. A lower remote fraction with unchanged throughput can mean another bottleneck dominates. A better throughput result without changed placement can reflect different scheduling or background conditions rather than the intended NUMA mechanism.
 
-
-![Deep-dive illustration: Derive a simple remote-latency model](./deep-dive.png)
-
-## 4. Model bandwidth and shared inter-socket demand
+### 4. Model bandwidth and shared inter-socket demand
 
 Remote traffic can consume both memory-controller capacity and an inter-domain path. For required remote bytes D_remote and available inter-domain bandwidth B_remote, a basic bound is
 
@@ -77,7 +76,7 @@ Several workers can share the same path. An isolated remote-memory benchmark can
 
 Interleaving can distribute pages across nodes and use multiple memory controllers in supported circumstances. It can also increase remote accesses for workers with localized data. Whether it helps depends on access pattern and shared capacity, not a general rule that interleaving is always more balanced or always slower.
 
-## 5. Align input workers and transfer buffers
+### 5. Align input workers and transfer buffers
 
 Data workers can read, decode, transform, and collate on CPUs before feeding a GPU. Their CPU location and host-buffer placement influence the path to the device. A worker near the GPU but consuming remotely allocated pages can still generate inter-domain traffic.
 
@@ -87,7 +86,7 @@ Pinned buffers have their own allocation and lifetime requirements. The relevant
 
 A simplified end-to-end input budget includes decoding, collation, transfer, and exposed waiting. Optimizing local memory can improve one stage while leaving another dominant. Use a timeline to confirm that the NUMA-sensitive stage was on the training critical path.
 
-## 6. Place communication progress deliberately
+### 6. Place communication progress deliberately
 
 Host workers can post network operations, process completions, or support communication progress. Their placement can affect latency and interference, especially when CPU resources are oversubscribed or remote buffers are involved.
 
@@ -103,7 +102,7 @@ This is an accounting constraint, not a precise CPU scheduler model. It reminds 
 
 Preserve launcher and scheduler affinity settings in the record. A job that receives a different allowed CPU mask can behave differently even when its application configuration is unchanged. Actual masks are stronger evidence than requested placement alone.
 
-## 7. Understand interrupt and queue locality
+### 7. Understand interrupt and queue locality
 
 Network and storage devices can use multiple queues and interrupt vectors. Their processing may interact with CPU placement and the operating system's balancing or managed-interrupt behavior. A requested affinity mask is not always the final execution assignment.
 
@@ -113,7 +112,7 @@ Do not move every interrupt to the same local core simply because it is near the
 
 Evaluate changes through observed execution and application outcomes. Lower interrupt count on one CPU is not itself a throughput improvement. The useful evidence is reduced host bottleneck or latency under the same traffic population, with no harmful effect on neighboring work.
 
-## 8. Account for container and scheduler boundaries
+### 8. Account for container and scheduler boundaries
 
 CPU and memory-node permissions can be constrained by cpusets and the cluster's allocation policy. A NUMA command operating inside those boundaries cannot use resources the job did not receive. Relative node numbering and policy scope can also differ from an operator's host-level assumption.
 
@@ -123,7 +122,9 @@ Memory policy can affect allocation failure behavior and fallback according to i
 
 Automatic balancing or other system policies can change observed placement over time where supported. Measure sustained behavior and document relevant controls. A short first-touch test does not establish that the same page distribution persists throughout a long job.
 
-## 9. Run a controlled locality matrix
+### 9. Run a controlled locality matrix
+
+![Deep dive: 9. Run a controlled locality matrix](./deep-dive-component-01.png)
 
 Compare local and remote CPU execution with local and remote buffer allocation under a defined operation. This separates affinity effects from memory effects. Add realistic concurrency only after the isolated relationships are understood.
 
@@ -133,15 +134,17 @@ A useful 2-by-2 experiment can hold the worker on node 0 or 1 and initialize the
 
 Repeat the best candidate in the full workload. An isolated memory improvement can disappear when storage, compute, or another shared resource dominates. The production decision should follow useful throughput and latency, with the locality measurements explaining the mechanism.
 
-## 10. Keep placement as a versioned execution decision
+### 10. Keep placement as a versioned execution decision
 
 Store topology, allowed masks, worker mapping, allocation policy, initialization behavior, queue and interrupt observations, and representative performance. Revisit after hardware changes, container updates, scheduler policy changes, and workload growth.
 
 A sensible default is a reproducible measured placement that satisfies the job's CPU and memory needs. There is no universal node number or worker count that is optimal across systems. The record should explain why the chosen mapping fits this workload.
 
+## Conclusion
+
 NUMA tuning succeeds when execution, host pages, and device progress share appropriate paths without overloading the selected domains. Affinity alone is insufficient, and locality labels are not performance guarantees. Discover the topology, control allocation and execution separately, verify actual state, and adopt the configuration that improves useful workload outcomes.
 
-## Sources
+### Sources
 
 - [Linux NUMA memory policy documentation](https://docs.kernel.org/admin-guide/mm/numa_memory_policy.html).
 - [Linux cpuset documentation](https://docs.kernel.org/admin-guide/cgroup-v1/cpusets.html).

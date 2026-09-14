@@ -3,7 +3,7 @@ title: 'Free Speed from the OS: Your GPUs Are Starving Because of Your CPUs'
 description: "Cross-NUMA copies, pageable memory, and untuned containers can cut host-to-device bandwidth 3x. Here's the zero-dollar host tuning that gets it back."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'os-1'
 order: 8
 series: "ai-performance"
@@ -12,11 +12,19 @@ topic: "Cluster Infrastructure"
 tags: [numa, linux, gpu]
 ---
 
+## Overview
+
+![Concept overview: Free Speed from the OS: Your GPUs Are Starving Because of Your CPUs](./section-overview.png)
+
 A PCIe Gen4 x16 link can move about 26 GB/s of pinned host memory into a GPU. The exact same link, on the exact same server, delivers around 8 GB/s when the copy comes from pageable memory sitting on the wrong CPU socket. That is a 3.3x spread in host-to-device bandwidth, and not 1 dollar of hardware separates the 2 numbers. The difference is entirely software configuration: where a process runs, which DRAM its pages landed in, and whether those pages are pinned.
 
 This article is about the cheapest performance work in AI infrastructure: host-level OS tuning. No new GPUs, no kernel rewrites, no quantization tradeoffs. Just `numactl`, a few DataLoader flags, a driver setting, and a Kubernetes policy. Individually each one is small. Together they routinely decide whether an 8-GPU node behaves like 8 GPUs or like 6.
 
-## The part of the server nobody profiles
+## Deep dive
+
+### The part of the server nobody profiles
+
+![Deep dive: The part of the server nobody profiles](./deep-dive-component-03.png)
 
 We tend to draw an AI server as "the GPUs, plus some stuff." The stuff matters. A modern training or inference node is a dual-socket machine: 2 CPU packages, each with its own memory controllers and its own bank of DRAM, joined by an inter-socket fabric (UPI on Intel, xGMI on AMD). This is NUMA, non-uniform memory access: every core can reach all memory, but memory attached to the *other* socket costs extra latency and flows through a link with far less bandwidth than local DRAM.
 
@@ -31,7 +39,9 @@ There is a second, independent tax: pageable versus pinned memory. Normal `mallo
 
 2 independent taxes, 4 combinations. Let's put numbers on them.
 
-## A worked example: 1 batch, 4 speeds
+### A worked example: 1 batch, 4 speeds
+
+![Deep dive: A worked example: 1 batch, 4 speeds](./deep-dive-component-01.png)
 
 Take a concrete batch: 256 images at 3x224x224 in float32.
 
@@ -73,10 +83,9 @@ DataLoader(dataset, batch_size=256, num_workers=8,
 
 2 more free knobs while you are logged in. `nvidia-smi -pm 1` enables persistence mode, which keeps the driver loaded when no client is connected; without it, the first CUDA call after an idle period eats seconds of driver re-initialization, which shows up as mysterious cold-start latency in inference services. And if multiple small processes share 1 GPU, MPS (Multi-Process Service) lets their kernels run concurrently instead of time-slicing, while MIG partitions an A100/H100/B200 into up to 7 isolated instances with dedicated memory and SM slices. Sharing policy is host configuration too.
 
-![Deep dive: A worked example: 1 batch, 4 speeds](./deep-dive-component-01.png)
+### Going deeper: the container trap
 
-
-## Going deeper: the container trap
+![Deep dive: Going deeper: the container trap](./deep-dive-component-02.png)
 
 Here is where modern deployment makes things worse. Teams assume containerization abstracts the host away. It does the opposite: a container inherits every property of an untuned host while adding its own throttles on top.
 
@@ -101,10 +110,7 @@ This assumes independent copy and compute engines, different batches, suitable s
 
 Prefetching buys the next batch's readiness with host memory. A rough queue budget is worker count times prefetch depth times batch payload: 8 workers and depth 2 with 154 MB batches suggest 2.46 GB of queued data before active batches and processing copies. Not every queued object is necessarily pinned. Measure resident and pinned memory separately, and test NUMA affinity against observed device topology rather than assuming the operating system automatically places GPU-facing buffers correctly.
 
-![Deep dive: Going deeper: the container trap](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"My GPUs show 95% utilization, so the host isn't the bottleneck."** `nvidia-smi` utilization only reports the fraction of time *at least 1 kernel was resident*, not how much of the chip that kernel used or whether it was waiting on data. A GPU dribbling through small kernels while starved by a 19 ms synchronous copy can post high utilization numbers all day. I covered this trap at length in [Goodput: Your "100% Utilized" Cluster Is Mostly Wasted](/blog/goodput-vs-utilization/); the honest metrics are samples per second and tokens per second, measured end to end.
 
@@ -112,19 +118,19 @@ Prefetching buys the next batch's readiness with host memory. A rough queue budg
 
 **"We run on Kubernetes, so host tuning is the platform team's problem, and containers isolate us from it anyway."** Containers virtualize namespaces, not topology. Your pod's threads still run on physical cores of a physical socket, its pages still land in 1 socket's DRAM, and its GPU still hangs off 1 root complex. Default Kubernetes actively scrambles this mapping. Whoever owns the workload owns checking that `single-numa-node` alignment, static CPU policy, and persistence mode are actually configured, because the symptom (slow steps, jittery TTFT) appears in *your* dashboards, not the platform team's.
 
-## Why this is the highest-ROI hour in the stack
+### Why this is the highest-ROI hour in the stack
 
 This series keeps returning to 1 theme: performance is decided by data movement, not arithmetic. [The memory wall](/blog/the-memory-wall-latency-numbers/) is about the gap between compute and DRAM inside 1 chip; [the DRAM-to-HBM story](/blog/from-dram-to-hbm/) is about buying bandwidth with packaging. Host tuning is the same battle fought 1 hop further out, at the PCIe boundary, where the bandwidth is thinnest and the software defaults are worst. A B200 with 8 TB/s of HBM bandwidth still receives its input batches through a straw measured in tens of GB/s; letting misconfiguration cut that straw's diameter by 3x is malpractice.
 
 It is also the purest example of what [an ML performance engineer actually does](/blog/what-does-an-ml-performance-engineer-do/): find the invisible tax, quantify it in milliseconds, remove it with configuration, and prove the win end to end. Kernel fusion takes weeks. `numactl` takes an afternoon, including the benchmark that convinces your team. When we scaled from 1 node to clusters in [the disaggregation story](/blog/the-prefill-decode-disaggregation-story/), every scheduling idea assumed the individual hosts underneath were sane. This is the checklist that makes them sane.
 
-## Takeaway
+## Conclusion
 
 - Host-to-device bandwidth on identical hardware varies about 3x with configuration: pinned memory on the GPU's local NUMA node reaches ~26 GB/s on PCIe Gen4, pageable memory on the remote socket ~8 GB/s. Check `nvidia-smi topo -m`, then bind with `numactl --cpunodebind --membind`.
 - Pinned memory is what makes H2D copies asynchronous; `pin_memory=True` plus `prefetch_factor` tuning hides the copy behind compute entirely, but budget the page-locked RAM, especially under cgroup limits.
 - Containers inherit an untuned host and add throttles: default Kubernetes topology policy is `none` and CPU limits cause 100 ms-period stalls. Enable the static CPU manager and `single-numa-node` Topology Manager on GPU nodes, and keep persistence mode on.
 
-## Sources
+### Sources
 
 - NVIDIA, CUDA C++ Best Practices Guide, pinned memory and async transfers: https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/
 - NVIDIA, Driver Persistence documentation: https://docs.nvidia.com/deploy/driver-persistence/

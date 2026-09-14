@@ -12,18 +12,21 @@ level: "intermediate"
 tags: ["ai-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Kubernetes and Slurm: Topology-Aware Placement and Resource Guarantees. A cluster scheduler places a multi-GPU job onto server racks with visible GPU/NIC locality.](./section-overview.png)
+
 An AI job needs more than a number of GPUs. Data workers need CPU capacity, host buffers need memory, communication needs suitable adapter paths, and distributed process groups need a coherent placement. A scheduler can allocate the requested devices correctly while the job still receives an inefficient execution topology.
 
 Kubernetes and Slurm express and manage resources through different models. Their available policies can support device allocation and local binding, but the exact guarantees depend on configuration and integration. Neither a resource request nor a topology label should be treated as a promise of measured application throughput.
 
 We will model job feasibility, distinguish local from cross-node topology, and build a verification method for the resources actually received. Numerical examples are illustrative. Current scheduler and device-plugin documentation defines the supported policy behavior.
 
-## 1. Represent demand as several resources and communication groups
+## Deep dive
 
-![Concept overview: Kubernetes and Slurm: Topology-Aware Placement and Resource Guarantees. A cluster scheduler places a multi-GPU job onto server racks with visible GPU/NIC locality.](./section-overview.png)
+### 1. Represent demand as several resources and communication groups
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Represent demand as several resources and communication groups](./deep-dive.png)
 
 For a job component i, record GPU demand g_i, CPU demand c_i, host-memory demand m_i, and relevant device-memory needs. Also record its role in the process mesh: tensor, pipeline, expert, context, or data-parallel groups can have different communication locality requirements.
 
@@ -37,10 +40,7 @@ The assignment a maps components to nodes. These inequalities omit device topolo
 
 Physical GPU memory also matters. A logical GPU allocation does not guarantee that a model's weights, activations, workspace, and cache fit. Shared-device or partitioned-device mechanisms have their own capacity and isolation semantics that must be included explicitly.
 
-
-![Deep-dive illustration: Represent demand as several resources and communication groups](./deep-dive.png)
-
-## 2. Understand declared requests and effective allocations
+### 2. Understand declared requests and effective allocations
 
 Schedulers use declared resources to make decisions under their policy. If a job declares only GPU demand while substantial CPU or memory work remains unaccounted for, the placement can be feasible in the scheduler's model and overloaded in practice.
 
@@ -50,7 +50,9 @@ Record the allocation actually visible to each worker: GPU identifiers, allowed 
 
 Preserve these effective values in performance reports. A container or launcher can change visibility and binding within a scheduler allocation. Comparing application configuration alone can miss the resource difference that caused a regression.
 
-## 3. Device allocation is not complete performance isolation
+### 3. Device allocation is not complete performance isolation
+
+![Deep dive: 3. Device allocation is not complete performance isolation](./deep-dive-component-01.png)
 
 A device plugin or GPU resource mechanism identifies allocatable accelerator resources. The allocation may represent a whole device, a hardware partition, or a provider-defined sharing arrangement. Those choices provide different memory, compute, and interference behavior.
 
@@ -62,7 +64,7 @@ Measure neighboring-load sensitivity where the deployment shares resources. Pres
 
 A useful isolation experiment runs the same request population first alone and then with representative neighboring work. Record which resources the neighbor shares: accelerator compute, host CPUs, memory bandwidth, adapter ports, or storage. If device allocation is unchanged but latency grows only when the shared adapter is busy, the evidence points toward that boundary rather than the accelerator resource count. This comparison also clarifies the scope of any promised isolation. A guarantee about one physical partition cannot be extended automatically to components outside that partition.
 
-## 4. Local topology policies coordinate resources within a node
+### 4. Local topology policies coordinate resources within a node
 
 Kubernetes Topology Manager uses topology information from participating resource managers under supported policies and scope. Its purpose includes coordinating local resource alignment. The exact admission and alignment behavior follows the configured policy and available hints.
 
@@ -72,7 +74,7 @@ Slurm generic-resource configuration and binding can describe device and CPU rel
 
 Inspect local CPU, memory, GPU, and adapter relationships after launch. A successful admission event is evidence that the scheduler's configured rules were satisfied; it is not a measured GPU-to-NIC bandwidth result.
 
-## 5. Cross-node placement is a separate communication problem
+### 5. Cross-node placement is a separate communication problem
 
 Local NUMA alignment does not determine which servers a distributed job receives or which fabric cuts its traffic crosses. Tensor-parallel groups, pipeline stages, and expert owners can benefit from different inter-node layouts.
 
@@ -86,7 +88,7 @@ Use the actual process mesh and collective schedule to count traffic. Aggregate 
 
 Spreading replicas can improve resilience for a serving workload, while concentrating tightly communicating ranks can improve locality for training. The correct policy follows the workload and failure objective. A generic preference to spread or pack every AI job ignores this distinction.
 
-## 6. Coherent group allocation prevents useless partial startup
+### 6. Coherent group allocation prevents useless partial startup
 
 A distributed operation requires its participating ranks. If only part of a multi-worker job starts, those workers may occupy resources while waiting for unavailable peers. The scheduler and job controller need supported behavior for group allocation, startup, and failure.
 
@@ -96,7 +98,7 @@ Slurm jobs and Kubernetes controllers organize startup differently, and integrat
 
 Bound startup waiting and preserve the reason for failure. A job waiting for resources is different from a job whose communicator initialized and then stalled. The distinction guides whether the next action belongs to scheduling, launch configuration, or communication diagnosis.
 
-## 7. Fragmentation can strand apparently free accelerators
+### 7. Fragmentation can strand apparently free accelerators
 
 Consider an illustrative cluster with 2 nodes, each holding 8 GPUs and 16 available CPU units. An 8-GPU job consists of 2 groups requiring 4 GPUs and 12 CPU units each. Both groups cannot share one node under the CPU constraint, so placing one group per node uses 24 CPU units total.
 
@@ -106,7 +108,7 @@ The example does not prove that a particular scheduler fragments resources incor
 
 Record queued demand alongside free resource vectors. The number of free devices is insufficient to explain whether a waiting job can run. Topology and granularity can strand capacity even when aggregate sums look adequate.
 
-## 8. Priority and preemption need a recovery contract
+### 8. Priority and preemption need a recovery contract
 
 A higher-priority workload may displace lower-priority work under supported policy. That can improve urgent service while discarding training progress or triggering restart costs. The operational value depends on what state survives and how quickly useful work resumes.
 
@@ -122,7 +124,9 @@ Some components overlap, and the expression is only accounting. Measure useful r
 
 Avoid treating every queued job as a candidate for immediate preemption without the cluster's intended fairness and recovery policy. The scheduler's supported mechanism supplies enforcement; the service objectives supply the reason to use it.
 
-## 9. Verify placement with a workload-sensitive test
+### 9. Verify placement with a workload-sensitive test
+
+![Deep dive: 9. Verify placement with a workload-sensitive test](./deep-dive-component-02.png)
 
 After launch, capture rank-to-GPU, rank-to-node, adapter mapping, effective CPU masks, memory placement, and relevant resource limits. Compare these with the intended process mesh and local topology.
 
@@ -134,10 +138,7 @@ A controlled placement experiment can keep the model and group dimensions fixed 
 
 CPU demand should be calibrated from the complete job rather than only the main process. Data workers, communication progress, compilation, logging, and storage handling can consume different amounts over time. Preserve startup and steady-state observations separately, and include burst behavior when it affects launch or request latency. An allocation that covers average use but repeatedly throttles a critical progress thread can still be unsuitable. Conversely, reserving excessive CPU capacity can reduce cluster packing efficiency without improving the tested application. The appropriate declaration follows measured useful behavior and the policy's resource semantics.
 
-![Deep dive: 9. Verify placement with a workload-sensitive test](./deep-dive-component-02.png)
-
-
-## 10. Connect scheduling policy to capacity planning
+### 10. Connect scheduling policy to capacity planning
 
 Track offered job demand, admitted allocations, queue time, startup time, useful execution, and termination outcomes. A policy can keep admitted jobs fast by leaving more demand queued, so both populations should remain visible.
 
@@ -151,9 +152,11 @@ The relationship uses means and stationarity assumptions. It does not predict ta
 
 Maintain a versioned policy record with resource definitions, device sharing mode, local topology configuration, inter-node placement rules, group-startup behavior, and recovery semantics. Revisit after hardware and workload changes.
 
+## Conclusion
+
 Kubernetes and Slurm can organize supported resource allocation, but useful AI performance depends on the placement the job actually receives. Describe complete demand, align local resources, map communication groups across the fabric, and verify useful execution. Resource guarantees become meaningful when their scope is explicit and their application consequences are measured.
 
-## Sources
+### Sources
 
 - [Kubernetes Topology Manager](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/).
 - [Kubernetes CPU management policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/).

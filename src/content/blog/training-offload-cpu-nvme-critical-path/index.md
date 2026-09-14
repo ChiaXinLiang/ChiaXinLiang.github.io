@@ -12,18 +12,19 @@ level: "advanced"
 tags: ["distributed-training", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Training Offload: CPU, NVMe, Bandwidth, and the Critical Path. A memory hierarchy cutaway shows GPU HBM, host RAM, and NVMe storage holding different training-state blocks.](./section-overview.png)
+
 Training offload uses host memory or storage to retain state that would otherwise occupy GPU memory. It can make a large model trainable on a smaller accelerator set, or leave more device capacity for activations and microbatches. The memory saving is real, but the displaced bytes still have to be stored, transferred, and sometimes updated elsewhere.
 
 The engineering problem is to place those operations on a dependency timeline. Gradients cannot be transferred before they are produced. Updated parameter values cannot return before the optimizer has computed them. A parameter shard needed for the next layer cannot arrive after that layer has already stalled waiting for it.
 
 We will distinguish optimizer offload from parameter offload, derive transfer and CPU-bandwidth bounds, and work an illustrative mixed-precision Adam example. The numbers are explicit assumptions rather than measured hardware results. Replace them with effective bandwidth and state sizes from the actual machine before making a capacity or throughput decision.
 
-## 1. Identify exactly what is being offloaded
+## Deep dive
 
-![Concept overview: Training Offload: CPU, NVMe, Bandwidth, and the Critical Path. A memory hierarchy cutaway shows GPU HBM, host RAM, and NVMe storage holding different training-state blocks.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Identify exactly what is being offloaded
 
 Optimizer offload places selected optimizer state and possibly optimizer computation in host memory. For Adam, the first and second moments and any master-weight copy can be large. Keeping them off the GPU removes an important persistent-state contribution while allowing compute weights to remain available for forward and backward.
 
@@ -33,7 +34,7 @@ Activation offload is a different mechanism: saved tensors move to another memor
 
 NVMe offload adds a storage tier beyond host DRAM. It increases available capacity but introduces another service path, buffering requirement, and latency distribution. A storage device’s advertised sequential bandwidth is not automatically the throughput achieved by the application’s access sizes, concurrency, filesystem, and shared workload.
 
-## 2. Derive a state-placement budget
+### 2. Derive a state-placement budget
 
 Let P be logical parameter count, D the state-sharding degree, and o bytes of optimizer-related state per parameter. Ideal optimizer-state device retention falls by P o divided by D when that local shard moves fully to host memory. Host retention increases by the corresponding amount.
 
@@ -43,7 +44,9 @@ Those numbers are not a complete host-memory budget. Gradient buffers, parameter
 
 Likewise, the device still needs compute weights or the materialized working set, gradients according to the schedule, activations, and workspaces. Offloading one category does not eliminate the others. Count the largest concurrent allocation in both tiers rather than declaring capacity solved because persistent GPU state became smaller.
 
-## 3. Count transfers in both directions
+### 3. Count transfers in both directions
+
+![Deep-dive illustration: Count transfers in both directions](./deep-dive.png)
 
 For a transfer of S bytes over a path with effective throughput beta, an optimistic service bound is
 
@@ -57,10 +60,7 @@ Suppose 7 billion gradients use 2 bytes each and 7 billion updated compute weigh
 
 A sharded implementation may transfer only local owned slices or use a different data representation. Some systems overlap outgoing and incoming chunks. The example is therefore a deliberately simple accounting baseline. Inspect the actual tensors and ordering to determine the byte volume and concurrency used by a particular offload method.
 
-
-![Deep-dive illustration: Count transfers in both directions](./deep-dive.png)
-
-## 4. The CPU optimizer has a bandwidth bill
+### 4. The CPU optimizer has a bandwidth bill
 
 Moving optimizer computation to the CPU does not make it negligible. An Adam update reads gradients, master weights, first moments, and second moments, then writes updated master weights and moments. Each parameter update can create substantial DRAM traffic even before temporary conversions or additional implementation passes.
 
@@ -74,7 +74,9 @@ $$
 
 The expression separates bandwidth and arithmetic limits. A nominally powerful CPU can still underperform if the optimizer reads remote NUMA memory or competes with input workers and several other ranks for the same channels.
 
-## 5. Work the sequential critical path
+### 5. Work the sequential critical path
+
+![Deep dive: 5. Work the sequential critical path](./deep-dive-component-02.png)
 
 In a simple optimizer-offload schedule, backward produces gradients, gradients transfer to the host, the CPU updates its state, and updated compute weights transfer back before the next forward pass. Using the illustrative bounds above, the extra serialized service is at least about 2.03 seconds.
 
@@ -84,10 +86,9 @@ For chunk j, define readiness r_j, outgoing transfer duration a_j, CPU update du
 
 A useful steady-state bound for balanced chunks is the largest stage service time, plus pipeline fill and drain. The last updated chunk can remain exposed after backward ends. Measure chunk readiness and completion timestamps to identify which stage limits the pipeline and how much of the tail reaches the next forward pass.
 
-![Deep dive: 5. Work the sequential critical path](./deep-dive-component-02.png)
+### 6. Parameter offload moves the dependency into layers
 
-
-## 6. Parameter offload moves the dependency into layers
+![Deep dive: 6. Parameter offload moves the dependency into layers](./deep-dive-component-01.png)
 
 When parameters are not retained on the GPU, each layer or sharding unit needs a fetch before compute. Prefetch can overlap the next unit’s transfer with the current unit’s arithmetic. Too little lookahead exposes transfer latency. Too much lookahead materializes several units and consumes the capacity offload was intended to save.
 
@@ -97,7 +98,7 @@ Access frequency matters. A parameter unit may be needed during forward, recompu
 
 Align offload units with compute and sharding boundaries initially. Then refine when traces show dominant stalls or wasted materialization. A policy based only on parameter size can miss expensive repeated accesses created by activation checkpointing or pipeline interleaving.
 
-## 7. NVMe adds capacity and another pipeline stage
+### 7. NVMe adds capacity and another pipeline stage
 
 Storage-backed offload commonly stages data through host memory before the GPU can consume it. The path may include storage reads, host buffering, transfer preparation, and a device copy. Compatible direct-I/O mechanisms can alter this path, but support and behavior must be verified for the actual stack.
 
@@ -107,7 +108,7 @@ Buffer count, request size, alignment, filesystem behavior, and competing checkp
 
 Storage latency variation also affects tails. A rare slow read can stall the next required layer even when average bandwidth appears sufficient. Record percentiles and complete-step variability, and evaluate whether prefetch headroom absorbs those delays under the supported workload.
 
-## 8. NUMA locality and pinned buffers matter
+### 8. NUMA locality and pinned buffers matter
 
 Host memory belongs to a physical topology. A CPU optimizer running on one socket while its state resides on another can consume inter-socket bandwidth and experience higher latency. GPU transfers can likewise follow different paths depending on CPU affinity and memory placement.
 
@@ -117,7 +118,7 @@ Input processing and checkpoint writing use the same host and storage resources.
 
 Correct synchronization also governs buffer reuse. A host or device staging buffer cannot be overwritten while a transfer or kernel still reads it. Events and completion signals establish ownership transitions. Avoid fixing lifetime bugs with indiscriminate global synchronization, because that can hide races while destroying the intended overlap schedule.
 
-## 9. Compare feasibility and useful throughput honestly
+### 9. Compare feasibility and useful throughput honestly
 
 Offload can be valuable even when fixed-work step time increases: it can make training possible on available resources. The honest comparison is between feasible configurations with documented device and host capacity, not against an unoffloaded instance that cannot execute.
 
@@ -127,13 +128,13 @@ Sweep chunk size, prefetch depth, thread placement, and buffer count in small co
 
 Finally, test checkpoint and recovery behavior with the offloaded state. A training job that fits and runs steadily can still fail when saving gathers state or when restart recreates temporary buffers differently. Capacity planning should include supported operational paths, not only the middle of a successful iteration.
 
-## Takeaway
+## Conclusion
 
 Offload changes where training state lives and sometimes where updates execute. It replaces GPU retention with host or storage capacity, transfer service, and new scheduling dependencies. Streaming can hide some work, but the final required state still has a critical path.
 
 Count the bytes in every tier, measure effective throughput under contention, and connect each chunk to its producer and consumer. Evaluate offload as a complete feasible training design rather than a free memory-reduction switch.
 
-## Sources
+### Sources
 
 - [DeepSpeed ZeRO-Offload tutorial](https://www.deepspeed.ai/tutorials/zero-offload/): optimizer offload and CPU update implementation.
 - [Ren et al., ZeRO-Offload](https://arxiv.org/abs/2101.06840): heterogeneous training-state placement and computation.

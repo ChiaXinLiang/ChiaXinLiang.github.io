@@ -12,16 +12,17 @@ level: "advanced"
 tags: ["llm-architectures", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Comparing LLM Architectures: Evidence, Tradeoffs, and Missing Disclosures. Several model silhouettes show dense attention cache, compact recurrent state plus attention, and routed experts.](./section-overview.png)
+
 Architecture comparisons often combine incompatible evidence: a total-parameter headline, a provider benchmark, a context limit, and a serving result from another backend. Each can be useful, but they answer different questions. A reliable comparison begins by defining what is being compared and which claims the available sources establish.
 
 This article uses the disclosed gpt-oss, Qwen3.6-35B-A3B, and DeepSeek-V4.1-Flash designs as examples of an evidence method. It does not rank them from unmeasured performance or infer undocumented structures for closed models. The aim is to make tradeoffs and missing information visible enough for an infrastructure decision.
 
-## 1. Define the object of comparison
+## Deep dive
 
-![Concept overview: Comparing LLM Architectures: Evidence, Tradeoffs, and Missing Disclosures. Several model silhouettes show dense attention cache, compact recurrent state plus attention, and routed experts.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Define the object of comparison
 
 Architecture is the structured computation: layer families, projections, state updates, expert routing, and residual paths. A checkpoint supplies trained weights. A backend chooses an execution schedule and numerical representation. An inference policy chooses sampling, search, and other request behavior.
 
@@ -29,7 +30,7 @@ A comparison can target any of these objects, but its label should match the evi
 
 Record the release identifier and comparison boundary first. This prevents later numbers from silently changing meaning as the discussion moves from quality to memory or latency.
 
-## 2. Establish a source hierarchy
+### 2. Establish a source hierarchy
 
 Released configuration and weight shapes establish dimensions. Reference code establishes operation order and implementation semantics. A primary paper explains methods and controlled experiments. A model card supplies release claims and benchmark provenance.
 
@@ -37,7 +38,9 @@ Marketing summaries can point toward these sources but should not replace them f
 
 Retrieval date or source revision makes an analysis reproducible. If a page changes, the recorded evidence explains which version supported the article. State missing fields explicitly rather than guessing from a related checkpoint.
 
-## 3. Compare attention representations
+### 3. Compare attention representations
+
+![Deep-dive illustration: Compare attention representations](./deep-dive.png)
 
 MHA, MQA, and GQA differ in key-value head sharing. MLA retains a factorized latent and positional side state. Sparse attention restricts eligible positions, and sliding windows bound recent history. These mechanisms address different dimensions of the system.
 
@@ -51,10 +54,7 @@ Latent cache, cross-layer sharing, or mixed local-global layers require another 
 
 Compare retained representation, eligible history, query work, and actual kernel traffic separately. Theoretical bytes establish capacity implications; measured traffic and time establish execution behavior.
 
-
-![Deep-dive illustration: Compare attention representations](./deep-dive.png)
-
-## 4. Compare hybrid state correctly
+### 4. Compare hybrid state correctly
 
 Qwen3.6's disclosed layout contains 30 Gated DeltaNet blocks and 10 Gated Attention blocks. Its recurrent and attention head dimensions differ. This composition needs separate state terms rather than one standard Transformer estimate.
 
@@ -66,7 +66,9 @@ The recurrent term can be bounded with sequence length while explicit history st
 
 A comparison with an explicit-attention model should use actual configurations and workload lengths. Constant recurrent state is an architectural property; useful long-distance retrieval is behavioral evidence requiring evaluation.
 
-## 5. Compare sparse experts with definitions
+### 5. Compare sparse experts with definitions
+
+![Deep dive: 5. Compare sparse experts with definitions](./deep-dive-component-04.png)
 
 Total parameters describe learned capacity under a counting convention. Active parameters describe a selected path under another convention. Weight residency follows assigned storage and representation, while arithmetic follows selected functions and other active components.
 
@@ -81,7 +83,7 @@ Shared branches and conditional-memory modules require additional terms. Do not 
 
 Expert count and selected count also do not determine dispatch cost. Group sizes, placement, padding, and topology affect execution. Compare those under an identified backend.
 
-## 6. Keep numerical representations attached
+### 6. Keep numerical representations attached
 
 The gpt-oss card reports MXFP4 MoE weights, while its straightforward PyTorch reference upcasts weights to BF16. DeepSeek-V4.1-Flash reports FP4 main cache with grouped scales. These statements refer to different stored quantities.
 
@@ -89,7 +91,7 @@ A precision table should distinguish expert weights, other weights, KV or latent
 
 Comparing one implementation's packed weights with another's expanded reference allocations can be a useful backend comparison, but it should not be presented as an inherent architecture memory ranking. Quality evidence should match the actual numerical path where possible.
 
-## 7. Separate prefill and decode
+### 7. Separate prefill and decode
 
 Prefill processes input and establishes state. Decode produces new tokens using that state. Architectures and backends can have different bottlenecks in these phases. DeepSeek's card explicitly reports different active-parameter figures for the 2 phases.
 
@@ -104,7 +106,7 @@ The decode term can change as history grows. Batching and concurrency add furthe
 
 Compare prompt-length and output-length distributions explicitly. An input-heavy advantage does not establish the same result for long generation. Time to first token and complete-response duration are separate user-facing quantities.
 
-## 8. Include multimodal representation costs
+### 8. Include multimodal representation costs
 
 A multimodal request can include image or audio encoding and many inserted feature positions beyond text tokens. The processor determines their representation under the release's input contract.
 
@@ -112,7 +114,7 @@ Count preprocessing, encoder execution, connector work, language prefill, and ge
 
 Do not infer modality capability from a generic family label. Consuming images, consuming audio, and generating those modalities are different claims. Use the release's disclosed interfaces and task evaluations.
 
-## 9. Match quality budgets
+### 9. Match quality budgets
 
 Post-training and inference work can materially affect benchmark scores. A reasoning policy sampling several candidates is not directly comparable to a single-attempt policy without identifying the budget and selector.
 
@@ -120,7 +122,7 @@ Report generated tokens, candidate count, verification work, and task controls. 
 
 Training data and evaluation leakage also matter. A quality difference across differently trained checkpoints cannot isolate architecture unless the experiment controls the relevant factors. State that limit without dismissing the system result.
 
-## 10. Quantify uncertainty
+### 10. Quantify uncertainty
 
 A measured latency distribution and task-success sample have uncertainty. Report sample count and a suitable summary rather than one unusually favorable run. Tail latency can matter more than the mean for interactive workloads.
 
@@ -128,7 +130,7 @@ For a defined Bernoulli success population, maximum likelihood estimates the rat
 
 A benchmark report should identify the population, repetition method, and uncertainty calculation. Extra decimal places do not compensate for small samples or uncontrolled workload differences.
 
-## 11. Preserve reported memory scopes
+### 11. Preserve reported memory scopes
 
 DeepSeek's card distinguishes global cache at 890 bytes per token from a separate persistent-cache reduction through bounded replay. Global state, active device state, persistent inactive state, and peak application memory are different categories.
 
@@ -136,7 +138,7 @@ A comparison table should retain the category beside each number. Never compare 
 
 Likewise, a model's reported ability to run on a device does not reserve arbitrary context, batch size, or workspace. Capacity decisions need actual allocation under the intended request distribution and admission policy.
 
-## 12. Build a comparison matrix
+### 12. Build a comparison matrix
 
 For each release, record layer families, attention state, expert counts and definitions, multimodal inputs, context policy, numerical representation, training disclosure, and reference implementation. Mark unknown fields as unknown.
 
@@ -144,7 +146,9 @@ Then add measured backend evidence in a separate set of columns: device topology
 
 A missing field is useful information. It tells the reader which inference would require further disclosure or measurement. Filling it with a plausible family resemblance makes the table look complete while reducing its reliability.
 
-## 13. Test the mechanism behind a claim
+### 13. Test the mechanism behind a claim
+
+![Deep dive: 13. Test the mechanism behind a claim](./deep-dive-component-01.png)
 
 If a claim concerns smaller cache, calculate state dimensions and compare actual allocation. If it concerns bounded deeper indexing, measure that component across contexts rather than only total latency. If it concerns expert efficiency, inspect group distributions and communication.
 
@@ -152,7 +156,9 @@ Use a semantic reference to establish correctness before comparing speed. A miss
 
 No models were executed or GPU benchmarks performed for this article. Its comparisons describe disclosed mechanisms and an evaluation method, not an independently measured ranking.
 
-## 14. Present tradeoffs as operating regions
+### 14. Present tradeoffs as operating regions
+
+![Deep dive: 14. Present tradeoffs as operating regions](./deep-dive-component-03.png)
 
 A system can perform well for short prompts and lose at long contexts, or favor input-heavy requests over long generation. Quality can improve with additional inference work while latency rises. These are operating regions rather than permanent architecture winners.
 
@@ -160,7 +166,7 @@ A useful visualization plots quality against defined cost or latency across seve
 
 Keep uncertainty visible and identify which quantities were calculated, provider-reported, or measured locally. This makes the conclusion reviewable and supports updates when new evidence appears.
 
-## 15. Turn the comparison into an infrastructure decision
+### 15. Turn the comparison into an infrastructure decision
 
 Start from the workload's quality requirement, prompt and output distributions, modalities, latency target, and available devices. Eliminate unsupported interfaces, then assess capacity and measured performance under compatible backends.
 
@@ -168,7 +174,9 @@ Use architecture formulas to predict likely pressure points and design measureme
 
 The resulting comparison is stronger because it preserves definitions. Architecture, training, representation, and inference work each contribute to a system. Evidence tied to those contributions supports a practical decision without turning incomplete disclosures into confident claims.
 
-## 16. Audit an apparently simple comparison
+### 16. Audit an apparently simple comparison
+
+![Deep dive: 16. Audit an apparently simple comparison](./deep-dive-component-02.png)
 
 Suppose a report says that one model is faster because it has fewer active parameters. Before accepting the explanation, ask whether the timing covers prefill, decode, or the complete request; whether outputs use the same length and quality budget; and whether both backends use comparable numerical representations. A difference in any of these can explain the result without isolating active parameter count.
 
@@ -180,16 +188,17 @@ Finally preserve the conclusion's scope. A measured advantage on one device and 
 
 This audit turns a headline into a testable chain: disclosed mechanism, predicted resource effect, observed execution, and validated task behavior. Each link can be examined independently. The chain is a useful standard for the entire series because it makes architectural innovation concrete while keeping uncertainty and workload dependence visible.
 
-![Deep dive: 16. Audit an apparently simple comparison](./deep-dive-component-02.png)
+### 17. Separate compressed preparation from architecture
 
-
-## 17. Separate compressed preparation from architecture
+![Deep dive: 17. Separate compressed preparation from architecture](./deep-dive-component-05.png)
 
 Distillation, low-rank adaptation, and quantization can change the prepared artifact without defining the original architecture. A fair comparison records those changes alongside the disclosed structure and numerical backend. In particular, a low trainable-parameter count does not establish low inference cost, and a small payload does not establish a smaller context state.
 
+## Conclusion
+
 The [compression experiment guide](/blog/compression-experiment-quality-deployment/) develops this separation through controlled candidates and a quality-resource frontier. For the theoretical mechanisms, compare [LoRA's factorized update](/blog/lora-low-rank-updates-memory/) with [teacher/student distillation](/blog/distillation-temperature-teacher-student/). Their preparation interfaces and deployed execution differ even when both are described broadly as efficient model methods.
 
-## Sources
+### Sources
 
 - [Official gpt-oss repository](https://github.com/openai/gpt-oss).
 - [Official Qwen3.6-35B-A3B model card](https://huggingface.co/Qwen/Qwen3.6-35B-A3B).

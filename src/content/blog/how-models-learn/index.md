@@ -3,7 +3,7 @@ title: 'How Models Learn: Gradient Descent and Backprop in Plain Words'
 description: "Training a neural network is finding the bottom of a valley you can't see, 1 step at a time — and billing every weight for its exact share of every mistake."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'nn-2'
 order: 2
 series: "llm-basics"
@@ -12,11 +12,17 @@ topic: "Neural Networks"
 tags: ['neural-networks', 'training', 'backpropagation']
 ---
 
+## Overview
+
+![Concept overview: How Models Learn: Gradient Descent and Backprop in Plain Words](./section-overview.png)
+
 GPT-3 has 175 billion adjustable weights. Nobody set a single one of them by hand.
 
 [Last article](/blog/what-is-a-neural-network/) established that a network's entire knowledge is its list of weight values. This 1 answers the obvious follow-up: how do those values get found? The answer is 2 ideas — one you can picture as walking downhill, one that is pure bookkeeping — and together they train everything from digit readers to ChatGPT.
 
-## First: give the network a score
+## Deep dive
+
+### First: give the network a score
 
 Training starts by defining failure numerically. Show the network an example whose answer you know, compare its output to the truth, and compute a **loss** — 1 number measuring how wrong it was. 0 means perfect; big means bad.
 
@@ -24,7 +30,7 @@ Now imagine a strange landscape. Each possible setting of the weights is a locat
 
 The catch: for a real model the landscape has billions of dimensions and you can't see any of it. You only know the altitude *where you're standing*.
 
-## Gradient descent: walking downhill blind
+### Gradient descent: walking downhill blind
 
 Here's what you *can* do while blind on a hillside: feel which way the ground slopes under your feet, and step downhill. Repeat.
 
@@ -33,7 +39,7 @@ That is the entire algorithm, called **gradient descent**. The "slope under your
 
 The step size (the *learning rate*) is a genuine tuning art: too small and training takes forever; too large and you overshoot valleys entirely. But the concept stays this simple.
 
-## Backprop: the bill for every mistake
+### Backprop: the bill for every mistake
 
 1 important question remains: how do you *compute* that slope for a weight buried deep in the middle of the network? When the final answer is wrong, which of the 175 billion knobs is to blame, and by how much?
 
@@ -46,7 +52,7 @@ The answer is **backpropagation** — popularized for multilayer neural networks
 
 The mathematical engine is the chain rule from first-year calculus, applied systematically. The result is remarkable: **1 forward pass plus 1 backward pass prices every weight's blame simultaneously** — many parameter derivatives in a coordinated reverse pass, with cost determined by the operations and saved intermediates. Without this trick, you'd have to nudge weights 1 at a time to see what happens; at billions of weights, that's not a slow method, it's an impossible 1.
 
-## The loop, assembled
+### The loop, assembled
 
 Put the pieces together and training is a 4-beat loop:
 
@@ -56,7 +62,9 @@ Run it on 1 batch of examples, then the next, millions of times. That loop is wh
 
 It's also why the field cares so much about training *efficiency*: shave 20% off the loop's cost and you've shaved 20% off one of the largest compute bills in industry. That thread — same loop, run cheaper — is exactly where this blog's [performance series](/blog/what-does-an-ml-performance-engineer-do/) picks up.
 
-## Different losses encode different questions
+### Different losses encode different questions
+
+![Deep dive: Different losses encode different questions](./deep-dive-component-01.png)
 
 The earlier phrase “0 means perfect” is a useful first cartoon, but it is not universal. A negative log-likelihood can remain positive even for a good predictor, and continuous-density log losses can sometimes be negative. The relevant question is whether an objective rewards the behavior we want under a clearly stated model.
 
@@ -66,10 +74,7 @@ For classification, cross-entropy penalizes low probability assigned to the obse
 
 This connection is developed in [maximum likelihood estimation](/blog/maximum-likelihood-estimation/). Optimization searches for parameters; the statistical objective defines which fitted behavior we are searching for. Backpropagation works with the chosen differentiable objective and does not decide whether the objective matches the task.
 
-![Deep dive: Different losses encode different questions](./deep-dive-component-01.png)
-
-
-## A complete gradient update by hand
+### A complete gradient update by hand
 
 Take the smallest useful regression model: a prediction $$\hat y=wx$$ with 1 weight w, input x, and no bias. Let the target be y, and choose half squared error
 
@@ -89,7 +94,9 @@ The new prediction is 3.6 and the new loss is 2.88. 1 step improved this example
 
 Here the exact best weight is 3. Setting the derivative to 0 finds it immediately. Iterative optimization becomes necessary when the parameter space and objective make an exact closed-form solution impractical. The tiny example shows the sign and scale of an update without requiring a picture of billions of dimensions.
 
-## Backpropagation is the chain rule, not blame allocation
+### Backpropagation is the chain rule, not blame allocation
+
+![Deep dive: Backpropagation is the chain rule, not blame allocation](./deep-dive-component-02.png)
 
 Now compose 2 scalar stages: $$h=w_1x$$ and $$\hat y=w_2h$$. With the same half squared error, the output derivative is prediction minus target. The chain rule sends that derivative through the operations that produced the output:
 
@@ -117,10 +124,9 @@ Thus repeated updates converge for this single quadratic when $$0<\eta<2/x^2$$. 
 
 This turns “overshooting a valley” into a checked mechanism rather than assuming a downhill direction guarantees a better finite step. Neural-network objectives have multiple directions with different curvature, and minibatch estimates introduce noise, so this scalar bound is not a universal learning-rate recommendation. Input scaling changes curvature even in this tiny model; normalization and adaptive methods can change update conditioning. Monitor a fixed diagnostic batch to test optimization behavior, then verify held-out performance independently. Backprop computes a local derivative accurately for the specified graph; choosing a useful finite update remains the optimizer's responsibility.
 
-![Deep dive: Backpropagation is the chain rule, not blame allocation](./deep-dive-component-02.png)
+### Minibatches trade exactness for useful computation
 
-
-## Minibatches trade exactness for useful computation
+![Deep dive: Minibatches trade exactness for useful computation](./deep-dive-component-03.png)
 
 A full gradient over a large dataset can be expensive. Minibatch training averages or sums gradients from a smaller group of examples, then updates the parameters. Repeating with different batches provides a noisy approximation to optimization of the overall objective.
 
@@ -130,7 +136,9 @@ Gradient accumulation computes several smaller microbatches before 1 optimizer s
 
 For token training, the denominator matters too. Averaging each microbatch equally when the microbatches contain different numbers of valid tokens is not necessarily equivalent to averaging over all valid tokens. Mask padding correctly and state whether the reported loss is per example, per sequence, or per token.
 
-## Why training needs extra memory
+### Why training needs extra memory
+
+![Deep dive: Why training needs extra memory](./deep-dive-component-04.png)
 
 The forward pass creates intermediate activations needed to evaluate derivatives later. Training additionally stores gradients and optimizer state. An adaptive optimizer can keep running averages related to gradients for every trainable parameter, and mixed-precision training may keep higher-precision copies.
 
@@ -138,7 +146,7 @@ Activation checkpointing saves fewer intermediates and recomputes selected forwa
 
 It is also inaccurate to say that forward plus backward always costs exactly twice inference. Backward work depends on operations, which inputs require gradients, and saved or recomputed intermediates. Dense-layer training often needs additional matrix multiplications beyond the forward multiplication. Measure the actual pipeline rather than deriving a bill from a fixed multiplier.
 
-## Common misconceptions about optimization
+### Common misconceptions about optimization
 
 **“Backpropagation and gradient descent are the same.”** Backpropagation computes derivatives efficiently. Gradient descent uses them to update parameters. Other optimizers can use the same computed gradients.
 
@@ -146,7 +154,7 @@ It is also inaccurate to say that forward plus backward always costs exactly twi
 
 **“Lower training loss guarantees better deployment behavior.”** It demonstrates better fit to the optimized data/objective. Held-out evaluation and task-specific measurements determine whether that improvement transfers to the situations where the model will be used.
 
-## Takeaway
+## Conclusion
 
 - Training = minimizing a loss by walking downhill in weight-space: feel the slope, step, repeat. That's gradient descent.
 - Backprop is the accounting trick that computes every weight's slope in 1 backward pass — an efficient application of the chain rule that helped make multilayer networks practical to train.
@@ -155,7 +163,7 @@ It is also inaccurate to say that forward plus backward always costs exactly twi
 
 For a useful debugging exercise, freeze a tiny batch and run repeated optimization steps on it. The training loss should usually fall when the model has enough capacity and the computation is correct. Failure suggests checking labels, masking, gradient flow, and learning rate before changing the architecture. Success only shows that the system can fit those examples; it says little about unseen data. Restore a separate validation set before evaluating generalization. This small experiment separates an implementation problem from a data or modeling problem and makes the learning loop observable without requiring an expensive full training run.
 
-## Sources
+### Sources
 
 - Goodfellow, Bengio, Courville, [Deep Learning, machine-learning basics](https://www.deeplearningbook.org/contents/ml.html) and [deep feedforward networks](https://www.deeplearningbook.org/contents/mlp.html).
 

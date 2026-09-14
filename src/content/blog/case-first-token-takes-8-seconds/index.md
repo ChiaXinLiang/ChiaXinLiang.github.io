@@ -3,7 +3,7 @@ title: 'Case File: First Token Takes 8 Seconds'
 description: "A TTFT detective story: how a 128k-token prompt turns prefill into a 41-petaFLOP compute wall, and 4 ranked fixes from chunked prefill to prefill-only silicon."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'case-1'
 order: 17
 series: "llm-serving"
@@ -12,11 +12,17 @@ topic: "Production Serving"
 tags: [troubleshooting, prefill, latency]
 ---
 
+## Overview
+
+![Concept overview: Case File: First Token Takes 8 Seconds](./section-overview.png)
+
 41 petaFLOPs. That is the arithmetic bill for prefilling 1 128k-token prompt through a 70B-parameter model, and it is the entire explanation for the ticket that opens this case: *"Chat feels instant, but our document-analysis tier takes 8 seconds before the first word appears. Is the cluster broken?"*
 
 In this illustrative case, the cluster was not broken. It was doing exactly what it was told, as fast as physics allows. This is the first entry in a series of troubleshooting case files: an illustrative reconstructed symptom, investigation, and internally checked numbers, and fixes ranked by what they actually buy you. If TTFT and TPOT are new vocabulary, start with the [basics article on those 2 metrics](/blog/ttft-and-tpot/) and come back; here we assume them.
 
-## The symptom
+## Deep dive
+
+### The symptom
 
 The setup: a 70B dense model served in BF16 on 1 8×H100 node with tensor parallelism across all 8 GPUs, running a mainstream inference engine. 2 traffic classes share the deployment. Interactive chat sends prompts of a few 100 to a few 1000 tokens. A document-analysis product stuffs entire contract bundles into the context window: 100k to 128k tokens per request.
 
@@ -29,7 +35,7 @@ The metrics dashboard tells a clean story:
 
 That last line sent the on-call engineer down the wrong alley first, because 100% utilization usually means "we're fine, the hardware is earning its keep." As the [goodput article](/blog/goodput-vs-utilization/) argues, utilization tells you the GPU was busy, not that it was busy doing something you wanted at the latency you promised.
 
-## The investigation
+### The investigation
 
 Step 1 in any latency case: split the time. TTFT decomposes into queueing time, prefill time, and scheduling overhead. The engine's request-level metrics showed queueing was under 200 ms even at p99, and scheduling overhead was noise. Roughly 7.9 of the 8.2 seconds was spent inside prefill itself, for a single request, with the GPUs fully occupied the whole time.
 
@@ -37,7 +43,9 @@ Step 2: profile a captured request. An Nsight Systems trace of 1 128k prefill sh
 
 That profile signature is the fingerprint of this case: **prefill on a long prompt is compute-bound**. There is no bug to find in a trace like this. The question changes from "what is broken?" to "why does the correct computation cost 8 seconds?" And that question you can answer on a napkin.
 
-## The arithmetic: 128k tokens through a 70B model
+### The arithmetic: 128k tokens through a 70B model
+
+![Deep dive: The arithmetic: 128k tokens through a 70B model](./deep-dive-component-01.png)
 
 Prefill FLOPs come from 2 places: the linear layers (attention projections and the MLP, which together hold nearly all of the weights) and the attention score computation itself.
 
@@ -79,17 +87,17 @@ The first term covers dense projections and MLPs; the second covers score and va
 
 The method saves computation already represented by resident KV, while suffix queries still attend to the cached prefix. A correct cache key must account for tokens and model/configuration identity; similarity of documents is insufficient. Cache hits also consume capacity and may require transfer time. Report warm-hit, cold-miss, and eviction behavior separately. This case is an illustrative reconstruction with stipulated trace and latency numbers, not a published incident measurement. Agreement with a FLOP budget supports a plausible diagnosis; it cannot prove that an unmeasured deployment has no remaining configuration problem.
 
-![Deep dive: The arithmetic: 128k tokens through a 70B model](./deep-dive-component-01.png)
+### Going deeper: why FlashAttention didn't save us
 
-
-## Going deeper: why FlashAttention didn't save us
+![Deep dive: Going deeper: why FlashAttention didn't save us](./deep-dive-component-03.png)
 
 A fair objection: "isn't FlashAttention supposed to fix quadratic attention?" It fixes the *memory* side, not the *math* side. Naive attention materializes the S×S score matrix in HBM; at 128k tokens that would be 17 billion entries per head per layer, which is why long contexts were once memory-impossible. FlashAttention tiles the computation through on-chip SRAM so the score matrix never touches HBM, turning attention from memory-bound to compute-bound (Dao, 2023). The FLOP count, though, is untouched: every query still multiplies against every prior key. FlashAttention is the reason our trace shows Tensor Cores saturated instead of HBM saturated. It moved the wall; it did not remove it.
 
 The second deep point: tensor parallelism is already helping, and it has a ceiling. Our 8 GPUs split every GEMM 8 ways, so the "1 GPU" framing understates the horsepower: a single H100 doing this prefill alone would take roughly a minute. But TP within a node hits diminishing returns because every layer ends in an all-reduce over NVLink, and going wider than the NVLink domain (TP=16 across nodes over InfiniBand) usually costs more in communication than it gains in FLOPs. 8 seconds is what a whole state-of-the-art node looks like when you hand it the full quadratic bill at once.
 
-## The fixes, ranked
+### The fixes, ranked
 
+![Deep dive: The fixes, ranked](./deep-dive-component-02.png)
 
 **Fix 1: chunked prefill, deployed first, for the collateral damage.** The 8-second monolithic prefill was not only slow for its own user; it froze every co-scheduled chat stream, because a batch executing 1 giant prefill emits no decode tokens. Chunked prefill (introduced as Sarathi-Serve, now standard in vLLM and friends) slices the 128k prompt into chunks of a few 1000 tokens and interleaves decode steps between chunks. TPOT spikes for chat users vanished within an hour of enabling it. Be precise about what it does *not* do: the document request's own TTFT stays around 8 seconds, in fact a few percent worse due to chunk-boundary overhead. Chunked prefill is a fairness fix, not a speed fix.
 
@@ -99,10 +107,7 @@ The second deep point: tensor parallelism is already helping, and it has a ceili
 
 **Fix 4: prefill-specialized silicon, the horizon option.** Once you accept that prefill is compute-bound and decode is bandwidth-bound, building different chips for them is the logical endpoint. NVIDIA's Rubin CPX is exactly that bet: a prefill-oriented part with high dense-compute throughput on cheaper GDDR7 memory, because prefill does not need HBM's bandwidth. That story gets its own article: [Prefill Gets Its Own Chip](/blog/prefill-gets-its-own-chip-rubin-cpx/). You cannot buy 1 today to close this ticket, but it tells you which way the industry believes this cost curve bends.
 
-![Deep dive: The fixes, ranked](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"TTFT is slow, so we need faster memory."** Backwards for this case. Decode is memory-bandwidth-bound, so engineers pattern-match all LLM slowness to bandwidth. Prefill's arithmetic intensity is enormous: 41 PFLOPs against a few 100 gigabytes of weight and activation traffic works out to thousands of FLOPs per byte, far past the roofline ridge point. An HBM upgrade would leave the 8 seconds untouched; only more usable FLOPs (or fewer required FLOPs) move it.
 
@@ -110,19 +115,19 @@ The second deep point: tensor parallelism is already helping, and it has a ceili
 
 **"Enable chunked prefill and TTFT will drop."** Chunked prefill does not inherently reduce that request's arithmetic bill; it slightly slows it while unblocking everyone scheduled alongside it. If your dashboard shows a *queueing*-dominated TTFT (short prompts stuck behind a whale), chunked prefill helps those victims' TTFT dramatically. If, as here, the slow TTFT belongs to the whale itself, chunking redistributes pain rather than removing it. Read your TTFT breakdown before reaching for the flag.
 
-## The bigger picture
+### The bigger picture
 
 Every fix in this case file is a special case of 1 idea: prefill and decode are different workloads wearing the same API. Prefill is a throughput problem measured in PFLOPs; decode is a latency problem measured in GB/s per stream (the [prefill and decode basics article](/blog/how-an-llm-generates-text/) builds this from scratch). Schedulers (chunked prefill), caches (prefix reuse), cluster topology (disaggregation), and silicon (Rubin CPX) are the same separation applied at 4 different layers of the stack. When a latency ticket lands on your desk, the first fork in the decision tree is always: which phase, and is it starved of compute, bandwidth, or scheduling? This case sat squarely in "prefill, compute" territory, and everything followed from placing it there.
 
 Next case in the series: the OOM that only happens on Tuesdays, or, why your KV cache eviction policy is a latency policy in disguise.
 
-## Takeaway
+## Conclusion
 
 - An 8-second TTFT on a 128k prompt is often not a bug: ~41 PFLOPs of prefill for a 70B model divided by ~62% MFU on an 8×H100 node *is* about 8 seconds. Do the napkin math before hunting ghosts in traces.
 - Attention only dominates prefill past a crossover length, S* ≈ N/(d·layers) ≈ 107k tokens for a 70B model; below that, linear layers dominate and cost grows linearly with prompt length.
 - Rank fixes by what they buy: chunked prefill protects bystanders' TPOT, prefix caching cuts the whale's own TTFT (8s → 1.7s here), disaggregation lets you scale prefill independently, and prefill-specialized hardware bends the cost curve long-term.
 
-## Sources
+### Sources
 
 - Agrawal et al., "Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve," OSDI 2024 — [arxiv.org/abs/2403.02310](https://arxiv.org/abs/2403.02310)
 - Zhong et al., "DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving," OSDI 2024 — [arxiv.org/abs/2401.09670](https://arxiv.org/abs/2401.09670)

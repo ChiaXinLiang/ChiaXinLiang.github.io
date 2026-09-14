@@ -12,18 +12,19 @@ level: "advanced"
 tags: ["llm-serving", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Admission Control and QoS: Deadlines, Fairness, and Overload. Several request classes arrive at a serving gate with deadline clocks.](./section-overview.png)
+
 An inference service can remain responsive during overload only if it makes explicit decisions about which work to accept and when to execute it. Allowing every request into an unbounded queue turns insufficient capacity into increasingly stale promises. The GPU may remain busy while many clients receive timeouts instead of useful answers.
 
 Admission control decides whether the service can accept a request under its current policy and resource budget. Scheduling decides how admitted requests share execution. Quality of service defines the outcomes and fairness the service promises to different populations. These mechanisms interact, but they should not be collapsed into a single concurrency limit.
 
 We will derive a simplified workload and cache budget, connect deadlines to queue decisions, and examine fairness under continuous batching. The calculations are illustrative models. Engine-specific controls and cache behavior should be verified for the installed implementation rather than treated as universal scheduling semantics.
 
-## 1. Separate offered demand from admitted work
+## Deep dive
 
-![Concept overview: Admission Control and QoS: Deadlines, Fairness, and Overload. Several request classes arrive at a serving gate with deadline clocks.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Separate offered demand from admitted work
 
 Let lambda_offered be the rate at which requests reach the service and lambda_admitted the rate accepted for execution. Let lambda_completed count useful successful completions. Rejection, cancellation, and failure explain why these rates can differ, especially outside steady state.
 
@@ -33,7 +34,9 @@ Measure the entire decision chain by request class: offered arrivals, admission 
 
 Admission can occur at more than one boundary. A frontend may accept an HTTP request while an engine later rejects its resource reservation. Define which event starts the service objective and which event constitutes accepted work. Otherwise queue time and failures can fall between monitoring layers.
 
-## 2. Request count is a poor proxy for resource demand
+### 2. Request count is a poor proxy for resource demand
+
+![Deep-dive illustration: Request count is a poor proxy for resource demand](./deep-dive.png)
 
 Requests differ in prompt length, expected output length, cache footprint, and phase behavior. A short classification request and a long conversation should not be assigned identical resource estimates simply because each occupies one scheduler slot.
 
@@ -49,10 +52,9 @@ Predicted output length is uncertain. A requested maximum is an upper bound unde
 
 Do not interpret the sum of isolated request times as an exact batched execution time. Continuous batching creates shared work and interference. Use the model to rank or budget demand, then validate admission thresholds against measurements at the intended mixed workload.
 
+### 3. Reserve cache capacity without pretending all tokens exist yet
 
-![Deep-dive illustration: Request count is a poor proxy for resource demand](./deep-dive.png)
-
-## 3. Reserve cache capacity without pretending all tokens exist yet
+![Deep dive: 3. Reserve cache capacity without pretending all tokens exist yet](./deep-dive-component-02.png)
 
 For conventional cached attention, let n_i be reserved sequence positions, H_kv the key-value head count, d the head width, b bytes per element, and L_layers the layer count. A simplified per-request reservation is
 
@@ -68,10 +70,7 @@ Reserving each request's maximum output can protect against growth but waste cap
 
 Shared-prefix blocks complicate attribution. Several requests can reference common physical state while maintaining separate future-growth obligations. Count physical occupancy and logical reservation separately so sharing benefits do not silently erase the budget needed for new tokens.
 
-![Deep dive: 3. Reserve cache capacity without pretending all tokens exist yet](./deep-dive-component-02.png)
-
-
-## 4. Use deadlines to bound waiting promises
+### 4. Use deadlines to bound waiting promises
 
 For a request arriving at time a_i with deadline d_i, let t be the current time and R_hat_i the estimated remaining execution and delivery time. Its estimated slack is
 
@@ -87,7 +86,7 @@ Separate first-token and completion deadlines. A long answer may satisfy an init
 
 Cancellation must propagate through queued and active work promptly. A client that has abandoned a request should not continue consuming cache and compute merely because the frontend connection ended without informing the engine. Measure resource-release delay as part of the cancellation path.
 
-## 5. Scheduling policies optimize different populations
+### 5. Scheduling policies optimize different populations
 
 First-come, first-served is easy to explain but can leave short requests behind long ones. A shortest-estimated-work policy can improve mean completion time while delaying long requests. Earliest-deadline-first uses urgency but still needs resource feasibility and protection against inaccurate estimates.
 
@@ -97,7 +96,7 @@ Do not claim that a frontend queue discipline directly controls every GPU iterat
 
 Evaluate policies using response distributions by request size and class. A fleet mean can improve while one important class experiences starvation. Include maximum or high-percentile waiting, deadline success, useful throughput, and the work abandoned after cancellation.
 
-## 6. Fairness needs a defined unit of entitlement
+### 6. Fairness needs a defined unit of entitlement
 
 Equal request counts do not imply equal resource use. If one tenant sends long prompts and another sends short prompts, dividing scheduler slots equally can allocate very different GPU time and cache capacity. Define whether fairness concerns requests, tokens, measured service time, or a policy-specific resource estimate.
 
@@ -113,7 +112,9 @@ Measured resource usage can support deficit or credit-based scheduling, but esti
 
 Add a starvation control such as bounded waiting or age-based promotion when the policy requires it. Priority should identify intentional service distinctions, not become an unrestricted bypass that every caller selects. Verify class assignment at the service boundary and test sustained contention among classes.
 
-## 7. Overload policy should reduce wasted work
+### 7. Overload policy should reduce wasted work
+
+![Deep dive: 7. Overload policy should reduce wasted work](./deep-dive-component-01.png)
 
 At overload, useful completed work can fall even as offered traffic rises. Queueing causes cancellations, retries add demand, and partial generations consume capacity without delivering successful responses. The target is useful completion under the objective rather than maximum admitted concurrency.
 
@@ -129,7 +130,7 @@ Bound queues by work or time where practical, not only item count. Apply backpre
 
 Use retry guidance and client behavior that avoid synchronized bursts. Backoff and jitter can reduce repeated contention, but the server should still enforce its own budget. Relying on every caller to behave cooperatively is not a capacity control.
 
-## 8. Test uncertainty and adversarial workload mixtures
+### 8. Test uncertainty and adversarial workload mixtures
 
 A useful load experiment includes varied prompt lengths, output lengths, arrival bursts, deadlines, and cancellations. Constant-length requests at a steady rate test only a narrow operating point. Add sudden demand changes and sustained overload to see whether the queue stabilizes or grows.
 
@@ -139,7 +140,7 @@ Measure useful completions during and after a burst. A controller may survive th
 
 Check resource release after every termination reason. Queued timeout, active cancellation, completed output, engine error, and preemption can follow different paths. Leaked cache reservations or stale queue entries gradually reduce capacity even when individual requests appear to finish correctly.
 
-## 9. Calibrate policy with service evidence
+### 9. Calibrate policy with service evidence
 
 Choose thresholds using the target workload and objectives. Record admitted workload, queue estimates, actual phase timing, cache occupancy, and completion outcomes at each operating point. The relationship between a control value and useful capacity should be observed rather than assumed from a vendor headline throughput number.
 
@@ -147,9 +148,11 @@ Recalibrate after model, quantization, kernel, scheduler, or hardware changes. A
 
 Expose a compact decision record for diagnosis: request class, admission result, estimated resource budget, relevant queue state, and termination reason. This makes it possible to explain why a request waited or was rejected without requiring a full device profile for every event.
 
+## Conclusion
+
 Admission control turns finite hardware capacity into explicit service promises. Good scheduling shares accepted work according to those promises, and observability verifies their outcomes. The best policy completes useful requests within the required objectives while bounding queue growth, preserving fairness, and releasing resources promptly when work ends.
 
-## Sources
+### Sources
 
 - [vLLM optimization and cache configuration guidance](https://docs.vllm.ai/en/latest/configuration/optimization/).
 - [vLLM metrics documentation](https://docs.vllm.ai/en/latest/design/metrics/).

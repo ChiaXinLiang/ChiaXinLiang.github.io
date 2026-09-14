@@ -3,7 +3,7 @@ title: 'Why GPUs Sit Idle: The Memory-Bandwidth Bottleneck'
 description: "An H100 needs ~295 FLOPs per byte of HBM traffic to stay busy; decode-phase inference delivers about 1. Here's the arithmetic behind idle tensor cores."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'exec-1'
 order: 1
 series: "gpu-performance"
@@ -12,11 +12,17 @@ topic: "GPU Execution and Memory"
 tags: [gpu, cuda, roofline]
 ---
 
+## Overview
+
+![Concept overview: Why GPUs Sit Idle: The Memory-Bandwidth Bottleneck](./section-overview.png)
+
 An H100 SXM can execute roughly 989 trillion BF16 floating-point operations per second, but its HBM3 memory can deliver only 3.35 trillion bytes per second. Divide the 2 and you get the most consequential number in inference performance: about 295 floating-point operations must happen for every byte fetched from memory, or the math units starve. Decode-phase LLM inference delivers about 1. That factor of ~300 is why a GPU running "flat out" during token generation is, from the tensor cores' point of view, idle more than 99% of the time.
 
 This article is the first in a set on CUDA and kernel-level execution. Before we can talk about writing fast kernels, we need a precise picture of what a GPU actually does with a workload, and why the answer for LLM decode is mostly "wait for memory."
 
-## How a GPU actually executes work
+## Deep dive
+
+### How a GPU actually executes work
 
 NVIDIA GPUs run a model called SIMT: single instruction, multiple threads. Threads are grouped into **warps** of 32, and a warp is the real unit of execution. All 32 threads in a warp execute the same instruction at the same time on different data. When you launch a kernel with a million threads, the hardware sees ~31,250 warps, distributed across the chip's streaming multiprocessors (SMs). An H100 has 132 SMs, and each SM can hold up to 64 resident warps at once.
 
@@ -27,7 +33,7 @@ This is latency *hiding*, not latency *reduction*. The load still takes 600-odd 
 
 That's the pivot from a latency problem to a bandwidth problem, and it's where the 295 number comes in.
 
-## Arithmetic intensity and the ridge point
+### Arithmetic intensity and the ridge point
 
 The ratio of floating-point operations performed to bytes moved from memory is called **arithmetic intensity**, measured in FLOPs per byte. Every kernel has 1. Every chip has a break-even value: peak compute divided by peak bandwidth.
 
@@ -44,7 +50,9 @@ Where does LLM inference land? It depends dramatically on the phase. [Prefill](/
 
 Let's compute it exactly.
 
-## Worked example: 1 GEMV, 2 clocks
+### Worked example: 1 GEMV, 2 clocks
+
+![Deep dive: Worked example: 1 GEMV, 2 clocks](./deep-dive-component-03.png)
 
 Take a single 4096 × 4096 projection matrix, the shape of an attention output projection in a 7B-class model, in BF16, applied to 1 decode token on an H100 SXM.
 
@@ -66,7 +74,9 @@ Scale this up and the whole decode story falls out. A 7B model in BF16 is about 
 
 This is also why batching is the single most powerful lever in inference serving. If 300 requests share a decode step, the weight matrix is loaded once and multiplied against 300 activation vectors: intensity rises to roughly 300 FLOPs per byte, right at the ridge point, and the GPU finally earns its TFLOPS. Everything in modern serving stacks, from vLLM's continuous batching onward, is an attempt to push decode up that slope.
 
-## Going deeper: what it takes to even saturate the bandwidth
+### Going deeper: what it takes to even saturate the bandwidth
+
+![Deep dive: Going deeper: what it takes to even saturate the bandwidth](./deep-dive-component-01.png)
 
 Saying "decode is bandwidth-bound" quietly assumes the kernel actually achieves 3.35 TB/s. That is not automatic. Bandwidth is a rate, and by Little's law, sustaining a rate across a long-latency pipe requires keeping enough requests in flight:
 
@@ -87,10 +97,7 @@ The 4096-square BF16 matrix-vector example has approximately 33.6 million operat
 
 The useful innovation in batching is reuse of a weight read across more outputs. It changes D per produced token while increasing F per iteration. Validate the predicted regime change by sweeping batch size at fixed context and observing memory throughput, tensor-pipe throughput, and iteration duration. If both resources remain lightly used, look for insufficient independent work, dependencies, or launch gaps. Intensity identifies a candidate ceiling, but only the trace establishes which mechanism currently prevents reaching it.
 
-![Deep dive: Going deeper: what it takes to even saturate the bandwidth](./deep-dive-component-01.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"nvidia-smi shows 100% GPU utilization, so the GPU is fully used."** The `nvidia-smi` utilization figure only reports the fraction of time *at least 1 kernel was resident* on the device. Our GEMV above would show 100% utilization while delivering 0.3% of peak FLOPS. The gap between "a kernel is running" and "the silicon is producing useful math" is the entire subject of [goodput measurement](/blog/goodput-vs-utilization/), and it's routinely a factor of 10 to 300.
 
@@ -98,7 +105,9 @@ The useful innovation in batching is reuse of a weight read across more outputs.
 
 **"Warp switching makes memory latency free, so memory isn't the problem."** Warp switching hides *latency*; it cannot manufacture *bandwidth*. With enough warps, no cycle is wasted waiting on any individual load, yet the kernel still can't move more than 3.35 TB/s of data. Latency hiding determines whether you reach the bandwidth roof; arithmetic intensity determines whether the bandwidth roof is the one you hit. These are 2 different walls, and decode-phase inference hits the second 1 with the first fully solved.
 
-## The bigger picture
+### The bigger picture
+
+![Deep dive: The bigger picture](./deep-dive-component-02.png)
 
 Almost everything in this series so far converges on this one ratio. The FLOPs-per-byte gap is the GPU-scale incarnation of [the memory wall](/blog/the-memory-wall-latency-numbers/): compute throughput has compounded faster than memory bandwidth for 3 decades, and stacking DRAM into [HBM](/blog/from-dram-to-hbm/) narrowed the gap without closing it. The B200 moves to ~8 TB/s but also raises compute, so its ridge point stays in the hundreds of FLOPs per byte; the [Blackwell-to-Rubin memory math](/blog/blackwell-to-rubin-memory-math/) shows the ratio drifting, not disappearing.
 
@@ -106,16 +115,13 @@ It also explains why the industry is physically splitting inference in 2. Prefil
 
 For a kernel engineer, the practical takeaway is a triage discipline. Before optimizing anything, compute the kernel's arithmetic intensity by hand, the way we just did. If it's far below ~295 (on Hopper; compute your own ridge for your chip and datatype), the tensor cores are spectators, and the only optimizations that matter are the ones that move fewer bytes or move them at full width: quantization, fusion to avoid round trips through HBM, coalescing, and batching. Shaving instructions from a kernel that's 99.7% memory-stalled optimizes the 0.3%.
 
-![Deep dive: The bigger picture](./deep-dive-component-02.png)
-
-
-## Takeaway
+## Conclusion
 
 - The ridge point is the chip's contract: H100 SXM offers ~989 TFLOPS BF16 against 3.35 TB/s of HBM, so a kernel needs ~295 FLOPs per byte of memory traffic to be compute-bound. Know this number for every chip you run on.
 - Decode-phase inference is a GEMV at ~1 FLOP per byte: streaming 1 33.5 MB weight matrix takes 10 µs while its math takes 0.034 µs, and a 7B BF16 model is bandwidth-capped near 250 tok/s per stream on an H100 regardless of kernel quality.
 - Warp switching hides latency for free but creates no bandwidth; once a kernel saturates HBM, the only wins left are fewer bytes (quantization, fusion) or more math per byte (batching).
 
-## Sources
+### Sources
 
 - NVIDIA, *H100 Tensor Core GPU* specifications — https://www.nvidia.com/en-us/data-center/h100/ (vendor-reported peaks)
 - NVIDIA, *CUDA C++ Programming Guide*, SIMT architecture and hardware multithreading — https://docs.nvidia.com/cuda/cuda-c-programming-guide/

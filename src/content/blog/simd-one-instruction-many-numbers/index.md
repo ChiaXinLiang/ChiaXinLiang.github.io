@@ -3,7 +3,7 @@ title: 'SIMD: 1 Instruction, Many Numbers'
 description: "How a single AVX-512 instruction adds 16 floats at once, why the compiler only sometimes gives you that speedup for free, and how GPUs scaled the same trick to thousands of lanes."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'par-1'
 order: 5
 series: "comp-arch"
@@ -12,11 +12,17 @@ topic: "Parallel Architectures"
 tags: ['simd', 'vectorization', 'parallelism']
 ---
 
+## Overview
+
+![Concept overview: SIMD: 1 Instruction, Many Numbers](./section-overview.png)
+
 A single core in a modern server CPU can finish 64 single-precision floating-point operations every clock cycle. It gets there with just 2 instructions per cycle: each one is a fused multiply-add applied to 16 numbers at once, and a multiply-add counts as 2 operations. 16 lanes, times 2 operations, times 2 execution units. That is 64.
 
 This matters because the other route to speed closed 2 decades ago. Clock frequencies have been stuck between roughly 3 and 5 GHz since the mid-2000s, when power density made further scaling impractical. Nearly all the growth in per-core arithmetic since then has come from *width*: making each instruction touch more data. The technique is called **SIMD**, and it is the first rung on a ladder that leads, a few articles from now, to GPUs and TPUs.
 
-## Flynn's 4 boxes
+## Deep dive
+
+### Flynn's 4 boxes
 
 In 1966 Michael Flynn proposed a classification of computers so simple it still organizes the whole field. Ask 2 questions about a machine. How many *instruction streams* does it follow at once? And how many *data streams* do those instructions touch? 2 questions with 2 answers each gives 4 boxes.
 
@@ -30,7 +36,7 @@ The taxonomy earns its keep because the boxes have very different economics. MIM
 
 The energy argument deserves a number. Fetching, decoding, and scheduling 1 instruction costs on the order of 10 to 100 times more energy than the 32-bit arithmetic it triggers (Horowitz put instruction overhead around 70 picojoules against under 1 picojoule for a floating-point add). A scalar machine pays that overhead per result. A 16-lane SIMD machine pays it per 16 results.
 
-## Wider registers, not faster ones
+### Wider registers, not faster ones
 
 The hardware mechanism is the **vector register**. A normal general-purpose register on x86-64 holds 64 bits. AVX-512, the widest SIMD extension in mainstream x86 CPUs, adds 32 registers named `zmm0` through `zmm31`, each 512 bits wide. 1 such register holds 16 single-precision floats, or 8 doubles, or 64 bytes, and the register file alone is 2 KB of the hottest storage on the chip.
 
@@ -41,7 +47,9 @@ The idea is old. The Cray-1 of 1976 built its legend on 8 vector registers of 64
 
 1 phrase in the heading above is doing real work: wider, *not faster*. A vector add has about the same latency as a scalar add, roughly 4 cycles on recent Intel cores. SIMD is a pure throughput play, and that distinction is about to bite us in the worked example.
 
-## A worked example: summing 1,024 floats
+### A worked example: summing 1,024 floats
+
+![Deep dive: A worked example: summing 1,024 floats](./deep-dive-component-03.png)
 
 Take the most ordinary loop in numerical computing, in C:
 
@@ -57,7 +65,9 @@ for (int i = 0; i < 1024; i++)
 
 Worth checking before celebrating: 1,024 floats is 4 KB, which sits comfortably in the L1 cache, so memory bandwidth is not the constraint here. Keep a pin in that; it does not stay true for big arrays.
 
-## Going deeper: feeding 2 pipes with 8 chains
+### Going deeper: feeding 2 pipes with 8 chains
+
+![Deep dive: Going deeper: feeding 2 pipes with 8 chains](./deep-dive-component-01.png)
 
 The vectorized loop is still leaving most of the machine idle. The core can *start* 2 vector adds per cycle (2 execution ports), but each add takes 4 cycles to finish, and our single accumulator forces every add to wait for the previous 1. 1 add begins every 4 cycles on hardware built to begin 8 in that time. The vector units sit idle 87% of the loop.
 
@@ -78,10 +88,9 @@ With the example's assumed $$L=4$$ and $$r=2$$, 8 accumulators can cover the ari
 
 The improvement over a single vector accumulator is software-created instruction-level parallelism. Its cost is additional live registers and a final reduction. Excessive unrolling can spill registers or enlarge instruction footprint, and reassociation changes floating-point rounding. LLVM documents that some targets can generate ordered reductions preserving the original order; it is therefore too broad to say every floating-point reduction requires fast-math. Inspect the actual vectorization report and numerical requirements, then measure both cache-resident and streaming inputs. A dependency-bound speedup is not a prediction for DRAM-bound arrays.
 
-![Deep dive: Going deeper: feeding 2 pipes with 8 chains](./deep-dive-component-01.png)
+### Auto-vectorization and where it gives up
 
-
-## Auto-vectorization and where it gives up
+![Deep dive: Auto-vectorization and where it gives up](./deep-dive-component-02.png)
 
 You rarely write `vaddps` by hand. Modern compilers auto-vectorize loops at `-O2`/`-O3`, and for clean loops they do it well. The interesting question is when they refuse, because they refuse often and silently. The classic blockers:
 
@@ -94,10 +103,7 @@ You rarely write `vaddps` by hand. Modern compilers auto-vectorize loops at `-O2
 
 The pragmatic workflow: ask the compiler for its vectorization report (`-Rpass=loop-vectorize` in Clang, `-fopt-info-vec` in GCC), read what it refused and why, then either fix the loop or drop to intrinsics, the C functions in Intel's Intrinsics Guide that map 1-to-1 onto vector instructions. And always measure.
 
-![Deep dive: Auto-vectorization and where it gives up](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"SIMD makes each operation faster."** It does not; it makes each *instruction* do more operations. A `vaddps` has essentially the same latency as a scalar `addss` (about 4 cycles either way, per Agner Fog's instruction tables). That is why our single-accumulator vector loop was still latency-bound and left 87% of the vector hardware idle. Width raises throughput; only breaking dependency chains fights latency.
 
@@ -105,7 +111,7 @@ The pragmatic workflow: ask the compiler for its vectorization report (`-Rpass=l
 
 **"SIMD and multithreading are the same kind of parallelism."** They are different Flynn boxes and they multiply, not compete. SIMD is data parallelism inside 1 instruction stream on 1 core; threads across cores are MIMD, independent streams. A 60-core server chip at 2.5 GHz doing 64 FP32 operations per core-cycle peaks near 9.6 TFLOPs precisely because the 2 axes stack, and leaving either 1 unused forfeits its full factor.
 
-## From 16 lanes to a warp
+### From 16 lanes to a warp
 
 Here is the bridge to everything that follows in this series. Suppose you commit fully to Flynn's SIMD box: strip out the branch predictors and the big caches, keep thousands of arithmetic lanes, and run at a modest clock. You have roughly described a GPU.
 
@@ -113,13 +119,13 @@ NVIDIA calls its model **SIMT**, single instruction, multiple *threads*. You wri
 
 The price of the wide, simple machine is everything the CPU's control logic used to handle: latency tolerance, branchy code, small irregular tasks. How GPUs pay that price, and why the CPU-versus-GPU split is really a latency-machine-versus-throughput-machine split, is the next article.
 
-## Takeaway
+## Conclusion
 
 - SIMD amortizes the expensive part of an instruction (fetch, decode, schedule, roughly 10–100× the energy of the arithmetic itself) across many lanes: AVX-512 does 16 float operations per instruction, and per-core FLOP growth since the mid-2000s has come almost entirely from this width.
 - Width fixes throughput, not latency. Summing 1,024 floats fell from 4,096 cycles to about 280 by vectorizing, and to about 60 only after 8 independent accumulators broke the dependency chain; the 2 tricks multiply.
 - Auto-vectorization fails silently on FP reductions, possible aliasing, and irregular access, and helps little when DRAM is the bottleneck; read the compiler's vectorization report and measure. GPUs (SIMT) are this same idea with thousands of lanes and masks managed by hardware.
 
-## Sources
+### Sources
 
 - [Verified primary source]([LLVM vectorization documentation](https://llvm.org/docs/Vectorizers.html))
 

@@ -12,18 +12,21 @@ level: "advanced"
 tags: ["ai-networking", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Congestion and RoCE: ECN, PFC, and Tail Latency. Several sending NICs funnel packets into a switch queue and receiver.](./section-overview.png)
+
 A RoCE fabric can deliver high throughput in an isolated test and still suffer long distributed-job stalls when many ranks transmit together. The relevant difference is often congestion: several sources demand the same outgoing capacity, queues grow, and feedback takes time to change sending behavior. A synchronized collective can then wait for the slowest affected participant.
 
 Explicit congestion notification and priority flow control address different parts of this problem. ECN signals congestion so endpoints can adjust sending rates. PFC pauses traffic in a selected priority on a neighboring link to protect buffer space. Neither should be treated as a magical setting that turns an oversubscribed workload into unlimited capacity.
 
 We will derive simple queue and headroom models, explain these mechanisms, and build a diagnostic method focused on useful distributed progress. Numerical examples are illustrative. Exact thresholds and configuration procedures are platform-specific and should follow the current supported deployment guidance.
 
-## 1. Congestion begins with demand at a shared resource
+## Deep dive
 
-![Concept overview: Congestion and RoCE: ECN, PFC, and Tail Latency. Several sending NICs funnel packets into a switch queue and receiver.](./section-overview.png)
+### 1. Congestion begins with demand at a shared resource
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Congestion begins with demand at a shared resource](./deep-dive.png)
 
 Consider an outgoing link or topology cut with service rate mu bytes per second. Let lambda(t) be aggregate incoming demand and Q(t) queued bytes. While the queue is nonempty, a simplified fluid model is
 
@@ -37,10 +40,7 @@ For an illustrative 100 GB/s arrival burst entering a 50 GB/s outgoing resource,
 
 Plot arrivals, queue occupancy, and outgoing traffic on compatible intervals. A coarse average can smooth away the burst that caused the pause or tail event. The observation method should resolve the relevant timescale sufficiently to support the hypothesis.
 
-
-![Deep-dive illustration: Congestion begins with demand at a shared resource](./deep-dive.png)
-
-## 2. Queueing delay can grow sharply near saturation
+### 2. Queueing delay can grow sharply near saturation
 
 A simple queue-delay estimate divides queued bytes by the available drain rate:
 
@@ -54,7 +54,7 @@ An idealized M/M/1 queue provides another intuition: mean time in the system is 
 
 Do not replace mean time with p99 in Little's law or other mean-based relationships. Tail behavior requires its own observations and assumptions. For synchronized distributed traffic, inspect per-rank completion and burst alignment rather than expecting a generic queue formula to describe the entire job.
 
-## 3. ECN provides a signal, not an instantaneous rate limit
+### 3. ECN provides a signal, not an instantaneous rate limit
 
 A congested switch can mark eligible packets using ECN. The receiving endpoint observes congestion information and the transport's feedback mechanism informs the sender. The sender's congestion-control algorithm then adjusts its rate according to that algorithm's policy.
 
@@ -64,7 +64,7 @@ DCQCN is a published congestion-control design for large-scale RDMA deployments.
 
 Feedback has delay. During that interval, existing and newly issued bytes can continue reaching the congested resource. The switch needs enough buffer margin and an appropriate supported marking policy for the intended rates and paths. A threshold copied from another link speed or topology can change when control begins relative to queue growth.
 
-## 4. Derive the in-flight headroom requirement
+### 4. Derive the in-flight headroom requirement
 
 Let r be incoming byte rate that can continue after a control event and tau the relevant reaction interval. A first-order headroom estimate is
 
@@ -80,7 +80,7 @@ Multiple senders can increase aggregate in-flight demand. Use the rate entering 
 
 This estimate is a consistency check for a documented configuration. If observed bursts or feedback timing differ substantially from the assumptions, investigate the mismatch with the platform's supported diagnostics rather than experimenting with arbitrary low-level thresholds.
 
-## 5. PFC changes neighboring-link behavior by priority
+### 5. PFC changes neighboring-link behavior by priority
 
 Priority flow control can pause a selected traffic priority on a link while other priorities continue according to the implementation and configuration. It protects against buffer exhaustion at that boundary, but its granularity is not necessarily one application flow.
 
@@ -90,7 +90,7 @@ PFC is therefore different from end-to-end congestion-rate control. Pauses addre
 
 Observe pause duration and affected priorities, not merely pause-event count. Many very short events and a few long pauses can have different application consequences. Correlate pauses with queue occupancy, traffic bursts, and collective tails to determine whether the mechanism is protecting buffers while preserving progress.
 
-## 6. Loss avoidance and low latency are different outcomes
+### 6. Loss avoidance and low latency are different outcomes
 
 A configuration can reduce packet drops while increasing waiting. Reliable transport retries can also hide packet loss from the application while adding delay. The service or training job ultimately cares about useful completion, not only whether bytes eventually arrive.
 
@@ -100,7 +100,9 @@ A low utilization reading does not exclude congestion. Sampling can miss bursts,
 
 For an illustrative collective with most ranks completing in 5 milliseconds and one rank completing in 20 milliseconds, the group can wait on the 20-millisecond result. A healthy mean across links does not explain that critical-path delay. Correlate the late rank's path with the congestion evidence.
 
-## 7. Synchronized workloads stress different patterns
+### 7. Synchronized workloads stress different patterns
+
+![Deep dive: 7. Synchronized workloads stress different patterns](./deep-dive-component-01.png)
 
 Gradient exchanges can align across ranks after similar backward work. Expert dispatch can create destination hotspots when routing is imbalanced. Pipeline boundaries can produce repeated activation bursts. These patterns can stress buffers differently from smooth independent traffic.
 
@@ -110,7 +112,7 @@ An all-to-all example makes this concrete. If several senders target the same re
 
 Reproduce the burst and concurrency pattern in controlled tests. A single pair transfer is useful for validating the path but cannot establish fabric behavior under a multi-rank synchronized exchange. Preserve message sizes and destinations when comparing configuration or placement changes.
 
-## 8. Build a layered congestion investigation
+### 8. Build a layered congestion investigation
 
 First verify transport selection and physical placement. Then identify which queues, priorities, ports, or cuts show correlated pressure. Compare isolated and concurrent transfers, and inspect the application's readiness and completion timeline.
 
@@ -120,7 +122,9 @@ Capture a baseline and degraded window with the same counter definitions and wor
 
 For every proposed adjustment, state the expected mechanism: earlier rate response, reduced burst alignment, improved traffic placement, or restored endpoint classification. Then verify both the relevant control evidence and useful job timing. A change that reduces marks but increases tail latency has not automatically improved the workload.
 
-## 9. Evaluate the deployment under realistic contention
+### 9. Evaluate the deployment under realistic contention
+
+![Deep dive: 9. Evaluate the deployment under realistic contention](./deep-dive-component-02.png)
 
 Run representative multi-job or multi-tenant traffic when the production fabric shares capacity. Include bursty and asymmetric cases, not only balanced all-to-all. Observe whether queues recover after a burst or remain elevated as arrivals continue.
 
@@ -132,12 +136,11 @@ An illustrative before-and-after record can show that a placement change reduced
 
 Maintain a supported configuration record with assumptions about speeds, paths, traffic classes, and endpoint behavior. Revisit it after link-rate, topology, or adapter changes. Headroom and feedback timing depend on the system that actually runs, not only on a configuration label.
 
+## Conclusion
+
 Congestion control connects offered demand to finite forwarding capacity through delayed feedback and buffering. ECN, endpoint response, and PFC contribute different mechanisms. Their success should be judged by stable useful progress and bounded tails, with counters that explain how the fabric handled the workload rather than merely whether packets were eventually delivered.
 
-![Deep dive: 9. Evaluate the deployment under realistic contention](./deep-dive-component-02.png)
-
-
-## Sources
+### Sources
 
 - [NVIDIA Cumulus Linux RoCE guidance](https://docs.nvidia.com/networking-ethernet-software/cumulus-linux-518/Layer-1-and-Switch-Ports/Quality-of-Service/RDMA-over-Converged-Ethernet-RoCE/).
 - [Congestion Control for Large-Scale RDMA Deployments: DCQCN](https://www.microsoft.com/en-us/research/publication/congestion-control-for-large-scale-rdma-deployments/).

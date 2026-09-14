@@ -3,7 +3,7 @@ title: 'The Transformer Architecture: Attention, Residuals, and Feed-Forward'
 description: "Attention plus a feed-forward layer, wrapped in residual connections, stacked N times. A simplified dense decoder block provides a reference for understanding current models."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'tf-2'
 order: 9
 series: "llm-basics"
@@ -12,11 +12,19 @@ topic: "Transformer"
 tags: ['transformer', 'architecture']
 ---
 
+## Overview
+
+![Concept overview: The Transformer Architecture: Attention, Residuals, and Feed-Forward](./section-overview.png)
+
 GPT-3 is 96 copies of the same block, stacked. Many models build on related components, while sparse and hybrid designs can differ substantially. For models with undisclosed internals, their exact block design is unknown.
 
 [Last article](/blog/attention-in-plain-words/) explained attention, the star mechanism. This 1 assembles the full machine around it — and explains *why* each supporting part exists, because every part earns its place.
 
-## The block
+## Deep dive
+
+### The block
+
+![Deep dive: The block](./deep-dive-component-03.png)
 
 The equation diagram below illustrates a modern pre-normalized dense block. The original 2017 Transformer placed normalization after each residual addition; this figure deliberately shows the pre-norm variant. Follow each skip path to see which representation is added back, and follow the operator path to see why its output must return to residual width d.
 
@@ -29,7 +37,7 @@ In this simplified dense decoder, tokens become vectors, pass through **N relate
 
 That alternation — gather context, process it, gather again with sharper questions, process again — repeated dozens of times, describes the main sublayers of this baseline. The grammar-to-meaning progression is an illustrative analogy, not an established layer-by-layer interpretability map.
 
-## The supporting cast (each solves a real failure)
+### The supporting cast (each solves a real failure)
 
 3 more components appear in the diagram, and none is decoration:
 
@@ -37,7 +45,9 @@ That alternation — gather context, process it, gather again with sharper quest
 - **Residual connections.** Every block's output is *added to* its input rather than replacing it — each block writes edits onto a running document instead of rewriting from scratch. This is ResNet's skip-connection trick, and it's what lets gradients flow through 96 blocks without [vanishing](/blog/rnn-lstm-and-the-wall/). Residual paths are important to the trainability of common deep Transformer designs.
 - **Normalization.** Keeps each layer's numbers in a healthy range so training stays stable across dozens of blocks. Bookkeeping, but load-bearing bookkeeping.
 
-## Walking 1 token through the stack
+### Walking 1 token through the stack
+
+![Deep dive: Walking 1 token through the stack](./deep-dive-component-01.png)
 
 Let's trace the sentence "The keys to the cabinet ___" through a decoder-only model predicting the blank, to make the machinery concrete:
 
@@ -49,14 +59,11 @@ Let's trace the sentence "The keys to the cabinet ___" through a decoder-only mo
 
 2 structural facts fall out of this walk. First, **width and depth dominate a simplified dense-stack estimate**: GPT-3 is 96 blocks of width 12,288, and that's where the 175B weights live. Second, the largest arithmetic terms in many of those steps are matrix multiplications — which is why [the entire AI hardware industry](/blog/blackwell-to-rubin-memory-math/) is an arms race in exactly 1 operation.
 
-![Deep dive: Walking 1 token through the stack](./deep-dive-component-01.png)
-
-
-## Where the compute goes (a preview of the economics)
+### Where the compute goes (a preview of the economics)
 
 A rough but honest accounting for a GPT-3-class block: the feed-forward layer holds ~2-thirds of the weights and, at short sequence lengths, ~2-thirds of the compute. Attention's weight share is smaller, but its cost **grows with the square of sequence length** while feed-forward grows linearly — so at long contexts, attention takes over the bill. That crossover explains a decade of engineering you'll meet in the other series: FlashAttention restructures the computation to dodge memory traffic, [DeepSeek's sparse attention](/blog/blackwell-to-rubin-memory-math/) prunes the all-pairs comparison, and the KV cache trades memory for recomputation. The architecture you're looking at *is* the cost model of modern AI.
 
-## Common misconceptions
+### Common misconceptions
 
 **"The Transformer was designed for chatbots."** It was built in 2017 for machine translation. The chatbot era required 2 additional bets that weren't obvious: that next-word prediction alone teaches broad competence (GPT-1's 2018 gamble), and that scale keeps paying ([the scaling laws](/blog/how-models-learn/)). The architecture enabled both; it anticipated neither.
 
@@ -64,7 +71,7 @@ A rough but honest accounting for a GPT-3-class block: the feed-forward layer ho
 
 **"N blocks means N different designs."** Blocks in this baseline share shapes with different learned weights. Modern sparse or hybrid models can alternate different block types. That uniformity is a *hardware feature*: 1 optimized kernel pipeline, run 96 times. Irregular architectures pay real performance taxes, which is 1 more reason regular ones keep winning.
 
-## 1 blueprint, 2 famous variants
+### 1 blueprint, 2 famous variants
 
 The 2017 original had 2 towers (an encoder reading the source sentence, a decoder writing the translation). The field then split it:
 
@@ -74,7 +81,9 @@ The 2017 original had 2 towers (an encoder reading the source sentence, a decode
 
 That "attend to self and earlier positions" rule, called causal masking, has a huge practical consequence: past tokens' computations can be cached and reused while generating — the KV cache that dominates the serving economics covered in [the performance series](/blog/goodput-vs-utilization/).
 
-## What's changed since 2017 (and what hasn't)
+### What's changed since 2017 (and what hasn't)
+
+![Deep dive: What's changed since 2017 (and what hasn't)](./deep-dive-component-02.png)
 
 The original blueprint dates to 2017, 9 years before this revision. Many dense models retain related sublayers, while sparse and hybrid systems can change the execution substantially. Several common changes can be named:
 
@@ -86,10 +95,9 @@ The original blueprint dates to 2017, 9 years before this revision. Many dense m
 
 Every one of these is an *efficiency* edit — same blueprint, lower cost per unit of capability. That's worth noticing: post-2017 architecture research has largely been performance engineering wearing a research hat, which is exactly why this blog runs [a whole series on the co-design between models and silicon](/blog/blackwell-to-rubin-memory-math/).
 
-![Deep dive: What's changed since 2017 (and what hasn't)](./deep-dive-component-02.png)
+### Count a simplified dense block
 
-
-## Count a simplified dense block
+![Deep dive: Count a simplified dense block](./deep-dive-component-04.png)
 
 Let the residual width be d. In a standard full multi-head attention block, the query, key, value, and output projections each contribute approximately $$d^2$$ weights. Ignoring biases, their total is approximately $$4d^2$$. A 2-matrix feed-forward layer expanding to width 4 d and projecting back contributes approximately $$8d^2$$. This yields the familiar rough total of $$12d^2$$ per dense block.
 
@@ -97,7 +105,7 @@ With d equal to 512, that estimate is 3,145,728 weights per block before biases 
 
 This approximation explains why “two-thirds of weights in feed-forward” can be sensible for a specific conventional design. It is not a universal architectural law. A released model configuration provides widths, layer counts, head counts, expert settings, and vocabulary size; use those facts rather than transferring the ratio to every model carrying the Transformer label.
 
-## Write the simplified parameter budget
+### Write the simplified parameter budget
 
 For the conventional dense block just counted, a stack with $$L$$ layers, width $$d$$, vocabulary size $$V$$, and tied input/output embeddings has approximate parameter count
 
@@ -109,7 +117,7 @@ With 6 layers, width 512, and vocabulary 32,000, this gives 18,874,368 block wei
 
 The baseline design makes the width-squared cost visible: doubling width roughly quadruples block parameters, while doubling depth doubles them. Modern grouped-query, gated, sparse, and hybrid blocks change the coefficients or the entire accounting. Use configuration and implementation details to replace this illustrative budget, rather than treating it as a formula for every model named Transformer.
 
-## Follow the prediction position precisely
+### Follow the prediction position precisely
 
 For the prefix “The keys to the cabinet,” the final hidden vector at the last observed token predicts the distribution of the next token. There is not necessarily an extra blank-token representation. After selecting a token such as “are,” the model appends it and computes the next distribution.
 
@@ -117,7 +125,7 @@ Self-attention at a position normally includes that position and earlier positio
 
 The final vocabulary projection converts a hidden vector into logits. Softmax then defines a probability distribution. Some models tie the projection to input embeddings and some do not. The selected output may come from greedy decoding, temperature sampling, or another policy. Those choices affect generated text without changing the learned block parameters.
 
-## The diagram is a family reference, not every current model
+### The diagram is a family reference, not every current model
 
 The original encoder–decoder Transformer has decoder cross-attention to encoder outputs as well as causal self-attention. A decoder-only diagram omits that cross-attention. Modern architectures may additionally use local attention, sparse experts, recurrent state, different normalization, or shared state across layers.
 
@@ -125,7 +133,7 @@ RoPE injects positional information through rotations of query/key vectors rathe
 
 These distinctions motivate the Modern LLM Architectures series. Read the basic block as a vocabulary for comparing actual configurations. For any named current model, identify which parts of the diagram are disclosed, which have changed, and which details are unknown. Shared ancestry is not evidence of an identical backbone.
 
-## Takeaway
+## Conclusion
 
 - The Transformer is 1 block — attention (tokens confer) + feed-forward (tokens digest), with residuals and normalization — stacked N times. GPT-3 is 96 of them.
 - Every support part fixes a specific failure: positions restore word order, residuals let 96-deep gradients survive, normalization keeps training stable.
@@ -134,7 +142,7 @@ These distinctions motivate the Modern LLM Architectures series. Read the basic 
 
 Configuration files provide a useful bridge between this diagram and a real checkpoint. Read the layer count, hidden width, attention head counts, intermediate width, vocabulary size, and positional settings before estimating memory. Then verify the implementation for details that a configuration may not express, such as normalization placement or attention masks. 2 models described as transformers can differ materially in these choices. Treat the basic block as a reading guide: identify what corresponds to each component, then write down deviations explicitly. This habit prevents a familiar diagram from hiding the details that determine a particular model’s behavior.
 
-## Sources
+### Sources
 
 - Vaswani et al. (2017). ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762) (the block figure is redrawn simplified from Figure 1)
 - He et al. (2015). ["Deep Residual Learning"](https://arxiv.org/abs/1512.03385) (residual connections)

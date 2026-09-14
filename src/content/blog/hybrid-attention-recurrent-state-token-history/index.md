@@ -12,16 +12,19 @@ level: "intermediate"
 tags: ["llm-architectures", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Hybrid Attention: Combining Recurrent State with Token Attention. Token history is visible as rows of explicit keys and values beside a compact recurrent-state matrix.](./section-overview.png)
+
 A hybrid language model combines more than one mechanism for using previous tokens. Some layers retain explicit key-value history and perform token attention. Other layers update a recurrent state whose size does not grow with the number of processed tokens. The combination aims to preserve useful long-range modeling while changing memory and execution costs.
 
 The word “linear” can be misleading here. It often refers to how a mechanism scales with sequence length, not to the absence of nonlinear gates or learned projections. A recurrent layer is also not equivalent to ordinary attention with a magically compressed lossless cache. Its state update defines a different computation, with different representational tradeoffs.
 
-## 1. Start from explicit token retrieval
+## Deep dive
 
-![Concept overview: Hybrid Attention: Combining Recurrent State with Token Attention. Token history is visible as rows of explicit keys and values beside a compact recurrent-state matrix.](./section-overview.png)
+### 1. Start from explicit token retrieval
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Start from explicit token retrieval](./deep-dive.png)
 
 Conventional causal attention compares a query with stored keys and combines the corresponding values. Its state preserves a representation for each retained position. Global attention can address an old position directly through its key, subject to the learned compatibility function.
 
@@ -33,10 +36,7 @@ This description is single-headed and omits positional transformations for clari
 
 Sliding-window attention keeps a bounded recent history instead. That is another independent choice: a local window retains individual recent tokens, whereas a recurrent state aggregates updates. Both can have bounded storage without implementing the same mathematical function.
 
-
-![Deep-dive illustration: Start from explicit token retrieval](./deep-dive.png)
-
-## 2. Build an associative state
+### 2. Build an associative state
 
 Consider an illustrative state matrix S mapping key features to value features. A simple additive recurrence stores outer products, and a query reads the matrix. Its dimensions are fixed by key and value feature widths rather than context length.
 
@@ -48,7 +48,9 @@ For value width d_v and key width d_k, state contains their product in elements.
 
 This simplified equation is not a complete normalized linear-attention model or an exact specification of every DeltaNet implementation. It isolates the idea of recurrent associative memory. Actual layers can include feature transformations, normalization, gates, output modulation, and head organization.
 
-## 3. Introduce the delta rule
+### 3. Introduce the delta rule
+
+![Deep dive: 3. Introduce the delta rule](./deep-dive-component-01.png)
 
 An additive update writes a new association without considering what the state already predicts. A delta-style update instead computes the current prediction for a key and writes a correction proportional to the difference from the desired value.
 
@@ -61,7 +63,9 @@ The coefficient beta controls update strength. With a unit-norm key and beta equ
 
 The update is therefore more selective than simply adding another outer product. It can correct an existing association. It still uses finite state and can interfere with associations involving overlapping keys. The method trades explicit history for a learned state-management rule rather than preserving every past value exactly.
 
-## 4. Add gated retention
+### 4. Add gated retention
+
+![Deep dive: 4. Add gated retention](./deep-dive-component-03.png)
 
 Gated DeltaNet introduces a retention mechanism alongside the delta update. A conceptual formulation first attenuates the previous state, then applies a correction using that retained state. The primary paper specifies the actual parameterization and efficient algorithms.
 
@@ -74,7 +78,7 @@ Here scalar gates illustrate the idea; implementations can use richer structure.
 
 If alpha is consistently less than one, repeated retention produces decay. A useful memory can still persist through learned updates or gate behavior, but bounded state alone is not evidence of unlimited exact recall. Evaluate long-context tasks rather than claiming context length and effective memory are interchangeable.
 
-## 5. Work through a one-dimensional update
+### 5. Work through a one-dimensional update
 
 Let the state initially be two, the key one, and the new value five. With no decay and update strength 1/2, the prediction is two and the correction is 1/2 times three. The new state becomes three and a half. A second identical update moves it to four and a quarter.
 
@@ -82,7 +86,7 @@ This trace shows iterative correction rather than an overwrite when beta is belo
 
 In higher dimensions, keys pointing in similar directions interact. A new association can modify predictions for another key because their inner product is nonzero. Orthogonal keys reduce that particular interference in the simplified model, but learned features and finite dimensions do not make all real-token keys orthogonal.
 
-## 6. Calculate hybrid state capacity
+### 6. Calculate hybrid state capacity
 
 Suppose a hybrid model has L_A explicit-attention layers and L_R recurrent layers. A simple memory estimate adds token-history storage and recurrent-state storage rather than applying one cache formula to every layer.
 
@@ -94,7 +98,7 @@ The recurrent term uses a representative matrix per recurrent head. Actual head 
 
 The explicit component still grows with context length. A hybrid with some global-attention layers therefore does not have entirely constant cache storage. Conversely, applying the full Transformer cache formula to every hybrid layer can substantially overestimate state. Count each family separately.
 
-## 7. Separate prefill and recurrence
+### 7. Separate prefill and recurrence
 
 A recurrence naturally processes tokens one at a time, which suits decode. Naively doing that during prefill can underuse parallel hardware. Research on linear and delta-rule attention develops chunked or parallel algorithms that exploit structure while preserving the intended recurrence.
 
@@ -102,7 +106,9 @@ These algorithms introduce block summaries, intermediate products, and numerical
 
 Measure prefill and decode separately. A hybrid can improve one phase while experiencing another bottleneck in the other. Sequence length, chunk size, batch size, state precision, and the proportion of explicit-attention layers all affect the observed result.
 
-## 8. Place attention layers deliberately
+### 8. Place attention layers deliberately
+
+![Deep dive: 8. Place attention layers deliberately](./deep-dive-component-04.png)
 
 Explicit attention can provide direct token retrieval at selected depths, while recurrent layers provide another form of sequence mixing. Their arrangement is an architectural choice requiring training evidence. Alternating families and grouping several recurrent layers between attention layers are not automatically equivalent.
 
@@ -110,7 +116,7 @@ The verified Qwen3.6-35B-A3B card describes 40 layers arranged as 10 groups of t
 
 The attention and recurrent heads can also have different widths. Reusing 1 head-width field across all layers is a configuration-reading error. The dedicated Qwen article follows these distinctions through its published dimensions.
 
-## 9. Preserve positions and state identity
+### 9. Preserve positions and state identity
 
 An explicit key-value cache associates stored entries with token positions and sequence identity. A recurrent state also belongs to a particular processed prefix. Mixing state between unrelated sequences changes the computation even if its tensor dimensions match.
 
@@ -118,7 +124,7 @@ Reset state at the correct sequence boundary. For packed training data, establis
 
 Prefix reuse needs compatible model weights, input representations, position policy, and state generation. A saved recurrent state can avoid reprocessing a prefix under supported conditions, but its validity follows from the computation that produced it, not from the prefix's textual label alone.
 
-## 10. Test recurrent and chunked paths together
+### 10. Test recurrent and chunked paths together
 
 A useful small reference executes the recurrence 1 token at a time. Compare its outputs and final state with the optimized chunked implementation for short sequences. Test lengths smaller than a chunk, exact chunk multiples, and partial final chunks.
 
@@ -126,7 +132,7 @@ Exercise gates near their supported extremes, repeated keys, orthogonal illustra
 
 Also test prefill followed by decode against processing the complete sequence through the reference. This catches state handoff and position errors at the phase boundary. Final output agreement alone can miss incorrect intermediate state that affects later tokens.
 
-## 11. Evaluate memory quality separately
+### 11. Evaluate memory quality separately
 
 Long nominal context support is a configuration and execution capability. Useful retention of information across that context is a behavioral property. A model can accept many tokens yet fail to retrieve a particular old fact, whether it uses recurrent state or explicit attention.
 
@@ -134,7 +140,7 @@ Evaluate tasks with controlled distance, distractors, and required relationships
 
 Avoid attributing every quality difference to 1 layer family when models differ in training, total parameters, experts, and post-training. Compare evidence within controlled experiments when available, and state the missing controls otherwise.
 
-## 12. Examine numerical state behavior
+### 12. Examine numerical state behavior
 
 A recurrent matrix is updated repeatedly. Its accumulation precision and normalization affect error over long sequences. Storing state in a low precision can change behavior differently from quantizing a collection of independently retained cache entries.
 
@@ -142,7 +148,7 @@ Monitor nonfinite values, state magnitude, and output differences across sequenc
 
 When comparing kernels, keep the mathematical gate order, state dtype, and reset rules fixed. A faster path using another state precision is a combined numerical and performance change, requiring corresponding quality evidence.
 
-## 13. Build an architecture-aware serving estimate
+### 13. Build an architecture-aware serving estimate
 
 List explicit-attention layers, their window or global policy, their key-value dimensions, and stored precision. List recurrent layers, their state tensors, auxiliary history, and precision. Add temporary workspace and allocator overhead separately.
 
@@ -150,7 +156,9 @@ Benchmark the real mixture of prompt lengths and generated-token counts. A fixed
 
 The equations here are explanatory models, not GPU measurements. Hybrid architectures are best understood as a composition of distinct state machines. Reading each update rule and counting each retained state gives a more reliable infrastructure picture than labeling the entire model simply “attention” or “linear.”
 
-## 14. Distinguish associativity from an identical floating-point schedule
+### 14. Distinguish associativity from an identical floating-point schedule
+
+![Deep dive: 14. Distinguish associativity from an identical floating-point schedule](./deep-dive-component-02.png)
 
 Parallel recurrence algorithms exploit a structured composition of state transformations. A transformation can often be summarized and combined with another transformation to describe the effect of a larger token interval. That algebraic composition explains how chunking can preserve the real-number recurrence without processing every token strictly serially.
 
@@ -158,16 +166,15 @@ Floating-point operations do not have perfect real-number associativity. Combini
 
 This distinction also helps debugging. Large or structured differences can indicate wrong gate order, missing reset, or incorrect chunk boundaries. Small differences that grow gradually can instead reflect accumulation order. Establish the reference and tolerance before declaring either pattern harmless.
 
-![Deep dive: 14. Distinguish associativity from an identical floating-point schedule](./deep-dive-component-02.png)
-
-
-## 15. Connect dynamics to scan execution
+### 15. Connect dynamics to scan execution
 
 The affine composition perspective helps explain how a content-dependent recurrence can expose whole-sequence parallelism while retaining a state for incremental generation. It also makes the assumptions visible: the transition representation must support affordable composition, temporal order must be preserved, and chunk boundaries must carry the correct initial state.
 
+## Conclusion
+
 Study [state-space dynamics and discretization](/blog/state-space-models-dynamics-discretization/) for the continuous-to-discrete foundation, then [scans, recurrence, and hybrids](/blog/state-space-execution-scans-recurrence-hybrids/) for execution. These foundations do not make every recurrent rule identical to Mamba or establish equal task quality. They explain which algebraic structure and state-management contract need verification before a backend comparison.
 
-## Sources
+### Sources
 
 - [Gated Delta Networks: Improving Mamba2 with Delta Rule](https://arxiv.org/abs/2412.06464).
 - [Official Qwen3.6-35B-A3B model card](https://huggingface.co/Qwen/Qwen3.6-35B-A3B).

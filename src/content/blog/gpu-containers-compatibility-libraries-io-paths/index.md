@@ -12,18 +12,19 @@ level: "intermediate"
 tags: ["ai-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: GPU Containers: Driver Compatibility, Runtime Libraries, and I/O Paths. Layered server illustration separates host GPU driver, container runtime, container CUDA libraries/application, and physical GPU.](./section-overview.png)
+
 A GPU container packages an application's user-space environment, but it does not turn the host into an irrelevant detail. The physical GPU, running kernel driver, device topology, and resource allocation remain part of execution. The container runtime exposes supported devices and libraries so the application can use them through the host's driver stack.
 
 This boundary explains many apparent container regressions. The framework version may change, a library may resolve differently, the process may receive a smaller CPU mask, or dataset access may follow a different filesystem path. The image can launch successfully while the workload executes a different program or receives different resources.
 
 We will trace compatibility and I/O responsibilities, define a reproducible software tuple, and build a comparison method. Numerical examples are illustrative. Exact driver/runtime compatibility and supported forward-compatibility mechanisms should be checked in current NVIDIA documentation.
 
-## 1. Separate the image from the running host driver
+## Deep dive
 
-![Concept overview: GPU Containers: Driver Compatibility, Runtime Libraries, and I/O Paths. Layered server illustration separates host GPU driver, container runtime, container CUDA libraries/application, and physical GPU.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Separate the image from the running host driver
 
 The host supplies the running operating-system kernel and GPU kernel driver. The image supplies application binaries and many user-space dependencies. NVIDIA's container tooling integrates supported GPU access with container execution, including the relevant device and driver interfaces.
 
@@ -33,7 +34,9 @@ Record GPU identity, host driver, container runtime integration, image identity,
 
 Keep the distinction visible during diagnosis. A device-access failure can originate in runtime exposure or host configuration. A missing application library originates elsewhere. A kernel-launch compatibility failure involves the compiled code, device, and driver capabilities rather than simply whether a GPU is visible.
 
-## 2. Treat compatibility as a constrained software tuple
+### 2. Treat compatibility as a constrained software tuple
+
+![Deep-dive illustration: Treat compatibility as a constrained software tuple](./deep-dive.png)
 
 A useful execution tuple is
 
@@ -49,10 +52,7 @@ The CUDA version printed by a driver-management utility should not be treated as
 
 Preserve supported compatibility documentation beside the tuple. If a deployment uses an exception or compatibility package, record its applicable hardware and software conditions. The reproduction target is the supported executed combination, not a slogan that all newer drivers or all containers are interchangeable.
 
-
-![Deep-dive illustration: Treat compatibility as a constrained software tuple](./deep-dive.png)
-
-## 3. Verify compiled code and JIT behavior
+### 3. Verify compiled code and JIT behavior
 
 GPU binaries can include architecture-specific machine code, intermediate representations, or both. The executed path depends on device compatibility and runtime selection. A framework or extension can also compile code at installation or first use.
 
@@ -68,7 +68,9 @@ $$
 
 for N comparable steps and one setup cost. With illustrative setup of 20 seconds and 1000 steps, setup contributes 20 milliseconds per step in the aggregate accounting. With only 10 steps, it contributes 2 seconds per step. The appropriate comparison follows the workload's lifetime.
 
-## 4. Inspect the libraries the application actually loads
+### 4. Inspect the libraries the application actually loads
+
+![Deep dive: 4. Inspect the libraries the application actually loads](./deep-dive-component-01.png)
 
 Framework packages, custom extensions, BLAS implementations, and communication libraries can be bundled or supplied through the environment. A version listing is useful, but the dynamic linker and application configuration determine what is actually loaded.
 
@@ -78,7 +80,7 @@ For distributed workloads, preserve the communication-library and transport inte
 
 Compare a minimal operation before a full model. A small correctness and timing case can reveal basic device access or library resolution problems. The full application remains necessary because it exercises custom extensions, dynamic shapes, and communication paths that the minimal case omits.
 
-## 5. Resource limits can change performance without changing code
+### 5. Resource limits can change performance without changing code
 
 The process receives an allocation of CPUs, memory, devices, and other resources through the host and container configuration. CPU quotas and allowed masks can influence data loading, posting, compilation, and progress. Device visibility determines which GPUs the process can select.
 
@@ -94,7 +96,7 @@ under a common accounting interval. It is not an exact scheduler model, but it i
 
 Keep allocation constant during container-versus-host comparisons. If the native baseline receives more CPUs or a different NUMA placement, the result measures both packaging and resources. Those differences can be intentional, but they should be explicit.
 
-## 6. Shared memory and worker buffers need capacity
+### 6. Shared memory and worker buffers need capacity
 
 Multiprocess data loading and interprocess tensor exchange can use shared-memory resources under the runtime's supported mechanisms. The container's shared-memory environment can differ from the host baseline, affecting capacity and failure behavior.
 
@@ -104,7 +106,7 @@ For illustrative 8 workers, 2 prefetched batches each, and 64 MiB per batch, que
 
 Distinguish capacity failures from throughput regressions. A worker failure can leave the training loop waiting on input, which may look like a GPU or network stall. Preserve the first worker error and loader state rather than diagnosing only the final blocked step.
 
-## 7. Trace the dataset's filesystem path
+### 7. Trace the dataset's filesystem path
 
 A dataset accessed through a mounted storage path can behave differently from files embedded in an image or written through a layered filesystem. Metadata, caching, copy-on-write behavior, and remote-storage configuration can affect the workload.
 
@@ -120,7 +122,7 @@ Preserve dataset version, mount identity, cache state, and record layout. Compar
 
 Direct-storage support requires its own platform and path verification. A GPU-enabled container is not automatically a GPUDirect Storage deployment. Verify the actual supported storage route and the decoding work that still follows it.
 
-## 8. Network namespaces and adapter exposure matter
+### 8. Network namespaces and adapter exposure matter
 
 The application's visible interfaces and addressing can differ inside the container. Distributed communication must establish supported connectivity and select the intended transport and adapters. A successful frontend connection does not prove a high-performance collective path.
 
@@ -130,7 +132,9 @@ Compare host-buffer and GPU-buffer communication where supported, then the inten
 
 Keep network and resource policies explicit in the deployment record. A native and containerized comparison with different interface access or process placement answers a broader question than container overhead alone.
 
-## 9. Build a controlled comparison matrix
+### 9. Build a controlled comparison matrix
+
+![Deep dive: 9. Build a controlled comparison matrix](./deep-dive-component-02.png)
 
 Hold model, useful inputs, output contract, hardware, placement, and offered load constant. Separate startup, compilation, input supply, transfer, kernel execution, and communication. A total duration without phase evidence can detect a change but cannot explain it.
 
@@ -142,18 +146,17 @@ Record the baseline and candidate tuples, effective resource masks, image digest
 
 A compact manifest can include the immutable image digest, package lock or environment export, custom-extension build configuration, driver identity, visible devices, effective CPU masks, dataset mounts, and communication diagnostics. Store it with the measured observations rather than only in an operator's terminal history. If a rebuilt image uses a newer dependency despite the same human-readable tag, the manifest reveals that change. This makes the comparison an execution experiment with identifiable components instead of an unexplained contrast between inside and outside a container.
 
-![Deep dive: 9. Build a controlled comparison matrix](./deep-dive-component-02.png)
-
-
-## 10. Keep packaging as part of the execution record
+### 10. Keep packaging as part of the execution record
 
 A container's value is a reproducible application environment integrated with supported host resources. It does not eliminate the host boundary, and it does not guarantee identical performance across differently configured machines.
 
 After updates, verify the relevant compatibility and path cases rather than repeating an unrelated exhaustive benchmark. Preserve failure evidence and remove exploratory settings whose effect is no longer needed. The required checks follow the components changed by the update.
 
+## Conclusion
+
 GPU container performance becomes understandable when the image, host driver, libraries, allocation, and I/O paths are recorded together. Compatibility establishes that execution is supported; phase measurements establish what executed and where time went. Adopt the environment that delivers correct useful work under the intended resource and service objectives.
 
-## Sources
+### Sources
 
 - [NVIDIA Container Toolkit overview](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/overview.html).
 - [NVIDIA CUDA compatibility documentation](https://docs.nvidia.com/deploy/cuda-compatibility/index.html).

@@ -12,18 +12,21 @@ level: "beginner"
 tags: ["gpu-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: CUDA Kernel Foundations: Indexing, Launch Geometry, and Boundary Masks. An output matrix is overlaid with CUDA blocks and threads.](./section-overview.png)
+
 Writing a CUDA kernel starts with an ownership question: which thread is responsible for which output element? Launching many threads is easy. Proving that every required element is written exactly once, with valid reads and supported synchronization, is the foundation that makes later optimization meaningful.
 
 A vector addition is a useful first example because the mathematical result is simple and the memory traffic is visible. It lets us separate indexing, launch geometry, boundary handling, buffer lifetime, and timing without hiding them inside a large model operation.
 
 We will derive the mapping and a grid-stride extension, then connect the kernel to a memory model. Numerical performance examples are illustrative. Device launch limits and supported execution details should be checked in the current CUDA guide and queried for the target hardware.
 
-## 1. State the mathematical operation and ownership contract
+## Deep dive
 
-![Concept overview: CUDA Kernel Foundations: Indexing, Launch Geometry, and Boundary Masks. An output matrix is overlaid with CUDA blocks and threads.](./section-overview.png)
+### 1. State the mathematical operation and ownership contract
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: State the mathematical operation and ownership contract](./deep-dive.png)
 
 For vectors a and b of length N, the required output is
 
@@ -37,10 +40,7 @@ Start with a deterministic reference and several lengths, including a size not d
 
 Assume separate supported device buffers for the example unless aliasing is explicitly part of the interface. Pointer overlap changes the correctness analysis for more general operations, especially when one output can overwrite data another thread still needs. The simple result does not authorize arbitrary buffer aliasing.
 
-
-![Deep-dive illustration: State the mathematical operation and ownership contract](./deep-dive.png)
-
-## 2. Derive one-dimensional thread indexing
+### 2. Derive one-dimensional thread indexing
 
 Let block width be D, block index b_x, and local thread index t_x. The global element index is
 
@@ -54,7 +54,9 @@ The number of blocks needed for N elements is the ceiling of N divided by D. In 
 
 CUDA's built-in indices and dimensions have specific types and limits. Casting before multiplication can prevent unintended narrow arithmetic in a large-index expression. A wide element index alone does not remove grid-dimension limits or allocation limits, so query supported properties for the target device.
 
-## 3. Make the partial final block explicit
+### 3. Make the partial final block explicit
+
+![Deep dive: 3. Make the partial final block explicit](./deep-dive-component-03.png)
 
 When N is not divisible by D, the launch includes threads whose indices are beyond the vector. They must not read or write the arrays. A boundary condition protects those accesses:
 
@@ -73,13 +75,15 @@ For N=1003 and D=256, 4 blocks launch 1024 threads. The last block starts at ind
 
 That fraction is not a hardware-utilization measurement. Inactive lanes, memory transactions, occupancy, and scheduling determine actual execution efficiency. The mask is first a correctness requirement; its performance effect should be measured rather than inferred solely from the number of padded positions.
 
-## 3-1. Separate matrix shape from storage stride
+### 3-1. Separate matrix shape from storage stride
 
 For a matrix, a two-dimensional launch can assign a row and column to each thread. The logical bounds are the row count and column count, while the address uses the storage stride. In row-major storage with leading dimension L, element row r and column c is addressed at r times L plus c. L need not equal the logical column count when rows have padding.
 
 A matrix with 3 rows and 5 columns stored with stride 8 has 15 logical elements but reserves 24 element positions. A kernel using 5 as the physical stride would address later rows incorrectly. Mask row and column bounds independently, and preserve the actual layout in the interface. This distinction becomes essential for tiled matrix operations and views into larger allocations.
 
-## 4. Extend ownership with a grid-stride loop
+### 4. Extend ownership with a grid-stride loop
+
+![Deep dive: 4. Extend ownership with a grid-stride loop](./deep-dive-component-02.png)
 
 A fixed grid can process a larger vector by advancing each thread through indices separated by the total launched thread count S:
 
@@ -106,10 +110,7 @@ For a small ownership example, launch 8 thread positions for 20 elements. The th
 
 Choose enough work to occupy the device while avoiding unsupported launch dimensions. Measure candidate grids on representative sizes. A small input and a huge input expose different overhead and scheduling behavior.
 
-![Deep dive: 4. Extend ownership with a grid-stride loop](./deep-dive-component-02.png)
-
-
-## 5. Connect contiguous ownership to memory access
+### 5. Connect contiguous ownership to memory access
 
 Adjacent threads reading adjacent elements can support efficient memory transactions under the hardware's access rules. The vector mapping therefore makes a useful baseline for examining memory throughput. Alignment and representation still matter.
 
@@ -119,7 +120,7 @@ Count useful bytes and inspect actual traffic where profiling is available. Cach
 
 Keep the working-set size and cache policy in the report. Both cache-resident and memory-resident cases can be useful, but they describe different resources. The same code can produce different apparent bandwidth without a change in indexing correctness.
 
-## 6. Derive the vector-add arithmetic intensity
+### 6. Derive the vector-add arithmetic intensity
 
 For FP32 inputs and output, the logical operation reads 2 values and writes 1 value per element. Ignoring overhead, it performs one addition and moves 12 bytes:
 
@@ -133,7 +134,7 @@ For N equal to 2 raised to 24, logical traffic is 201326592 bytes, or 192 MiB. A
 
 Effective logical bandwidth is logical bytes divided by measured kernel duration. Label it as such. Profiling physical traffic can reveal rereads or cache effects, so the derived figure should not be equated blindly with a sensor's memory-bandwidth counter.
 
-## 7. Buffer lifetime and stream dependencies remain necessary
+### 7. Buffer lifetime and stream dependencies remain necessary
 
 Correct array bounds do not establish that inputs are ready. Host-to-device copies and kernel launches can be asynchronous, and the consumer must follow the supported dependency ordering. The output also cannot be used or freed before its execution completes.
 
@@ -143,7 +144,7 @@ Preserve host-buffer lifetime for outstanding asynchronous transfers. Likewise, 
 
 Use a clear ownership timeline during debugging: allocation, producer completion, transfer, kernel consumption, output completion, and reuse. The relevant synchronization boundary is part of the interface, not a performance detail that can be removed without changing correctness.
 
-## 8. Check errors at informative boundaries
+### 8. Check errors at informative boundaries
 
 Launch configuration and asynchronous execution failures can surface at different points. Use supported error checking around launch and completion so the first relevant failure is preserved. A later copy failure may be a consequence of an earlier invalid kernel access.
 
@@ -153,7 +154,9 @@ Memory-checking tools can reveal invalid accesses that output comparisons miss. 
 
 For an illustrative small check, set a_i=i and b_i=2i. Every valid output should be 3i, including the final element. Surrounding allocations or output patterns can help reveal missing writes, while a sanitizer is the appropriate mechanism for detecting unsupported out-of-bounds accesses.
 
-## 9. Benchmark steady execution and useful work
+### 9. Benchmark steady execution and useful work
+
+![Deep dive: 9. Benchmark steady execution and useful work](./deep-dive-component-01.png)
 
 Separate allocation, transfers, warmup, and kernel execution unless the intended question measures the whole operation. Use timing that includes actual device completion, not only host posting. Preserve the boundary in comparisons.
 
@@ -163,15 +166,17 @@ A faster kernel-local duration does not automatically improve a larger pipeline.
 
 Do not add complexity before the baseline is understood. Shared memory is not inherently beneficial for an operation with no reuse among threads, and additional synchronization can add overhead. The memory model should identify a benefit before an optimization is introduced.
 
-## 10. Build from a proved mapping
+### 10. Build from a proved mapping
 
 The essential proof is simple: valid elements are covered, writers are unique, reads are in range, and ownership follows supported execution dependencies. Launch geometry and grid-stride iteration then become choices within that contract.
 
 Preserve the reference, representative sizes, supported launch limits, timing method, and logical traffic model. Include both aligned and deliberately partial final blocks in the record. This record makes later tiling, fusion, or scheduling experiments easier to interpret because the original result and denominator remain clear.
 
+## Conclusion
+
 CUDA kernel foundations are not about memorizing one block width. They are about translating an operation into a valid parallel ownership scheme and measuring the resources that scheme uses. Once indexing, boundaries, and lifetime are explicit, optimization can target a real bottleneck without changing the required computation.
 
-## Sources
+### Sources
 
 - [Current NVIDIA CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/).
 - [NVIDIA CUDA runtime API documentation](https://docs.nvidia.com/cuda/cuda-runtime-api/).

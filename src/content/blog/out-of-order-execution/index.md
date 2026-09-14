@@ -12,14 +12,17 @@ topic: "CPU Fundamentals"
 tags: ['computer-architecture', 'cpu', 'microarchitecture']
 ---
 
+## Overview
+
+![Instruction scheduling and ordered retirement.](./section-overview.png)
+
 Intel's Golden Cove core can hold 512 instructions in flight at the same time, and independent measurements put Apple's Firestorm core near 630. Your program says "do A, then B, then C." The silicon underneath is juggling hundreds of half-finished operations in whatever order their inputs happen to arrive, then quietly filing the results so it looks like nothing unusual ever happened.
 
 This is out-of-order execution, and it is the single most elaborate piece of machinery in a modern CPU core. It is also, as we'll see at the end, the machinery that AI chips deliberately threw away. Understanding why CPUs need it, and why GPUs and TPUs don't, explains most of the design split between the 2 worlds.
 
-## Why in-order pipelines stall
+## Deep dive
 
-![Instruction scheduling and ordered retirement.](./section-overview.png)
-
+### Why in-order pipelines stall
 
 In [the first article of this series](/blog/what-a-cpu-actually-does/) we built the pipeline: fetch, decode, execute, overlapped so a new instruction enters every cycle. The pipeline's promise is 1 instruction completed per cycle. Its weakness is that the promise only holds when every instruction is ready to run the moment its turn comes.
 
@@ -29,7 +32,7 @@ Now put numbers on the wait. On a current core, a load that hits the L1 cache ta
 
 The fix sounds almost too obvious: let the people with exact change go around. Formally, **out-of-order (OoO) execution** means the core starts instructions as soon as their inputs are ready, regardless of program order, while still making the results appear in program order. The internal order is dataflow order. The external order is the illusion.
 
-## The shape of the machine
+### The shape of the machine
 
 An out-of-order core is a sandwich: in-order at both ends, chaos in the middle.
 
@@ -42,7 +45,9 @@ The **back end** restores the fiction. Finished instructions don't immediately b
 
 Retiring in order is what makes the whole scheme safe. If instruction 30 triggers a page fault, or a branch before it was mispredicted, everything younger in the ROB is simply discarded before it ever becomes official. The program observes a machine that ran instructions 1 through 29 and then stopped, cleanly. Architects call this a **precise exception**, and it's the property that lets operating systems and debuggers work at all.
 
-## A worked example you can trace by hand
+### A worked example you can trace by hand
+
+![Deep dive: A worked example you can trace by hand](./deep-dive-component-01.png)
 
 Take 4 instructions. R1 through R8 are registers, and `[R4]` means "the memory address stored in R4":
 
@@ -82,10 +87,9 @@ For our 4-instruction example, $$N=4$$, $$w=1$$, and the load-to-add chain takes
 
 The innovation over in-order issue is readiness-based scheduling, not elimination of dependencies. Renaming removes name conflicts; it cannot shorten the actual load-to-add chain. To evaluate a larger window, measure whether it exposes independent instructions or additional simultaneous cache misses. Extra bookkeeping buys little if every useful operation still waits on the same pointer chain, while scheduler ports and comparisons consume area and energy.
 
-![Deep dive: A worked example you can trace by hand](./deep-dive-component-01.png)
+### Register renaming, in plain words
 
-
-## Register renaming, in plain words
+![Deep dive: Register renaming, in plain words](./deep-dive-component-03.png)
 
 There's a catch I skipped. Real programs reuse register names constantly, because the instruction set only exposes a handful (16 general-purpose registers in x86-64, 31 in ARM). Reuse creates dependencies that are about *names*, not *data*, and they would strangle reordering if taken at face value. Watch:
 
@@ -114,7 +118,7 @@ I3 and I4 can now run immediately, in any order, while the divide grinds. The on
 
 The everyday analogy: a kitchen with 1 cutting board forces cooks to queue even when their recipes are unrelated. Renaming is buying a stack of cutting boards and handing a clean 1 to each cook. The recipes didn't change; the phony contention evaporated.
 
-## Going 1 level deeper
+### Going 1 level deeper
 
 The scheme has a name and a birthday: Robert Tomasulo built the essentials for the IBM System/360 Model 91's floating-point unit in 1967, including renaming and the broadcast-wakeup mechanism (his "common data bus"). The Model 91 could juggle about a dozen operations; the full apparatus with a reorder buffer didn't become standard in desktop CPUs until the mid-1990s, roughly a million-fold more transistors later.
 
@@ -124,7 +128,7 @@ The scheduler is the expensive part. Every cycle it must compare every broadcast
 
 1 more interaction worth seeing: out-of-order execution is what makes [branch prediction](/blog/branch-prediction-the-cpu-gambler/) so high-stakes. The core doesn't just predict a branch and fetch a few instructions past it; it renames, schedules, and *executes* hundreds of instructions beyond an unresolved branch, all provisionally. Predicted right, they retire and the speculation was free. Predicted wrong, the ROB discards every younger instruction, the rename map rolls back, and 500-odd slots of work evaporate. The deeper the window, the bigger the bonfire.
 
-## Common misconceptions
+### Common misconceptions
 
 **"Out of order means the program can compute wrong results."** No. Execution order changes; visible order doesn't. Renaming guarantees every instruction reads exactly the values program order says it should, and in-order retirement guarantees memory, registers, and exceptions appear sequentially. A single-threaded program cannot tell it ran on an OoO core. (The 1 real leak is timing: speculative execution leaves cache-timing footprints, which is what the 2018 Spectre and Meltdown attacks exploited. That's an information side channel, not a wrong answer.)
 
@@ -132,7 +136,9 @@ The scheduler is the expensive part. Every cycle it must compare every broadcast
 
 **"A bigger out-of-order window always means proportionally more speed."** Diminishing returns hit fast. Doubling the window helps only if the extra slots contain independent work, and dependent chains, branch mispredictions, and plain lack of parallelism all cap what's findable. Meanwhile scheduler cost climbs steeply with size, which is why 25 years took us from roughly 40-entry windows (Pentium Pro, 1995) to roughly 600, a 15x growth, while transistor budgets grew thousands of times. Memory-bound code is the cruelest case: if every instruction chains off the previous cache miss, a 600-entry window drains just as dry as a 40-entry 1.
 
-## The fork in the road: why AI chips said no
+### The fork in the road: why AI chips said no
+
+![Deep dive: The fork in the road: why AI chips said no](./deep-dive-component-02.png)
 
 Here's the punchline for this series. Out-of-order execution exists to extract parallelism from code that doesn't announce it, 1 thread of tangled, branchy, pointer-chasing instructions, at enormous cost in silicon and watts per instruction.
 
@@ -142,16 +148,13 @@ So GPUs and TPUs made the opposite trade. A GPU streaming multiprocessor is, at 
 
 The CPU's bet: the code is sequential and unpredictable, so build a machine that finds parallelism at runtime. The accelerator's bet: the code is parallel and predictable, so build a machine that doesn't have to look. Both bets are correct, for their own workloads. The rest of this series lives in the space between them.
 
-![Deep dive: The fork in the road: why AI chips said no](./deep-dive-component-02.png)
-
-
-## Takeaway
+## Conclusion
 
 - In-order pipelines stall whenever an instruction waits on data, and everything behind it waits too; out-of-order cores execute in dataflow order but retire results in program order, keeping hundreds of instructions in flight (512 in Intel Golden Cove, about 630 measured in Apple Firestorm) so independent work fills the shadow of slow loads.
 - Register renaming is the enabling trick: mapping each write of a named register onto a fresh physical register erases write-after-read and write-after-write false dependencies, leaving only the true dataflow graph for the scheduler.
 - The whole apparatus buys single-thread speed at a steep price in area and power, and that's exactly the price GPUs and TPUs refuse to pay: with explicitly parallel workloads, they spend the same silicon on arithmetic and hide latency with massive threading or compiler-fixed schedules.
 
-## Sources
+### Sources
 
 - R. M. Tomasulo, "An Efficient Algorithm for Exploiting Multiple Arithmetic Units," IBM Journal of Research and Development, vol. 11, no. 1, 1967 — the original renaming and dynamic scheduling design for the System/360 Model 91.
 - J. E. Smith and G. S. Sohi, "The Microarchitecture of Superscalar Processors," Proceedings of the IEEE, vol. 83, no. 12, 1995 — the classic survey of OoO machinery: renaming, scheduling, reorder buffers.

@@ -3,7 +3,7 @@ title: 'The KV Cache Is a First-Class Citizen Now'
 description: "How the KV cache went from a per-process scratch buffer to pooled, tiered, network-attached infrastructure with attention kernels built around it."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'scale-2'
 order: 7
 series: "llm-serving"
@@ -12,11 +12,19 @@ topic: "Production Serving"
 tags: [inference, kv-cache, serving]
 ---
 
+## Overview
+
+![Concept overview: The KV Cache Is a First-Class Citizen Now](./section-overview.png)
+
 Model-specific cached-input discounts on [public provider price sheets](https://developers.openai.com/api/docs/pricing) are a commercial signal of a systems shift: the KV cache stopped being a throwaway buffer inside a serving process and became infrastructure. It now has a global namespace, a storage hierarchy, a network transfer layer, and attention kernels designed around its on-disk-style layout rather than the other way around.
 
 If you need a refresher on what the cache actually holds and why decode cannot live without it, start with [The KV Cache, Explained for Engineers](/blog/kv-cache-explained/) and [How an LLM Generates Text](/blog/how-an-llm-generates-text/). This article is about what happened once serving systems noticed that the most expensive bytes in the datacenter were being computed, used once, and thrown away.
 
-## From scratch buffer to storage system
+## Deep dive
+
+### From scratch buffer to storage system
+
+![Deep dive: From scratch buffer to storage system](./deep-dive-component-01.png)
 
 Circa 2022, every serving engine treated KV state the same way: allocate a contiguous region per request, fill it during prefill, append to it during decode, free it when the request ends. vLLM's PagedAttention broke the "contiguous" part in 2023, chopping the cache into fixed-size blocks managed through a page table. That was a memory-allocator fix, but it quietly created the primitive everything since has been built on: once the engine adds reusable identities to paged KV blocks, blocks can be shared, evicted, migrated, and stored anywhere.
 
@@ -29,10 +37,9 @@ Circa 2022, every serving engine treated KV state the same way: allocate a conti
 
 **A transfer layer.** Once KV blocks live on other machines, moving them must be cheap, and for years every stack hand-rolled its own transport. NIXL, the transfer library underneath NVIDIA's Dynamo, gives 1 API across NVLink, InfiniBand and RoCE with GPUDirect RDMA, PCIe, and local SSD, and picks the fastest available path per transfer ([NIXL](https://github.com/ai-dynamo/nixl)). With GPUDirect RDMA, KV moves NIC-to-HBM without staging through host memory; a 400 Gb/s NIC sustains roughly 50 GB/s, so gigabyte-scale cache entries move in tens of milliseconds while the GPU keeps decoding other requests. This is the same plumbing that carries prefill-to-decode handoffs in disaggregated serving, which is no accident: a cache with a wire format is what made [disaggregation](/blog/the-prefill-decode-disaggregation-story/) practical at all.
 
-![Deep dive: From scratch buffer to storage system](./deep-dive-component-01.png)
+### Worked example: 1 system prompt, 10 1000 requests
 
-
-## Worked example: 1 system prompt, 10 1000 requests
+![Deep dive: Worked example: 1 system prompt, 10 1000 requests](./deep-dive-component-02.png)
 
 Numbers make the case better than architecture diagrams. Take a 70B-parameter GQA model with Llama-3.1-70B's shape: 80 layers, 8 KV heads, head dimension 128, FP16 cache. KV bytes per token:
 
@@ -71,10 +78,9 @@ The break-even exists only when cS exceeds startup a. Ignoring startup, m equal 
 
 Reuse also requires matching weights, adapters, tokenizer, positional treatment, and prefix content. Paged allocation alone does not create content-addressed identity; the engine's hashing or radix index adds that layer. Admission and eviction should consider expected future hits against retained-byte cost. A large cold entry can displace many smaller hot prefixes, so hit count alone is an incomplete objective. Measure avoided GPU work, transfer traffic, tier occupancy, and actual first-token latency together before choosing a cache policy.
 
-![Deep dive: Worked example: 1 system prompt, 10 1000 requests](./deep-dive-component-02.png)
+### Going deeper: kernels shaped by the cache
 
-
-## Going deeper: kernels shaped by the cache
+![Deep dive: Going deeper: kernels shaped by the cache](./deep-dive-component-03.png)
 
 Decode attention is, mechanically, a read of the KV cache: every generated token scans every cached K and V for its sequence. When the cache became paged, shared, and variable-length, the kernels had to follow, and 2025's fastest decode kernels are recognizable by what they accept as arguments: page tables, not contiguous tensors.
 
@@ -82,7 +88,7 @@ DeepSeek's **FlashMLA** is the sharpest example. MLA (multi-head latent attentio
 
 The direction of design authority has reversed. Kernels used to dictate memory layout and the serving layer coped; now the cache's layout is the stable interface, close to an ABI, and kernels compete on how fast they can traverse it.
 
-## Common misconceptions
+### Common misconceptions
 
 **"Prefix caching only helps when requests arrive back-to-back on the same GPU."** That was true of early implementations, where reuse meant catching a warm buffer before eviction. Pooled designs remove both constraints: Mooncake's pool spans the cluster's DRAM and SSD, so a prefix computed on 1 node hours ago serves a request landing on another node now. Popular system prompts stay warm for as long as the eviction policy keeps them, which for a 0.655 GB entry earning thousands of hits per hour depends on measured reuse and competing working sets.
 
@@ -90,19 +96,19 @@ The direction of design authority has reversed. Kernels used to dictate memory l
 
 **"A cache hit is free."** Provider discounts vary by model and cache policy; a cached-input discount is a price signal, not evidence that reuse consumes no resources. A hit still pays transfer bandwidth and, more importantly, the entry pays memory rent the entire time it sits in the pool: 0.655 GB of HBM held for a prefix that never gets a second hit is strictly worse than not caching. That is why real systems have admission policies, TTLs, and tier demotion rather than "cache everything," and why cache hit rate is now a first-order capacity-planning metric alongside [goodput](/blog/goodput-vs-utilization/).
 
-## The bigger picture
+### The bigger picture
 
 Once you see the KV cache as infrastructure, several 2025-2026 storylines snap into 1 frame. Prefill/decode disaggregation is a KV pipeline: the prefill fleet is a cache producer, the decode fleet a cache consumer, and NIXL is the conveyor belt between them. [Rubin CPX](/blog/prefill-gets-its-own-chip-rubin-cpx/) hardens that boundary into silicon, and the CPX-to-Rubin KV handoff is the contract the whole rack design is built around. Meanwhile HBM capacity is staying flat at 288 GB from Blackwell Ultra to Rubin while contexts and concurrency keep growing ([the memory math](/blog/blackwell-to-rubin-memory-math/)), which makes the hierarchy not an optimization but the only way the working set fits. Even model architecture is responding: MLA, sparse attention, and Mamba hybrids are all, from this angle, attempts to shrink the bytes the cache system has to carry.
 
 The professional consequence is worth stating plainly. "KV cache management" used to be a paragraph in a serving engine's README. It is now a storage system with hit-rate dashboards, eviction policies, replication decisions, and its own kernels, and the engineers who reason about it with storage-systems instincts, working sets, admission control, tiering economics, are the ones who find the next 2x.
 
-## Takeaway
+## Conclusion
 
 - The KV cache is now shared, tiered, network-attached infrastructure: prefix hashing gives it a global namespace, Mooncake/LMCache-style pools give it HBM→DRAM→NVMe tiers, and NIXL with GPUDirect RDMA gives it a fast wire format.
 - The economics are stark: a 2,000-token system prompt on a 70B model costs ~0.56 GPU-seconds to recompute but ~10 ms to fetch from DRAM; at 10,000 requests/hour, caching avoids approximately 1.6 GPUs of repeated prefix work in this hypothetical workload. Any tier above ~1.17 GB/s beats recompute.
 - Kernels follow the cache now, not the reverse: FlashMLA, ThunderMLA, and FlexDecoding all take paged, shared KV layouts as their input contract, and compete on reading them at HBM line rate.
 
-## Sources
+### Sources
 
 - Qin et al., "Mooncake: Trading More Storage for Less Computation — A KVCache-centric Architecture for Serving LLM Chatbot," FAST'25 best paper. https://arxiv.org/abs/2407.00079
 - Zheng et al., "SGLang: Efficient Execution of Structured Language Model Programs" (RadixAttention). https://arxiv.org/abs/2312.07104

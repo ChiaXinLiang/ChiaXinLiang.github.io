@@ -3,7 +3,7 @@ title: 'Latency vs. Throughput: Why You Can''t Have Both for Free'
 description: 'Connect request latency, concurrency, and aggregate throughput with queueing and batching equations, including explicit assumptions and tradeoffs.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'llm-4'
 order: 12
 series: "llm-basics"
@@ -12,11 +12,17 @@ topic: "Inference Basics"
 tags: [inference, latency, throughput]
 ---
 
+## Overview
+
+![Concept overview: Latency vs. Throughput: Why You Can't Have Both for Free](./section-overview.png)
+
 To generate a single token, a 7-billion-parameter model in 16-bit precision has to stream all 14 GB of its weights from GPU memory into the compute units. Every token, every time. On a GPU with 1,000 GB/s of memory bandwidth, that read alone takes 14 milliseconds, which caps 1 lonely request at about 71 tokens per second no matter how many teraflops the chip advertises.
 
 That 1 fact explains most of what you observe when you use an LLM service: why some endpoints feel snappy and others feel like molasses, why providers sell discounted "batch" tiers, and why an ML performance engineer can honestly say "we made the system 5x faster" while your chat session got slightly slower. Latency and throughput are 2 different clocks, and the knob that improves 1 usually taxes the other. This article is about that knob.
 
-## 2 clocks, not 1
+## Deep dive
+
+### 2 clocks, not 1
 
 First, vocabulary. When people say an LLM is "fast," they might mean 4 different things, and serving teams measure all 4.
 
@@ -30,7 +36,7 @@ First, vocabulary. When people say an LLM is "fast," they might mean 4 different
 
 Here is the crux: latency is a per-user clock and throughput is a per-system clock, and on the same hardware you can trade 1 for the other over roughly an order of magnitude. The lever that moves you along that curve is batching.
 
-## The kitchen with 1 oven
+### The kitchen with 1 oven
 
 Picture a restaurant kitchen with 1 industrial oven. A tray takes 14 minutes to bake, and the oven fits 8 trays.
 
@@ -40,8 +46,9 @@ The throughput-obsessed kitchen refuses to start the oven until all 8 slots are 
 
 The oven is the GPU's memory system. The 14-minute bake is the 14 GB weight read. The insight that makes LLM serving economics work at all is this: **the oven costs the same to run whether it holds 1 tray or 8.** When the GPU streams the weights through its compute units for a decode step, those weights can be applied to 1 request's next token or to 8 requests' next tokens for almost the same cost. The weight read is shared; only the small per-request math is duplicated.
 
+### A worked example you can check by hand
 
-## A worked example you can check by hand
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
 
 Let's put real numbers on the kitchen. Take our 7B model (14 GB of weights in FP16) on a GPU with 1,000 GB/s of usable memory bandwidth and, say, 300 TFLOPS of 16-bit compute. Round numbers, deliberately.
 
@@ -63,10 +70,7 @@ Read that pair of numbers again, because it is the entire economics of LLM infer
 
 So why not batch 64? Or 512? Because the lunch stops being free.
 
-![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
-
-
-## Concurrency is not the same unit as token rate
+### Concurrency is not the same unit as token rate
 
 For a stable service, Little's law relates time-average requests in the system $$L$$, completed request rate $$\lambda$$, and mean request residence time $$\mathbb E[T]$$:
 
@@ -80,7 +84,9 @@ The identity does not select an optimal batch. A snapshot of occupied slots is n
 
 Compared with maximizing aggregate throughput in isolation, this accounting connects throughput to the population experiencing latency. Raising batching can reduce weight traffic per token while extending residence and consuming more history memory. The practical method is to sweep admission and batching policies at a fixed workload, plot completed rate and tail latency together, and stop where the service objective fails. A faster kernel can move this boundary; a longer queue merely stores more waiting users and can make a saturated system look busy.
 
-## Going deeper: where the free lunch ends
+### Going deeper: where the free lunch ends
+
+![Deep dive: Going deeper: where the free lunch ends](./deep-dive-component-02.png)
 
 Whether a step is limited by memory or by compute comes down to **arithmetic intensity**: FLOPs performed per byte fetched. Our GPU can do 300 TFLOPS against 1,000 GB/s, so it needs roughly 300 FLOPs per byte to keep its compute units fed. Batch-1 decode delivers about 1 FLOP per byte (2 FLOPs per parameter, 2 bytes per parameter). It is starved by a factor of ~300.
 
@@ -97,10 +103,9 @@ Even with continuous batching, though, the fundamental dial remains. Admit more 
 
 You can see providers' chosen points from the outside. Interactive chat endpoints sit on the low-batch, latency-protected end. Batch APIs — the ones offering roughly half price for results within 24 hours — are the same hardware run at the throughput end of the curve, soaking up off-peak capacity where per-request wait is irrelevant. The discount isn't generosity. It's the curve, priced.
 
-![Deep dive: Going deeper: where the free lunch ends](./deep-dive-component-02.png)
+### Common misconceptions
 
-
-## Common misconceptions
+![Deep dive: Common misconceptions](./deep-dive-component-03.png)
 
 **"A GPU with more TFLOPS will make my tokens stream faster."** For decode at low batch sizes, mostly no. The example above showed compute occupying under 1% of a batch-1 decode step; the other 99% is waiting on memory. Per-user token speed is governed by memory bandwidth and model size, which is why spec-sheet comparisons of inference chips lead with GB/s (and why HBM capacity and bandwidth are the axis of the current hardware race). Extra FLOPS mainly buy you faster prefill and a later roofline crossover, meaning better throughput at high batch — a real benefit, but not the one this claim imagines.
 
@@ -108,19 +113,19 @@ You can see providers' chosen points from the outside. Interactive chat endpoint
 
 **"The service does 10,000 tokens per second, so my request will be blazing fast."** That's the system clock, not yours. Aggregate throughput is *summed across the batch*: 10,000 tokens/s might be 200 users each receiving 50 tokens/s. Per-user decode speed rarely exceeds the batch-1 bandwidth limit and generally degrades as the operator raises concurrency. When you evaluate an endpoint, ask for TTFT and per-request TPOT at realistic load; a single "tokens/sec" number without saying whose tokens is marketing, not measurement.
 
-## The bigger picture
+### The bigger picture
 
 Latency versus throughput is the first genuinely *systems* trade-off you meet after learning what a transformer is, and it's worth seeing how it hooks into the rest of the stack. The reason decode exists as a 1-token-at-a-time loop in the first place is the autoregressive structure we covered in [The Transformer Architecture](/blog/transformer-architecture-in-one-picture/); the reason each step must touch every weight traces back to what a forward pass through [a neural network](/blog/what-is-a-neural-network/) actually computes. The reason memory bandwidth, not compute, sets the batch-1 floor is the same memory-wall arithmetic explored in [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/). And the discipline of choosing a point on the curve, defending it with SLOs, and measuring what users actually receive rather than what the hardware nominally did is precisely the territory of [Goodput vs Utilization](/blog/goodput-vs-utilization/) — a GPU pinned at 95% utilization serving a batch so large that every request blows its deadline has splendid throughput and 0 goodput.
 
 Once you internalize the curve, provider behavior stops looking arbitrary. Speculative decoding, quantization, multi-token prediction, disaggregated prefill: nearly every inference technique you'll read about is an attempt to move the whole curve outward — more throughput at the same latency, or less latency at the same throughput — rather than to escape it. Nothing escapes it. The trade-off is arithmetic, and arithmetic doesn't negotiate.
 
-## Takeaway
+## Conclusion
 
 - Latency (TTFT, TPOT) is the user's clock; throughput (aggregate tokens/s) is the provider's clock. On fixed hardware, batching trades between them — in our worked example, batch 8 bought 7x throughput for a 14% per-user slowdown.
 - Small-batch decode is memory-bandwidth-bound: streaming 14 GB of weights takes ~14 ms while the math takes ~0.05 ms. Batching is nearly free until KV-cache traffic and the compute roofline end the discount.
 - Judge serving systems by the operating point, not 1 number: aggregate tokens/s without per-request TTFT and TPOT under load tells you almost nothing about what users will feel.
 
-## Sources
+### Sources
 
 - Kwon et al., "Efficient Memory Management for Large Language Model Serving with PagedAttention" (vLLM), SOSP 2023 — [arxiv.org/abs/2309.06180](https://arxiv.org/abs/2309.06180)
 - Yu et al., "Orca: A Distributed Serving System for Transformer-Based Generative Models," OSDI 2022 — [usenix.org/conference/osdi22/presentation/yu](https://www.usenix.org/conference/osdi22/presentation/yu)

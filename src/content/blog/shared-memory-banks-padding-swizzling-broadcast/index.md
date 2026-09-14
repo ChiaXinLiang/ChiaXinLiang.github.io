@@ -12,18 +12,21 @@ level: "intermediate"
 tags: ["gpu-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Shared-Memory Bank Conflicts: Padding, Swizzling, and Broadcast. Shared memory is drawn as parallel bank columns.](./section-overview.png)
+
 Shared memory is fast when the access pattern fits its bank organization. It is not one unlimited-bandwidth array. A warp can request distinct words that map to the same bank, forcing additional service work even though all addresses are valid and the mathematical operation is correct.
 
 The useful method is to map lane addresses to banks, distinguish repeated reads of one word from requests for different words, and inspect the instruction the compiler actually generates. Padding or swizzling can change the physical layout while preserving the logical tensor.
 
 We will derive a simple FP32 mapping and work a transpose example. The arithmetic model uses 32 banks and successive 32-bit words, matching the stated CUDA guidance. Other element widths and generated instructions require their actual supported access behavior rather than a blind application of the simplified formula.
 
-## 1. Begin with lane addresses, not array dimensions
+## Deep dive
 
-![Concept overview: Shared-Memory Bank Conflicts: Padding, Swizzling, and Broadcast. Shared memory is drawn as parallel bank columns.](./section-overview.png)
+### 1. Begin with lane addresses, not array dimensions
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Begin with lane addresses, not array dimensions](./deep-dive.png)
 
 For a warp access, record which logical element each active lane requests and convert it to a physical shared-memory word address. Shape alone does not determine the access pattern. Threads reading a row and threads reading a column can use the same array with very different bank behavior.
 
@@ -37,10 +40,9 @@ The base address adds a constant offset to the mapping. That changes bank labels
 
 Keep the active-lane mask and instruction scope explicit. A full-warp formula should not be applied unchanged to a partial request or an instruction that is split into multiple transactions. The model is a starting point for analysis, not a replacement for the compiled access.
 
+### 2. Derive the stride conflict pattern
 
-![Deep-dive illustration: Begin with lane addresses, not array dimensions](./deep-dive.png)
-
-## 2. Derive the stride conflict pattern
+![Deep dive: 2. Derive the stride conflict pattern](./deep-dive-component-02.png)
 
 For distinct FP32 words with positive stride s, let q_l=q_0+ls over 32 active lanes. The number of distinct banks is 32 divided by the greatest common divisor of 32 and s:
 
@@ -56,10 +58,7 @@ The conflict factor is not automatically the whole-kernel slowdown. Other instru
 
 The stride result follows from the first repeat in the bank sequence. Two lanes separated by t use the same bank when t times s is divisible by 32. The smallest positive such t is 32 divided by the greatest common divisor. That is the sequence period, so a full 32-lane access repeats each used bank the corresponding number of times. This derivation also identifies the assumptions: distinct words, the stated bank width, and the stated active population. It is more reliable than memorizing that odd strides happen to work in one example.
 
-![Deep dive: 2. Derive the stride conflict pattern](./deep-dive-component-02.png)
-
-
-## 3. Work the unpadded matrix transpose
+### 3. Work the unpadded matrix transpose
 
 Consider a shared FP32 tile with 32 rows and 32 columns stored row-major. The word index for row r and column c is
 
@@ -73,7 +72,7 @@ A transpose kernel can use shared memory to make global reads and writes coalesc
 
 Derive both the load and store patterns through the staging tile. Producers and consumers can traverse it differently. The relevant analysis follows each shared-memory instruction, not just the declaration or the global output layout.
 
-## 4. Add padding while preserving logical shape
+### 4. Add padding while preserving logical shape
 
 Allocate 33 physical columns for a logical 32-column tile. The word index becomes 33r+c. A column access now maps lane l to bank l+c modulo 32, distributing distinct words across all banks.
 
@@ -89,7 +88,7 @@ That small storage increase can matter near a shared-memory allocation threshold
 
 Test boundary tiles with the same physical stride. A correct full tile can hide an incorrect masked tail or a consumer that assumes logical width equals storage stride.
 
-## 5. Derive a simple XOR swizzle
+### 5. Derive a simple XOR swizzle
 
 A swizzle permutes physical locations while preserving logical identity. For a 32-by-32 tile, one illustrative mapping uses
 
@@ -103,7 +102,7 @@ The mapping is bijective within the tile because each row keeps its own 32-word 
 
 This is an explanatory software layout, not a universal hardware swizzle recipe. Wider tiles, different element widths, specialized matrix loads, and asynchronous-copy mechanisms need their supported layouts. An arbitrary XOR expression should not be substituted for a hardware-required format without checking semantics.
 
-## 6. Distinguish broadcast from different-word collisions
+### 6. Distinguish broadcast from different-word collisions
 
 When active lanes read exactly the same shared-memory word, supported broadcast behavior can serve that value to the requesting lanes. The address equality matters: equal bank identifiers alone do not establish that the requested words are the same.
 
@@ -113,7 +112,7 @@ Writes require a separate ownership analysis. Multiple ordinary writes to one lo
 
 Keep read and write patterns distinct in the diagram and tests. A layout that improves a read phase may not improve the write phase, and a performance counter does not prove that conflicting writers compute the required result.
 
-## 7. Respect element width and generated transactions
+### 7. Respect element width and generated transactions
 
 The simple modulo formula is based on 32-bit words. A wider element can span multiple banks, and an instruction can be partitioned into transactions with a particular service pattern. Smaller elements can share word-level structure. These details change how conflicts should be counted.
 
@@ -123,7 +122,7 @@ Compiler vectorization can also change the request pattern. Source-level scalar 
 
 Specialized matrix operations can impose operand layouts that deliberately differ from ordinary row-major indexing. Their supported layout contract is the relevant starting point. Padding designed for a scalar transpose should not automatically be assumed optimal for those instructions.
 
-## 8. Verify that the mapping preserves values
+### 8. Verify that the mapping preserves values
 
 Use a deterministic tile whose value encodes row and column, such as 100r+c. Store and recover through the padded or swizzled layout, then compare the logical output. This exposes incorrect producer-consumer association that uniform values can hide.
 
@@ -133,7 +132,9 @@ Exercise repeated staging and reuse with the supported barriers. A conflict-free
 
 Include partial logical dimensions and the supported lane masks. Tail loads should initialize needed shared slots appropriately, and final stores should preserve logical bounds. A proof for a full 32-by-32 tile does not establish every wrapper case automatically.
 
-## 9. Measure local evidence and whole-kernel impact
+### 9. Measure local evidence and whole-kernel impact
+
+![Deep dive: 9. Measure local evidence and whole-kernel impact](./deep-dive-component-01.png)
 
 Use profiler measurements appropriate to shared-memory requests and conflict behavior, consulting current metric definitions. Compare the same logical workload and generated path. A counter reduction is useful evidence for the mechanism, not the final performance objective.
 
@@ -145,7 +146,9 @@ Repeat across representative shapes and working sets. A microbenchmark designed 
 
 Global-memory coalescing and shared-bank distribution are separate mappings. A producer can read consecutive global elements efficiently and then store them through a padded or swizzled shared layout. The consumer must recover the intended logical element before its global output mapping. Improving the shared layout should preserve those global access and value relationships, otherwise a local gain can introduce a different traffic cost or an incorrect transpose.
 
-## 10. Choose the simplest verified layout
+### 10. Choose the simplest verified layout
+
+![Deep dive: 10. Choose the simplest verified layout](./deep-dive-component-03.png)
 
 Begin with a lane-to-address map and identify actual different-word collisions. Padding is often easy to reason about and test. A swizzle can preserve storage capacity but adds mapping complexity and must match all consumers.
 
@@ -153,9 +156,11 @@ Keep the layout contract, deterministic recovery tests, supported synchronizatio
 
 A useful comparison can list the unpadded, padded, and swizzled versions with physical stride, storage bytes, observed requests, kernel duration, and correctness. If a layout reduces conflict evidence but leaves duration unchanged, another resource may dominate. If it improves duration while increasing storage enough to reduce concurrency on larger cases, the operating choice needs the full workload distribution rather than one isolated tile.
 
+## Conclusion
+
 Shared-memory bank optimization is a mapping problem. Distinct words, bank organization, broadcast, and instruction scope determine the local service pattern. Prove the logical permutation, preserve producer-consumer ownership, and adopt the layout whose measured useful execution improves under the actual supported hardware path.
 
-## Sources
+### Sources
 
 - [CUDA shared-memory access and transpose guidance](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html).
 - [CUDA advanced kernel programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html).

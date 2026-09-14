@@ -3,7 +3,7 @@ title: 'Prefill Gets Its Own Chip: The Roofline Bet Behind Rubin CPX'
 description: "Why NVIDIA put gaming-class GDDR7 on a datacenter GPU: the roofline math that makes HBM a waste of money for prefill."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'chip-2'
 order: 4
 series: "efficient-ai"
@@ -12,9 +12,15 @@ topic: "AI Chips"
 tags: [gpu, inference, roofline]
 ---
 
+## Overview
+
+![Concept overview: Prefill Gets Its Own Chip: The Roofline Bet Behind Rubin CPX](./section-overview.png)
+
 30 petaflops of 4-bit compute, fed by gaming-class memory. That is Rubin CPX, the GPU NVIDIA announced for "massive-context inference": 30 PFLOPS of NVFP4 next to 128 GB of GDDR7, the same memory family that ships on a $700 graphics card. Every serious datacenter GPU of the past 8 years has used HBM, the stacked memory whose price is a large slice of the entire board. Dropping it looks like corner-cutting. It is actually one of the most legible pieces of hardware-software co-design in years, and you can derive the whole decision from a single chart called the roofline. This article draws that chart with real numbers.
 
-## Inference is 2 different jobs wearing 1 trench coat
+## Deep dive
+
+### Inference is 2 different jobs wearing 1 trench coat
 
 When an LLM answers you, the GPU does 2 phases of work that could hardly be less alike.
 
@@ -26,7 +32,7 @@ Same model, same silicon, opposite bottlenecks. Prefill is limited by how fast y
 
 Rubin CPX is what happens when that software insight jumps the boundary into silicon. If prefill runs on its own pool of chips anyway, why should those chips carry memory sized for decode?
 
-## The roofline, in plain words
+### The roofline, in plain words
 
 The roofline model, introduced by Williams, Waterman, and Patterson in 2009, answers 1 question: for a given piece of code on a given machine, is the ceiling set by compute or by memory bandwidth?
 
@@ -37,7 +43,9 @@ The rule is 1 comparison. If your workload's arithmetic intensity is below the m
 
 The strategic question for a chip architect is then: where do prefill and decode land relative to the ridge point, and what does moving the ridge point cost?
 
-## A worked example you can check by hand
+### A worked example you can check by hand
+
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
 
 Let's put real numbers on it. Rubin CPX: 30 PFLOPS of dense NVFP4 compute and roughly 2.1 TB/s of GDDR7 bandwidth (the bandwidth figure is from The Next Platform's analysis; NVIDIA's release gives compute and capacity).
 
@@ -51,10 +59,7 @@ Let's put real numbers on it. Rubin CPX: 30 PFLOPS of dense NVFP4 compute and ro
 
 So the design writes itself. Keep the compute (in fact, The Next Platform reports the CPX die is a single Rubin compute chiplet clocked about 20% higher). Replace the memory with something cheap, dense, and merely adequate: 128 GB of GDDR7 holds the weights and the in-flight KV cache with room to spare, and 2.1 TB/s is plenty when your intensity is 131,000.
 
-![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
-
-
-## Correct the roofline for scale metadata
+### Correct the roofline for scale metadata
 
 For $$P$$ weights, $$T$$ prompt rows, effective weight storage $$s$$ bytes per parameter, and additional activation/cache traffic $$D_a$$, a weight-reuse model gives
 
@@ -68,7 +73,9 @@ Even that corrected crossing omits activations, attention history, staging, and 
 
 The specialization favors reuse-rich prefill; it does not make memory bandwidth irrelevant. Benchmark the actual format, prompt distribution, and handoff. Compared with buying the same expensive memory system for both phases, the design reallocates cost toward a different balance point, while accepting tighter capacity and communication constraints.
 
-## Going deeper: the handoff and the rack
+### Going deeper: the handoff and the rack
+
+![Deep dive: Going deeper: the handoff and the rack](./deep-dive-component-03.png)
 
 Disaggregation only works if the KV cache built during prefill reaches the decode GPU quickly. That handoff is real machinery, not hand-waving: for a 200B-class model, a 100K-token context can mean tens of gigabytes of KV state that must move from CPX memory to an HBM Rubin GPU before the first output token. This is why NVIDIA ships Dynamo (the serving layer that orchestrates disaggregated pools) and NIXL (a transfer library that abstracts NVLink, InfiniBand, PCIe, and SSD paths) alongside the silicon. The KV cache has quietly become a first-class infrastructure object with its own transport layer and its own storage tiers.
 
@@ -78,7 +85,7 @@ At rack scale, NVIDIA packages the split as the Vera Rubin NVL144 CPX: standard 
 
 1 number from the launch deserves explicit labeling: NVIDIA's claim that $100M of CPX capex can generate "$5B in token revenue." That figure is pure marketing. It assumes a token price, a utilization rate, a workload mix, and a depreciation schedule, none of which NVIDIA publishes, and it should never be quoted as an engineering result. The roofline argument stands on its own; the revenue projection does not.
 
-## Common misconceptions
+### Common misconceptions
 
 **"GDDR7 means it's a cut-down budget chip."** The opposite. The compute die is a full Rubin chiplet running at higher clocks than the flagship, per The Next Platform's reporting. Calling CPX "cheap" because of its memory is like calling a drag racer cheap because it lacks a trailer hitch: the part was deleted because the workload cannot use it, not to hit a price point. The design center is maximum FLOPs per dollar for a workload that sits on the compute roof.
 
@@ -86,7 +93,9 @@ At rack scale, NVIDIA packages the split as the Vera Rubin NVL144 CPX: standard 
 
 **"Disaggregation is a new NVIDIA invention that requires CPX."** Backwards on both counts. Disaggregation was proven in software first (DistServe published in 2024, and the technique was the default across vLLM, SGLang, Mooncake, and in-house stacks at DeepSeek and Meta well before CPX existed), and it runs fine on homogeneous GPUs: MLPerf v5.1's ~1.5x disaggregated result used identical Blackwell parts for both phases. CPX does not enable disaggregation; it *assumes* it, and then optimizes the silicon for one side of a split the software already made.
 
-## The bigger picture: the schedule rewrote the SKU list
+### The bigger picture: the schedule rewrote the SKU list
+
+![Deep dive: The bigger picture: the schedule rewrote the SKU list](./deep-dive-component-02.png)
 
 The deepest thing about Rubin CPX is the direction of causality. For decades, hardware shipped and software adapted. Here a scheduling idea, published in an academic paper, became the default serving architecture in a year and a half, and then reached back across the hardware-software boundary and changed what chips get built. That is the co-design flywheel running at product-line scale.
 
@@ -94,16 +103,13 @@ It also completes a picture from earlier in this series. In [Blackwell to Rubin 
 
 Expect the split to deepen. Once prefill and decode are separate line items, each can evolve at its own pace: prefill parts chasing FLOPs per dollar on cheap memory, decode parts chasing bytes per second per dollar on whatever HBM5 becomes. The trench coat is off.
 
-![Deep dive: The bigger picture: the schedule rewrote the SKU list](./deep-dive-component-02.png)
-
-
-## Takeaway
+## Conclusion
 
 - Prefill and decode sit on opposite sides of the roofline: a 32K-token prefill runs at ~131,000 FLOPs/byte, far above CPX's ~14,300 ridge point, while batch-1 decode runs at ~4 FLOPs/byte and can use only ~0.03% of the chip's compute. HBM is worth 10x to decode and roughly nothing to prefill.
 - Rubin CPX (30 PF NVFP4, 128 GB GDDR7 at ~2.1 TB/s) is prefill/decode disaggregation reaching silicon: the software split proved out in serving stacks first, and the chip simply deletes the HBM that prefill cannot exploit.
 - Rack-level claims (8 EF, 7.5x GB300 NVL72) and especially the "$5B revenue per $100M capex" figure are vendor marketing without published methodology; the roofline arithmetic is the part you can verify yourself.
 
-## Sources
+### Sources
 
 - NVIDIA — "NVIDIA Unveils Rubin CPX: A New Class of GPU Designed for Massive-Context Inference": https://nvidianews.nvidia.com/news/nvidia-unveils-rubin-cpx-a-new-class-of-gpu-designed-for-massive-context-inference
 - The Next Platform — "Nvidia Disaggregates Long Context Inference To Drive Bang For The Buck": https://www.nextplatform.com/compute/2025/09/11/nvidia-disaggregates-long-context-inference-to-drive-bang-for-the-buck/1642017

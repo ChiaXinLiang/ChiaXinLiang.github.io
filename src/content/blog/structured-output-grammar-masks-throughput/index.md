@@ -12,18 +12,19 @@ level: "intermediate"
 tags: ["llm-serving", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Structured Output: Grammar Masks and Constrained Decoding Throughput. A parser state and grammar tree constrain a token probability bar chart, with invalid next tokens visibly masked and valid tokens retained.](./section-overview.png)
+
 A service that returns almost-valid JSON can waste more time than a service with slightly slower token generation. The client retries, repairs malformed text, or rejects a response after waiting for the entire generation. Structured output attempts to prevent part of this waste by restricting which tokens the model may produce at each step.
 
 The useful mechanism is more precise than asking the model to follow a format. A grammar matcher tracks the generated prefix, determines which vocabulary tokens can continue it, and masks the other logits before sampling. The model supplies preferences among permitted choices. The matcher supplies a formal constraint on the emitted sequence.
 
 This separation introduces new computation, state, and scheduling concerns. We will derive the masked distribution, explain why tokenization makes grammar matching difficult, and evaluate the benefit using accepted completed objects. The examples use simplified grammars and illustrative timings rather than benchmark claims for any named engine.
 
-## 1. Define the contract before selecting the implementation
+## Deep dive
 
-![Concept overview: Structured Output: Grammar Masks and Constrained Decoding Throughput. A parser state and grammar tree constrain a token probability bar chart, with invalid next tokens visibly masked and valid tokens retained.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Define the contract before selecting the implementation
 
 A structural contract can describe JSON syntax, a JSON Schema subset, a regular language, or a more general grammar. These choices express different requirements. Valid JSON allows many objects that a particular application cannot use. A schema may constrain keys, types, and some value properties, but support for individual schema features depends on the implementation.
 
@@ -33,7 +34,9 @@ For example, a response containing a status field and a numeric score can be syn
 
 Define how the service represents refusal, cancellation, timeout, and incomplete generation. These outcomes must not be silently converted into successful structured answers. A strict object contract needs a surrounding protocol that tells the client whether a complete accepted object was actually delivered.
 
-## 2. Treat decoding as a state transition system
+### 2. Treat decoding as a state transition system
+
+![Deep-dive illustration: Treat decoding as a state transition system](./deep-dive.png)
 
 Let q_t denote the matcher state after the emitted prefix of t tokens. Let V be the vocabulary and delta the transition operation. The allowed set contains tokens whose decoded contents can extend the prefix without making completion impossible under the supported grammar:
 
@@ -47,10 +50,7 @@ An admissible prefix is also different from a completed output. After emitting a
 
 The per-request matcher must follow exactly the tokens accepted into that request's output. Sharing mutable matcher state across requests would connect their grammars accidentally. Compiled grammar information may be reusable; the current prefix and transition history belong to the individual generation.
 
-
-![Deep-dive illustration: Treat decoding as a state transition system](./deep-dive.png)
-
-## 3. Derive the masked sampling distribution
+### 3. Derive the masked sampling distribution
 
 Let z_v be the model logit for vocabulary token v and T a positive sampling temperature. Constrained sampling assigns probability only to the allowed set:
 
@@ -64,7 +64,9 @@ For a small example, suppose the unconstrained model assigns probability 0.7 to 
 
 Sampling operations need a documented order. Applying a top-k restriction before the grammar mask can discard all legal choices even when the vocabulary contains valid continuations. Temperature, top-p, repetition penalties, and grammar restrictions interact. Verify the engine's actual sampling pipeline instead of assuming that every ordering implements the same distribution.
 
-## 4. Tokenization is the bridge between characters and logits
+### 4. Tokenization is the bridge between characters and logits
+
+![Deep dive: 4. Tokenization is the bridge between characters and logits](./deep-dive-component-02.png)
 
 Grammars often describe characters or bytes, while models predict vocabulary tokens. A token can contain several characters, including punctuation, whitespace, or part of an escaped string. One token may cross multiple grammar transitions. Allowing it requires checking its complete decoded content, not merely its first character.
 
@@ -74,10 +76,7 @@ Unicode and byte-oriented token representations require careful handling. A toke
 
 The tokenizer vocabulary can be organized to share work across common token prefixes. Compiled structures and cached classifications avoid parsing every token from scratch at every decoding step. These optimizations explain why grammar processing can become practical for large vocabularies, but their effectiveness depends on the grammar and generated states.
 
-![Deep dive: 4. Tokenization is the bridge between characters and logits](./deep-dive-component-02.png)
-
-
-## 5. Separate compilation cost from request-time cost
+### 5. Separate compilation cost from request-time cost
 
 A service may compile a schema once and reuse its immutable representation for many requests. It still initializes and advances a matcher for each request. Cold compilation, cache lookup, matcher construction, mask generation, device transfer, and logit masking are different costs and should be measured separately.
 
@@ -91,7 +90,7 @@ The exposed terms matter because host grammar work may overlap with other reques
 
 For an illustrative vocabulary of 128000 tokens, a bit-packed mask occupies 16000 bytes, while one byte per token occupies 128000 bytes. For a batch of 64 requests, those representations differ by nearly 7 MiB per step. The exact transfer path may avoid a full host copy or use device-resident buffers, so measure physical transfers rather than assuming this calculation describes the implementation.
 
-## 6. Batching introduces independent parser timelines
+### 6. Batching introduces independent parser timelines
 
 Every active request has its own grammar state, even when many requests share a compiled schema. Some prefixes permit broad vocabulary choices; others allow only a small fixed punctuation set. Matcher costs and mask contents can therefore vary across requests in the same batch.
 
@@ -101,7 +100,7 @@ Schema diversity affects compilation-cache behavior. A workload that creates a u
 
 Avoid assuming that parser work is negligible because a single-request demonstration looks fast. Test the expected concurrent population, vocabulary size, schema complexity, and output lengths. The service can shift from a GPU bottleneck to a CPU matcher bottleneck as model execution becomes faster or the number of simultaneously decoding requests grows.
 
-## 7. Speculative decoding requires reversible grammar state
+### 7. Speculative decoding requires reversible grammar state
 
 A speculative decoder proposes multiple draft tokens before the target model decides how many to accept. Grammar matching must remain consistent with the accepted prefix. If the matcher advances through every proposal and rejection discards part of the sequence, the state must return to the accepted point.
 
@@ -111,7 +110,9 @@ The draft path should also respect the constraint when the algorithm requires it
 
 A correctness test should force partial acceptance, complete rejection, and completion within a draft block. It should verify both the final text and subsequent masks. An output that happens to parse correctly is insufficient evidence that rollback works for all future continuations.
 
-## 8. Optimize for accepted objects rather than raw tokens
+### 8. Optimize for accepted objects rather than raw tokens
+
+![Deep dive: 8. Optimize for accepted objects rather than raw tokens](./deep-dive-component-01.png)
 
 Let N_ok be the number of outputs that are complete, structurally valid, semantically accepted by the application, and delivered before the relevant deadline. The useful throughput is
 
@@ -125,7 +126,7 @@ The independence assumption in the retry example is strong. Some malformed outpu
 
 Track failure categories separately: syntax error, unsupported schema feature, semantic rejection, empty allowed set, token-limit truncation, timeout, and engine error. A single validity percentage can hide the difference between a useful complete response and a valid prefix that never reaches completion.
 
-## 9. Build a verification suite around the boundary conditions
+### 9. Build a verification suite around the boundary conditions
 
 Use small grammars with known valid and invalid sequences to test token acceptance. Include tokens that cross punctuation boundaries, escaped strings, multibyte text, nested containers, optional fields, and termination. Validate the generated output with an independent parser and the application's schema validator.
 
@@ -133,9 +134,11 @@ Exercise concurrent requests with different schemas and repeatedly reused schedu
 
 Benchmark warm and cold schema paths separately and preserve the model, tokenizer, grammar-library, and engine versions. Current feature support and optimized representations can change. A reproducible report should identify the exact configuration that supplied the guarantee and produced the timing result.
 
+## Conclusion
+
 Constrained decoding works by connecting a formal language to the model's next-token distribution. Its performance value comes from reducing unusable generations while keeping matcher work off the exposed critical path. The engineering target is a complete accepted response at the required latency, with every token mask tied to the correct request state.
 
-## Sources
+### Sources
 
 - [XGrammar constrained decoding documentation](https://xgrammar.mlc.ai/docs/latest/start/constrained_decoding.html).
 - [XGrammar engine integration](https://xgrammar.mlc.ai/docs/latest/using_xgrammar/engine_integration.html).

@@ -3,7 +3,7 @@ title: 'Prefill and Decode Are Different Workloads — Stop Serving Them Togethe
 description: "Colocating prefill and decode inflates tail TPOT up to 30x; here's the head-of-line blocking math, the KV handoff cost, and why disaggregation wins."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'scale-1'
 order: 6
 series: "llm-serving"
@@ -12,11 +12,19 @@ topic: "Production Serving"
 tags: [inference, serving, disaggregation]
 ---
 
+## Overview
+
+![Concept overview: Prefill and Decode Are Different Workloads — Stop Serving Them Together](./section-overview.png)
+
 An illustrative 70B-model calculation using 1 H100's compute and bandwidth budget gives roughly 2.9 seconds for an 8,192-token prefill. The 140 GB of BF16 weights require multiple 80 GB GPUs in a real deployment, so these numbers are a reference model rather than a runnable single-GPU configuration. If that prefill runs inside the same engine that is decoding for 30 other users, every 1 of those users watches their next token arrive 2.9 seconds late — a 69x spike over the 42 ms they were getting a moment earlier. This is not a pathological corner case. The DistServe team measured decode inter-token latency inflating 2–30x under colocation on real traces, and that single observation went from rejected paper to the default architecture of every major serving stack in about 18 months.
 
 This article is the operator's view: why the interference happens, how to compute it by hand for your own traffic, what the KV handoff actually costs, and where disaggregation does *not* pay. If you want the history of how the idea won — Splitwise, DistServe, Mooncake, and NVIDIA eventually cutting a dedicated prefill chip — that story is in [The Prefill/Decode Disaggregation Story](/blog/the-prefill-decode-disaggregation-story/). Here we do the math.
 
-## 2 workloads wearing 1 trench coat
+## Deep dive
+
+### 2 workloads wearing 1 trench coat
+
+![Deep dive: 2 workloads wearing 1 trench coat](./deep-dive-component-03.png)
 
 Autoregressive inference has 2 phases with almost nothing in common except the weights they read. (If the phases themselves are new to you, start with [How an LLM Generates Text](/blog/how-an-llm-generates-text/).)
 
@@ -29,7 +37,9 @@ So 1 phase wants maximum FLOPs, the other wants maximum bandwidth; 1 wants small
 
 But the config compromise is the smaller problem. The bigger 1 is interference in time.
 
-## The head-of-line blocking math
+### The head-of-line blocking math
+
+![Deep dive: The head-of-line blocking math](./deep-dive-component-01.png)
 
 Modern engines use continuous batching: at every iteration the scheduler assembles a batch from whatever work is pending — decode steps for running streams, prefills for newly admitted requests — and launches it. The GPU executes iterations serially. So when a large prefill enters an iteration, every decode stream in the engine waits for it. That is head-of-line (HOL) blocking, and you can compute its size with 4 numbers.
 
@@ -46,17 +56,16 @@ Use a 70B-parameter dense model in BF16 and 1 H100's resource budget as a hypoth
 
 Chunked prefill — splitting the prompt into slices and co-scheduling 1 slice per decode iteration — is the standard colocated mitigation, and it genuinely caps the worst-case gap. But look at what the knob trades. A 512-token chunk costs ≈ 2 × 70e9 × 512 ≈ 72 TFLOP ≈ 180 ms per iteration at our 400 TFLOPS effective rate: TPOT for everyone degrades ~4x for the whole duration of the prefill. Shrink the chunk to 128 tokens and the per-iteration tax drops near the 42 ms floor, but now the 8,192-token prompt needs 64 iterations interleaved with decode, and its TTFT stretches past 3 seconds. Chunked prefill does not remove the interference; it lets you choose which SLO absorbs it, smeared instead of spiked.
 
-![Deep dive: The head-of-line blocking math](./deep-dive-component-01.png)
-
-
-## Disaggregation: separate pools, explicit handoff
+### Disaggregation: separate pools, explicit handoff
 
 The disaggregated answer is blunt: run prefill and decode on **different GPUs**. A prefill pool runs prompts to their first token, then ships the KV cache to a decode pool that carries the stream to completion. Each pool gets its own right-sized configuration — the prefill pool tunes tensor parallelism for TTFT and runs near the compute roofline; the decode pool packs large batches, tunes for bandwidth, and its iteration time never sees a prompt. The p99 TPOT collapses back to the median because the mechanism that created the tail is physically gone.
 
 
 The obvious objection is the handoff. Let's price it. For a Llama-70B-class model with GQA (80 layers, 8 KV heads, head dim 128, FP16), the KV cache is 2 × 8 × 128 × 2 B × 80 ≈ **320 KB per token**. The 8,192-token prompt's cache is ~2.6 GB. Over a 400 Gb/s RDMA NIC that is ~52 ms; inside an NVLink domain at 900 GB/s, ~3 ms. Against 2.9 s of prefill compute, the nominal transfer time is about 0.1–1.8% of that compute time — and in practice it is not even that, because implementations that stream KV **layer by layer** can overlap it, overlapping the transfer of layer *n* with the compute of layer *n+1*. How much handoff remains exposed depends on the implementation, network contention, and streaming granularity.
 
-## Going deeper: what the operator actually tunes
+### Going deeper: what the operator actually tunes
+
+![Deep dive: Going deeper: what the operator actually tunes](./deep-dive-component-02.png)
 
 3 mechanisms separate a demo from a production deployment.
 
@@ -79,10 +88,7 @@ These are necessary average-capacity conditions, not sufficient tail-latency gua
 
 The innovation changes which phase can interrupt another; it does not reduce every phase's intrinsic work. Sweep pool ratios using the same mixed arrival trace, include KV handoff time in first-token latency, and count duplicated weight residency in capacity. If the decode queue grows despite smooth iterations, further shrinking prefill chunks cannot fix insufficient decode capacity. Use the phase demands to select candidates, then accept only configurations that satisfy both streaming and first-token targets.
 
-![Deep dive: Going deeper: what the operator actually tunes](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"Chunked prefill solves interference, so disaggregation is unnecessary."** Chunking converts a 69x tail spike into a persistent 1.5–4x TPOT tax (chunk-size dependent) plus a stretched TTFT — the interference is smeared, not removed. And it does nothing about the deeper mismatch: the colocated engine still runs 1 parallelism layout and 1 batch policy for 2 workloads that want opposite settings. Chunking is the right tool for small deployments where a second pool can't be justified; it is not an equivalent.
 
@@ -90,17 +96,17 @@ The innovation changes which phase can interrupt another; it does not reduce eve
 
 **"Disaggregation is a throughput trick."** Mostly backwards. Aggregated serving can match or beat disaggregated raw tokens/s at low load or with uniform short prompts — you're paying for an extra hop and duplicated weight copies, and a request's prefill GPU-seconds don't disappear by moving them. What disaggregation buys is **goodput under an SLO**: throughput that still counts when you require p99 TPOT within bounds. That is exactly the condition under which MLPerf's 1.5x was measured. If you have no tail-latency SLO — offline batch inference, evals — colocate and save the hardware.
 
-## Where this sits in the bigger picture
+### Where this sits in the bigger picture
 
 Disaggregation is the first of several moves that turn "a model server" into "an inference system": once prefill and decode are separate services connected by a KV handoff, the KV cache stops being an engine-internal buffer and becomes an infrastructure object with its own tiering (HBM, DRAM, SSD), its own transport, and its own hit-rate economics — Mooncake and LMCache are storage systems in all but name. It also changes what hardware you buy (prefill wants FLOPs per dollar, decode wants bandwidth per dollar) and what you monitor: pool-level queue depth and p99 TPOT, not GPU utilization. The through-line of this series is that utilization was never the goal; [goodput](/blog/goodput-vs-utilization/) is, and disaggregation is the single highest-leverage serving change for defending it at scale.
 
-## Takeaway
+## Conclusion
 
 - Prefill is compute-bound and bursty; decode is memory-bound and steady. Colocated, a single 8K prefill stalls every decode stream for seconds — median TPOT barely moves, p99 explodes 2–30x. Do the 4-number math (weight bytes / HBM bandwidth, 2 × params × prompt tokens / effective FLOPs) for your own model before trusting any dashboard average.
 - The KV handoff is cheap relative to what it saves: ~320 KB/token for a 70B GQA model, ~2% of prefill time on 400 Gb/s RDMA, mostly hidden by layer-wise overlap. Pool ratio and early rejection are the knobs that actually need operating.
 - Disaggregate for SLO goodput, not raw throughput: it wins when you have tail-latency requirements and mixed prompt lengths (MLPerf v5.1 showed ~1.5x under SLA). For offline batch or uniformly short prompts, colocation with chunked prefill remains the cheaper answer.
 
-## Sources
+### Sources
 
 - Zhong et al., *DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving*, OSDI 2024 — [arXiv:2401.09670](https://arxiv.org/abs/2401.09670)
 - Patel et al., *Splitwise: Efficient Generative LLM Inference Using Phase Splitting*, ISCA 2024 — [arXiv:2311.18677](https://arxiv.org/abs/2311.18677)

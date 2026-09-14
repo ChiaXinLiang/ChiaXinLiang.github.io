@@ -3,7 +3,7 @@ title: 'Tokens per Second: What It Means and What It Hides'
 description: "The same model on the same GPU can honestly report 24 tokens per second or 6,600 — learn to tell which number a benchmark is showing you."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'llm-6'
 order: 14
 series: "llm-basics"
@@ -12,11 +12,19 @@ topic: "Inference Basics"
 tags: ['inference', 'llm', 'benchmarks']
 ---
 
+## Overview
+
+![Concept overview: Tokens per Second: What It Means and What It Hides](./section-overview.png)
+
 The same 8-billion-parameter model, under different serving configurations, can be honestly benchmarked at 24 tokens per second and at 6,600 tokens per second. These illustrative values describe different metric and deployment assumptions; comparing them requires those assumptions.
 
 That 275× spread is why "tokens per second" is simultaneously the most quoted and the most misread number in LLM inference. This article closes out the basics series by unpacking what the metric actually measures, working through the arithmetic that sets its ceiling, and giving you a short checklist for reading any benchmark without being fooled.
 
-## 1 metric, 2 questions
+## Deep dive
+
+### 1 metric, 2 questions
+
+![Deep dive: 1 metric, 2 questions](./deep-dive-component-03.png)
 
 A token is the unit an LLM reads and writes: a word fragment of roughly 4 characters, so 100 tokens is about 75 English words. Tokens per second sounds like it should be 1 number. It's actually the answer to 2 different questions.
 
@@ -31,7 +39,9 @@ The highway analogy holds up well. Per-user throughput is the speed of 1 car. Ag
 
 The 2 phases stress the hardware differently. Prefill processes thousands of tokens in 1 shot, so it's rich in parallel arithmetic and tends to be limited by the GPU's compute rate. Decode produces a single token per step, and each step must read every model weight from memory to produce it. Almost no arithmetic per byte moved. Decode is limited by memory bandwidth, and that observation gives us the whole ceiling calculation.
 
-## A worked example you can do on a napkin
+### A worked example you can do on a napkin
+
+![Deep dive: A worked example you can do on a napkin](./deep-dive-component-01.png)
 
 Take Llama-3-8B in 16-bit precision on an NVIDIA H100. 2 spec-sheet numbers drive everything:
 
@@ -57,10 +67,7 @@ Second, **quantization moves the ceiling**. Compress the weights to 4-bit intege
 
 And prefill? A 2,000-token prompt needs roughly 2 × 8B × 2,000 ≈ 32 trillion operations. At half of the H100's compute rate, that's ~65 milliseconds of TTFT. This is why long prompts feel like a pause before the streaming starts, and why prefill, unlike decode, actually does use all those FLOPS.
 
-![Deep dive: A worked example you can do on a napkin](./deep-dive-component-01.png)
-
-
-## Give the 2 rates distinct denominators
+### Give the 2 rates distinct denominators
 
 Over a wall-clock interval $$\Delta t$$, aggregate delivered output rate is
 
@@ -80,7 +87,9 @@ The timestamps are delivery times on the same clock; first-token waiting is inte
 
 Compared with a single headline metric, these definitions expose batching's gain and its individual latency cost. Measure per-request streaming distributions separately from per-token gap distributions: long responses contribute more observations to the latter. Also report TTFT, accepted output, offered load, and model quality. A benchmark becomes interpretable when its counters and clocks are explicit, rather than when its numerator looks impressive.
 
-## Going deeper: what a loaded server actually does
+### Going deeper: what a loaded server actually does
+
+![Deep dive: Going deeper: what a loaded server actually does](./deep-dive-component-02.png)
 
 The clean batch-of-32 picture above assumes 32 requests that arrive together and finish together. Real traffic is messier: requests arrive continuously, with wildly different prompt and response lengths. Modern serving engines handle this with **continuous batching**, an idea introduced by the Orca system: instead of waiting for a whole batch to finish, the engine operates at the granularity of a single decode step, ejecting finished sequences and admitting new ones between steps. The vLLM project paired this with **PagedAttention**, which manages KV cache memory in small blocks the way an operating system pages RAM, so memory fragmentation stops limiting batch size.
 
@@ -88,10 +97,7 @@ The consequence for benchmark reading is that a real server's per-user speed *de
 
 This is also why serious evaluations report **percentiles** rather than averages. A p50 TPOT of 20 ms with a p99 of 200 ms means the median user sees smooth streaming while 1 user in 1 hundred watches the response stutter. Averages bury exactly the users who will tweet about you. The most useful summary metric to emerge from recent serving research (the DistServe paper is a good entry point) is **goodput**: the number of requests per second that *meet a stated latency target*, such as "TTFT under 200 ms and TPOT under 50 ms." Raw tokens per second counts a token that arrived after the user gave up and closed the tab. Goodput doesn't.
 
-![Deep dive: Going deeper: what a loaded server actually does](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"A GPU with twice the FLOPS generates tokens twice as fast."** For single-user decode, FLOPS barely matter; the ceiling is bandwidth divided by bytes of weights, and the arithmetic units are mostly idle. A GPU upgrade that doubles compute but leaves bandwidth unchanged will speed up prefill and large-batch serving, yet do almost nothing for the streaming speed 1 user experiences. When Grace-Hopper-class marketing quotes enormous FLOPS gains, check the bandwidth line in the spec sheet before predicting decode speed.
 
@@ -99,7 +105,7 @@ This is also why serious evaluations report **percentiles** rather than averages
 
 **"Optimizing aggregate throughput makes responses faster for users."** Usually the opposite. Pushing batch size up is the main lever for aggregate throughput and cost, and it works precisely by making each user share memory bandwidth with more neighbors, stretching everyone's TPOT. Providers deliberately pick an operating point that trades some user speed for a lot of cost efficiency. When a provider's streaming feels slower this month than last, their hardware likely didn't change; their batching policy did.
 
-## How to read a benchmark honestly
+### How to read a benchmark honestly
 
 Everything above compresses into 7 questions. If a published number doesn't answer them, the number is decoration.
 
@@ -114,19 +120,19 @@ Everything above compresses into 7 questions. If a published number doesn't answ
 
 Vendor-published numbers, including every figure a hardware or API provider self-reports, should be treated as the best case across all 7 knobs simultaneously until an independent measurement says otherwise. That's not cynicism; it's just knowing which point on the curve marketing will choose.
 
-## Where this leaves you
+### Where this leaves you
 
 This article closes the loop the series opened. You've seen [what a neural network computes](/blog/what-is-a-neural-network/), how [attention lets tokens consult each other](/blog/attention-in-plain-words/), and how [the transformer assembles those pieces](/blog/transformer-architecture-in-one-picture/) into the models everyone now benchmarks. Tokens per second is where all of that meets physical hardware and real money, and you now know why the metric bends the way it does: decode is a memory-bandwidth problem, batching is a sharing problem, and honest measurement is a full-curve problem.
 
 It's also the doorway to a different discipline. Squeezing more goodput out of the same silicon — overlapping prefill with decode, paging KV caches, choosing quantization formats, measuring what a "100% utilized" GPU actually accomplishes — is the day job described in [What Does an ML Performance Engineer Do?](/blog/what-does-an-ml-performance-engineer-do/), and the measurement mindset continues in [Goodput vs Utilization](/blog/goodput-vs-utilization/). If this article's napkin math felt satisfying, that series is where the napkin gets bigger.
 
-## Takeaway
+## Conclusion
 
 - Tokens per second answers 2 different questions: per-user streaming speed (capped by memory bandwidth ÷ bytes read per step) and aggregate server output (multiplied by batching). A 100×+ gap between them is normal, so always identify which one you're reading.
 - The ceiling math fits on a napkin: weights ÷ bandwidth gives per-user decode speed, batching multiplies aggregate throughput at the cost of everyone's latency, and KV cache traffic makes long contexts measurably slower.
 - Trust no benchmark that omits batch size, context length, precision, TTFT, percentile, and hardware count; prefer goodput (requests meeting a latency target) over raw token counts.
 
-## Sources
+### Sources
 
 - Kwon et al., "Efficient Memory Management for Large Language Model Serving with PagedAttention" (the vLLM paper), SOSP 2023 — [arxiv.org/abs/2309.06180](https://arxiv.org/abs/2309.06180)
 - Zhong et al., "DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving," OSDI 2024 — [arxiv.org/abs/2401.09670](https://arxiv.org/abs/2401.09670)

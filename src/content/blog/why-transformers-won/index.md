@@ -3,7 +3,7 @@ title: 'Why Transformers Won: Parallelism Beat Recurrence'
 description: 'How attention changes training dependencies and parallel computation, with complexity equations and the limits of the comparison with recurrence.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'tf-3'
 order: 10
 series: "llm-basics"
@@ -12,11 +12,19 @@ topic: "Transformer"
 tags: ['transformer', 'parallelism', 'hardware']
 ---
 
+## Overview
+
+![Concept overview: Why Transformers Won: Parallelism Beat Recurrence](./section-overview.png)
+
 12 hours on 8 GPUs. That's what it took to train the original Transformer's base model in 2017, and it beat Google's production recurrent translation system, which had burned roughly **7 times the compute** to reach a *lower* score (3.3×10¹⁸ FLOPs and 27.3 BLEU versus 2.3×10¹⁹ FLOPs and 24.6, by the paper's own accounting).
 
 Better quality for a seventh of the compute is a nice result. It is not, by itself, a revolution; architectures leapfrog each other all the time. The revolution was hiding in *why* the numbers came out that way, and the "Attention Is All You Need" authors said it plainly in their abstract: the new model was "more parallelizable." This article is about that 1 word, because it, not attention, is the real answer to why every frontier model today is a Transformer.
 
-## The 2017 context: recurrence ruled, and it crawled
+## Deep dive
+
+### The 2017 context: recurrence ruled, and it crawled
+
+![Deep dive: The 2017 context: recurrence ruled, and it crawled](./deep-dive-component-01.png)
 
 Rewind to early 2017. The state of the art in language was the LSTM (the gated recurrent network [from 2 articles back](/blog/rnn-lstm-and-the-wall/)), usually with an attention mechanism bolted on so the decoder could glance back at the source sentence. Google Translate's 2016 overhaul (GNMT) was exactly this: 8 layers of LSTMs plus attention, trained on ~96 GPUs for days per language pair.
 
@@ -26,10 +34,7 @@ Why would you want it to go? An LSTM has a structural property that no clevernes
 
 A GPU is precisely the wrong machine for long dependency chains. It's a throughput device: tens of thousands of small arithmetic units that are only fast when you hand them 1 enormous, internally independent job, ideally a big matrix multiplication. Hand a GPU a chain of 2,048 tiny dependent steps and it idles between links, using a sliver of its silicon. This mismatch is old news, and it has a name worth knowing: Sara Hooker calls it the **hardware lottery** — research ideas win or lose partly on how well they fit the machines of their era. [CNNs won the 2012 lottery](/blog/cnn-how-machines-learned-to-see/) because convolutions map beautifully onto GPUs; AlexNet was 2 gaming cards exploiting that fit. In 2017 the Transformer bought a ticket for the same draw.
 
-![Deep dive: The 2017 context: recurrence ruled, and it crawled](./deep-dive-component-01.png)
-
-
-## What "parallelizable" actually means here
+### What "parallelizable" actually means here
 
 The Transformer processes a sequence [as 1 batch of matrix multiplications](/blog/transformer-architecture-in-one-picture/): every token's query-key comparisons happen simultaneously, every token's feed-forward pass happens simultaneously. Positions can be processed together within each sublayer, but projections, attention scores, softmax, and value aggregation still have dependencies. Layers also depend on prior layers — a chain as long as the network is deep, not as long as the document.
 
@@ -41,7 +46,9 @@ The paper itself compresses the argument into a small table, and it's worth redr
 
 2 columns matter. **Sequential operations**: O(n) for recurrence, O(1) for self-attention — the dependency-chain argument above. **Maximum path length**: how many hops information needs to travel between 2 tokens. In an RNN a fact from token 3 reaches token 2,000 only by surviving 1,997 rewrites of the hidden state, which is [why gradients vanish](/blog/rnn-lstm-and-the-wall/). In self-attention every token is 1 hop from every other, so the learning signal for long-range dependencies arrives intact. 1 design choice, 2 payoffs: the hardware runs full tilt, *and* the optimization problem gets easier.
 
-## A worked example: counting the chain
+### A worked example: counting the chain
+
+![Deep dive: A worked example: counting the chain](./deep-dive-component-02.png)
 
 Concrete numbers, small enough to check by hand. Take 1 training document of 2,048 tokens, and 2 models of similar size: an LSTM with hidden width 1,024, and a 24-layer Transformer of width 1,024.
 
@@ -51,10 +58,7 @@ Concrete numbers, small enough to check by hand. Take 1 training document of 2,0
 
 1 more check you can do by hand: the paper says base-model training took 12 hours on 8 P100 GPUs and cost ~3.3×10¹⁸ FLOPs. A P100 peaks near 10¹³ FLOPs/second, so 8 × 43,200 s × 10¹³ ≈ 3.5×10¹⁸. The proximity of these rounded values is not a utilization measurement: the applicable precision peak, counted operations, and training accounting must be established. An RNN could burn the same 12 hours without ever coming close to that FLOP count, because it can't keep the machines fed.
 
-![Deep dive: A worked example: counting the chain](./deep-dive-component-02.png)
-
-
-## Distinguish total work from dependent work
+### Distinguish total work from dependent work
 
 A parallel execution has total useful work $$W$$ and a critical chain of $$S$$ dependent stages. If attainable work rate is $$C$$ and each stage requires at least $$\tau$$ seconds, a simplified lower bound is
 
@@ -68,7 +72,7 @@ The Transformer changes dependencies across positions within a layer during trai
 
 This is more precise than saying recurrence cannot use a large cluster. Data parallelism, larger batches, persistent recurrent kernels, and pipeline methods can exploit substantial hardware. The difference is which dependencies remain inside each example. Compared with recurrent baselines, attention trades more pairwise work and memory for a shorter position-wise critical path. Its advantage depends on sequence length, batching, implementation, and quality, rather than following from an unlimited claim that all Transformer operations run at once.
 
-## Going deeper: scaling laws made compute the currency
+### Going deeper: scaling laws made compute the currency
 
 Parallel training would be merely convenient if bigger models weren't better. What made it *decisive* came 3 years later: the **scaling laws**. Kaplan and colleagues showed in 2020 that a language model's loss falls as a smooth, predictable power law in parameters, data, and training compute, across many orders of magnitude; the Chinchilla follow-up refined the recipe (scale model and data together). The strategic meaning: capability became *purchasable*. Spend 10× the compute, get a reliably better model — no new idea required.
 
@@ -76,7 +80,9 @@ Once loss is a function of compute, the only architectures that matter are ones 
 
 So the causal chain behind "Transformers won" runs: scaling laws made compute the currency of capability; parallelism determines how much compute an architecture can spend; the Transformer is the most parallel sequence architecture we found; therefore the Transformer collects the winnings. Attention is the mechanism, but parallelism is the *reason*.
 
-## The honest bill: what the trade cost
+### The honest bill: what the trade cost
+
+![Deep dive: The honest bill: what the trade cost](./deep-dive-component-03.png)
 
 Subtraction has a price, and it's fair to state it as plainly as the win.
 
@@ -89,7 +95,7 @@ Subtraction has a price, and it's fair to state it as plainly as the win.
 
 The field judged the trade obviously worth it: training is where the capability is bought, and quadratic-but-parallel beats linear-but-serial whenever compute is the constraint.
 
-## Common misconceptions
+### Common misconceptions
 
 **"Transformers won because attention understands language better."** Attention predates the Transformer by 3 years and was already inside the recurrent systems it dethroned; GNMT had attention. The 2017 novelty was *removing recurrence*, and the paper's stated motive was parallelization. Tellingly, the other strong 2017 contender, convolutional sequence-to-sequence (ConvS2S), made the same bet (no recurrence, parallel training) with a different mechanism. The common denominator of that generation's winners was hardware fit, not any 1 mechanism.
 
@@ -97,19 +103,19 @@ The field judged the trade obviously worth it: training is where the capability 
 
 **"The Transformer is simply the best architecture, full stop."** It's the best fit *for this hardware regime*. On a machine that rewarded long serial chains — imagine cheap, fast single-thread silicon instead of wide matmul engines — the trade would score differently, and the hardware-lottery argument says we'd likely be scaling something else. Architectures don't win in the abstract; they win on the machines that exist. The dependency runs both ways now: [chips are redesigned around the Transformer](/blog/blackwell-to-rubin-memory-math/) as much as models are designed around chips.
 
-## The bigger picture: compute as destiny
+### The bigger picture: compute as destiny
 
 This closes the Transformer topic, and it's worth saying what kind of story it turned out to be. Not primarily a story about linguistics, or even about [attention's elegant mechanics](/blog/attention-in-plain-words/) — a story about *economics*: the architecture that could turn dollars into FLOPs into capability at the steepest rate won, exactly as [the GPU had crowned CNNs](/blog/cnn-how-machines-learned-to-see/) a decade earlier. If you remember 1 sentence from this whole topic, make it this: **the Transformer won because it made training embarrassingly parallel, at the exact moment scaling laws made parallel compute the price of intelligence.**
 
 It also sets up everything that follows. Given an architecture that can absorb any amount of compute, the questions become operational: what data do you feed it, what does a 10²⁵-FLOP training run actually look like, how does a raw next-token predictor become a helpful assistant, and what does it cost to serve? That's the LLM lifecycle — pretraining, fine-tuning, alignment, inference — and it's where this series goes next.
 
-## Takeaway
+## Conclusion
 
 - The Transformer's decisive property is a short critical path: training work is a few hundred huge matmuls per document instead of thousands of tiny dependent steps, so thousands of GPUs can be kept busy at once. Recurrence caps that spend structurally.
 - Scaling laws turned compute into the currency of capability, which promoted "parallelizable" from an implementation detail to the kingmaking property of architectures.
 - The win wasn't free: attention costs grow with the square of context length, and generation is still 1 token at a time — the 2 facts that define the efficiency and serving battles covered elsewhere on this blog.
 
-## Sources
+### Sources
 
 - Vaswani et al. (2017). ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762) — training-cost comparisons from Table 2; complexity figure redrawn from Table 1
 - Wu et al. (2016). ["Google's Neural Machine Translation System"](https://arxiv.org/abs/1609.08144) (GNMT, the recurrent baseline)

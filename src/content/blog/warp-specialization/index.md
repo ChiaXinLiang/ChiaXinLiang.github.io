@@ -12,16 +12,17 @@ topic: "Kernel Pipelines and Orchestration"
 tags: [cuda, kernels, gpu]
 ---
 
+## Overview
+
+![Concept overview: Assembly Lines Inside a GPU: Warp Specialization. A cutaway GPU shared-memory tile and tensor compute units with a producer warp loading tiles into alternating buffers and consumer warps computing from ready tiles.](./section-overview.png)
+
 FlashAttention-3 sustains roughly 740 TFLOPS of FP16 attention on an H100, about 75% of the chip's rated tensor-core peak, and in the kernel that does it, a third of the warps never execute a single multiply. They only fetch data. Other warps only compute. A few handle stores. This is not an accident of scheduling; it is the design. The fastest kernels on Hopper and Blackwell are organized like factory assembly lines, with each warp holding down 1 station, and the pattern has a name: warp specialization.
 
 If you profile a naive kernel and a warp-specialized 1 doing the same math, the difference is not the instruction count. It is what each warp is *waiting* on. This article is about why splitting warps into producers and consumers wins, how the hardware makes it cheap, and how to reason about the speedup with pencil and paper.
 
-## From "every warp does everything" to stations on a line
+## Deep dive
 
-![Concept overview: Assembly Lines Inside a GPU: Warp Specialization. A cutaway GPU shared-memory tile and tensor compute units with a producer warp loading tiles into alternating buffers and consumer warps computing from ready tiles.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### From "every warp does everything" to stations on a line
 
 The classic CUDA mental model is homogeneous: you launch a block of threads, every warp runs the same loop, and each iteration loads a tile from global memory to shared memory, syncs, computes on it, syncs again. Latency is hidden statistically. When 1 warp stalls on a memory load, the SM's schedulers pick another warp that is ready. This works, and for years the tuning advice was simply "raise occupancy so the scheduler has choices." (For why GPUs are built around this throughput trade, see [CPU vs GPU](/blog/cpu-vs-gpu-latency-vs-throughput-machines/).)
 
@@ -39,7 +40,9 @@ With those pieces, the natural kernel shape is a bounded buffer straight out of 
 
 1 more Hopper feature makes the split efficient rather than merely tidy: **register reallocation**. `setmaxnreg` lets warpgroups resize their register allocation at runtime. Producer warps, which only babysit TMA descriptors, shrink to as few as 24-40 registers each; consumer warpgroups grow to 224-240 to hold giant accumulator tiles. In FlashAttention-3's FP16 forward kernel the producer warpgroup drops to 24-32 registers while each consumer warpgroup takes ~160-240, which is exactly how the kernel affords 2 consumer warpgroups' worth of accumulators without spilling. The deadweight of "every warp carries every job's registers" is gone.
 
-## A worked example you can check by hand
+### A worked example you can check by hand
+
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
 
 Take a Hopper-class GEMM tile and put real numbers on the pipeline. Say each thread block owns a 128×256 output tile of an FP16 matrix multiply, and iterates over the K dimension in slices of 64.
 
@@ -73,10 +76,9 @@ With n equal to 8, l equal to 0.5 microseconds, and c equal to 0.56 microseconds
 
 Ring depth addresses latency as well as throughput. A stage must not be overwritten until every consumer has finished reading it. Use transaction-counted full barriers and consumer-completion empty barriers, including phase changes when the ring wraps. Measure stalls before increasing the stage count: each 48-KiB buffer consumes shared memory, potentially reducing block residency. Multicast improves duplicate-transfer cost where blocks genuinely share operands, while specialization improves instruction ownership and overlap. Compare those mechanisms separately to a buffered generalist baseline, since asynchronous copies were already possible before Hopper.
 
-![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
+### Going deeper: persistence, clusters, and ping-pong
 
-
-## Going deeper: persistence, clusters, and ping-pong
+![Deep dive: Going deeper: persistence, clusters, and ping-pong](./deep-dive-component-02.png)
 
 Warp specialization solves overlap *within* a tile. 3 more mechanisms extend the assembly line across tiles and across SMs.
 
@@ -89,10 +91,9 @@ Warp specialization solves overlap *within* a tile. 3 more mechanisms extend the
 
 On Blackwell the trend goes further, not back. The fifth-generation tensor core (`tcgen05`) takes its accumulators out of the register file into dedicated tensor memory (TMEM), and an MMA is launched by a *single thread*, with completion again signaled through barriers. Kernels grow more roles: an MMA-issue warp, TMA load warps, epilogue warps moving TMEM to registers to global. The assembly line is winning so decisively that the hardware is being reshaped around it.
 
-![Deep dive: Going deeper: persistence, clusters, and ping-pong](./deep-dive-component-02.png)
+### Common misconceptions
 
-
-## Common misconceptions
+![Deep dive: Common misconceptions](./deep-dive-component-03.png)
 
 **"High occupancy is how you hide latency, so specialized kernels with few warps must be leaving performance on the table."** Occupancy hides latency by giving the scheduler many interchangeable warps; specialization hides it structurally, by making the copy engine and tensor core run concurrently by construction. A CUTLASS Hopper GEMM often runs 1 block of a few 100 threads per SM, single-digit-percent "occupancy" by the classic metric, at 90%+ of peak FLOPS. The registers and shared memory that low occupancy frees up are precisely what the fat accumulators and deep tile rings consume. Chasing the occupancy number would make the kernel slower.
 
@@ -100,19 +101,19 @@ On Blackwell the trend goes further, not back. The fifth-generation tensor core 
 
 **"TMA is basically a faster memcpy."** TMA's bandwidth is the same HBM and L2 bandwidth everyone else gets. What it removes is the *instruction and register cost* of copying: 1 thread issues 1 descriptor instead of 128 threads each computing addresses, predicating bounds, and issuing loads per tile, and the engine handles swizzling into bank-conflict-free layouts plus multicast without each consumer issuing an independent copy. On a kernel that was instruction-issue-bound or register-spilling, that is worth far more than any bandwidth delta; on a purely bandwidth-bound kernel, TMA alone speeds up almost nothing.
 
-## Why this pattern matters beyond 1 kernel
+### Why this pattern matters beyond 1 kernel
 
 Warp specialization is the microcosm of a theme that runs through this whole series: peak silicon is only reachable when you stop treating execution units as 1 pool and start choreographing them. DeepSeek's DeepGEMM and DeepEP kernels, which we covered in [When a Kernel Cuts API Prices 50%](/blog/when-a-kernel-cuts-api-prices/), lean on exactly these Hopper mechanisms, down to SMs partitioned into communication and compute roles. The disaggregation story repeats at every scale: prefill and decode get separate warps here, separate SMs in DeepEP, and [separate chips in Rubin CPX](/blog/prefill-gets-its-own-chip-rubin-cpx/). And it is a big part of why LLM-generated kernels still trail experts on [KernelBench](/blog/a-year-of-kernelbench/)-style tasks: writing a correct producer-consumer pipeline with transaction-counted barriers and register reallocation is systems design, not loop translation.
 
 For a performance engineer the practical takeaway is diagnostic. When Nsight Compute shows tensor pipes under 50% busy while memory is not saturated either, the kernel usually has an overlap problem, not a resource problem, and the fix is structural: give the loads their own warps, put barriers between the stations, and let the line run.
 
-## Takeaway
+## Conclusion
 
 - Hopper's TMA and async WGMMA turn loading and computing into independent hardware activities; warp specialization is the software shape that exploits it — producer warps feed a barrier-guarded shared-memory ring, consumer warpgroups drain it, and `setmaxnreg` shifts registers to where the accumulators live.
 - The win is arithmetic you can do by hand: a serial kernel pays load + compute per stage, a specialized pipeline pays max(load, compute); with TMA multicast and L2 reuse pulling effective load below compute time, tensor cores run at ~90% duty cycle instead of ~50%.
 - Persistent blocks, thread block clusters with DSMEM, and ping-pong consumer scheduling extend the same overlap across tiles, across SMs, and across compute units — the pattern behind FlashAttention-3's 740 TFLOPS and near-peak CUTLASS GEMMs.
 
-## Sources
+### Sources
 
 - Shah, Bikshandi, Zhang, Thakkar, Ramani, Dao — *FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-precision* — https://arxiv.org/abs/2407.08608
 - NVIDIA Developer Blog — *NVIDIA Hopper Architecture In-Depth* (TMA, thread block clusters, DSMEM, async barriers) — https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/

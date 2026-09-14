@@ -3,7 +3,7 @@ title: "Case File: Long Chats Get Slower and Slower"
 description: "Model KV-cache growth, distinguish capacity from attention traffic, and test why long conversations slow down even when weights and GPU utilization remain stable."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'case-7'
 order: 23
 series: "llm-serving"
@@ -12,11 +12,17 @@ topic: "Inference Methods"
 tags: [troubleshooting, inference, performance]
 ---
 
+## Overview
+
+![Concept overview: Case File: Long Chats Get Slower and Slower](./section-overview.png)
+
 A conversation streams quickly at its first turn and slowly at its twentieth. The model checkpoint, GPU, and decoding parameters are unchanged. Restarting the conversation restores the earlier speed. That pattern suggests context-dependent work, but it does not yet distinguish longer prompt prefill, larger decode attention, cache recomputation, or a client that repeatedly sends unnecessary history.
 
 This case follows a hypothetical service whose contexts grow from 4096 to 32768 tokens. Its operators see both higher first-token latency on later turns and wider gaps between generated tokens. Treat those as separate symptoms. The first concerns processing a newly submitted prompt; the second concerns repeatedly consulting historical keys and values during decode. Both depend on context, but their costs and remedies differ.
 
-## Count the context the server actually sees
+## Deep dive
+
+### Count the context the server actually sees
 
 Conversation length is not the same as the number of visible user messages. The submitted prompt may include system instructions, earlier assistant outputs, tool results, retrieved documents, hidden formatting, and duplicated transcript sections. Tokenize the final serialized request with the model's tokenizer and log that token count without logging private content.
 
@@ -29,7 +35,9 @@ Record input and output lengths per turn and per request cohort. Later turns may
 
 *Original explanatory schematic based on the standard KV-cache mechanism; context sizes are illustrative.*
 
-## Derive the raw KV-cache size
+### Derive the raw KV-cache size
+
+![Deep dive: Derive the raw KV-cache size](./deep-dive-component-03.png)
 
 For an autoregressive transformer, each layer stores historical key and value vectors. Define L as the layer count, H_kv as the key/value head count, d as the per-head dimension, s_kv as bytes per stored cache element, and C_i as the retained token count of sequence i. The raw cache requirement is:
 
@@ -45,7 +53,7 @@ For an illustrative model with 32 layers, 8 KV heads, dimension 128, and BF16 ca
 
 Suppose a GPU has 80 GiB usable in our hypothetical budget, weights and persistent buffers consume 20 GiB, and another 8 GiB is reserved for workspaces and operating margin. The remaining 52 GiB supports at most 13 4-GiB caches by raw arithmetic. Block fragmentation or additional buffers can lower that number. 16 long conversations cannot be admitted at their full length under these assumptions, even if the same server comfortably supports 16 short ones.
 
-## Capacity and speed are different problems
+### Capacity and speed are different problems
 
 KV growth can slow a service before it runs out of memory. Full attention for the next generated token must compare its query with historical keys and combine the corresponding values. The per-token attention work and data consulted therefore grow with the retained context. Weight memory remains roughly fixed; the history does not.
 
@@ -64,7 +72,9 @@ The calculation also reveals a capacity violation under the previous 52-GiB cach
 
 *Original calculation figure. The model dimensions are hypothetical and the cache equation is stated in the text.*
 
-## Going deeper: why a generation gets more expensive
+### Going deeper: why a generation gets more expensive
+
+![Deep dive: Going deeper: why a generation gets more expensive](./deep-dive-component-01.png)
 
 Let a request start with C prompt tokens and generate G output tokens. Under full attention, the context lengths consulted across its decode steps are approximately C, C+1, through C+G−1, depending on indexing conventions. Their sum is:
 
@@ -89,10 +99,7 @@ The intercept t_0 collects exposed work not represented by the traffic estimate.
 
 Fit that trend using several context lengths while holding batch, dtype, and kernel path fixed. A smooth measured slope supports the history-traffic explanation; a sudden jump accompanied by preemptions supports a separate capacity mechanism. A changed attention kernel can also change the slope or intercept. Prefix reuse reduces new prefill work but not this full-attention context term. Shortening history changes the information supplied to the model, so accept that method only with task-quality checks as well as a faster latency curve.
 
-![Deep dive: Going deeper: why a generation gets more expensive](./deep-dive-component-01.png)
-
-
-## Distinguish growth from memory-pressure amplification
+### Distinguish growth from memory-pressure amplification
 
 Plot inter-token latency against retained context at fixed batch size. A gradual increase without preemptions supports the attention-growth explanation. Abrupt jumps near a cache threshold suggest capacity effects layered on top. Correlate those jumps with available cache blocks, active requests, and preemption or recomputation events.
 
@@ -102,7 +109,9 @@ Inspect prefix-cache hit behavior on later turns separately. A low hit rate can 
 
 Also check whether the client resends duplicated history. For example, adding a summary while retaining the complete transcript can increase the prompt instead of reducing it. A serialization test that counts tokens before and after the proposed change is a cheap way to catch that mistake.
 
-## Remedies and what each one changes
+### Remedies and what each one changes
+
+![Deep dive: Remedies and what each one changes](./deep-dive-component-02.png)
 
 Bound the context intentionally when the product permits it. A rolling window reduces retained attention history but discards older information. Summarization can preserve selected facts with fewer tokens, yet it can omit details or introduce errors. Evaluate task quality on long conversations, not merely token counts and speed.
 
@@ -119,10 +128,7 @@ Prefix caching helps repeated prompt processing; paged allocation helps cache ma
 
 Resource-aware admission also needs to reserve growth, not just the cache that exists at the instant a request arrives. A request beginning with a short prompt can generate a long answer or continue for many turns. If admission consumes every currently free cache block, several accepted requests can grow into a capacity crisis together. Use an output limit, an explicit context limit, or a conservative growth allowance when estimating the request commitment. Measure how often that allowance is too small and how much unused capacity it leaves, then tune it against the service target rather than guessing once.
 
-![Deep dive: Remedies and what each one changes](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 “The model remembers the conversation for free.” The serving system must supply or retain the relevant state. More history consumes cache capacity and often more decode work. There is no constant-size hidden memory implied by a chat interface.
 
@@ -130,19 +136,19 @@ Resource-aware admission also needs to reserve growth, not just the cache that e
 
 “Paging makes the cache smaller.” Paging improves allocation and can support sharing; it does not change the raw tensor size for an unshared context. Cache quantization, restricted attention, or shorter retained history are different mechanisms.
 
-## Verify the improvement with quality and latency
+### Verify the improvement with quality and latency
 
 Save a matched-context experiment with fixed batch sizes and generation limits, plus a realistic multi-turn test. Compare cache occupancy, preemptions, first-token latency, inter-token latency, and completed requests within the service target. For truncation, summarization, or retrieval, include factual recall and task-completion checks from the affected long conversations.
 
 Read [KV cache explained](/blog/kv-cache-explained/) for the mechanism and [GPU memory budgeting](/blog/gpu-memory-math-will-it-fit/) for capacity planning. The case closes when context growth is visible in the resource model, threshold effects are controlled, and any reduction in retained history preserves the product's required behavior.
 
-## Takeaway
+## Conclusion
 
 - Count serialized, reused, and retained tokens separately.
 - Model both raw KV capacity and the history consulted during decode.
 - Treat context reduction as a quality-affecting product change, and validate it alongside serving performance.
 
-## Sources
+### Sources
 
 - [vLLM optimization documentation](https://docs.vllm.ai/en/stable/configuration/optimization/), cache pressure and preemption.
 - [Hugging Face Transformers cache documentation](https://huggingface.co/docs/transformers/en/kv_cache), cache implementations and supported tradeoffs.

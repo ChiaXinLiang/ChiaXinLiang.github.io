@@ -3,7 +3,7 @@ title: 'AI Optimizing AI: Kernels Written by Models, for Models'
 description: "AlphaTensor's 47 multiplications, R1-generated kernels, and why 100T-parameter serving forces the optimization loop to close on itself."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'future-1'
 order: 16
 series: "llm-serving"
@@ -12,11 +12,19 @@ topic: "AI for Infrastructure"
 tags: [kernels, automation, future]
 ---
 
+## Overview
+
+![Concept overview: AI Optimizing AI: Kernels Written by Models, for Models](./section-overview.png)
+
 For 53 years, the fastest known way to multiply 2 4x4 matrices took 49 scalar multiplications, a bound set by recursively applying Volker Strassen's 1969 trick. In October 2022, DeepMind's AlphaTensor found an algorithm that does it in 47 over the finite field F₂ (binary arithmetic modulo 2), published in Nature using a human-designed game, reward, and search system. Nobody asked the agent to be clever. It was rewarded for winning a single-player game whose legal moves happened to encode every possible matrix multiplication algorithm, and 47 is simply where the search landed.
 
 That result is the cleanest early specimen of a pattern that, 3 years later, runs through kernel generation, serving configuration, and increasingly the entire performance stack: a learned prior proposes, a mechanical verifier disposes, and search does the work in between. This article is about where the whole discipline is heading, which is that the software models run on is increasingly written and tuned by models.
 
-## The pattern: prior, verifier, search
+## Deep dive
+
+### The pattern: prior, verifier, search
+
+![Deep dive: The pattern: prior, verifier, search](./deep-dive-component-03.png)
 
 Strip any of these systems down and you find the same 3 parts.
 
@@ -37,7 +45,9 @@ And KernelBench, the Stanford benchmark that made the whole area measurable, chr
 
 The honest historical footnote is that machine-searched performance is not new. ATLAS autotuned BLAS in the late 1990s, FFTW planned transforms by empirical search, and Halide and TVM built careers on schedule autotuning. What changed is the proposal distribution. An autotuner permutes parameters inside a template a human wrote. A code model can emit the template itself, and it can read a profiler dump as text and respond to it. The search space stopped being enumerable, and that is precisely when it started reaching results humans hadn't already parameterized.
 
-## A worked example: why 100T parameters forces the issue
+### A worked example: why 100T parameters forces the issue
+
+![Deep dive: A worked example: why 100T parameters forces the issue](./deep-dive-component-01.png)
 
 You could read everything above as a curiosity: nice results, modest speedups, experts still better at the hard parts. So let me do the arithmetic that turns it from a curiosity into a requirement. The question: what does it take to serve a 100-trillion-parameter model?
 
@@ -51,11 +61,9 @@ That number is not science fiction. Kimi K2, an open-weights MoE you can downloa
 
 An exhaustive manual sweep is impractical. Constraint pruning, cost models, classical autotuning, and learned proposals can all reduce the required trials; the learned systems described here are promising additions: priors plus verifiers plus search, running continuously, re-tuning as traffic shifts and hardware generations turn over. At 100T scale, AI optimizing AI stops being a research direction and becomes the deployment plan.
 
+### Going deeper: the verifier is the product
 
-![Deep dive: A worked example: why 100T parameters forces the issue](./deep-dive-component-01.png)
-
-
-## Going deeper: the verifier is the product
+![Deep dive: Going deeper: the verifier is the product](./deep-dive-component-02.png)
 
 If the pattern is prior-verifier-search, where does the leverage concentrate? Not where you might expect.
 
@@ -76,10 +84,7 @@ k is a candidate kernel, t measured runtime, and the tolerances define the numer
 
 Random fuzzing is evidence within a test distribution, not proof of functional equality. Include edge shapes, strides, aliasing, cancellation-sensitive values, and repeated nondeterministic runs where relevant. Keep hidden tests outside the proposal loop to reduce harness exploitation. Separate search-set speed from held-out shapes and devices, and measure compilation plus search cost when judging net benefit. AlphaTensor's 47-multiplication result concerns arithmetic over the finite field F2; it does not supply an interchangeable 47-multiply floating-point GPU kernel. The practical innovation is learned proposals over broader algorithms, constrained by a verifier humans still have to specify.
 
-![Deep dive: Going deeper: the verifier is the product](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"AI-designed compute kernels are a post-LLM invention."** Machine search over performance-critical code is nearly 30 years old: ATLAS tuned BLAS by empirical search in the 1990s, FFTW planned FFTs the same way, and AutoTVM made learned cost models mainstream in 2018. What LLMs added is a proposal distribution that is not confined to a hand-written template, plus the ability to consume compiler errors and profiler text as feedback. The loop is old. The prior escaped the template. That is the actual news, and it is enough.
 
@@ -87,7 +92,7 @@ Random fuzzing is evidence within a test distribution, not proof of functional e
 
 **"This automates the performance engineer out of a job."** It automates the bottom of the job and inflates the top. What gets absorbed: operator fusion, boilerplate kernels, config sweeps, the re-derivation of known techniques on new hardware. What gets more valuable: defining correctness for systems whose failure modes are statistical, building verifiers that an RL loop cannot cheat, and deciding which of the 311,040 configurations' objective function actually matches the business. Every automated layer so far has moved the human up 1 level of abstraction. There is no evidence this layer terminates the sequence, and the reward-hacking record is direct evidence it does not.
 
-## Closing the optimization loop
+### Closing the optimization loop
 
 Look at what the flywheel does once it closes. A model generates a better kernel; the kernel makes serving cheaper; cheaper serving means more search and more RL steps per dollar; more search trains a better kernel-generator. DeepSeek already demonstrated the economic half of this loop with human-written kernels, when [a few hundred lines of PTX helped cut API prices in half](/blog/when-a-kernel-cuts-api-prices/). The automation half is what 2025's results sketched in outline.
 
@@ -96,13 +101,13 @@ Which brings me to the metric this series has been circling throughout these art
 
 The systems in this article are the first ones that can turn those levers without us. What they cannot do, and what nothing in the current evidence suggests they will soon do, is decide which direction to turn them, define what counts as correct when they are turned, or notice that the ratio being optimized has stopped measuring what matters. I opened this series asking [what an ML performance engineer actually does](/blog/what-does-an-ml-performance-engineer-do/). Here at the end, the answer has sharpened rather than changed: the job was never writing kernels. The job is owning the number the kernels serve. The machines are coming for the typing, and they are going to be very good at it, and the number still needs an owner.
 
-## Takeaway
+## Conclusion
 
 - Every headline system in AI-for-systems shares 1 architecture: a learned prior proposes, a mechanical verifier scores, and search closes the loop; the 2025 shift is that the prior became a general code model that can escape hand-written template spaces.
 - The 100T-parameter arithmetic makes automation load-bearing: 56 TB of NVFP4 weights across 5 or more NVL72 racks, and a coarse tuning grid of 311,000+ configurations costing years of pod time to sweep, put optimal configs permanently beyond hand-tuning.
 - The leverage is migrating from priors to verifiers: search optimizes exactly what you measure (AlphaTensor produced different algorithms per hardware target when the reward changed), so defining unhackable correctness and the right objective is the durable human job.
 
-## Sources
+### Sources
 
 - Fawzi et al., "Discovering faster matrix multiplication algorithms with reinforcement learning," Nature 610 (2022). https://www.nature.com/articles/s41586-022-05172-4
 - NVIDIA Developer Blog, "Automating GPU Kernel Generation with DeepSeek-R1 and Inference Time Scaling" (Feb 2025, vendor self-reported results). https://developer.nvidia.com/blog/automating-gpu-kernel-generation-with-deepseek-r1-and-inference-time-scaling/

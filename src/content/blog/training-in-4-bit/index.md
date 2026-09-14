@@ -3,7 +3,7 @@ title: 'Training in 4-Bit: How Low Can Pretraining Actually Go?'
 description: 'A 12B model trained on 10 trillion tokens with 4-bit matrix operations: numerical limitations, scaling choices, and the reported training evidence.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'fmt-2'
 order: 7
 series: "efficient-ai"
@@ -12,13 +12,19 @@ topic: "Precision"
 tags: ['precision', 'training', 'quantization']
 ---
 
+## Overview
+
+![Concept overview: Training in 4-Bit: How Low Can Pretraining Actually Go?](./section-overview.png)
+
 16 numbers, 1 shared scale factor, 4 bits each. In late 2025, NVIDIA researchers pretrained a 12-billion-parameter model on 10 trillion tokens with its matrix multiplies running in that format, and the loss curve sat on top of the FP8 baseline for the entire run ([arXiv 2509.25149](https://arxiv.org/abs/2509.25149)). That sentence would have been dismissed as fantasy 3 years ago.
 
 Quantizing a model for *inference* is old news. You train in high precision, freeze the weights, and squeeze them into fewer bits for serving; OpenAI now ships gpt-oss natively in 4-bit MXFP4, straight from the factory. Quantizing *training* is a different problem entirely, because training is a feedback loop. Every rounding error you make in the forward pass gets baked into the gradients, fed back through the optimizer, and compounded across 1 million steps. Inference quantization is taking a photo with a cheap lens. Training quantization is building the camera out of cheap lenses and hoping the picture still converges.
 
 This article is about why that loop breaks at 4 bits, and about the specific fixes that made a 10-trillion-token run survive it.
 
-## What 4 bits can actually hold
+## Deep dive
+
+### What 4 bits can actually hold
 
 Start with the raw material. The FP4 format used here (E2M1: 1 sign bit, 2 exponent bits, 1 mantissa bit) can represent exactly 16 values:
 
@@ -36,7 +42,9 @@ Smaller blocks mean each scale factor only has to cover 16 neighbors instead of 
 
 If you want the blow-by-blow of the format war itself, that was the previous article in this series. Here we care about what happens when you push these formats into the training loop.
 
-## A worked example you can check by hand
+### A worked example you can check by hand
+
+![Deep dive: A worked example you can check by hand](./deep-dive-component-03.png)
 
 Take 1 NVFP4 block: 16 weights from some attention layer. Suppose the largest magnitude among them is 0.048. The encoder picks the block scale so that this maximum lands on 6, the top of the FP4 range:
 
@@ -71,7 +79,9 @@ The outlier itself encodes perfectly. Everything else in the block gets crushed:
 
 Failure mode number 2 is subtler and belongs to the gradients. As training converges, gradient magnitudes shrink. Sooner or later, huge numbers of gradient values are smaller than half the smallest representable step in their block. Round-to-nearest sends every one of them to 0, deterministically, step after step. The optimizer goes blind to exactly the fine corrections that late-stage training is made of. In [how models learn](/blog/how-models-learn/) we walked through why gradient descent lives or dies on those accumulated small signals; 4-bit round-to-nearest quietly deletes them.
 
-## Going deeper: the 3 fixes
+### Going deeper: the 3 fixes
+
+![Deep dive: Going deeper: the 3 fixes](./deep-dive-component-01.png)
 
 The NVFP4 pretraining recipe ([arXiv 2509.25149](https://arxiv.org/abs/2509.25149)) is essentially a targeted counter to each failure mode.
 
@@ -86,10 +96,7 @@ That last point deserves emphasis: even in a "4-bit training" run, the skeleton 
 
 With all 3 fixes in place, the paper's headline result: a 12B hybrid Mamba-Transformer pretrained on 10T tokens in NVFP4 matches the FP8 baseline's loss curve throughout, with downstream task accuracy comparable at the end (MMLU-pro within about a point). This is the first public demonstration of 4-bit pretraining at that token scale, and it turns "can it be done" into a settled question.
 
-![Deep dive: Going deeper: the 3 fixes](./deep-dive-component-01.png)
-
-
-## What stochastic rounding actually guarantees
+### What stochastic rounding actually guarantees
 
 Suppose a normalized scalar $$x$$ lies between adjacent representable values $$a$$ and $$b$$. Stochastic rounding chooses the upper value with probability
 
@@ -107,7 +114,7 @@ These are normalized units; multiplying by a block scale multiplies variance by 
 
 This explains the method more precisely than saying quantization errors cancel. Deterministic rounding can systematically erase small updates; stochastic rounding preserves their expectation at the cost of added variance. Block scaling and outlier handling control the range, while the optimizer and accumulation precision determine how noise propagates. Training quality must still be checked against a higher-precision baseline across seeds and downstream tasks. Unbiased local rounding is a useful mechanism, not a convergence theorem or proof that every 4-bit recipe is lossless.
 
-## Common misconceptions
+### Common misconceptions
 
 **"4-bit training means the whole model lives in 4 bits."** No. The 4-bit part is the matrix-multiply inputs: weights, activations, and gradients as they flow through the GEMMs. Master weights, optimizer states, accumulations, norms, and a few sensitive layers stay in FP32/BF16. The point is that GEMMs dominate the FLOP and memory-traffic budget, so quantizing only them still captures most of the win. A checkpoint from this run is not 4 bits per parameter on disk.
 
@@ -115,7 +122,9 @@ This explains the method more precisely than saying quantization errors cancel. 
 
 **"We already had 4-bit training: QLoRA."** Different animal. QLoRA *freezes* a 4-bit copy of a pretrained model and trains small high-precision adapter matrices on top; the 4-bit weights never receive a gradient update. It's an inference-style quantization cleverly reused to make fine-tuning fit on small GPUs. NVFP4 pretraining updates every parameter from random initialization through 10T tokens with 4-bit compute in the loop. The frozen base avoids updating its quantized weights, but adapter training still has moving activations, gradients, and its own numerical constraints.
 
-## Why this moves the cluster economics
+### Why this moves the cluster economics
+
+![Deep dive: Why this moves the cluster economics](./deep-dive-component-02.png)
 
 Follow the hardware. Blackwell tensor cores execute FP4 at 2 times the rate of FP8; Blackwell Ultra's headline 15 dense PFLOPS is an NVFP4 number. On the memory side, 4-bit tensors halve the bytes a GEMM must stream against FP8, and memory traffic, as we saw in [the Blackwell-to-Rubin memory math](/blog/blackwell-to-rubin-memory-math/), is the resource that's actually scarce this generation. A format that halves both the FLOP cost and the byte cost of the dominant kernel is, to a first approximation, a claim that the same cluster can train on 2 times the tokens in the same time and power envelope. Real speedups land below 2x, since non-GEMM work, communication, and the BF16 islands don't shrink, but the direction is unambiguous, and with grid interconnects now the binding constraint on AI buildout, tokens-per-megawatt is the metric that 4-bit training directly improves.
 
@@ -123,16 +132,13 @@ The silicon is committing in both directions. AWS's Trainium3 builds a hardware 
 
 How much lower can it go? The honest answer: below 4 bits, the 16-value grid stops looking like arithmetic and starts looking like coding theory, and today's fixes lean hard on high-precision scales and accumulators that don't shrink with the payload. 4 bits may be near the floor for this style of quantization. But "FP8 pretraining is conservative" is now a sentence you can say with a straight face, and it wasn't in 2024.
 
-![Deep dive: Why this moves the cluster economics](./deep-dive-component-02.png)
-
-
-## Takeaway
+## Conclusion
 
 - 4-bit *training* is harder than 4-bit inference because rounding errors feed back through gradients and compound; the 2 killers are outliers stretching block scales and small gradients rounding to 0 forever.
 - The NVFP4 recipe beats both with Hadamard rotations (reshape the distribution), stochastic rounding (unbiased in expectation), and selective BF16 for scales, accumulators, and a few sensitive layers — and matched FP8 loss at 12B params / 10T tokens.
 - The payoff is economic: FP4 doubles tensor-core throughput and halves GEMM memory traffic versus FP8, so validated 4-bit pretraining converts directly into tokens-per-dollar and tokens-per-megawatt, which is why Blackwell and Trainium3 are wiring it into silicon.
 
-## Sources
+### Sources
 
 - NVIDIA et al., *Pretraining Large Language Models with NVFP4* — [arXiv:2509.25149](https://arxiv.org/abs/2509.25149)
 - NVIDIA Developer Blog, *NVFP4 Trains with the Precision of 16-Bit and the Speed and Efficiency of 4-Bit* — [developer.nvidia.com](https://developer.nvidia.com/blog/nvfp4-trains-with-precision-of-16-bit-and-speed-and-efficiency-of-4-bit/)

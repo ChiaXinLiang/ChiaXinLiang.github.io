@@ -12,18 +12,19 @@ level: "beginner"
 tags: ["ai-networking", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Ethernet, InfiniBand, and RDMA: The Data Path and Its Guarantees. Two illustrated servers with application buffers, registered memory, queue pairs, NICs, and a network switch.](./section-overview.png)
+
 Ethernet, InfiniBand, and RDMA are often presented as interchangeable choices for an AI cluster. That framing mixes different layers. Ethernet and InfiniBand describe networking technologies and fabrics. Remote direct memory access describes communication semantics that allow supported adapters to access registered memory with less per-transfer involvement from a remote CPU. RDMA can operate over InfiniBand and over Ethernet through supported transports such as RoCE.
 
 Understanding the layers matters because bandwidth, reliability, ordering, and memory visibility are different properties. A link can be fast while an application uses a poor staging path. A reliable transport can deliver bytes correctly while the application launches a consumer before those bytes are safe to use.
 
 We will trace the host-buffer data path, connect it to GPU memory, and define the guarantees an application must verify. The numerical examples are explanatory calculations. Specific capabilities depend on the adapter, transport, driver, runtime, and platform.
 
-## 1. Distinguish a fabric from a programming operation
+## Deep dive
 
-![Concept overview: Ethernet, InfiniBand, and RDMA: The Data Path and Its Guarantees. Two illustrated servers with application buffers, registered memory, queue pairs, NICs, and a network switch.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Distinguish a fabric from a programming operation
 
 An Ethernet fabric supplies packet forwarding and link connectivity. IP and transport layers add addressing and communication behavior above it. RoCE provides an RDMA-capable path on supported Ethernet infrastructure; the deployment also needs the appropriate adapter and network configuration.
 
@@ -33,7 +34,9 @@ At the programming layer, verbs describe operations such as posting sends, recei
 
 Keep a diagram of the layers beside performance measurements: application operation, communication library, RDMA interface, adapter, link, and switches. An observation at one layer does not establish the implementation at every other layer. Packet counters can show network activity without proving a direct GPU-memory path.
 
-## 2. Registration makes a memory region accessible under a contract
+### 2. Registration makes a memory region accessible under a contract
+
+![Deep-dive illustration: Registration makes a memory region accessible under a contract](./deep-dive.png)
 
 An RDMA operation does not normally accept an arbitrary virtual address and make it universally reachable. Memory registration associates a supported region with the adapter's access machinery and permissions. The resulting keys and metadata participate in validating access to that region.
 
@@ -49,10 +52,9 @@ The expression assumes one registration reused for N transfers and no overlap am
 
 For an illustrative registration cost of 100 microseconds and 1000 transfers, the amortized setup is 0.1 microseconds per transfer. Registering separately for each transfer would instead add 100 microseconds each time. These values are assumptions, but the distinction explains why allocator and buffer-reuse behavior can matter in network benchmarks.
 
+### 3. Sends and one-sided operations have different participation rules
 
-![Deep-dive illustration: Registration makes a memory region accessible under a contract](./deep-dive.png)
-
-## 3. Sends and one-sided operations have different participation rules
+![Deep dive: 3. Sends and one-sided operations have different participation rules](./deep-dive-component-01.png)
 
 A send operation delivers data through a corresponding receive path. The receiver must have the appropriate resources and protocol state available. The application or communication library arranges these resources and determines how completed messages reach consumers.
 
@@ -62,7 +64,7 @@ One-sided describes the data operation, not the entire distributed protocol. The
 
 Choose the operation based on the protocol's requirements. A library can combine one-sided data movement with separate notification messages or other synchronization. Measuring the payload alone excludes that control path, so an application-level latency budget should include the signaling required for safe use.
 
-## 4. Completion is an event with a particular scope
+### 4. Completion is an event with a particular scope
 
 A completion queue reports events defined by the operation and transport. A local completion can indicate that local resources are no longer needed by a completed operation under its contract. It should not be casually interpreted as proof that a remote application has consumed the data.
 
@@ -72,7 +74,7 @@ Draw an ownership timeline: prepare the buffer, post work, wait for the required
 
 Batching and unsignaled operations can reduce completion-processing overhead in supported designs, but they require careful accounting of outstanding work and reclamation. A benchmark that minimizes notifications may measure a useful transport capability without implementing the full ownership protocol needed by a production application.
 
-## 5. Reliable delivery does not imply arbitrary cross-operation ordering
+### 5. Reliable delivery does not imply arbitrary cross-operation ordering
 
 A reliable transport can retry and preserve specified ordering properties within its supported scope. That does not establish a global order across all queue pairs, devices, streams, or memory consumers. The scope of each guarantee should be explicit in the application design.
 
@@ -82,7 +84,7 @@ Do not turn a transport guarantee into a language-level memory guarantee without
 
 When debugging corruption, inspect the order of posting, completion processing, notification, consumer launch, and buffer reuse. A payload checksum after a forced synchronization can distinguish a data-transfer problem from an early-consumer problem, though the synchronization may hide the original timing race.
 
-## 6. GPU memory adds a second execution domain
+### 6. GPU memory adds a second execution domain
 
 GPUDirect RDMA allows supported network and other PCIe devices to access supported GPU memory paths without the traditional host staging sequence. The platform requires compatible hardware and software, and the physical GPU-to-adapter path can constrain support and performance.
 
@@ -96,7 +98,7 @@ $$
 
 A direct path avoids those explicit staging copies, but still includes its own startup, interface, and synchronization costs. Chunk pipelines can overlap stages, so the serial sum is not always the observed time. Measure the actual schedule rather than treating direct access as a fixed multiplicative speedup.
 
-## 7. Account for bytes across the entire path
+### 7. Account for bytes across the entire path
 
 For an illustrative 16 MiB payload, two staging copies add 32 MiB of logical host-device movement beyond the network payload. Repeated across many ranks and steps, that traffic can stress interfaces and host memory even if the external fabric has spare capacity.
 
@@ -112,7 +114,9 @@ Measure host memory traffic, adapter counters, and device transfer events alongs
 
 Use compatible units and distinguish payload from physical transport bytes. Headers, retransmissions, and control messages can increase link traffic without increasing useful application payload. Useful throughput and wire utilization therefore need not move together.
 
-## 8. Verify the path through a layered test sequence
+### 8. Verify the path through a layered test sequence
+
+![Deep dive: 8. Verify the path through a layered test sequence](./deep-dive-component-02.png)
 
 Start with device and driver discovery, registration support, and a simple correctness transfer using the intended memory type. Next test representative message sizes between the actual GPU-adapter pairs. Then run the collective or application protocol with its real completion and notification behavior.
 
@@ -124,10 +128,7 @@ During investigation, change one layer at a time. Comparing host buffers with GP
 
 A useful repeated-transfer test writes a sequence number and a deterministic payload pattern, waits through the supported completion and consumer path, and verifies both before reusing the region. Alternating buffers can distinguish reuse timing from basic addressing mistakes. Introduce enough repetitions and concurrency to exercise outstanding operations rather than only an empty queue. Record the first failing sequence, operation order, and ownership transitions. This evidence is more diagnostic than a final checksum alone, because it identifies which logical transfer the consumer believed was ready when corruption appeared.
 
-![Deep dive: 8. Verify the path through a layered test sequence](./deep-dive-component-02.png)
-
-
-## 9. Connect guarantees to a reproducible application contract
+### 9. Connect guarantees to a reproducible application contract
 
 Document the memory type, registration lifetime, selected operation, transport service, completion scope, notification mechanism, and consumer synchronization. This record is as important as the adapter rate because it defines what makes the delivered data safe to use.
 
@@ -135,9 +136,11 @@ Separate correctness tests from throughput tests, while ensuring that the throug
 
 Recheck the contract after changes to drivers, allocation strategies, communication libraries, and process placement. The supported device-memory path and its registration behavior can change even when the network hardware remains identical.
 
+## Conclusion
+
 The central distinction is between moving bytes and transferring safe ownership. Ethernet or InfiniBand supplies the fabric, RDMA supplies supported memory-access operations, and the application supplies the protocol that connects completion to consumption. Performance engineering succeeds when all 3 layers are measured without weakening their correctness contract.
 
-## Sources
+### Sources
 
 - [NVIDIA GPUDirect RDMA documentation](https://docs.nvidia.com/cuda/gpudirect-rdma/index.html).
 - [Linux RDMA core implementation](https://github.com/linux-rdma/rdma-core).

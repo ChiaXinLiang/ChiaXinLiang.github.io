@@ -3,7 +3,7 @@ title: 'The Fastest GPU Is Useless If It''s Waiting on Storage'
 description: "Checkpoint write storms, input-pipeline stalls, and the math for how often to checkpoint — why storage bandwidth quietly sets your training goodput."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'storage-1'
 order: 9
 series: "ai-performance"
@@ -12,13 +12,21 @@ topic: "Cluster Infrastructure"
 tags: [storage, checkpointing, goodput]
 ---
 
+## Overview
+
+![Concept overview: The Fastest GPU Is Useless If It's Waiting on Storage](./section-overview.png)
+
 During a 54-day stretch of Llama 3 405B pre-training, Meta's 16,384-GPU job was interrupted 466 times — 419 of them unplanned, mostly hardware failures. Every single interruption meant the same thing: roll the entire cluster back to the last checkpoint and redo the lost work. How much work gets lost, and how long the cluster stands still while checkpoints are written, is not decided by the GPUs at all. It's decided by storage.
 
 Storage is the least glamorous part of an AI cluster, which is exactly why it's where clusters quietly bleed money. Teams will fight for weeks over a 3% kernel speedup and then attach 1,024 GPUs to a filesystem that stalls the whole job for 3 minutes every time it saves state. Scaling GPUs without scaling the data path just means paying more per hour for idle silicon.
 
 This article covers the 2 places storage throttles training — the input pipeline and the checkpoint path — works the checkpoint math by hand, and then goes 1 level down into how GPUDirect Storage and DeepSeek's 3FS attack the problem.
 
-## 3 jobs storage does for a training cluster
+## Deep dive
+
+### 3 jobs storage does for a training cluster
+
+![Deep dive: 3 jobs storage does for a training cluster](./deep-dive-component-01.png)
 
 When people say "storage for AI," they usually picture capacity: petabytes of tokens sitting in an object store. Capacity is the easy part. The hard part is bandwidth delivered at the right moments, and there are 3 distinct demand patterns:
 
@@ -30,10 +38,7 @@ When people say "storage for AI," they usually picture capacity: petabytes of to
 
 Inference adds a fourth pattern — model weights loaded at cold start, and increasingly KV-cache tiers spilled to SSD — but training is where the goodput math bites hardest, so let's stay there.
 
-![Deep dive: 3 jobs storage does for a training cluster](./deep-dive-component-01.png)
-
-
-## Anatomy of a checkpoint write storm
+### Anatomy of a checkpoint write storm
 
 Start with the size. A 70B-parameter model trained in mixed precision with Adam carries, per parameter: 2 bytes of bf16 weights, 4 bytes of fp32 master weights, and 4 + 4 bytes of fp32 Adam momentum and variance. That's 14 bytes per parameter:
 
@@ -46,7 +51,9 @@ While that write drains, the GPUs do nothing. This is a pure goodput subtraction
 
 So checkpoint rarely, right? That's where the failure math pushes back.
 
-## Worked example: how often should you checkpoint?
+### Worked example: how often should you checkpoint?
+
+![Deep dive: Worked example: how often should you checkpoint?](./deep-dive-component-03.png)
 
 This is a classic reliability trade-off, solved in first-order form by John Young in 1974 for mainframes and refined by John Daly in 2006 for HPC. You lose goodput 2 ways:
 
@@ -90,27 +97,26 @@ The first term buys durability; the second prices recomputation. With M equal to
 
 Asynchronous checkpointing changes the blocking term but still must drain bytes to durable storage. For checkpoint size S and delivered storage bandwidth beta, a necessary steady-state condition is S/beta no greater than tau. Otherwise unfinished checkpoints accumulate. Measure both training stalls and time to durable completion; faster acknowledgments alone do not establish a safer recovery point.
 
-## Going deeper: shortening δ at the systems level
+### Going deeper: shortening δ at the systems level
+
+![Deep dive: Going deeper: shortening δ at the systems level](./deep-dive-component-02.png)
 
 The formula says everything improves with √δ, so the engineering game is shrinking δ. 2 mechanisms matter.
 
-### Kill the bounce buffer: GPUDirect Storage
+#### Kill the bounce buffer: GPUDirect Storage
 
 On the standard POSIX path, data moving between an NVMe drive and GPU memory takes a detour: the drive DMAs blocks into a kernel page cache in host DRAM, the CPU copies them into a user-space buffer, and then `cudaMemcpy` pushes them across PCIe into GPU HBM. Every byte crosses host memory 2 times and burns CPU cycles on copies. That intermediate staging area is the **bounce buffer**.
 
 GPUDirect Storage (GDS) removes the detour. Through the cuFile API, the DMA engine in the NVMe drive or the storage NIC writes **directly into GPU memory** over PCIe peer-to-peer, with the CPU only orchestrating, never touching payload bytes ([NVIDIA GDS documentation](https://docs.nvidia.com/gpudirect-storage/)). NVIDIA's own gdsio benchmarks report 2–8× bandwidth gains and large CPU-utilization drops versus the bounce-buffer path — vendor-reported numbers, but the mechanism is sound and the same trick already proved out in networking as GPUDirect RDMA. For checkpoints, the win runs both directions: weights stream from HBM to flash on save and back on restore without squeezing through host DRAM, which matters precisely when 1000 ranks are doing it simultaneously and host memory bandwidth would otherwise become the chokepoint.
 
 
-### Build the filesystem for the burst: DeepSeek's 3FS
+#### Build the filesystem for the burst: DeepSeek's 3FS
 
 In early 2025 DeepSeek open-sourced the Fire-Flyer File System ([github.com/deepseek-ai/3FS](https://github.com/deepseek-ai/3FS)), the storage layer behind their training clusters, and it's a clean example of designing for exactly the patterns above. 3FS disaggregates storage across nodes stuffed with NVMe SSDs and reaches them over RDMA, so any client can hit the aggregate bandwidth of the whole cluster rather than 1 server's. Consistency uses CRAQ (chain replication with apportioned queries), which keeps reads cheap under strong consistency. DeepSeek reports **6.6 TiB/s aggregate read throughput** from a 180-node cluster — self-reported, but the design is inspectable in the repo. Notably, 3FS also serves as an SSD tier for inference KV cache, the fourth demand pattern from earlier.
 
 The third lever is **asynchronous checkpointing**: snapshot GPU state into host DRAM in seconds, resume training, and let a background thread drain the snapshot to persistent storage. ByteDance's MegaScale ([arXiv:2402.15627](https://arxiv.org/abs/2402.15627)) and PyTorch's distributed checkpointing both do this. It shrinks the *stall* δ dramatically, though the drain time still bounds how often you can checkpoint, and a node that dies holding an undrained snapshot loses that checkpoint. The Young/Daly framework still applies; you just plug in different constants.
 
-![Deep dive: Going deeper: shortening δ at the systems level](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"Storage only matters when the job starts."** Loading the dataset is the *least* demanding phase. The input pipeline hammers storage every step for months, checkpoints hammer it every interval, and restarts hammer it at the worst possible moments. Meta provisioned 3.5× headroom (2 TB/s sustained vs. 7 TB/s peak) specifically for mid-training bursts, not for day 1.
 
@@ -118,19 +124,19 @@ The third lever is **asynchronous checkpointing**: snapshot GPU state into host 
 
 **"Checkpointing more often is always safer."** Young's formula says otherwise: waste is U-shaped in the interval. With δ = 196 s and a 50-hour MTBF, checkpointing every 20 minutes wastes 16% of the cluster on stalls alone — over triple the total waste at the 2.3-hour optimum. "Safer" checkpointing that ignores δ can cost more goodput than the failures it protects against.
 
-## The bottom of the memory hierarchy
+### The bottom of the memory hierarchy
 
 Storage is best understood as the last tier of the same hierarchy this series keeps returning to: registers, SRAM caches, HBM, host DRAM, then flash — each tier roughly 10× cheaper per byte and 10× slower than the one above ([The Memory Wall](/blog/the-memory-wall-latency-numbers/), [From DRAM to HBM](/blog/from-dram-to-hbm/)). The engineering pattern is identical at every level: overlap transfers with compute, batch small accesses into large ones, and keep the expensive resource fed. GPUDirect Storage is to flash what prefetching is to caches.
 
 It's also a pure goodput story. A cluster stalled on a checkpoint shows near-0 GPU utilization if you look, but plenty of dashboards sample coarsely enough to miss 16-second stalls entirely — the waste hides in the gap between allocation and useful work that [the goodput article](/blog/goodput-vs-utilization/) is about. And it's a reminder that frontier labs treat infrastructure as a competitive weapon: DeepSeek didn't just write custom kernels to cut costs ([When a Kernel Cuts API Prices 50%](/blog/when-a-kernel-cuts-api-prices/)), they built and open-sourced an entire filesystem. If your mental model of an [ML performance engineer](/blog/what-does-an-ml-performance-engineer-do/) stops at CUDA, the storage tier is where the job description quietly doubles.
 
-## Takeaway
+## Conclusion
 
 - **Checkpoint stalls are a goodput tax with closed-form math.** Waste = δ/τ + τ/(2M), minimized at τ = √(2δM); at the optimum, checkpoint overhead equals expected lost work, and both scale with √δ — so faster storage pays 2 times.
 - **Size storage for the burst, not the average.** A terabyte-scale checkpoint from 1000 synchronized ranks is the design point; Meta provisioned 7 TB/s peak against 2 TB/s sustained for exactly this.
 - **Shrink δ with mechanism, not hope:** GPUDirect Storage removes the CPU bounce buffer, RDMA-based parallel filesystems like 3FS aggregate NVMe bandwidth across the cluster, and async checkpointing hides the drain behind compute.
 
-## Sources
+### Sources
 
 - Grattafiori et al., "The Llama 3 Herd of Models" — interruption counts and storage provisioning. [arXiv:2407.21783](https://arxiv.org/abs/2407.21783)
 - Mohan et al., "Analyzing and Mitigating Data Stalls in DNN Training." [arXiv:2007.06775](https://arxiv.org/abs/2007.06775)

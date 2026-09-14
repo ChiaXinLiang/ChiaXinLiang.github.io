@@ -12,18 +12,19 @@ level: "intermediate"
 tags: ["distributed-training", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Tensor and Pipeline Parallelism: Partitions, Bubbles, and the Network. A neural model is split into pipeline stages across GPU servers; within a stage a weight matrix is partitioned across tensor-parallel ranks.](./section-overview.png)
+
 When a model cannot be trained efficiently by replicating a complete instance, there are several ways to divide the work. Tensor parallelism splits operations inside layers. Pipeline parallelism assigns different layers to different stages. Both let multiple devices cooperate on one logical model, but their communication patterns and scheduling constraints are different.
 
 A tensor-parallel rank may need a collective during nearly every block. A pipeline stage communicates at boundaries between layer ranges and can execute different microbatches concurrently with other stages. Combining the strategies requires understanding where tensors are partitioned, when their partial results must be combined, and how the process layout maps to physical links.
 
 We will derive a matrix-partition example, a balanced pipeline bubble model, and a boundary-traffic calculation. These are analytical models. Actual implementations can fuse collectives, partition activations, interleave stages, and overlap communication in ways that require a more detailed trace.
 
-## 1. Distinguish the computation being divided
+## Deep dive
 
-![Concept overview: Tensor and Pipeline Parallelism: Partitions, Bubbles, and the Network. A neural model is split into pipeline stages across GPU servers; within a stage a weight matrix is partitioned across tensor-parallel ranks.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Distinguish the computation being divided
 
 Data parallelism assigns different training examples to replicas. Tensor parallelism assigns different parts of one layer’s arithmetic to cooperating ranks. Pipeline parallelism assigns different layer ranges to stages that process a stream of microbatches. These dimensions can coexist in a process mesh.
 
@@ -33,7 +34,9 @@ Sharding optimizer state is another ownership decision. It need not coincide wit
 
 The starting point should be the logical computation: matrix shapes, layer dependencies, batch and sequence dimensions, and gradient flow. Then assign those objects to ranks. Starting with a desired GPU count and only later discovering which collectives it requires can produce an expensive or infeasible layout.
 
-## 2. Work a column-partitioned linear layer
+### 2. Work a column-partitioned linear layer
+
+![Deep-dive illustration: Work a column-partitioned linear layer](./deep-dive.png)
 
 Consider a linear transformation Y equal to XW, with X shaped B by H and W shaped H by F. Partition the output-feature columns of W among t tensor-parallel ranks. Rank i computes its corresponding output slice using W_i.
 
@@ -51,10 +54,9 @@ For a row-partitioned matrix product, splitting the reduction dimension yields p
 
 For an H by F weight matrix, ideal parameter storage falls to approximately HF divided by t elements per rank. Arithmetic also partitions ideally, but startup and communication do not necessarily fall with t. Increasing tensor degree eventually makes small local operations and frequent synchronization dominate. The best degree is a workload and topology decision.
 
+### 3. Account for tensor-parallel communication frequency
 
-![Deep-dive illustration: Work a column-partitioned linear layer](./deep-dive.png)
-
-## 3. Account for tensor-parallel communication frequency
+![Deep dive: 3. Account for tensor-parallel communication frequency](./deep-dive-component-02.png)
 
 A Transformer block contains operations whose tensor layouts can be chosen to reduce unnecessary gathers. Those layouts require carefully matched backward communication as well. A forward partition that appears efficient in isolation can introduce an expensive gradient dependency later.
 
@@ -70,10 +72,9 @@ Small tensor-parallel messages can be latency-sensitive because the schedule syn
 
 Place frequently communicating tensor groups within the fastest feasible local interconnect domain when the model and resource constraints allow it. That is a reasoned starting point, not a guarantee that every optimal layout follows one rule. Memory capacity, expert placement, and total group dimensions can force tradeoffs that need complete measurements.
 
-![Deep dive: 3. Account for tensor-parallel communication frequency](./deep-dive-component-02.png)
+### 4. Pipeline stages process a stream of microbatches
 
-
-## 4. Pipeline stages process a stream of microbatches
+![Deep dive: 4. Pipeline stages process a stream of microbatches](./deep-dive-component-01.png)
 
 A pipeline assigns consecutive or otherwise scheduled layer ranges to p stages. Forward activations move toward later stages; gradients flow backward. One microbatch by itself leaves most stages waiting while it progresses. Several microbatches allow different stages to work concurrently.
 
@@ -83,7 +84,7 @@ The schedule determines when an optimizer update is legal. Gradients for the int
 
 Use an implementation whose update semantics match the desired reference. It is not enough that each stage computes a plausible forward and backward operation independently. The complete schedule must preserve the intended parameter version, loss weighting, and gradient accumulation.
 
-## 5. Derive the balanced flush bubble model
+### 5. Derive the balanced flush bubble model
 
 For a simple balanced pipeline with m microbatches and p stages, a commonly used schematic utilization model is
 
@@ -99,7 +100,7 @@ With p equal to 8 and m equal to 32, the estimated bubble fraction is 7 divided 
 
 Microbatch count cannot be increased without considering memory and the intended training batch. A flush schedule may retain more activations as more microbatches remain in flight. Smaller microbatches can lower local compute efficiency. Gradient accumulation affects optimizer-update frequency and loss scaling. Report these changes when using a larger m to improve pipeline utilization.
 
-## 6. Stage imbalance can dominate the bubble
+### 6. Stage imbalance can dominate the bubble
 
 Dividing layers equally does not necessarily divide execution time equally. Embeddings, output projections, attention lengths, expert routing, checkpoint recomputation, and communication can make some layer ranges more expensive than others. The slowest stage limits steady-state throughput.
 
@@ -109,7 +110,7 @@ Balance stages using measured representative workloads, including backward and r
 
 A profiler timeline should show stage activity and boundary transfers together. Distinguish waiting for incoming activations, waiting for outgoing buffer reuse, delayed gradients, and local kernels. All can appear as idle GPU time, but they point to different scheduling changes.
 
-## 7. Derive pipeline boundary bytes
+### 7. Derive pipeline boundary bytes
 
 Suppose a boundary transfers a hidden-state activation with microbatch size B, sequence length L, hidden width H, and b-byte elements. The raw payload is
 
@@ -123,7 +124,7 @@ This calculation does not assume every implementation transfers the complete rep
 
 Boundary bandwidth matters when the transfer cannot finish inside available overlap. Startup matters when many small microbatches generate many transfers. Shared links can also carry tensor, data, or expert-parallel traffic at the same time. An isolated point-to-point benchmark is a useful component check, but it does not establish complete pipeline performance.
 
-## 8. Build and place the process mesh deliberately
+### 8. Build and place the process mesh deliberately
 
 A simple combined layout has data, tensor, and pipeline degrees d, t, and p, with total rank count d times t times p. Additional expert or context dimensions require specifying whether they replace, factor, or overlap parts of those groups. Multiplying every named parallelism degree blindly can double-count ranks.
 
@@ -133,7 +134,7 @@ Keep the layout description with the experiment configuration. A rank-number per
 
 Before a long run, test every relevant collective and point-to-point route with representative payloads. Verify correctness and timeout behavior across the actual ranks. A process mesh that launches successfully can still contain an unintended slow path that only appears during the full schedule.
 
-## 9. Compare complete feasible schedules
+### 9. Compare complete feasible schedules
 
 Begin with a small correctness reference whose full model fits. Validate the partitioned update under the same loss and accumulation convention. Check activation and gradient shapes at boundaries, including the longest supported sequence and any padding masks.
 
@@ -143,13 +144,13 @@ Tune tensor degree, pipeline stage count, microbatch size, and microbatch count 
 
 The final selection should satisfy capacity and supported workload limits while preserving training behavior. A configuration that produces more kernel activity but fewer useful optimizer updates is not necessarily an improvement. Evaluate the end-to-end learning schedule rather than treating parallelism as a collection of independent speedup multipliers.
 
-## Takeaway
+## Conclusion
 
 Tensor parallelism partitions operations and creates collective dependencies. Pipeline parallelism partitions layers and creates a fill, steady-state, and drain schedule. Their costs depend on tensor shapes, stage balance, microbatches, and physical placement.
 
 Write the partitions and dependencies explicitly, derive the important bytes and bubbles, then verify the resulting update and timeline. Combining parallelism dimensions works best when their communication groups are designed as one complete process mesh.
 
-## Sources
+### Sources
 
 - [Megatron Core pipeline parallel API](https://docs.nvidia.com/megatron-core/developer-guide/latest/apidocs/core/core.pipeline_parallel.schedules.html): scheduling implementations and interleaved/non-interleaved execution.
 - [Shoeybi et al., Megatron-LM](https://arxiv.org/abs/1909.08053): tensor partitioning for large language-model training.

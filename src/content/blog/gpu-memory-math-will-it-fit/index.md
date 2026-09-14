@@ -3,7 +3,7 @@ title: 'GPU Memory Math: Will the Model Fit?'
 description: "How to estimate weights, KV cache, activations, and optimizer states by hand, and know in 5 minutes whether a model fits on your GPU."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'gpumem-1'
 order: 3
 series: "ai-performance"
@@ -12,13 +12,21 @@ topic: "Hardware and Capacity"
 tags: [gpu, memory, inference]
 ---
 
+## Overview
+
+![Concept overview: GPU Memory Math: Will the Model Fit?](./section-overview.png)
+
 A Llama-3-70B checkpoint in FP16 weighs 141 GB. An H100 has 80 GB of HBM. That single subtraction kills more deployment plans than any benchmark ever will, and yet the full version of the question "will it fit?" involves 4 separate memory consumers, only one of which is printed on the model card.
 
 Every capacity conversation I have with infra teams starts the same way: someone quotes a parameter count, someone else quotes a GPU spec, and both walk away with a number that is wrong by 2x. The gap is almost never the weights. It is the KV cache, the activations, and the runtime overhead nobody budgeted for. The good news is that all of it is arithmetic you can do on a napkin, and this article is that napkin.
 
 If prefill, decode, and the KV cache are fuzzy concepts for you, read [How an LLM Generates Text](/blog/how-an-llm-generates-text/) first; this piece assumes them.
 
-## The 4 tenants of GPU memory
+## Deep dive
+
+### The 4 tenants of GPU memory
+
+![Deep dive: The 4 tenants of GPU memory](./deep-dive-component-03.png)
 
 At inference time, GPU memory is rented out to 4 tenants:
 
@@ -47,8 +55,9 @@ The leading 2 is for K and V. Note that it is `n_kv_heads`, not the full attenti
 
 Training adds 2 more tenants, gradients and optimizer states, which we will get to in the going-deeper section. They are why an 8B model that serves comfortably on 1 GPU needs a small cluster to fine-tune in full precision.
 
+### Worked example: Llama-3-8B on 1 H100
 
-## Worked example: Llama-3-8B on 1 H100
+![Deep dive: Worked example: Llama-3-8B on 1 H100](./deep-dive-component-01.png)
 
 Let's do the whole calculation by hand for a realistic serving setup: Llama-3-8B in FP16 on an H100 80 GB, 8k context, and we want to know how many concurrent sequences we can hold.
 
@@ -95,10 +104,9 @@ Here $$L$$ is layer count, $$h_{kv}$$ KV-head count, $$d$$ head dimension, and $
 
 Paging changes allocation granularity and avoids reserving unused future tokens; it cannot violate this inequality. Admit by projected live-token growth, include generation allowances, and validate measured high-water memory. Sharding also needs per-device accounting: 141.2 GB of FP16 70B weights split across 2 GPUs leaves 70.6 GB of weights on each, not 35.3 GB. Under a 72 GB budget with a 5 GB reserve, that illustrative configuration has no positive cache budget. More devices, lower precision, or a different measured reserve are required.
 
-![Deep dive: Worked example: Llama-3-8B on 1 H100](./deep-dive-component-01.png)
+### Going deeper: training, and where the formulas come from
 
-
-## Going deeper: training, and where the formulas come from
+![Deep dive: Going deeper: training, and where the formulas come from](./deep-dive-component-02.png)
 
 The inference math above prices a model at 2 bytes per parameter plus cache. Training the same model in standard mixed precision costs **16 bytes per parameter** before a single activation is stored. The breakdown, from the ZeRO paper (Rajbhandari et al., 2019):
 
@@ -117,10 +125,7 @@ Back on the inference side, 2 mechanisms deserve 1 more level of detail.
 
 **PagedAttention is why the "floor" isn't the ceiling.** Naive serving pre-allocates each request's KV cache at maximum context length, so a 200-token chat inside an 8k reservation wastes 97 percent of its gigabyte. vLLM's PagedAttention (Kwon et al., 2023) allocates KV memory in fixed-size blocks (16 tokens by default) on demand, exactly like OS virtual memory pages, reporting under 4 percent waste versus 60 to 80 percent for contiguous pre-allocation. The napkin math gives you the worst-case bound; paging is what lets real systems live near the average case instead.
 
-![Deep dive: Going deeper: training, and where the formulas come from](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"The parameter count tells you whether it fits."** It tells you the floor, not the footprint. Our 8B example spends 16 GB on weights and up to 51 GB on KV cache; at high concurrency the cache is 3 times the model. Long-context workloads invert the model card entirely: at 128k context, a single Llama-3-8B sequence carries 16.8 GB of KV, more than the weights themselves.
 
@@ -128,7 +133,7 @@ Back on the inference side, 2 mechanisms deserve 1 more level of detail.
 
 **"An 80 GB GPU gives you 80 GB."** The CUDA context takes its cut before your process allocates a byte, NCCL buffers appear as soon as you go multi-GPU, attention kernels want workspace, and allocators fragment. Serving engines institutionalize this: vLLM's default budget is 90 percent of device memory, and pushing it to 0.98 is a reliable way to meet a mid-traffic OOM. Plan against 72 GB and treat anything above it as margin, not capacity.
 
-## The bigger picture
+### The bigger picture
 
 This arithmetic is the entry ticket to almost every topic in this series. The reason KV cache size matters so much is that decode is memory-bandwidth-bound: every generated token re-reads the weights plus the whole cache from HBM, a mechanism covered in [The Memory Wall](/blog/the-memory-wall-latency-numbers/) and [From DRAM to HBM](/blog/from-dram-to-hbm/). Fitting is necessary; streaming what you fit is what sets your tokens per second.
 
@@ -136,7 +141,7 @@ It is also the lens for reading hardware roadmaps. When NVIDIA moves from 80 GB 
 
 Later in the series, the napkin-math articles push this further: per-request cost modeling, bandwidth-bound tokens-per-second ceilings, and when the arithmetic says to shard versus quantize. Today's goal was narrower: never again let "will it fit?" be answered with a shrug and a parameter count.
 
-## Takeaway
+## Conclusion
 
 - Memory has 4 tenants at inference (weights, KV cache, activations, runtime overhead) and 6 at training (add gradients and 12 bytes/param of optimizer state). Budget all of them, not just the first.
 - The KV formula `2 × layers × kv_heads × head_dim × bytes` is worth memorizing: Llama-3-8B costs 131 KB per token, about 1 GB per 8k sequence, and concurrency is whatever cache budget remains after weights and overhead.
@@ -145,7 +150,7 @@ Later in the series, the napkin-math articles push this further: per-request cos
 
 Capacity planning should include a small experiment that checks the estimate under the intended request distribution. Start with the chosen precision and engine configuration, then measure memory after loading, after warmup, and at the target concurrency. Use the longest admitted context rather than an average context when setting an admission limit. Record both allocated and reserved memory, since allocator behavior can leave a gap between them. A safe operating budget also allows temporary workspaces and variations in request shape. An arithmetic estimate tells you where to begin; these measurements tell you whether that configuration is stable enough to serve.
 
-## Sources
+### Sources
 
 - Rajbhandari et al., "ZeRO: Memory Optimizations Toward Training Trillion Parameter Models," 2019. https://arxiv.org/abs/1910.02054
 - Grattafiori et al., "The Llama 3 Herd of Models," 2024. https://arxiv.org/abs/2407.21783

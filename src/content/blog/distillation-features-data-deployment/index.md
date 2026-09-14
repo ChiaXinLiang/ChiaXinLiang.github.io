@@ -9,8 +9,12 @@ order: 9
 topic: "Distillation and Adaptation"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: './deep-dive.png'
+heroImage: './section-overview.png'
 ---
+
+## Overview
+
+![Concept overview: Distillation 2: Features, Data, and Deployment Tradeoffs](./section-overview.png)
 
 Matching teacher probabilities is one way to distill a model. Another transfers intermediate representations, relations between examples, or complete generated sequences. These objectives expose different information and create different preparation costs. The central design question is what a constrained student should reproduce to improve the task that matters.
 
@@ -19,7 +23,11 @@ Feature matching does not require the student to become an exact internal copy. 
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
-## 1. Define an intermediate interface
+## Deep dive
+
+### 1. Define an intermediate interface
+
+![Deep-dive illustration: Define an intermediate interface](./deep-dive.png)
 
 Let h_t(x) be a teacher representation and h_s(x) the student representation for input x. Their dimensions and spatial or sequence resolutions can differ. Introduce an alignment map P when direct comparison is not meaningful.
 
@@ -31,10 +39,7 @@ FitNets introduced intermediate hints and a mapping to support thinner students.
 
 Choose the layer correspondence deliberately. Equal layer indices do not imply equal semantic depth when teacher and student architectures differ. A mapping is part of the method and needs documented shapes, initialization, and training status.
 
-
-![Deep-dive illustration: Define an intermediate interface](./deep-dive.png)
-
-## 2. Write a feature reconstruction objective
+### 2. Write a feature reconstruction objective
 
 A simple aligned feature loss uses squared distance, normalized here by teacher feature width. Its gradient teaches both the student representation and any trainable projector.
 
@@ -46,7 +51,7 @@ The normalization makes the convention explicit; implementations can use another
 
 A small feature error is a local achievement. It does not guarantee equal final outputs, and it can be dominated by high-magnitude coordinates. Inspect the feature distribution and downstream task rather than interpreting the reconstruction number as a complete quality measure.
 
-## 3. Recognize representation nonuniqueness
+### 3. Recognize representation nonuniqueness
 
 Suppose a hidden representation is transformed by an invertible matrix R and the next linear layer is transformed by its inverse. The composed real-number function can remain unchanged even though the hidden coordinates differ.
 
@@ -58,7 +63,7 @@ This demonstrates why raw feature equality is stronger than functional equivalen
 
 Conversely, a very powerful projector can fit teacher features while leaving the student poorly prepared for the task. Feature matching should support learning rather than become an auxiliary network that solves the comparison independently of useful student behavior.
 
-## 4. Compare normalized features
+### 4. Compare normalized features
 
 Normalizing representations focuses a loss on direction rather than unrestricted magnitude. A small positive epsilon stabilizes the denominator under the chosen implementation.
 
@@ -70,7 +75,9 @@ This changes the objective. Magnitude can carry useful confidence or activation 
 
 Evaluate normalized and unnormalized objectives under the same student and data budget when the choice is uncertain. Inspect whether one objective makes the representation comparison easier while weakening downstream quality. A convenient similarity score should not substitute for the application objective.
 
-## 5. Transfer relations between examples
+### 5. Transfer relations between examples
+
+![Deep dive: 5. Transfer relations between examples](./deep-dive-component-03.png)
 
 Relational knowledge distillation compares structure across a set of representations. Its primary paper develops distance-wise and angle-wise objectives. The general idea is to preserve how examples relate rather than require every feature coordinate to match.
 
@@ -82,7 +89,7 @@ $$
 
 This illustrative definition needs safeguards for degenerate batches. It also makes batch composition part of the supervision. A batch containing only nearly identical examples supplies different relational information from one spanning several classes or behaviors.
 
-## 6. Work through geometric invariance
+### 6. Work through geometric invariance
 
 Take 3 illustrative teacher points: the origin, a point one unit along the first axis, and a point one unit along the second. Translate and rotate all 3 points to produce student points. Pairwise distances remain identical while raw coordinate differences can be large.
 
@@ -90,7 +97,7 @@ A distance-based objective therefore treats these configurations as equivalent. 
 
 The same invariance can hide distinctions an application needs. Pairwise distance preservation alone does not require identical classification heads or confidence. Combine appropriate task supervision and evaluate the final student. The geometric example explains what the loss ignores as well as what it preserves.
 
-## 7. Budget the alignment computation
+### 7. Budget the alignment computation
 
 A dense linear projector from width d_s to d_t contains d_s times d_t weights, plus a bias if used. Several intermediate matches can add substantial training computation and activation storage.
 
@@ -102,7 +109,7 @@ The compute estimate uses N compared representations and counts a multiply-add a
 
 A projector used only for training can be removed from the deployed student. Verify that removal in the exported graph. If inference still requires the teacher or alignment network, the deployment claim must include those components rather than counting only the student backbone.
 
-## 8. Distill complete sequences
+### 8. Distill complete sequences
 
 Sequence-level distillation uses teacher-produced outputs as training targets. For an autoregressive student, a selected teacher sequence y_star can define an ordinary conditional negative log-likelihood objective.
 
@@ -114,7 +121,7 @@ This differs from comparing every teacher token distribution. The selected seque
 
 The original sequence-level work studied sequence-to-sequence learning. Applying the same broad mechanism elsewhere requires checking task and generation policy. A beam-selected translation, a sampled response, and a filtered reasoning trace represent different supervision populations and should retain that provenance.
 
-## 9. Understand target-selection bias
+### 9. Understand target-selection bias
 
 Teacher generation depends on prompts, decoding, length limits, sampling, and filtering. Those choices determine what the student sees. A target set can overrepresent polished short answers or omit difficult cases rejected by a quality filter.
 
@@ -122,7 +129,7 @@ Data filtering can be useful, but it changes the training distribution. Record r
 
 Also distinguish teacher correctness from target fluency. Fluent generated text can contain errors. Evaluate targets using task-appropriate evidence when available, and preserve independent labels or references for final evaluation. The student can reproduce a consistent error pattern with high likelihood.
 
-## 10. Model the data-generation cost
+### 10. Model the data-generation cost
 
 Let N be the number of prompts, c_t their average teacher-generation cost, and c_v the average verification cost. A simple preparation estimate adds those costs to student training.
 
@@ -134,7 +141,7 @@ The units must agree: device time, monetary cost, energy, or another chosen reso
 
 The deployment savings must justify this preparation under the expected reuse. A frequently deployed student can amortize a large teacher-generation phase, while a one-off task may not. Report preparation and inference separately so that readers can apply their own reuse assumptions.
 
-## 11. Control task and data comparisons
+### 11. Control task and data comparisons
 
 Compare distillation variants on the same student architecture and evaluation setup. If one variant uses substantially more generated data, its improvement cannot be attributed solely to feature or sequence supervision.
 
@@ -142,7 +149,9 @@ Useful ablations separate hard targets, soft probabilities, feature losses, and 
 
 Select methods using a validation population and reserve independent evaluation for the final artifact. Repeated selection against one test benchmark can overfit the distillation recipe even when student weights never directly train on those benchmark labels.
 
-## 12. Inspect capacity mismatch
+### 12. Inspect capacity mismatch
+
+![Deep dive: 12. Inspect capacity mismatch](./deep-dive-component-04.png)
 
 A teacher can learn distinctions that a smaller student cannot represent under its architecture. Increasing the feature-loss weight can then force an unfavorable compromise with the task objective.
 
@@ -150,7 +159,7 @@ Inspect whether training reduces auxiliary feature error while task quality stag
 
 Intermediate supervision can also make optimization easier without requiring exact teacher representation. Select interfaces that preserve task-relevant information and allow the student its own efficient structure. An architecture-specific mapping should be assessed for what it teaches and what it costs.
 
-## 13. Check inference independence
+### 13. Check inference independence
 
 The final student should have a clearly defined inference graph. Confirm which training-only modules were removed, which parameters were retained, and whether preprocessing still depends on a teacher-derived service.
 
@@ -158,7 +167,9 @@ Measure the exported artifact on the intended backend. Parameter reduction can c
 
 No student training or GPU execution was performed for this article. The equations and geometric examples are explanatory. The primary papers provide their own experimental evidence under their stated tasks, while a new deployment requires measurements of its actual student and numerical policy.
 
-## 14. Choose the interface from the objective
+### 14. Choose the interface from the objective
+
+![Deep dive: 14. Choose the interface from the objective](./deep-dive-component-01.png)
 
 Use output probabilities when relative alternatives provide useful supervision and the class interface is compatible. Use intermediate hints when a justified alignment can improve representation learning. Use relational objectives when preserving geometry is more meaningful than matching coordinates. Use generated sequences when the task benefits from selected teacher outputs and their distribution is understood.
 
@@ -166,7 +177,9 @@ These options can be combined, but each component adds assumptions and preparati
 
 The most useful explanation of distillation identifies the information transferred, the invariances imposed, the data that carries it, and the student execution that follows. That connects statistical learning to efficiency without treating teacher imitation as an automatic guarantee of quality or speed.
 
-## 15. Examine batch effects in relational learning
+### 15. Examine batch effects in relational learning
+
+![Deep dive: 15. Examine batch effects in relational learning](./deep-dive-component-02.png)
 
 Pairwise objectives can involve a quadratic number of pairs in the minibatch, while angle-based comparisons can involve more expensive tuple construction. Practical methods sample or organize these relations to control preparation cost. The selected relation population should be documented because it determines which geometry the student is encouraged to preserve.
 
@@ -174,12 +187,11 @@ A batch with repeated or nearly identical examples can make distance normalizati
 
 For a diagnostic, construct a small batch with known distances, verify the normalization and zero-distance policy, and compare the loss after translation, rotation, and scaling. Then inspect batches sampled from the actual training data. The synthetic geometry tests correctness; the real population tests whether the objective carries useful information.
 
+## Conclusion
+
 Avoid interpreting a low relational loss as an assurance that the student preserves every teacher behavior. The loss only constrains selected relations under selected inputs. Independent task evaluation remains necessary, especially when the deployed distribution differs from the data used to create teacher features.
 
-![Deep dive: 15. Examine batch effects in relational learning](./deep-dive-component-02.png)
-
-
-## Sources
+### Sources
 
 - [FitNets: Hints for Thin Deep Nets](https://arxiv.org/abs/1412.6550).
 - [Relational Knowledge Distillation](https://arxiv.org/abs/1904.05068).

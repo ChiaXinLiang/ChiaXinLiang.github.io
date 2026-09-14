@@ -12,18 +12,19 @@ level: "beginner"
 tags: ["gpu-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Triton Kernel Foundations: Programs, Masks, Layouts, and Correctness. A rectangular tensor grid is divided into program tiles.](./section-overview.png)
+
 Triton expresses GPU kernels through programs that operate on logical tensor tiles. Instead of assigning one scalar expression manually to each CUDA thread, the author describes a collection of offsets, loads, and operations. The compiler maps that tile onto supported hardware execution and layouts.
 
 This model can make kernel construction concise, but it does not remove ownership or correctness requirements. Every required output still needs a valid writer, every memory access needs a supported address, and the tile's shape must match the real tensor layout. A compact expression can be wrong for a strided view or a partial final tile.
 
 We will build vector addition from program ownership, then examine masks, strides, compilation, and measurement. Numerical examples are illustrative. The official tutorial and language documentation define the APIs supported by the installed Triton version.
 
-## 1. Start from a precise operation and storage contract
+## Deep dive
 
-![Concept overview: Triton Kernel Foundations: Programs, Masks, Layouts, and Correctness. A rectangular tensor grid is divided into program tiles.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Start from a precise operation and storage contract
 
 For length N vectors, the required result is c_i=a_i+b_i for every valid index. Assume separate contiguous FP32 device buffers for the initial example. Shape, dtype, device, and storage layout are part of the interface, not implicit properties guaranteed by the language.
 
@@ -33,7 +34,9 @@ Pointer aliasing changes the analysis when outputs can overlap inputs. Some simp
 
 Record completion and lifetime requirements. Inputs must be ready before the kernel consumes them, and outputs cannot be read or freed before completion. These dependencies remain necessary even when the kernel body is only a few expressions.
 
-## 2. Derive program-owned tile offsets
+### 2. Derive program-owned tile offsets
+
+![Deep-dive illustration: Derive program-owned tile offsets](./deep-dive.png)
 
 Let program identifier p own K consecutive logical positions. Define a tile of offsets j from 0 to K minus 1 and global offsets
 
@@ -47,10 +50,9 @@ For N=1003 and K=256, 4 programs cover 1024 logical positions. Program 3 owns of
 
 A program is not a single hardware thread, and K is not simply a CUDA block width. Compiler layouts and launch configuration distribute tile operations across hardware execution resources. Keep logical ownership separate from assumptions about lane assignment.
 
+### 3. Apply the mask to loads and stores
 
-![Deep-dive illustration: Derive program-owned tile offsets](./deep-dive.png)
-
-## 3. Apply the mask to loads and stores
+![Deep dive: 3. Apply the mask to loads and stores](./deep-dive-component-02.png)
 
 A minimal illustrative kernel is
 
@@ -75,10 +77,7 @@ Zero is harmless for this masked elementwise addition because invalid results ar
 
 A masked sum and a masked mean illustrate why replacement values and statistics must be considered together. If a tile has 235 valid values equal to 1 and 21 masked values replaced by zero, its sum is 235. Dividing by the physical tile size 256 produces about 0.918, while the mean of the valid population is 1. The denominator must describe the intended valid count. A maximum similarly needs a replacement that cannot dominate valid values. This reasoning becomes part of the normalization contract, even though the same zero replacement was harmless in the elementwise addition example.
 
-![Deep dive: 3. Apply the mask to loads and stores](./deep-dive-component-02.png)
-
-
-## 4. Separate logical shape from physical strides
+### 4. Separate logical shape from physical strides
 
 The contiguous example addresses element i by pointer plus i. A strided vector instead requires pointer plus i times its element stride. A matrix requires row and column strides, which can differ from its logical dimensions.
 
@@ -94,7 +93,7 @@ For an illustrative 3-by-5 matrix stored with row stride 8 and column stride 1, 
 
 Validate noncontiguous inputs only if the interface claims support for them. A host wrapper can choose to make a contiguous copy, but that copy changes the end-to-end cost and should not disappear from a workload comparison.
 
-## 5. Understand compile-time tile choices and runtime sizes
+### 5. Understand compile-time tile choices and runtime sizes
 
 The tile shape used by operations such as arange must satisfy the language's compile-time and supported-size requirements. A compile-time block parameter lets the compiler construct and optimize that tile. The vector length can remain a runtime scalar used by the mask in this example.
 
@@ -110,7 +109,7 @@ $$
 
 for L comparable uses of one compiled variant. Variant proliferation changes the accounting, so one large L should not be assigned to many rarely reused shapes.
 
-## 6. Treat layouts as a compiler and hardware interaction
+### 6. Treat layouts as a compiler and hardware interaction
 
 Logical tensor expressions must be distributed across lanes, warps, registers, and supported memory operations. Layout choice affects coalescing, reductions, communication between execution lanes, and register pressure. Concise source code does not establish an efficient mapping automatically.
 
@@ -120,7 +119,9 @@ Inspect the generated execution and profiler evidence when a hypothesis requires
 
 Begin from supported simple layouts and introduce complexity only when the traffic or dependency model suggests a benefit. A vector operation with no cross-element reuse does not necessarily benefit from shared staging or elaborate synchronization.
 
-## 7. Derive the useful traffic model
+### 7. Derive the useful traffic model
+
+![Deep dive: 7. Derive the useful traffic model](./deep-dive-component-03.png)
 
 For contiguous FP32 vector addition, logical traffic is 2 reads and 1 write per element:
 
@@ -136,7 +137,7 @@ For an illustrative N=1000000, logical traffic is 12 MB. At an assumed achieved 
 
 Measure the enclosing operation when it includes copies or layout conversion. A faster device kernel can lose its advantage if the wrapper adds a large contiguous materialization or repeated allocation.
 
-## 8. Build correctness tests around the claimed interface
+### 8. Build correctness tests around the claimed interface
 
 Use deterministic values and a reference with appropriate numerical precision. For vector addition, inputs a_i=i and b_i=2i produce an easily checked result 3i over the supported range. Include the final valid element and lengths that exercise a partial tile.
 
@@ -146,7 +147,7 @@ Exercise repeated buffer reuse and the intended stream dependencies. One success
 
 Supported memory-checking and diagnostic tools can reveal invalid accesses beyond output comparisons. A tail mask should be tested explicitly because aligned inputs never exercise it. Do not treat a familiar tutorial as proof that a modified indexing expression remains safe.
 
-## 9. Benchmark representative sizes and compiled states
+### 9. Benchmark representative sizes and compiled states
 
 Warm up the same compiled path, time actual device completion, and keep allocation or transfer costs separate unless they belong to the intended estimand. Record repeated observations and variation. Keep cold compilation observations separate from reused kernel timings.
 
@@ -156,7 +157,9 @@ Compare tile size and launch choices under fixed inputs and output semantics. Pr
 
 A candidate wrapper that makes inputs contiguous should be compared both kernel-locally and end-to-end. The local result explains execution efficiency; the full result establishes whether the interface transformation benefits useful work.
 
-## 10. Extend only after ownership and layout are clear
+### 10. Extend only after ownership and layout are clear
+
+![Deep dive: 10. Extend only after ownership and layout are clear](./deep-dive-component-01.png)
 
 A reduction or normalization kernel adds dependencies among tile elements and requires valid neutral values, accumulator precision, and output statistics. A matrix kernel adds tile reuse and layout conversions. These extensions build on the same ownership and mask contract.
 
@@ -164,9 +167,11 @@ Keep the vector reference and representative tests as a baseline, but do not ass
 
 For a simple ownership check, a 4-program grid with 256 offsets each must cover every index below 1003 exactly once and store none above it. This logical check can be performed independently of hardware execution. The hardware test then verifies memory behavior, compilation, and timing under the actual supported runtime. Separating the proof from the measurement makes failures easier to locate.
 
+## Conclusion
+
 Triton foundations are about describing valid program-owned tiles and letting the compiler map them through supported layouts. Masks protect boundaries, strides preserve storage meaning, and lifetime preserves execution correctness. Optimization becomes meaningful when those contracts are explicit and the useful traffic and timing populations are measured consistently.
 
-## Sources
+### Sources
 
 - [Triton vector-add tutorial](https://triton-lang.org/main/getting-started/tutorials/01-vector-add.html).
 - [Triton language API](https://triton-lang.org/main/python-api/triton.language.html).

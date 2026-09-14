@@ -11,16 +11,17 @@ topic: "Building Blocks"
 tags: ['architecture', 'transformer', 'moe', 'attention']
 ---
 
+## Overview
+
+![Concept overview: Reading a Modern LLM: From Model Configuration to Computational Structure. An architectural model cutaway of token embeddings, repeated decoder layers, attention/recurrent state blocks and optional routed expert bank.](./section-overview.png)
+
 A model name is a poor architecture diagram. “35 billion parameters” tells you little about which weights each token uses, how attention state grows, or whether every layer performs the same operation. Those details matter when explaining an innovation, estimating memory, or comparing 2 released checkpoints. The reliable starting point is the evidence: an exact model configuration, its implementation, and the authors’ technical disclosure.
 
 This article develops a practical reading method. We start with a deliberately simple decoder block, derive useful parameter and cache estimates, then identify where publicly documented modern models depart from that baseline. The model examples are a snapshot checked on September 12, 2026. They illustrate structural choices rather than establish a leaderboard. Subsequent articles in this series examine routing, attention variants, hybrid state, and individual models in greater depth. If the basic Transformer is unfamiliar, read [the introductory block explanation](/blog/transformer-architecture-in-one-picture/) first.
 
-## Separate structure, learned weights, and serving policy
+## Deep dive
 
-![Concept overview: Reading a Modern LLM: From Model Configuration to Computational Structure. An architectural model cutaway of token embeddings, repeated decoder layers, attention/recurrent state blocks and optional routed expert bank.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### Separate structure, learned weights, and serving policy
 
 3 layers of description are easy to confuse. Architecture defines the operations and connections: layer types, widths, projections, routing, and state. A checkpoint supplies learned parameter values, often packaged with a particular numerical representation. Serving policy determines how requests are scheduled, batched, cached, or sampled. These layers interact, but changing a scheduler does not automatically change the underlying model architecture.
 
@@ -28,7 +29,7 @@ A useful reading record therefore names the checkpoint and records the evidence 
 
 Also distinguish a moving repository branch from a reproducible snapshot. Save the downloaded configuration and record a commit or revision when available. If you only inspected a current model card, say that explicitly. “Latest” is a date-dependent selection criterion, not a substitute for identifying the model you actually analyzed.
 
-## Read the residual stream before the individual operators
+### Read the residual stream before the individual operators
 
 Let a prompt contain T token positions, and let d be the residual width. A simplified language model represents its hidden state as a matrix X with shape T by d. Each row is a position’s current representation. A common pre-normalized decoder block can be written as
 
@@ -40,7 +41,7 @@ Here N denotes normalization, A is causal attention, and F is a position-wise fe
 
 The reading method is to trace shapes through each operation. Find the input width, the operator’s internal dimensions, and the projection returning to the residual width. This prevents an especially common mistake: assuming an attention head dimension must equal residual width divided by head count. Released implementations can use an attention projection width different from the residual width.
 
-## A baseline parameter estimate exposes its assumptions
+### A baseline parameter estimate exposes its assumptions
 
 For a simple dense block, assume the combined query, key, and value widths each equal d, and the attention output projection is also d by d. Ignoring biases and normalization parameters, those 4 matrices contain approximately 4 d squared parameters. A 2-matrix feed-forward layer with intermediate width rd contributes approximately 2 r d squared. Therefore
 
@@ -52,7 +53,9 @@ With r equal to 4, this becomes 12 d squared. A hypothetical width of 2,048 give
 
 The estimate fails if its assumptions fail. Grouped-query attention changes key and value projection sizes. A gated feed-forward network usually has 3 principal matrices rather than 2. Expert layers replicate feed-forward weights. An untied vocabulary output matrix adds another large parameter term. Write down these deviations before using a familiar rule of thumb. Understanding why an estimate changes is more valuable than memorizing its coefficient.
 
-## Attention mixes positions under an explicit information rule
+### Attention mixes positions under an explicit information rule
+
+![Deep dive: Attention mixes positions under an explicit information rule](./deep-dive-component-03.png)
 
 In the conventional scaled dot-product baseline,
 
@@ -66,8 +69,9 @@ The innovation in an attention variant may concern a different part of this comp
 
 Read the mask, head layout, positional treatment, and state representation separately. A single field named “attention” cannot establish all 4. This separation also makes limitations easier to explain: a local window restricts direct access, whereas sharing key and value heads changes the representation used for that access.
 
+### Translate cache structure into a memory equation
 
-## Translate cache structure into a memory equation
+![Deep dive: Translate cache structure into a memory equation](./deep-dive-component-01.png)
 
 For a conventional per-layer cache with L cached layers, H_kv key/value heads, head dimension d_h, and b bytes per element, the key and value payload for T positions is
 
@@ -81,10 +85,9 @@ This excludes allocator overhead, metadata, padding, and other model state. Mult
 
 Consequently, applying this full-cache equation indiscriminately to every layer of a modern model can badly overestimate memory. The equation remains useful because its terms reveal what to inspect: which layers cache historical positions, what dimensions are stored, and whether sharing or quantization changes the byte count.
 
-![Deep dive: Translate cache structure into a memory equation](./deep-dive-component-01.png)
+### Sparse experts separate total capacity from active computation
 
-
-## Sparse experts separate total capacity from active computation
+![Deep dive: Sparse experts separate total capacity from active computation](./deep-dive-component-02.png)
 
 An expert layer has a collection of parameterized transformations and a router selecting a subset for each token. A simplified token output is
 
@@ -98,10 +101,7 @@ For a hypothetical bank of 128 equal-sized experts selecting 4 per token, only 1
 
 The methodological question is therefore precise: does an innovation increase stored capacity without proportionally increasing selected arithmetic, and how does the implementation distribute that work? A headline parameter count cannot answer it. Report total parameters, the authors’ active-parameter convention, and the actual execution assumptions separately.
 
-![Deep dive: Sparse experts separate total capacity from active computation](./deep-dive-component-02.png)
-
-
-## A public sparse model makes the distinction concrete
+### A public sparse model makes the distinction concrete
 
 OpenAI’s disclosed gpt-oss-120b architecture has approximately 116.8 billion total parameters and 5.1 billion active parameters per token under its counting convention. It uses 128 experts with 4 selected per token. The disclosure describes alternating local and dense attention, grouped-query attention, and an attention mechanism with an additional denominator term that can leave attention weight unassigned to tokens.
 
@@ -109,7 +109,7 @@ These facts show why the baseline equations require inspection. A conventional s
 
 The important innovation story is conditional computation combined with specific attention choices. The useful comparison keeps quality and workload explicit and asks which resource each choice changes. The parameter ratio alone establishes neither quality nor serving cost. This series’ dedicated model article will examine the disclosed operators and counting conventions in detail.
 
-## Hybrid configurations demand a layer-by-layer inventory
+### Hybrid configurations demand a layer-by-layer inventory
 
 The released Qwen3.6-35B-A3B configuration inspected for this article declares 40 text layers, with repeated groups of 3 linear-attention layers and 1 full-attention layer. It separately specifies residual width, attention head dimensions, linear-state dimensions, and expert routing fields. Those separate fields are evidence that a uniform dense-block diagram is insufficient.
 
@@ -117,7 +117,9 @@ The reading procedure is to count each layer type, inspect its state update, and
 
 The potential benefit is a different balance between historical access and bounded state. The tradeoff is that bounded state and explicit token attention provide different mechanisms for retaining and retrieving information. A claimed advantage should be tested on relevant tasks rather than inferred from asymptotic notation alone. We will study this distinction in the hybrid-attention subtopic.
 
-## Recent designs can change where attention state originates
+### Recent designs can change where attention state originates
+
+![Deep dive: Recent designs can change where attention state originates](./deep-dive-component-04.png)
 
 DeepSeek’s public DeepSeek-V4.1-Flash disclosure describes a 40-layer causal encoder-decoder structure: 20 causal encoder layers followed by 20 decoder layers. The decoder’s global cache is projected from the final encoder representations rather than independently from each decoder layer’s own hidden states. The authors distinguish 8 billion activated parameters during prefill from 16 billion during decode.
 
@@ -125,16 +127,17 @@ This is a structural change, not simply a larger context limit. It changes the o
 
 Its causal encoder should also not be confused with the bidirectional encoder in the original translation Transformer. Similar labels can describe different information constraints. Read the stated causal structure and implementation rather than importing an old diagram based on the word “encoder.” Claims about the design’s efficiency remain workload-dependent and require measured evidence beyond the architectural description.
 
-
-## Finish with a testable architectural claim
+### Finish with a testable architectural claim
 
 A strong architecture explanation ends with a claim someone could evaluate. For example: sharing key/value heads reduces the conventional cache payload when other cache dimensions and precision are fixed. The equation predicts the reduction; a tensor inspection checks whether the implementation stores that payload; a serving experiment measures the actual effect on memory and throughput.
 
 Keep those 3 conclusions separate. Lower state bytes need not mean proportionally lower latency, because another operator may dominate execution. Lower selected arithmetic need not mean a smaller checkpoint. A longer advertised context need not mean equally strong retrieval at every position. Each innovation changes a mechanism under assumptions, and those assumptions determine which practical result follows.
 
+## Conclusion
+
 The recurring method is simple: identify exact evidence, trace shapes, classify layer types, write a resource equation, check a small example, and state what remains unmeasured. That approach lets us study modern models without relying on marketing labels or pretending that undisclosed internals are known.
 
-## Sources
+### Sources
 
 - [OpenAI, gpt-oss architecture and model details](https://deploymentsafety.openai.com/gpt-oss/a2): public architecture disclosure and parameter conventions.
 - [Qwen3.6-35B-A3B released configuration](https://huggingface.co/Qwen/Qwen3.6-35B-A3B/blob/main/config.json): configuration inspected September 12, 2026; moving main branch, not a pinned checkpoint revision.

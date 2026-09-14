@@ -3,7 +3,7 @@ title: 'Tokens per Megawatt: The Power Envelope Is the New Constraint'
 description: "190 GW of AI datacenters are announced and 12 GW exist. What happens to an industry when the scarce resource is not chips but grid connections."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'econ-1'
 order: 3
 series: "efficient-ai"
@@ -12,6 +12,10 @@ topic: "Economics"
 tags: [economics, power, infrastructure]
 ---
 
+## Overview
+
+![Concept overview: Tokens per Megawatt: The Power Envelope Is the New Constraint](./section-overview.png)
+
 There are 190 gigawatts of announced AI datacenter capacity in the pipeline, spread across 777 projects. Roughly 12 gigawatts are actually operational. The gap between those 2 numbers, a factor of about 16, is the single most important fact in AI economics right now, and it explains a surprising amount of what chip vendors, cloud providers, and model labs have been doing for the past year.
 
 The numbers come from Bessemer Venture Partners' roadmap of the AI datacenter stack, and the reason for the gap is not money or chips. It is the electrical grid. A modern AI datacenter goes from groundbreaking to racks-online in 12 to 18 months. Getting permission to draw hundreds of megawatts from the grid, a process called interconnection, takes 5 to 7 years in most US markets. The queue is so long that some operators have stopped waiting: about 50 GW of "behind-the-meter" gas generation, power plants built on-site specifically to bypass the grid, was announced in 2025 alone. Even the components have queues now. Lead times for large grid transformers have stretched to 5 years.
@@ -19,7 +23,9 @@ The numbers come from Bessemer Venture Partners' roadmap of the AI datacenter st
 
 When an input becomes scarce, industries reorganize around the ratio of output to that input. Farming optimizes yield per acre. Mobile chips optimize performance per milliwatt of battery. AI infrastructure has found its version: tokens per megawatt. NVIDIA now markets it explicitly. Google frames every TPU generation around performance per watt. It is worth understanding exactly what this metric means, how to compute it, and what it changes.
 
-## What tokens per megawatt actually measures
+## Deep dive
+
+### What tokens per megawatt actually measures
 
 A token, for our purposes, is 1 unit of LLM output, roughly 3-quarters of an English word. Serving a model means converting electricity into tokens, and tokens are what customers pay for. So tokens per megawatt is a revenue density: given a fixed allocation of grid power, how much sellable output can you generate?
 
@@ -27,7 +33,9 @@ Note what the megawatt in the denominator represents. It is not an electricity b
 
 This inverts a decade of datacenter thinking. When power was cheap and available, you optimized cost per server and bought whatever electricity you needed. Now the megawatts are fixed and the question is how much business fits inside them. A chip that produces 2 times the tokens per watt does not just cut your power bill by half, which would be a minor line item. It doubles the revenue capacity of every site you own, without touching the interconnection queue.
 
-## A worked example: 1 megawatt, by hand
+### A worked example: 1 megawatt, by hand
+
+![Deep dive: A worked example: 1 megawatt, by hand](./deep-dive-component-01.png)
 
 Let's compute the tokens-per-megawatt of a current flagship system, using numbers you can check. The system is NVIDIA's GB300 NVL72, a rack-scale machine with 72 Blackwell Ultra GPUs that Azure deploys as a single unit. In MLPerf Inference v5.1, the first industry-audited benchmark round to include it, a GB300 NVL72 served DeepSeek-R1 at 5,842 tokens per second per GPU in the offline scenario.
 
@@ -46,10 +54,7 @@ That ceiling assumes the offline benchmark scenario: perfectly batched work, no 
 
 2 cautions on numbers like these. MLPerf figures are audited, but the marketing composites built on top of them are not: NVIDIA's "5x TPS per megawatt versus Hopper" and the "50x AI factory output" headline are vendor-constructed multiplications, not benchmark results. And any tokens-per-MW claim is model-dependent; a sparser or smaller model shifts every step of the calculation. The method is the durable part.
 
-![Deep dive: A worked example: 1 megawatt, by hand](./deep-dive-component-01.png)
-
-
-## Keep the power boundary in the equation
+### Keep the power boundary in the equation
 
 For a fleet-average estimate, let grid power be $$P_g$$ watts, facility overhead be $$\mathrm{PUE}$$, IT rack draw be $$P_r$$ watts, devices per rack be $$n$$, and measured compliant output per device be $$r$$ tokens per second. Then
 
@@ -61,7 +66,9 @@ At 1 million watts, PUE 1.2, rack draw 135,000 watts, 72 devices, and 5,842 outp
 
 The improvement over quoting accelerator efficiency alone is accounting for supporting power and service requirements. Use rack IT power consistently: add external network power only when excluded from that measurement. Multiplying a maximum throughput benchmark by a nameplate power allocation mixes operating points. Measure both at the same load and quality target. Better batching can improve this ratio while worsening individual token latency, so compliant output belongs in the numerator. Energy, capacity reservation, and facility overhead remain separate decisions even when reported in 1 ratio.
 
-## Going deeper: where the watts actually go
+### Going deeper: where the watts actually go
+
+![Deep dive: Going deeper: where the watts actually go](./deep-dive-component-02.png)
 
 If the megawatt is fixed, every watt spent on anything other than computation is revenue lost. Follow that logic through the stack and you can predict most of the current infrastructure roadmap.
 
@@ -75,10 +82,7 @@ If the megawatt is fixed, every watt spent on anything other than computation is
 
 The same pressure propagates upward into software and model design. 4-bit number formats, mixture-of-experts models that activate 3% of their weights per token, sparse attention, disaggregated serving: each is usually described as a cost or latency optimization, but under a fixed power envelope they are all the same move, more tokens through the same megawatts.
 
-![Deep dive: Going deeper: where the watts actually go](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"The bottleneck is GPU supply."** It was, in 2023. Today a well-capitalized operator can get GPUs in months but a grid connection in years, which makes power the binding constraint in the economic sense: the one that determines output when relaxed. The 50 GW of announced behind-the-meter gas is the clearest evidence, since operators only build their own power plants when buying grid power is impossible on relevant timescales. Chips queue in quarters; interconnections queue in half-decades.
 
@@ -86,7 +90,9 @@ The same pressure propagates upward into software and model design. 4-bit number
 
 **"190 GW announced means 190 GW is coming."** Announcements are free; interconnections are not. The 777 projects behind that figure include speculative land grabs, duplicate site options, and projects that will die in the queue. Even the buildable fraction arrives on grid timelines, not press-release timelines. Treat announced capacity the way you would treat a startup's "signed LOIs": an indicator of demand, not a forecast of supply. The operational number, about 12 GW, growing at the pace transformers and substations allow, is the real supply curve.
 
-## The metric that reorders the stack
+### The metric that reorders the stack
+
+![Deep dive: The metric that reorders the stack](./deep-dive-component-03.png)
 
 Tokens per megawatt is doing something quietly important: it gives every layer of the AI stack a common denominator. A 4-bit quantization scheme, a better attention kernel, a co-packaged optical switch, and an 800 V busbar are incommensurable in their native units. Expressed as tokens per megawatt, they compose into a single number that maps directly to revenue per site, which is why it is becoming the number that decides what gets built.
 
@@ -94,13 +100,13 @@ It also explains a pattern we have traced elsewhere in this series. The [Blackwe
 
 The deeper shift is cultural. An industry that grew up maximizing peak performance, because power was assumed, is relearning the discipline of embedded systems, where the envelope comes first and everything is designed backward from it. Mobile chip designers have worked this way for 20 years. AI infrastructure is now, at gigawatt scale, doing the same.
 
-## Takeaway
+## Conclusion
 
 - Power, not silicon, is the binding constraint on AI buildout: 190 GW announced against ~12 GW operational, with datacenters built in 12–18 months but grid interconnections taking 5–7 years.
 - Tokens per megawatt is a revenue-density metric. You can estimate it by hand: 1 MW ÷ PUE ÷ rack power × per-GPU throughput gives ~82T tokens/MW-year peak for a GB300 NVL72 fleet, and realistic goodput lands closer to ~33T.
 - Under a fixed envelope, every efficiency gain, from 4-bit formats to 800 VDC busbars to co-packaged optics, is the same economic move: more sellable output per megawatt already secured. Perf/watt decides winners because it multiplies revenue, not because it trims the power bill.
 
-## Sources
+### Sources
 
 - Bessemer Venture Partners, "Roadmap: The AI Data Center Stack" — https://www.bvp.com/atlas/roadmap-the-ai-data-center-stack
 - NVIDIA, "NVIDIA 800 V HVDC Architecture Will Power the Next Generation of AI Factories" — https://developer.nvidia.com/blog/nvidia-800-v-hvdc-architecture-will-power-the-next-generation-of-ai-factories/

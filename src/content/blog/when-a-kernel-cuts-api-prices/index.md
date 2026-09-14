@@ -3,7 +3,7 @@ title: 'When a Kernel Cuts API Prices 50%: DeepSeek''s Sparse Attention'
 description: 'Read attention-state compression, sparse attention, and API price changes through checked serving-cost estimates and their assumptions.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'cd-2'
 order: 10
 series: "efficient-ai"
@@ -12,13 +12,21 @@ topic: "Co-Design Cases"
 tags: ['sparse-attention', 'co-design', 'inference']
 ---
 
+## Overview
+
+![Concept overview: When a Kernel Cuts API Prices 50%: DeepSeek's Sparse Attention](./section-overview.png)
+
 On September 29, 2025, the price of 1 million output tokens from DeepSeek's API dropped from $1.68 to $0.42. Input tokens fell from $0.56 to $0.28. The hardware serving those tokens did not change. The model's benchmark scores did not change in any meaningful way. What changed was the attention mechanism inside the model and the GPU kernels that run it, and DeepSeek published both, the same day, in the same release notes as the price cut.
 
 That release, [DeepSeek-V3.2-Exp](https://api-docs.deepseek.com/news/news250929/), is the cleanest public demonstration of a claim this series keeps circling: kernels are not an implementation detail under the economics. Kernels *are* the economics. Most of the time the chain from "engineer makes attention faster" to "customer pays less" is hidden inside a company's margins. Here the entire chain was published at once — architecture, kernels, and price sheet.
 
 This article walks through what DeepSeek Sparse Attention (DSA) actually does, why it cuts the bill, and what the episode says about where efficiency gains end up.
 
-## The quadratic bill
+## Deep dive
+
+### The quadratic bill
+
+![Deep dive: The quadratic bill](./deep-dive-component-01.png)
 
 Standard transformer attention has a property that dominates long-context economics: every token attends to every previous token. If you have read [attention in plain words](/blog/attention-in-plain-words/), you know the mechanism: each token's query is compared against every earlier token's key, the scores become weights, and the weights blend the values. It is the reason [transformers won](/blog/transformer-architecture-in-one-picture/), and it is also a bill that grows with the *square* of context length.
 
@@ -28,10 +36,7 @@ The observation behind every sparse-attention scheme is that most of those 8.6 b
 
 DSA's answer: add a tiny, fast module whose only job is knowing which ones matter.
 
-![Deep dive: The quadratic bill](./deep-dive-component-01.png)
-
-
-## What DSA actually does
+### What DSA actually does
 
 DeepSeek Sparse Attention splits attention into 2 stages, described in the [V3.2-Exp technical report](https://github.com/deepseek-ai/DeepSeek-V3.2-Exp).
 
@@ -44,7 +49,9 @@ The crucial word in "trainable sparse attention" is *trainable*. Fixed sparsity 
 
 The complexity story: main attention drops from O(L²) to O(L·k) with k = 2,048 fixed. The indexer keeps an O(L²) term, but with a constant so small it stays cheap deep into the 6-figure context range.
 
-## The worked example: count the pairs, then count the dollars
+### The worked example: count the pairs, then count the dollars
+
+![Deep dive: The worked example: count the pairs, then count the dollars](./deep-dive-component-03.png)
 
 Take a 128K-token prompt, L = 131,072, and 1 attention layer.
 
@@ -61,8 +68,7 @@ Now the dollars. Consider a document-analysis call: 100K input tokens, 5K output
 
 A 53% cut on this workload. An agent platform making 10 million such calls a month goes from $644,000 to $301,000. Cached input fell too, from $0.07 to $0.028 per million. And this was not an introductory promotion: when DeepSeek later promoted V3.2 to its main endpoint, the prices stayed.
 
-
-## Separate expensive attention from its indexer
+### Separate expensive attention from its indexer
 
 For causal length $$L$$, dense attention examines $$N_d=L(L+1)/2$$ query-key pairs. If each query retains at most $$k$$ keys, its main sparse attention work examines
 
@@ -80,7 +86,7 @@ $$
 
 where the 2 coefficients express measured indexer and main-attention cost per pair. The indexer still scans history, but with a cheaper representation. Its work, routing overhead, projections, and memory transfers do not vanish. Compared with dense attention, the innovation moves expensive full-vector interactions behind a learned selection stage. It trades additional machinery and possible selection error for fewer costly interactions. Check quality, the indexer timeline, and total request latency before interpreting the pair ratio as a saving. A public release and price cut establish contemporaneous changes; they do not isolate hardware, margin, or every contributing serving change in a controlled experiment.
 
-## The lineage: MLA made DSA possible
+### The lineage: MLA made DSA possible
 
 DSA did not appear from nowhere. It is the third step in a lineage of DeepSeek attacking the attention bill, and the steps compose.
 
@@ -90,8 +96,9 @@ DSA did not appear from nowhere. It is the third step in a lineage of DeepSeek a
 
 **DSA (September 2025).** V3.2-Exp fuses the 2 ideas: fine-grained, per-token selection (sharper than NSA's blocks) running on top of MLA's compact latents. The combination is not accidental. Because MLA in its decode form behaves like multi-query attention — all 128 query heads share the same per-token latent — the 2,048 selected latents are fetched once and reused by every head. A sparse gather that would be scattered, bandwidth-wasting reads in a standard attention layout becomes a dense, reusable working set of about 1.2 million values. The architecture 2 generations back is what makes the sparse kernel efficient today.
 
+### Going deeper: training a module whose output is a hard cutoff
 
-## Going deeper: training a module whose output is a hard cutoff
+![Deep dive: Going deeper: training a module whose output is a hard cutoff](./deep-dive-component-02.png)
 
 A top-k selection is not differentiable — a token is in the shortlist or it is not, and gradients do not flow through "not". So how do you train the indexer to make good choices?
 
@@ -101,10 +108,7 @@ The kernel side is just as deliberate. Sparse attention has historically died in
 
 1 honest caveat belongs in any account of this story: "benchmark parity" is DeepSeek's own evaluation, on DeepSeek's chosen suite, for a model explicitly labeled experimental. The company itself kept V3.1-Terminus available through a comparison API for 2 weeks so users could check for regressions on their workloads. That is better epistemics than most launches, but parity on a published table is a vendor claim until third parties have hammered the edge cases, and long-context retrieval oddities are precisely where sparse attention would fail quietly.
 
-![Deep dive: Going deeper: training a module whose output is a hard cutoff](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"Sparse attention throws away context, so it must lose information."** DSA evicts nothing. The full 128K cache stays resident, and the top-2,048 selection is recomputed *per query token*. A passage the indexer skips at step 500 can be selected at step 501 the moment it becomes relevant. This is the key difference from sliding-window attention, where tokens outside the window are unreachable no matter what. The failure mode is subtler: the indexer must correctly *rank* relevance, and it is a small model that can misjudge.
 
@@ -112,7 +116,7 @@ The kernel side is just as deliberate. Sparse attention has historically died in
 
 **"Prices fell because compute got cheaper."** No new GPUs were involved. This cut arrived on the same export-constrained hardware DeepSeek was already serving on, which is what makes it such a clean experiment: hardware constant, software changed, price halved. If anything the causality runs the other way — teams with constrained hardware have the strongest incentive to do this kind of engineering. Hardware price-performance does improve each generation, but that cycle takes years; this took 1 model revision.
 
-## Where efficiency gains land
+### Where efficiency gains land
 
 The bigger question this episode answers: when someone makes inference cheaper, who pockets the difference?
 
@@ -120,13 +124,13 @@ In a market with 1 dominant provider, efficiency gains land in margins. In a mar
 
 It also says something about what an efficiency team is worth. The engineers who built DSA's indexer kernels and gather paths did not speed up a benchmark; they moved a public price by half. If you want a concrete answer to "what does an [ML performance engineer](/blog/what-does-an-ml-performance-engineer-do/) actually produce," this is it, denominated in dollars per million tokens.
 
-## Takeaway
+## Conclusion
 
 - DSA replaces "attend to everything" with "cheaply score everything, attend to the top 2,048." At 128K context that is 32× less main-attention compute in prefill and 64× fewer KV reads per decoded token, at vendor-reported benchmark parity.
 - The mechanism composes with its lineage: MLA (2024) shrank the memory side of the quadratic bill by ~93%; DSA (2025) shrinks the compute side, and MLA's shared latents are exactly what make DSA's sparse gathers hardware-friendly.
 - The release shipped architecture, open-source kernels (TileLang + CUDA), and a 50–75% price cut simultaneously — the most legible public evidence that kernel engineering is not below the economics, it is the economics.
 
-## Sources
+### Sources
 
 - DeepSeek — [Introducing DeepSeek-V3.2-Exp](https://api-docs.deepseek.com/news/news250929/) (release notes, price cut, open-source links)
 - DeepSeek — [DeepSeek-V3.2-Exp technical report and kernels](https://github.com/deepseek-ai/DeepSeek-V3.2-Exp) (DSA architecture, lightning indexer, training recipe)

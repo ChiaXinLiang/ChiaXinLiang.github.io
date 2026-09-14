@@ -3,7 +3,7 @@ title: "Instruction Sets: The Contract Between Software and Hardware"
 description: "Understand registers, instructions, memory, privilege, and the ABI through a worked load-add-store example."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'isa-1'
 order: 2
 series: "comp-arch"
@@ -12,13 +12,19 @@ topic: "CPU Fundamentals"
 tags: ['computer-architecture', 'isa', 'cpu']
 ---
 
+## Overview
+
+![Concept overview: Instruction Sets: The Contract Between Software and Hardware](./section-overview.png)
+
 The same 4-line calculation can execute on processors with very different pipelines. 1 core may run instructions in order, another may speculate far ahead, and both can produce the same architecturally correct result. The agreement between software and hardware is the instruction set architecture, usually shortened to ISA.
 
 After [the fetch-decode-execute introduction](../what-a-cpu-actually-does/), this is the next foundation. Fetch supplies instruction bits; decode interprets them according to an ISA; execution implements their defined effects. Understanding that boundary makes Arm, RISC-V, and x86-64 easier to compare without reducing each family to a marketing slogan.
 
 We will trace a small integer calculation, distinguish architecture from microarchitecture, and introduce the other contracts needed to run a real program. The goal is to read a few assembly instructions meaningfully before studying branch prediction and out-of-order execution.
 
-## What the ISA promises
+## Deep dive
+
+### What the ISA promises
 
 An ISA defines the machine state visible to software and how instructions change it. That state includes registers, memory effects, control flow, and the conditions under which an instruction raises an exception. A register is a small named storage location directly operated on by instructions. Memory is a much larger addressable collection of bytes.
 
@@ -28,8 +34,9 @@ The ISA also defines encodings: the bit patterns that identify operations and op
 
 A programmer can rely on the defined behavior, but cannot infer execution time from the mnemonic alone. A load from nearby cache and a load from DRAM have the same architectural meaning while taking very different amounts of time.
 
+### What the ISA leaves to implementation
 
-## What the ISA leaves to implementation
+![Deep dive: What the ISA leaves to implementation](./deep-dive-component-04.png)
 
 Microarchitecture is the machinery that implements the contract. Pipeline depth, issue width, execution units, cache sizes, branch prediction, and instruction scheduling are implementation choices. 2 processors with the same ISA can make different choices and have very different performance.
 
@@ -39,7 +46,7 @@ This freedom explains compatibility. A binary can continue to work on a newer pr
 
 The ISA is therefore a behavioral contract rather than a complete chip blueprint. A processor additionally contains interconnects, memory controllers, power management, and often accelerators. Those systems may have their own interfaces and are not explained by the CPU's integer instruction list.
 
-## 3 basic kinds of instructions
+### 3 basic kinds of instructions
 
 Data-processing instructions transform register values. Examples include addition, subtraction, bitwise AND, shifts, and comparison. Some operations affect condition flags, while other architectures encode comparisons into branch instructions directly.
 
@@ -49,7 +56,9 @@ Control-flow instructions change which instruction executes next. Conditional br
 
 The categories are useful for learning, but some instructions combine roles. An x86 arithmetic instruction may read a memory operand. An AArch64 load can update its base pointer. An instruction set's precise rules matter more than a rigid classification.
 
-## A worked load-add-store example
+### A worked load-add-store example
+
+![Deep dive: A worked load-add-store example](./deep-dive-component-01.png)
 
 Imagine a memory location at hexadecimal address `0x1000` containing the unsigned 64-bit integer 7. A register holds that address. We want to load the value, add 5, and write it back. A compact AArch64 example is:
 
@@ -76,10 +85,9 @@ Assume the location is valid, the access width is 64 bits, and no other agent mo
 
 The method is to describe architectural effects independently of the internal schedule. Register renaming, forwarding, and speculative execution may change when operations run, but a correct implementation preserves the specified visible result. The concurrency assumption matters: ordinary separate load and store instructions do not make an increment atomic. If 2 threads both load 7 before either stores, both may store 12 and lose an intended increment. An ISA's atomic operation or a correctly implemented synchronization protocol is needed for that different contract. Memory ordering and atomicity are related but distinct; a barrier can constrain ordering without converting this entire sequence into an indivisible update. Architectural reasoning starts by stating which shared-memory guarantee the program requires.
 
-![Deep dive: A worked load-add-store example](./deep-dive-component-01.png)
+### Why width and signedness matter
 
-
-## Why width and signedness matter
+![Deep dive: Why width and signedness matter](./deep-dive-component-03.png)
 
 A 64-bit integer register can represent bit patterns from 0 through $$2^{64}-1$$ when interpreted as unsigned. The same bits can represent signed 2's-complement values. Many operations act on bits identically regardless of interpretation; signedness becomes decisive for comparisons, division, and extension into a larger width.
 
@@ -89,7 +97,7 @@ The compiler must translate language semantics into instructions correctly. Seei
 
 Loads can sign-extend or zero-extend a smaller memory value. A byte `ff` becomes 255 under unsigned extension and minus 1 under signed extension. The opcode and operand width determine the hardware behavior; the source type guides the compiler's choice.
 
-## Registers are named roles, not ordinary RAM
+### Registers are named roles, not ordinary RAM
 
 An instruction usually encodes register indices in a limited number of bits. AArch64 exposes 31 general-purpose integer registers, while base RISC-V exposes 32 integer register names with register 0 hardwired to 0. Those counts do not describe every physical register inside a modern core.
 
@@ -97,7 +105,7 @@ Register renaming can map architectural registers to a larger internal collectio
 
 Registers also have conventions imposed by an ABI. 1 register may carry a function argument, another may need preservation across calls. Those conventions are not the same as an instruction's fundamental ability to add or load the register. The next article develops AArch64's register model and calling convention.
 
-## The ABI is a second contract
+### The ABI is a second contract
 
 An application binary interface describes how compiled pieces cooperate. It defines matters such as argument passing, return values, stack alignment, and which registers a called function must preserve. Object-file format and linking conventions belong to the broader binary environment.
 
@@ -107,7 +115,9 @@ For AArch64, Arm's AAPCS64 uses `x0` through `x7` for initial integer/pointer pa
 
 Operating-system interfaces add another layer. System-call numbers, executable loading, libraries, and permissions depend on the platform. “Supports the ISA” is necessary for a native binary, but not sufficient to run an executable built for a different operating system.
 
-## Going deeper: memory ordering
+### Going deeper: memory ordering
+
+![Deep dive: Going deeper: memory ordering](./deep-dive-component-02.png)
 
 A single-thread trace is not a complete account of concurrent software. Different architectures allow different observable orderings of memory operations. A processor may buffer stores or overlap loads, while coherence and memory-model rules constrain what other observers can see.
 
@@ -117,10 +127,7 @@ Memory ordering and atomicity are related but distinct. An operation can be atom
 
 This subject becomes especially important when a CPU communicates with an accelerator or memory-mapped device. Normal cached memory and device memory may have different access rules. A convenient integer pointer is not a substitute for the platform's required device-access API.
 
-![Deep dive: Going deeper: memory ordering](./deep-dive-component-02.png)
-
-
-## Privilege and the system boundary
+### Privilege and the system boundary
 
 A useful computer must isolate applications and manage resources. Privileged architecture defines facilities for address translation, exceptions, interrupts, and protected control state. Ordinary application code cannot freely change every register merely because the ISA documents it.
 
@@ -130,7 +137,7 @@ Interrupts and exceptions also expose the difference between instruction semanti
 
 We will not memorize privilege registers here. The useful mental boundary is that user instructions operate within an environment established by more privileged software. Booting a processor and running a normal function involve different architectural responsibilities.
 
-## This matters for AI chips
+### This matters for AI chips
 
 AI workloads still need CPUs for scheduling, preprocessing, networking, and operating-system services. The CPU ISA influences the software toolchain and available vector instructions, but the accelerator's matrix throughput is not determined by whether its host CPU uses Arm or x86.
 
@@ -138,7 +145,7 @@ A GPU kernel usually targets a separate device execution model and instruction s
 
 Custom instructions and vector extensions can accelerate parts of inference, but they require compiler and library support. A hardware capability has little practical value if the application never emits its instructions. Connect this foundation to [SIMD](../simd-one-instruction-many-numbers/) and the AI Performance series when evaluating optimized kernels.
 
-## Common misconceptions
+### Common misconceptions
 
 **The ISA tells you the pipeline.** It tells you visible behavior. Pipeline organization is a microarchitectural choice, which is why compatible processors can have different speeds.
 
@@ -148,14 +155,13 @@ Custom instructions and vector extensions can accelerate parts of inference, but
 
 **ISA compatibility guarantees executable compatibility.** Required extensions, ABI, operating system, and libraries also have to match.
 
-
-## Takeaway
+## Conclusion
 
 Read an instruction as a defined change to architectural state. Then ask separately how a particular core implements it and how the surrounding ABI and operating system make it part of a program.
 
 Continue with [Arm and AArch64](../arm-aarch64-registers-and-ecosystem/), then [RISC-V](../riscv-small-base-extensible-system/). With those examples in place, comparisons between architectures become concrete rather than ideological.
 
-## Sources
+### Sources
 
 - [Arm A64 Instruction Set Architecture Guide](https://documentation-service.arm.com/static/674d8b61c7fc0d1f211dc776): instruction classes and AArch64 operand semantics.
 - [Arm AAPCS64](https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst): register model and procedure-call conventions.

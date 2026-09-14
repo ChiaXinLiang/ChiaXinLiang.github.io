@@ -11,7 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "metadata": "python3 tools/export-content.py",
-    "prebuild": "npm run metadata",
+    "prebuild": "npm run metadata && python3 tools/check-article-visuals.py",
     "predev": "npm run metadata"
   },
   "dependencies": {

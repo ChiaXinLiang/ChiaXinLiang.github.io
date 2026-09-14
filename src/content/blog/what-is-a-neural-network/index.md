@@ -3,7 +3,7 @@ title: 'What Is a Neural Network, Really?'
 description: "Strip away the brain metaphors: a neural network is weighted sums and simple squashing functions, stacked. That's it — and that's enough to run ChatGPT."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'nn-1'
 order: 1
 series: "llm-basics"
@@ -12,11 +12,17 @@ topic: "Neural Networks"
 tags: ['neural-networks', 'fundamentals']
 ---
 
+## Overview
+
+![Concept overview: What Is a Neural Network, Really?](./section-overview.png)
+
 Multiply, add, squash. That 3-step operation, repeated a few trillion times, is how a frontier LLM produces 1 word of its answer.
 
 "Neural network" sounds like it involves something brain-like and mysterious. This article's goal is to remove the mystery completely: by the end, you'll see that the unit is arithmetic you learned in school, and the intelligence — such as it is — lives in how many of those units there are and how their knobs get set.
 
-## 1 neuron: a weighted vote
+## Deep dive
+
+### 1 neuron: a weighted vote
 
 The basic unit — an artificial neuron — takes some input numbers and produces 1 output number, in 3 steps:
 
@@ -29,7 +35,7 @@ A useful mental model: a neuron is a **weighted vote**. Each input gets a say; t
 
 There is genuinely nothing else inside. No symbols, no rules, no little brain. Multiply, add, squash.
 
-## A network: votes about votes
+### A network: votes about votes
 
 1 neuron can only draw 1 straight boundary through its inputs — useful, but weak. The power move is stacking:
 
@@ -42,7 +48,7 @@ Stacking is what buys abstraction. In an image network, first-layer neurons end 
 
 The key vocabulary: every connection line in that picture is 1 **weight** — 1 adjustable number. "Training a network" means nothing more mystical than setting all those numbers.
 
-## Scale changes the engineering, not just the count
+### Scale changes the engineering, not just the count
 
 Here is the part that surprises people. The network in the figure above might have a few hundred weights. GPT-3 has 175 billion. Many later models use larger or sparse parameter sets; undisclosed models cannot be compared by assumed parameter count. The *unit* is unchanged — multiply, add, squash — and has been essentially unchanged for decades.
 
@@ -56,14 +62,14 @@ Some rough numbers to calibrate the scale:
 
 These models share learned numerical operations, but differ in architecture, objectives, data, and scale. When we cover [why GPUs matter](/blog/what-does-an-ml-performance-engineer-do/) elsewhere on this blog, this is the reason: the workload is trillions of multiply-adds, and GPUs are machines built to do exactly that in bulk.
 
-## What the network "knows"
+### What the network "knows"
 
 Learned weights are central to a trained network, but reproducing its behavior also requires the architecture, tokenizer, preprocessing, and runtime context. That has 2 consequences worth internalizing now:
 
 - **Learning = adjusting numbers.** There is no database of facts inside; there are weights whose values make useful outputs likely. How those values get found — gradient descent and backpropagation — is the next article.
 - **Size = memory and bandwidth.** 175 billion weights at even 1 byte each is 175 GB that must be stored and, during use, *read*. Every performance topic on this blog ultimately traces back to moving these numbers around.
 
-## Run 1 neuron with actual numbers
+### Run 1 neuron with actual numbers
 
 Consider a simple sensor example. Let the 2 inputs be temperature and vibration, already transformed into dimensionless standardized values. For 1 observation, use $$x_1=2$$ and $$x_2=-1$$. Give the neuron weights $$w_1=0.5$$ and $$w_2=-0.25$$, and bias $$b=-0.2$$. The number before activation is
 
@@ -77,7 +83,9 @@ Now change vibration from minus 1 to 1 while holding temperature fixed. The pre-
 
 Input scaling matters. A weight of 0.5 attached to a temperature measured in degrees cannot be compared directly with the same weight attached to a standardized temperature. Units, preprocessing, and the input distribution determine what a coefficient means. This is 1 reason inspecting raw weight magnitudes rarely gives a complete explanation of a prediction.
 
-## Activation means more than squashing
+### Activation means more than squashing
+
+![Deep dive: Activation means more than squashing](./deep-dive-component-01.png)
 
 The earlier shorthand “squash” is useful for sigmoid and tanh, but common activations need not keep their outputs in a bounded range. ReLU returns 0 for negative input and returns the input itself for positive input. GELU and gated activations behave differently again. The essential property is introducing a nonlinear transformation, not necessarily compressing every number between fixed bounds.
 
@@ -87,10 +95,9 @@ A nonlinear activation between those layers prevents that collapse. The network 
 
 The common statement that 1 neuron draws 1 straight boundary also needs context. A sigmoid classifier on raw features has a linear decision boundary at a fixed threshold. If its inputs are already nonlinear features produced by earlier layers, that same last neuron can participate in a nonlinear boundary in the original input space. Always say which representation a geometric claim refers to.
 
-![Deep dive: Activation means more than squashing](./deep-dive-component-01.png)
+### Count a small network before counting a frontier model
 
-
-## Count a small network before counting a frontier model
+![Deep dive: Count a small network before counting a frontier model](./deep-dive-component-02.png)
 
 Suppose a fully connected network has 3 input features, a hidden layer of 4 neurons, and 2 output scores. Every hidden neuron receives 3 weights and 1 bias, so the first layer contains 16 parameters. Every output receives 4 weights and 1 bias, so the second layer contains 10. Total parameter count is 26.
 
@@ -111,10 +118,9 @@ U maps the hidden representation to the next layer and c is its bias. If both ac
 
 For a concrete ReLU example, choose x equal to (2,-1), W with rows (0.5,-0.25) and (-1,1), and b equal to (-0.2,0). The pre-activations are (1.05,-3), so h is (1.05,0). With U equal to (2,-1) and c equal to 0.1, an identity output is 2.2. Change the input enough to cross a ReLU boundary and the active linear rule changes. Capacity grows, but fitting that capacity still requires data, an objective, and validation; the equation alone does not guarantee learning or useful abstractions.
 
-![Deep dive: Count a small network before counting a frontier model](./deep-dive-component-02.png)
+### What a representation actually is
 
-
-## What a representation actually is
+![Deep dive: What a representation actually is](./deep-dive-component-03.png)
 
 A hidden representation is a vector produced by applying the learned computation to a particular input. It can summarize useful features without having 1 neatly named concept per coordinate. Individual features may be distributed across many coordinates, and a coordinate can contribute to more than 1 behavior.
 
@@ -124,7 +130,7 @@ Embeddings illustrate the same point. A token identifier indexes a learned vecto
 
 The network also has a fixed computational design beyond its learned parameter values: which operations are applied, how data flow, and what preprocessing/tokenizer is used. Copying weights without the corresponding architecture and input contract can produce an unusable model. In retrieval-augmented systems, external documents and temporary context additionally influence answers without becoming new trained weights.
 
-## A network is not a guarantee of understanding
+### A network is not a guarantee of understanding
 
 A trained model is useful when its computation generalizes beyond the examples used to fit it. A flexible network can also memorize correlations that fail under new conditions. Predicting a label correctly on training data is evidence about fit, not proof of reliable behavior everywhere.
 
@@ -134,7 +140,7 @@ For probabilistic outputs, inspect confidence as well as accuracy. A model can b
 
 The transferable foundation is therefore richer than “more weights means more intelligence.” Networks compose learned numerical transformations. Their usefulness depends on architecture, data, objective, optimization, and evaluation together. Scale changes capacity and cost, while those other choices determine what that capacity is used to learn.
 
-## Takeaway
+## Conclusion
 
 - A neuron is a weighted vote: multiply inputs by weights, add a bias, squash. Nothing else is inside.
 - A network is votes about votes: layers stack simple boundaries into abstractions. Every connection is 1 adjustable weight.
@@ -143,7 +149,7 @@ The transferable foundation is therefore richer than “more weights means more 
 
 You can inspect a small network without treating it as a mysterious black box. Choose 1 input, record each layer output, and check its shape against the intended computation. Then change 1 input feature and observe which activations move. This does not fully explain a large model, but it exposes concrete operations and helps find mistakes such as transposed dimensions or missing biases. Keep the learned weights fixed during this exercise so that the comparison reflects inference rather than training. Once those operations are clear, training becomes a separate question: how to choose parameter values that work across many examples.
 
-## Sources
+### Sources
 
 - Goodfellow, Bengio, Courville, [Deep Learning, machine-learning basics](https://www.deeplearningbook.org/contents/ml.html) and [deep feedforward networks](https://www.deeplearningbook.org/contents/mlp.html).
 

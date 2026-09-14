@@ -12,18 +12,19 @@ level: "beginner"
 tags: ["ai-networking", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: AI Cluster Topology: PCIe, NVLink, NVSwitch, and Scale-Out Fabrics. Nested topology cutaway: GPUs joined by NVLink/NVSwitch inside a node, PCIe paths to local NICs, network leaf and spine switches joining several nodes.](./section-overview.png)
+
 A cluster topology is a map of communication opportunities and shared bottlenecks. Two systems with the same accelerator count and network-adapter rate can deliver different distributed performance because their devices are connected differently. The job's process groups then determine which parts of that physical map carry the most traffic.
 
 The useful engineering task is to connect a logical exchange to its actual path. A tensor-parallel all-reduce, pipeline boundary transfer, and expert all-to-all can stress different resources even when they run on the same devices. Topology-aware placement starts by identifying those exchanges rather than treating every GPU pair as equivalent.
 
 This article develops a method for drawing local and scale-out paths, deriving simple capacity bounds, and testing placement decisions. It avoids generation-specific link-rate claims: product specifications and supported topologies should be checked for the actual platform. Numerical examples are illustrative traffic calculations.
 
-## 1. Separate the logical communication graph from physical links
+## Deep dive
 
-![Concept overview: AI Cluster Topology: PCIe, NVLink, NVSwitch, and Scale-Out Fabrics. Nested topology cutaway: GPUs joined by NVLink/NVSwitch inside a node, PCIe paths to local NICs, network leaf and spine switches joining several nodes.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Separate the logical communication graph from physical links
 
 The logical graph describes which ranks exchange data, how often, and how many bytes move. The physical graph describes devices, switches, interface capacities, and shared paths. Rank numbering alone does not tell you where a process's GPU or network adapter is located.
 
@@ -33,7 +34,7 @@ A mapping function assigns each rank to a device and placement. The resulting ph
 
 Keep the two graphs visible during diagnosis. A topology diagram without a workload tells you where data could move, while a communication trace without placement tells you what moved logically. Their combination identifies which physical resources are likely to limit the job.
 
-## 2. Draw the accelerator-local fabric first
+### 2. Draw the accelerator-local fabric first
 
 Within a server or a supported accelerator domain, GPUs may communicate through dedicated accelerator links, a switching fabric, PCIe paths, or a combination. NVLink and NVSwitch describe NVIDIA accelerator interconnection technologies, but supported connectivity and bandwidth vary by platform and generation.
 
@@ -43,7 +44,7 @@ PCIe is another important local path. Devices can share downstream switches and 
 
 Discover the actual machine rather than inferring it from the GPU model name. Record GPU identifiers, PCI bus locations, NUMA relationships, and peer-access capabilities. The same accelerator product can appear in systems with materially different host and interconnect layouts.
 
-## 3. Peer accessibility is a capability, not a benchmark result
+### 3. Peer accessibility is a capability, not a benchmark result
 
 A programming interface can report whether one device can access another device's memory under supported conditions. That capability does not establish the achieved transfer bandwidth or guarantee that every application operation uses the intended direct path.
 
@@ -53,7 +54,9 @@ Test representative transfers between relevant pairs and preserve directionality
 
 Do not substitute a host-memory copy test for a device-to-device path test. Buffer location, transfer API, synchronization boundary, and process model affect what the experiment measures. Verify these details before attributing a surprising result to the physical interconnect.
 
-## 4. Trace the GPU-to-NIC path before the leaf switch
+### 4. Trace the GPU-to-NIC path before the leaf switch
+
+![Deep-dive illustration: Trace the GPU-to-NIC path before the leaf switch](./deep-dive.png)
 
 Scale-out communication begins inside the source server. Data must reach a network adapter through a supported transport path, which may use direct GPU memory access or staging through host memory. The server-side path can limit performance even when the external fabric is healthy.
 
@@ -69,10 +72,7 @@ This is a bottleneck bound, not a complete latency model. Pipelined segments nee
 
 A server with several high-rate adapters therefore needs a mapping that can use them effectively. Port count and aggregate advertised rate do not establish balanced traffic across adapters. Inspect per-adapter counters and application path selection when one part of the server underperforms.
 
-
-![Deep-dive illustration: Trace the GPU-to-NIC path before the leaf switch](./deep-dive.png)
-
-## 5. Model leaf-spine capacity through relevant cuts
+### 5. Model leaf-spine capacity through relevant cuts
 
 A scale-out fabric commonly connects servers to leaf switches and leaves to a spine layer, but actual designs can include multiple planes, rails, tiers, and oversubscription. Identify the path and capacity available to the job rather than treating the fabric as one unlimited network cloud.
 
@@ -86,7 +86,9 @@ For an illustrative cut requiring 64 GB of traffic with 400 GB/s available capac
 
 The cut must match the required direction and paths. Adding unrelated links elsewhere in the rack does not increase this cut's capacity. Likewise, a bidirectional total cannot be assigned entirely to traffic traveling one way. This method exposes why an impressive aggregate fabric specification can coexist with a bottleneck for a particular placement.
 
-## 6. Oversubscription is a workload-dependent constraint
+### 6. Oversubscription is a workload-dependent constraint
+
+![Deep dive: 6. Oversubscription is a workload-dependent constraint](./deep-dive-component-01.png)
 
 A fabric is oversubscribed when its upstream capacity is smaller than the potential simultaneous demand from downstream connections. That ratio describes a capacity relationship, but the performance impact depends on which traffic actually crosses the constrained boundary.
 
@@ -102,7 +104,9 @@ Use the application's traffic matrix to estimate how much work remains local and
 
 Measure under realistic multi-job conditions when the cluster shares fabric capacity. A single job's isolated benchmark can miss contention patterns created by neighboring jobs. Preserve placement and background-load conditions in reports so later comparisons remain meaningful.
 
-## 7. Map parallelism dimensions onto locality deliberately
+### 7. Map parallelism dimensions onto locality deliberately
+
+![Deep dive: 7. Map parallelism dimensions onto locality deliberately](./deep-dive-component-02.png)
 
 High-frequency communication is a strong candidate for the fastest local domain. Tensor parallelism often benefits from strong accelerator-local connectivity because exchanges can occur repeatedly inside each layer. Pipeline boundaries may carry larger activation messages less frequently, while data-parallel traffic depends on synchronization and sharding schedules.
 
@@ -114,10 +118,7 @@ Record rank-to-device and rank-to-NIC mappings as part of the experiment. Keep t
 
 Consider a simplified 16-GPU job split across 2 servers with 8 GPUs each. A tensor-parallel group of 4 can remain within one server, while a data-parallel group can connect corresponding local groups across servers. An alternative interleaving places every tensor-parallel group across both servers and makes its frequent layer exchanges use the scale-out path. This example does not prove the first layout optimal, but it identifies a specific traffic difference to measure. Compare layer communication, synchronization tails, and memory feasibility before selecting the mapping.
 
-![Deep dive: 7. Map parallelism dimensions onto locality deliberately](./deep-dive-component-02.png)
-
-
-## 8. Verify with a hierarchy of experiments
+### 8. Verify with a hierarchy of experiments
 
 Begin with topology discovery and capability checks. Then measure representative device pairs and GPU-NIC paths. Next run the relevant collective across the intended rank group. Finally measure the application timeline, because good isolated paths do not establish effective overlap or balanced readiness.
 
@@ -127,7 +128,7 @@ Inspect the slowest ranks and paths rather than reporting only the fleet average
 
 Change placement while holding the logical workload fixed to test a topology hypothesis. If moving a group onto a stronger local domain improves the expected communication phase, the result supports the path explanation. Also inspect computation time so a placement benefit is not confused with a different CPU or memory bottleneck.
 
-## 9. Maintain a topology record that operators can use
+### 9. Maintain a topology record that operators can use
 
 A useful record contains physical device relationships, supported peer access, representative pair measurements, adapter mapping, relevant switch cuts, and the process meshes used by important jobs. Keep hardware and software versions beside the record, because drivers and communication libraries can change path behavior.
 
@@ -135,9 +136,11 @@ Annotate diagrams with usable measured capacities and assumptions rather than on
 
 Recheck after hardware maintenance, scheduler changes, adapter configuration changes, and communication-library upgrades. A stale topology document can cause placement policies to preserve a locality assumption that the current cluster no longer satisfies.
 
+## Conclusion
+
 The essential method is to follow data from the producing GPU to its consumer and identify the resources it must share. Dedicated accelerator fabrics, PCIe locality, GPU-NIC paths, and scale-out cuts all contribute. Topology-aware placement succeeds when the logical communication schedule fits the physical paths that the job actually receives.
 
-## Sources
+### Sources
 
 - [CUDA programming guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html).
 - [NVIDIA system topology commands](https://docs.nvidia.com/deploy/nvidia-smi/index.html).

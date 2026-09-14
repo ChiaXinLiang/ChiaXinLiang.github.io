@@ -12,18 +12,21 @@ level: "intermediate"
 tags: ["ai-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: The Training Input Pipeline: Workers, Prefetch, Pinned Memory, and GDS. Storage files feed several CPU data-loader workers, a prefetch queue, pinned host buffers, and a GPU training engine.](./section-overview.png)
+
 A training GPU can wait for data while the storage device appears fast and CPU utilization appears high. The missing distinction is between raw bytes read and a batch ready for device computation. Parsing, decompression, augmentation, collation, and host-to-device transfer all sit between those events.
 
 The input pipeline should be treated as an execution program with rates, queues, memory budgets, and correctness requirements. Increasing workers or prefetch depth helps only when it addresses the limiting stage or absorbs relevant variability. It can also increase memory pressure and contention.
 
 We will derive a steady-state pipeline model, budget buffered batches, and examine pinned memory and GPUDirect Storage. Numerical examples are illustrative. DataLoader options and supported storage paths should be verified for the installed runtime and platform.
 
-## 1. Draw the complete path from a sample to computation
+## Deep dive
 
-![Concept overview: The Training Input Pipeline: Workers, Prefetch, Pinned Memory, and GDS. Storage files feed several CPU data-loader workers, a prefetch queue, pinned host buffers, and a GPU training engine.](./section-overview.png)
+### 1. Draw the complete path from a sample to computation
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep dive: 1. Draw the complete path from a sample to computation](./deep-dive-component-02.png)
 
 Start with storage access, then identify decoding, transforms, sample grouping, collation, host buffering, transfer, and GPU consumption. Some stages may be fused, cached, or moved to the device. The diagram should describe the actual workload rather than an idealized generic loader.
 
@@ -35,10 +38,9 @@ Record cache state. A dataset that fits in the page cache can behave differently
 
 Storage layout also affects the program. Many small files can expose metadata and request overhead, while larger record containers can support more efficient sequential reads. Random sample access may require additional indexing or read amplification within a container. Measure useful decoded samples per second alongside physical bytes read so a format that reads more data to produce the same batch is visible. Caching or offline preprocessing can reduce repeated work, but their preparation cost and storage footprint belong in the deployment record. Preserve the intended sampling distribution when reorganizing records; improved locality should not silently replace the training data policy.
 
-![Deep dive: 1. Draw the complete path from a sample to computation](./deep-dive-component-02.png)
+### 2. Derive the steady-state bottleneck approximation
 
-
-## 2. Derive the steady-state bottleneck approximation
+![Deep-dive illustration: Derive the steady-state bottleneck approximation](./deep-dive.png)
 
 For stages with effective batch service times t_j and sufficient overlap, an ideal pipeline's steady-state interval is bounded by its slowest stage:
 
@@ -52,10 +54,7 @@ For illustrative times of 40 milliseconds reading, 20 decoding, 15 transforming,
 
 Measure queue occupancy and starvation to test the model. If ready batches disappear before each GPU step, upstream supply is insufficient or too variable. If queues remain full and GPU timing is unchanged, increasing loader concurrency may add resource cost without improving training.
 
-
-![Deep-dive illustration: Derive the steady-state bottleneck approximation](./deep-dive.png)
-
-## 3. Workers increase capacity only under the right conditions
+### 3. Workers increase capacity only under the right conditions
 
 Multiple workers can parallelize independent sample reads and preprocessing. Their useful scaling depends on storage concurrency, CPU availability, transform cost, and shared memory bandwidth. A worker count is not itself a throughput model.
 
@@ -65,7 +64,7 @@ Dataset representation also affects memory. Worker processes can retain or repli
 
 Preserve multiprocessing context and initialization behavior in reports. Startup, serialization, process creation, and persistent-worker settings can affect cold and steady-state costs differently. Changing them can also alter how dataset state and randomness are initialized.
 
-## 4. Prefetch is a queue budget, not free performance
+### 4. Prefetch is a queue budget, not free performance
 
 Let w be workers, f the configured batches prefetched per worker under the runtime's semantics, and m the batch-buffer footprint. A first-order queued-data estimate is
 
@@ -79,7 +78,7 @@ For w=8, f=2, and m=64 MiB, queued batches alone account for about 1 GiB under t
 
 Prefetch absorbs variability only if average upstream supply can keep up. A permanently slower producer eventually empties any finite queue. Increasing queue depth can delay the visible stall while leaving the steady-state bottleneck unchanged.
 
-## 5. Size buffering for the variability it must absorb
+### 5. Size buffering for the variability it must absorb
 
 Suppose compute consumes one batch every t_c and upstream production occasionally pauses for J. A rough number of ready batches needed to bridge that pause is
 
@@ -93,7 +92,9 @@ Measure the interruption distribution and memory cost before selecting q. A queu
 
 Inspect recovery after interruptions. If producers never refill the queue because their mean rate barely matches consumption, bursts can create recurring starvation. Additional average production capacity may matter more than a larger initial buffer.
 
-## 6. Pinned memory changes the transfer path and its constraints
+### 6. Pinned memory changes the transfer path and its constraints
+
+![Deep dive: 6. Pinned memory changes the transfer path and its constraints](./deep-dive-component-03.png)
 
 Pinned host memory can support efficient asynchronous host-to-device transfer under the runtime's supported behavior. It is different from ordinary pageable memory and consumes a host resource whose allocation and lifetime matter.
 
@@ -109,7 +110,7 @@ where D is transferred bytes and B_H2D achieved bandwidth. Many tiny tensors can
 
 Do not reuse a source buffer while an outstanding transfer still reads it. Similarly, the GPU consumer must wait on the required transfer event. A fast loader that violates ownership can create intermittent corruption that disappears under diagnostic synchronization.
 
-## 7. GPUDirect Storage does not perform the whole input pipeline
+### 7. GPUDirect Storage does not perform the whole input pipeline
 
 GPUDirect Storage provides supported data paths that can move storage data into GPU memory without the traditional CPU bounce-buffer sequence. Its applicability depends on storage, filesystem, software, and platform support.
 
@@ -119,7 +120,7 @@ Compare the complete ready-input path. Direct storage can reduce host traffic or
 
 Label the actual path and cache conditions. A library request for direct I/O is not evidence that every read used the intended route. Use supported diagnostics and workload measurements to verify the mechanism before attributing a training speedup to GDS.
 
-## 8. Distributed input correctness is a performance requirement
+### 8. Distributed input correctness is a performance requirement
 
 Different ranks must receive the intended dataset partitions and sampling behavior. Map-style samplers and iterable datasets have different sharding responsibilities. Worker-level and rank-level partitioning must not accidentally duplicate or omit records.
 
@@ -129,7 +130,7 @@ Random transforms need an explicit reproducibility policy. Worker initialization
 
 Options that drop incomplete batches change the processed population. They can be appropriate for the method, but performance reports should count the actual useful samples or tokens. Faster epochs caused by omitting work are not equivalent to faster execution of the same training program.
 
-## 9. Use traces to distinguish starvation from device execution
+### 9. Use traces to distinguish starvation from device execution
 
 Capture loader wait, transfer events, and GPU computation on compatible timelines. If the device waits before each transfer, inspect producer supply. If transfers are ready but computation waits on dependencies, inspect the device scheduling path.
 
@@ -139,7 +140,9 @@ Sweep workers, prefetch depth, and transfer configuration while preserving input
 
 Measure sustained steps after warmup and include startup separately where relevant. Keep CPU utilization, host memory, storage demand, and GPU starvation alongside useful-token throughput. These measurements explain whether a gain comes from greater supply, absorbed jitter, or a changed data population.
 
-## 10. Preserve a reproducible input-pipeline record
+### 10. Preserve a reproducible input-pipeline record
+
+![Deep dive: 10. Preserve a reproducible input-pipeline record](./deep-dive-component-01.png)
 
 Record dataset version and format, sample distribution, cache state, workers, prefetch semantics, process model, collation, pinning, transfer path, rank sharding, and observed memory. Preserve representative batch and step timing.
 
@@ -147,9 +150,11 @@ A useful report separates raw-read throughput, ready-batch throughput, and train
 
 For an illustrative investigation, increasing workers from 4 to 8 might eliminate ready-queue starvation while increasing to 16 produces no further training gain and doubles host-memory pressure. That supports choosing 8 for the tested workload, not declaring 8 universally optimal. A later faster compute kernel can shift the limiting rate and require another sweep.
 
+## Conclusion
+
 The training input pipeline is a chain of useful transformations with finite rates and buffer ownership. Workers provide capacity, prefetch absorbs variability, pinned memory supports a transfer path, and GDS can remove particular staging work. Their value is established by correct, sustained useful training progress rather than by isolated raw bandwidth or an arbitrarily large queue.
 
-## Sources
+### Sources
 
 - [PyTorch data loading documentation](https://docs.pytorch.org/docs/stable/data.html).
 - [NVIDIA GPUDirect Storage overview](https://docs.nvidia.com/gpudirect-storage/overview-guide/index.html).

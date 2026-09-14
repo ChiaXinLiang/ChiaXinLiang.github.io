@@ -3,7 +3,7 @@ title: 'Goodput: What GPU Utilization Leaves Out'
 description: "GPU utilization measures activity. Goodput measures retained training progress or serving output that meets its objectives; defining the denominator makes the difference."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'intro-2'
 order: 2
 series: "ai-performance"
@@ -12,11 +12,17 @@ topic: "Performance Methodology"
 tags: ['goodput', 'gpu', 'ml-performance']
 ---
 
+## Overview
+
+![Concept overview: Goodput: What GPU Utilization Leaves Out](./section-overview.png)
+
 Your GPU dashboard can report high utilization while the job makes disappointing progress or the service misses its promises.
 
 Those 2 sentences can both be true at once, and understanding why is the single most important idea in AI performance engineering. This article is about the metric that exposes the gap: **goodput**.
 
-## Busy is not useful
+## Deep dive
+
+### Busy is not useful
 
 "Utilization" answers 1 question: is the GPU doing *something* right now? It says nothing about whether that something moves your training run or your user's request forward.
 
@@ -30,14 +36,15 @@ Goodput asks the better question: **of the work this hardware could theoreticall
 
 Some overheads leave GPU kernels active, while others leave the device idle. Repeated work can raise activity without advancing retained progress. The dashboard stays green. The money burns.
 
-## What Meta actually measured
+### What Meta actually measured
 
 Meta's infrastructure team analyzed research-cluster reliability in [Revisiting Reliability in Large-Scale Machine Learning Research Clusters](https://arxiv.org/abs/2410.21680). Their effective training time ratio evaluates reliability and job overhead at a defined scope. It should not be read as a universal claim that 70 percent of every fully utilized GPU cluster is wasted. The study motivates measuring retained progress over the full job lifecycle.
 
 The following figure is an illustrative accounting schematic, not a reproduction of Meta's measured fleet results.
 
+### Why this metric changes behavior
 
-## Why this metric changes behavior
+![Deep dive: Why this metric changes behavior](./deep-dive-component-04.png)
 
 Once you track goodput instead of utilization, priorities reorder themselves:
 
@@ -45,7 +52,7 @@ Once you track goodput instead of utilization, priorities reorder themselves:
 
 This is also why the job I described in [the previous article](/blog/what-does-an-ml-performance-engineer-do/) exists at all. The gap between theoretical and useful throughput *is* the performance engineer's territory. Closing 20 points of it on a large cluster is worth millions of dollars a year — and unlike buying hardware, it compounds: every future job runs on the improved stack.
 
-## How to start measuring it
+### How to start measuring it
 
 You don't need Meta's infrastructure to begin:
 
@@ -55,7 +62,9 @@ You don't need Meta's infrastructure to begin:
 
 The first time a team runs this exercise, the result is usually uncomfortable. That discomfort is the point: you can't close a gap you haven't measured.
 
-## There is more than 1 goodput denominator
+### There is more than 1 goodput denominator
+
+![Deep dive: There is more than 1 goodput denominator](./deep-dive-component-01.png)
 
 The word goodput appears in several systems contexts, and its exact definition must accompany the number. A network may count application bytes delivered after excluding protocol overhead and retransmissions. A training system may count retained progress per elapsed hour. A serving system may count requests or tokens that meet latency and quality requirements. These quantities share the idea of useful completion, but they are not interchangeable ratios.
 
@@ -65,10 +74,9 @@ For serving, 1 possible definition is the rate of requests that satisfy a specif
 
 Token goodput is another legitimate definition, but length weighting changes the result. A long response contributes more tokens than a short response, and an aggregate token objective can conceal poor treatment of short interactive requests. Publish both the weighting and the acceptance rule so the team understands which behavior the metric rewards.
 
-![Deep dive: There is more than 1 goodput denominator](./deep-dive-component-01.png)
+### A consistent illustrative calculation
 
-
-## A consistent illustrative calculation
+![Deep dive: A consistent illustrative calculation](./deep-dive-component-03.png)
 
 Consider a hypothetical training job with a validated clean-run baseline of 10,000 retained tokens per second. During an hour of allocated time, 600 seconds are lost to startup, checkpointing, or recovery. During the remaining 3,000 seconds, exposed communication and input stalls reduce the average processing rate to 8,000 tokens per second. The job retains 24 million tokens:
 
@@ -88,7 +96,7 @@ This example deliberately defines nonoverlapping categories. You cannot safely s
 
 Published peak compute is a different denominator from the clean-run baseline. A model's operations may not use all available execution units, and a bandwidth-bound operation cannot realize a tensor-core FLOPS peak. Normalizing tokens to an unexplained hardware maximum mixes resource matching with reliability. Keep a practical throughput baseline separate from a hardware efficiency model.
 
-## Read reliability evidence at its actual scope
+### Read reliability evidence at its actual scope
 
 The Meta reliability study analyzes a particular set of research-cluster jobs and models effective training time as a function of job and system parameters. Its effective training time ratio concerns retained training progress and the effects of reliability and job overhead. It is evidence that failures, recovery, scheduling, and job duration matter at scale. It is not evidence that every GPU fleet loses 70 percent of its compute to 1 universal set of causes.
 
@@ -96,7 +104,9 @@ A reliability ratio also does not directly measure kernel efficiency or model FL
 
 The practical lesson is to inspect the population behind a published number: training or inference, large jobs or small jobs, allocated time or active execution, measured outcomes or modeled projections. Then choose a matching metric for your own workload. A benchmark is context for reasoning, not a substitute for local measurement.
 
-## Why tails change the answer in serving
+### Why tails change the answer in serving
+
+![Deep dive: Why tails change the answer in serving](./deep-dive-component-02.png)
 
 Suppose a service delivers 100 requests per second at moderate load, and nearly all requests meet a 2-second first-token objective. Increasing offered traffic to 130 requests per second might raise raw throughput while causing queue delays that push many requests past the objective. The hardware can become busier as the useful completion rate becomes worse.
 
@@ -112,10 +122,7 @@ If a stable service accepts 50 requests per second and each spends an average of
 
 Admission control can protect latency by rejecting or deferring work before it overloads the service. That policy should expose both accepted goodput and the rejection rate. Otherwise a configuration can appear excellent by accepting only an easy subset of requests. An honest report includes offered load, completed load, accepted goodput, and the latency distribution.
 
-![Deep dive: Why tails change the answer in serving](./deep-dive-component-02.png)
-
-
-## Measure progress across the whole lifecycle
+### Measure progress across the whole lifecycle
 
 For training, store the timestamps of allocation, startup completion, each successful checkpoint, failures, restart completion, and final durable progress. Pair those events with the retained token or optimizer-step count. Decide whether queueing before allocation belongs in the metric: a user-facing turnaround measure may include it, while an allocated-resource efficiency measure may exclude it.
 
@@ -123,7 +130,7 @@ For serving, record arrival and completion timestamps, input and output lengths,
 
 The dashboard should then support a concrete investigation. A fall in retained progress with unchanged healthy-run step time suggests lifecycle or reliability overhead. A rise in step time suggests an execution or resource issue. A serving goodput drop concentrated on long prompts suggests interference or capacity pressure. The metric identifies the symptom; tracing and experiments identify the cause.
 
-## Choose the intervention by recovered output
+### Choose the intervention by recovered output
 
 Return to the hypothetical training example. Recovering half of the 600-second unavailable interval adds 300 seconds at 8,000 tokens per second: 2.4 million additional retained tokens per hour. Improving the active rate from 8,000 to 9,000 over the original 3,000 seconds adds 3 million tokens. Either may be worthwhile, and their engineering costs and risks can differ substantially.
 
@@ -131,7 +138,7 @@ The comparison makes priorities explicit. Count useful output recovered per unit
 
 A busy GPU is still a useful observation. It tells you that some work is executing. Pair it with completion, progress, and service objectives, and it becomes part of an explanation rather than the explanation itself.
 
-## Takeaway
+## Conclusion
 
 - Utilization measures busy-ness; goodput measures retained or accepted output over time. Relate that output to an explicit cost boundary.
 - Reliability studies quantify particular workloads and denominators; their percentages should not be generalized to every fleet.
@@ -140,7 +147,7 @@ A busy GPU is still a useful observation. It tells you that some work is executi
 
 A goodput dashboard should expose the denominator as clearly as the numerator. Show the observation interval, admitted request count, completion count, and the exact conditions used to accept a result. If requests can be cancelled or retried, report how those events enter the calculation. Otherwise, the same serving system can appear to improve simply because difficult requests disappeared from the measured sample. Preserve a workload description alongside each comparison, including prompt lengths, output lengths, and concurrency. This makes an improvement reproducible and helps distinguish a scheduler change from a change in the traffic it happened to receive.
 
-## Sources
+### Sources
 
 - Meta — ["Revisiting Reliability in Large-Scale Machine Learning Research Clusters"](https://arxiv.org/abs/2410.21680) (effective training time / goodput measurements)
 - [MLPerf benchmark results](https://mlcommons.org/benchmarks/) — reference points for achievable throughput

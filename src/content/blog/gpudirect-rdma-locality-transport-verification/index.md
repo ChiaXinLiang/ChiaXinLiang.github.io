@@ -12,18 +12,21 @@ level: "intermediate"
 tags: ["ai-networking", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: GPUDirect RDMA: GPU–NIC Locality and Transport Verification. Cutaway server shows GPU memory and a nearby NIC connected through a local PCIe fabric.](./section-overview.png)
+
 GPUDirect RDMA is useful because it can remove explicit host staging from communication involving GPU memory. It is also easy to misdiagnose: a process can request a direct path, fall back to another transport, and still complete correctly. A cluster can support the capability while a particular GPU-adapter pairing performs poorly because of physical locality.
 
 The engineering goal is evidence of the executed path. Compatibility checks establish that the path is supported. Registration and allocation behavior establish that the buffers are accessible. Diagnostics and counters establish what the communication library selected. Measurements establish whether the selection improves the application's exposed cost.
 
 We will build this evidence in layers and use simple traffic and placement models to interpret it. Numerical rates below are illustrative assumptions, not observations from a particular server. Follow the current platform and library documentation for supported configurations.
 
-## 1. Draw both the direct and staged alternatives
+## Deep dive
 
-![Concept overview: GPUDirect RDMA: GPU–NIC Locality and Transport Verification. Cutaway server shows GPU memory and a nearby NIC connected through a local PCIe fabric.](./section-overview.png)
+### 1. Draw both the direct and staged alternatives
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Draw both the direct and staged alternatives](./deep-dive.png)
 
 A traditional staged send can copy data from GPU memory to host memory, transmit it through the adapter, and copy received data from host memory to the remote GPU. A direct supported path allows the adapter to access the relevant GPU-memory mapping without those explicit staging copies.
 
@@ -37,10 +40,7 @@ $$
 
 The parameters include the selected measurement boundary. Real staged implementations can pipeline chunks, and direct transfers can have additional setup or signaling. Use the equations to identify avoided work, then compare the actual timelines instead of treating their ratio as a promised speedup.
 
-
-![Deep-dive illustration: Draw both the direct and staged alternatives](./deep-dive.png)
-
-## 2. Check platform support before tuning performance
+### 2. Check platform support before tuning performance
 
 NVIDIA documents hardware and platform constraints for GPUDirect RDMA. The GPU, adapter, PCIe topology, driver integration, and supported memory-registration mechanism all matter. A device model name alone cannot establish the complete configuration.
 
@@ -50,7 +50,7 @@ Avoid diagnosing every failure as a missing environment variable. If the underly
 
 Begin with a minimal correctness test using the intended memory type. Confirm that the path can register and transfer the relevant allocation repeatedly. Only then move to bandwidth tuning, because an unstable or invalid direct path cannot support a meaningful performance comparison.
 
-## 3. Locality determines which internal resources feed the adapter
+### 3. Locality determines which internal resources feed the adapter
 
 Map GPU and NIC PCI bus identities and their relationship to switches, root complexes, and CPU NUMA domains. A nearby pair can avoid shared upstream resources that a more distant pair traverses. Exact behavior depends on the platform, so discover and measure rather than relying solely on proximity labels.
 
@@ -66,7 +66,9 @@ Use topology tools as discovery evidence, then build a pair-performance matrix. 
 
 Adapter assignment also affects load balance. Sending every rank through the nearest adapter can overload one shared port when multiple nearby GPUs communicate together. The mapping must account for both local path quality and aggregate adapter capacity.
 
-## 4. Registration is part of the steady-state design
+### 4. Registration is part of the steady-state design
+
+![Deep dive: 4. Registration is part of the steady-state design](./deep-dive-component-01.png)
 
 Making GPU memory accessible to a peer device involves supported mapping and registration machinery. Setup can be expensive relative to a small payload, so communication libraries often benefit from reusable buffers and registration caching. The exact mechanism and constraints depend on the current stack.
 
@@ -82,7 +84,7 @@ This model shows why repeated allocation and registration can degrade a workload
 
 Allocator changes can therefore influence communication independently of kernel arithmetic. A speed regression after an allocation-policy change should include registration-cache behavior in the investigation, rather than assuming the external fabric slowed down.
 
-## 5. Preserve ordering and consumer visibility
+### 5. Preserve ordering and consumer visibility
 
 An adapter writing GPU memory and a GPU kernel reading that memory are different execution agents. Correct integration requires the supported synchronization and work-submission behavior documented for the memory path. Arbitrary concurrent consumption is not established by successful data movement.
 
@@ -92,7 +94,7 @@ NVIDIA's GPUDirect RDMA documentation addresses memory ordering and synchronizat
 
 A correctness test should alternate deterministic payloads and repeatedly reuse buffers under the intended concurrency. Check the sequence number and contents after the supported consumer boundary. Tests that never reuse memory can miss the lifetime and visibility races that appear only at sustained throughput.
 
-## 6. Build a placement calculation from measured pair costs
+### 6. Build a placement calculation from measured pair costs
 
 Suppose an illustrative server has 4 GPUs and 2 adapters. GPUs 0–1 achieve 24 GB/s to adapter A and 12 GB/s to B; GPUs 2–3 have the reverse relationship. If each GPU sends a 1 GB message, the local-pair transfer component is about 41.7 milliseconds, while the distant-pair component is about 83.3 milliseconds.
 
@@ -106,7 +108,7 @@ $$
 
 subject to supported GPU-adapter assignments and with additional path constraints. D_g is assigned traffic and B_n adapter capacity. A realistic solver also needs shared PCIe cuts and communication timing. The expression illustrates why neither nearest-only assignment nor equal request count fully defines good placement.
 
-## 7. Verify transport selection with multiple evidence sources
+### 7. Verify transport selection with multiple evidence sources
 
 Enable appropriate library diagnostics for a controlled run and identify the selected transport, devices, and fallback behavior. Keep output bounded and tied to the test configuration. A requested setting is only an input; diagnostic evidence should describe what the library actually executed.
 
@@ -116,7 +118,9 @@ Compare GPU-buffer and host-buffer cases where the benchmark supports them. If h
 
 Repeat with the actual collective, because its channels, rank groups, and algorithm can select different devices or paths from a point-to-point test. Verify all participating ranks rather than concluding from one successful GPU-NIC pair that the whole distributed job is direct.
 
-## 8. Measure the benefit at the application's dependency boundary
+### 8. Measure the benefit at the application's dependency boundary
+
+![Deep dive: 8. Measure the benefit at the application's dependency boundary](./deep-dive-component-02.png)
 
 A direct transfer can save bytes and CPU work while leaving step time nearly unchanged if the transfer was already hidden behind computation. Conversely, an exposed final synchronization can benefit substantially even when total transferred bytes are a small fraction of the job's work.
 
@@ -134,10 +138,7 @@ Report useful tokens or completed steps under stable numerical behavior. Transfe
 
 A useful counter comparison uses the same payload population and duration for both alternatives. If the staged case produces additional host-device copy events and host-memory traffic while the direct case does not, that supports the avoided-staging explanation. Adapter bytes alone cannot make this distinction because both paths still transmit the network payload. Check physical interface demand as well as logical payload, and account for background traffic before attributing all observed bytes to the test. Repeat at representative concurrency: an isolated direct path can look healthy while several ranks share an upstream link. Keep the per-rank message count and total payload fixed during this comparison so a different communication schedule does not accidentally explain the traffic reduction.
 
-![Deep dive: 8. Measure the benefit at the application's dependency boundary](./deep-dive-component-02.png)
-
-
-## 9. Maintain a repeatable verification record
+### 9. Maintain a repeatable verification record
 
 Preserve platform support, versions, allocation type, topology, pair measurements, adapter mapping, diagnostics, and application results. Label theoretical bounds, illustrative calculations, and observed measurements separately. This record makes it possible to revisit a regression after a driver or library change.
 
@@ -145,9 +146,11 @@ A minimal recurring check can test registration and correctness, representative 
 
 When performance changes, compare this record layer by layer. Healthy pair rates with a larger application tail suggest readiness or scheduling. Poor GPU-buffer rates with healthy host-buffer networking suggest an internal device path. Broad cross-node degradation suggests a shared network resource or transport issue.
 
+## Conclusion
+
 GPUDirect RDMA earns its performance benefit by removing particular staging work on a supported path. The reliable way to use it is to verify compatibility, locality, registration, ordering, and actual selection, then measure the exposed application cost. Directness is a data-path property that needs evidence, not a conclusion supplied by a configuration flag.
 
-## Sources
+### Sources
 
 - [NVIDIA GPUDirect RDMA guide](https://docs.nvidia.com/cuda/gpudirect-rdma/index.html).
 - [NVIDIA topology and device-management documentation](https://docs.nvidia.com/deploy/nvidia-smi/index.html).

@@ -3,7 +3,7 @@ title: 'Pretraining, Fine-Tuning, RLHF: How a Base Model Becomes a Chatbot'
 description: 'The 3-stage training lifecycle, with language-model objectives, compute accounting, and the methods that shape assistant behavior.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'llm-1'
 order: 11
 series: "llm-basics"
@@ -12,12 +12,19 @@ topic: "LLM Lifecycle"
 tags: [llm, training, rlhf]
 ---
 
+## Overview
+
+![Concept overview: Pretraining, Fine-Tuning, RLHF: How a Base Model Becomes a Chatbot](./section-overview.png)
+
 In early 2022, OpenAI put 2 of its models in front of human judges. 1 had 175 billion parameters. The other had 1.3 billion, about 134 times fewer. The judges preferred the small model's answers. That result, from the InstructGPT paper, is the cleanest evidence we have that a chatbot is not just a big language model. It is a big language model that went through 2 more stages of training, and those stages change what the model *does* far more than what it *knows*.
 
 This article walks through the full lifecycle: pretraining, supervised fine-tuning, and reinforcement learning from human feedback (RLHF). By the end you should be able to explain why the base model underneath ChatGPT would happily answer your question with 3 more questions, and why fixing that costs less than 2% of the compute that built the model in the first place.
 
+## Deep dive
 
-## Stage 1: pretraining, the expensive part
+### Stage 1: pretraining, the expensive part
+
+![Deep dive: Stage 1: pretraining, the expensive part](./deep-dive-component-01.png)
 
 Pretraining is a single, simple task repeated at absurd scale: given a stretch of text, predict the next token. A token is a chunk of text, usually a word piece of 3 to 4 characters on average in English. The model reads "The capital of France is" and assigns a probability to every token in its vocabulary; training nudges the weights so that "Paris" gets more probability and "banana" gets less. That nudging is ordinary gradient descent, the same mechanism covered in [How Models Learn](/blog/how-models-learn/), applied trillions of times.
 
@@ -27,10 +34,9 @@ The numbers are worth staring at. GPT-3 was trained on roughly 300 billion token
 
 What you get at the end is a **base model**, and here is the part people miss: a base model is not an assistant. It is a text-completion engine. Its entire worldview is "what token plausibly comes next in a document like this?" Ask it a question and it may answer, or it may continue with more questions, because on the internet a list of questions is often followed by more questions. It is a mirror of its training distribution, nothing more.
 
-![Deep dive: Stage 1: pretraining, the expensive part](./deep-dive-component-01.png)
+### The Chinchilla recipe: a worked example
 
-
-## The Chinchilla recipe: a worked example
+![Deep dive: The Chinchilla recipe: a worked example](./deep-dive-component-03.png)
 
 Before moving on to fine-tuning, it is worth asking how you should spend a pretraining budget. For years the answer was "buy more parameters." Kaplan et al.'s 2020 scaling-law paper showed loss falls predictably as you scale compute, and the field read it as a license to grow models faster than datasets.
 
@@ -52,7 +58,7 @@ Nearly identical compute, but Chinchilla shrank the model 4× and stretched the 
 
 There is a practical postscript: a smaller model trained on more data is also cheaper to *serve*, because inference cost scales with N, not D. That is why many production models today are deliberately trained far past 20 tokens per parameter. Compute-optimal is not the same as deployment-optimal.
 
-## Stage 2: supervised fine-tuning
+### Stage 2: supervised fine-tuning
 
 Supervised fine-tuning (SFT) is where the base model learns the *format* of being helpful. Human labelers write demonstrations: a prompt, followed by the answer a good assistant would give. The model is then trained on these examples with the exact same next-token objective as pretraining. Only the data changes.
 
@@ -60,7 +66,7 @@ The scale drops off a cliff. InstructGPT's SFT stage used on the order of 13,000
 
 SFT alone gets you a decent instruction-follower. But it has a structural ceiling: the model can only imitate what labelers wrote, and labelers cannot write down everything they know about what makes 1 answer better than another. "Slightly too verbose," "technically true but misleading," "confident about something false": these judgments are easy to make in comparison and hard to specify in a demonstration. That gap is what stage 3 closes.
 
-## Stage 3: RLHF, learning from preferences
+### Stage 3: RLHF, learning from preferences
 
 Reinforcement learning from human feedback, as laid out in the InstructGPT paper, has 2 moving parts.
 
@@ -71,7 +77,7 @@ Reinforcement learning from human feedback, as laid out in the InstructGPT paper
 
 Here is the striking part, and the reason this article's opening result is possible. Per the InstructGPT paper, fine-tuning the 175B model cost about 4.9 petaflop/s-days for SFT and about 60 for PPO. Pretraining GPT-3 cost 3,640. The entire alignment pipeline was under 2% of the pretraining bill, and it mattered more to users than a 100× increase in model size. Alignment changes behavior, not knowledge, and behavior is what people experience.
 
-## Before and after: the same model, 2 personalities
+### Before and after: the same model, 2 personalities
 
 The InstructGPT paper includes a comparison that has become the canonical demo. Prompt: *"Explain the moon landing to a 6 year old in a few sentences."*
 
@@ -87,7 +93,9 @@ It has seen worksheets full of writing prompts, so it generates more writing pro
 
 Every fact needed for the good answer was already in the base model. The lifecycle's last 2 stages did not add moon-landing knowledge; they changed which of the model's many possible continuations gets selected. A base model is an actor who has read every script ever written. SFT and RLHF hand it a role.
 
-## Going deeper: the math inside the reward model
+### Going deeper: the math inside the reward model
+
+![Deep dive: Going deeper: the math inside the reward model](./deep-dive-component-02.png)
 
 1 level down, the reward model is trained with a loss borrowed from the 1950s: the Bradley-Terry model of pairwise comparisons, the same family of math behind chess Elo ratings. If answer A gets reward score r(A) and answer B gets r(B), the model's predicted probability that a human prefers A is:
 
@@ -103,10 +111,7 @@ The β coefficient sets the leash length. Small β lets the model chase reward a
 
 A 2023 development worth knowing: direct preference optimization (DPO) showed you can skip the explicit reward model and the RL loop entirely. Some algebra on the Bradley-Terry and KL-constrained objectives turns the whole thing into a single classification-style loss on preference pairs. Many current open-weight models use DPO or its descendants instead of PPO. The pipeline picture stays the same; the third stage just got simpler to run.
 
-![Deep dive: Going deeper: the math inside the reward model](./deep-dive-component-02.png)
-
-
-## A preference objective makes the tradeoff explicit
+### A preference objective makes the tradeoff explicit
 
 1 direct preference optimization objective compares a preferred answer $$y_w$$ with a rejected answer $$y_l$$ for prompt $$x$$:
 
@@ -120,7 +125,7 @@ Compared with a pipeline that fits a reward model and runs reinforcement learnin
 
 SFT and preference training update weights and can teach information or behaviors represented in their data. Their usual compute budgets are smaller than pretraining, but that does not make new knowledge mathematically impossible. The useful distinction is the training signal and deployment objective, rather than an absolute boundary between learning capability and learning manners.
 
-## Common misconceptions
+### Common misconceptions
 
 **"RLHF is what makes the model smart."** No. Capability comes overwhelmingly from pretraining, and the compute split proves it: 3,640 petaflop/s-days for pretraining versus roughly 65 for the whole alignment pipeline in InstructGPT. RLHF selects and shapes behavior that pretraining already made possible. A base model can often solve the same problems; it just will not reliably choose to.
 
@@ -128,19 +133,19 @@ SFT and preference training update weights and can teach information or behavior
 
 **"Bigger models are always better."** The Chinchilla arithmetic above says otherwise: at fixed compute, a 70B model trained on 1.4T tokens beat a 280B model trained on 300B tokens. Parameter count alone tells you little without the token count next to it, and marketing pages that quote only 1 number are hiding half the story.
 
-## Where this sits in the bigger picture
+### Where this sits in the bigger picture
 
 Everything in this article runs on machinery covered earlier in this series. The base model doing next-token prediction is the transformer from [The Transformer Architecture in 1 Picture](/blog/transformer-architecture-in-one-picture/), with the attention mechanism from [Attention in Plain Words](/blog/attention-in-plain-words/) deciding which earlier tokens inform each prediction. All 3 lifecycle stages, including the PPO step, ultimately update weights by gradient descent as described in [How Models Learn](/blog/how-models-learn/). And the reason the field obsesses over the 6ND formula is money: at 10²³-FLOP scale, the efficiency questions explored in [Goodput vs Utilization](/blog/goodput-vs-utilization/) decide whether a training run costs 1 fortune or several.
 
 The lifecycle framing also explains the industry's structure. Only a handful of labs can afford stage 1, which is why "foundation model" is a business category. But stages 2 and 3 are within reach of far smaller teams, which is why an ecosystem of fine-tuned open-weight variants can bloom on top of a single released base model.
 
-## Takeaway
+## Conclusion
 
 - **Pretraining builds capability; alignment steers it.** Next-token prediction over internet-scale text creates all the knowledge; SFT and RLHF, at under 2% of the compute, decide how it gets used, and users notice the steering more than the size.
 - **Balance parameters against tokens.** Compute is roughly 6ND, and the Chinchilla result says a compute-optimal model wants about 20 tokens per parameter; a smaller model on more data can beat a giant on less.
 - **Preferences beat demonstrations for the last mile.** Humans are better at ranking answers than writing perfect ones, and RLHF (or DPO) converts those rankings into behavior a demonstration set alone cannot pin down.
 
-## Sources
+### Sources
 
 - Rafailov et al., [Direct Preference Optimization](https://arxiv.org/abs/2305.18290), the original reference-policy preference objective.
 

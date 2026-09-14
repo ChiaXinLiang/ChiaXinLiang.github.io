@@ -3,7 +3,7 @@ title: 'Quantization from FP16 to INT4: What You Gain, What You Lose'
 description: "Every halving of weight bytes doubles the decode ceiling. Here's the exact math for a 70B model on an H100, and where the quality cliffs hide."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'opt-3'
 order: 3
 series: "llm-serving"
@@ -12,11 +12,19 @@ topic: "Inference Methods"
 tags: [quantization, inference, gpu]
 ---
 
+## Overview
+
+![Concept overview: Quantization from FP16 to INT4: What You Gain, What You Lose](./section-overview.png)
+
 A 70-billion-parameter model in FP16 is 141 GB of weights, and at batch size 1 the GPU streams every 1 of those bytes out of HBM for each token it decodes. On an H100 SXM, which reads memory at 3.35 TB/s, that arithmetic tops out at about 24 tokens per second per GPU. Not because the tensor cores are slow. Because the weights are fat.
 
 Quantization is the one optimization that attacks the numerator directly. Batching amortizes weight reads across requests, KV-cache tricks shrink the per-token state, speculative decoding gets more tokens per weight pass. Quantization just makes the weights smaller: FP16 to FP8 halves the bytes, FP8 to INT4 halves them again. In a memory-bound regime (which decode almost always is; see [compute-bound vs. memory-bound](/blog/compute-bound-vs-memory-bound/)), halving the bytes you must move doubles your theoretical speed. That is the gain. The loss is subtler, and it does not show up where most people look for it.
 
-## The formats, and what a "bit" buys
+## Deep dive
+
+### The formats, and what a "bit" buys
+
+![Deep dive: The formats, and what a "bit" buys](./deep-dive-component-01.png)
 
 A quick inventory, because the names hide real differences. FP16 and BF16 both spend 16 bits per number but split them differently: FP16 gives 10 bits to the mantissa (precision) and 5 to the exponent (range), BF16 gives 7 to the mantissa and 8 to the exponent. Training runs in BF16 almost universally because gradients need range, not precision; a gradient spike that overflows FP16's ±65,504 range just becomes `inf` and poisons the step. Inference has no gradients. Once training is done, the weights are frozen numbers in a well-behaved range, and you can re-encode them in whatever format moves fewest bytes. This is why "the model was trained in BF16" tells you nothing about what you should serve it in.
 
@@ -30,11 +38,9 @@ The more important taxonomy is *what* you quantize, because there are 3 separate
 - **Weight + activation (W8A8, FP8).** Both operands of the matmul are low-precision, so the tensor cores themselves run at 8-bit rates, doubling peak FLOPS. This is what helps *prefill*, which is compute-bound. It is also much harder, because activations are not frozen: they change every token, and a handful of channels in large transformers carry outlier values 20-100x larger than the rest (Dettmers et al. documented this in LLM.int8()). SmoothQuant's trick is to migrate that difficulty offline, rescaling channels so activations get flatter and weights absorb the variance.
 - **KV cache.** The cache is read once per token per layer, and at long context or large batch it out-weighs the weights themselves. Quantizing it to INT8 or FP8 (increasingly INT4/FP4 for the key half) doubles or quadruples how many sequences fit, which shows up as batch size, which shows up as throughput.
 
+### Calibration: why GPTQ and AWQ are not just rounding
 
-![Deep dive: The formats, and what a "bit" buys](./deep-dive-component-01.png)
-
-
-## Calibration: why GPTQ and AWQ are not just rounding
+![Deep dive: Calibration: why GPTQ and AWQ are not just rounding](./deep-dive-component-03.png)
 
 Naive round-to-nearest works fine at 8-bit. At 4-bit it visibly hurts, and the interesting engineering is in the calibration step: a few 100 sample sequences run through the model, 1 layer at a time, to decide *how* to round.
 
@@ -44,7 +50,7 @@ AWQ (Lin et al., 2023) starts from an observation instead of an optimization: ro
 
 The practical difference for you: both give W4A16 checkpoints; GPTQ optimizes reconstruction harder, AWQ overfits calibration data less. Both are a 1-time offline cost.
 
-## Worked example: 1 70B model, 3 precisions
+### Worked example: 1 70B model, 3 precisions
 
 Take Llama-3.1-70B, 70.6B parameters, served on H100 SXM (80 GB HBM3 at 3.35 TB/s, per NVIDIA's datasheet). Decode at batch size 1 must read every weight byte once per token, so the ceiling is bandwidth divided by weight bytes. Ignore the KV cache read for a moment; it only makes things worse for the fatter formats.
 
@@ -56,8 +62,9 @@ Take Llama-3.1-70B, 70.6B parameters, served on H100 SXM (80 GB HBM3 at 3.35 TB/
 
 These are ceilings; real kernels deliver maybe 60-80% of them, and per-token KV reads shave more as context grows. But the ratios survive contact with reality: every halving of weight bytes roughly halves per-token latency or halves the GPU count, and the ranking never changes. If you want to sanity-check the fit calculations themselves, the method is in [GPU memory math](/blog/gpu-memory-math-will-it-fit/).
 
+### Going deeper: where the quality actually goes
 
-## Going deeper: where the quality actually goes
+![Deep dive: Going deeper: where the quality actually goes](./deep-dive-component-02.png)
 
 The standard evidence that quantization is "free" is a perplexity table: WikiText-2 perplexity moves from 3.32 to 3.42 and everyone ships. The problem is that perplexity is an average over independent next-token predictions, and the failure mode of low-bit models is not average. It is *sequential*.
 
@@ -83,10 +90,7 @@ $$
 
 W is the original layer matrix, Q the permitted quantized matrices, and H the curvature approximation used for error compensation, commonly with damping for stability. AWQ instead chooses activation-informed channel scales: replacing W with W times diag(a) and X with diag(a) inverse times X preserves their unquantized product before rounding. The methods improve the proposal for which errors to tolerate; neither guarantees quality outside the calibration distribution. Evaluate rare formats, long contexts, and task decisions, then verify the fused kernel path on the deployment hardware.
 
-![Deep dive: Going deeper: where the quality actually goes](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"INT4 makes the math 4x faster."** Weight-only INT4 does not change the arithmetic rate at all; the tensor cores still multiply in FP16 after an on-the-fly dequantize. The speedup is bandwidth: fewer bytes per weight per token. That is why W4A16 does little for prefill (compute-bound) while nearly doubling decode over FP8, and why compute-format quantization (FP8, FP4 with hardware support) is a separate decision from storage-format quantization.
 
@@ -94,25 +98,25 @@ W is the original layer matrix, Q the permitted quantized matrices, and H the cu
 
 **"We trained in BF16, so we should serve in BF16."** Training format and serving format solve different problems. BF16 exists to give gradients dynamic range during training; frozen inference weights do not need it, and post-training quantization to FP8 or INT4 is applied afterward precisely because the requirements diverge. The 2 worlds are converging from the other direction too, with training itself moving below 16-bit (see [Training in 4-bit](/blog/training-in-4-bit/)), but "serve what you trained in" was never the rule.
 
-## The bigger picture
+### The bigger picture
 
 Quantization is the purest expression of the theme running through this whole series: modern inference is a bytes problem before it is a FLOPs problem. The [memory wall](/blog/the-memory-wall-latency-numbers/) means bandwidth grows slower than compute every generation, so the only durable way to get faster is to need fewer bytes. Hardware vendors have internalized this completely; each generation's headline FLOPS number is quoted at a lower precision than the last, because the datapath and the format now co-evolve. Meanwhile the technique stack layers cleanly: quantization shrinks the bytes per weight pass, batching amortizes each pass across more tokens, and if decode fundamentals are fuzzy, the [prefill/decode split](/blog/how-an-llm-generates-text/) is the right foundation to revisit.
 
 The frontier is below 4 bits and beyond weights: FP4 KV caches, quantization-aware training that bakes the format in from the start, and block-scaled formats fighting over the last half-bit of overhead. But the accounting in this article does not change. Count the bytes, divide by bandwidth, and you know your ceiling before you launch a single kernel.
 
-## Takeaway
+## Conclusion
 
 - Decode is memory-bound, so weight bytes set the speed limit: FP16→FP8→INT4 halves the bytes each step, and a 70B model goes from 141 GB on 2 H100s to 37.5 GB and a ~2x higher per-GPU ceiling on 1.
 - Weight-only quantization (GPTQ, AWQ) buys bandwidth and capacity but not arithmetic speed; weight+activation (FP8, SmoothQuant) buys tensor-core throughput for prefill; KV-cache quantization buys batch size. Pick per bottleneck, not by fashion.
 - Quality loss is sequential, not average: flat perplexity can hide real accuracy drops on long reasoning chains, so evaluate low-bit configs at your actual generation lengths.
 
-## Method foundations and controlled selection
+### Method foundations and controlled selection
 
 The preparation mechanisms deserve separate derivations. [Scales, clipping, and calibration](/blog/quantization-scales-clipping-calibration/) explains the finite-grid error tradeoff. [GPTQ, AWQ, and SmoothQuant](/blog/gptq-awq-smoothquant-mechanisms/) distinguishes compensation from activation-aware protection and range migration. [PTQ and QAT](/blog/ptq-qat-fake-quantization-training/) separates fixed preparation from learning through a simulated grid.
 
 When one format harms selected layers, [mixed-precision allocation](/blog/mixed-precision-layer-sensitivity-budget/) connects sensitivity to a discrete budget. Evaluate the complete exported artifact: local reconstruction is a surrogate, and the supported packing and kernels determine execution. These foundations explain why a nominal bit width cannot specify either quality or latency by itself.
 
-## Sources
+### Sources
 
 - Frantar, Ashkboos, Hoefler, Alistarh — *GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers* (2022): https://arxiv.org/abs/2210.17323
 - Lin et al. — *AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration* (2023): https://arxiv.org/abs/2306.00978

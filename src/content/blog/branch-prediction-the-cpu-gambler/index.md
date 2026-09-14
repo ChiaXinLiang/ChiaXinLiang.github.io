@@ -3,7 +3,7 @@ title: 'Branch Prediction: Why Your CPU Is a Gambler That Wins 95% of the Time'
 description: "Your CPU bets on the outcome of every if-statement before it knows the answer, and the math of why a 95% win rate still isn't good enough."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'arch-2'
 order: 10
 series: "comp-arch"
@@ -12,13 +12,19 @@ topic: "CPU Fundamentals"
 tags: [cpu, branch-prediction, hardware]
 ---
 
+## Overview
+
+![Concept overview: Branch Prediction: Why Your CPU Is a Gambler That Wins 95% of the Time](./section-overview.png)
+
 1 instruction in 5. That's roughly how often a typical program asks the CPU to make a decision: an `if`, a loop test, a function return, a virtual call. In a processor executing 4 instructions per cycle, a branch shows up almost every single cycle, and the pipeline that makes the machine fast is exactly what makes each branch dangerous.
 
 Recall the assembly line from [the pipeline article](/blog/what-a-cpu-actually-does/): a modern core doesn't finish 1 instruction before starting the next. It has 14 to 19 stages of work in flight at once, with fetch running many cycles ahead of execute. Now look at what a branch does to that arrangement. The instruction says "if this register is 0, jump to address X; otherwise fall through." But the comparison happens deep in the pipeline, at the execute stage. By the time the CPU *knows* which way the branch goes, it has already fetched, decoded, and queued 15-plus instructions behind it. Which instructions should those have been? The ones at address X, or the ones right after the branch?
 
 The honest answer is "wait until you know." The honest answer is also a performance disaster. Stalling the front end for every branch, with branches arriving every 4 or 5 instructions, would leave the pipeline mostly empty. Early RISC machines actually shipped this problem to the compiler as "branch delay slots." Modern CPUs do something bolder: they gamble.
 
-## Predict, then speculate
+## Deep dive
+
+### Predict, then speculate
 
 The bet has 2 halves. First, a **branch predictor** guesses the outcome the moment the branch is fetched, long before it executes: taken or not-taken, and if taken, to what address. Second, the CPU **speculatively executes** down the predicted path. It doesn't just fetch the guessed instructions; it decodes them, renames their registers, executes them, computes real results. Everything is held in a kind of escrow (the reorder buffer, which we'll meet properly in the next article) and only becomes permanent, "retires," once the branch resolves and confirms the guess.
 
@@ -29,7 +35,9 @@ If the guess was wrong, everything fetched after the branch is garbage. The CPU 
 
 So everything hinges on the win rate. And this is where the story gets genuinely clever.
 
-## How the predictor learns
+### How the predictor learns
+
+![Deep dive: How the predictor learns](./deep-dive-component-01.png)
 
 The simplest dynamic predictor is 1 bit per branch: remember what this branch did last time, predict the same. It sounds reasonable and fails embarrassingly on the most common branch in all of computing, the loop test. A loop that runs 100 iterations has a branch that's taken 99 times and not-taken once. A 1-bit predictor mispredicts twice per loop execution: once at the final iteration (it expected "taken"), and once at the *first* iteration of the next run (it now expects "not-taken"). 1 surprise becomes 2 mistakes.
 
@@ -44,10 +52,9 @@ Modern predictors push much further. **TAGE** (Seznec and Michaud, 2006), an inf
 
 On real workloads these predictors hit **95 to 99% accuracy**. Which sounds like the problem is solved. Let's check that with actual numbers.
 
-![Deep dive: How the predictor learns](./deep-dive-component-01.png)
+### A worked example: what 95% really costs
 
-
-## A worked example: what 95% really costs
+![Deep dive: A worked example: what 95% really costs](./deep-dive-component-02.png)
 
 Take a program of 1 billion instructions on a 4 GHz core that can otherwise sustain 4 instructions per cycle (IPC = 4). Say 20% of instructions are branches, and a misprediction costs 17 cycles, the middle of our 15-20 range.
 
@@ -71,10 +78,7 @@ Our example uses $$c_0=0.25$$, $$f_b=0.20$$, $$m_b=0.05$$, and $$P_b=17$$. CPI b
 
 The important innovation from a per-branch counter to a history-based predictor is separating contexts that need different answers. A branch alternating outcomes defeats a single stable counter but becomes predictable when the previous outcome selects a different table entry. Shared tables introduce aliasing: unrelated branch/history pairs can update the same counter. Tags, multiple history lengths, and allocation policies try to preserve useful distinctions under a finite storage budget. Longer histories are not uniformly better: they add state, training requirements, and lookup work. Measure misses by branch location and context, not only 1 program-wide accuracy percentage.
 
-![Deep dive: A worked example: what 95% really costs](./deep-dive-component-02.png)
-
-
-## Going deeper: what a "prediction" actually contains
+### Going deeper: what a "prediction" actually contains
 
 Saying "the CPU predicts the branch" hides 3 separate questions the front end must answer, every cycle, before decode has even seen the bytes.
 
@@ -86,7 +90,7 @@ Saying "the CPU predicts the branch" hides 3 separate questions the front end mu
 
 1 more consequence of speculation deserves a mention: the wrong-path work isn't just discarded, it leaves footprints. Speculatively executed loads pull data into the cache, and those timing footprints are measurable. That's the mechanism behind Spectre (2018), which turned the branch predictor from a performance story into a security story. The fix costs performance, naturally.
 
-## Common misconceptions
+### Common misconceptions
 
 **"The compiler handles branch prediction."** The compiler can shape branches (lay out the hot path fall-through, convert some branches to conditional moves, unroll loops) and hints like `likely()` influence code layout. But the prediction itself is made by hardware, at runtime, per branch instance. Modern x86 cores ignore static prediction-hint prefixes entirely. A profile-guided compiler and the hardware predictor are partners, not substitutes: the compiler decides what branches exist, the silicon decides what to do about them 4 billion times per second.
 
@@ -94,7 +98,9 @@ Saying "the CPU predicts the branch" hides 3 separate questions the front end mu
 
 **"Branchless code is always faster."** Replacing a branch with a conditional move (`cmov`) or arithmetic trick avoids misprediction, but it also forces the CPU to wait for *both* inputs and creates a data dependency that speculation could have skipped past. If the branch is predictable, which is 95%+ of the time by definition of the average, the branch is effectively free and branchless code is slower. Branchless tricks win in the genuinely unpredictable cases: branches on random data, like the pivot comparison in quicksort or binary search over unsorted keys. Measure before "optimizing."
 
-## What this means for AI chips
+### What this means for AI chips
+
+![Deep dive: What this means for AI chips](./deep-dive-component-03.png)
 
 Here's the punchline for anyone who works on ML systems: the branch predictor is a monument to how expensive control flow is, and AI accelerators are designed around *not paying for it*.
 
@@ -107,13 +113,13 @@ Go 1 step further to a TPU-style systolic array and branches disappear entirely:
 
 Meanwhile the CPU's predictor keeps growing. Apple's and AMD's recent cores spend striking amounts of area and power on prediction, because for irregular, branchy code, the general-purpose kind that runs the world, there is still no better trick than betting well.
 
-## Takeaway
+## Conclusion
 
 - Branches arrive about every 5 instructions while the answer lives 15+ stages deep, so modern CPUs predict the outcome and speculatively execute past it; a miss flushes roughly 15-20 cycles of work.
 - Predictors are online learners in silicon, from 2-bit saturating counters to TAGE and true perceptrons; the honest cost metric is mispredictions per kilo-instruction, and going 95% → 99% accurate can speed real code by ~1.5x.
 - AI accelerators sidestep the gamble instead of winning it: GPUs mask and serialize divergent warp paths, systolic arrays remove branches altogether, which is exactly why uniform, branch-free workloads are what they devour best.
 
-## Sources
+### Sources
 
 - Dan Luu, "Branch prediction" (history from 1-bit counters to TAGE and perceptrons): https://danluu.com/branch-prediction/
 - Agner Fog, "The microarchitecture of Intel, AMD and VIA CPUs" (misprediction penalties, per-core details): https://www.agner.org/optimize/

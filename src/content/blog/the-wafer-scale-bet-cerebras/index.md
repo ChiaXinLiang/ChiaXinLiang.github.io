@@ -3,7 +3,7 @@ title: 'The Wafer-Scale Bet: Cerebras and the SRAM Extreme'
 description: 'Read wafer-scale computation through local memory, bandwidth, external weight traffic, and the tradeoffs of keeping a wafer as 1 device.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'chip-4'
 order: 6
 series: "efficient-ai"
@@ -11,6 +11,10 @@ level: intermediate
 topic: "AI Chips"
 tags: ['cerebras', 'sram', 'accelerators']
 ---
+
+## Overview
+
+![Concept overview: The Wafer-Scale Bet: Cerebras and the SRAM Extreme](./section-overview.png)
 
 46,225 square millimeters. That is the silicon area of the Cerebras Wafer-Scale Engine 3 (WSE-3), the largest chip ever sold, roughly 57 times the area of the biggest GPU die NVIDIA has shipped. It exists because Cerebras looked at a step every other chipmaker performs, slicing the finished wafer into hundreds of separate chips, and simply refused to do it.
 
@@ -20,8 +24,11 @@ Cerebras keeps the whole wafer as 1 part. The WSE-3, built on TSMC's 5 nm proces
 
 Set that against the flagship GPU profile from [the first article in this series](/blog/blackwell-to-rubin-memory-math/): an NVIDIA B200 carries 192 GB of HBM3e at 8 TB/s. The wafer has less than a quarter of the capacity and about 2,600 times the bandwidth. It is the precise mirror image of a GPU — bandwidth-rich and capacity-poor, where the GPU is capacity-rich and, by comparison, bandwidth-starved.
 
+## Deep dive
 
-## Why SRAM flips the ratio
+### Why SRAM flips the ratio
+
+![Deep dive: Why SRAM flips the ratio](./deep-dive-component-01.png)
 
 The mirror image is not a styling choice. It falls straight out of 2 memory technologies.
 
@@ -31,10 +38,9 @@ The mirror image is not a styling choice. It falls straight out of 2 memory tech
 
 The trade is symmetric and unforgiving. HBM's density buys the GPU 192 GB but throttles it at the package boundary. SRAM's proximity buys Cerebras 3 orders of magnitude more bandwidth, but at 6 transistors per bit, even a dinner-plate-sized chip holds only 44 GB. Neither side gets to cheat physics; they just picked opposite ends of the same lever.
 
-![Deep dive: Why SRAM flips the ratio](./deep-dive-component-01.png)
+### A worked example you can do on paper
 
-
-## A worked example you can do on paper
+![Deep dive: A worked example you can do on paper](./deep-dive-component-03.png)
 
 Why does bandwidth dominate this discussion at all? Because of how [transformers generate text](/blog/transformer-architecture-in-one-picture/): producing 1 token requires streaming essentially every active model weight through the compute units, and tokens are produced 1 after another. For a single user, decode is a memory-reading exercise with some math attached.
 
@@ -49,7 +55,7 @@ Then comes the other side of the mirror. 140 GB of weights do not fit in 44 GB o
 
 That is the whole architecture in 1 division and 1 ceiling function. Everything else is consequences.
 
-## Capacity is a floor, locality is the method
+### Capacity is a floor, locality is the method
 
 If weight storage is $$M_w$$ bytes and each wafer has usable local memory $$M_s-M_r$$ after reserving $$M_r$$ bytes for runtime state, a necessary capacity condition is
 
@@ -61,7 +67,7 @@ A 140 GB weight payload with 44 GB per wafer and 4 GB reserved needs at least 4 
 
 The innovation is distributing weights and computation near many SRAM banks. Aggregate SRAM bandwidth does not make those banks 1 globally accessible memory channel. Mapping must balance stages and communicate activations between them. A pipeline's steady-state rate is constrained by its slowest stage, so adding bank bandwidth at another stage may produce no gain. Evaluate per-stage bytes, compute, link traffic, and bubbles rather than dividing whole-model bytes by the sum of every bank's peak bandwidth. Compared with an HBM design, locality can reduce repeated external weight traffic; the tradeoffs include mapping complexity, capacity expansion, and inter-wafer communication. A headline bandwidth ratio cannot establish the usable model-level speedup.
 
-## The number Cerebras leads with
+### The number Cerebras leads with
 
 Cerebras reports serving Llama 4 Maverick — a 400B-parameter mixture-of-experts model with 17B active parameters per token — at **2,500 tokens/second per user**, which it claims is more than double a DGX B200 system. Both figures are vendor-reported, so treat them as a manufacturer's best foot forward. But the roofline math says the *shape* of the claim is credible: 17B active parameters at 16-bit means 34 GB per token, so a single B200 caps at about 235 tokens/second per user, and even 8 of them with flawless tensor parallelism (64 TB/s aggregate) cap near 1,900. To go faster for one user at that precision, you need bandwidth GPUs do not have. SRAM machines do.
 
@@ -69,7 +75,7 @@ Notice also what the capacity math says: 400B total parameters is 800 GB at 16-b
 
 Single-stream speed is not a vanity metric in 2026. Reasoning models think in chains of sequential tokens; agents run loops of generate-act-observe; none of that parallelizes across the batch dimension for the user who is waiting. When the product is 1 long chain of thought, tokens/second *per user* is the latency of intelligence.
 
-## Going deeper: keeping a wafer alive
+### Going deeper: keeping a wafer alive
 
 Saying "just don't cut the wafer" skips the 3 problems that made wafer-scale integration a graveyard of attempts (Gene Amdahl's Trilogy Systems burned roughly a quarter billion 1980s dollars on it).
 
@@ -81,8 +87,7 @@ Saying "just don't cut the wafer" skips the 3 problems that made wafer-scale int
 
 Capacity gets solved by systems design rather than silicon. For **training**, Cerebras streams weights: parameters live in an external MemoryX appliance and flow through the wafer layer by layer, so the SRAM holds activations while model size scales past the on-wafer limit. For **inference**, latency rules out streaming weights per token, so models are partitioned layer-wise across multiple systems in a pipeline. Either way, the design says the quiet part aloud: on-wafer memory is a bandwidth resource, not a capacity resource.
 
-
-## Common misconceptions
+### Common misconceptions
 
 **"You can't manufacture a wafer-sized chip — yield would be zero."** True for a monolithic design, and it is why wafer-scale integration failed for 40 years. It stops being true when the architecture is a sea of small redundant cores: defects get mapped out and routed around, converting yield from a pass/fail lottery per die into a ~1% capacity tax per wafer. Cerebras has shipped 3 generations this way; manufacturability is the solved part of the story.
 
@@ -90,7 +95,9 @@ Capacity gets solved by systems design rather than silicon. For **training**, Ce
 
 **"2,500 tokens/s/user means Cerebras beats GPUs, full stop."** It means Cerebras wins *1 regime*: minimum latency for a single stream. A GPU serving a batch of 200 users reads the weights once per step and shares that 140 GB stream across everyone, so its cost per token can be far lower even while each individual user gets tokens more slowly. Which machine "wins" depends on whether your product sells latency or throughput — the same distinction [goodput vs utilization](/blog/goodput-vs-utilization/) draws between what a system does and what a customer receives. Vendor benchmarks, Cerebras's included, are always measured in the regime that flatters the architecture.
 
-## 1 axis, pushed to the end
+### 1 axis, pushed to the end
+
+![Deep dive: 1 axis, pushed to the end](./deep-dive-component-02.png)
 
 Zoom out and the WSE-3 stops looking like an oddity and starts looking like a data point: the far end of a spectrum every accelerator sits on. Memory close to compute is fast and small; memory far from compute is big and cheap. NVIDIA's Rubin CPX puts 128 GB of inexpensive GDDR7 on a prefill-specialized GPU because prefill barely needs bandwidth. Flagship HBM parts hold the middle. Groq builds SRAM-only chips at normal die size (230 MB each) and gangs hundreds together. Cerebras takes the same SRAM bet and scales the die to the wafer. Nobody is wrong; they are answering different sub-questions of "what does serving a model actually cost?"
 
@@ -98,16 +105,13 @@ The bet's weak flank is the part specs never show: ecosystem. GPUs come with CUD
 
 What makes the WSE-3 worth studying is not that it wins; it is that it is *legible*. 1 decision — never cut the wafer — mechanically produces everything else: the PB/s bandwidth, the 44 GB ceiling, the yield trick, the 20 kW cold plate, the multi-system pipelines, the single-stream speed records, and the capacity economics. Few chips let you trace cause to effect that cleanly.
 
-![Deep dive: 1 axis, pushed to the end](./deep-dive-component-02.png)
-
-
-## Takeaway
+## Conclusion
 
 - The WSE-3 gets 21 PB/s by making memory and compute the same piece of silicon — 900,000 cores each reading local SRAM — and pays for it with a 44 GB per-wafer capacity that makes big models a multi-system, multi-million-dollar affair.
 - Single-user decode speed is bandwidth ÷ bytes per token: ~57 tok/s for a 70B FP16 model on 1 B200, 6-figure ceilings on wafer SRAM. Cerebras's vendor-reported 2,500 tok/s/user on Llama 4 Maverick is the regime where that math shines.
 - Every accelerator picks a point on the memory distance-versus-density lever: GDDR7 prefill parts, HBM flagships, SRAM wafers. Match the machine to whether you are selling latency or cost per token.
 
-## Sources
+### Sources
 
 - Cerebras — [Cerebras Inference: 3x faster](https://www.cerebras.ai/blog/cerebras-inference-3x-faster) (WSE-3 SRAM specs; Llama 4 Maverick 2,500 tok/s/user, vendor-reported)
 - Introl — [Cerebras Wafer-Scale Engine & CS-3 architecture guide](https://introl.com/blog/cerebras-wafer-scale-engine-cs3-alternative-ai-architecture-guide-2025)

@@ -9,8 +9,12 @@ order: 2
 topic: "Efficient Vision"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: './deep-dive.png'
+heroImage: './section-overview.png'
 ---
+
+## Overview
+
+![Concept overview: Efficient Vision: Token Reduction and Resolution Tradeoffs](./section-overview.png)
 
 Efficient vision can reduce the number of tokens processed by later transformer blocks. Pruning discards selected tokens, merging combines representations, and changing resolution alters the image information available before embedding. These interventions all reduce work through token count, but they preserve different information and create different execution overhead.
 
@@ -19,7 +23,11 @@ The useful design connects a reduction policy to quality and measured cost. A ma
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
-## 1. Begin with the token-cost model
+## Deep dive
+
+### 1. Begin with the token-cost model
+
+![Deep-dive illustration: Begin with the token-cost model](./deep-dive.png)
 
 For a common dense transformer block with sequence length S and width D, tokenwise projections and feed-forward work scale approximately linearly in S, while pairwise attention scales quadratically.
 
@@ -31,10 +39,7 @@ Constants a and b depend on the actual architecture and counting convention. The
 
 Reducing S can therefore affect several components, not only attention. The reduction point matters: removing tokens after a block cannot save work already performed in that block. Count the sequence length at each layer and include the selection or merging operation itself.
 
-
-![Deep-dive illustration: Begin with the token-cost model](./deep-dive.png)
-
-## 2. Distinguish pruning from masking
+### 2. Distinguish pruning from masking
 
 Token pruning selects a retained subset. A logical mask can express that subset while leaving tensors at their original dimensions. A generic dense kernel can still perform nearly the same work under that arrangement.
 
@@ -42,7 +47,7 @@ To reduce execution, the implementation needs an effective smaller representatio
 
 Inspect the actual graph and shapes after reduction. A method reporting fewer active tokens has established semantics, but not automatically lower latency. This distinction parallels weight sparsity: removing information mathematically and avoiding physical work are separate implementation achievements.
 
-## 3. Explain merging as compression of representations
+### 3. Explain merging as compression of representations
 
 Merging combines several token features into one representative. Let h_i and h_j represent token features, with positive sizes s_i and s_j indicating how many original patches they summarize.
 
@@ -54,7 +59,7 @@ A size-weighted average preserves the weighted first moment of the combined feat
 
 The merge should use a similarity measure appropriate to the representation and task. Averaging unrelated regions can destroy useful boundaries. Keeping token-size metadata also affects how later operations interpret a token that summarizes several patches.
 
-## 4. Work through weighted merging
+### 4. Work through weighted merging
 
 Take two illustrative scalar token features: value 2 representing one patch and value 4 representing 3 patches. Their weighted merge is 3.5 and has size 4.
 
@@ -62,7 +67,9 @@ An unweighted average would be 3, which treats the two tokens as equally sized d
 
 That property does not establish task equivalence. Nonlinear operations applied before or after merging can respond differently to individual features. The example explains why size tracking matters after earlier merges, while quality evaluation determines whether the combined representation remains useful.
 
-## 5. Choose similarity from model features
+### 5. Choose similarity from model features
+
+![Deep dive: 5. Choose similarity from model features](./deep-dive-component-05.png)
 
 Token Merging, or ToMe, uses attention-key information to compare tokens under its studied setup. The paper examines feature choices and cosine similarity rather than assuming raw patch pixels are the best matching representation.
 
@@ -74,7 +81,7 @@ A zero-norm policy must be defined by the implementation. Cosine similarity emph
 
 Attention keys already encode information used for compatibility in the transformer. Reusing them can provide a practical matching signal. The specific signal should remain attached to the method and model; it does not prove that every high-similarity pair is interchangeable for all downstream tasks.
 
-## 6. Explain bipartite soft matching
+### 6. Explain bipartite soft matching
 
 ToMe partitions tokens into 2 sets and lets tokens in one set choose similar destinations in the other. It retains a selected number of high-similarity connections, merges connected features, and combines the resulting token sets.
 
@@ -82,7 +89,9 @@ The design avoids an iterative procedure that repeatedly finds one global pair a
 
 Bipartite does not mean every destination necessarily receives only one source under this soft-matching construction. Follow the actual aggregation procedure when several sources connect to a destination. Protect special tokens according to the model interface and record the reduction count and layer placement.
 
-## 7. Understand proportional attention
+### 7. Understand proportional attention
+
+![Deep dive: 7. Understand proportional attention](./deep-dive-component-04.png)
 
 A merged token can represent several original patches. If those patches were identical in key and value, their repeated contribution in a softmax denominator would be proportional to their count.
 
@@ -96,7 +105,7 @@ The duplicate-token thought experiment explains the multiplicity factor because 
 
 ToMe studies proportional attention and its interaction with model training. Preserve the implementation convention and evaluated model conditions rather than claiming the correction always improves every architecture.
 
-## 8. Choose the reduction schedule
+### 8. Choose the reduction schedule
 
 Let S_l be the sequence length entering layer l. A schedule can remove a fixed count or a fraction at selected layers, subject to protected tokens and a minimum viable representation.
 
@@ -108,7 +117,7 @@ Early reduction can save work in more later blocks but acts on less-developed fe
 
 A fixed count differs from a ratio. ToMe's described reduction parameter is a count under its procedure. Record the schedule precisely so that readers can reproduce the sequence lengths and cost model.
 
-## 9. Compare content-dependent and fixed counts
+### 9. Compare content-dependent and fixed counts
 
 Selecting different token identities for each image is content dependent even when the output count is fixed. Allowing the count itself to vary introduces another execution dimension.
 
@@ -116,7 +125,7 @@ Variable counts can allocate more work to difficult inputs, but batching can req
 
 Measure the actual service distribution and batching policy. A single-image token reduction result does not establish sustained throughput with heterogeneous requests. Dynamic information selection and predictable execution can be balanced, but their tradeoff needs backend evidence.
 
-## 10. Include selection overhead
+### 10. Include selection overhead
 
 Similarity computation, sorting, gathering, aggregation, and metadata updates all consume resources. An efficient reduction mechanism should cost less than the later work it avoids under the target shapes.
 
@@ -128,7 +137,7 @@ The terms can overlap or fuse in an actual implementation, so this is a conceptu
 
 Small token sequences can leave little work to save, while large sequences can make pairwise selection costly. Use the actual algorithm's complexity and measurements. A mathematically aggressive reduction can be operationally unattractive if the selection path becomes the new bottleneck.
 
-## 11. Distinguish resolution reduction
+### 11. Distinguish resolution reduction
 
 Resizing an image before embedding reduces the initial patch count and all downstream work. It also changes pixel information before the model can identify useful regions.
 
@@ -136,7 +145,7 @@ Token selection operates on learned representations and can use content after so
 
 Compare both strategies under the same task and preprocessing conventions. A smaller image can be a strong simple baseline. It should not be omitted merely because a learned reduction method sounds more sophisticated. Quality-resource evidence determines whether the additional mechanism contributes value.
 
-## 12. Preserve spatial tasks and special tokens
+### 12. Preserve spatial tasks and special tokens
 
 Classification can pool a reduced representation, while detection or segmentation may need location correspondence. Store or reconstruct the mapping required by the output head when tokens merge or disappear.
 
@@ -144,7 +153,9 @@ Special tokens can carry class or other task roles. Treating them as ordinary me
 
 Inspect small objects, thin boundaries, and visually similar neighboring regions. Those cases can expose information loss hidden by aggregate metrics. A merging method that preserves classification accuracy has not automatically established suitability for every dense-prediction task.
 
-## 13. Validate mechanisms on tiny examples
+### 13. Validate mechanisms on tiny examples
+
+![Deep dive: 13. Validate mechanisms on tiny examples](./deep-dive-component-03.png)
 
 Use known token features and sizes to verify weighted aggregation. Check that the total represented size is conserved under the stated merge policy. Construct identical keys and values to verify the multiplicity interpretation of size-aware attention.
 
@@ -152,7 +163,7 @@ Then test partial merges, protected tokens, ties, and the minimum token-count po
 
 These checks establish the numerical and indexing contract. They do not validate the learned similarity signal on real images. Held-out task evaluation and complete backend measurement provide that evidence after implementation correctness is established.
 
-## 14. Evaluate the complete operating point
+### 14. Evaluate the complete operating point
 
 Report model revision, input resolution, patch count, reduction schedule, protected tokens, numerical policy, backend, device, batch, and quality. Include reduction overhead and peak allocation in the complete resource results.
 
@@ -160,7 +171,9 @@ Compare with an unchanged model and a relevant resolution baseline. If recovery 
 
 No image-model run or GPU timing was performed for this article. The scalar merge and cost equations are illustrative. Primary papers provide evidence under their tasks, while a new deployment needs measurements of its actual reduced graph.
 
-## 15. Interpret the useful design choice
+### 15. Interpret the useful design choice
+
+![Deep dive: 15. Interpret the useful design choice](./deep-dive-component-01.png)
 
 Pruning, merging, and resolution changes reduce work by preserving different information. The right policy follows the task's spatial needs and the measured bottleneck. It also depends on whether the backend benefits from a smaller fixed sequence, supports dynamic counts, and can execute selection efficiently.
 
@@ -168,18 +181,19 @@ The innovation in a practical token-reduction method includes both a representat
 
 Keep the mechanism visible: which tokens combine or disappear, how size and position are handled, where sequence length changes, and what later work is avoided. That makes the quality-resource tradeoff understandable rather than reducing it to a retained-token percentage.
 
-## 16. Check whether savings persist across batches
+### 16. Check whether savings persist across batches
+
+![Deep dive: 16. Check whether savings persist across batches](./deep-dive-component-02.png)
 
 A reduction policy can look favorable for one image while interacting poorly with a larger batch. Gathering different token identities for each sample changes memory access patterns, and a variable count can require padding to the largest sequence. The saved mathematical work should therefore be compared with actual batch execution.
 
 Measure several representative batch sizes under the deployment backend. Record whether the algorithm keeps the same count across images and whether any sorting or packing creates temporary allocations. Inspect both throughput and latency rather than assuming one scales directly from the other.
 
+## Conclusion
+
 If a method changes only token identities while keeping counts fixed, shape predictability can help execution even though the representation remains content dependent. That distinction is useful when interpreting dynamic methods. It also explains why a fixed-count schedule can be an engineering advantage without claiming that every image needs exactly the same information budget.
 
-![Deep dive: 16. Check whether savings persist across batches](./deep-dive-component-02.png)
-
-
-## Sources
+### Sources
 
 - [Token Merging: Your ViT But Faster](https://arxiv.org/abs/2210.09461).
 - [DynamicViT: Efficient Vision Transformers with Dynamic Token Sparsification](https://arxiv.org/abs/2106.02034).

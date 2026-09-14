@@ -3,7 +3,7 @@ title: 'CUDA Graphs: Record Once, Replay Forever'
 description: 'How graph capture changes repeated kernel launch overhead, with lifecycle constraints and a checked latency accounting example.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'orch-2'
 order: 19
 series: "gpu-performance"
@@ -12,11 +12,17 @@ topic: "Kernel Pipelines and Orchestration"
 tags: [cuda, kernels, latency]
 ---
 
+## Overview
+
+![Concept overview: CUDA Graphs: Record Once, Replay Forever](./section-overview.png)
+
 Launching a CUDA kernel costs roughly 5 microseconds of CPU time before the GPU runs a single instruction. That sounds like nothing until you multiply it: a 40-layer transformer decoding 1 token launches on the order of 500 kernels, so the host spends about 2.5 milliseconds per token doing nothing but *asking* the GPU to work. If the GPU-side math for that token only takes 2 milliseconds, your inference server is now bottlenecked by a Python process filling out paperwork.
 
 CUDA graphs exist to delete that paperwork. You record the entire sequence of kernels once, bake it into an executable object, and from then on replay the whole decode step with a single API call. vLLM ships with this on by default for decode, and the win is not subtle: on small-batch decode, capturing the step into a graph is worth 20-30% of end-to-end latency. This article walks through where those microseconds go, does the arithmetic by hand, and then goes 1 level down into how capture, instantiation, and replay actually work.
 
-## The launch tax
+## Deep dive
+
+### The launch tax
 
 When your framework calls a kernel, a surprising amount of machinery runs on the CPU. The user-mode driver validates arguments, resolves the function handle, serializes launch parameters into a command buffer, and eventually rings a doorbell register so the GPU's front end picks the work up. Even in tight C++ calling `cudaLaunchKernel` directly, that path costs a few microseconds. Go through a framework and it gets worse: PyTorch's dispatcher, shape checks, stream bookkeeping, and Python itself can push per-operator overhead well past 10 microseconds in eager mode.
 
@@ -27,7 +33,9 @@ Decode processes 1 token per sequence per step. At small batch sizes the tensors
 
 The brutal part is that the gaps are invisible to naive utilization metrics. `nvidia-smi` happily reports high utilization because the sampling window sees *some* kernel active. The gaps only show up in a trace, or in the number that actually matters, tokens per second.
 
-## A worked example: 1 decode step, 40 layers
+### A worked example: 1 decode step, 40 layers
+
+![Deep dive: A worked example: 1 decode step, 40 layers](./deep-dive-component-01.png)
 
 Let's put real numbers on a 40-layer decoder running batch-1 decode, the worst case and also the latency-critical 1.
 
@@ -48,10 +56,9 @@ Now capture the step into a CUDA graph. Replay costs 1 launch (~5 µs) plus a sm
 
 At 2.5 ms per token you were generating 400 tokens/s per sequence; at 2.05 ms you generate 488. Same GPU, same kernels, same model. The only thing that changed is who does the orchestration.
 
-![Deep dive: A worked example: 1 decode step, 40 layers](./deep-dive-component-01.png)
+### What a graph actually is
 
-
-## What a graph actually is
+![Deep dive: What a graph actually is](./deep-dive-component-03.png)
 
 A CUDA graph is a DAG: nodes are kernels (or memcpys, memsets, even child graphs), edges are dependencies. The lifecycle has 3 phases, and keeping them straight explains almost every practical constraint.
 
@@ -77,7 +84,9 @@ Here g is graph-launch cost and e measured residual graph scheduling and depende
 
 Capture cost must amortize too. If setup costs C seconds and each replay saves delta seconds, more than C/delta replays are needed to recover setup time. A 20-millisecond setup saving 0.454 milliseconds per step breaks even after about 45 steps. Padding changes device duration, so compare graph buckets using the actual batch distribution. Stable addresses also require keeping static buffers alive and synchronizing writes before replay; silently rebinding a Python variable does not update captured pointer arguments. Validate outputs against eager execution while tracing gaps and memory reservations.
 
-## Going deeper: shrinking the CPU's job to 0
+### Going deeper: shrinking the CPU's job to 0
+
+![Deep dive: Going deeper: shrinking the CPU's job to 0](./deep-dive-component-02.png)
 
 Graphs move orchestration from host software to device hardware, and once you see it that way, they are 1 point on a spectrum of "get the CPU out of the loop" techniques.
 
@@ -91,10 +100,7 @@ Graphs move orchestration from host software to device hardware, and once you se
 
 Each step down this list trades flexibility for latency. Eager launches can do anything; graphs need static structure; persistent kernels need you to hand-roll scheduling. Decode's structure is blessedly repetitive, the same 500 kernels in the same order forever, which is why it is the perfect customer for the rigid end of the spectrum.
 
-![Deep dive: Going deeper: shrinking the CPU's job to 0](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"CUDA graphs make my kernels faster."** They do not touch kernel execution at all. The same SASS runs at the same speed; graphs only remove the dead time *between* kernels. If your kernels average 500 µs (prefill, large-batch training), graphs are worth roughly nothing, and this is why vLLM historically ran prefill eagerly while capturing only decode. Profile the gaps, not the kernels, before reaching for graphs.
 
@@ -102,7 +108,7 @@ Each step down this list trades flexibility for latency. Eager launches can do a
 
 **"This is Python overhead; a C++ rewrite fixes it."** A C++ rewrite helps, but the floor is the driver, not the language. Raw `cudaLaunchKernel` from C++ still costs microseconds per call because validation and command-buffer submission happen regardless of who calls it. In our worked example, even a 0-overhead framework submitting at 5 µs per launch leaves the GPU idle 20% of the step. Graph replay can beat a host-side launch loop when per-kernel submission sets the critical path because it changes where scheduling happens, moving it onto the device, rather than making the host loop tighter.
 
-## The bigger picture
+### The bigger picture
 
 CUDA graphs are the cleanest illustration of a theme that runs through this whole series: at small batch sizes, LLM inference is not limited by FLOPs, and often not even by [memory bandwidth](/blog/the-memory-wall-latency-numbers/), but by orchestration. The CPU-GPU relationship is a producer-consumer system, and [a latency machine feeding a throughput machine](/blog/cpu-vs-gpu-latency-vs-throughput-machines/) stalls whenever the work items get too small.
 
@@ -110,13 +116,13 @@ It is also why decode and prefill keep drifting apart architecturally. Prefill w
 
 If you run inference in production, the checklist is short. Trace 1 decode step with Nsight Systems. Measure the gap fraction. If the GPU is idle between kernels, you are paying the launch tax, and capture-plus-replay is the highest-leverage fix per line of code you will find this quarter.
 
-## Takeaway
+## Conclusion
 
 - **Decode is launch-bound before it is compute-bound.** A 40-layer model at 5 µs per launch spends ~2.5 ms of CPU time per token submitting ~500 kernels that need only ~2 ms of GPU time; the CPU is the bottleneck and the GPU idles 20% of the step.
 - **Graphs move scheduling from host software to device hardware.** Capture once, instantiate once, then replay the whole step for the cost of a single launch, worth 20-30% of decode latency in engines like vLLM, at the price of static shapes and addresses (hence bucketed graphs plus padding).
 - **It is 1 point on a spectrum.** Graph update, conditional nodes, Programmatic Dependent Launch, and persistent kernels with L2-resident work queues progressively remove the CPU from the loop; the more repetitive the workload, the further down that spectrum you can profitably go.
 
-## Sources
+### Sources
 
 - Alan Gray, "Getting Started with CUDA Graphs," NVIDIA Developer Blog: https://developer.nvidia.com/blog/cuda-graphs/
 - NVIDIA, *CUDA C++ Programming Guide*, CUDA Graphs section: https://docs.nvidia.com/cuda/cuda-c-programming-guide/

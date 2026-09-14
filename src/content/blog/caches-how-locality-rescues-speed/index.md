@@ -3,7 +3,7 @@ title: 'Caches: How Locality Rescues a 100x Speed Gap'
 description: "A DRAM access costs your CPU around 200 cycles. Caches hide that almost entirely, and the trick behind them — locality — is the same 1 FlashAttention uses on a GPU."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'mem-2'
 order: 4
 series: "comp-arch"
@@ -12,19 +12,25 @@ topic: "Memory Hierarchy"
 tags: ['computer-architecture', 'caches', 'memory']
 ---
 
+## Overview
+
+![Concept overview: Caches: How Locality Rescues a 100x Speed Gap](./section-overview.png)
+
 A load instruction that hits the L1 cache returns in about 1 nanosecond. The same instruction, missing all the way to main memory, takes roughly 100 nanoseconds. That is a 100x penalty hiding inside the most common operation a CPU performs, and a modern core issues billions of loads per second.
 
 At 4 GHz, 100 nanoseconds is about 400 clock cycles. A core that could have retired well over a 1000 instructions in that window instead sits and waits for 1 value to arrive from a DRAM chip a few centimeters away. If every memory access paid this price, your 4 GHz processor would perform like a machine from the early 1990s.
 
 It doesn't, because of a piece of hardware that exploits a statistical property of programs. This article is about that hardware, the arithmetic that governs it, and why the same idea now decides how fast large language models run.
 
-## The gap, briefly
+## Deep dive
+
+### The gap, briefly
 
 In the [CPU pipeline article](/blog/what-a-cpu-actually-does/) we treated memory as a black box: fetch an instruction, load a value, done. The uncomfortable truth is that CPU logic and DRAM have improved at wildly different rates for 40 years. Transistor scaling made cores faster and wider; DRAM optimized for *capacity and cost per bit*, and its access latency barely moved. Around 100 nanoseconds to open a row and read it out was true in 2005 and is still approximately true today.
 
 Nobody closed this gap. Instead, architects built a hierarchy of small, fast memories between the core and DRAM, and bet the entire performance of the machine on 1 empirical observation: programs do not access memory randomly.
 
-## 2 habits every program has
+### 2 habits every program has
 
 Watch the address stream of almost any real program and 2 patterns jump out.
 
@@ -36,7 +42,7 @@ Neither pattern is guaranteed. Both are overwhelmingly common, because they fall
 
 A cache is a small, fast memory that bets on both. It keeps recently used data close to the core (exploiting temporal locality) and it fetches data in chunks larger than you asked for (exploiting spatial locality). A typical L1 data cache is 32 to 48 KB and answers in about 4 cycles. That's absurdly small next to gigabytes of DRAM, and it routinely serves well over 90% of all accesses.
 
-## The 64-byte bet
+### The 64-byte bet
 
 The unit of that second bet has a name: the **cache line**. On essentially every mainstream CPU today, x86 and most ARM designs alike, a cache line is 64 bytes. The cache never moves a single byte or a single 8-byte word; it moves lines. Ask for 1 4-byte float and the hardware fetches the aligned 64-byte block containing it, all 16 floats.
 
@@ -45,7 +51,9 @@ This is spatial locality made mechanical. If you're walking an array front to ba
 
 If your access pattern doesn't, the same mechanism becomes pure waste: you pull 64 bytes across the memory bus, use 4 of them, and evict the rest untouched. Hold that thought.
 
-## The arithmetic of a hit rate
+### The arithmetic of a hit rate
+
+![Deep dive: The arithmetic of a hit rate](./deep-dive-component-01.png)
 
 The standard model for cache performance is **average memory access time**, or AMAT:
 
@@ -83,10 +91,9 @@ With $$h=4$$ and $$p=200$$, reducing $$m$$ from 0.05 to 0.01 changes the modeled
 
 The method that improves locality is to change the reuse distance: how much distinct data is accessed before revisiting a line. Blocking a matrix traversal keeps a smaller tile active, so useful lines survive until reuse instead of being displaced by an entire matrix sweep. Check tile footprint against the relevant cache, including all inputs and outputs. Larger tiles improve reuse only until capacity or associativity pressure introduces new misses. Prefetching addresses predictable latency, while tiling reduces traffic; they solve related but different constraints.
 
-![Deep dive: The arithmetic of a hit rate](./deep-dive-component-01.png)
+### A worked example you can feel: traversal order
 
-
-## A worked example you can feel: traversal order
+![Deep dive: A worked example you can feel: traversal order](./deep-dive-component-03.png)
 
 Here's where the arithmetic meets code you have actually written. Take a large matrix, say 4096 × 4096 single-precision floats. That's 64 MB, far bigger than any CPU cache, stored in **row-major** order: row 0's elements sit at consecutive addresses, then row 1, and so on. C, C++, Rust, and NumPy (by default) all do this.
 
@@ -101,7 +108,7 @@ Same data. Same number of additions. Same instruction count, near enough. About 
 
 This is the cheapest performance lesson in all of computing: **the loop order is a statement about locality, whether you meant it or not.**
 
-## Going deeper: where a line lives, and who gets evicted
+### Going deeper: where a line lives, and who gets evicted
 
 1 level down, a cache isn't a bag of lines; it's organized so lookups take a fixed, tiny time.
 
@@ -113,7 +120,7 @@ Stack the levels and you get the actual hierarchy in your laptop: L1 at ~32–48
 
 2 more pieces of machinery matter in practice. **Hardware prefetchers** watch the miss stream, detect strides, and fetch lines *before* you ask, which is why streaming through memory in a predictable pattern can hide much of the access latency even when the data can't fit in cache. And because writes also flow through this hierarchy, caches track **dirty lines** that must be written back on eviction, which is 1 reason random writes over a large footprint hurt roughly twice as much as random reads.
 
-## Common misconceptions
+### Common misconceptions
 
 **"A bigger cache is always a faster cache."** Size and speed are in direct tension. A bigger cache means longer wires, more sets to index, and higher access latency; that's precisely why the hierarchy exists instead of 1 giant cache. L1 has stayed in the 32–48 KB range for nearly 2 decades not because architects lack transistors but because keeping the 4-to-5-cycle latency requires staying small. Apple's M-series ships unusually large L1 caches (128 KB+ data) and pays for it with more access cycles at lower clocks, a deliberately different point on the same trade-off curve, not a free lunch.
 
@@ -121,7 +128,9 @@ Stack the levels and you get the actual hierarchy in your laptop: L1 at ~32–48
 
 **"Caches are transparent, so software can't do anything about them."** Transparent means *correctness* doesn't depend on them; performance absolutely does. Loop order (the example above), tiling loops so a working set fits in cache, choosing structure-of-arrays over array-of-structures so you don't drag unused fields through 64-byte lines, and padding to avoid 2 threads fighting over 1 line (false sharing) are all standard techniques that regularly buy integer factors. The entire discipline of cache-aware programming exists because "transparent" hardware responds dramatically to how you lay out and walk your data.
 
-## Why this decides how fast your LLM runs
+### Why this decides how fast your LLM runs
+
+![Deep dive: Why this decides how fast your LLM runs](./deep-dive-component-02.png)
 
 Everything above scales up to AI hardware with 1 twist: on a GPU, part of the cache isn't automatic.
 
@@ -131,16 +140,13 @@ FlashAttention is the most famous recent example of this as an algorithmic idea.
 
 This is also why memory bandwidth, not FLOPS, headlines modern accelerator spec sheets; the [Blackwell-to-Rubin memory math article](/blog/blackwell-to-rubin-memory-math/) works through those numbers, and [goodput versus utilization](/blog/goodput-vs-utilization/) shows what happens at the cluster level when data isn't where the compute needs it. The 100x gap never went away. From the L1 in your laptop to the SRAM tiles inside an H100 kernel, the entire stack is 1 long answer to the same question: how do we keep the fast thing from waiting on the slow thing? Locality is the answer, every time.
 
-![Deep dive: Why this decides how fast your LLM runs](./deep-dive-component-02.png)
-
-
-## Takeaway
+## Conclusion
 
 - **Caches work because programs repeat themselves.** Temporal locality (reuse the same data soon) and spatial locality (use nearby data next) let a 48 KB cache satisfy the vast majority of accesses to gigabytes of memory, and 64-byte lines are the hardware's standing bet on the spatial half.
 - **Think in miss rates, not hit rates.** AMAT = hit time + miss rate × miss penalty. With a 200-cycle penalty, improving from 95% to 99% hits cuts average latency 2.3x, because it's really a 5x cut in misses.
 - **Locality is programmable.** Loop order alone swings memory cost by ~12x in the model (5–10x measured), and GPU shared-memory tiling and FlashAttention are the same principle applied deliberately at datacenter scale.
 
-## Sources
+### Sources
 
 - Ulrich Drepper, *What Every Programmer Should Know About Memory* (2007) — [people.freedesktop.org/~lkml/cpumemory.pdf](https://people.freedesktop.org/~lkml/cpumemory.pdf)
 - Colin Scott, *Interactive Latency Numbers Every Programmer Should Know* — [colin-scott.github.io/personal_website/research/interactive_latency.html](https://colin-scott.github.io/personal_website/research/interactive_latency.html)

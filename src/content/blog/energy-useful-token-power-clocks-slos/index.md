@@ -12,18 +12,21 @@ level: "advanced"
 tags: ["llm-serving", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Energy per Useful Token: Power Caps, Clocks, Thermals, and SLOs. Illustrated GPU server has a power meter, thermal gauge, and clock setting.](./section-overview.png)
+
 Reducing a GPU's reported power does not necessarily reduce the energy required to serve a request. If computation takes longer, the device draws power for more time. The host and network also remain active. If a slower operating point causes clients to cancel or retry, the service can consume more energy per useful answer despite a lower instantaneous wattage.
 
 Energy engineering therefore needs a denominator tied to useful work and a measurement boundary tied to the power being integrated. The relevant question is how many accepted outputs the system produces for its energy expenditure while satisfying latency and capacity requirements.
 
 We will derive the basic accounting, examine power caps and clocks, and build an experiment that distinguishes an efficient operating point from a merely low-power one. All numerical examples are illustrative calculations. Available telemetry and control behavior vary by GPU, driver, platform, and deployment permissions.
 
-## 1. Define energy and useful work on the same interval
+## Deep dive
 
-![Concept overview: Energy per Useful Token: Power Caps, Clocks, Thermals, and SLOs. Illustrated GPU server has a power meter, thermal gauge, and clock setting.](./section-overview.png)
+### 1. Define energy and useful work on the same interval
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Define energy and useful work on the same interval](./deep-dive.png)
 
 Power is an instantaneous rate of energy consumption. For an observation interval from time a to time b, energy is the integral of measured power. If N_useful is the number of qualifying output tokens delivered during that interval, define
 
@@ -37,10 +40,7 @@ Choose a useful-output policy suited to the service. A conversational service ma
 
 If no useful output completes in the interval, energy per useful token is undefined rather than zero. Report the energy and the absence of useful completions separately. This case is important during startup, failure, or overload, when considerable power consumption can coexist with little usable progress.
 
-
-![Deep-dive illustration: Define energy and useful work on the same interval](./deep-dive.png)
-
-## 2. State whether the boundary is a device or a system
+### 2. State whether the boundary is a device or a system
 
 GPU telemetry measures a device-level quantity whose exact scope depends on the sensor and platform. It does not generally represent the total electricity used by CPUs, memory, storage, networking, fans, and facility infrastructure. A device-only result should be labeled accordingly.
 
@@ -56,7 +56,9 @@ Specify whether the denominator is aggregate useful output across all devices or
 
 Wall-level energy includes conversion losses and additional components that software telemetry may not see. Either boundary can support useful comparisons if it remains consistent across alternatives. Do not compare a device-only baseline with a wall-measured candidate and attribute the entire difference to an algorithm.
 
-## 3. Integrate telemetry rather than averaging mismatched counters
+### 3. Integrate telemetry rather than averaging mismatched counters
+
+![Deep dive: 3. Integrate telemetry rather than averaging mismatched counters](./deep-dive-component-02.png)
 
 Suppose samples provide power P_i at times t_i. A trapezoidal estimate is
 
@@ -72,10 +74,9 @@ Align the energy interval with the output-count interval. If energy includes war
 
 Repeat measurements and inspect variation. Preserve raw timestamps and samples so another reviewer can reconstruct the integral and confirm the selected measurement window. Power sampling, thermal conditions, batch composition, and background activity can change results. An apparent improvement smaller than the measurement variation should not be presented as a reliable ranking.
 
-![Deep dive: 3. Integrate telemetry rather than averaging mismatched counters](./deep-dive-component-02.png)
+### 4. Derive why a lower power cap can lose efficiency
 
-
-## 4. Derive why a lower power cap can lose efficiency
+![Deep dive: 4. Derive why a lower power cap can lose efficiency](./deep-dive-component-01.png)
 
 For approximately constant average power P and useful throughput G over a steady interval, the energy per useful token simplifies to
 
@@ -89,7 +90,7 @@ The power decrease is the same in both capped examples, but the throughput respo
 
 This model assumes stable useful throughput and average power. During queue growth or changing concurrency, a simple ratio can conceal an infeasible operating point. Verify that arrivals, admitted work, and useful completions are consistent with the capacity requirement before ranking the alternatives.
 
-## 5. Connect clock sensitivity to the actual bottleneck
+### 5. Connect clock sensitivity to the actual bottleneck
 
 A workload's response to power and clock controls depends on its limiting resources. A compute-heavy prefill can respond differently from cache-intensive decode. Memory bandwidth, matrix arithmetic, launch overhead, and CPU scheduling do not all scale with the same device clock.
 
@@ -105,7 +106,7 @@ If decode is primarily limited by memory movement, reducing compute capability m
 
 Inspect both phase timing and achieved throughput during a sweep. If prefill slows significantly while decode remains stable, a mixed workload's first-token objective may become the binding constraint. The energy-efficient point for one phase is not automatically the efficient point for a service processing both.
 
-## 6. Thermal state is part of the experiment
+### 6. Thermal state is part of the experiment
 
 A short benchmark can begin on a cool device and complete before reaching the temperature and clock behavior seen in production. A long sustained workload can encounter different cooling conditions, fan behavior, and thermal limits. Compare candidates after a documented stabilization period.
 
@@ -115,7 +116,7 @@ Keep ambient and neighboring-load conditions as consistent as practical. Shared 
 
 Do not disable protective behavior to obtain an attractive benchmark. The intended deployment's normal supported controls provide the relevant feasibility boundary. An efficient configuration must remain stable under the duration and environmental conditions expected by the service.
 
-## 7. Compare energy under latency and capacity constraints
+### 7. Compare energy under latency and capacity constraints
 
 An operating point is feasible only if it meets the required service outcomes. Let G_min be required useful throughput and L_max the applicable latency objective. A simplified selection problem is
 
@@ -129,7 +130,7 @@ Batching can improve device efficiency by increasing work per execution interval
 
 Plot or tabulate the feasible alternatives together. Some configurations consume less energy but cannot supply the demand; others have more headroom at a higher energy cost. A frontier of feasible choices is more informative than declaring one globally optimal power setting without workload context.
 
-## 8. Include idle capacity and deployment utilization
+### 8. Include idle capacity and deployment utilization
 
 A benchmark with continuously busy devices can omit much of a real deployment's energy use. Replicas kept warm for redundancy or bursts draw power while handling little useful traffic. Their energy belongs in a deployment-level calculation even if a saturated-kernel benchmark excludes it.
 
@@ -139,7 +140,7 @@ Reducing replica count can improve utilization and aggregate energy efficiency w
 
 For variable demand, integrate over representative periods instead of extrapolating from a single saturated minute. Report the demand distribution, scaling policy, and warm-capacity assumptions. The same model and kernel can have very different deployment energy per useful response under different traffic patterns.
 
-## 9. Build a sweep that produces a defensible decision
+### 9. Build a sweep that produces a defensible decision
 
 Use the same model, prompt distribution, output policy, hardware boundary, and measurement method for each candidate. Record the applied controls and observed operating state. Warm up execution, stabilize thermal behavior, and measure long enough to include representative batching and response completions.
 
@@ -147,9 +148,11 @@ For each point, report useful output, energy, throughput, first-token latency, s
 
 Use profiles only after the measurements reveal a question, such as why one cap changes prefill more than decode. The profile can identify resource sensitivity, while the service experiment establishes the net result. Keep mathematical estimates separate from observed numbers in the report.
 
+## Conclusion
+
 Energy per useful output joins hardware behavior to the service's purpose. Power caps, clocks, and cooling are controls; accepted work and latency are outcomes. A sound choice reduces the integrated energy required for those outcomes at a feasible operating point, with a consistent measurement boundary and enough evidence to reproduce the comparison.
 
-## Sources
+### Sources
 
 - [NVIDIA System Management Interface documentation](https://docs.nvidia.com/deploy/nvidia-smi/index.html).
 - [NVIDIA Management Library API reference](https://docs.nvidia.com/deploy/nvml-api/).

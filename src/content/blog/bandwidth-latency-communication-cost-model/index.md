@@ -12,18 +12,19 @@ level: "beginner"
 tags: ["ai-networking", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Bandwidth, Latency, and the Communication Cost Model. GPU/NIC servers, packets, matching startup intervals, payload-transfer timelines, and narrow versus wide links explain the cost equation.](./section-overview.png)
+
 A network advertised in gigabits per second does not tell you how quickly a distributed training step will finish. The step may exchange many small messages, use a path with an unexpected bottleneck, or begin communication only after most of the useful computation is already complete. Link capacity is one input to a communication model, not the model's final answer.
 
 A useful first approximation separates fixed startup from payload transfer. It explains why bandwidth matters differently across message sizes and why reducing bytes can have little effect on a latency-dominated exchange. From there, we can add rounds, topology, and computation dependencies without pretending that an entire collective is a single wire transfer.
 
 The examples below are arithmetic illustrations rather than measured results. Effective parameters should be calibrated on the actual devices, transport, message population, and concurrency pattern that the job will use.
 
-## 1. Convert the units before doing any performance arithmetic
+## Deep dive
 
-![Concept overview: Bandwidth, Latency, and the Communication Cost Model. GPU/NIC servers, packets, matching startup intervals, payload-transfer timelines, and narrow versus wide links explain the cost equation.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Convert the units before doing any performance arithmetic
 
 Networking commonly states rates in bits per second, while tensors and buffers are sized in bytes. Divide by 8 to convert a bit rate to a byte rate. A nominal 400 Gb/s link corresponds to 50 GB/s before protocol overhead and implementation limits, using decimal units.
 
@@ -33,7 +34,9 @@ A 1 GiB payload at an ideal 50 GB/s takes about 21.47 milliseconds for serializa
 
 Distinguish a single directional link rate from aggregate bidirectional capacity. An exchange sending and receiving simultaneously can exploit different directions, but summing them does not make one outgoing payload travel twice as fast. Multiple ports also provide aggregate capacity only if the communication schedule and physical paths can use them effectively.
 
-## 2. Derive the startup-plus-transfer approximation
+### 2. Derive the startup-plus-transfer approximation
+
+![Deep-dive illustration: Derive the startup-plus-transfer approximation](./deep-dive.png)
 
 Let n be payload bytes, alpha a fixed startup time, and beta an effective sustained payload bandwidth in bytes per second. An isolated transfer can be approximated by
 
@@ -53,10 +56,9 @@ For illustrative alpha=10 microseconds and beta=25 GB/s, the crossover is 250000
 
 This simple calculation prevents a common mistaken expectation: doubling link bandwidth barely improves a tiny message when its dominant cost is startup. Conversely, reducing launch overhead does little for a transfer whose sustained byte movement already lasts several milliseconds.
 
+### 3. Calibrate the parameters with a message-size sweep
 
-![Deep-dive illustration: Derive the startup-plus-transfer approximation](./deep-dive.png)
-
-## 3. Calibrate the parameters with a message-size sweep
+![Deep dive: 3. Calibrate the parameters with a message-size sweep](./deep-dive-component-01.png)
 
 Measure a sequence of payload sizes over the intended path. Small messages reveal the latency region, and sufficiently large messages reveal a transfer-dominated region. Plot time against bytes or examine the slope numerically; one convenient model can then be fitted within a clearly defined range.
 
@@ -72,7 +74,7 @@ Repeat runs and report variation. Warmup, registration caches, allocation behavi
 
 Use multiple observations rather than relying on a two-point fit for final reporting. Residuals can reveal size-dependent behavior that one line hides. Preserve the raw size-time data so later changes can be compared without assuming the same protocol regime remains valid.
 
-## 4. A collective adds rounds and rank-dependent traffic
+### 4. A collective adds rounds and rank-dependent traffic
 
 An all-reduce combines contributions from many ranks and returns the reduced result to every rank. Its implementation determines how many communication rounds occur and how much data each rank sends. A collective model must count those operations rather than insert the tensor size into the point-to-point equation once.
 
@@ -88,7 +90,7 @@ With p=8, alpha=10 microseconds, beta=25 GB/s, and n=64 MiB, the startup term is
 
 Tree and hierarchical algorithms can change round counts and path use. The purpose of the ring equation is to connect rank count and message size to the schedule, not to declare a ring optimal for every exchange. Measure the actual algorithm and topology when diagnosing a real collective.
 
-## 5. Read algorithm bandwidth and bus bandwidth carefully
+### 5. Read algorithm bandwidth and bus bandwidth carefully
 
 A collective benchmark can report logical tensor throughput, often called algorithm bandwidth, as payload size divided by elapsed time. That number describes how quickly the collective processes its logical input. It is not automatically the physical rate of one network link.
 
@@ -98,7 +100,7 @@ The ring example makes the distinction visible. A rank can send approximately tw
 
 Record the collective, participating ranks, message size, benchmark version, and bandwidth definition. A result from one process controlling many devices can differ from many processes with different CPU placement. A reported number becomes useful evidence only when its execution conditions and denominator are clear.
 
-## 6. Topology changes the meaning of effective bandwidth
+### 6. Topology changes the meaning of effective bandwidth
 
 Communication follows physical interfaces and shared resources. Within a server, a path can traverse accelerator links or PCIe switches. Across servers, it also involves the GPU-to-NIC connection, network adapter, switches, and remote device path. The narrowest relevant resource can bound sustained traffic.
 
@@ -112,7 +114,7 @@ $$
 
 The bound depends on the traffic actually required by the algorithm and the cut's usable direction-specific capacity. It does not assume every link in the cluster contributes to this one exchange. A large aggregate fabric number can coexist with a much smaller capacity across the cut relevant to the job's placement.
 
-## 7. Concurrent communication changes the calibration
+### 7. Concurrent communication changes the calibration
 
 An isolated benchmark can obtain bandwidth unavailable when multiple ranks or jobs compete for the same resource. Shared NIC ports, PCIe links, switch uplinks, and memory paths can introduce contention. Effective beta should therefore be measured under the relevant concurrency pattern when predicting job time.
 
@@ -122,7 +124,9 @@ Burst alignment matters. Many ranks becoming ready simultaneously can create tra
 
 Measure tail behavior as well as means. One slow rank or path can delay a collective whose completion is required by all participants. A modest average transfer time is insufficient evidence that the distributed critical path is stable.
 
-## 8. Communication delays the job only when dependencies expose it
+### 8. Communication delays the job only when dependencies expose it
+
+![Deep dive: 8. Communication delays the job only when dependencies expose it](./deep-dive-component-02.png)
 
 If a gradient bucket becomes ready while backward computation continues, part of its communication can overlap with that computation. The step waits only for the portion that remains on the critical path, subject to resource contention and the framework's dependency ordering.
 
@@ -138,18 +142,17 @@ Overlap still consumes resources. Communication can compete with computation for
 
 A compact diagnostic record can contain the expected path, observed large-message slope, small-message intercept, participating rank count, and application communication tail. For example, a healthy slope with a much larger intercept suggests a different investigation from a healthy intercept with reduced sustained bandwidth. Add rank-by-rank observations when only one placement degrades. Preserve the same timing boundaries during comparisons, because adding a synchronization or allocation to one measurement can imitate a transport regression. This record turns the model into a repeatable troubleshooting method rather than a collection of disconnected benchmark numbers.
 
-![Deep dive: 8. Communication delays the job only when dependencies expose it](./deep-dive-component-02.png)
-
-
-## 9. Use the model to choose the next experiment
+### 9. Use the model to choose the next experiment
 
 If small messages dominate, investigate startup count, batching, and readiness rather than expecting a link-rate upgrade to solve the problem. If large-message slope is poor, verify the physical path, protocol, placement, and contention. If isolated bandwidth is healthy but job time is poor, inspect collective timing and the slowest participants.
 
 Keep calculations and measurements separate. Label assumed alpha and beta values, list omitted costs, and test the predictions against a message-size sweep and an application trace. A model is useful when its errors guide investigation, not when its equation is treated as an authoritative substitute for evidence.
 
+## Conclusion
+
 The central method is to count bytes, rounds, and dependencies in compatible units. Bandwidth determines a transfer slope; latency determines startup; topology limits available paths; overlap determines exposed time. Together they connect a network specification to the distributed workload it is supposed to accelerate.
 
-## Sources
+### Sources
 
 - [NCCL tests performance and bandwidth definitions](https://github.com/NVIDIA/nccl-tests/blob/master/doc/PERFORMANCE.md).
 - [NCCL collective operations documentation](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html).

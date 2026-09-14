@@ -3,7 +3,7 @@ title: "Case File: p50 Looks Great, but p99 Is Terrible"
 description: "Use queueing theory and a long-tail workload example to explain excellent median latency alongside poor p99, then design a meaningful serving benchmark."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'case-8'
 order: 24
 series: "llm-serving"
@@ -12,11 +12,17 @@ topic: "Production Serving"
 tags: [troubleshooting, inference, performance]
 ---
 
+## Overview
+
+![Concept overview: Case File: p50 Looks Great, but p99 Is Terrible](./section-overview.png)
+
 A service reports 300-millisecond median first-token latency and a 9-second p99. The team celebrates the median and blames the tail on a few unusually long prompts. Users who encounter the tail still wait 9 seconds. More importantly, a small number of expensive requests can delay ordinary requests through shared queues, so the tail may be a property of the scheduler and offered load rather than only of those prompts.
 
 This case uses a deliberately simplified single-server queue to build intuition. A real inference engine performs continuous batching, has separate prefill and decode behavior, and shares GPU work across requests. The equations below are therefore an analytical toy model, not an exact prediction for vLLM or any other engine. They make 3 facts concrete: high utilization magnifies waiting, service-time variance matters, and request percentiles must be measured under a specified arrival process.
 
-## Define the latency whose tail you are discussing
+## Deep dive
+
+### Define the latency whose tail you are discussing
 
 First-token latency includes the time from arrival until the first visible output token. End-to-end latency also includes generation and delivery of the remaining output. Inter-token latency describes gaps during streaming. A 9-second p99 in 1 is not equivalent to a 9-second p99 in another. Name the metric and its clock boundaries before selecting a remedy.
 
@@ -24,7 +30,9 @@ Break first-token latency into ingress, queueing, prompt processing, and deliver
 
 Record separate distributions by prompt length, output length, cache-hit status, priority, and tenant. The global p99 is useful for a broad service target, but a conditional view explains who is affected. If short requests have a long queueing tail whenever long prompts arrive, dismissing the incident as “only long prompts are slow” contradicts the evidence.
 
-## Start with utilization in the simplest queue
+### Start with utilization in the simplest queue
+
+![Deep dive: Start with utilization in the simplest queue](./deep-dive-component-01.png)
 
 Let lambda be the request arrival rate and S the random service time. In a single-server queue the utilization is rho equal to lambda times E[S]. Stability requires rho less than 1 under the model assumptions. This is server occupancy in a queueing model, not NVIDIA's GPU-activity utilization field.
 
@@ -52,10 +60,9 @@ This is the stationary time-in-system distribution for that queue, requiring lam
 
 These are valid theoretical percentiles under an exponential single-server model, not percentiles for continuous-batched inference. The benefit is methodological: reducing utilization changes the queue tail even when isolated service time remains fixed. Compare predicted direction with a load sweep, then use the actual engine's observed distribution for the decision. A measured p99 improvement should include acceptance and recovery after bursts, since rejecting the slowest arrivals can improve the accepted sample while reducing delivered service.
 
-![Deep dive: Start with utilization in the simplest queue](./deep-dive-component-01.png)
+### Work a long-tail service-time example
 
-
-## Work a long-tail service-time example
+![Deep dive: Work a long-tail service-time example](./deep-dive-component-03.png)
 
 Now use an M/G/1 queue: Poisson arrivals remain, but service times may have a general distribution. For a first-come, first-served single server with independent service times and finite second moment, the Pollaczek–Khinchine formula gives mean waiting time:
 
@@ -74,7 +81,9 @@ Again, none of those values is p99. The calculation shows why a rare long job ca
 
 *Original worked-example figure. Arrival rate and service times are hypothetical analytical inputs.*
 
-## Going deeper: estimate the distribution honestly
+### Going deeper: estimate the distribution honestly
+
+![Deep dive: Going deeper: estimate the distribution honestly](./deep-dive-component-02.png)
 
 A reported p99 is an estimated quantile, and the number of observations matters. With 1000 completed requests, only about 10 observations lie in the top 1 percent by rank. A single burst or unusual prompt can change the estimate materially. With 100 requests, a nominal p99 is essentially near the largest observed value under common quantile conventions.
 
@@ -90,10 +99,7 @@ $$
 
 If 10000 requests have a 1-percent violation rate, that standard error is about 0.001, or 0.1 percentage points. Bursty or correlated arrivals reduce the validity of the independence approximation. Use longer runs or block-based uncertainty estimates when requests share incident periods. This small equation is more honest than presenting a tail number with unexplained decimal precision.
 
-![Deep dive: Going deeper: estimate the distribution honestly](./deep-dive-component-02.png)
-
-
-## The load generator can hide the problem
+### The load generator can hide the problem
 
 A closed-loop client starts its next request after the previous response completes. As the server slows, that client offers less work. The resulting test can show bounded queues and a reassuring latency distribution because the generator automatically backs off. That behavior may match an interactive user population, but it does not represent a fixed external arrival stream.
 
@@ -103,7 +109,7 @@ This issue is often discussed as coordinated omission: the measurement process o
 
 Measure failures, cancellations, rejections, and timeouts. A p99 computed only over successful requests can improve when the slowest requests time out and disappear from the sample. Report success rate and completed goodput within the latency target alongside the successful-request distribution. Rejected or failed work should not become an invisible route to a better dashboard.
 
-## Locate the tail's source before tuning
+### Locate the tail's source before tuning
 
 Compare queue wait and processing time for tail requests. If queue wait dominates and grows sharply with arrival rate, first reduce saturation or control admission. If prompt-processing time dominates for long inputs, chunking, prefix reuse, or a separate prefill pool may help. If shared streaming gaps dominate, revisit the [batch-scheduler stall case](/blog/case-latency-spikes-batch-scheduler/).
 
@@ -113,7 +119,7 @@ Track KV pressure and active context lengths. The request rate can remain consta
 
 Check queue placement across replicas. A balanced total arrival rate does not guarantee balanced work when 1 replica receives several expensive requests. Routing by request count can create an overloaded tail replica while another remains lightly loaded. Work-aware routing needs estimates, but even a coarse prompt-length and cache-capacity signal can be more informative than counting requests alone.
 
-## Remedies have fairness and capacity costs
+### Remedies have fairness and capacity costs
 
 Add headroom when queueing dominates. A server running close to its effective limit may need more replicas or less admitted work to satisfy p99. Faster kernels help only to the extent that they reduce the dominant service demand. Extra headroom can be more valuable than chasing a small median improvement at saturation.
 
@@ -128,7 +134,7 @@ Admission control bounds the queue and returns a timely overload signal. It prot
 
 After changing capacity or routing, repeat a load sweep around the operating point rather than checking only 1 arrival rate. A configuration may improve the tail at light load yet reach saturation sooner because its smaller batches sacrifice throughput. Include a burst that resembles the product's busiest interval and a recovery period afterward. The recovery curve matters: a server that keeps a large backlog long after arrivals return to normal can continue delivering poor latency even though its current arrival rate looks safe. Save the offered arrival trace so that the before and after runs face comparable work.
 
-## Common misconceptions
+### Common misconceptions
 
 “A good p50 means the service is mostly healthy.” It describes the middle observation, not stability under offered load or the cost of long delays. Track a service target and its violation rate alongside the median.
 
@@ -136,7 +142,7 @@ After changing capacity or routing, repeat a load sweep around the operating poi
 
 “Queueing formulas predict our engine's p99 exactly.” The examples here predict means under stated single-server assumptions. Continuous batching and mixed-phase scheduling need measurement or a richer model. Use theory to form a hypothesis, not to manufacture a percentile.
 
-## Takeaway
+## Conclusion
 
 - Name the latency metric, arrival process, workload mixture, and sample count.
 - Investigate both saturation and service-time variance before optimizing the median.
@@ -144,7 +150,7 @@ After changing capacity or routing, repeat a load sweep around the operating poi
 
 For related practice, see [benchmarking pitfalls](/blog/benchmarking-pitfalls/), [profiling the critical path](/blog/profiling-basics-where-time-goes/), and [TTFT versus TPOT](/blog/ttft-and-tpot/).
 
-## Sources
+### Sources
 
 - [MIT OpenCourseWare: Eytan Modiano, Lectures 8–9, M/G/1 Queues](https://ocw.mit.edu/courses/6-263j-data-communication-networks-fall-2002/65d9ab519ec4851af812f4b89ffaeedc_Lectures8_9.pdf), service-time second moments and the Pollaczek–Khinchine mean-wait formula.
 - [MIT: Cathy Wu, Queuing Models](https://web.mit.edu/1.041/www/lectures/L8-queuing-models-2026sp.pdf), M/M/1 assumptions and mean-response analysis.

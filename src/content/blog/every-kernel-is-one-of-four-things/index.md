@@ -3,7 +3,7 @@ title: '4 Kernel Bottlenecks: What Nsight Can Tell You'
 description: "A field taxonomy for slow CUDA kernels: underutilized, latency-bound, memory-bound, or compute-bound — and how to read the diagnosis straight off an Nsight Compute report."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'ktune-1'
 order: 8
 series: "gpu-performance"
@@ -12,11 +12,19 @@ topic: "GPU Execution and Memory"
 tags: [cuda, profiling, kernels]
 ---
 
+## Overview
+
+![Concept overview: 4 Kernel Bottlenecks: What Nsight Can Tell You](./section-overview.png)
+
 Nsight Compute will happily print more than 100 metrics for a single kernel launch. You need 3 of them to make the first, most important call: **Compute (SM) Throughput**, **Memory Throughput**, and the top **warp stall reason**. Those 3 numbers provide a useful first-pass grouping for slow kernels into 1 of 4 buckets, and each bucket has its own family of fixes. Apply a fix from the wrong bucket and you can spend a week making a kernel more elegant without making it 1 microsecond faster.
 
 This article is that taxonomy: what the 4 buckets are, what each one looks like in a profile, and a worked example where we classify a kernel by hand from a mock Nsight summary and pick the matching fix.
 
-## The 2 percentages that decide everything
+## Deep dive
+
+### The 2 percentages that decide everything
+
+![Deep dive: The 2 percentages that decide everything](./deep-dive-component-03.png)
 
 Nsight Compute's report opens with a section called *GPU Speed of Light Throughput*. It condenses the whole kernel into 2 headline percentages:
 
@@ -35,8 +43,9 @@ That rule already splits the world into 3 regions. The fourth bucket hides insid
 
 **4. Compute-bound: the math units are the limit.** SM Throughput is high, and stalls skew toward *Math Pipe Throttle* or *Not Selected* (the warp was ready, another warp got the slot). This is where you want big GEMMs to be. Fixes are about cheaper math: route work to tensor cores, drop precision, or change the algorithm to do fewer FLOPs. If you are compute-bound on tensor cores at high utilization, congratulations, you are done; buy more GPUs.
 
+### Worked example: classify this kernel
 
-## Worked example: classify this kernel
+![Deep dive: Worked example: classify this kernel](./deep-dive-component-01.png)
 
 Here is a mock Nsight Compute summary of the kind you will actually stare at. The kernel is an RMSNorm over FP16 activations, hidden size 8,192, on 16,384 rows (batch × sequence), running on an H100 SXM (132 SMs, 3.35 TB/s HBM3, 67 TFLOPS FP32 per NVIDIA's datasheet):
 
@@ -67,11 +76,9 @@ Walk the decision procedure. Both throughputs low? No, memory is at 87%. So this
 
 1 counterfactual to sharpen the method: suppose the same kernel had reported SM 23% and Memory 31%. Then the procedure sends you to Launch Statistics. Waves per SM ≈ 62 means the grid was plenty, so it would be a candidate for latency or dependency limits, and the 38.7 warp cycles per issued instruction becomes the number to attack.
 
+### Going deeper: Little's law, and why unrolling can halve the warps you need
 
-![Deep dive: Worked example: classify this kernel](./deep-dive-component-01.png)
-
-
-## Going deeper: Little's law, and why unrolling can halve the warps you need
+![Deep dive: Going deeper: Little's law, and why unrolling can halve the warps you need](./deep-dive-component-02.png)
 
 The latency-bound bucket deserves one more level of mechanism, because the standard reflex ("raise occupancy") is only half the toolbox.
 
@@ -99,10 +106,7 @@ D is HBM bytes, t elapsed kernel time, F executed floating-point work, q bytes d
 
 At 25 GB/s per SM and 340 nanoseconds latency, approximately 8500 bytes must be outstanding. Loads delivering 128 bytes per warp need roughly 67 independent warp loads; 512-byte loads need 17. Vectorization changes the payload per issued load, while unrolling changes the number of independent loads. Check alignment, register growth, and spills after either change. If measured HBM traffic rises through spilling, the apparent latency-hiding improvement can defeat itself.
 
-![Deep dive: Going deeper: Little's law, and why unrolling can halve the warps you need](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"Low achieved occupancy means the kernel is slow."** Occupancy is a means, not an end: it is 1 of 2 ways to buy latency hiding, and the profile above shows the other 1. Well-tuned GEMMs routinely run at 25 to 50% occupancy while saturating tensor cores, because each warp carries huge ILP and register-heavy tiles. If Speed of Light already shows a resource above 80%, raising occupancy changes nothing except perhaps making things worse by shrinking per-thread registers. Diagnose first; occupancy is a lever for exactly 1 bucket (latency-bound), not a score.
 
@@ -110,7 +114,7 @@ At 25 GB/s per SM and 340 nanoseconds latency, approximately 8500 bytes must be 
 
 **"Memory-bound is a dead end; only faster HBM helps."** Memory-bound means the *byte count* is your budget, and byte counts are very negotiable. The worked example cut 40% of traffic with 1 fusion. FlashAttention (Dao et al., 2022) is the canonical existence proof at scale: attention was memory-bound on materializing the N×N score matrix, and tiling it through on-chip SRAM so those scores never touch HBM sped up attention several-fold on the same hardware, with the memory hierarchy itself unchanged. When a kernel is memory-bound, the question is not "how do I get more bandwidth" but "which of these bytes did I never need to move?"
 
-## Where this fits in the bigger picture
+### Where this fits in the bigger picture
 
 The 4 buckets are really a roofline model read off a profiler. Underutilized and latency-bound kernels sit *below* the roofline (the hardware could go faster at this arithmetic intensity); memory-bound and compute-bound kernels sit *on* it, on the slanted and flat sections respectively. The fix hierarchy follows the same order you should apply it: first fill the machine, then hide latency, then move fewer bytes, then do less math.
 
@@ -118,13 +122,13 @@ It also explains why so much of modern inference engineering is fusion and preci
 
 The taxonomy is also a communication tool. "The kernel is slow" starts a debate; "it's at 87% of DRAM speed-of-light with 1 FLOP/byte, so we fuse or we ship it" ends 1.
 
-## Takeaway
+## Conclusion
 
 - Classify before you tune: 2 Speed-of-Light percentages plus waves-per-SM sort any kernel into underutilized, latency-bound, memory-bound, or compute-bound, and each bucket has a disjoint fix family.
 - Verify the profiler by hand: bytes ÷ time vs. peak bandwidth, and FLOPs ÷ bytes vs. the ridge point. If achieved bandwidth is already near peak, only moving fewer bytes (fusion, precision, layout) can help.
 - Latency hiding obeys Little's law, and ILP is interchangeable with occupancy: vectorized loads and a 2× unroll can cut the warps needed to saturate bandwidth from 66 to 9 on an H100 SM.
 
-## Sources
+### Sources
 
 - NVIDIA, *Nsight Compute Kernel Profiling Guide* (Speed of Light, warp stall reasons) — https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html
 - NVIDIA, *CUDA C++ Best Practices Guide* — https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/

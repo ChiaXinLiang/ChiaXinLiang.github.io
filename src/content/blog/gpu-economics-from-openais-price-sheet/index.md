@@ -3,7 +3,7 @@ title: 'Reading GPU Economics Off OpenAI''s Price Sheet'
 description: "OpenAI's API prices are a compressed datasheet: every ratio on the page maps to a specific bottleneck in the silicon serving your tokens."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'econ-2'
 order: 8
 series: "efficient-ai"
@@ -12,11 +12,19 @@ topic: "Economics"
 tags: [economics, inference, pricing]
 ---
 
+## Overview
+
+![Concept overview: Reading GPU Economics Off OpenAI's Price Sheet](./section-overview.png)
+
 50 to 1. That is the spread inside a single row of OpenAI's current price sheet: 1 million output tokens from gpt-5.6-sol costs $20, 1 million fresh input tokens costs $4, and 1 million cached input tokens costs $0.40. Nobody sat in a meeting and invented those gaps for marketing reasons. Each 1 is a hardware bottleneck with a dollar sign attached, and once you know what to look for, a public pricing page reads like a leaked engineering document.
 
 This article decodes the page ratio by ratio. The prices themselves are public facts (I pulled them from OpenAI's pricing page in September 2026); the mapping from price to silicon is inference on my part, so treat the ratios as approximate signals rather than an audited bill of materials. The signals, though, are remarkably consistent.
 
-## The vocabulary: 2 phases and a cache
+## Deep dive
+
+### The vocabulary: 2 phases and a cache
+
+![Deep dive: The vocabulary: 2 phases and a cache](./deep-dive-component-03.png)
 
 Serving a large language model has 2 phases with opposite personalities.
 
@@ -28,7 +36,7 @@ The bridge between the phases is the **KV cache**. During prefill, the model sav
 
 With those 3 ideas, the whole price sheet opens up.
 
-## 4 prices, 4 bottlenecks
+### 4 prices, 4 bottlenecks
 
 Here is the standard-tier row for gpt-5.6-sol, OpenAI's mid-flagship, as of September 2026, in dollars per million tokens:
 
@@ -52,7 +60,9 @@ Let's decode each ratio.
 
 **Long context at ~2x: attention grows and the cache balloons.** Attention cost during prefill grows quadratically with sequence length, and the KV cache grows linearly, hogging memory that would otherwise hold other users' requests. More on this below too.
 
-## A worked example: 1 agent session, by hand
+### A worked example: 1 agent session, by hand
+
+![Deep dive: A worked example: 1 agent session, by hand](./deep-dive-component-01.png)
 
 Abstract ratios stick better with a concrete bill. Take a coding agent with a 50,000-token context (system prompt plus a repository digest) that runs for 20 turns. Each turn the user adds 1,000 tokens and the model replies with 500, and the full history is resent every turn. All prices are gpt-5.6-sol standard tier.
 
@@ -71,10 +81,7 @@ Abstract ratios stick better with a concrete bill. Take a coding agent with a 50
 
 The bill dropped 5x, and its composition flipped: output went from a rounding error (4% of spend) to nearly a fifth of it. This is the general pattern for agentic workloads, which is why every serious agent framework became obsessed with prompt-cache hygiene. It also explains a breakeven rule you can derive from the sheet: the write premium is $1 per million tokens (the extra 0.25 x $4), and each later hit saves $3.60 per million ($4.00 minus $0.40). Caching pays for itself if a prefix has even a ~28% chance of being reused once. Almost any multi-turn conversation clears that bar on turn 2.
 
-![Deep dive: A worked example: 1 agent session, by hand](./deep-dive-component-01.png)
-
-
-## Derive a cache decision without guessing provider costs
+### Derive a cache decision without guessing provider costs
 
 Let fresh input price be $$p_f$$, cache-write price $$p_w$$, and cache-hit price $$p_h$$, all in dollars per million tokens. If a written prefix receives an expected $$q$$ later billed hits, its incremental saving over fresh processing is positive when
 
@@ -86,7 +93,9 @@ For the listed prices of 4, 5, and 0.40 dollars, break-even expected reuse excee
 
 Compared with treating cached input as simply discounted input, this model includes the initial write premium. It supports a customer-side experiment: stabilize the prefix, record billed hit tokens, and compare complete session charges. It cannot recover the provider's actual cost from retail prices. Hardware efficiency, competitive positioning, demand, margins, and tier policy can all affect those prices. Roofline examples explain plausible engineering pressures; neither the fivefold output ratio nor the cache discount uniquely identifies a deployed chip or a cost decomposition.
 
-## Going deeper: the ratios, derived from the chip
+### Going deeper: the ratios, derived from the chip
+
+![Deep dive: Going deeper: the ratios, derived from the chip](./deep-dive-component-02.png)
 
 Now push 1 level down and ask why the ratios take these particular values. Use a concrete stand-in: a 70B-parameter dense model in FP8 (1 byte per weight, so 70 GB of weights) on a GB300-class GPU with 288 GB of HBM at 8 TB/s, capable of very roughly 5 x 10^15 FLOPs of dense FP8 matrix math per second.
 
@@ -102,10 +111,7 @@ Providers claw back efficiency by batching many users' decode steps together, so
 
 **Why batch is half price and fast mode is double.** These 2 tiers price the same thing in opposite directions: scheduling freedom. Batch jobs (results within 24 hours) let the provider fill idle capacity and run at maximum utilization, so they cost 50% of standard. Fast mode sells a different latency policy; reserved capacity and scheduling can contribute, but the public price does not disclose occupancy or guarantee 0 queueing, and it costs 2x. Same silicon, different goodput contract.
 
-![Deep dive: Going deeper: the ratios, derived from the chip](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"Cache discounts are a loyalty perk, like a bulk coupon."** No. The discount maps to compute the provider genuinely does not perform. An example consistent with efficiency affecting prices came from DeepSeek: the day it shipped its sparse-attention architecture (DSA) in V3.2-Exp, it cut API prices by more than half, and published the kernels. The concurrent announcement does not isolate costs, margins, or competitive pricing decisions.
 
@@ -113,19 +119,19 @@ Providers claw back efficiency by batching many users' decode steps together, so
 
 **"A cache hit costs the provider basically nothing, so 10% is a rip-off."** The raw compute-versus-read ratio is indeed closer to 1,000x than 10x, but the priced product is not a memory read. It is a distributed storage tier holding your KV state (about 160 KB per token, gigabytes per long conversation) across HBM, DRAM, and SSD, with transfer, indexing, eviction, and miss costs baked in. 10 percent of fresh price for all of that is closer to fair than it first appears, and the 1.25x write premium is the honest admission that persistence costs money up front.
 
-## The bigger picture
+### The bigger picture
 
 Once you read 1 price sheet this way, the whole market becomes legible. The 20x input-price spread between gpt-5.6-sol ($4) and gpt-5.6-luna ($0.20) tells you the frontier is no longer 1 flagship model but a routing ladder, that customers can use to route suitable workloads; the sheet does not disclose actual traffic shares. The long-context premium tells you memory capacity, not FLOPs, is the scarce resource, the same conclusion the [Blackwell-to-Rubin memory math](/blog/blackwell-to-rubin-memory-math/) reaches from the hardware side, where capacity stays flat at 288 GB while bandwidth nearly triples. The batch and fast-mode tiers are [goodput versus utilization](/blog/goodput-vs-utilization/) translated into retail pricing: you are buying a latency distribution, not just tokens. And the entire cached-input economy exists because of the KV cache, a data structure whose origin story is the attention mechanism itself, covered in [Attention in Plain Words](/blog/attention-in-plain-words/).
 
 This is also, quietly, a recruiting pitch. Several tiers on that page correspond to useful optimization questions, and shifting any of them (a better cache hit rate, a leaner KV format, a smarter batch scheduler) moves real revenue. That is precisely the job described in [What Does an ML Performance Engineer Do?](/blog/what-does-an-ml-performance-engineer-do/), except now the performance report is published monthly, in dollars, for everyone to read.
 
-## Takeaway
+## Conclusion
 
 - API price sheets suggest workload optimization opportunities: cached input at 0.1x prices skipped prefill compute, the 1.25x cache-write premium prices KV storage, output at 5-6x prices bandwidth-bound decode, and long-context premiums price the KV cache crowding out batch size.
 - The roofline explains possible cost pressures, while prices also reflect product policy and competition. DeepSeek announced sparse attention alongside a price reduction, without a controlled decomposition of the causes.
 - For anyone building on these APIs, the sheet is an optimization guide: maximize cache hits (stable prefixes, append-only context), budget output tokens hardest, and treat long context as a 2x luxury rather than a default.
 
-## Sources
+### Sources
 
 - OpenAI, "API Pricing," developer documentation: https://developers.openai.com/api/docs/pricing (prices retrieved September 2026)
 - DeepSeek, "DeepSeek-V3.2-Exp Release" (DSA sparse attention with same-day 50%+ API price cut): https://api-docs.deepseek.com/news/news250929/

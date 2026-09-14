@@ -12,18 +12,21 @@ level: "intermediate"
 tags: ["llm-serving", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Serving Observability: Request Traces, GPU Counters, and Capacity Alerts. A request enters a serving scheduler, waits in a visible queue, runs a GPU kernel, and streams tokens.](./section-overview.png)
+
 A dashboard full of green GPU-utilization charts can coexist with an unusable inference service. Requests may wait in an admission queue, long prompts may delay short ones, and the engine may spend substantial work on responses that clients cancel. Observability needs to connect the user's waiting time to the system's execution rather than treating each layer as an unrelated collection of charts.
 
 The goal is a causal investigation path. A latency alert identifies an affected request population. Request traces locate the time interval that grew. Scheduler and resource measurements explain why that interval grew. A targeted profile then tests the suspected execution mechanism.
 
 We will define consistent timing boundaries, derive a few useful capacity relationships, and design measurements that survive batching and multiple replicas. Numerical examples are illustrative. Exact exported metric names and their availability depend on the installed serving-engine version and should be verified against its documentation.
 
-## 1. Begin with the timeline the client experiences
+## Deep dive
 
-![Concept overview: Serving Observability: Request Traces, GPU Counters, and Capacity Alerts. A request enters a serving scheduler, waits in a visible queue, runs a GPU kernel, and streams tokens.](./section-overview.png)
+### 1. Begin with the timeline the client experiences
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Begin with the timeline the client experiences](./deep-dive.png)
 
 For a streaming request, record arrival at the service boundary, admission to engine work, start of prompt processing, delivery of the first generated token, subsequent token deliveries, and termination. These events describe different waits. A client-side timestamp also includes network and application buffering that an engine-local timestamp cannot observe.
 
@@ -37,10 +40,9 @@ $$
 
 Some engines produce the first output token at the end of prefill rather than in a separately identified decode interval. Use a decomposition matching the actual implementation and avoid double-counting it. The equation is a bookkeeping model, not a requirement that every engine expose those exact phase labels.
 
+### 2. Measure token delivery without hiding gaps
 
-![Deep-dive illustration: Begin with the timeline the client experiences](./deep-dive.png)
-
-## 2. Measure token delivery without hiding gaps
+![Deep dive: 2. Measure token delivery without hiding gaps](./deep-dive-component-02.png)
 
 After the first token, define delivery gaps between consecutive output-token timestamps. Their distribution reveals pauses that average generation time can conceal. A response can have a fast initial burst followed by a long stall while maintaining an apparently acceptable mean time per token.
 
@@ -56,10 +58,7 @@ Distinguish averaging per-response gaps from pooling every observed token gap. P
 
 Track successful termination, client cancellation, timeout, and engine failure as separate outcomes. A cancelled request's generated tokens can consume compute without becoming useful client output. Completion throughput and engine-generated token throughput answer different questions and both belong in a production investigation.
 
-![Deep dive: 2. Measure token delivery without hiding gaps](./deep-dive-component-02.png)
-
-
-## 3. Connect request traces to shared engine work
+### 3. Connect request traces to shared engine work
 
 Continuous batching breaks the simple assumption that one request owns one GPU launch. A single attention kernel can process tokens from many requests, and one request can move through multiple changing batch compositions. Tracing every launch as a child of a single request would misrepresent this shared execution.
 
@@ -69,7 +68,7 @@ Use monotonic clocks for durations within one process. Cross-process comparisons
 
 The most useful trace attributes describe the workload and state: prompt length, generated length, model and configuration identity, cache-hit category, scheduling class, and termination reason. Preserve bounded attribute values for aggregated metrics. Unique request identifiers belong in traces or logs, where they do not create an unbounded metric series population.
 
-## 4. Interpret queues using consistent request populations
+### 4. Interpret queues using consistent request populations
 
 Little's law relates average population L, arrival rate lambda, and average time W for a stable system with consistent boundaries:
 
@@ -85,7 +84,7 @@ Track offered, admitted, rejected, and completed requests separately. An admissi
 
 Queue request count is also a weak proxy for queued work. Ten short prompts differ from ten long prompts with large output budgets. Add workload measures such as pending prompt tokens, estimated cache reservations, and request classes where the engine can provide them accurately.
 
-## 5. Aggregate histograms correctly across replicas
+### 5. Aggregate histograms correctly across replicas
 
 A quantile is a property of a distribution. Averaging per-instance p99 values does not produce the fleet p99, because instances can receive different volumes and shapes of traffic. The same problem appears when averaging quantiles across time windows.
 
@@ -95,7 +94,7 @@ For a simple example, suppose one replica handles 990 fast requests and another 
 
 Choose buckets around meaningful service objectives and expected operating ranges. Retain counts so an apparently dramatic percentile is not interpreted without its sample population. Small-window tails can fluctuate sharply when only a few requests complete, especially for low-volume classes or newly started replicas.
 
-## 6. Link GPU evidence to the suspected bottleneck
+### 6. Link GPU evidence to the suspected bottleneck
 
 Utilization indicates activity over a sampling interval, but it does not tell you how much useful work completed. A GPU may execute inefficient kernels continuously, wait through small alternating gaps, or process work whose results will be discarded. Pair utilization with admitted workload, completed tokens, and latency.
 
@@ -105,7 +104,9 @@ Resource counters sampled at coarse intervals can hide short stalls. Conversely,
 
 GPU memory measurements need similar care. Allocated tensor memory, allocator-reserved memory, cache-block occupancy, and device-wide usage represent different layers. A high reserved-memory value does not alone prove that the cache is full. Inspect the engine's capacity and eviction measurements alongside runtime and device totals.
 
-## 7. Design alerts that identify an actionable failure mode
+### 7. Design alerts that identify an actionable failure mode
+
+![Deep dive: 7. Design alerts that identify an actionable failure mode](./deep-dive-component-01.png)
 
 Start with the service outcome: successful completion latency, first-token latency, streaming gaps, or accepted throughput below its objective. Pair it with supporting evidence such as queue growth, rejections, cache pressure, or a replica losing capacity. An alert should make the next investigation clear.
 
@@ -121,7 +122,7 @@ Use both a sustained view and a shorter confirmation view when the alerting syst
 
 Avoid alerting on every resource threshold independently. A GPU counter crossing a threshold can be normal at the intended operating point. Resource alerts are most useful when they signal a known failure risk or support a service symptom, rather than generating noise whenever hardware is busy.
 
-## 8. Use controlled experiments to validate the diagnosis
+### 8. Use controlled experiments to validate the diagnosis
 
 When investigating a regression, preserve the model, engine version, hardware, request distribution, and concurrency policy. Compare prompt and output lengths, cache-hit rates, and termination reasons before attributing a latency change to a code change. A workload shift can imitate a kernel regression.
 
@@ -131,7 +132,7 @@ Use traces to select representative profiling windows, including ordinary operat
 
 After applying a fix, verify the original service objective and neighboring outcomes. A scheduler adjustment can improve short-request latency while reducing long-request completion throughput. Report the affected populations rather than declaring success from a single fleet average.
 
-## 9. Turn dashboards into a reproducible operating record
+### 9. Turn dashboards into a reproducible operating record
 
 Maintain a compact set of linked views: service outcomes, offered and admitted demand, engine queues and cache state, replica health, and resource execution. Their filters should use compatible model and request-class labels so moving between views preserves the investigated population.
 
@@ -139,9 +140,11 @@ Document metric boundaries and version-dependent definitions near the dashboards
 
 Keep a small reproducible load case for each important incident pattern. It should capture the relevant workload shape and objective without requiring the entire original traffic stream. The case becomes useful evidence for future regressions and a practical test of whether an optimization survives realistic serving conditions.
 
+## Conclusion
+
 Good observability closes the distance between a slow response and the mechanism that made it slow. Request measurements define the symptom, engine state locates the wait, and GPU evidence tests the execution hypothesis. Capacity decisions become much more reliable when all 3 describe the same workload and timing boundaries.
 
-## Sources
+### Sources
 
 - [vLLM metrics design documentation](https://docs.vllm.ai/en/latest/design/metrics/).
 - [Prometheus histogram practices](https://prometheus.io/docs/practices/histograms/).

@@ -12,18 +12,21 @@ level: "intermediate"
 tags: ["gpu-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Stream-Ordered Allocation: Memory Pools, Events, and Safe Reuse. Two GPU stream timelines share a memory pool.](./section-overview.png)
+
 Allocating and freeing device memory can affect the schedule of an otherwise efficient GPU pipeline. A traditional allocation path can introduce overhead or synchronization, while repeated temporary buffers can raise peak capacity. Stream-ordered allocation expresses supported allocation and release operations within execution timelines and can reuse memory through pools.
 
 The central requirement is still lifetime correctness. Every consumer must execute after allocation is valid and before release permits reuse. Multiple streams make that dependency graph explicit: a pointer returned to the host does not automatically order unrelated device work.
 
 We will derive these dependencies, examine pool accounting, and build a measurement method. This article describes supported patterns rather than reporting hardware tests. Current CUDA documentation defines platform support, graph interactions, and pool policies.
 
-## 1. Treat memory lifetime as part of the execution graph
+## Deep dive
 
-![Concept overview: Stream-Ordered Allocation: Memory Pools, Events, and Safe Reuse. Two GPU stream timelines share a memory pool.](./section-overview.png)
+### 1. Treat memory lifetime as part of the execution graph
 
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+![Deep-dive illustration: Treat memory lifetime as part of the execution graph](./deep-dive.png)
 
 An allocation is useful only during a defined lifetime. Producers initialize its contents, consumers read or modify them, and release ends ownership. The scheduler must preserve these dependencies even when host calls return before device work completes.
 
@@ -37,10 +40,7 @@ Multiple consumers require release to follow every supported use. One consumer's
 
 Draw the dependency graph before selecting an allocator. An asynchronous API can reduce unnecessary host blocking, but it cannot remove the dependencies required by the computation. A faster host return is not evidence that memory is ready for every execution domain.
 
-
-![Deep-dive illustration: Treat memory lifetime as part of the execution graph](./deep-dive.png)
-
-## 2. Understand the stream-local pattern
+### 2. Understand the stream-local pattern
 
 A supported asynchronous allocation enqueued on a stream can be followed by work on that stream using the allocation, then a supported asynchronous free after the work. The stream's ordering supplies the basic lifetime relation under the API contract.
 
@@ -50,7 +50,7 @@ Keep setup, error checking, and supported device capability in the interface. Th
 
 A single-stream example is useful as a reference because ownership is easy to inspect. Preserve it when developing a multi-stream pipeline. If the simple path is correct and the concurrent path corrupts data, cross-stream lifetime becomes a strong hypothesis.
 
-## 3. Derive allocation-to-consumer ordering across streams
+### 3. Derive allocation-to-consumer ordering across streams
 
 Suppose stream A allocates a buffer and stream B consumes it. Record an event after the relevant allocation and initialization work in A, then make B wait through the supported event dependency before consumption.
 
@@ -67,7 +67,9 @@ Preserve the supported event and stream semantics for the target runtime. The ho
 
 Exercise the pattern repeatedly with deterministic sequence values. A buffer can appear correct in one iteration because previous contents resemble the expected result. Sequence identifiers make stale or early reads easier to detect.
 
-## 4. Release must follow the final consumer
+### 4. Release must follow the final consumer
+
+![Deep dive: 4. Release must follow the final consumer](./deep-dive-component-02.png)
 
 If A frees the buffer, it must wait for B's consumed event before enqueuing release under the supported pattern. With more consumers, A must follow all relevant completion edges.
 
@@ -85,10 +87,7 @@ Keep aliases and helper-library uses in the consumer inventory. A temporary pass
 
 A concrete timeline makes the final-consumer rule visible. Suppose allocation and initialization complete at 3 milliseconds, consumer B finishes at 5 milliseconds, and consumer C finishes at 12 milliseconds. Release must follow the supported completion of C as well as B; ordering it after the producer at 3 milliseconds is insufficient. The host may have posted all operations earlier, so wall-clock call order cannot substitute for these device dependencies. Record both consumed events and make the freeing stream wait for them. If C becomes slower in a later iteration, the event graph remains correct without assuming a fixed duration.
 
-![Deep dive: 4. Release must follow the final consumer](./deep-dive-component-02.png)
-
-
-## 5. Derive a logical peak-memory budget
+### 5. Derive a logical peak-memory budget
 
 Let L(t) be the set of logically live allocations under the chosen dependency schedule, and b_i their sizes. A first-order live-memory peak is
 
@@ -102,7 +101,9 @@ For illustrative buffers A=400 MiB, B=300 MiB, and C=200 MiB, overlapping all th
 
 Buffer scheduling can therefore change capacity without changing tensor shapes. The useful optimization is to shorten valid lifetimes or reuse storage after the last consumer, not simply call free earlier in host code.
 
-## 6. Distinguish used memory from reserved pool capacity
+### 6. Distinguish used memory from reserved pool capacity
+
+![Deep dive: 6. Distinguish used memory from reserved pool capacity](./deep-dive-component-01.png)
 
 A pool can retain physical capacity after allocations are released so later requests can reuse it. Used bytes describe active allocation demand under the API's definitions; reserved bytes describe capacity held by the pool. Their difference is not automatically a leak.
 
@@ -114,7 +115,7 @@ A true lifetime leak would involve allocations or references remaining active un
 
 Reserved capacity can also reflect allocation granularity and a changing size population. A pool that serves many different temporary sizes may retain capacity beyond the current live sum, while a stable repeated shape may reuse a smaller set efficiently. Compare size histograms and sustained peaks when investigating growth. A single snapshot after one free cannot establish either a leak or an optimal retention policy. Include other workloads' memory needs when deciding whether retained capacity is acceptable for the deployment.
 
-## 7. Pool policy changes reuse and retention
+### 7. Pool policy changes reuse and retention
 
 Supported pool policies influence retention, release, and reuse behavior. A release threshold or trimming action can change when capacity returns to the system, while reuse settings can affect dependencies and allocation behavior under their documented semantics.
 
@@ -124,7 +125,7 @@ Measure cold allocation, repeated allocation, peak live memory, retained capacit
 
 Avoid interpreting a pool policy as permission for unsafe application reuse. The runtime's internal reuse machinery does not establish missing producer-consumer edges in arbitrary user code. Keep the application lifetime graph valid under the supported contract.
 
-## 8. Graph capture and library integration need their own contract
+### 8. Graph capture and library integration need their own contract
 
 Allocation and release can interact with graph capture and replay under documented CUDA rules. Graph memory nodes and ordinary pool behavior should not be assumed identical in every context. Check the current supported semantics before transferring a stream example into a captured graph.
 
@@ -134,7 +135,7 @@ Framework caching allocators can also manage memory independently of a custom po
 
 Test the actual integration path, including repeated replay or library calls where applicable. A standalone allocator example does not establish graph or framework correctness automatically.
 
-## 9. Measure the pipeline instead of host-call latency alone
+### 9. Measure the pipeline instead of host-call latency alone
 
 Separate allocation API duration, device execution, synchronization, and total useful workload time. A smaller host-call duration can improve posting without shortening the device critical path. A removed synchronization can matter more than a local allocation speedup.
 
@@ -150,7 +151,9 @@ Trace allocation, producer, consumer, and release boundaries. Compare peak memor
 
 Repeat under representative concurrency and shapes. Variable temporary sizes can change reuse behavior, and several streams can raise lifetime overlap. Preserve the actual allocation population and event graph in the comparison.
 
-## 10. Test ownership transitions before adopting reuse
+### 10. Test ownership transitions before adopting reuse
+
+![Deep dive: 10. Test ownership transitions before adopting reuse](./deep-dive-component-03.png)
 
 Use deterministic contents, repeated allocations, varying sizes, multiple consumers, and the intended stream pattern. Include cases where one consumer is deliberately slower so release ordering is exercised rather than accidentally serialized.
 
@@ -158,9 +161,11 @@ Run supported memory diagnostics where relevant and preserve the first failing s
 
 A useful test can allocate in A, initialize a sequence value, consume in B and C, and release only after both consumed events. Delaying C should not change the value observed by either consumer. Removing C's completion edge in a dedicated diagnostic reproducer tests a different invalid protocol and should not be adopted as an optimization. This distinction keeps the test tied to lifetime rather than one lucky execution order.
 
+## Conclusion
+
 Stream-ordered allocation makes memory management part of the execution program. Its value comes from supported reuse and reduced unnecessary waiting while preserving allocation-to-use and use-to-release dependencies. Measure logical lifetime, pool reservation, and useful timing together, then choose the policy that fits the valid pipeline and its capacity budget.
 
-## Sources
+### Sources
 
 - [CUDA stream-ordered memory allocation](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/stream-ordered-memory-allocation.html).
 - [CUDA memory-pool runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html).

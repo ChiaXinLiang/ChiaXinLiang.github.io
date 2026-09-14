@@ -3,7 +3,7 @@ title: 'The Memory Wall: Latency Numbers Every Engineer Should Feel'
 description: "Register to RAM is a 300x cliff, RAM to SSD is 1,000x more — scale it to human time and you'll never write a pointer chase the same way again."
 pubDate: 'Sep 13 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'mem-1'
 order: 3
 series: "comp-arch"
@@ -12,11 +12,17 @@ topic: "Memory Hierarchy"
 tags: [memory, latency, hardware]
 ---
 
+## Overview
+
+![Concept overview: The Memory Wall: Latency Numbers Every Engineer Should Feel](./section-overview.png)
+
 Reading a value from a CPU register takes about 0.3 nanoseconds. Reading the same value from main memory takes about 100 nanoseconds, roughly 300 times longer, and a random read from an SSD costs another one000 times on top of that. Those 3 numbers explain more real-world performance mysteries than any profiler feature I know, and most engineers have never sat down and felt how big the ratios actually are.
 
 This article is about building that feel. We'll walk the canonical latency table, rescale it to human time, count exactly what 1 cache miss costs in wasted arithmetic, look at why the gap exists in the first place, and end with the place the memory wall bites hardest today: generating tokens from a large language model.
 
-## The table, and why it looks the way it does
+## Deep dive
+
+### The table, and why it looks the way it does
 
 Every working systems engineer eventually memorizes some version of this table. It descends from a slide Jeff Dean showed at Google in 2009 ("Numbers Everyone Should Know"), which Peter Norvig had published a version of earlier, and which Colin Scott later turned into an interactive chart that extrapolates the trends year by year. The rough 2020s values:
 
@@ -35,7 +41,7 @@ Every working systems engineer eventually memorizes some version of this table. 
 
 Quick vocabulary so nothing is taken on faith. A *register* is one of a few dozen storage slots inside the CPU core itself, physically adjacent to the arithmetic units. A *cache* is a small, fast memory on the CPU die that keeps copies of recently used data; L1, L2, and L3 are successively larger and slower levels of it. *DRAM* (dynamic random-access memory) is main memory, the "16 GB of RAM" in your laptop, sitting centimeters away across a bus. An *SSD* stores bits in flash cells and is persistent; DRAM forgets everything at power-off. *Latency* is how long 1 access takes from request to data; it is a different quantity from *bandwidth*, which is how many bytes per second you can stream, and confusing the 2 is the most common memory-performance mistake there is. We'll come back to that.
 
-## Scaled to human time
+### Scaled to human time
 
 Multiply everything by a billion, so 1 nanosecond becomes 1 second. Now the table reads like this:
 
@@ -50,7 +56,9 @@ Multiply everything by a billion, so 1 nanosecond becomes 1 second. Now the tabl
 
 The step that should reorganize your programming instincts is the third 1. A modern out-of-order core can start several instructions every cycle, but only when the operands are on-chip. The moment it needs a value from DRAM, your CPU stands in the hallway for 2 subjective minutes, and it can do that millions of times per second without any profiler line saying "waiting."
 
-## A worked example you can do on paper
+### A worked example you can do on paper
+
+![Deep dive: A worked example you can do on paper](./deep-dive-component-01.png)
 
 Take a 3 GHz core. 1 cycle is 1/3 of a nanosecond. Suppose it can complete 2 integer additions per cycle, which is conservative for anything shipped in the last decade. That's 6 additions per nanosecond. A single last-level cache miss to DRAM costs about 100 ns, so:
 
@@ -77,10 +85,9 @@ For a dependent list reading 4 useful bytes per node with $$Q=1$$ and $$\ell=100
 
 The innovation behind prefetching and memory-level parallelism is moving from “discover the next address after the previous load” to having multiple requests ready together. Array layout enables that transformation; a dependent pointer chain often does not. A request may transfer a whole cache line while only 4 bytes are used, so physical bus traffic exceeds useful payload. Measure both dependencies and bytes transferred. The 2-millisecond array estimate above is a bandwidth floor under its assumed 20-GB/s service rate, not a universal measured 500× application speedup.
 
-![Deep dive: A worked example you can do on paper](./deep-dive-component-01.png)
+### Why the wall exists: compute sprinted, memory walked
 
-
-## Why the wall exists: compute sprinted, memory walked
+![Deep dive: Why the wall exists: compute sprinted, memory walked](./deep-dive-component-03.png)
 
 None of this was inevitable. In 1980 a DRAM access cost a handful of CPU cycles and the hierarchy barely mattered. Then the trajectories split. Hennessy and Patterson's textbook has the famous chart: single-core processor performance grew around 52% per year from the mid-80s to the early 2000s, while DRAM latency improved around 7% per year. Compound those for 2 decades and you get a gap of several 100 times; the industry saw it coming, and Wulf and McKee named it in their 1995 paper "Hitting the Memory Wall."
 
@@ -89,7 +96,9 @@ Why couldn't DRAM keep up? Because DRAM is optimized for a different objective: 
 
 So architects stopped waiting for DRAM and built around it. That is the entire reason the memory *hierarchy* exists: since you can't make all memory fast, you make a little memory fast and bet on locality, the empirical fact that programs reuse recently touched data (temporal locality) and touch neighbors of recently touched data (spatial locality). Caches are that bet cast in silicon, and on a modern die they take up more area than the cores do.
 
-## Going deeper: anatomy of 1 miss, and how CPUs fight back
+### Going deeper: anatomy of 1 miss, and how CPUs fight back
+
+![Deep dive: Going deeper: anatomy of 1 miss, and how CPUs fight back](./deep-dive-component-02.png)
 
 Follow 1 load instruction that misses everywhere. The core computes a virtual address, translates it through the TLB (a small cache of page mappings; missing *there* adds a page-table walk on top). The L1 lookup fails in a nanosecond or so, L2 in a few more, L3 in 10 to 20. The request enters the memory controller's queue, gets scheduled onto a DRAM channel, and the chip executes its little protocol: activate the row (~14 ns), issue the column read (~14 ns), burst the 64-byte cache line back, eventually precharge the row for the next access. Add queueing and the trip across the chip, and you arrive at the ~100 ns headline number. Note the useful payload: you asked for maybe 8 bytes, and the machine moved 64, because betting on spatial locality means always fetching a full line.
 
@@ -97,10 +106,7 @@ The core does not simply stand still for those 100 ns. Out-of-order execution ke
 
 There is an energy version of the wall too, and it decides chip architecture as much as the time version. In Mark Horowitz's much-cited ISSCC 2014 numbers, a 32-bit add costs about 0.1 picojoules while fetching 64 bits from DRAM costs on the order of a nanojoule, a ratio of several 1000. Moving data costs vastly more than computing on it, in joules as well as nanoseconds.
 
-![Deep dive: Going deeper: anatomy of 1 miss, and how CPUs fight back](./deep-dive-component-02.png)
-
-
-## The memory wall, at datacenter scale: LLM decode
+### The memory wall, at datacenter scale: LLM decode
 
 Here is the modern punchline. When a large language model generates text, it produces 1 token at a time, and each new token's computation must read essentially every weight of the model once while performing only about 2 floating-point operations per weight read. That ratio, FLOPs per byte moved, is called arithmetic intensity, and at batch size 1 it sits around 1–2. Many modern accelerator arithmetic paths require intensity in the hundreds to approach peak, with the threshold dependent on precision and memory interface.
 
@@ -115,7 +121,7 @@ no matter that the same chip advertises near a petaflop of tensor throughput. Du
 
 The entire modern inference stack is a response to this. Batching lets N concurrent requests share 1 read of the weights, multiplying arithmetic intensity by N. Quantization to 8 or 4 bits shrinks the bytes that must move. KV caches, speculative decoding, HBM stacked ever higher and wider: all of it is memory-wall engineering. It's why I keep insisting that [an ML performance engineer's job](/blog/what-does-an-ml-performance-engineer-do/) is mostly moving bytes, why [goodput and utilization tell such different stories](/blog/goodput-vs-utilization/) on decode-heavy fleets, and why the [Blackwell-to-Rubin roadmap is best read as memory math](/blog/blackwell-to-rubin-memory-math/) rather than FLOPs math. And if the pipeline mechanics of a core stalling on a load are fuzzy, the picture in [What a CPU Actually Does](/blog/what-a-cpu-actually-does/) is the prequel to this article.
 
-## Common misconceptions
+### Common misconceptions
 
 **"DDR5 is way faster than DDR4, so memory latency is improving."** Faster here means bandwidth. DDR5 moves more bytes per second through prefetching wider chunks and running the interface faster, but the time from a cold request to first data is still governed by row activation and sensing, around 14 ns internally and ~80–100 ns load-to-use, essentially unchanged since DDR2. If your workload is a dependent pointer chase, a DDR5 upgrade does approximately nothing.
 
@@ -123,13 +129,13 @@ The entire modern inference stack is a response to this. Batching lets N concurr
 
 **"SSDs are so fast now that RAM barely matters."** An NVMe flash read at ~100 µs is a genuine miracle next to a 10 ms disk seek. It is also a 1000 times slower than DRAM. In human scale: 2 minutes versus 28 hours. Any system that treats flash as "slightly slower memory" (rather than as a different tier with its own access-size and queueing rules) gets destroyed by this ratio, which is precisely why databases still obsess over buffer pools and why "it fit in RAM" remains the best performance fix in the industry.
 
-## Takeaway
+## Conclusion
 
 - The hierarchy steps are multiplicative cliffs: ~1 ns L1, ~100 ns DRAM, ~100 µs SSD. 1 DRAM miss forfeits several 100 additions; layout and access patterns routinely beat algorithmic constants.
 - The wall is physics plus economics: DRAM optimizes cost per bit, so its latency has been nearly flat for decades while bandwidth (and compute) compounded. Caches, prefetchers, and out-of-order execution are all workarounds for that 1 flat line.
 - LLM decode is the memory wall wearing a datacenter badge: ~2 FLOPs per byte means token rate is bandwidth divided by model bytes. Judge accelerators, batching schemes, and quantization through that lens first.
 
-## Sources
+### Sources
 
 - Colin Scott, "Latency Numbers Every Programmer Should Know" (interactive): https://colin-scott.github.io/personal_website/research/interactive_latency.html
 - Ulrich Drepper, *What Every Programmer Should Know About Memory* (2007): https://people.freedesktop.org/~lkml/cpumemory.pdf

@@ -9,8 +9,12 @@ order: 6
 topic: "Experiments"
 level: "intermediate"
 tags: ["optimization", "ai-infrastructure"]
-heroImage: './deep-dive.png'
+heroImage: './section-overview.png'
 ---
+
+## Overview
+
+![Concept overview: Vision and Generation Deployment: A Controlled Experiment](./section-overview.png)
 
 Efficient vision and generation should be evaluated as complete task systems. A smaller token sequence, fewer denoising evaluations, or reduced weight precision can save a specific resource while changing information, quality, or another pipeline stage. The useful result is an accepted operating point under a reproducible workload.
 
@@ -19,7 +23,9 @@ This guide brings patch design, token reduction, diffusion solvers, and step dis
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
 
-## 1. Define the task and output requirement
+## Deep dive
+
+### 1. Define the task and output requirement
 
 Specify classification, dense prediction, unconditional generation, or conditional generation. Each requires different quality evidence. A classification accuracy comparison cannot establish that a generator follows prompts, and a distributional image metric does not fully assess segmentation boundaries.
 
@@ -27,7 +33,7 @@ Define the input population, preprocessing, resolution, output count, and any co
 
 Write the deployment constraint before selecting optimizations. It might concern batch throughput, single-request latency, peak memory, startup, or a combined envelope. That requirement determines which measurement and quality-resource frontier should guide the decision.
 
-## 2. Preserve the complete pipeline baseline
+### 2. Preserve the complete pipeline baseline
 
 For a classifier, include image decoding, preprocessing, backbone, and output head as appropriate to the service boundary. For conditional generation, include condition encoding, repeated prediction, decoding, and relevant postprocessing.
 
@@ -35,7 +41,7 @@ Measure stages separately for diagnosis and end-to-end execution for acceptance.
 
 Record warmup, compilation, allocation, and batching policies. Keep baseline and candidates under the same service boundary. Comparing a candidate's device-only time with a baseline's end-to-end request time does not isolate an efficiency mechanism.
 
-## 3. Choose a controlled candidate matrix
+### 3. Choose a controlled candidate matrix
 
 For vision, candidates can vary resolution, patch size, token-reduction schedule, width, or numerical format. For generation, vary a supported solver, evaluation budget, guidance policy, or a step-distilled model.
 
@@ -43,7 +49,9 @@ Change one interpretable variable at a time where feasible and include combined 
 
 A lower resolution and a faster attention kernel are different interventions: one changes input information, the other can preserve a supported mathematical operation. The candidate matrix should make that distinction visible instead of labeling both simply as accelerated vision.
 
-## 4. Account for token and resolution scaling
+### 4. Account for token and resolution scaling
+
+![Deep-dive illustration: Account for token and resolution scaling](./deep-dive.png)
 
 With fixed patch size P, the patch count is proportional to image area. Doubling each spatial dimension quadruples tokens before special-token handling.
 
@@ -55,10 +63,7 @@ The equation explains why resolution can affect tokenwise and pairwise work diff
 
 For a dense latent denoiser, resolution similarly changes feature-map shapes, but its exact cost depends on architecture. Do not import the ViT quadratic formula into every diffusion network. Inspect the actual operators and state sizes before using a scaling estimate to predict resource use.
 
-
-![Deep-dive illustration: Account for token and resolution scaling](./deep-dive.png)
-
-## 5. Count generation evaluations and fixed stages
+### 5. Count generation evaluations and fixed stages
 
 A generator's total time can be organized into predictor evaluations, scheduler work, and fixed stages. Guidance can change the prediction work per update.
 
@@ -70,7 +75,7 @@ NFE means neural function evaluations under a documented counting convention. A 
 
 Report update count, NFE, guidance, and complete runtime together. A claim of 4-step generation is incomplete if the system actually performs more network predictions or uses a different condition encoder than the baseline.
 
-## 6. Work through the fixed-cost limit
+### 6. Work through the fixed-cost limit
 
 Suppose an illustrative baseline takes 40 milliseconds in condition encoding, 400 in repeated denoising, and 60 in decoding. Its total is 500 milliseconds under this simplified serial model.
 
@@ -78,7 +83,7 @@ If denoising becomes 4 times faster while the other stages remain unchanged, the
 
 These invented timings explain pipeline accounting rather than measure a model. Actual stages can overlap, batch differently, or change numerical paths. Measure the complete service and identify whether reduced repeated work reveals a new bottleneck in fixed processing.
 
-## 7. Measure memory at the intended envelope
+### 7. Measure memory at the intended envelope
 
 Track model representation, live activations, temporary workspace, condition state, and any cached buffers. Peak allocation depends on tensor lifetimes and concurrency, not only the sum of model parameters.
 
@@ -90,7 +95,7 @@ The compact expression emphasizes that unrelated per-stage maxima should not aut
 
 Report resolution, batch, concurrency, numerical format, and backend allocation policy with the peak. A reduced checkpoint can still fail capacity at a large resolution or under several concurrent generations. Test the documented maximum operating case.
 
-## 8. Evaluate discriminative quality
+### 8. Evaluate discriminative quality
 
 For classification, report the required metric with sample counts and relevant slices. For detection and segmentation, preserve task-specific evaluation, thresholds, and spatial-output policy.
 
@@ -98,7 +103,9 @@ Token merging or pruning can affect small objects and boundaries differently fro
 
 Use independent held-out evaluation after selecting reduction schedules. Repeatedly choosing a configuration on one benchmark can overfit the recipe. Preserve preprocessing across comparisons or explicitly report a changed information budget such as resolution and cropping.
 
-## 9. Understand distributional generation metrics
+### 9. Understand distributional generation metrics
+
+![Deep dive: 9. Understand distributional generation metrics](./deep-dive-component-01.png)
 
 Fréchet Inception Distance compares Gaussian approximations to real and generated feature distributions under a specified feature extractor and preprocessing. A numerically convenient form uses a symmetric covariance product.
 
@@ -110,7 +117,9 @@ The means and covariances are estimated from feature samples. The expression is 
 
 Preserve feature-extractor revision, resizing, sample counts, reference population, and implementation. Finite-sample estimates and preprocessing differences can affect results. Comparing FID values computed under incompatible conventions does not establish a reliable quality ranking.
 
-## 10. Work through a feature-statistic example
+### 10. Work through a feature-statistic example
+
+![Deep dive: 10. Work through a feature-statistic example](./deep-dive-component-03.png)
 
 For an illustrative one-dimensional feature distribution with equal variances, the covariance term cancels. If the real mean is 0 and the generated mean is 1, the squared-mean contribution is 1.
 
@@ -118,7 +127,9 @@ If the means match but the standard deviations are 1 and 2, the one-dimensional 
 
 This example is not an image benchmark. Different non-Gaussian distributions can share the same mean and covariance, so these statistics do not capture every distributional distinction. Use additional evidence when diversity, rare modes, or semantic correctness matters to the deployment.
 
-## 11. Assess condition fidelity independently
+### 11. Assess condition fidelity independently
+
+![Deep dive: 11. Assess condition fidelity independently](./deep-dive-component-04.png)
 
 A conditional generator can produce visually plausible images while failing the requested objects, relations, text, or attributes. Distributional similarity to a reference image population does not by itself establish prompt following.
 
@@ -126,7 +137,7 @@ Use task-appropriate condition evaluation and inspect a documented held-out cond
 
 Human evaluation can add useful evidence when implemented with a clear protocol, blinding, and sample population. Automatic metrics and qualitative examples should retain their limits. Neither one attractive image nor one scalar score is a complete conditional-generation assessment.
 
-## 12. Preserve stochastic evaluation policies
+### 12. Preserve stochastic evaluation policies
 
 Record initial-noise seeds, sample counts, stochastic sampler settings, and guidance. Paired seeds can support diagnostics between candidates, but different samplers can produce different trajectories from related starting states.
 
@@ -134,7 +145,7 @@ Evaluate enough outputs to assess the relevant quality and diversity requirement
 
 Separate timing repetitions from quality samples where appropriate. Repeating one fixed seed can characterize runtime variation but does not characterize the generated distribution. More timing data cannot repair a narrow condition population.
 
-## 13. Measure execution with a matching statistic
+### 13. Measure execution with a matching statistic
 
 Use sustained workloads for throughput and the intended concurrency for service latency. Report a variability summary appropriate to the requirement rather than selecting one unusually fast run.
 
@@ -142,7 +153,7 @@ Inspect numerical fallbacks, compilation, and kernel support. A low-bit artifact
 
 Measure complete graphs and include preprocessing when it is part of the service boundary. Theoretical operation counts help explain results but should not replace measured time when the question concerns deployment speed.
 
-## 14. Include preparation and reuse
+### 14. Include preparation and reuse
 
 Token-reduction recovery, architecture changes, and step distillation can require additional training. A training-free solver change has a different preparation bill, though it still needs validation.
 
@@ -154,7 +165,7 @@ K denotes the number of uses under a simplified stable-cost model. Choose consis
 
 A widely reused generator can justify substantial preparation for lower repeated cost. A one-off task can prefer a supported solver adjustment. Capacity or condition-quality benefits can also matter independently of a simple monetary calculation. State which objective supports the decision.
 
-## 15. Select the accepted frontier
+### 15. Select the accepted frontier
 
 Compare candidate quality, latency, throughput, and peak allocation under the same operating conditions. Discard candidates that fail required constraints and retain tradeoffs among the feasible set.
 
@@ -162,7 +173,9 @@ A candidate with lower memory but worse latency can still be useful if capacity 
 
 All numerical examples in this guide are illustrative. No vision or generation model was executed on a GPU. The experiment protocol connects the series' mechanisms to the measurements needed for a real deployment rather than presenting invented acceleration or quality results.
 
-## 16. Preserve a reviewable artifact record
+### 16. Preserve a reviewable artifact record
+
+![Deep dive: 16. Preserve a reviewable artifact record](./deep-dive-component-05.png)
 
 Store the model and encoder-decoder revisions, exported graph, numerical formats, preprocessing, resolution, token or sampling schedule, guidance, data provenance, and measurement summary. Include the preparation lineage for a distilled model.
 
@@ -170,7 +183,9 @@ Verify that training-only modules are absent where expected and that the serving
 
 This record makes the result usable beyond one notebook. It connects spatial information, probabilistic generation, numerical integration, and systems execution while preserving the evidence and limits of each. The accepted configuration then represents a concrete task system rather than a generic claim of efficient AI.
 
-## 17. Count usable outputs rather than only attempts
+### 17. Count usable outputs rather than only attempts
+
+![Deep dive: 17. Count usable outputs rather than only attempts](./deep-dive-component-02.png)
 
 If an application accepts only a fraction p of generated outputs under a fixed quality rule, the expected number of independent attempts per accepted output is one over p. Under a simple constant-cost model, usable-output cost scales accordingly.
 
@@ -180,12 +195,11 @@ $$
 
 Independence and constant cost are assumptions; retries can change prompts or budgets in a real system. The model nevertheless explains why a faster individual attempt can be less efficient when its acceptance rate falls substantially.
 
+## Conclusion
+
 Report filtering, retries, and the selection criterion when they form part of deployment. Include verification work in the service boundary where required. This connects condition fidelity and artifact quality to effective throughput without pretending that every generated image is equally useful. A fair comparison uses the same acceptance requirement for baseline and candidates.
 
-![Deep dive: 17. Count usable outputs rather than only attempts](./deep-dive-component-02.png)
-
-
-## Sources
+### Sources
 
 - [Token Merging](https://arxiv.org/abs/2210.09461).
 - [DPM-Solver](https://arxiv.org/abs/2206.00927).

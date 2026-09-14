@@ -3,7 +3,7 @@ title: 'The Default CUDA Stream Is a Hidden Global Barrier'
 description: 'How default-stream ordering can serialize a pipeline, and how explicit streams, pinned memory, and events alter its dependencies.'
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'orch-1'
 order: 10
 series: "gpu-performance"
@@ -12,11 +12,17 @@ topic: "Kernel Pipelines and Orchestration"
 tags: [cuda, streams, overlap]
 ---
 
+## Overview
+
+![Concept overview: The Default CUDA Stream Is a Hidden Global Barrier](./section-overview.png)
+
 9 GPU operations. Serialized, they take 18 ms. Pipelined across 3 streams, the same 9 operations take 10 ms. And 1 `cudaMemcpy` issued on the wrong stream, anywhere in your process, snaps you right back to 18. That wrong stream has a name: the legacy default stream, also known as stream 0 or the NULL stream, and it is not a stream so much as a device-wide synchronization primitive wearing a stream costume.
 
 This article is about what the default stream actually does, why "async" copies silently stop being async, and how the classic 3-way overlap of transfer and compute works. If prefill/decode mechanics or latency metrics are new territory, start with [how an LLM generates text](/blog/how-an-llm-generates-text/); here we stay down at the CUDA runtime level.
 
-## What a stream actually is
+## Deep dive
+
+### What a stream actually is
 
 A CUDA stream is an ordered work queue. Everything you submit to a stream (kernel launches, memory copies, memset calls) executes in submission order within that stream. Across *different* streams, the hardware is free to run work concurrently, subject to resources. Streams are how you express independence to the GPU: "these two operations don't depend on each other, overlap them if you can."
 
@@ -24,7 +30,7 @@ The hardware that exploits this independence is real and specific. A modern data
 
 But concurrency requires that you *ask* for it. If you never create a stream, every call lands in the default stream, and the default stream has legacy semantics that date back to CUDA's earliest days.
 
-## The barrier hiding in stream 0
+### The barrier hiding in stream 0
 
 The CUDA programming guide defines the legacy default stream's behavior precisely, and it is brutal. A command issued to the NULL stream:
 
@@ -38,7 +44,7 @@ Here is the part that bites people in production: the trap composes across your 
 
 There's a second trap layered on top. Streams you create with plain `cudaStreamCreate()` are **blocking streams**: they participate in the barrier semantics above. To opt out, you must create them with `cudaStreamCreateWithFlags(&s, cudaStreamNonBlocking)`. A non-blocking stream ignores the legacy default stream entirely, in both directions. Most CUDA codebases that care about overlap use non-blocking streams everywhere and treat any bare launch as a code-review bug.
 
-## The 3-way overlap
+### The 3-way overlap
 
 The canonical use of streams is pipelining data transfers against compute, described in Mark Harris's classic NVIDIA developer blog posts on overlapping data transfers. The recipe has 3 mandatory ingredients:
 
@@ -48,7 +54,9 @@ The canonical use of streams is pipelining data transfers against compute, descr
 
 The pinned-memory requirement is not a performance nicety, it is a correctness condition for asynchrony. The GPU's DMA engine reads host memory by physical address. Pageable memory can be moved or evicted by the OS at any time, so the driver cannot safely DMA from it. Instead, `cudaMemcpyAsync` from pageable memory degrades: the runtime stages the data through an internal pinned buffer, and the call loses its asynchronous character with respect to the host and its ability to overlap. Your code still says "Async"; your timeline says otherwise. (The staging path is also simply slower: a pageable H2D copy runs at roughly half the pinned bandwidth on typical PCIe systems because of the extra host-side memcpy.)
 
-## Worked example: 3 chunks, by hand
+### Worked example: 3 chunks, by hand
+
+![Deep dive: Worked example: 3 chunks, by hand](./deep-dive-component-03.png)
 
 Take a concrete workload: 3 chunks, and on our hypothetical GPU each chunk costs 2 ms to copy in (H2D), 2 ms to process (kernel), and 2 ms to copy out (D2H). Total copy work is 12 ms, total compute is 6 ms.
 
@@ -73,7 +81,9 @@ Now do the copy-time accounting, because this is the number that generalizes. Th
 
 1 `cudaMemcpy` on stream 0 between chunk boundaries and the table above degenerates back to the serial line. The barrier drains the H2D engine, the SMs, and the D2H engine before it runs, then holds all 3 idle until it finishes. That is the entire thesis of this article in 1 sentence.
 
-## Derive the pipeline rather than promising overlap
+### Derive the pipeline rather than promising overlap
+
+![Deep dive: Derive the pipeline rather than promising overlap](./deep-dive-component-01.png)
 
 For $$N$$ independent chunks with host-to-device time $$h$$, kernel time $$k$$, and device-to-host time $$d$$, an ideal 3-stage pipeline has makespan
 
@@ -87,10 +97,9 @@ The stream policy enables this schedule but does not guarantee it. A legacy-defa
 
 Compared with relying on implicit defaults, explicit stream ownership and events express the dependencies the buffers actually need. Pinned memory makes asynchronous host transfers practical, but API behavior also depends on direction and memory type. Check device copy-engine capabilities and the actual timeline. Avoid replacing a required data dependency with a race merely to make the trace overlap.
 
-![Deep dive: Derive the pipeline rather than promising overlap](./deep-dive-component-01.png)
+### Going deeper: events, and the modern escape hatches
 
-
-## Going deeper: events, and the modern escape hatches
+![Deep dive: Going deeper: events, and the modern escape hatches](./deep-dive-component-02.png)
 
 Suppose stream B genuinely needs a result produced in stream A. The lazy fix is `cudaDeviceSynchronize()`, which stalls the host and every stream. The surgical fix is a **CUDA event**:
 
@@ -110,10 +119,7 @@ cudaStreamWaitEvent(streamB, ev, 0);     // only B waits, only for ev
 
 A note on frameworks: PyTorch issues work to its "current stream," which by default *is* the legacy default stream. That is a deliberately safe choice, and it is why naive PyTorch code shows no copy/compute overlap; `torch.cuda.Stream`, `non_blocking=True` copies, and pinned tensors exist precisely to buy back the pipeline described above.
 
-![Deep dive: Going deeper: events, and the modern escape hatches](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"`cudaMemcpyAsync` is asynchronous, the name says so."** Only from pinned memory. From pageable memory the runtime stages through an internal pinned buffer and the copy will not overlap with kernels; depending on direction and size the call can even block the host for most of the transfer. The function name describes the API contract you *can* get, not the one you always get. Check any profiler trace: pageable "async" copies sit rigidly between kernels.
 
@@ -121,19 +127,19 @@ A note on frameworks: PyTorch issues work to its "current stream," which by defa
 
 **"I created my streams with `cudaStreamCreate`, so I'm isolated from stream 0."** No. Plain `cudaStreamCreate` returns a *blocking* stream that fully participates in the legacy default stream's barrier, in both directions. Isolation requires `cudaStreamNonBlocking` at creation time (or per-thread default stream compilation). This is arguably the nastiest of the 3 because the code looks like it did the right thing.
 
-## Why this matters beyond 1 GPU
+### Why this matters beyond 1 GPU
 
 Zoom out and the default stream is a miniature of the central problem in performance engineering: work that could proceed in parallel, silently serialized by a convenience default. It is the same failure mode as a "100% utilized" cluster whose GPUs are mostly waiting, which is the subject of [Goodput: your 100% utilized cluster is mostly wasted](/blog/goodput-vs-utilization/), just at microsecond scale instead of job scale. The 3-way overlap is also the memory wall in action: moving bytes costs as much as computing on them, so you hide the movement, the same economics covered in [The Memory Wall](/blog/the-memory-wall-latency-numbers/) and [From DRAM to HBM](/blog/from-dram-to-hbm/). And the reason overlap is possible at all traces back to the GPU being a throughput machine with independent engines rather than 1 fast serial pipe, the theme of [CPU vs GPU](/blog/cpu-vs-gpu-latency-vs-throughput-machines/).
 
 Streams and events are also the vocabulary for everything that comes next in this topic. Multi-GPU communication overlap, NCCL scheduling, and inference engines interleaving prefill and decode all reduce to the same primitives: independent queues, explicit dependencies, no device-wide syncs on the hot path.
 
-## Takeaway
+## Conclusion
 
 - The legacy default stream wraps every call in an implicit device-wide barrier: it waits for all blocking streams and blocks them afterward, and plain `cudaStreamCreate` streams are blocking. Use `cudaStreamNonBlocking` (or per-thread default streams) and treat bare `<<<>>>` launches as review findings.
 - Copy/compute overlap needs all 3 ingredients: chunked work, non-blocking streams, and pinned host memory; pageable memory silently demotes `cudaMemcpyAsync` to a staged, non-overlapping copy.
 - In the 3-chunk example, pipelining hides 8 of 12 copy milliseconds and cuts end-to-end time from 18 ms to 10 ms; only the pipeline fill and drain stay exposed. Cross-stream ordering belongs to `cudaEventRecord`/`cudaStreamWaitEvent`, never `cudaDeviceSynchronize` on the hot path.
 
-## Sources
+### Sources
 
 - NVIDIA, [Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html), current default-stream semantics and overlapping transfers.
 

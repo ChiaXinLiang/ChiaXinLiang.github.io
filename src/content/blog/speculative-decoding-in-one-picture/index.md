@@ -3,7 +3,7 @@ title: 'Speculative Decoding: Draft, Verify, and Accept'
 description: 'How cheap draft tokens are verified in 1 parallel pass, with checked acceptance-rate arithmetic and workload-dependent cost tradeoffs.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'opt-4'
 order: 13
 series: "llm-serving"
@@ -12,11 +12,17 @@ topic: "Inference Methods"
 tags: [inference, speculative-decoding, latency]
 ---
 
+## Overview
+
+![Concept overview: Speculative Decoding: Draft, Verify, and Accept](./section-overview.png)
+
 A 70B-parameter model in FP16 streams roughly 140 GB of weights through the GPU to emit 1 token, which is about 2 bytes of useful output. On an H100 SXM with 3.35 TB/s of HBM bandwidth, that read alone takes ~42 ms, and no amount of extra compute shortens it. Speculative decoding attacks exactly this waste: it routinely delivers 2-3x faster decoding while producing, provably, the *same* output distribution as the original model.
 
 That last clause is the part people refuse to believe at first, so let's earn it properly.
 
-## The waste speculation exploits
+## Deep dive
+
+### The waste speculation exploits
 
 During [decode](/blog/how-an-llm-generates-text/), an autoregressive model generates 1 token per forward pass, and each pass must read every weight from HBM. The arithmetic per token is tiny relative to the bytes moved, so the tensor cores sit mostly idle while the memory system does all the work. This is [the memory wall](/blog/the-memory-wall-latency-numbers/) in its purest form: at batch size 1, a GPU capable of ~990 TFLOPS of dense BF16 might sustain 1-2% of that during decode.
 
@@ -30,8 +36,9 @@ So the recipe, first published by Leviathan, Kalman, and Matias at Google and in
 
 Every verification pass emits at least 1 token, because even if the very first draft token is rejected, the correction comes straight from the target's distribution. And if all k drafts survive, you also get a free "bonus" token: the target's prediction at position k+1 was computed anyway.
 
+### Why the output is exactly the same
 
-## Why the output is exactly the same
+![Deep dive: Why the output is exactly the same](./deep-dive-component-03.png)
 
 The acceptance rule is a small piece of rejection sampling, and it is worth seeing in plain words because it converts speculation from "clever approximation" to "exact algorithm."
 
@@ -41,7 +48,9 @@ Add the 2 paths together and every token comes out with probability exactly p(x)
 
 This is what separates speculative decoding from distillation, quantization, or early exit. Those trade quality for speed. Speculation trades *spare compute* for speed and touches quality not at all.
 
-## A worked example you can check by hand
+### A worked example you can check by hand
+
+![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
 
 Take k = 4 drafted tokens per cycle and a per-token acceptance rate of α = 0.70, a realistic figure for a well-matched draft. Assume, as the original analysis does, that acceptances are roughly independent. Enumerate the outcomes of 1 draft-verify cycle:
 
@@ -80,10 +89,9 @@ $$
 
 L includes a target-produced correction or bonus token. At alpha equal to 0.7 and k equal to 4, E[L] is 2.7731. With 30-millisecond target verification and 2 milliseconds per draft token, predicted speedup is 2.19. Measure acceptance by position and verification duration under real batching; context-dependent acceptance and saturated compute invalidate a single constant-alpha forecast.
 
-![Deep dive: A worked example you can check by hand](./deep-dive-component-01.png)
+### Going deeper: drafts that live inside the target
 
-
-## Going deeper: drafts that live inside the target
+![Deep dive: Going deeper: drafts that live inside the target](./deep-dive-component-02.png)
 
 The classic setup needs a separate small model that behaves like the big 1, which is an annoying artifact to train, deploy, and keep in sync. The strongest recent methods dissolve the draft into the target itself.
 
@@ -93,10 +101,7 @@ The classic setup needs a separate small model that behaves like the big 1, whic
 
 The trend line matters more than any single number: draft quality keeps improving because the draft gets to peek at richer signals from the target, while verification cost stays 1 parallel pass.
 
-![Deep dive: Going deeper: drafts that live inside the target](./deep-dive-component-02.png)
-
-
-## The batch-size catch
+### The batch-size catch
 
 Everything above assumed the verify pass is "free" beyond its weight read. That's true at batch 1 and thoroughly false at batch 64.
 
@@ -105,7 +110,7 @@ Speculation spends extra FLOPs to save bandwidth-bound time: draft FLOPs, plus t
 
 So production schedulers treat speculation as a latency tool, not a throughput tool: enable it for interactive, low-concurrency traffic where [TPOT](/blog/ttft-and-tpot/) is the metric that matters, shrink k or disable it as batch pressure rises. vLLM's implementation exposes exactly this knob for that reason. This is the same logic that drives [prefill/decode disaggregation](/blog/the-prefill-decode-disaggregation-story/): different phases and different traffic mixes want different operating points on the same hardware.
 
-## Common misconceptions
+### Common misconceptions
 
 **"Speculative decoding is a lossy approximation, so quality must drop a little."** No. The rejection-sampling rule reconstructs the target distribution exactly; with greedy sampling the output is bit-identical to the unassisted model. This is proven in 3 lines in both founding papers, not measured empirically and hoped for. If a deployment shows quality drift, something else is wrong (a mismatched tokenizer, a relaxed acceptance rule, or "lossy" variants deliberately chosen for extra speed).
 
@@ -113,17 +118,17 @@ So production schedulers treat speculation as a latency tool, not a throughput t
 
 **"It saves compute."** It spends strictly *more* FLOPs than plain decoding: the entire draft, plus target work on every rejected position. What it saves is time spent stalled on memory bandwidth. That's precisely why the technique shines at batch 1 and fades at batch 64, and why "speculation made my throughput worse" is not a bug report, it's the roofline talking.
 
-## Where this sits in the bigger picture
+### Where this sits in the bigger picture
 
 Speculative decoding is the third member of a family of tricks that all answer the same question: decode wastes the GPU's parallelism, so where do we find useful parallel work? Batching finds it across *requests*. Speculation finds it across *future positions of 1 request*, which makes it the rare optimization that helps the single user waiting on a chatbot rather than the aggregate. That is also why it shows up in latency-critical products first: the technique buys the thing money otherwise can't, faster tokens for 1 stream, without the accuracy negotiations that quantization requires. If you internalize 1 diagram from this series, make it the one at the top: sequential cheap guesses, 1 parallel expensive check, exact output. Most of modern inference optimization is variations on that move.
 
-## Takeaway
+## Conclusion
 
 - Decode is bandwidth-bound, so verifying k drafted tokens in 1 target pass costs about the same as generating 1; acceptance rate α converts that slack into real speedup, (1 − α^(k+1))/(1 − α) expected tokens per pass.
 - The rejection-sampling acceptance rule makes the output distribution *exactly* the target model's. Speed without a quality trade, at the price of extra FLOPs.
 - Those extra FLOPs are free only when the GPU has idle compute: speculation is a low-batch latency optimization that fades, and can invert, at high batch.
 
-## Sources
+### Sources
 
 - Leviathan, Kalman, Matias. *Fast Inference from Transformers via Speculative Decoding.* ICML 2023. https://arxiv.org/abs/2211.17192
 - Chen et al. *Accelerating Large Language Model Decoding with Speculative Sampling.* DeepMind, 2023. https://arxiv.org/abs/2302.01318

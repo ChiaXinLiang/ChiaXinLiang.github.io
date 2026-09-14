@@ -3,7 +3,7 @@ title: 'Case File: Same Model, 3x Slower on the "Bigger" GPU'
 description: 'An illustrative GPU migration produces 3× slower decoding. Follow bandwidth and parallelism measurements to identify the bottleneck.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'case-4'
 order: 20
 series: "llm-serving"
@@ -12,13 +12,21 @@ topic: "Inference Methods"
 tags: [troubleshooting, bandwidth, inference]
 ---
 
+## Overview
+
+![Concept overview: Case File: Same Model, 3x Slower on the "Bigger" GPU](./section-overview.png)
+
 312 versus 362 TFLOPS. 80 GB versus 96 GB. 1 generation newer. The new instance beat the old 1 on every line quoted in the migration ticket, and decode throughput still fell from 52 tokens per second to 18. Nobody changed the model, the serving stack, or a single flag.
 
 This is the fourth case file in the troubleshooting series, and it is the most common 1 I see in the wild, because it is baked into how cloud instances are marketed. In this hypothetical incident, a team serving a 13B model on a single A100 80GB gets a cost-optimization nudge: a newer instance type with 2 NVIDIA L40S GPUs is cheaper per hour, has 96 GB of total VRAM instead of 80, supports FP8, and carries an Ada Lovelace headline of "1,466 TFLOPS." They migrate. Time-to-first-token barely moves. Per-token decode speed drops by roughly 3x, users notice streaming has turned to molasses, and the rollback discussion starts before lunch.
 
 The regression is not a bug. It is arithmetic, and you can predict it to within about 10 percent from 2 datasheet numbers before you ever launch the instance.
 
-## Decode is a memory race, not a math race
+## Deep dive
+
+### Decode is a memory race, not a math race
+
+![Deep dive: Decode is a memory race, not a math race](./deep-dive-component-01.png)
 
 If the prefill/decode split is fuzzy, start with [how an LLM generates text](/blog/how-an-llm-generates-text/) and [TTFT and TPOT](/blog/ttft-and-tpot/); here is the one-paragraph version that matters for this case.
 
@@ -34,10 +42,7 @@ Bytes touched per token is model weights plus KV cache read. Effective bandwidth
 
 That is the whole trap, and the spec sheets are built to spring it.
 
-![Deep dive: Decode is a memory race, not a math race](./deep-dive-component-01.png)
-
-
-## The spec-sheet trap
+### The spec-sheet trap
 
 Put the 2 cards side by side and read the lines in the order a procurement doc reads them:
 
@@ -56,7 +61,9 @@ The L40S wins the architecture line, the FP16 line, and the FP8 line outright, a
 
 A useful habit: when someone says "bigger GPU," ask *bigger at what?* Every GPU is a point in a 3-dimensional space of FLOPS, bandwidth, and capacity, and workloads project onto different axes. Batch-1 decode projects almost entirely onto bandwidth.
 
-## The worked example: predicting the regression by hand
+### The worked example: predicting the regression by hand
+
+![Deep dive: The worked example: predicting the regression by hand](./deep-dive-component-03.png)
 
 Take the actual workload: a 13B-parameter dense model served in FP16, typical chat traffic around 4,096 tokens of context, latency-sensitive so effective batch per GPU stays small. Call it batch 1 for clean arithmetic.
 
@@ -79,7 +86,9 @@ Predicted ratio: 2.7x. Observed in the ticket: 52 tokens/s down to 18, a 2.9x re
 
 Notice what the calculation never asked for: TFLOPS, VRAM size, architecture generation, CUDA version. For a compute check, those 26 GFLOPs per token would take the L40S about 0.07 ms at datasheet FP16 throughput. The memory traffic takes 52 ms. During decode this "1,466 TFLOPS" card runs its tensor cores at well under 1 percent duty cycle.
 
-## Going deeper: why the second GPU doesn't rescue you
+### Going deeper: why the second GPU doesn't rescue you
+
+![Deep dive: Going deeper: why the second GPU doesn't rescue you](./deep-dive-component-02.png)
 
 The instance has 2 L40S cards, so the obvious counter is tensor parallelism: split the model across both, halve the bytes each card reads per token. Here the arithmetic gets quietly brutal.
 
@@ -102,10 +111,7 @@ The bound assumes 1 weight and cache sweep and excludes other overhead. For the 
 
 Those efficiencies are assumptions to test, not generic properties of HBM and GDDR. Run matched precision and matched context first, then separately test quantization. Native FP8 weights plus FP8 cache would stream about 14.68 GB, not 9; weight-only 4-bit payload plus FP8 cache is about 8.18 GB before metadata. Verify that the relevant kernels exist and that quality meets the same task criterion. 2 replicas can improve aggregate capacity while leaving every individual stream's latency unchanged.
 
-![Deep dive: Going deeper: why the second GPU doesn't rescue you](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"It has more VRAM, so it's faster."** VRAM is capacity, not speed. Capacity determines whether the weights fit and how much KV cache you can hold, which caps batch size and context length. It contributes nothing to how quickly a resident byte reaches the compute units. The 96 GB bought headroom this latency-bound workload never used, while giving up the 2 TB/s that it used on every single token.
 
@@ -113,7 +119,7 @@ Those efficiencies are assumptions to test, not generic properties of HBM and GD
 
 **"2 GPUs are faster than 1."** Not when each has 42 percent of the bandwidth and they share a PCIe bus. Aggregate bandwidth here is lower than the single card being replaced, and tensor parallelism at small batch adds dozens of latency-bound all-reduces per token. Multi-GPU is a tool for fitting bigger models and scaling throughput, and it earns its keep there; it is not a general speed multiplier, and over PCIe it can lose to 1 well-chosen card.
 
-## The bigger picture
+### The bigger picture
 
 Underneath this case sits the single most useful reflex in performance work: classify the workload as compute-bound or memory-bound *before* comparing hardware, because the answer decides which spec line is load-bearing. That reflex is the subject of [compute-bound vs. memory-bound](/blog/compute-bound-vs-memory-bound/), and it is the same logic that separates latency machines from throughput machines in [CPU vs. GPU](/blog/cpu-vs-gpu-latency-vs-throughput-machines/). Vendors will always print the largest number on the box; your job is knowing which number your workload actually purchases.
 
@@ -121,13 +127,13 @@ It is also a neat portrait of [what an ML performance engineer actually does](/b
 
 Napkin first, dashboard second. The napkin knew before the migration did.
 
-## Takeaway
+## Conclusion
 
 - Decode speed is bytes-per-token divided by effective memory bandwidth; TFLOPS and VRAM capacity are not in the formula. An L40S at 864 GB/s cannot out-decode an A100 at 2,039 GB/s in the same precision, no matter what the FLOPS lines say.
 - Predict before you migrate: weights plus KV bytes, times a realistic 60 to 80 percent MBU, gives you tokens per second to within about 10 percent. If the prediction says slower, the benchmark will too.
 - Adding cards adds bandwidth only if the aggregate actually exceeds what you had, minus the interconnect tax; over PCIe at small batch that tax is steep. Cutting bytes through quantization is usually the stronger move on bandwidth-poor cards.
 
-## Sources
+### Sources
 
 - NVIDIA, A100 80GB Tensor Core GPU datasheet and product page (vendor peak specs): https://www.nvidia.com/en-us/data-center/a100/
 - NVIDIA, L40S GPU product page (vendor peak specs): https://www.nvidia.com/en-us/data-center/l40s/

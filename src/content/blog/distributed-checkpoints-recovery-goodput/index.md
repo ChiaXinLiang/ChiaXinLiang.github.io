@@ -12,18 +12,19 @@ level: "advanced"
 tags: ["distributed-training", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Distributed Checkpoints and Recovery: Goodput Under Failure. A distributed GPU job writes coordinated checkpoint shards into storage.](./section-overview.png)
+
 A training cluster can display high GPU utilization while making little durable progress. If checkpoints take too long, they repeatedly interrupt computation. If checkpoints are too infrequent, failures discard many completed steps. If recovery is not tested, a directory full of files can turn out not to contain a usable continuation of the training job.
 
 Distributed checkpointing is therefore part of performance engineering, not only a reliability feature. It defines what work survives, how much service time saving consumes, and how quickly the job returns to useful training after an interruption. The appropriate metric includes checkpoint and recovery costs alongside ordinary step throughput.
 
 We will define the state needed for a meaningful restart, derive a simplified checkpoint interval, and examine asynchronous saving and resharded loading. The reliability calculations assume a stationary failure process and are illustrative. Actual intervals should use observed job-level behavior and storage performance under the intended workload.
 
-## 1. Define the training point being preserved
+## Deep dive
 
-![Concept overview: Distributed Checkpoints and Recovery: Goodput Under Failure. A distributed GPU job writes coordinated checkpoint shards into storage.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Define the training point being preserved
 
 A model-weight checkpoint is useful for inference or evaluation, but continuing training usually requires additional state. The optimizer needs its moments and other persistent values. A learning-rate scheduler needs its position. Mixed-precision machinery may maintain scaling state. The loop needs its optimizer-step count and accumulation position.
 
@@ -33,7 +34,9 @@ The checkpoint also needs configuration and version information sufficient to in
 
 Choose a clear capture boundary, such as immediately after a completed optimizer update. Capturing in the middle of accumulation requires preserving the partial gradients and loop state consistently. The simplest supported boundary is often preferable to a more flexible boundary whose recovery semantics are not understood.
 
-## 2. Sharded state should not require an impossible gather
+### 2. Sharded state should not require an impossible gather
+
+![Deep dive: 2. Sharded state should not require an impossible gather](./deep-dive-component-02.png)
 
 A fully sharded training job can hold state that no single GPU can materialize completely. Gathering all parameters and optimizer tensors onto rank 0 just to save them can therefore recreate the original capacity problem. Distributed writers instead save local shards alongside metadata describing their logical ownership.
 
@@ -43,10 +46,9 @@ The storage path includes metadata operations, local serialization or staging, s
 
 Count both logical checkpoint bytes and actual physical bytes written. Replicated tensors, duplicated metadata, format overhead, and compression can change the relationship. A filesystem reporting a large directory size and a network reporting transferred bytes may use different conventions, so compare measurements under defined units.
 
-![Deep dive: 2. Sharded state should not require an impossible gather](./deep-dive-component-02.png)
+### 3. Derive a simple checkpoint interval
 
-
-## 3. Derive a simple checkpoint interval
+![Deep-dive illustration: Derive a simple checkpoint interval](./deep-dive.png)
 
 Let I be useful compute time between checkpoints, C the blocking checkpoint cost, tau the mean time between job-level interruptions, and R the average recovery cost. Under a simplified independent, stationary failure model, expected waste can be approximated by
 
@@ -66,10 +68,7 @@ The result is a useful planning baseline: faster checkpointing permits more freq
 
 Use the job-level interruption interval, not an unrelated component reliability number. If one device failure stops a large gang-scheduled job, the effective job failure process can differ greatly from the reliability of one GPU. Shared power, networking, and software failures also violate naive independence assumptions.
 
-
-![Deep-dive illustration: Derive a simple checkpoint interval](./deep-dive.png)
-
-## 4. Work a checkpoint-cost example
+### 4. Work a checkpoint-cost example
 
 Suppose a blocking checkpoint costs 30 seconds, average job interruption time is 7200 seconds, and recovery costs 45 seconds. The simplified optimal interval is the square root of 432,000, approximately 657 seconds, or about 11 minutes of useful computation.
 
@@ -79,7 +78,7 @@ These values are hypothetical and demonstrate the model’s sensitivity. Reducin
 
 A long interval chosen solely to minimize visible save stalls can produce worse expected progress when failures are common. A very short interval chosen solely to minimize lost steps can consume excessive storage service. The interval should be justified with both measured checkpoint behavior and a documented interruption model.
 
-## 5. Asynchronous saving separates capture from persistence
+### 5. Asynchronous saving separates capture from persistence
 
 An asynchronous checkpoint can copy or stage a consistent state and write it while training resumes. This reduces the visibly blocking interval, but the background work still consumes host memory, storage bandwidth, and potentially network or device-transfer resources.
 
@@ -89,7 +88,7 @@ If training mutates tensors while the writer still reads them, saving can captur
 
 Limit the number of outstanding saves. If checkpoint production is faster than the writer can persist them, queues and staging buffers grow. That can consume host capacity and turn an apparently asynchronous feature into an eventual stall. Backpressure is part of the scheduling design, not evidence that asynchronous saving failed conceptually.
 
-## 6. Measure background contention, not only blocking time
+### 6. Measure background contention, not only blocking time
 
 A checkpoint writer can compete with the training input pipeline, optimizer offload, and other jobs for storage and host resources. Training step time may increase during background writes even when no explicit save barrier appears in the GPU trace.
 
@@ -99,7 +98,9 @@ The relevant checkpoint cost for interval planning is therefore an effective los
 
 Capture host-memory peaks and queue depth alongside bandwidth. Staging large optimizer state can exceed available DRAM even when GPU memory is comfortable. The worst-case supported checkpoint path should be part of capacity testing for a long-running job.
 
-## 7. Resharded loading is an algorithmic operation
+### 7. Resharded loading is an algorithmic operation
+
+![Deep dive: 7. Resharded loading is an algorithmic operation](./deep-dive-component-01.png)
 
 Loading a checkpoint into a different rank layout requires mapping logical tensors to new owners. Metadata describes the old shards; the load planner determines which ranges each new rank needs. Supported systems can avoid reconstructing every complete tensor on one device.
 
@@ -109,7 +110,7 @@ Test the exact layout changes that operations will support, such as restarting w
 
 A useful recovery test loads the checkpoint, checks the logical training position and tensor values, executes forward and backward, and completes an optimizer update. This verifies more than file readability. Include the longest supported input shape when that path can recreate memory peaks absent from a small test.
 
-## 8. Make incomplete checkpoints distinguishable
+### 8. Make incomplete checkpoints distinguishable
 
 A checkpoint should have a clear completion or commit convention. Readers must be able to distinguish a fully written state from a partially created directory left by interruption. Atomicity depends on the storage and writer design; a filename or timestamp alone is not a proof of consistency.
 
@@ -119,7 +120,7 @@ Retention policies should preserve enough known-good checkpoints to recover from
 
 Treat cleanup and lifecycle separately from training performance. Removing obsolete state should not race with a writer or reader still using it. Operational policies need explicit ownership and completion signals, just as device buffers do in an asynchronous compute schedule.
 
-## 9. Evaluate durable training goodput
+### 9. Evaluate durable training goodput
 
 Raw tokens per second counts useful computation while the job is active. Durable progress over an observation interval also accounts for checkpoint stalls, background slowdown, lost work, and recovery. A simple empirical metric divides retained useful training tokens by elapsed wall-clock time.
 
@@ -129,13 +130,13 @@ Run failure-injection tests in an appropriate disposable training environment be
 
 Keep recovery results with the training configuration. Record checkpoint format, storage backend, software versions, rank layout, capture boundary, and supported restart scenarios. The method should remain reviewable when a later change alters optimizer state or distributed ownership.
 
-## Takeaway
+## Conclusion
 
 A recoverable checkpoint represents one consistent training point, including the state required to continue the intended update sequence. Distributed writers preserve sharded ownership; asynchronous saving separates capture from durable completion but introduces background resource costs.
 
 Choose intervals using measured effective save cost and job-level interruption behavior. Verify loading and a subsequent update, and report durable useful progress across failures. Checkpoint engineering improves the training result by preserving work, not simply by producing files faster.
 
-## Sources
+### Sources
 
 - [PyTorch Distributed Checkpoint](https://docs.pytorch.org/docs/stable/distributed.checkpoint.html): parallel save/load, planners, and resharding.
 - [PyTorch asynchronous checkpoint recipe](https://docs.pytorch.org/tutorials/recipes/distributed_async_checkpoint_recipe.html): staging, asynchronous writes, and memory considerations.

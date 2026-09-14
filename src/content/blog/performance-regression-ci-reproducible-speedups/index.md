@@ -12,18 +12,19 @@ level: "advanced"
 tags: ["ai-performance", "ai-infrastructure"]
 ---
 
+## Overview
+
+![Concept overview: Performance Regression CI: Keeping a Speedup After the Next Commit. A source revision produces a versioned binary and test workload on a GPU test server.](./section-overview.png)
+
 A speedup is useful only if later changes preserve it under the workload that mattered. Performance regression CI turns selected measurements into a recurring decision process. It can catch a changed kernel path, unnecessary synchronization, compilation growth, or degraded communication before those changes become an unexplained production slowdown.
 
 The challenge is that timing is noisy and hardware state changes. A gate that fails every harmless fluctuation will be ignored. A gate that accepts every uncertain comparison can miss real regressions. The solution begins with representative cases, controlled runners, and an explicit practical budget, then uses uncertainty to decide what the observations support.
 
 We will derive ratio-based decisions, examine multiple comparisons and baseline drift, and design artifacts that lead from a failure to a diagnosis. Numerical examples are illustrative. The suite should follow the actual implementation and deployment risks rather than mirror every line of code.
 
-## 1. Choose cases that represent meaningful execution paths
+## Deep dive
 
-![Concept overview: Performance Regression CI: Keeping a Speedup After the Next Commit. A source revision produces a versioned binary and test workload on a GPU test server.](./section-overview.png)
-
-*Overview of the article’s core mechanism. The following sections explain the objects, relationships, equations, assumptions, and worked examples shown here.*
-
+### 1. Choose cases that represent meaningful execution paths
 
 Start from known bottlenecks and important workload populations. A compact suite can include a latency-sensitive small shape, a throughput-dominated large shape, a dynamic-shape path, a topology-sensitive collective, and one useful application outcome where relevant.
 
@@ -33,7 +34,7 @@ Preserve useful work and output requirements. A candidate that changes token cou
 
 Keep the suite proportional to the change. A broad expensive campaign may be appropriate for a new kernel family or hardware stack, while a focused representative check can suffice for a narrow change. Additional tests should resolve meaningful uncertainty rather than duplicate the implementation.
 
-## 2. Establish correctness before interpreting speed
+### 2. Establish correctness before interpreting speed
 
 Run the relevant correctness contract before ranking timing. Check output values and layouts using suitable tolerances, and include boundary conditions that exercise the mechanism: masks, uneven shapes, repeated buffer reuse, or distributed ownership where applicable.
 
@@ -43,7 +44,7 @@ For training, a micro-level numerical check can be complemented by the update se
 
 Record the baseline's correctness too. An old reference can itself have changed dependencies or unsupported behavior. The gate needs a known valid comparison, not simply a historically fast executable whose meaning is no longer understood.
 
-## 3. Control and identify the performance runner
+### 3. Control and identify the performance runner
 
 Record hardware identity, driver and runtime versions, framework, compiler, communication stack, placement, and resource allocation. Preserve the actual CPU and device masks. A runner label alone may not reveal a changed machine or software image.
 
@@ -53,7 +54,9 @@ Inspect background load and sustained thermal behavior where they affect the cas
 
 Use supported timing and synchronization boundaries. Host posting duration can undercount asynchronous work, while unnecessary global synchronization can destroy overlap. Keep the measurement method versioned with the case.
 
-## 4. Define a regression ratio and practical budget
+### 4. Define a regression ratio and practical budget
+
+![Deep-dive illustration: Define a regression ratio and practical budget](./deep-dive.png)
 
 For comparable baseline time B and candidate time C, define
 
@@ -69,10 +72,9 @@ Define budgets before observing a candidate. Choosing a threshold after seeing t
 
 Keep absolute impact alongside percentage. A large percentage increase in a negligible path may matter less than a small increase in a frequently repeated operation. The application outcome remains the final context for prioritization.
 
+### 5. Use paired observations and an inconclusive state
 
-![Deep-dive illustration: Define a regression ratio and practical budget](./deep-dive.png)
-
-## 5. Use paired observations and an inconclusive state
+![Deep dive: 5. Use paired observations and an inconclusive state](./deep-dive-component-03.png)
 
 When comparable pairing is feasible, let B_i and C_i be paired observations and define
 
@@ -88,7 +90,7 @@ The distinction matters: failing to detect a regression is not the same as estab
 
 Pairing and interval methods rely on valid experimental units. Many correlated iterations within one process are not necessarily independent runs. Preserve run structure and inspect order effects, drift, and outliers before interpreting a narrow interval.
 
-## 6. Bound remeasurement instead of testing until favorable
+### 6. Bound remeasurement instead of testing until favorable
 
 An inconclusive result can trigger a limited additional measurement under a predefined policy. The goal is to resolve uncertainty, not repeat the benchmark until noise produces a pass. Preserve every attempted comparison and its run context.
 
@@ -98,7 +100,9 @@ For an illustrative interval from 1% to 5% regression with a 3% budget, more con
 
 Record reversal checks where practical. Restoring the baseline and reproducing its prior behavior can support attribution. If neither baseline nor candidate remains stable, the result does not justify blaming the code change alone.
 
-## 7. Account for many simultaneous comparisons
+### 7. Account for many simultaneous comparisons
+
+![Deep dive: 7. Account for many simultaneous comparisons](./deep-dive-component-01.png)
 
 A suite with many noisy cases can produce occasional false alarms even when every case's individual decision rule has a low false-positive rate. Under an illustrative independence model with per-case false-alarm probability alpha and K cases,
 
@@ -112,7 +116,7 @@ A policy can control the comparison family through an appropriate method, practi
 
 Keep detection sensitivity and operational cost in view. Excessively conservative thresholds can hide small important regressions, while excessive noise can cause developers to ignore the suite. Evaluate the gate's behavior on known unchanged runs and known meaningful regressions.
 
-## 8. Prevent baseline updates from erasing cumulative drift
+### 8. Prevent baseline updates from erasing cumulative drift
 
 A baseline should identify a known configuration and useful workload, not silently become the latest result after every commit. Automatic replacement can normalize each small slowdown and hide a substantial cumulative change.
 
@@ -128,7 +132,7 @@ Update baselines deliberately after a supported hardware or software transition,
 
 If the workload changes, keep old and new populations distinct. A faster result for shorter sequences cannot replace the old long-sequence baseline without acknowledging that the measured work changed.
 
-## 9. Make failure artifacts diagnostic
+### 9. Make failure artifacts diagnostic
 
 Store raw timing observations, case inputs or generators, output checks, software tuple, hardware identity, placement, warmup, selected paths, and the analysis result. A failed percentage alone forces developers to repeat the entire investigation.
 
@@ -138,7 +142,9 @@ Classify correctness failure, supported performance regression, inconclusive mea
 
 A compact report can show baseline and candidate, the practical budget, interval, sample structure, observed path, and first useful diagnostic. It should make the conclusion assessable without requiring access to an operator's terminal history.
 
-## 10. Verify that the gate detects the intended mechanism
+### 10. Verify that the gate detects the intended mechanism
+
+![Deep dive: 10. Verify that the gate detects the intended mechanism](./deep-dive-component-02.png)
 
 Exercise the suite with known changes that meaningfully affect its cases: an added synchronization, a changed supported kernel path, or a controlled resource reduction where appropriate. Also run unchanged comparisons to observe false-alarm and inconclusive behavior.
 
@@ -148,12 +154,11 @@ For an illustrative synchronization regression, a timeline can show that transfe
 
 Maintain the cases after workload and architecture changes. A once-representative shape can become irrelevant, and a new path can escape coverage. Retire or revise cases based on the execution program rather than accumulating benchmarks indefinitely.
 
+## Conclusion
+
 Performance regression CI preserves useful improvements by making comparisons reproducible and decisions explicit. Correctness comes first, practical budgets define significance, uncertainty defines what the observations support, and artifacts identify the mechanism. A durable speedup is one that survives the next change under the same useful-work contract.
 
-![Deep dive: 10. Verify that the gate detects the intended mechanism](./deep-dive-component-02.png)
-
-
-## Sources
+### Sources
 
 - [PyTorch benchmark utilities](https://docs.pytorch.org/docs/stable/benchmark_utils.html).
 - [NIST confidence limits for the mean](https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm).

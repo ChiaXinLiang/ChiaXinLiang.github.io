@@ -3,7 +3,7 @@ title: 'Cost per 1 Million Tokens: Connecting Performance to Money'
 description: 'Translate measured throughput, utilization, precision, and instance cost into cost per million tokens, keeping workload and pricing assumptions explicit.'
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'serve-4'
 order: 5
 series: "llm-serving"
@@ -12,11 +12,19 @@ topic: "Cost and Energy"
 tags: [inference, economics, serving]
 ---
 
+## Overview
+
+![Concept overview: Cost per 1 Million Tokens: Connecting Performance to Money](./section-overview.png)
+
 The same H100, rented at the same $2.50 an hour, can serve the same 70B model for $15.43 per million tokens or for 23 cents. A 67x spread, and not a single component changed hands. The only difference is software: how many requests share the GPU, how the KV cache is managed, whether the kernels keep the memory bus busy.
 
 That spread is the entire business case for performance engineering, compressed into 1 number. Everything this series has covered so far, rooflines, batching, quantization, disaggregation, has been measured in tokens per second. This article does the last step: converting tokens per second into dollars, because dollars are the unit your CFO, your capacity planner, and your pricing page actually speak.
 
-## The 1-line formula
+## Deep dive
+
+### The 1-line formula
+
+![Deep dive: The 1-line formula](./deep-dive-component-01.png)
 
 A GPU costs some rate in dollars per hour. While you hold it, it emits tokens at some rate. Divide 1 by the other:
 
@@ -34,10 +42,9 @@ Second, tokens per second here means *aggregate delivered throughput per GPU*, a
 
 Third, the formula is deliberately symmetric: halve the hourly cost or double the throughput and you get the same result. That symmetry is why performance work and procurement work are the same job viewed from different chairs.
 
-![Deep dive: The 1-line formula](./deep-dive-component-01.png)
+### Worked example: 1 H100, 3 software stacks
 
-
-## Worked example: 1 H100, 3 software stacks
+![Deep dive: Worked example: 1 H100, 3 software stacks](./deep-dive-component-03.png)
 
 Take Llama-70B-class weights served in FP8, so roughly 70 GB of parameters sitting on an 80 GB H100. (A tight fit once KV cache needs its share; real deployments often shard across 2 GPUs, which doubles both the hourly cost and the throughput and cancels out in the division, so the single-GPU math is a fair proxy.) The GPU rents at $2.50/hr.
 
@@ -58,7 +65,7 @@ Now hold those numbers against the market. GPU aggregators list 70B-class open-w
 
 This is also why "should we self-host?" has no general answer. Self-hosting wins only if your team can climb this ladder and keep the GPUs busy; a half-utilized cluster running batch-4 workloads is almost always more expensive than an API.
 
-## Input tokens are cheaper to make, and priced accordingly
+### Input tokens are cheaper to make, and priced accordingly
 
 The formula above quietly assumed all tokens cost the same to produce. They do not, and the price sheets of every provider say so: output tokens typically list at 3 to 5x the price of input tokens.
 
@@ -67,7 +74,9 @@ The asymmetry is physical, not commercial. Prefill (processing your prompt) read
 
 The practical consequence for cost modeling: never compute 1 blended $/Mtok for your workload. Compute 1 for input and 1 for output, weighted by your actual traffic shape. A RAG service pushing 8,000-token contexts to produce 200-token answers lives almost entirely in cheap prefill; a code-generation agent emitting 3,000-token diffs lives in expensive decode. 2 services with identical total token counts can differ 5x in real serving cost.
 
-## Going deeper: why API prices fell 10 to 100x in 2 years
+### Going deeper: why API prices fell 10 to 100x in 2 years
+
+![Deep dive: Going deeper: why API prices fell 10 to 100x in 2 years](./deep-dive-component-02.png)
 
 GPT-4 launched in March 2023 at $30 per million input tokens and $60 per million output. By 2025, models matching or beating its benchmark scores listed at $2.50/$10 (GPT-4o) and small-tier models at $0.15/$0.60. Depending on the capability tier you compare, that is a 10x to 100x collapse in about 2 years. Hardware alone cannot explain it; H100 to B200 bought maybe 2 to 3x per dollar in that window. The rest came from stacked multiplicative software and model-design wins, each one an instance of the formula's denominator growing:
 
@@ -93,10 +102,7 @@ The approximation assumes the busy throughput represents the actual request mix.
 
 The 3 throughput points above are illustrative scenarios, not validated 70B deployments. A 70-GB FP8 checkpoint leaves only 10 nominal gigabytes on an 80-GB GPU before workspace and cache, so high-concurrency feasibility requires an explicit context budget or more devices. Measure utilization across the billed period and acceptance across all offered work. Provider list prices are customer charges; they cannot by themselves reveal the provider's production cost or explain its pricing decisions.
 
-![Deep dive: Going deeper: why API prices fell 10 to 100x in 2 years](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 **"A cheaper GPU-hour means cheaper tokens."** The formula has 2 variables. An A100 at $1.20/hr looks like a bargain next to an H100 at $2.50, but with roughly 2 TB/s of HBM bandwidth against 3.35 TB/s plus a weaker compute and kernel ecosystem, its delivered throughput on a 70B model is often well under half. $1.20 divided by a small number can easily exceed $2.50 divided by a big 1. Buy tokens per dollar, never GPU-hours per dollar.
 
@@ -104,19 +110,19 @@ The 3 throughput points above are illustrative scenarios, not validated 70B depl
 
 **"Input/output price asymmetry is just price discrimination."** The 3 to 5x output premium tracks a genuine hardware asymmetry: parallel, compute-bound prefill amortizes 1 weight pass over the whole prompt, while sequential, bandwidth-bound decode pays a full pass per token. Providers did not invent the gap; the memory wall did. The evidence is that the same ratio shows up across competing providers who would happily undercut each other on any padded margin.
 
-## The metric that unifies the series
+### The metric that unifies the series
 
 Every article in this series has secretly been about this number. A kernel that lifts throughput 30% is a 23% cost cut. Quantization that fits double the batch is a near-halving. Disaggregation that stops prefill from stalling decode raises goodput, which is the honest denominator. Even the power story reduces to the same shape: [Tokens per Megawatt](/blog/tokens-per-megawatt/) is this exact formula with the numerator swapped from dollars to watts, and as electricity becomes the binding constraint on AI buildout, the 2 versions converge, because power is becoming the dominant term in the fully loaded rate.
 
 That is the quiet dignity of performance engineering. It rarely ships a feature anyone screenshots. It moves a denominator, and the denominator decides which products are economically possible at all. Agents that burn 100,000 tokens per task exist as products only because tokens stopped costing 1998 long-distance rates.
 
-## Takeaway
+## Conclusion
 
 - **$/Mtok = hourly cost ÷ (tokens/sec × 3600 / 1e6).** Use fully loaded cost in the numerator and delivered aggregate goodput in the denominator; every optimization in this series is an attack on that ratio.
 - **The same $2.50/hr H100 spans $15.43 to $0.23 per million tokens** between naive batch-1 serving and a tuned stack. Software, not silicon, decides whether self-hosting beats the API.
 - **Cost input and output tokens separately.** Prefill amortizes 1 weight pass across the whole prompt; decode pays a full pass per token. Workload shape can swing real cost 5x at identical token counts.
 
-## Sources
+### Sources
 
 - NVIDIA, H100 Tensor Core GPU specifications: https://www.nvidia.com/en-us/data-center/h100/
 - Kwon et al., "Efficient Memory Management for Large Language Model Serving with PagedAttention" (vLLM): https://arxiv.org/abs/2309.06180

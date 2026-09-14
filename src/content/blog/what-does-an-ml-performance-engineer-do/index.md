@@ -3,7 +3,7 @@ title: 'What Does an ML Performance Engineer Actually Do?'
 description: "Same model, same answers — delivered faster and cheaper. Inside the role that decides whether AI products make or lose money."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'intro-1'
 order: 1
 series: "ai-performance"
@@ -12,17 +12,23 @@ topic: "Performance Methodology"
 tags: ['ml-performance', 'career', 'gpu']
 ---
 
+## Overview
+
+![Concept overview: What Does an ML Performance Engineer Actually Do?](./section-overview.png)
+
 Imagine a company that has invested heavily in GPUs, yet its AI service still misses its latency and cost targets.
 
 Closing that gap is a job title now — ML Performance Engineer, AI Systems Performance Engineer, inference optimization engineer, the names vary. It is one of the most leveraged and least understood roles in AI. This article opens my AI Performance Engineering series by explaining what the job actually is.
 
-## Not making the model smarter
+## Deep dive
+
+### Not making the model smarter
 
 The most common misconception: performance work means improving the model's answers. It doesn't. The mission is to deliver the required model quality **faster and cheaper**. Many improvements preserve the model and its computation; numerical changes such as quantization require explicit quality validation.
 
 That distinction matters because it defines the toolbox. Model quality is a research problem. Performance is a systems problem: hardware, memory, networks, schedulers, and the software that connects them.
 
-## The triangle you can't escape
+### The triangle you can't escape
 
 Every decision in this job trades between 3 quantities:
 
@@ -35,7 +41,7 @@ The cruel part: they fight each other. The single biggest throughput lever is ba
 
 A performance engineer's actual job description is 1 sentence: *find the point on this triangle that your product needs, and get there with the least hardware possible.*
 
-## A day in the life
+### A day in the life
 
 What does that look like concretely? Across a week, a performance engineer might:
 
@@ -48,7 +54,9 @@ What does that look like concretely? Across a week, a performance engineer might
 
 Notice the range: from chip-level memory access patterns to fleet-level capacity planning. That breadth — hardware, systems software, and algorithms in 1 head — is exactly why the role is scarce and well paid.
 
-## Why the money is real
+### Why the money is real
+
+![Deep dive: Why the money is real](./deep-dive-component-03.png)
 
 The economics are blunt. Inference at scale is priced per token, and every efficiency gain drops straight to the margin. Public benchmarks make the stakes visible: [MLPerf](https://mlcommons.org/benchmarks/inference-datacenter/) publishes results under specified benchmark rules, models, and quality constraints. Those results illustrate achievable performance, but they do not establish a universal 2–3× software speedup over an unspecified baseline.
 
@@ -56,7 +64,7 @@ DeepSeek made the sharpest case in recent memory: constrained to export-complian
 
 For a company running thousands of GPUs, a performance engineer who improves cluster efficiency by 20% is worth millions of dollars a year. Few roles have a cleaner line from work to money.
 
-## What this series covers
+### What this series covers
 
 Over the coming months, this series walks the whole stack in order, the way the problems actually nest:
 
@@ -67,7 +75,9 @@ Over the coming months, this series walks the whole stack in order, the way the 
 5. **PyTorch** — framework-level speed without writing CUDA
 6. **Inference** — batching, KV caches, quantization, and serving at planetary scale
 
-## Define the promise before optimizing
+### Define the promise before optimizing
+
+![Deep dive: Define the promise before optimizing](./deep-dive-component-01.png)
 
 “Faster” needs a unit and a workload. An interactive assistant might promise that the first token arrives within 2 seconds and subsequent tokens appear smoothly. A document-processing service might instead promise that a nightly queue finishes before morning. Both run inference, but the right configuration can differ because 1 protects individual waiting time while the other concentrates on sustained completion rate.
 
@@ -77,10 +87,9 @@ The quality promise matters too. Some changes, such as removing redundant copies
 
 A useful experiment specification includes the model revision, precision, hardware, engine version, request distribution, concurrency, and service objectives. Without those details, “twice as fast” is difficult to reproduce and may describe a different problem. Keeping the specification small enough to repeat is more valuable than collecting a dashboard full of unexplained numbers.
 
-![Deep dive: Define the promise before optimizing](./deep-dive-component-01.png)
+### 2 equations that guide the investigation
 
-
-## 2 equations that guide the investigation
+![Deep dive: 2 equations that guide the investigation](./deep-dive-component-02.png)
 
 The first equation is a lower bound on an operation's execution time. If it performs F floating-point operations and transfers D bytes through the limiting memory level, while sustainable compute and bandwidth are C and B, then:
 
@@ -102,10 +111,9 @@ If a kernel accounts for 10 percent of request time, making it 2 times as fast i
 
 The assumptions deserve attention. Once 1 bottleneck is removed, another can become dominant, and batching or scheduling changes may alter several runtime fractions at once. Use Amdahl's law to estimate a first experiment, then measure the new system rather than repeatedly applying an old profile.
 
-![Deep dive: 2 equations that guide the investigation](./deep-dive-component-02.png)
+### Follow 1 request through the stack
 
-
-## Follow 1 request through the stack
+![Deep dive: Follow 1 request through the stack](./deep-dive-component-04.png)
 
 Imagine an assistant becomes slow when traffic rises. Start with the request timeline: admission, queueing, tokenization, host preparation, prompt processing, generation, and delivery. If most of the additional delay appears before GPU work starts, rewriting a GPU kernel is unlikely to address the cause. Queue length, admission policy, and the request mix become the first places to investigate.
 
@@ -115,7 +123,7 @@ Suppose the trace shows that a CPU thread repeatedly asks for a GPU tensor's sca
 
 Finally replay realistic arrivals. A configuration that succeeds at fixed concurrency may behave badly under bursts. Long prompts can interfere with short requests, and the queue can amplify small changes in service time. The performance engineer therefore connects the microsecond explanation to the second-scale user result.
 
-## Make improvements safe to operate
+### Make improvements safe to operate
 
 A change is useful only if the service can run it reliably. Measure warm-up time and model load time, not just steady state. Record memory headroom so a slightly longer prompt does not turn a successful benchmark into an out-of-memory failure. Check cancellation and unusual shapes when they are part of the product workload. These operational details determine whether the measured speedup survives deployment.
 
@@ -123,7 +131,7 @@ Compare the baseline and candidate using the same request set and conditions. Re
 
 Quality validation should match the proposed change. An exact scheduling change may need output and numerical consistency checks. A quantized model needs representative quality evaluation, including tasks sensitive to the precision reduction. A stochastic decoder requires distribution-aware or task-level evaluation; comparing 1 generated sentence is not enough to establish equivalence.
 
-## Turn throughput into a capacity decision
+### Turn throughput into a capacity decision
 
 Suppose a hypothetical node costs 16 dollars per hour and produces 20 million accepted output tokens in that hour. Its direct node cost is 80 cents per million tokens. If a validated change raises accepted output to 25 million tokens while preserving latency and quality, that cost becomes 64 cents per million. The arithmetic is useful precisely because the output definition and cost boundary are explicit.
 
@@ -133,13 +141,13 @@ The strongest deliverable is consequently more than a patch. It is a reproducibl
 
 A useful experiment also documents the rejected alternatives. If higher batching raises aggregate output while violating streaming latency, retain that result as evidence for an offline pool rather than accepting it for interactive service. This preserves the reason for the chosen operating point and prevents a later dashboard comparison from silently relaxing the original promise.
 
-## Takeaway
+## Conclusion
 
 - ML performance engineering delivers a defined quality level within latency, throughput, and cost objectives.
 - Every decision trades between latency, throughput, and cost — the job is choosing your point on that triangle deliberately.
 - The value is measurable through accepted output, reproducible benchmarks, and an explicit cost boundary.
 
-## Sources
+### Sources
 
 - [MLPerf Inference: Datacenter benchmark results](https://mlcommons.org/benchmarks/inference-datacenter/) — MLCommons
 - [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437) — the H800 engineering story

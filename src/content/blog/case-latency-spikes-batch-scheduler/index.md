@@ -3,7 +3,7 @@ title: "Case File: Latency Spikes Every Few Seconds"
 description: "Use a serving timeline, token-budget arithmetic, and controlled experiments to distinguish batch scheduling stalls from periodic CPU or memory interruptions."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'case-5'
 order: 21
 series: "llm-serving"
@@ -12,11 +12,17 @@ topic: "Production Serving"
 tags: [troubleshooting, inference, performance]
 ---
 
+## Overview
+
+![Concept overview: Case File: Latency Spikes Every Few Seconds](./section-overview.png)
+
 A streaming service emits tokens every 25 milliseconds, then pauses for almost a second every few seconds. Average output throughput looks respectable, and no request fails. Users still describe the experience as broken because the pauses interrupt every active conversation at once. A periodic symptom is an invitation to correlate events, not proof that the scheduler is defective.
 
 This case uses an illustrative server with 16 active decode sequences and occasional long prompts. The baseline iteration takes 25 milliseconds. A new 8192-token prompt sometimes coincides with an 800-millisecond streaming gap. Those numbers are hypothetical, selected to make the scheduling arithmetic easy to follow. The investigation must determine whether the gap comes from a long prefill, CPU work, memory pressure, or another recurring event.
 
-## Measure the pause at the token level
+## Deep dive
+
+### Measure the pause at the token level
 
 End-to-end request latency combines queueing, prefill, generation, and delivery. A request can have an acceptable total duration while containing a conspicuous mid-generation pause. Capture inter-token intervals for every sequence and correlate them with server-side timestamps. If all streams stop together, look first for a shared execution or delivery interruption.
 
@@ -27,7 +33,9 @@ Do not summarize the problem only as mean time per output token. A mean of 30 mi
 
 *Original incident timeline. Durations are illustrative, and this is not a source-paper figure.*
 
-## Why prefill can block ongoing decode
+### Why prefill can block ongoing decode
+
+![Deep dive: Why prefill can block ongoing decode](./deep-dive-component-03.png)
 
 At any scheduler iteration, the engine chooses which active sequences to advance and which prompt tokens to process. If it admits an entire long prompt into 1 non-preempted execution segment, that segment can occupy resources much longer than an ordinary decode step. Ongoing streams then wait for the next opportunity to advance.
 
@@ -37,7 +45,9 @@ Continuous batching lets an engine add and retire requests as sequences finish. 
 
 Current vLLM V1 documentation describes decode-prioritized scheduling with chunked prefill enabled whenever possible: pending decode requests are scheduled first, remaining token budget admits prefill work, and a prompt that does not fit is split. That describes a documented implementation, not a guarantee for every engine or version. Record the actual configuration and release before reasoning from it.
 
-## Work a token-budget example
+### Work a token-budget example
+
+![Deep dive: Work a token-budget example](./deep-dive-component-01.png)
 
 Let T be the maximum scheduled token budget for an iteration and B_d the number of active decode sequences. Under a simplified decode-first accounting, the prompt-token allowance is:
 
@@ -67,10 +77,7 @@ S is the uncached prompt length and K the minimum chunk count. The bound is mean
 
 Chunking changes the longest admitted execution segment compared with monolithic prefill; it does not remove prompt computation. Fit the mixed-batch duration curve from controlled injections, including cache misses and long attention contexts. Then check both streaming gaps and prompt completion. If the smaller budget makes new arrivals queue indefinitely, its latency benefit is not sustainable. This adds a stability check to the token accounting rather than treating the scheduler flag itself as evidence of a resolved incident.
 
-![Deep dive: Work a token-budget example](./deep-dive-component-01.png)
-
-
-## Chunk size is a multi-objective decision
+### Chunk size is a multi-objective decision
 
 A smaller chunk often protects streaming latency by limiting prompt work admitted at once. It can also delay time to first token for newly arriving requests and add scheduling or launch overhead. A larger chunk improves prompt processing opportunities but may lengthen iterations shared with decoding. The optimum depends on the model, accelerator, context lengths, and mix of incoming requests.
 
@@ -80,7 +87,7 @@ Measure a Pareto curve: output throughput, first-token latency, and inter-token 
 
 For sustained mixed workloads, separate prefill and decode workers may be appropriate. That introduces cache transfer and coordination costs, so it belongs after a local scheduler diagnosis. Link the decision to the broader article on [prefill and decode as different workloads](/blog/the-prefill-decode-disaggregation-story/) rather than treating disaggregation as an automatic cure.
 
-## Going deeper: locate the actual critical path
+### Going deeper: locate the actual critical path
 
 Capture a timeline spanning several pauses. Label request arrivals, scheduling decisions, prefill chunks, decode kernels, CPU scheduling spans, cache allocation events, and delivery flushes. The strongest evidence is repeated alignment: each large streaming gap begins with the same class of event and disappears when that event is controlled.
 
@@ -90,7 +97,9 @@ If pauses align with KV exhaustion or preemption, count those events. vLLM docum
 
 A periodic checkpoint, adapter load, or maintenance task can also share the GPU or host resources. Verify whether these tasks run on the serving critical path. Use a short, controlled test with the task disabled or moved, preserving the rest of the workload. A causal intervention is stronger evidence than finding a periodic timestamp that merely happens to be nearby.
 
-## A controlled diagnosis sequence
+### A controlled diagnosis sequence
+
+![Deep dive: A controlled diagnosis sequence](./deep-dive-component-02.png)
 
 First run a decode-only workload with fixed prompt lengths and enough active requests to reproduce normal occupancy. If the periodic pauses persist without new prompt admission, long prefill is not sufficient to explain the incident. Keep the trace and pursue host, cache, or delivery effects.
 
@@ -107,10 +116,7 @@ Write down the expected event sequence before the controlled test. A scheduler e
 
 Then compare more than 1 recurrence. A single coincidence can be misleading because a busy server contains many overlapping events. If a periodic logging task occurs near each pause, move that task off the request path for 1 test while preserving the long-prompt injections. If the pauses remain and still follow prompt execution, the logging hypothesis loses support. If they disappear without changing GPU work, the host task deserves a focused investigation. This intervention is inexpensive and prevents a scheduler flag from becoming a permanent workaround for a separate host problem.
 
-![Deep dive: A controlled diagnosis sequence](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 “Continuous batching guarantees smooth streaming.” It improves the admission and retirement of work, but the admitted work can still contain long critical-path segments. Verify the engine's prefill policy and measure token intervals directly.
 
@@ -118,19 +124,19 @@ Then compare more than 1 recurrence. A single coincidence can be misleading beca
 
 “Every regular spike is garbage collection.” Garbage collection is 1 plausible host event. Prefill arrivals, telemetry, adapter changes, cache preemption, and network buffering are also plausible. Align the stall with a trace and change 1 cause at a time.
 
-## Close the case with a reproducible workload
+### Close the case with a reproducible workload
 
 Save the injected-prompt experiment, scheduler settings, engine release, and arrival trace. Add alerts for large token gaps and preemption rates alongside first-token latency. A capacity dashboard should show whether the chosen chunk budget remains appropriate as prompts get longer or concurrency increases.
 
 The general mechanism connects to [batching](/blog/batching-the-biggest-throughput-lever/), [profiling](/blog/profiling-basics-where-time-goes/), and [TTFT versus TPOT](/blog/ttft-and-tpot/). The operational result is narrower: identify the recurring event on the critical path, limit its interference, and demonstrate that users receive smoother tokens under the same offered work.
 
-## Takeaway
+## Conclusion
 
 - Correlate shared streaming gaps with GPU, host, cache, and delivery timelines.
 - Use token-budget arithmetic to guide chunk-size experiments, then measure actual mixed-batch duration.
 - Accept a scheduler change only when streaming latency, new-request latency, and sustainable goodput meet their targets together.
 
-## Sources
+### Sources
 
 - [vLLM optimization documentation](https://docs.vllm.ai/en/stable/configuration/optimization/), chunked prefill, token budgets, and preemption.
 - [vLLM serving metrics documentation](https://docs.vllm.ai/en/stable/usage/metrics/), latency and request instrumentation.

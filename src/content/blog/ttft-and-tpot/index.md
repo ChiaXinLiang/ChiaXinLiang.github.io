@@ -3,7 +3,7 @@ title: 'TTFT and TPOT: The 2 Numbers That Define LLM UX'
 description: "Why the first token and every token after it obey different physics, and how to estimate both from a model's size and a GPU spec sheet."
 updatedDate: 'Sep 12 2026'
 pubDate: 'Sep 13 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 code: 'llm-5'
 order: 13
 series: "llm-basics"
@@ -12,11 +12,19 @@ topic: "Inference Basics"
 tags: ['inference', 'latency', 'llm']
 ---
 
+## Overview
+
+![Concept overview: TTFT and TPOT: The 2 Numbers That Define LLM UX](./section-overview.png)
+
 14 gigabytes read, 14 gigaflops computed. That is the bill for producing a single output token from a 7-billion-parameter model in half precision: the GPU streams every weight in the network out of memory and performs, on average, just 1 multiply-add per byte it fetched. Meanwhile the *first* token of the same reply came from a phase that did 2 thousand times more math per byte. 1 request, 2 completely different physical regimes.
 
 This is why serious inference dashboards never show 1 latency number. They show 2: **time to first token (TTFT)** and **time per output token (TPOT)**. Once you understand what each 1 physically depends on, a lot of confusing behavior — why long prompts feel sluggish, why streaming exists, why a beefier GPU sometimes changes nothing — becomes almost obvious.
 
-## Every request lives 2 lives
+## Deep dive
+
+### Every request lives 2 lives
+
+![Deep dive: Every request lives 2 lives](./deep-dive-component-01.png)
 
 When your prompt arrives at an LLM server, the model processes it in 2 phases with different names and, more importantly, different bottlenecks.
 
@@ -38,16 +46,15 @@ total latency ≈ TTFT + TPOT × (output tokens − 1)
 
 That formula is worth memorizing, because it tells you which knob matters for which product. A classification endpoint returning 3 tokens lives and dies by TTFT. A chatbot writing 500-token answers is mostly a TPOT story.
 
-![Deep dive: Every request lives 2 lives](./deep-dive-component-01.png)
-
-
-## Why streaming exists
+### Why streaming exists
 
 Suppose a reply takes 2.4 seconds to finish. If the server waits for the whole thing before responding, the user stares at a blank box for 2.4 seconds, which feels broken. If the server **streams** — sends each token the moment decode produces it — the user sees text starting at TTFT, a couple hundred milliseconds in, and then watches it flow at 1/TPOT.
 
 Streaming does not make the model faster by a single microsecond. It changes *which* metric the user's patience is charged against: perceived responsiveness becomes TTFT instead of total latency. This is the entire reason chat interfaces type at you. As a bonus, humans read at roughly 3 to 5 words per second; once TPOT pushes generation comfortably past reading speed, further decode speedups are invisible in a chat UI, and a good operator will spend that slack on serving more users instead. How that trade is made is the batching story, which deserves its own article.
 
-## A worked example you can do on a napkin
+### A worked example you can do on a napkin
+
+![Deep dive: A worked example you can do on a napkin](./deep-dive-component-02.png)
 
 Let's put real numbers on a hypothetical but honest setup:
 
@@ -88,10 +95,7 @@ Without streaming: a 2.4-second blank stare. With streaming: text appears at 0.2
 
 1 more number ties the 2 phases together: **arithmetic intensity**, the FLOPs performed per byte moved. Our GPU needs about 150 FLOPs per byte (300 TFLOPS ÷ 2 TB/s) to keep its compute units fed. Prefill delivered ~1,900 FLOPs per byte of weights — comfortably compute-bound. Decode delivered ~1. Same weights, same model, opposite sides of the roofline.
 
-![Deep dive: A worked example you can do on a napkin](./deep-dive-component-02.png)
-
-
-## Use an exact timestamp identity
+### Use an exact timestamp identity
 
 For request arrival $$t_0$$ and delivered token times $$t_1,\ldots,t_N$$, define $$\mathrm{TTFT}=t_1-t_0$$. For at least 2 outputs, mean time per output gap is
 
@@ -105,7 +109,9 @@ It also explains why averaging request TPOT and multiplying by an average output
 
 Compared with blending prompt processing and generation into 1 rate, separate metrics let engineers choose different interventions. Queue admission and prefill policy chiefly influence first-token waiting; scheduling interference and history reads influence gaps. Neither mapping is exclusive. If a session has 20 independent opportunities for a 1-percent tail event, the probability of at least 1 is approximately 18.21 percent. Correlated requests require a different calculation. A small request-level tail can therefore matter noticeably over a long interaction.
 
-## Going deeper: percentiles, batching, and the tail
+### Going deeper: percentiles, batching, and the tail
+
+![Deep dive: Going deeper: percentiles, batching, and the tail](./deep-dive-component-03.png)
 
 Everything above describes 1 request on an idle GPU. Production servers are neither idle nor fair, and this is where **p50 versus p99** enters.
 
@@ -120,7 +126,7 @@ Where does the tail come from? Mostly from requests interfering with each other:
 
 Percentiles matter more than they first appear because sessions multiply exposure. If p99 TTFT is 1.4 s and a chat session involves 20 turns, the chance a user hits at least 1 tail event is 1 − 0.99²⁰ ≈ 18%. Nearly 1 user in 5 experiences your worst-case behavior. Dean and Barroso called this "the tail at scale" in the datacenter context a decade before LLMs, and the logic transfers intact.
 
-## Common misconceptions
+### Common misconceptions
 
 **"A GPU with more TFLOPS will stream tokens faster."** For single-stream decode, usually not. Our worked example spent 0.05 ms computing and 7.5 ms reading memory per token; tripling the FLOPS attacks the 0.05. Extra compute *does* cut TTFT (prefill is compute-bound) and lets you batch more users at the same TPOT, which is valuable — but the tokens/s a single user sees is a bandwidth number. Check which regime you are in before buying hardware.
 
@@ -128,19 +134,19 @@ Percentiles matter more than they first appear because sessions multiply exposur
 
 **"Our median latency is 210 ms, so users experience 210 ms."** The median describes 1 request in isolation. Users experience sessions, and sessions sample the whole distribution repeatedly. With the 20-turn arithmetic above, a service with a flawless p50 and an ugly p99 delivers an ugly experience to a sizable minority every single day. This is why serious SLOs are written against p95 or p99, and why teams track goodput-style measures ([throughput that meets the latency target](/blog/goodput-vs-utilization/)) rather than raw throughput.
 
-## The bigger picture
+### The bigger picture
 
 TTFT and TPOT are where the transformer's architecture becomes something you can feel with your fingertips. The parallel-friendly attention design that made training scalable ([the same 1 picture](/blog/transformer-architecture-in-one-picture/) from earlier in this series) is also what makes prefill a single wide, compute-hungry pass. The autoregressive loop bolted onto it at inference time is what makes decode a memory-bandwidth treadmill. Every serving technique you will meet later — KV-cache paging, continuous batching, speculative decoding, prefill/decode disaggregation — is an attempt to move one of these 2 numbers without wrecking the other. And an [ML performance engineer's](/blog/what-does-an-ml-performance-engineer-do/) day often reduces to exactly that negotiation: which metric does this workload actually care about, and what is the cheapest way to buy it?
 
 When a vendor quotes "tokens per second," now you know to ask 3 questions. Per user, or summed across the whole batch? At what prompt length? And at which percentile? The answers frequently shrink marketing numbers by an order of magnitude — most published throughput figures are aggregate, batched, short-prompt p50s.
 
-## Takeaway
+## Conclusion
 
 - 1 request has 2 phases with different physics: prefill is compute-bound and sets **TTFT**; decode is bandwidth-bound and sets **TPOT**. Total latency ≈ TTFT + TPOT × output tokens.
 - You can estimate both from spec sheets: prefill time ≈ 2 × params × prompt tokens ÷ FLOPS; decode time per token ≈ (weight bytes + KV bytes) ÷ memory bandwidth. For a 7B FP16 model on an A100-class GPU: ~200 ms and ~7.6 ms.
 - Report and design against percentiles, not medians: sessions sample the distribution many times, so a 1% tail becomes a double-digit share of user experiences.
 
-## Sources
+### Sources
 
 - Pope et al., ["Efficiently Scaling Transformer Inference"](https://arxiv.org/abs/2211.05102) — the canonical treatment of prefill/decode cost modeling and memory-bandwidth limits.
 - Kwon et al., ["Efficient Memory Management for Large Language Model Serving with PagedAttention"](https://arxiv.org/abs/2309.06180) — KV-cache mechanics and the vLLM serving model.

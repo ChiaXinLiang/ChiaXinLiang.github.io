@@ -3,7 +3,7 @@ title: "Cross-Entropy and KL Divergence: Why Language Models Optimize Log Loss"
 description: "Derive cross-entropy from likelihood, decompose it into entropy plus KL divergence, and calculate a next-token loss without confusing probability with factual confidence."
 pubDate: 'Sep 12 2026'
 updatedDate: 'Sep 12 2026'
-heroImage: './deep-dive-component-01.png'
+heroImage: './section-overview.png'
 series: "llm-basics"
 level: advanced
 code: 'stat-4'
@@ -12,11 +12,17 @@ topic: "Statistical Learning"
 tags: [statistics, theory, learning]
 ---
 
+## Overview
+
+![Concept overview: Cross-Entropy and KL Divergence: Why Language Models Optimize Log Loss](./section-overview.png)
+
 Assigning the observed token probability 0.8 produces a much smaller training penalty than assigning it 0.01. That penalty is negative log probability: approximately 0.223 versus 4.605 using natural logarithms. A language model receives this signal repeatedly across its training tokens. The loss tells it to allocate more probability to observed continuations under the supplied prefixes.
 
 Cross-entropy explains this objective, and KL divergence explains how it relates to matching distributions. The names sound more complicated than the underlying idea: score a predicted distribution by how much log probability it gives to outcomes from another distribution. We will derive the relationship, calculate an example, and identify what low loss does and does not demonstrate.
 
-## Start with the observed-label likelihood
+## Deep dive
+
+### Start with the observed-label likelihood
 
 Let x denote an input and y its observed label among K possible classes. A model with parameters theta assigns probabilities q_theta(k given x), each nonnegative and summing to 1. For 1 labeled observation, its likelihood contribution is q_theta(y given x). Maximizing that probability is equivalent to minimizing its negative logarithm.
 
@@ -30,7 +36,7 @@ The logarithm here is natural, so the units are nats per observation. Using base
 
 This is the likelihood logic derived in [MLE](/blog/maximum-likelihood-estimation/). Choosing log loss is connected to a categorical data model, not just convention. Optimization then tries to minimize the resulting function. A theoretically appropriate objective does not guarantee that a finite training run finds its global minimum.
 
-## 1-hot labels make the cross-entropy visible
+### 1-hot labels make the cross-entropy visible
 
 Represent the observed label y by a 1-hot vector p: its y entry equals 1 and all other entries equal 0. The per-observation loss becomes negative the sum of p_k times log q_k across classes. Only the observed class contributes, so this expression equals negative log q_y.
 
@@ -46,7 +52,7 @@ A 1-hot label is 1 observed outcome, not proof that the true conditional distrib
 
 Soft targets appear in label smoothing or distillation. The same formula applies, but the target has changed. Be explicit about that change: a smoothed-label objective is not numerically identical to the ordinary observed-label negative log-likelihood. Distillation also involves choices about temperature and teacher distributions that this introductory derivation does not cover.
 
-## Work a 3-outcome example
+### Work a 3-outcome example
 
 Suppose the target distribution is p equal to (0.7, 0.2, 0.1), and a model predicts q equal to (0.6, 0.3, 0.1). The cross-entropy is negative 0.7 log 0.6 minus 0.2 log 0.3 minus 0.1 log 0.1, approximately 0.8286 nats.
 
@@ -63,7 +69,9 @@ If q matches p, the cross-entropy equals H(p). If q shifts mass away from outcom
 
 *Original analytical example. Distributions and values are illustrative and calculated with natural logarithms.*
 
-## Derive entropy plus KL divergence
+### Derive entropy plus KL divergence
+
+![Deep dive: Derive entropy plus KL divergence](./deep-dive-component-03.png)
 
 For discrete distributions, KL divergence from p to q is:
 
@@ -85,7 +93,9 @@ Support matters. If p assigns positive mass to an outcome and q assigns exactly 
 
 KL is also not a distance metric: it is asymmetric and does not satisfy the triangle inequality in general. Calling it a “distribution distance” informally can be useful, but do not import geometric properties it does not have. Its direction identifies which mistakes receive high weight.
 
-## Going deeper: logits and stable gradients
+### Going deeper: logits and stable gradients
+
+![Deep dive: Going deeper: logits and stable gradients](./deep-dive-component-01.png)
 
 A neural classifier commonly produces real-valued logits z_k and transforms them with softmax. The predicted probability q_k equals exp(z_k) divided by the sum of all exp(z_j). Logits are scores, not normalized probabilities. Adding the same constant to every logit leaves the distribution unchanged.
 
@@ -117,10 +127,7 @@ For logits (1000,1001,999) and observed class 2, subtracting m equal to 1001 giv
 
 Check an implementation using both the loss and its gradients on a small reference case before enabling lower precision. Preserve masks and reduction conventions when comparing optimized paths. Label smoothing intentionally changes p, so a different loss after smoothing cannot be credited solely to a faster or more stable kernel. Separate objective changes from implementation changes in the experiment.
 
-![Deep dive: Going deeper: logits and stable gradients](./deep-dive-component-01.png)
-
-
-## Apply the objective to next-token prediction
+### Apply the objective to next-token prediction
 
 Let x_1 through x_T be a token sequence. The chain rule factorizes its probability into conditional next-token probabilities. Taking negative logarithms converts the sequence product into a sum of per-token log losses:
 
@@ -135,7 +142,7 @@ Padding and excluded tokens should not contribute to the numerator or denominato
 
 Tokenization also changes the unit. A tokenizer that splits text into more tokens can change average nats per token and perplexity. Compare perplexity only under compatible tokenization, datasets, masks, and evaluation procedures. It is not a universal model-quality scale across arbitrary vocabularies.
 
-## Perplexity is an exponential summary
+### Perplexity is an exponential summary
 
 For mean token negative log-likelihood L measured with natural logs, perplexity is exp(L). Suppose the observed next-token probabilities across 3 positions are 0.5, 0.25, and 0.125. Their negative log probabilities are approximately 0.6931, 1.3863, and 2.0794. The mean is 1.3863 and perplexity is 4.
 
@@ -146,7 +153,9 @@ Perplexity is useful for evaluating modeled text likelihood under a fixed setup.
 
 *Original worked-example figure. Values follow directly from the probabilities stated in this article.*
 
-## Interpret changes in loss carefully
+### Interpret changes in loss carefully
+
+![Deep dive: Interpret changes in loss carefully](./deep-dive-component-02.png)
 
 A small improvement in average log loss can be meaningful over many tokens. Because likelihood multiplies probabilities, tiny average differences compound across long sequences. Yet average improvement can also hide regressions on rare formats, domains, or long contexts. Report subgroup metrics where the application depends on them.
 
@@ -161,10 +170,7 @@ For example, a short sequence with 10 evaluated tokens and a long sequence with 
 
 *Redrawn from [Dive into Deep Learning, Fig. 4.1.1](https://d2l.ai/chapter_linear-classification/softmax-regression.html#fig-softmaxreg). The diagram shows the source's fully connected structure; softmax normalization follows the logits.*
 
-![Deep dive: Interpret changes in loss carefully](./deep-dive-component-02.png)
-
-
-## Common misconceptions
+### Common misconceptions
 
 “Cross-entropy should become zero.” It can approach 0 for deterministic 1-hot training labels that the model fits, but expected loss for an uncertain target is bounded below by that target's entropy. Our example has minimum expected loss around 0.8018 nats.
 
@@ -172,7 +178,7 @@ For example, a short sequence with 10 evaluated tokens and a long sequence with 
 
 “Low perplexity means the answer is true.” It measures assigned probability to evaluated tokens under a specified setup. Truth and task correctness need separate evaluation.
 
-## Takeaway
+## Conclusion
 
 - Observed-label negative log-likelihood is 1-hot cross-entropy; soft targets define a different weighting.
 - Expected cross-entropy equals target entropy plus KL divergence from target to model.
@@ -180,7 +186,7 @@ For example, a short sequence with 10 evaluated tokens and a long sequence with 
 
 Continue from [MLE](/blog/maximum-likelihood-estimation/) and [MAP](/blog/map-estimation-and-priors/) to [generalization](/blog/generalization-and-regularization/) and then [pretraining and adaptation](/blog/pretraining-finetuning-rlhf/).
 
-## Sources
+### Sources
 
 - [Dive into Deep Learning: Softmax Regression](https://d2l.ai/chapter_linear-classification/softmax-regression.html), cross-entropy, information theory, and softmax gradients.
 - [Dive into Deep Learning: Language Models](https://d2l.ai/chapter_recurrent-neural-networks/language-model.html), autoregressive likelihood and perplexity.
