@@ -3,8 +3,8 @@ import { SITE_TITLE, GITHUB_URL, LINKEDIN_URL } from '../consts';
 import HeaderLink from './HeaderLink.astro';
 ---
 
-<header>
-	<nav>
+<header data-site-header>
+	<nav aria-label="Main navigation">
 		<h2><a href="/">{SITE_TITLE}</a></h2>
 		<div class="internal-links">
 			<HeaderLink href="/">Home</HeaderLink>
@@ -51,6 +51,12 @@ import HeaderLink from './HeaderLink.astro';
 </header>
 <script is:inline>
 	(function () {
+		var header = document.querySelector('[data-site-header]');
+		if (header) {
+			var updateHeight = function () { document.documentElement.style.setProperty('--header-height', header.getBoundingClientRect().height + 'px'); };
+			new ResizeObserver(updateHeight).observe(header);
+			updateHeight();
+		}
 		var min = 17, max = 25, def = 21;
 		function cur() { return parseInt(localStorage.getItem('baseFont') || def, 10); }
 		function apply(v) {
@@ -66,13 +72,18 @@ import HeaderLink from './HeaderLink.astro';
 <style>
 	header {
 		margin: 0;
-		padding: 0 1em;
+		padding: 0 24px;
+		position: sticky;
+		top: 0;
+		z-index: 30;
+		border-bottom: 1px solid rgb(var(--gray-light));
+		font-size: 16px;
 		background: var(--bg);
 		box-shadow: 0 2px 8px rgba(var(--black), 5%);
 	}
 	h2 {
 		margin: 0;
-		font-size: 1em;
+		font-size: 18px;
 	}
 
 	h2 a,
@@ -83,10 +94,15 @@ import HeaderLink from './HeaderLink.astro';
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 20px;
+		min-height: 64px;
+		max-width: 1400px;
+		margin: auto;
 	}
 	nav a {
-		padding: 1em 0.5em;
-		color: var(--black);
+		padding: 18px 10px;
+		white-space: nowrap;
+		color: rgb(var(--black));
 		border-bottom: 4px solid transparent;
 		text-decoration: none;
 	}
@@ -94,6 +110,10 @@ import HeaderLink from './HeaderLink.astro';
 		text-decoration: none;
 		border-bottom-color: var(--accent);
 	}
+	.internal-links { display: flex; align-items: center; min-width: 0; }
+	h2 { flex-shrink: 0; }
+	h2 a { padding: 0; border: 0; }
+	nav a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 	.font-controls {
 		display: flex;
 		gap: 0.4em;
@@ -119,7 +139,14 @@ import HeaderLink from './HeaderLink.astro';
 		display: flex;
 		align-items: center;
 	}
-	@media (max-width: 650px) { nav { flex-wrap: wrap; } .internal-links { display: flex; flex-wrap: wrap; } nav a { padding: .65em .35em; font-size: .85em; } }
+	@media (max-width: 760px) {
+        header { padding: 0 16px; }
+        nav { flex-wrap: wrap; gap: 0 12px; padding-top: 12px; }
+        h2 { font-size: 17px; }
+        .font-controls { margin: 0 0 0 auto; }
+        .internal-links { order: 3; flex: 0 0 100%; overflow-x: auto; scrollbar-width: thin; }
+        .internal-links a { padding: 12px 10px; font-size: 15px; }
+    }
 	@media (max-width: 900px) {
 		.social-links {
 			display: none;

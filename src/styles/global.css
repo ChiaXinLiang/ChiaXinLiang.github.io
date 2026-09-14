@@ -5,6 +5,7 @@
  */
 
 :root {
+	--header-height: 65px;
 	--accent: #5b7c46;
 	--accent-2: #b06a4e;
 	--accent-dark: #3f5a2f;
@@ -158,3 +159,5 @@ hr {
 	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
 }
+
+html { scroll-padding-top: calc(var(--header-height, 65px) + 20px); }
