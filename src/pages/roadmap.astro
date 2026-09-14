@@ -32,13 +32,14 @@ const stages = [
 ].map(stage => ({...stage, steps: stage.ids.map(id => steps.findIndex(s => s.id === id)).filter(i => i >= 0)})).filter(stage => stage.steps.length);
 ---
 <!doctype html><html lang="en"><head><BaseHead title="Learning Roadmap" description="An interactive learning map through published AI infrastructure articles." /></head><body><Header /><main>
-<h1>Learning roadmap</h1><p>Work through the stages from top to bottom. Steps in the same stage are independent — start with either. Select a step to see its articles; steps marked <span class="legend-chip">background</span> are recommended reading before it.</p>
+<h1>Learning roadmap</h1><p>Work through the stages from top to bottom. Steps in the same stage are independent — start with either. Select a step to see how it connects: dashed arrows come from recommended background, solid arrows point to what you can learn next.</p>
 <section class="roadmap" aria-label="Interactive learning roadmap">
 <div class="controls"><label for="learning-path">Your learning goal</label><select id="learning-path"><option value="all">Explore everything</option><option value="models">I want to understand how LLMs work</option><option value="infra">I want to train & serve models at scale</option><option value="hardware">I want to go deep on GPUs & chips</option></select></div>
 <p class="path-order" aria-live="polite"></p>
 <div class="map">
+<svg class="arrows" aria-hidden="true"></svg>
 {stages.map(stage=><section class="stage"><h3>{stage.title}</h3><p class="stage-hint">{stage.hint}</p><div class="stage-nodes">
-{stage.steps.map(i=>{const step=steps[i];return <button type="button" class="node" data-step={step.id} aria-pressed="false" aria-controls="step-detail"><span class="step-number">{i+1}</span><strong>{step.name}</strong><span class="badge" aria-hidden="true">background</span><span class="tags">{step.tag} · {step.level}</span><span class="node-count">{step.articles.length} articles</span></button>;})}
+{stage.steps.map(i=>{const step=steps[i];return <button type="button" class="node" data-step={step.id} aria-pressed="false" aria-controls="step-detail"><span class="step-number">{i+1}</span><strong>{step.name}</strong><span class="tags">{step.tag} · {step.level}</span><span class="node-count">{step.articles.length} articles</span></button>;})}
 </div></section>)}
 </div>
 <section id="step-detail" class="detail" aria-label="Selected learning step"><h2>Choose a step</h2><p>Select a node above to explore the reading sequence.</p></section>
@@ -52,24 +53,45 @@ function initRoadmap(){
  type Step={id:string;name:string;level:string;goal:string;before:string[];articles:{id:string;title:string;href:string}[]};
  const {steps,paths}=JSON.parse(root.querySelector('.roadmap-data')!.textContent!) as {steps:Step[];paths:Record<string,string[]>};
  const select=root.querySelector<HTMLSelectElement>('#learning-path')!;const detail=root.querySelector<HTMLElement>('#step-detail')!;let selected=steps[0].id;
+ const hash=decodeURIComponent(location.hash.slice(1));if(steps.some(s=>s.id===hash))selected=hash;
  const link=(title:string,href:string)=>{const a=document.createElement('a');a.textContent=title;a.href=href;return a;};
+ const svg=root.querySelector<SVGSVGElement>('.arrows')!;const map=root.querySelector<HTMLElement>('.map')!;
+ function drawArrows(){
+  const m=map.getBoundingClientRect();if(!m.width)return;
+  svg.setAttribute('viewBox',`0 0 ${m.width} ${m.height}`);
+  const route=paths[select.value];const sel=steps.find(s=>s.id===selected)!;
+  const rect=(id:string)=>{const r=root!.querySelector(`[data-step="${id}"]`)!.getBoundingClientRect();return{l:r.left-m.left,t:r.top-m.top,r:r.right-m.left,b:r.bottom-m.top,cx:r.left-m.left+r.width/2,cy:r.top-m.top+r.height/2};};
+  type R=ReturnType<typeof rect>;
+  const curve=(a:R,b:R)=>{
+   if(b.t>=a.b){const my=(a.b+b.t)/2;return `M${a.cx} ${a.b}C${a.cx} ${my} ${b.cx} ${my} ${b.cx} ${b.t-4}`;}
+   if(a.t>=b.b){const my=(a.t+b.b)/2;return `M${a.cx} ${a.t}C${a.cx} ${my} ${b.cx} ${my} ${b.cx} ${b.b+4}`;}
+   if(b.l>a.r){const mx=(a.r+b.l)/2;return `M${a.r} ${a.cy}C${mx} ${a.cy} ${mx} ${b.cy} ${b.l-4} ${b.cy}`;}
+   const mx=(b.r+a.l)/2;return `M${a.l} ${a.cy}C${mx} ${a.cy} ${mx} ${b.cy} ${b.r+4} ${b.cy}`;
+  };
+  const selRect=rect(sel.id);const segs:string[]=[];
+  for(const id of sel.before)if(route.includes(id))segs.push(`<path class="arrow-in" d="${curve(rect(id),selRect)}"/>`);
+  for(const s of steps)if(s.before.includes(sel.id)&&route.includes(s.id))segs.push(`<path class="arrow-out" d="${curve(selRect,rect(s.id))}"/>`);
+  svg.innerHTML=`<defs><marker id="rm-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="currentColor"/></marker></defs>${segs.join('')}`;
+ }
  function update(){
   const route=paths[select.value];
   root!.querySelector('.path-order')!.textContent=select.value==='all'?'':'Suggested order (other steps are dimmed): '+route.map(id=>steps.find(s=>s.id===id)!.name).join(' → ');
   const sel=steps.find(s=>s.id===selected)!;
-  for(const step of steps){const node=root!.querySelector<HTMLButtonElement>(`[data-step="${step.id}"]`)!;node.classList.toggle('off-path',!route.includes(step.id));node.classList.toggle('prereq',sel.before.includes(step.id));node.setAttribute('aria-pressed',String(step.id===selected));}
+  for(const step of steps){const node=root!.querySelector<HTMLButtonElement>(`[data-step="${step.id}"]`)!;node.classList.toggle('off-path',!route.includes(step.id));node.classList.toggle('prereq',sel.before.includes(step.id));node.classList.toggle('next',step.before.includes(sel.id));node.setAttribute('aria-pressed',String(step.id===selected));}
+  requestAnimationFrame(drawArrows);
  }
+ window.addEventListener('resize',()=>requestAnimationFrame(drawArrows));
  function render(){
   const step=steps.find(s=>s.id===selected)!;detail.replaceChildren();const h=document.createElement('h2');h.textContent=step.name;detail.append(h);const goal=document.createElement('p');goal.textContent=step.goal;detail.append(goal);
   if(step.before.length){const p=document.createElement('p');p.append('Useful background: ');step.before.forEach((id,i)=>{const prior=steps.find(s=>s.id===id)!;if(i)p.append(' · ');p.append(link(prior.name,`/series/${id}/`));});detail.append(p);}
   detail.append(link('Open this series →',`/series/${step.id}/`));const list=document.createElement('ol');
   step.articles.forEach(article=>{const item=document.createElement('li');item.append(link(article.title,article.href));list.append(item);});detail.append(list);update();
  }
- root.querySelectorAll<HTMLButtonElement>('[data-step]').forEach(node=>node.addEventListener('click',()=>{selected=node.dataset.step!;render();detail.scrollIntoView({behavior:'smooth',block:'nearest'});}));select.addEventListener('change',()=>{selected=paths[select.value][0];render();});
+ root.querySelectorAll<HTMLButtonElement>('[data-step]').forEach(node=>node.addEventListener('click',()=>{selected=node.dataset.step!;history.replaceState(null,'','#'+selected);render();detail.scrollIntoView({behavior:'smooth',block:'nearest'});}));select.addEventListener('change',()=>{selected=paths[select.value][0];render();});
  render();
 }
 initRoadmap();document.addEventListener('astro:page-load',initRoadmap);
 </script>
 <style>
-main{width:900px;max-width:calc(100% - 2rem)}h1{margin-bottom:.5rem}.controls{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}select,button{font:inherit;color:rgb(var(--black));background:var(--bg);border:1px solid rgb(var(--gray-light));border-radius:8px;padding:.6rem;cursor:pointer}select{max-width:100%}.path-order{font-size:.75em;color:rgb(var(--gray))}.map{margin:1.5rem 0}.stage{border-left:3px solid rgba(var(--gray-light),.9);padding:0 0 .25rem 1.1rem;margin:0 0 1.6rem}.stage h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:0 0 .15rem}.stage-hint{font-size:.78rem;color:rgb(var(--gray));margin:0 0 .7rem}.stage-nodes{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem}.node{position:relative;display:flex;flex-direction:column;justify-content:center;text-align:left;min-height:88px;padding:.7rem .7rem .7rem 2.7rem;font-size:.72rem;box-shadow:0 3px 12px rgba(var(--gray-light),.15)}.node strong{font-size:.8rem}.node .badge{display:none;position:absolute;right:.6rem;top:.6rem;font-size:.58rem;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);border:1px dashed var(--accent);border-radius:20px;padding:.1rem .45rem}.node.prereq .badge{display:inline-block}.node.prereq{border:1px dashed var(--accent)}.legend-chip{font-size:.7em;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);border:1px dashed var(--accent);border-radius:20px;padding:.05rem .45rem;white-space:nowrap}.step-number{position:absolute;left:.75rem;top:.7rem;color:var(--accent);font-size:1rem;font-weight:700}.tags{font-size:.6rem;color:rgb(var(--gray));margin:.3rem 0}.node-count{font-size:.65rem;color:var(--accent)}.node[aria-pressed="true"]{border:2px solid var(--accent)}.node.off-path{opacity:.5}.detail{border:1px solid rgb(var(--gray-light));border-radius:12px;padding:1.5rem;margin:1rem 0}.detail h2{font-size:1.4rem}.detail :global(li){margin:.7rem 0;font-size:.85em}.detail :global(ol){padding-left:1.4rem}.reading-list{margin:2rem 0}.reading-list summary{cursor:pointer;color:var(--accent)}.reading-list h2{font-size:1.2rem}.reading-list li{font-size:.85em;margin:.5rem 0}[hidden]{display:none!important}button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:4px}@media(max-width:650px){.stage-nodes{grid-template-columns:1fr}.stage{padding-left:.8rem}.detail{padding:1rem}}
+main{width:900px;max-width:calc(100% - 2rem)}h1{margin-bottom:.5rem}.controls{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}select,button{font:inherit;color:rgb(var(--black));background:var(--bg);border:1px solid rgb(var(--gray-light));border-radius:8px;padding:.6rem;cursor:pointer}select{max-width:100%}.path-order{font-size:.75em;color:rgb(var(--gray))}.map{margin:1.5rem 0;position:relative}.arrows{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;color:var(--accent);z-index:0;overflow:visible}.arrows :global(path){fill:none;stroke:currentColor;stroke-width:2;marker-end:url(#rm-arrow)}.arrows :global(.arrow-in){stroke-dasharray:7 5;opacity:.75}.arrows :global(marker path){stroke:none}.stage{border-left:3px solid rgba(var(--gray-light),.9);padding:0 0 .25rem 1.1rem;margin:0 0 1.6rem}.stage h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:0 0 .15rem}.stage-hint{font-size:.78rem;color:rgb(var(--gray));margin:0 0 .7rem}.stage-nodes{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem}.node{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;text-align:left;min-height:88px;padding:.7rem .7rem .7rem 2.7rem;font-size:.72rem;box-shadow:0 3px 12px rgba(var(--gray-light),.15)}.node strong{font-size:.8rem}.node.prereq{border:1px dashed var(--accent)}.node.next{border:1px solid var(--accent)}.step-number{position:absolute;left:.75rem;top:.7rem;color:var(--accent);font-size:1rem;font-weight:700}.tags{font-size:.6rem;color:rgb(var(--gray));margin:.3rem 0}.node-count{font-size:.65rem;color:var(--accent)}.node[aria-pressed="true"]{border:2px solid var(--accent)}.node.off-path{opacity:.5}.detail{border:1px solid rgb(var(--gray-light));border-radius:12px;padding:1.5rem;margin:1rem 0}.detail h2{font-size:1.4rem}.detail :global(li){margin:.7rem 0;font-size:.85em}.detail :global(ol){padding-left:1.4rem}.reading-list{margin:2rem 0}.reading-list summary{cursor:pointer;color:var(--accent)}.reading-list h2{font-size:1.2rem}.reading-list li{font-size:.85em;margin:.5rem 0}[hidden]{display:none!important}button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:4px}@media(max-width:650px){.stage-nodes{grid-template-columns:1fr}.stage{padding-left:.8rem}.detail{padding:1rem}}
 </style>
