@@ -24,11 +24,11 @@ DeepSeek-R1's primary paper provides a concrete example of reasoning-oriented po
 
 ### 1. Separate structure and behavior
 
-Architecture determines the computation graph: attention, recurrent state, expert functions, residual paths, and representations. Learned weights determine the functions within that graph. Inference policy determines how outputs are sampled, constrained, or searched.
+Architecture determines the computation graph: attention, recurrent state, expert functions, residual paths, and representations. Learned weights then determine the functions within that graph, and the inference policy determines how outputs are sampled, constrained, or searched, so 3 independent choices sit behind any reasoning result.
 
-A model can improve reasoning benchmarks through changed weights and training while keeping the same basic network structure. Another system can improve final answers by sampling several candidates and selecting among them without changing weights. Both improvements require evidence about their actual mechanism.
+A model can improve reasoning benchmarks through changed weights and training while keeping the same basic network structure, and another system can improve final answers by sampling several candidates and selecting among them without changing weights, so both of these 2 routes require evidence about their actual mechanism.
 
-Record the base checkpoint, post-training method, and inference budget separately. This gives an architecture comparison a clear boundary and prevents a quality difference caused by additional inference work from being attributed automatically to an attention design.
+Record the 3 ingredients separately: base checkpoint, post-training method, and inference budget. This gives an architecture comparison a clear boundary and prevents a quality difference caused by additional inference work from being attributed automatically to an attention design.
 
 ### 2. Derive supervised post-training
 
@@ -40,24 +40,24 @@ $$
 \mathcal L_{\mathrm{SFT}}(\theta)=-\sum_{t}\log p_\theta(y_t\mid x,y_{<t}).
 $$
 
-The examples determine which behavior receives training signal. Long solution demonstrations can teach formatting and problem-solving patterns, but copying their distribution does not establish correct reasoning on every new task.
+The examples determine which behavior receives training signal, so long solution demonstrations can teach 2 things, formatting and problem-solving patterns, but copying their distribution does not establish correct reasoning on every new task.
 
-Data quality, task coverage, and leakage controls matter. A benchmark overlap can create apparent competence without the intended generalization. Report evaluation separation and use independently verified answers when possible.
+3 things matter here: data quality, task coverage, and leakage controls, because a benchmark overlap can create apparent competence without the intended generalization, so report evaluation separation and use independently verified answers when possible.
 
 The R1 paper distinguishes its cold-start examples from the reinforcement-learning-only R1-Zero experiment. Preserve that distinction rather than describing the complete released pipeline as containing no supervised training.
 
 ### 3. Introduce reward optimization
 
-Reinforcement learning optimizes behavior using a reward signal for sampled outputs. A conceptual objective combines expected reward with a penalty for departing too far from a reference policy:
+Reinforcement learning optimizes behavior using a reward signal for sampled outputs. A conceptual objective combines 2 terms, expected reward and a penalty for departing too far from a reference policy:
 
 $$
 J(\theta)=\mathbb E_{y\sim p_\theta(\cdot\mid x)}[R(x,y)]
 -\beta D_{KL}(p_\theta\|p_{\mathrm{ref}}).
 $$
 
-This equation illustrates the tradeoff and is not the complete GRPO implementation. Actual objectives use sampling, importance ratios, clipping, and defined reward normalization. Their details affect optimization behavior.
+This equation illustrates the tradeoff and is not the complete GRPO implementation, because actual objectives add 4 further pieces, sampling, importance ratios, clipping, and defined reward normalization, whose details affect optimization behavior.
 
-A reward can assess final-answer correctness, format compliance, or other properties. A programmatically verifiable task provides another kind of evidence from an open-ended preference judgment. Neither reward type is automatically reliable outside its defined domain.
+A reward can assess final-answer correctness, format compliance, or other properties. A programmatically verifiable task provides another kind of evidence from an open-ended preference judgment. Neither of these 2 reward types is automatically reliable outside its defined domain.
 
 ### 4. Explain group-relative advantages
 
@@ -69,13 +69,13 @@ $$
 A_i=\frac{r_i-\overline r}{\operatorname{std}(r_1,\ldots,r_G)+\epsilon}.
 $$
 
-The expression explains relative comparison. The paper specifies the full optimization objective and its choices. Adding epsilon here illustrates numerical handling rather than claiming this exact formula is a release setting.
+The expression explains relative comparison. The R1 paper specifies the full optimization objective and its choices. Adding epsilon here illustrates numerical handling rather than claiming this exact formula is a release setting.
 
-If every sample receives the same reward, the group provides no relative ranking under this statistic. Reward diversity and task difficulty therefore affect the available learning signal. Larger groups cost more sampling work and do not automatically solve a poorly designed reward.
+If every sample receives the same reward, the advantage numerator is 0 for every member and the group provides no relative ranking under this statistic, so reward diversity and task difficulty determine the available learning signal, and larger groups cost more sampling work without automatically solving a poorly designed reward.
 
 ### 5. Separate outcome and process supervision
 
-Outcome supervision evaluates the final result. Process supervision evaluates intermediate steps or another structured account of progress. A correct final answer can arise through an unreliable path, while a plausible-looking sequence can still end incorrectly.
+The 2 kinds of supervision differ: outcome supervision evaluates the final result, while process supervision evaluates intermediate steps or another structured account of progress. A correct final answer can arise through an unreliable path, while a plausible-looking sequence can still end incorrectly.
 
 A verifier for intermediate work needs a clear validity contract. It should not reward verbosity or superficial formatting as a substitute for correctness. For mathematical or programming tasks, independently checking equations or executing supported tests can provide useful evidence.
 
@@ -83,7 +83,7 @@ The model's generated explanation is an output artifact, not a guaranteed faithf
 
 ### 6. Understand inference-time computation
 
-Additional inference work can take several forms: longer generated solutions, multiple independently sampled candidates, verifier-guided selection, or a structured search policy. These methods consume different resources and expose different parallelism.
+Additional inference work can take at least 4 forms: longer generated solutions, multiple independently sampled candidates, verifier-guided selection, or a structured search policy. These methods consume different resources and expose different parallelism.
 
 Let a request use a base cost C_0, generate m candidates of lengths n_i, and spend verification cost V. A simple accounting model is:
 
@@ -91,7 +91,7 @@ $$
 C\approx C_0+\sum_{i=1}^{m}n_i c_i+V.
 $$
 
-The per-token costs depend on context, batching, and backend. Parallel candidates can reduce wall-clock time relative to serial generation while consuming more total resources. Report both duration and work rather than treating them as the same budget.
+The per-token costs depend on context, batching, and backend. Parallel candidates can reduce wall-clock time relative to serial generation while consuming more total resources, so report both of those 2 budgets, duration and work, rather than treating them as one.
 
 ### 7. Work through multiple attempts
 
@@ -103,15 +103,15 @@ $$
 
 For an illustrative p of 0.2 and 4 attempts, the probability is about 0.59. This is not a model benchmark. It depends on independence and perfect selection, both of which can fail in practice.
 
-Candidates from one model can share errors, and a verifier can select an incorrect answer even when a correct candidate exists. The oracle expression is therefore an optimistic reference, not the expected deployed accuracy. Measure correlation and selection quality under the actual policy.
+Candidates from one model can share errors, and a verifier can select an incorrect answer even when a correct candidate exists, so a number like that 0.59 is an optimistic reference rather than the expected deployed accuracy: measure correlation and selection quality under the actual policy.
 
 ### 8. Distinguish pass-at-k and selected accuracy
 
-A pass-at-k-style metric asks whether a candidate set contains a correct result under its defined evaluation procedure. Selected accuracy asks whether the system's chosen result is correct. These answer different questions.
+A pass-at-k-style metric asks whether a candidate set contains a correct result under its defined evaluation procedure. Selected accuracy asks whether the system's chosen result is correct. These 2 metrics answer different questions.
 
 A deployment needs a real selector or verifier, not an evaluation oracle. Report its cost and errors. If a benchmark uses hidden tests to identify a successful candidate, that test access should not be silently treated as available to a production application.
 
-Also match token and candidate budgets across comparisons. A model given more attempts can show a higher set-success metric without being better on a single attempt. Budget-aware evaluation makes the improvement assessable.
+Also match the 2 budgets, tokens and candidates, across comparisons. A model given more attempts can show a higher set-success metric without being better on a single attempt. Budget-aware evaluation makes the improvement assessable.
 
 ### 9. Evaluate reward robustness
 

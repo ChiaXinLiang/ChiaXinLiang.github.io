@@ -87,7 +87,7 @@ Again, none of those values is p99. The calculation shows why a rare long job ca
 
 A reported p99 is an estimated quantile, and the number of observations matters. With 1000 completed requests, only about 10 observations lie in the top 1 percent by rank. A single burst or unusual prompt can change the estimate materially. With 100 requests, a nominal p99 is essentially near the largest observed value under common quantile conventions.
 
-State the sample count, duration, warmup procedure, and quantile convention. Retain raw event times or a histogram with enough resolution in the tail. Averaging the p99 of 10 separate windows does not generally equal the p99 of all requests pooled together. Those answer different questions because quantiles are nonlinear summaries.
+State the sample count, duration, warmup procedure, and quantile convention. Retain raw event times or a histogram with enough resolution in the tail, and remember that averaging the p99 of 10 separate windows does not generally equal the p99 of all requests pooled together: those 2 numbers answer different questions because quantiles are nonlinear summaries.
 
 Stratify and then report the aggregate under the expected workload mixture. A benchmark containing only short prompts cannot support a claim about long-conversation p99. A benchmark that increases the short-request fraction between runs can make the median improve even when every comparable request type stays unchanged.
 
@@ -101,13 +101,13 @@ If 10000 requests have a 1-percent violation rate, that standard error is about 
 
 ### The load generator can hide the problem
 
-A closed-loop client starts its next request after the previous response completes. As the server slows, that client offers less work. The resulting test can show bounded queues and a reassuring latency distribution because the generator automatically backs off. That behavior may match an interactive user population, but it does not represent a fixed external arrival stream.
+A closed-loop client starts its next request after the previous response completes, so as the server slows that client offers less work, and the resulting test can show bounded queues and a reassuring latency distribution because the generator automatically backs off. That behavior may match an interactive user population, but it does not represent a fixed external arrival stream.
 
 An open-loop test schedules arrivals independently of completion. It can expose queue buildup at a specified request rate. Track scheduled arrival time, actual send time, server arrival time, and completion time. If the generator falls behind its own schedule, reporting latency only from actual send time can omit the waiting that the test was supposed to measure.
 
 This issue is often discussed as coordinated omission: the measurement process omits opportunities to observe delays during a stall. Avoid claiming that one load-generation mode is universally correct. Choose the mode that matches the product, then disclose it and preserve offered-load information.
 
-Measure failures, cancellations, rejections, and timeouts. A p99 computed only over successful requests can improve when the slowest requests time out and disappear from the sample. Report success rate and completed goodput within the latency target alongside the successful-request distribution. Rejected or failed work should not become an invisible route to a better dashboard.
+Measure failures, cancellations, rejections, and timeouts. A p99 computed only over successful requests can improve when the slowest requests time out and disappear from the sample, so report success rate and completed goodput within the latency target alongside the successful-request distribution. Rejected or failed work should not become an invisible route to a better dashboard.
 
 ### Locate the tail's source before tuning
 
@@ -115,19 +115,19 @@ Compare queue wait and processing time for tail requests. If queue wait dominate
 
 Examine per-request traces for tail events and also sample normal requests from the same time window. A slow request may have a cache miss, recomputation, network interruption, or host pause absent from its neighbors. Conversely, a shared queue spike can delay every tenant. The comparison tells you whether the remedy belongs to a specific request class or the shared service.
 
-Track KV pressure and active context lengths. The request rate can remain constant while offered GPU work increases because prompts become longer or generations expand. Requests per second is not a complete load metric for language-model serving. Use input tokens, output tokens, active token-state footprint, and phase-specific work where possible.
+Track KV pressure and active context lengths. The request rate can remain constant while offered GPU work increases because prompts become longer or generations expand, which is why requests per second is not a complete load metric for language-model serving: use input tokens, output tokens, active token-state footprint, and phase-specific work where possible.
 
 Check queue placement across replicas. A balanced total arrival rate does not guarantee balanced work when 1 replica receives several expensive requests. Routing by request count can create an overloaded tail replica while another remains lightly loaded. Work-aware routing needs estimates, but even a coarse prompt-length and cache-capacity signal can be more informative than counting requests alone.
 
 ### Remedies have fairness and capacity costs
 
-Add headroom when queueing dominates. A server running close to its effective limit may need more replicas or less admitted work to satisfy p99. Faster kernels help only to the extent that they reduce the dominant service demand. Extra headroom can be more valuable than chasing a small median improvement at saturation.
+Add headroom when queueing dominates. A server running close to its effective limit may need more replicas or less admitted work to satisfy p99, and faster kernels help only to the extent that they reduce the dominant service demand, so extra headroom can be more valuable than chasing a small median improvement at saturation.
 
 Separate request classes when their service demands differ substantially. Long prompts can use a pool or queue designed for their work; interactive short requests can have a latency-oriented path. This reduces interference but can waste capacity if pools are rigid. Share spare capacity where the scheduler permits it and monitor both classes.
 
 Priority scheduling can improve interactive tails while delaying bulk work. Shortest-job policies can reduce mean waiting under suitable assumptions, but job lengths are estimates and large jobs can starve. Use aging, explicit service targets, and honest accounting for lower-priority delays. An improved high-priority p99 is not an all-user improvement if another class becomes unusable.
 
-Admission control bounds the queue and returns a timely overload signal. It protects accepted-request latency but reduces acceptance rate. The decision must be visible in the product and the benchmark. Pair it with retry behavior that avoids synchronized retry storms; otherwise rejecting work simply transforms 1 queue into a later arrival burst.
+Admission control bounds the queue and returns a timely overload signal, which protects accepted-request latency but reduces acceptance rate, so the decision must be visible in both the product and the benchmark. Pair it with retry behavior that avoids synchronized retry storms; otherwise rejecting work simply transforms 1 queue into a later arrival burst.
 
 
 *Original diagnostic summary; investigate the listed mechanisms with controlled measurements.*

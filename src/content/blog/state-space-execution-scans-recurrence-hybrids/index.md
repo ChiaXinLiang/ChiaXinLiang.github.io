@@ -16,9 +16,9 @@ heroImage: './section-overview.png'
 
 ![Concept overview: Efficient State-Space Execution: Scans, Recurrence, and Hybrids](./section-overview.png)
 
-A recurrence appears sequential because each state depends on the previous one. For an affine state update, however, the transition functions can be composed associatively. A parallel scan can organize that composition over a whole sequence, while incremental inference still updates one state at a time.
+A recurrence appears sequential because each state depends on the previous one, but for an affine state update the transition functions can be composed associatively, so a parallel scan can organize that composition over a whole sequence while incremental inference still updates 1 state at a time.
 
-This article derives the composition law and connects it to selective state-space execution, chunking, and hybrid architectures. The algebra explains available parallelism, but actual efficiency depends on structured matrices, memory traffic, kernel support, and workload. It is not a benchmark claim that every scan automatically beats attention.
+This article derives the composition law and connects it to selective state-space execution, chunking, and hybrid architectures. The algebra explains available parallelism, but actual efficiency depends on 4 further things: structured matrices, memory traffic, kernel support, and workload. It is not a benchmark claim that every scan automatically beats attention.
 
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
@@ -29,15 +29,15 @@ This article derives the composition law and connects it to selective state-spac
 
 ![Deep-dive illustration: Define the affine update](./deep-dive.png)
 
-Write one sequence transition as a matrix A_k and an input-dependent offset b_k. The state can be a vector or a structured collection of values under the architecture's representation.
+Write one sequence transition as a matrix A_k and an input-dependent offset b_k. The state can take either of 2 shapes: a vector, or a structured collection of values under the architecture's representation.
 
 $$
 h_k=A_kh_{k-1}+b_k.
 $$
 
-A_k and b_k can vary by token while remaining fixed for the purpose of evaluating a given forward sequence. Their dependence on input does not prevent composition of the resulting affine functions.
+The 2 coefficients A_k and b_k can vary by token while remaining fixed for the purpose of evaluating a given forward sequence. Their dependence on input does not prevent composition of the resulting affine functions.
 
-The important distinction is whether the coefficients themselves require an unavailable previous state. The scan argument considered here assumes they can be formed under the model's supported interface before or during the organized computation. Arbitrary nonlinear recurrent functions do not inherit this simple affine composition law.
+The important distinction is whether the coefficients themselves require an unavailable previous state, since the scan argument considered here assumes they can be formed under the model's supported interface before or during the organized computation, and arbitrary nonlinear recurrent functions do not inherit this simple affine composition law.
 
 ### 2. Compose two transitions
 
@@ -49,7 +49,7 @@ $$
 
 Represent a transition by the pair (A,b). Composition in temporal order therefore produces the pair (A_2A_1, A_2b_1+b_2).
 
-Order matters because matrix multiplication need not commute. A parallel algorithm can regroup composition but cannot arbitrarily reorder tokens. This distinction prevents a common implementation mistake: associativity permits a tree of operations, while commutativity would permit swapping them. The recurrence needs only the first property.
+Order matters because matrix multiplication need not commute. A parallel algorithm can regroup composition but cannot arbitrarily reorder tokens. This distinction prevents a common implementation mistake: associativity permits a tree of operations, while commutativity would permit swapping them. The recurrence needs only the first of those 2 properties.
 
 ### 3. Verify associativity
 
@@ -69,11 +69,11 @@ Take a first scalar transition with multiplier 0.5 and offset 1, followed by a s
 
 Starting from state 4, direct recurrence produces 3 after the first transition and 2.75 after the second. Applying the composed pair gives 0.125 times 4 plus 2.25, also 2.75.
 
-The example verifies temporal order and offset propagation. Reversing the pair order generally changes the result. These small known values are more useful for detecting composition mistakes than an unexplained large random test, though neither establishes learned-model quality.
+The example verifies temporal order and offset propagation. Reversing the pair order generally changes the result. These small known values, such as the 2.75 that both routes produce, are more useful for detecting composition mistakes than an unexplained large random test, though neither establishes learned-model quality.
 
 ### 5. Explain parallel prefix scan
 
-A scan computes every prefix of an associative operation. A tree can combine neighboring transition pairs, then distribute prefix information to recover states across the sequence.
+A scan computes every prefix of an associative operation. A tree can combine neighboring transitions 2 at a time, then distribute prefix information to recover states across the sequence.
 
 For L items, appropriate parallel scan algorithms can have logarithmic dependency depth while keeping total work proportional to L under a constant-cost associative operation.
 
@@ -81,29 +81,29 @@ $$
 \text{work}=O(L),\qquad \text{parallel depth}=O(\log L).
 $$
 
-These bounds exclude the cost of each pair composition. General dense matrix multiplication is expensive, so the structure of A matters. A theoretical logarithmic dependency depth does not imply low wall time or efficient GPU occupancy for every state representation and sequence length.
+These bounds exclude the cost of each pair composition, and general dense matrix multiplication is expensive, so the structure of A matters: a theoretical logarithmic dependency depth does not imply low wall time or efficient GPU occupancy for every state representation and sequence length.
 
 ### 6. Use structured transitions
 
-Diagonal transitions replace matrix products with elementwise multiplication, and the offset update uses compatible elementwise operations. Other structured forms can offer their own efficient composition paths.
+Diagonal transitions replace matrix products with elementwise multiplication, 1 multiply per state channel, and the offset update uses compatible elementwise operations. Other structured forms can offer their own efficient composition paths.
 
-This is why state-space parameterization and execution algorithm must be discussed together. A generic dense n-by-n transition can require much more work and storage than a diagonal or constrained representation.
+State-space parameterization and execution algorithm are 2 halves of the same question and must be discussed together. A generic dense n-by-n transition can require much more work and storage than a diagonal or constrained representation.
 
-Inspect the actual tensor dimensions: batch, channels, state width, sequence, and parameter sharing. A scalar composition example explains the law, but implementation must preserve those axes. Broadcasting mistakes can silently turn an intended selective recurrence into a different mapping with the same output shape.
+Inspect the 4 actual tensor axes, batch, channels, state width, and sequence, along with parameter sharing. A scalar composition example explains the law, but implementation must preserve those axes. Broadcasting mistakes can silently turn an intended selective recurrence into a different mapping with the same output shape.
 
 ### 7. Connect selectivity to execution
 
 ![Deep dive: 7. Connect selectivity to execution](./deep-dive-component-01.png)
 
-Mamba makes parameters including discretization step, input mapping, and readout depend on the input under its selective state-space design. That changes a fixed time-invariant mapping into a time-varying one.
+The selective state-space design in Mamba makes parameters including discretization step, input mapping, and readout depend on the input. That changes a fixed time-invariant mapping into a time-varying one.
 
-A single fixed convolution kernel no longer represents the whole sequence in the same way as an LTI system. The architecture instead uses a hardware-conscious selective scan path.
+1 fixed convolution kernel no longer represents the whole sequence in the same way as an LTI system. The architecture instead uses a hardware-conscious selective scan path.
 
-The mathematical recurrence and its optimized evaluation are complementary innovations. Content-dependent coefficients address information selection, while execution organization addresses memory and parallelism. Discuss both rather than treating input dependence alone as a guarantee of efficiency or presenting a generic scan as the complete original algorithm.
+The mathematical recurrence and its optimized evaluation are 2 complementary innovations. Content-dependent coefficients address information selection, while execution organization addresses memory and parallelism. Discuss both rather than treating input dependence alone as a guarantee of efficiency or presenting a generic scan as the complete original algorithm.
 
 ### 8. Understand memory traffic in a naive scan
 
-Materializing expanded state at every token can create a tensor proportional to sequence length times channel count times state dimension. Reading and writing it can overwhelm the benefit of parallel arithmetic.
+Materializing expanded state at every token can create a tensor proportional to the product of 3 axes: sequence length, channel count, and state dimension. Reading and writing it can overwhelm the benefit of parallel arithmetic.
 
 $$
 M_{\mathrm{expanded}}\propto BLDNp.
@@ -111,23 +111,23 @@ $$
 
 Here B is batch, L sequence length, D channels, N state width, and p bytes per value under this illustrative layout. Actual sharing and implementations can change the tensor structure.
 
-Mamba's hardware-aware execution emphasizes organizing computation and memory so that large intermediate state is not unnecessarily moved through device memory. Inspect which values are materialized, retained, or recomputed. Operation counts alone cannot establish the cost of a selective state-space layer.
+The hardware-aware execution in Mamba emphasizes organizing computation and memory so that large intermediate state is not unnecessarily moved through device memory. Inspect which values are materialized, retained, or recomputed. Operation counts alone cannot establish the cost of a selective state-space layer.
 
 ### 9. Explain chunked execution
 
 ![Deep dive: 9. Explain chunked execution](./deep-dive-component-05.png)
 
-Chunking divides a long sequence into blocks. Each block can compute local prefix information, and block summaries can compose across boundaries. The initial state passed into a chunk must include all preceding effects.
+Chunking divides a long sequence into blocks, where each block computes local prefix information and block summaries compose across boundaries, so the initial state passed into chunk 2 must already include everything chunk 1 produced.
 
-This can balance local parallelism, memory footprint, and kernel scheduling. Chunk length affects temporary work, synchronization, and utilization, so it is an execution parameter rather than a semantic change when implemented correctly.
+This can balance 3 pressures: local parallelism, memory footprint, and kernel scheduling. Chunk length affects temporary work, synchronization, and utilization, so it is an execution parameter rather than a semantic change when implemented correctly.
 
-Verify a two-chunk computation against uninterrupted recurrence with nonzero initial state. Also test a partial final chunk. The exact output should agree within the chosen numerical tolerance under the same coefficients and readout. A reset at each boundary would define a different model.
+Verify a 2-chunk computation against uninterrupted recurrence with nonzero initial state. Also test a partial final chunk. The exact output should agree within the chosen numerical tolerance under the same coefficients and readout. A reset at each boundary would define a different model.
 
 ### 10. Distinguish whole-sequence training from decoding
 
-Whole-sequence processing has many known inputs and can exploit prefix parallelism. Autoregressive decoding receives one newly generated token at a time and usually updates the retained state incrementally.
+Whole-sequence processing has many known inputs and can exploit prefix parallelism. Autoregressive decoding receives 1 newly generated token at a time and usually updates the retained state incrementally.
 
-The recurrent state can remain bounded by architecture dimensions rather than context length. However, weights, temporary work, and any hybrid attention cache remain separate memory terms.
+The recurrent state can remain bounded by architecture dimensions rather than context length. However, weights, temporary work, and any hybrid attention cache remain 3 separate memory terms.
 
 Measure prefill and decode under their actual shapes. A fast full-sequence scan does not automatically establish one-token latency, and bounded state does not establish equivalent long-context retrieval quality. The execution and information tradeoffs need separate evidence.
 
@@ -159,7 +159,7 @@ $$
 
 The attention term can still grow with context, even if many layers use bounded recurrence. Report the layer schedule, state dimensions, attention heads, cache precision, and context envelope.
 
-Hybrids can balance information access and cost, but their existence does not establish a universal best ratio. Evaluate actual task behavior and backend execution. A model family label is insufficient to determine whether its serving memory is entirely independent of sequence length.
+Hybrids can balance information access and cost, but their existence does not establish a universal best ratio, so evaluate actual task behavior and backend execution: a model family label is insufficient to determine whether its serving memory is entirely independent of sequence length.
 
 ### 14. Inspect numerical regrouping
 

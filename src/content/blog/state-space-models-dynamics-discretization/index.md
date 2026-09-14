@@ -16,7 +16,7 @@ heroImage: './section-overview.png'
 
 ![Concept overview: State-Space Models: Dynamics, Discretization, and Stability](./section-overview.png)
 
-State-space models summarize an input sequence through an evolving state. Their mathematical foundation comes from dynamical systems: an input drives a hidden state, and a readout produces an output. Discretization connects continuous dynamics to token-by-token computation, while structure determines whether the model can also be evaluated efficiently over a whole sequence.
+State-space models summarize an input sequence through an evolving state, and their mathematical foundation comes from dynamical systems, where an input drives a hidden state and a readout produces an output, so discretization connects continuous dynamics to token-by-token computation while structure determines whether the model can also be evaluated efficiently over a whole sequence.
 
 This article derives the basic dynamics, discrete transitions, stability, and convolution relationship. It then explains what changes when parameters depend on input. The examples are illustrative foundations for understanding sequence architectures, not benchmark evidence that one architecture universally outperforms attention.
 
@@ -29,13 +29,13 @@ This article derives the basic dynamics, discrete transitions, stability, and co
 
 ![Deep-dive illustration: Define continuous linear dynamics](./deep-dive.png)
 
-Let u(t) be an input signal, h(t) an n-dimensional state, and y(t) an output. A continuous linear state-space system uses matrices A, B, and C to define evolution and readout.
+Let u(t) be an input signal, h(t) an n-dimensional state, and y(t) an output. A continuous linear state-space system uses 3 matrices A, B, and C to define evolution and readout.
 
 $$
 \frac{dh(t)}{dt}=Ah(t)+Bu(t),\qquad y(t)=Ch(t).
 $$
 
-A governs how existing state evolves, B maps input into state, and C reads state into output. Some systems also include a direct input-to-output term; the simplified equations omit it to isolate the recurrence.
+A governs how existing state evolves, B maps input into state, and C reads state into output. Some systems also include a direct input-to-output term, which would be a 4th matrix, but the simplified equations omit it to isolate the recurrence.
 
 A sequence model places these dynamics inside a learned architecture with projections, nonlinearities, and other components. The linear system is an important mechanism, but it is not a complete language model by itself.
 
@@ -49,7 +49,7 @@ $$
 
 The matrix exponential carries the previous state forward. The integral accumulates input effects over the interval, weighted by subsequent state dynamics.
 
-This expression shows why discretization requires an input assumption. A token sequence does not directly specify a continuous function between samples. A zero-order hold or another rule provides that missing interface. The resulting discrete coefficients depend on that rule and the step size.
+This expression shows why discretization requires an input assumption. A token sequence does not directly specify a continuous function between samples: it supplies 1 value per token and nothing in between, so a zero-order hold or another rule provides that missing interface. The resulting discrete coefficients depend on that rule and the step size.
 
 ### 3. Derive zero-order-hold discretization
 
@@ -61,7 +61,7 @@ $$
 
 The integral expression remains valid when A is singular. A formula using A inverse is only appropriate under its additional invertibility assumptions and numerical handling.
 
-The recurrence maps a sampled input into a new state. Indexing conventions can place the sample at another interval boundary, so define them consistently before translating the formula into code. Discretization is a numerical interface, not merely replacing derivatives with token indices.
+The recurrence maps a sampled input into a new state. Indexing conventions can place the sample at the other interval boundary, shifting the index by 1, so define them consistently before translating the formula into code. Discretization is a numerical interface, not merely replacing derivatives with token indices.
 
 ### 4. Work through a scalar decay
 
@@ -69,7 +69,7 @@ Consider dh/dt equal to negative 2h plus u, with interval length 0.5 and constan
 
 The input multiplier is the integral of exp of negative 2tau over the interval, approximately 0.3161. Starting from state 0 and input 1 gives a new state of approximately 0.3161.
 
-These values show how continuous decay and input accumulation combine. Using the transition exponential but replacing the input integral with an arbitrary coefficient would define a different discrete system. The example is a known scalar calculation, not evidence of a learned sequence model's quality or runtime.
+These values, 0.3679 for the transition and 0.3161 for the input, show how continuous decay and input accumulation combine, because using the transition exponential while replacing the input integral with an arbitrary coefficient would define a different discrete system: the example is a known scalar calculation, not evidence of a learned sequence model's quality or runtime.
 
 ### 5. Compare a forward-Euler approximation
 
@@ -103,9 +103,9 @@ $$
 \rho(\bar A)<1\quad\Longrightarrow\quad\bar A^k h_0\to0.
 $$
 
-This condition concerns fixed finite-dimensional linear dynamics. It does not imply that every learned nonlinear architecture using a similar component is globally stable under arbitrary inputs.
+The spectral-radius-below-1 condition concerns fixed finite-dimensional linear dynamics. It does not imply that every learned nonlinear architecture using a similar component is globally stable under arbitrary inputs.
 
-Non-normal matrices can also exhibit transient growth even when eigenvalues lie inside the unit circle. Inspect conditioning and numerical behavior when long recurrences matter. An eigenvalue plot is useful theory, but it should not be mistaken for a complete finite-precision robustness test.
+Non-normal matrices can also exhibit transient growth even when every eigenvalue has magnitude below 1, so inspect conditioning and numerical behavior when long recurrences matter, because an eigenvalue plot is useful theory and should not be mistaken for a complete finite-precision robustness test.
 
 ### 8. Connect decay to memory timescales
 
@@ -117,7 +117,7 @@ $$
 
 The half-life expression applies to the magnitude under its assumptions and excludes a equal to 0 or unit magnitude. It describes decay, not semantic memory accuracy.
 
-Long retention can preserve useful context but also retain irrelevant information. A sequence architecture must decide what to write and read, not only how slowly state decays. This distinction motivates input-dependent selection mechanisms beyond fixed linear dynamics.
+A multiplier near 1 gives long retention, which can preserve useful context but also retain irrelevant information. A sequence architecture must decide what to write and read, not only how slowly state decays. This distinction motivates input-dependent selection mechanisms beyond fixed linear dynamics.
 
 ### 9. Unroll the discrete recurrence
 
@@ -129,7 +129,7 @@ $$
 
 Each coefficient depends only on the lag k minus j. That time-invariant structure creates a convolutional representation with kernel K_l equal to C A_bar to the power l B_bar.
 
-The recurrence and convolution describe the same fixed linear mapping under the initial-state and indexing convention. Their execution differs: recurrence suits incremental state updates, while convolution can expose whole-sequence parallelism. Computing the kernel efficiently is itself an important algorithmic problem.
+The recurrence and convolution describe the same fixed linear mapping under the initial-state and indexing convention, but their 2 execution paths differ, since recurrence suits incremental state updates while convolution can expose whole-sequence parallelism, and computing the kernel efficiently is itself an important algorithmic problem.
 
 ### 10. Understand S4's structured contribution
 
@@ -137,7 +137,7 @@ The recurrence and convolution describe the same fixed linear mapping under the 
 
 S4 develops a structured state-space parameterization and efficient handling of the resulting sequence convolution. The contribution includes mathematical structure that makes large useful state spaces practical, rather than merely noticing that a recurrence can be unrolled.
 
-The paper connects its design to long-range sequence modeling and prior state-space structure. Implementing it requires the exact parameterization and kernel computation, not only a generic dense matrix exponential.
+The S4 paper connects its design to long-range sequence modeling and prior state-space structure. Implementing it requires the exact parameterization and kernel computation, not only a generic dense matrix exponential.
 
 Keep the convolutional training path and recurrent inference path attached to their numerical conventions. Equivalent real-number mappings can produce small finite-precision differences. Validate a small direct recurrence against convolution before measuring a learned complete architecture.
 
@@ -149,7 +149,7 @@ $$
 h_k=\bar A_k h_{k-1}+b_k,\qquad b_k=\bar B_k u_k.
 $$
 
-Mamba introduces input-dependent selection through parameters including step size and input/readout mappings under its architecture. That allows information propagation to respond to content rather than only fixed lag.
+Input-dependent selection in Mamba works through parameters including step size and input/readout mappings under its architecture, which allows information propagation to respond to content rather than only fixed lag.
 
 The fixed convolution identity no longer applies directly because coefficients depend on the sequence. The computational strategy must change accordingly. The next article derives how affine composition supports parallel scans even when a single fixed convolution kernel is unavailable.
 
@@ -157,7 +157,7 @@ The fixed convolution identity no longer applies directly because coefficients d
 
 ![Deep dive: 12. Avoid an overly broad stability claim](./deep-dive-component-05.png)
 
-Time-varying transitions require reasoning about products of matrices rather than powers of one fixed matrix. Individually benign eigenvalues do not automatically prove stability for arbitrary switching among noncommuting transitions.
+Time-varying transitions require reasoning about products of matrices rather than powers of one fixed matrix. Eigenvalues individually below 1 in magnitude do not automatically prove stability for arbitrary switching among noncommuting transitions.
 
 A constrained diagonal or otherwise structured design can support stronger statements under specific parameter bounds. State those assumptions explicitly. Do not borrow a fixed-system spectral-radius argument and apply it unchanged to every selective model.
 

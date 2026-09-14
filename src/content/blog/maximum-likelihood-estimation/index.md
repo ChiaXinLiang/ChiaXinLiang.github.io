@@ -88,7 +88,7 @@ $$
 \hat\theta_{\mathrm{MLE}}=\frac{k}{n}.
 $$
 
-For 7 successes out of 10, the estimate is 0.7. The second derivative is negative when both successes and failures are observed, confirming that this stationary point is a maximum. If all trials succeed, the maximum occurs at the boundary theta equals 1; if all fail, it occurs at 0. The interior derivative calculation alone does not cover those cases.
+For 7 successes out of 10, the estimate is 0.7, and the second derivative is negative when both successes and failures are observed, confirming that this stationary point is a maximum, while if all trials succeed the maximum occurs at the boundary theta equals 1 and if all fail it occurs at 0. The interior derivative calculation alone does not cover those cases.
 
 The estimator looks obvious because the model is simple. Its value is the reasoning: specify a distribution, write the likelihood, transform to a tractable objective, and optimize within the allowed parameter domain. The same workflow remains useful when the parameter vector contains millions of weights.
 
@@ -182,7 +182,7 @@ Nor does maximizing training likelihood guarantee good future performance. A suf
 
 **“Averaging the loss never changes anything.”** It preserves the unregularized minimizer on a fixed sample, but changes gradient scale and the relative strength of a separately added penalty. State whether an equation sums or averages before comparing regularization coefficients.
 
-A useful comparison fits the same observations with a plausible alternative likelihood and evaluates held-out log loss under a consistent observation model. If residuals have strong tails or variance changes with the input, Gaussian squared error may fit the center while misrepresenting uncertainty. Modeling assumptions should be examined empirically alongside optimization convergence.
+A useful comparison fits the same observations with a plausible alternative likelihood and evaluates held-out log loss under a consistent observation model, because if residuals have strong tails or variance changes with the input, Gaussian squared error may fit the center while misrepresenting uncertainty, so examine modeling assumptions empirically alongside optimization convergence.
 
 ## Conclusion
 

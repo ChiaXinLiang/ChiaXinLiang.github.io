@@ -53,7 +53,7 @@ Expectation is not necessarily a possible outcome. A single event never costs 0.
 
 The most probable outcome is success, with cost 0. The expected cost is 0.9. Those answer different questions: what occurs most often, and what average cost the full distribution implies. Choosing an action solely from the most probable outcome can ignore rare but expensive failures. This is why uncertainty becomes useful only when connected to a decision or loss.
 
-A practical classifier may choose the most probable label, while a decision system may minimize expected cost over available actions. If missing a serious failure costs much more than raising a false alarm, the decision threshold can differ from 0.5. The probabilities and the action rule are separate parts of the system.
+A practical classifier may choose the most probable label, while a decision system may minimize expected cost over available actions, so if missing a serious failure costs much more than raising a false alarm the decision threshold can differ from 0.5, which is why the probabilities and the action rule are separate parts of the system.
 
 ### Variance describes spread around the expectation
 
@@ -83,7 +83,7 @@ $$
 
 The vertical bar means “given.” Let A be request failure and B be a high-load interval. P(A given B) may differ from the overall failure probability. The conditioning event changes the population being considered; it does not by itself establish that high load causes failure.
 
-The product rule follows by rearranging this definition: P(A and B) equals P(A given B) times P(B). Repeated application gives the chain rule for a sequence. A language model factorizes the probability of a token sequence into probabilities of each token given the earlier tokens:
+The product rule follows by rearranging this definition, since P(A and B) equals P(A given B) times P(B), and repeated application gives the chain rule for a sequence, which is how a language model factorizes the probability of a token sequence into probabilities of each token given the earlier tokens:
 
 $$
 p(x_1,\ldots,x_T)=\prod_{t=1}^{T}p(x_t\mid x_1,\ldots,x_{t-1}).
@@ -114,7 +114,7 @@ This is a base-rate example, not a claim about a real monitoring system. It show
 
 ![Deep dive: Continuous variables use densities, not point probabilities](./deep-dive-component-02.png)
 
-A latency value is naturally modeled as continuous, at least before measurement rounds it. A probability density f(x) describes how probability accumulates over intervals. The integral of the density over an interval gives its probability, and the integral over the full domain equals 1.
+A latency value is naturally modeled as continuous, at least before measurement rounds it, and a probability density f(x) describes how probability accumulates over intervals, so the integral of the density over an interval gives its probability while the integral over the full domain equals 1.
 
 For a continuous distribution, the probability of exactly 1 real-number value is typically 0. That does not make observations impossible: measurements represent intervals or finite precision. A density value can also exceed 1 because it has units inverse to x. Only integrated probabilities must lie between 0 and 1.
 
@@ -162,7 +162,7 @@ For example, a language model can confidently predict a common continuation that
 
 “Conditioning proves causation.” Failure can be associated with high load because both relate to another factor. Conditional probabilities summarize modeled dependence; causal claims require an appropriate design or additional assumptions.
 
-Before using a probabilistic prediction, state the random variable, its possible values, the conditioning information, and the population represented by the data. Check normalization and distinguish a parameter estimate from an outcome probability. Then identify the decision loss: an accurate probability can support different actions when their costs differ.
+Before using a probabilistic prediction, state the random variable, its possible values, the conditioning information, and the population represented by the data, then check normalization and distinguish a parameter estimate from an outcome probability, and finally identify the decision loss, because an accurate probability can support different actions when their costs differ.
 
 ## Conclusion
 

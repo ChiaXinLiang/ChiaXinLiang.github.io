@@ -26,11 +26,11 @@ This case follows a hypothetical service whose contexts grow from 4096 to 32768 
 
 Conversation length is not the same as the number of visible user messages. The submitted prompt may include system instructions, earlier assistant outputs, tool results, retrieved documents, hidden formatting, and duplicated transcript sections. Tokenize the final serialized request with the model's tokenizer and log that token count without logging private content.
 
-Track how much history is reused across turns. Many stateless chat APIs receive the entire transcript again. A server-side prefix cache may avoid recomputing matching prefix tokens, but the presence of a cache feature does not guarantee a hit. Differences in templates, ordering, tokenization, or content can invalidate the reusable prefix.
+Track how much history is reused across turns. Many stateless chat APIs receive the entire transcript again, and a server-side prefix cache may avoid recomputing matching prefix tokens, but the presence of a cache feature does not guarantee a hit, because differences in templates, ordering, tokenization, or content can invalidate the reusable prefix.
 
 Separate 3 lengths: the serialized prompt length, the reused prefix length, and the active decode context length. A prompt of 16000 tokens with 14000 cached prefix tokens has only 2000 newly computed prompt tokens, yet its decode attention can still need to consult a much longer retained history. Prefix reuse changes prefill work; it does not make all later attention work constant.
 
-Record input and output lengths per turn and per request cohort. Later turns may generate longer answers, use tools more frequently, or arrive at busier times. Compare token intervals at matched active batch sizes before attributing every latency change to context growth. Good observability makes the context hypothesis testable instead of merely intuitive.
+Record input and output lengths per turn and per request cohort. Later turns may generate longer answers, use tools more frequently, or arrive at busier times, so compare token intervals at matched active batch sizes before attributing every latency change to context growth: that observability makes the context hypothesis testable instead of merely intuitive.
 
 
 *Original explanatory schematic based on the standard KV-cache mechanism; context sizes are illustrative.*
@@ -45,7 +45,7 @@ $$
 M_{\mathrm{KV}}=2 L H_{\mathrm{kv}} d s_{\mathrm{kv}}\sum_i C_i.
 $$
 
-The leading 2 accounts for keys and values. Use the KV-head count rather than the query-head count for grouped-query or multi-query attention. Using all query heads in the formula can overestimate the cache by the grouping ratio. Conversely, assuming every model uses grouped-query attention can severely underestimate capacity.
+The leading 2 accounts for keys and values. Use the KV-head count rather than the query-head count for grouped-query or multi-query attention, since putting all query heads into the formula can overestimate the cache by the grouping ratio, while assuming every model uses grouped-query attention can severely underestimate capacity.
 
 This formula covers the raw tensors. A production allocation also includes block rounding, metadata, quantization scales when applicable, allocator overhead, and any implementation-specific cache layout. Reserved workspaces and activations belong in the total GPU memory budget even though they are not KV entries. Distinguish raw size from the serving engine's available block pool: in the budget below, 80 GiB of usable memory leaves 52 GiB for cache.
 
@@ -105,7 +105,7 @@ Plot inter-token latency against retained context at fixed batch size, sweeping 
 
 vLLM documents that insufficient KV capacity can cause requests to be preempted and later recomputed. This avoids simply failing all affected work, but recomputation can worsen end-to-end latency. A conversation that grows from 4096 to 32768 tokens may cross the threshold that turns ordinary attention growth into repeated extra prefill work.
 
-Inspect prefix-cache hit behavior on later turns separately. A low hit rate can explain high first-token latency even when decode intervals match the context model. A high hit rate with slow decode is equally possible. Do not conclude that prefix caching is broken merely because long-chat streaming remains slower.
+Inspect prefix-cache hit behavior on later turns separately. A low hit rate can explain high first-token latency even when decode intervals match the context model, and a high hit rate with slow decode is equally possible, so do not conclude that prefix caching is broken merely because long-chat streaming remains slower.
 
 Also check whether the client resends duplicated history. For example, adding a summary while retaining the complete transcript can increase the prompt instead of reducing it. A serialization test that counts tokens before and after the proposed change is a cheap way to catch that mistake.
 
@@ -113,9 +113,9 @@ Also check whether the client resends duplicated history. For example, adding a 
 
 ![Deep dive: Remedies and what each one changes](./deep-dive-component-02.png)
 
-Bound the context intentionally when the product permits it. A rolling window reduces retained attention history but discards older information. Summarization can preserve selected facts with fewer tokens, yet it can omit details or introduce errors. Evaluate task quality on long conversations, not merely token counts and speed.
+Bound the context intentionally when the product permits it. A rolling window reduces retained attention history but discards older information, while summarization can preserve selected facts with fewer tokens, yet it can omit details or introduce errors, so evaluate task quality on long conversations rather than token counts and speed alone.
 
-Retrieve relevant earlier turns rather than appending every turn. This changes the application contract: the model sees selected evidence instead of a complete transcript. Use citations or source identifiers where the user needs traceability, and evaluate whether important facts are still recovered. Systems optimization cannot assume semantic equivalence after deleting context.
+Retrieve relevant earlier turns rather than appending every turn. This changes the application contract, because the model then sees selected evidence instead of a complete transcript, so use citations or source identifiers where the user needs traceability, evaluate whether important facts are still recovered, and remember that systems optimization cannot assume semantic equivalence after deleting context.
 
 KV quantization reduces stored cache bytes when the engine and model support it. Its effect on speed depends on the attention kernel and conversion overhead, while its quality impact depends on the quantization method and workload. Validate long-context tasks, because short-prompt evaluations may miss the very accuracy loss this change could introduce.
 

@@ -75,7 +75,7 @@ $$
 
 S is the uncached prompt length and K the minimum chunk count. The bound is meaningful only when I_max exceeds d and a is positive. At I_max equal to 50 milliseconds, d equal to 25, and a equal to 0.10 milliseconds per token, the tentative chunk limit is 250 and an 8192-token prompt needs 33 chunks.
 
-Chunking changes the longest admitted execution segment compared with monolithic prefill; it does not remove prompt computation. Fit the mixed-batch duration curve from controlled injections, including cache misses and long attention contexts. Then check both streaming gaps and prompt completion. If the smaller budget makes new arrivals queue indefinitely, its latency benefit is not sustainable. This adds a stability check to the token accounting rather than treating the scheduler flag itself as evidence of a resolved incident.
+Chunking changes the longest admitted execution segment compared with monolithic prefill; it does not remove prompt computation. Fit the mixed-batch duration curve from controlled injections, including cache misses and long attention contexts, then check both streaming gaps and prompt completion. If the smaller budget makes new arrivals queue indefinitely, its latency benefit is not sustainable. This adds a stability check to the token accounting rather than treating the scheduler flag itself as evidence of a resolved incident.
 
 ### Chunk size is a multi-objective decision
 
@@ -89,7 +89,7 @@ For sustained mixed workloads, separate prefill and decode workers may be approp
 
 ### Going deeper: locate the actual critical path
 
-Capture a timeline spanning several pauses. Label request arrivals, scheduling decisions, prefill chunks, decode kernels, CPU scheduling spans, cache allocation events, and delivery flushes. The strongest evidence is repeated alignment: each large streaming gap begins with the same class of event and disappears when that event is controlled.
+Capture a timeline spanning several pauses, and label request arrivals, scheduling decisions, prefill chunks, decode kernels, CPU scheduling spans, cache allocation events, and delivery flushes, because the strongest evidence is repeated alignment: each large streaming gap begins with the same class of event and disappears when that event is controlled.
 
 If the GPU runs a long prefill kernel while every stream waits, the scheduling hypothesis is supported. If the GPU is idle during the gap, inspect the host path: tokenization, Python garbage collection, model-server locks, logging, a metrics scrape, CPU throttling, or memory allocation. Periodic work can cause periodic stalls without any faulty GPU kernel.
 
@@ -101,13 +101,13 @@ A periodic checkpoint, adapter load, or maintenance task can also share the GPU 
 
 ![Deep dive: A controlled diagnosis sequence](./deep-dive-component-02.png)
 
-First run a decode-only workload with fixed prompt lengths and enough active requests to reproduce normal occupancy. If the periodic pauses persist without new prompt admission, long prefill is not sufficient to explain the incident. Keep the trace and pursue host, cache, or delivery effects.
+First run a decode-only workload with fixed prompt lengths and enough active requests to reproduce normal occupancy. If the periodic pauses persist without new prompt admission, long prefill is not sufficient to explain the incident, so keep that trace and pursue host, cache, or delivery effects instead.
 
-Next inject 1 long prompt at a known time while existing streams remain active. Observe whether the gap scales with injected prompt length. Sweep 1024, 4096, and 8192 prompt tokens without changing output limits. A roughly increasing shared stall supports the prefill interference explanation, although nonlinear kernel behavior can change the slope.
+Next inject 1 long prompt at a known time while existing streams remain active, watch whether the gap scales with injected prompt length, and sweep 1024, 4096, and 8192 prompt tokens without changing output limits. A roughly increasing shared stall supports the prefill interference explanation, although nonlinear kernel behavior can change the slope.
 
 Then enable or adjust the engine's supported chunked-prefill settings and repeat exactly the same injection. Compare the largest streaming gap, first-token latency of the injected request, aggregate goodput, and preemption count. A better p50 alone does not demonstrate that the original issue is resolved. The gap that users reported must improve.
 
-Finally repeat with realistic arrival variability. A setting that works for 1 injected prompt may fail when several long prompts arrive together. Include cancellations and disconnects, because unfinished requests should release their resources promptly. Confirm that the test driver actually sends arrivals independently of response completion; a closed-loop driver can mask growing queues.
+Finally repeat with realistic arrival variability. A setting that works for 1 injected prompt may fail when several long prompts arrive together, so include cancellations and disconnects, because unfinished requests should release their resources promptly, and confirm that the test driver actually sends arrivals independently of response completion, since a closed-loop driver can mask growing queues.
 
 
 *Original diagnostic summary; investigate the listed mechanisms with controlled measurements.*

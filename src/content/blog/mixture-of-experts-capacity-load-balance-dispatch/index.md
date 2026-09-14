@@ -16,7 +16,7 @@ tags: ["llm-architectures", "ai-infrastructure"]
 
 ![Concept overview: Mixture of Experts 2: Load Balance, Capacity, and Dispatch. Router sends colored tokens into expert queues with visible capacity boundaries.](./section-overview.png)
 
-Sparse expert routing defines which functions a token uses. The runtime must turn those choices into efficient batches without losing token identity or changing the combining rule. Uneven assignments, bounded buffers, small expert groups, and network exchanges make that transformation a substantial infrastructure problem.
+Sparse expert routing defines which functions a token uses. The runtime must turn those choices into efficient batches inside each Transformer layer without losing token identity or changing the combining rule. Uneven assignments, bounded buffers, small expert groups, and network exchanges make that transformation a substantial infrastructure problem.
 
 This article separates training-time balancing from runtime capacity and dispatch. The Switch Transformer paper provides a primary example of a balancing objective and capacity-constrained routing. Modern implementations can use different policies, including dropless execution. Their semantics must be read explicitly rather than inferred from the shared label MoE.
 
@@ -41,7 +41,7 @@ A token selecting several experts appears in several groups and later receives s
 
 ![Deep dive: 2. Separate frequency and probability mass](./deep-dive-component-04.png)
 
-Assignment frequency measures actual selected pairs. Router probability mass measures scoring preferences before or under the selection normalization. The populations differ, especially when top-k selection and selected-score renormalization are involved.
+Assignment frequency measures actual selected pairs. Router probability mass measures scoring preferences before or under the selection normalization. The populations differ, especially when top-k selection with k greater than 1 and selected-score renormalization are involved.
 
 In the top-one Switch example, define f_e as the fraction of tokens assigned to expert e and P_e as the average router probability for that expert. A representative auxiliary loss from the paper is:
 
@@ -49,9 +49,9 @@ $$
 \mathcal L_{\mathrm{balance}}=\alpha E\sum_e f_eP_e.
 $$
 
-Use the paper's exact definitions for its setup. Generalizing the expression to top-k requires deciding how assignment frequency is normalized and which probabilities are included. Copying the equation while changing those definitions can change its scale and meaning.
+Use the Switch paper's exact definitions for its setup. Generalizing the expression to top-k requires deciding how assignment frequency is normalized and which probabilities are included. Copying the equation while changing those definitions can change its scale and meaning.
 
-The loss encourages useful distribution during training. It is not an atomic runtime allocator and does not prove that every batch fits a chosen expert buffer.
+The Switch balancing loss encourages useful distribution during training. It is not an atomic runtime allocator and does not prove that every batch fits a chosen expert buffer.
 
 ### 3. Derive capacity factor
 
@@ -69,15 +69,15 @@ For N equal to 1,024, k equal to 2, and E equal to 64, average load is 32 assign
 
 ![Deep dive: 4. Define overflow semantics](./deep-dive-component-01.png)
 
-A capacity-constrained implementation must say what happens to assignments exceeding the limit. It might drop a branch, reroute, use another buffer, or execute an additional pass. These choices can change model outputs and system cost.
+A capacity-constrained implementation must say what happens to assignments exceeding the limit, because it might drop a branch, reroute, use another buffer, or execute an additional pass, and those 4 choices can change model outputs and system cost.
 
-If a selected branch is dropped, the remaining weights may or may not be renormalized according to the trained policy. Either choice differs from executing the original full selected mixture. Dropping without disclosure is not merely a memory optimization.
+If 1 of the k selected branches is dropped, the remaining weights may or may not be renormalized according to the trained policy. Either choice differs from executing the original full selected mixture. Dropping without disclosure is not merely a memory optimization.
 
-Dropless implementations preserve all assignments but need flexible storage and execution. They can avoid one semantic compromise while paying different allocation, grouping, or scheduling costs. Compare the actual policy and quality evidence instead of assuming dropless means overhead-free.
+Dropless implementations preserve all assignments but need flexible storage and execution, so they can avoid one semantic compromise while paying 3 other kinds of cost, allocation, grouping, and scheduling, and you should compare the actual policy and quality evidence instead of assuming dropless means overhead-free.
 
 ### 5. Group assignments correctly
 
-Dispatch groups token-expert pairs so each expert receives a contiguous or otherwise efficient batch. A permutation maps original assignments into grouped storage. The runtime must preserve token identity, expert identity, and combine weight through that mapping.
+Dispatch groups token-expert pairs so each expert receives a contiguous or otherwise efficient batch, and a permutation maps original assignments into grouped storage, through which the runtime must preserve 3 things: token identity, expert identity, and combine weight.
 
 $$
 \pi:(t,e)\mapsto\mathrm{dispatchSlot},\qquad
@@ -90,7 +90,7 @@ Use unique token and expert patterns in a tiny test. Verify every expected pair 
 
 ### 6. Account for padding and small groups
 
-A padded expert batch can reserve more slots than are logically used. Matrix kernels may still perform work on padded rows unless the implementation avoids it. Logical active work and issued work therefore differ.
+A padded expert batch can reserve more slots than are logically used, 40 of them for an average load of 32 in the example above. Matrix kernels may still perform work on padded rows unless the implementation avoids it. Logical active work and issued work therefore differ.
 
 Dropless grouping can reduce padding but create irregular expert batch sizes. Very small groups may use matrix hardware poorly or incur disproportionate launch overhead. Grouped GEMM and fusion can help, depending on backend support and shapes.
 
@@ -102,7 +102,7 @@ Expert parallelism places complete experts on different devices. A token's activ
 
 A simplified logical dispatch volume scales with remote assignment count times activation width times element size. Return traffic adds its own width and representation. Packing metadata and collective implementation contribute further costs.
 
-All-to-all-style exchange is common, but hierarchical, fused, or specialized strategies can change the physical traffic and synchronization pattern. Use the actual topology and implementation when estimating performance. Model expert count alone cannot determine network bytes.
+All-to-all-style exchange is common, but hierarchical, fused, or specialized strategies can change the physical traffic and synchronization pattern. Use the actual topology and implementation, Megatron's dispatcher for example, when estimating performance. Model expert count alone cannot determine network bytes.
 
 ### 8. Balance work rather than only counts
 
@@ -114,13 +114,13 @@ $$
 I=\frac{\max_en_e}{kN/E}.
 $$
 
-It is a useful diagnostic but not a complete scheduler objective. A low value can coexist with poor expert kernel efficiency or expensive remote placement. A high value can be tolerable if the overloaded expert has more capacity or another bottleneck dominates.
+It is a useful diagnostic but not a complete scheduler objective, since a low value can coexist with poor expert kernel efficiency or expensive remote placement, while a high value can be tolerable if the overloaded expert has more capacity or another bottleneck dominates.
 
-Training-time bias adjustments or balancing losses can influence distribution, but runtime scheduling still needs capacity and ownership rules. Keep model selection quality and system workload balance as separate measured properties.
+Training-time bias adjustments or balancing losses such as the Switch objective can influence distribution, but runtime scheduling still needs capacity and ownership rules. Keep model selection quality and system workload balance as separate measured properties.
 
 ### 9. Explain overlap with dependencies
 
-Dispatch must finish enough data movement before an expert reads its inputs. Expert output must be published before the combine step reads it. A buffer can be reused only after every relevant consumer finishes.
+Dispatch must finish enough data movement before an expert reads its inputs. Expert output must be published before the combine step reads it. A buffer can be reused only after every relevant consumer finishes, which gives 3 ordering constraints.
 
 $$
 \mathrm{dispatchComplete}\prec\mathrm{expertRead},\qquad
@@ -144,17 +144,17 @@ Report phase-specific throughput and latency with real or clearly defined routin
 
 ![Deep dive: 11. Test boundary and overflow cases](./deep-dive-component-03.png)
 
-Exercise zero assignments, empty experts, one overloaded expert, nonmultiple group sizes, and supported capacity limits. Verify the declared overflow behavior rather than only checking that no memory error occurs.
+Exercise 5 boundary cases: zero assignments, empty experts, one overloaded expert, nonmultiple group sizes, and supported capacity limits. Verify the declared overflow behavior rather than only checking that no memory error occurs.
 
 Test top-k assignments from the same token, selected weights, shared branches, and any distributed return mapping. Distinct outputs by expert make omitted or duplicated branches visible. Compare with an explicit reference mixture.
 
-For gradients, ensure dispatch and inverse mapping preserve association through backward as well as forward. The gradient of a correctly calculated expert output still belongs to its original token and parameter population. Forward agreement on a trivial batch does not establish backward correctness.
+For gradients, ensure dispatch and inverse mapping preserve association through backward as well as forward, because the gradient of a correctly calculated expert output still belongs to its original token and parameter population, and forward agreement on a trivial batch does not establish backward correctness.
 
 ### 12. Read implementation evidence
 
 Megatron's documented token-dispatcher interfaces expose dispatch and return behavior, while the original Switch paper explains a particular training and capacity design. Use each source for its stated scope. Neither defines every modern MoE runtime.
 
-Record backend version, placement, capacity policy, numerical representation, and process topology. A performance regression can originate in router distribution, packing, communication, padding, or expert kernels. Component measurements help locate it.
+Record backend version, placement, capacity policy, numerical representation, and process topology. A performance regression can originate in any of 5 places: router distribution, packing, communication, padding, or expert kernels. Component measurements help locate it.
 
 No GPU benchmark was performed for this article. The equations are accounting and correctness models. Deployment evidence requires actual execution with the intended model and workload.
 
@@ -164,17 +164,17 @@ Take 3 tokens selecting 2 experts each. There are 6 assignments, not 3. Group th
 
 If 1 expert receives 4 assignments and another receives 2, a capacity of 3 cannot hold the first group without a declared overflow path. Padding both groups to 4 creates 8 slots while retaining 6 logical assignments. These distinctions explain how logical work, reserved capacity, and issued matrix rows can diverge.
 
-The batch trace provides a practical review tool. Count pairs, inspect group boundaries, follow the inverse mapping, and verify each weighted contribution. Once those invariants are established, optimize communication and kernels under measured distributions. Efficient MoE infrastructure preserves the sparse equation while making its irregular assignments manageable.
+The 6-assignment batch trace provides a practical review tool. Count pairs, inspect group boundaries, follow the inverse mapping, and verify each weighted contribution. Once those invariants are established, optimize communication and kernels under measured distributions. Efficient MoE infrastructure preserves the sparse equation while making its irregular assignments manageable.
 
 ### 14. Relate skew to the completion tail
 
 ![Deep dive: 14. Relate skew to the completion tail](./deep-dive-component-02.png)
 
-A distributed expert phase often waits for the slowest required group or communication participant. The mean expert load therefore understates the tail when one group is much larger than the others. Under a simplified equal-cost model, the maximum group size is a more relevant indicator of that phase's completion than the average alone.
+A distributed expert phase often waits for the slowest required group or communication participant, so the mean expert load understates the tail when one group is much larger than the others, and under a simplified equal-cost model the maximum group size, 4 in the trace above, is a more relevant indicator of that phase's completion than the average alone.
 
 The simplification has limits. Larger groups can achieve better matrix efficiency, while small groups can be dominated by launch overhead. Communication can also delay an otherwise lightly loaded expert. Measure group duration and readiness rather than assuming that time is perfectly proportional to assignment count.
 
-A useful report pairs each group's count with its measured compute time and dispatch completion. If a heavily loaded expert determines the tail, balancing or placement may help. If all expert computation is short beside an exchange delay, optimizing the router's count distribution may have little effect. These patterns point to different interventions.
+A useful report pairs each group's count with its measured compute time and dispatch completion, because if a heavily loaded expert determines the tail then balancing or placement may help, while if all expert computation is short beside an exchange delay then optimizing the router's count distribution may have little effect. These patterns point to different interventions.
 
 Also examine correlation across layers and requests. Repeatedly selecting experts on the same device can create a placement hotspot even if each layer appears reasonably balanced in isolation. Aggregate per-device work and traffic are therefore useful alongside per-expert statistics. Do not optimize one view while ignoring the process topology.
 

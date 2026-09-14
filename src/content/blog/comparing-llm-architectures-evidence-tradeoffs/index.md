@@ -16,7 +16,7 @@ tags: ["llm-architectures", "ai-infrastructure"]
 
 ![Concept overview: Comparing LLM Architectures: Evidence, Tradeoffs, and Missing Disclosures. Several model silhouettes show dense attention cache, compact recurrent state plus attention, and routed experts.](./section-overview.png)
 
-Architecture comparisons often combine incompatible evidence: a total-parameter headline, a provider benchmark, a context limit, and a serving result from another backend. Each can be useful, but they answer different questions. A reliable comparison begins by defining what is being compared and which claims the available sources establish.
+Architecture comparisons often combine 4 kinds of incompatible evidence, a total-parameter headline, a provider benchmark, a context limit, and a serving result from another backend, each of which can be useful even though they answer different questions, so a reliable comparison begins by defining what is being compared and which claims the available sources establish.
 
 This article uses the disclosed gpt-oss, Qwen3.6-35B-A3B, and DeepSeek-V4.1-Flash designs as examples of an evidence method. It does not rank them from unmeasured performance or infer undocumented structures for closed models. The aim is to make tradeoffs and missing information visible enough for an infrastructure decision.
 
@@ -24,15 +24,15 @@ This article uses the disclosed gpt-oss, Qwen3.6-35B-A3B, and DeepSeek-V4.1-Flas
 
 ### 1. Define the object of comparison
 
-Architecture is the structured computation: layer families, projections, state updates, expert routing, and residual paths. A checkpoint supplies trained weights. A backend chooses an execution schedule and numerical representation. An inference policy chooses sampling, search, and other request behavior.
+Architecture is the structured computation, and it has 5 parts: layer families, projections, state updates, expert routing, and residual paths. A checkpoint supplies trained weights. A backend chooses an execution schedule and numerical representation. An inference policy chooses sampling, search, and other request behavior.
 
-A comparison can target any of these objects, but its label should match the evidence. Two checkpoints with different training and inference budgets provide a complete-system comparison. They do not isolate the effect of a head-sharing rule.
+A comparison can target any of these objects, but its label should match the evidence. 2 checkpoints with different training and inference budgets provide a complete-system comparison. They do not isolate the effect of a head-sharing rule.
 
-Record the release identifier and comparison boundary first. This prevents later numbers from silently changing meaning as the discussion moves from quality to memory or latency.
+Record 2 things first: the release identifier and the comparison boundary. This prevents later numbers from silently changing meaning as the discussion moves from quality to memory or latency.
 
 ### 2. Establish a source hierarchy
 
-Released configuration and weight shapes establish dimensions. Reference code establishes operation order and implementation semantics. A primary paper explains methods and controlled experiments. A model card supplies release claims and benchmark provenance.
+Released configuration and weight shapes establish dimensions, the first of 4 source tiers. Reference code establishes operation order and implementation semantics. A primary paper explains methods and controlled experiments. A model card supplies release claims and benchmark provenance.
 
 Marketing summaries can point toward these sources but should not replace them for precise technical claims. A family name is especially weak evidence when later releases revise layer arrangements or state formats.
 
@@ -42,7 +42,7 @@ Retrieval date or source revision makes an analysis reproducible. If a page chan
 
 ![Deep-dive illustration: Compare attention representations](./deep-dive.png)
 
-MHA, MQA, and GQA differ in key-value head sharing. MLA retains a factorized latent and positional side state. Sparse attention restricts eligible positions, and sliding windows bound recent history. These mechanisms address different dimensions of the system.
+MHA, MQA, and GQA differ in key-value head sharing. MLA retains 2 things, a factorized latent and positional side state. Sparse attention restricts eligible positions, and sliding windows bound recent history. These mechanisms address different dimensions of the system.
 
 A simple explicit-cache formula is useful only when its assumptions match the architecture:
 
@@ -62,15 +62,15 @@ $$
 M_{\mathrm{hybrid}}=M_{\mathrm{explicitHistory}}+M_{\mathrm{recurrentState}}+M_{\mathrm{auxiliary}}.
 $$
 
-The recurrent term can be bounded with sequence length while explicit history still grows. State precision and auxiliary history matter. A hybrid label alone does not disclose exact runtime allocation.
+The recurrent term from those 30 DeltaNet blocks can be bounded with sequence length while explicit history still grows. State precision and auxiliary history matter. A hybrid label alone does not disclose exact runtime allocation.
 
-A comparison with an explicit-attention model should use actual configurations and workload lengths. Constant recurrent state is an architectural property; useful long-distance retrieval is behavioral evidence requiring evaluation.
+A comparison with an explicit-attention model should use actual configurations and workload lengths. Those are 2 different kinds of claim: constant recurrent state is an architectural property, while useful long-distance retrieval is behavioral evidence requiring evaluation.
 
 ### 5. Compare sparse experts with definitions
 
 ![Deep dive: 5. Compare sparse experts with definitions](./deep-dive-component-04.png)
 
-Total parameters describe learned capacity under a counting convention. Active parameters describe a selected path under another convention. Weight residency follows assigned storage and representation, while arithmetic follows selected functions and other active components.
+Total parameters describe learned capacity under 1 counting convention, and active parameters describe a selected path under another. Weight residency follows assigned storage and representation, while arithmetic follows selected functions and other active components.
 
 A representative decomposition is:
 
@@ -104,27 +104,27 @@ $$
 
 The decode term can change as history grows. Batching and concurrency add further dependence. A single total-token throughput hides these distinctions.
 
-Compare prompt-length and output-length distributions explicitly. An input-heavy advantage does not establish the same result for long generation. Time to first token and complete-response duration are separate user-facing quantities.
+Compare prompt-length and output-length distributions explicitly. An input-heavy advantage does not establish the same result for long generation. Time to first token and complete-response duration are 2 separate user-facing quantities.
 
 ### 8. Include multimodal representation costs
 
 A multimodal request can include image or audio encoding and many inserted feature positions beyond text tokens. The processor determines their representation under the release's input contract.
 
-Count preprocessing, encoder execution, connector work, language prefill, and generation within the chosen boundary. Cached modality features can alter the boundary but require compatible source signals and processor versions.
+Count 5 stages within the chosen boundary: preprocessing, encoder execution, connector work, language prefill, and generation. Cached modality features can alter the boundary but require compatible source signals and processor versions.
 
-Do not infer modality capability from a generic family label. Consuming images, consuming audio, and generating those modalities are different claims. Use the release's disclosed interfaces and task evaluations.
+Do not infer modality capability from a generic family label. Consuming images, consuming audio, and generating those modalities are 3 different claims. Use the release's disclosed interfaces and task evaluations.
 
 ### 9. Match quality budgets
 
-Post-training and inference work can materially affect benchmark scores. A reasoning policy sampling several candidates is not directly comparable to a single-attempt policy without identifying the budget and selector.
+Post-training and inference work can materially affect benchmark scores. A reasoning policy sampling several candidates is not directly comparable to a single-attempt policy without identifying 2 things, the budget and the selector.
 
-Report generated tokens, candidate count, verification work, and task controls. A pass-at-k-style success measure can use an evaluation oracle that is unavailable in deployment. Selected-answer accuracy is another metric.
+Report 4 quantities: generated tokens, candidate count, verification work, and task controls. A pass-at-k-style success measure can use an evaluation oracle that is unavailable in deployment. Selected-answer accuracy is another metric.
 
 Training data and evaluation leakage also matter. A quality difference across differently trained checkpoints cannot isolate architecture unless the experiment controls the relevant factors. State that limit without dismissing the system result.
 
 ### 10. Quantify uncertainty
 
-A measured latency distribution and task-success sample have uncertainty. Report sample count and a suitable summary rather than one unusually favorable run. Tail latency can matter more than the mean for interactive workloads.
+A measured latency distribution and task-success sample have uncertainty. Report sample count and a suitable summary rather than 1 unusually favorable run. Tail latency can matter more than the mean for interactive workloads.
 
 For a defined Bernoulli success population, maximum likelihood estimates the rate as observed successes divided by trials. That estimate is conditional on the sampled tasks and policy. Correlated problem variants provide less independent evidence than their raw count suggests.
 
@@ -140,9 +140,9 @@ Likewise, a model's reported ability to run on a device does not reserve arbitra
 
 ### 12. Build a comparison matrix
 
-For each release, record layer families, attention state, expert counts and definitions, multimodal inputs, context policy, numerical representation, training disclosure, and reference implementation. Mark unknown fields as unknown.
+For each release, record 8 fields: layer families, attention state, expert counts and definitions, multimodal inputs, context policy, numerical representation, training disclosure, and reference implementation. Mark unknown fields as unknown.
 
-Then add measured backend evidence in a separate set of columns: device topology, workload, memory, prefill, decode, and quality budget. This keeps architecture facts from blending into one deployment's results.
+Then add measured backend evidence in a separate set of 6 columns: device topology, workload, memory, prefill, decode, and quality budget. This keeps architecture facts from blending into one deployment's results.
 
 A missing field is useful information. It tells the reader which inference would require further disclosure or measurement. Filling it with a plausible family resemblance makes the table look complete while reducing its reliability.
 
@@ -150,9 +150,9 @@ A missing field is useful information. It tells the reader which inference would
 
 ![Deep dive: 13. Test the mechanism behind a claim](./deep-dive-component-01.png)
 
-If a claim concerns smaller cache, calculate state dimensions and compare actual allocation. If it concerns bounded deeper indexing, measure that component across contexts rather than only total latency. If it concerns expert efficiency, inspect group distributions and communication.
+Match the test to the claim in 3 ways: if a claim concerns smaller cache, calculate state dimensions and compare actual allocation; if it concerns bounded deeper indexing, measure that component across contexts rather than only total latency; and if it concerns expert efficiency, inspect group distributions and communication.
 
-Use a semantic reference to establish correctness before comparing speed. A missing branch, wrong mask, or truncated input can produce a fast result while changing the task. Numerical and behavioral contracts should accompany the timing boundary.
+Use a semantic reference to establish correctness before comparing speed. Any of 3 defects, a missing branch, a wrong mask, or a truncated input, can produce a fast result while changing the task. Numerical and behavioral contracts should accompany the timing boundary.
 
 No models were executed or GPU benchmarks performed for this article. Its comparisons describe disclosed mechanisms and an evaluation method, not an independently measured ranking.
 
@@ -160,7 +160,7 @@ No models were executed or GPU benchmarks performed for this article. Its compar
 
 ![Deep dive: 14. Present tradeoffs as operating regions](./deep-dive-component-03.png)
 
-A system can perform well for short prompts and lose at long contexts, or favor input-heavy requests over long generation. Quality can improve with additional inference work while latency rises. These are operating regions rather than permanent architecture winners.
+A system can perform well for short prompts and lose at long contexts, or favor input-heavy requests over long generation, and quality can improve with additional inference work while latency rises, so these are operating regions rather than permanent architecture winners.
 
 A useful visualization plots quality against defined cost or latency across several policies, with memory and workload labels. The reader can then choose a region matching the application rather than copying one maximum-budget headline.
 
@@ -168,25 +168,25 @@ Keep uncertainty visible and identify which quantities were calculated, provider
 
 ### 15. Turn the comparison into an infrastructure decision
 
-Start from the workload's quality requirement, prompt and output distributions, modalities, latency target, and available devices. Eliminate unsupported interfaces, then assess capacity and measured performance under compatible backends.
+Start from 5 inputs: the workload's quality requirement, prompt and output distributions, modalities, latency target, and available devices. Eliminate unsupported interfaces, then assess capacity and measured performance under compatible backends.
 
 Use architecture formulas to predict likely pressure points and design measurements. Use actual results to choose the operating configuration. When a field remains undisclosed, state the uncertainty and test what can be observed rather than inventing an internal structure.
 
-The resulting comparison is stronger because it preserves definitions. Architecture, training, representation, and inference work each contribute to a system. Evidence tied to those contributions supports a practical decision without turning incomplete disclosures into confident claims.
+The resulting comparison is stronger because it preserves definitions: 4 contributors, architecture, training, representation, and inference work, each shape a system, and evidence tied to those contributions supports a practical decision without turning incomplete disclosures into confident claims.
 
 ### 16. Audit an apparently simple comparison
 
 ![Deep dive: 16. Audit an apparently simple comparison](./deep-dive-component-02.png)
 
-Suppose a report says that one model is faster because it has fewer active parameters. Before accepting the explanation, ask whether the timing covers prefill, decode, or the complete request; whether outputs use the same length and quality budget; and whether both backends use comparable numerical representations. A difference in any of these can explain the result without isolating active parameter count.
+Suppose a report says that 1 model is faster because it has fewer active parameters. Before accepting the explanation, ask whether the timing covers prefill, decode, or the complete request; whether outputs use the same length and quality budget; and whether both backends use comparable numerical representations. A difference in any of these can explain the result without isolating active parameter count.
 
 Next inspect the limiting resource. If the slower run spends most time on expert exchange or attention history reads, fewer selected matrix weights may not be the relevant cause. If it spends most time on selected expert arithmetic, active work becomes a more plausible contributor. Profiling connects the architectural hypothesis to execution evidence.
 
 Then check quality and correctness. A faster run truncating visual inputs, dropping overflowing expert assignments, or using a smaller generation budget has changed the workload. That can still be an intentional operating choice, but the report must identify it. The speed comparison should not silently imply equivalent behavior.
 
-Finally preserve the conclusion's scope. A measured advantage on one device and context distribution supports that operating point. It does not prove superiority across every backend, prompt length, or task. Publishing the configuration and measurement method allows readers to reproduce or challenge the result.
+Finally preserve the conclusion's scope. A measured advantage on 1 device and context distribution supports that operating point. It does not prove superiority across every backend, prompt length, or task. Publishing the configuration and measurement method allows readers to reproduce or challenge the result.
 
-This audit turns a headline into a testable chain: disclosed mechanism, predicted resource effect, observed execution, and validated task behavior. Each link can be examined independently. The chain is a useful standard for the entire series because it makes architectural innovation concrete while keeping uncertainty and workload dependence visible.
+This audit turns a headline into a testable chain of 4 links: disclosed mechanism, predicted resource effect, observed execution, and validated task behavior. Each link can be examined independently. The chain is a useful standard for the entire series because it makes architectural innovation concrete while keeping uncertainty and workload dependence visible.
 
 ### 17. Separate compressed preparation from architecture
 

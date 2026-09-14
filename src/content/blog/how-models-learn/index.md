@@ -70,7 +70,7 @@ The earlier phrase “0 means perfect” is a useful first cartoon, but it is no
 
 For a regression example, squared error penalizes the square of the difference between prediction and target. Predicting 3 when the target is 5 gives error 4; predicting 1 gives error 16. Larger mistakes receive disproportionately larger penalties. Under independent Gaussian observation noise with fixed variance, this loss corresponds to maximizing a conditional likelihood.
 
-For classification, cross-entropy penalizes low probability assigned to the observed class. Giving the correct class probability 0.8 incurs about 0.2231 nats of loss, while giving it probability 0.1 incurs about 2.3026. Both predictions could choose the same winning label in a larger class set, yet their probabilistic quality differs.
+For classification, cross-entropy penalizes low probability assigned to the observed class, so giving the correct class probability 0.8 incurs about 0.2231 nats of loss while giving it probability 0.1 incurs about 2.3026, and both predictions could still choose the same winning label in a larger class set even though their probabilistic quality differs.
 
 This connection is developed in [maximum likelihood estimation](/blog/maximum-likelihood-estimation/). Optimization searches for parameters; the statistical objective defines which fitted behavior we are searching for. Backpropagation works with the chosen differentiable objective and does not decide whether the objective matches the task.
 
@@ -128,9 +128,9 @@ This turns “overshooting a valley” into a checked mechanism rather than assu
 
 ![Deep dive: Minibatches trade exactness for useful computation](./deep-dive-component-03.png)
 
-A full gradient over a large dataset can be expensive. Minibatch training averages or sums gradients from a smaller group of examples, then updates the parameters. Repeating with different batches provides a noisy approximation to optimization of the overall objective.
+A full gradient over a large dataset can be expensive, so minibatch training averages or sums gradients from a smaller group of examples and then updates the parameters, and repeating that with different batches provides a noisy approximation to optimization of the overall objective.
 
-Batch size affects more than memory use. Larger batches can improve hardware utilization but provide fewer parameter updates for a fixed number of examples. They change gradient noise and can require different learning-rate schedules. A bigger batch is not automatically better statistical learning even when it improves examples processed per second.
+Batch size affects more than memory use. Larger batches can improve hardware utilization but provide fewer parameter updates for a fixed number of examples, they change gradient noise and can require different learning-rate schedules, and a bigger batch is not automatically better statistical learning even when it improves examples processed per second.
 
 Gradient accumulation computes several smaller microbatches before 1 optimizer step. To match a larger effective batch, scale losses consistently and avoid accidental updates between microbatches. Dropout, batch-dependent normalization, numerical rounding, and optimizer schedules can still make 2 implementations differ.
 

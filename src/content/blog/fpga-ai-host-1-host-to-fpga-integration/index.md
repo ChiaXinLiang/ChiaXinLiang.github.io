@@ -28,7 +28,7 @@ Start after [Synthesize and Implement the Accelerator on an FPGA](/blog/fpga-ai-
 
 The host figure writes input/weights, submits a command, waits for completion and reads output. The software transport model follows this sequence synchronously. A real driver must connect it to the chosen board's bus/API.
 
-Keep the numerical contract independent of transport. The same input matrix should produce the same result through the model and hardware. Transport-specific cache handling and request completion remain explicit.
+Keep the numerical contract independent of transport. The same 2×2 input matrix should produce the same result through the model and hardware. Transport-specific cache handling and request completion remain explicit.
 
 Begin with a fixed fixture before optimizing transfers. If numerical results fail, compare packed bytes and register fields before changing the PE array. A wrong dimension or byte order can mimic arithmetic corruption.
 
@@ -40,7 +40,7 @@ The packing figure uses signed bytes for INT8 and little-endian signed words for
 
 Python struct packing with b preserves the intended signed byte values; decoding with little-endian i restores signed 32-bit results. Endianness and widths belong to the interface contract, not the host's default native settings.
 
-Shapes and strides must match the canonical row-major layout. If hardware uses banked tiles, the packing layer performs that transformation deliberately. Test round-trip packing with negative values and distinct elements.
+Shapes and strides must match the canonical row-major layout. If hardware uses banked tiles, the packing layer performs that transformation deliberately. Test round-trip packing with negative INT8 values and distinct elements.
 
 ### Transfers need completion and coherency
 
@@ -122,7 +122,7 @@ class Accelerator:
 
 ### Retain a reproducible integration boundary
 
-The released project verifies software and RTL simulation. Its FPGA Tcl is a core-only out-of-context implementation exercise, and the host transport is a functional model. A board-ready system additionally needs documented clock/reset, pins, memory and physical host I/O. Select those for a real target and retain their versions before claiming a working board application.
+The released project verifies software and RTL simulation. Its FPGA Tcl is a core-only out-of-context implementation exercise, and the host transport is a functional model, so a board-ready system additionally needs documented clock/reset, pins, memory and physical host I/O, which you select for a real target and whose versions you retain before claiming a working board application.
 
 Bring up the simplest observable path first. Check register or transport access, then a transfer loopback, memory behavior and a small known matrix. Compare raw bytes and wider signed results before running the tiny MLP. If a complete inference fails, intermediate values should identify the first wrong layer rather than leaving arithmetic, packing and clocks mixed together.
 
@@ -144,13 +144,13 @@ The integrated RTL top has another layout boundary: A uses padded row stride 8 a
 
 The host writes all required A/B bytes, completes the transport's required visibility steps, publishes a complete command and starts the operation. The device then snapshots the accepted configuration and consumes ready operands. Writing command metadata into the weight region or asserting start before all operands arrive can create a legal-looking matrix call with the wrong data. Draw metadata and tensor storage as separate objects.
 
-A proposed MMIO or packet interface needs field widths, byte units, alignment, supported dimensions and submission behavior. A functional Python Command object is not a physical packet parser, and the simple RTL top has dimension/start ports rather than address registers. A driver for a new transport must serialize exactly the fields its wrapper implements. Keep a version or schema identifier if the protocol will evolve.
+A proposed MMIO or packet interface needs field widths, byte units, alignment, supported dimensions and submission behavior, while a functional Python Command object is not a physical packet parser, and the simple RTL top has dimension/start ports rather than address registers. A driver for a new transport must serialize exactly the fields its wrapper implements. Keep a version or schema identifier if the protocol will evolve.
 
 Busy handling is also part of submission. The current top ignores additional starts and operand writes while busy. A wrapper may return backpressure or a defined busy response, but it must not report acceptance for work the top discards. The host should wait for the declared accepted/completed state and avoid reusing live buffers. A driver that writes faster than the core can accept is not automatically a higher-throughput system.
 
 #### Consume results only after the declared completion
 
-For the simple top, DONE follows capture of local INT32 outputs. For an external-memory extension, successful output writes and platform visibility may add another completion condition. Host polling must wait for that event, perform required platform-specific acquisition/cache handling, then decode the output. Cache handling after an already completed read cannot retroactively establish correct visibility.
+For the simple top, DONE follows capture of local INT32 outputs. For an external-memory extension, successful output writes and platform visibility may add another completion condition, so host polling must wait for that event, perform required platform-specific acquisition/cache handling, then decode the output. Cache handling after an already completed read cannot retroactively establish correct visibility.
 
 A timeout is a distinct outcome. It says the driver did not observe completion within its interval. It does not prove the device stopped or its memory is safe to overwrite. Define cancellation/reset and outstanding-transfer recovery for the selected wrapper. Keep error status distinguishable from numerical mismatch so a transport failure does not look like a wrong model prediction.
 
@@ -164,7 +164,7 @@ Next implement the optional board transport behind the same high-level operation
 
 Test a second job with different shapes and values. Stale command fields or incompletely overwritten padded storage often remain hidden when every job repeats the same matrix. Include an invalid dimension, misalignment where the exposed interface requires it, and prohibited overlap in the command model. Confirm rejected operations preserve memory and do not produce an ordinary success event.
 
-The architectural lesson is that a host interface is a numerical and lifetime contract, not just a way to move bits. Packing, accepted submission, snapshot, successful output completion and decoding all need evidence. The release provides a verified functional path and a simulated host-loaded core, creating a precise starting point for a board driver while keeping physical transport unperformed.
+The architectural lesson is that a host interface is a numerical and lifetime contract, not just a way to move bits, so packing, accepted submission, snapshot, successful output completion and decoding all need evidence, and the release provides a verified functional path and a simulated host-loaded core, creating a precise starting point for a board driver while keeping physical transport unperformed.
 
 #### Extend the next boundary
 

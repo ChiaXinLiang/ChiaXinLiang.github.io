@@ -30,7 +30,7 @@ The network figure defines a tiny supported graph: 4 inputs, a 4×4 dense layer,
 
 Use the released input [[1,2,-1,3]] and fixed weights in test_small_mlp. The first layer's integer sums are [6,1,6,6]. ReLU and division by 2 with ties-away rounding produce hidden values [3,1,3,3]. The second layer produces [5,4], with argmax index 0.
 
-These small distinct values let you check every product. A larger random network is useful later but makes the first debugging step harder. Only implemented operators belong in the supported graph.
+These 4 small distinct values let you check every product. A larger random network is useful later but makes the first debugging step harder. Only implemented operators belong in the supported graph.
 
 ### Retain scales across layer boundaries
 
@@ -40,7 +40,7 @@ The scale figure connects one layer's stored output to the next layer's input co
 
 Record each layer's input, weight, accumulator and output scale. Bias must use compatible accumulator units. If output quantization changes, the next layer's interpretation must change consistently. Merely copying INT8 bytes does not preserve their real meaning across arbitrary scales.
 
-Compare a bit-accurate integer reference before evaluating model quality. Circuit equivalence and predictive accuracy are separate checks. A quantized network can be implemented perfectly yet be a poor approximation of its original trained model.
+Compare a bit-accurate integer reference, such as the hidden [3,1,3,3] above, before evaluating model quality. Circuit equivalence and predictive accuracy are separate checks. A quantized network can be implemented perfectly yet be a poor approximation of its original trained model.
 
 ### Compare intermediate activations
 
@@ -58,7 +58,7 @@ For hardware integration, preserve the same fixtures and collect each layer's ou
 
 The batching figure maps independent input examples to rows of A while reusing B weights. Each output row remains an independent example. Batch size changes scheduling and reuse, not the neural-network function.
 
-A larger batch can amortize loading but increases resident activations and complete job time. Request latency includes time waiting for the batch. Report batch throughput separately from one example's completion latency.
+A larger batch, beyond the 4-row local tile, can amortize loading but increases resident activations and complete job time. Request latency includes time waiting for the batch. Report batch throughput separately from one example's completion latency.
 
 The project's useful outcome is a fully checkable small inference graph and a path to tile-level RTL execution. Do not label software-model runtime as FPGA performance. A board benchmark needs its own transport, bitstream and measured timing boundary.
 
@@ -85,7 +85,7 @@ def mlp(x,w1,w2):
 
 ### Retain a reproducible integration boundary
 
-The released project verifies software and RTL simulation. Its FPGA Tcl is a core-only out-of-context implementation exercise, and the host transport is a functional model. A board-ready system additionally needs documented clock/reset, pins, memory and physical host I/O. Select those for a real target and retain their versions before claiming a working board application.
+The released project verifies software and RTL simulation. Its FPGA Tcl is a core-only out-of-context implementation exercise, and the host transport is a functional model, so a board-ready system additionally needs documented clock/reset, pins, memory and physical host I/O, which you select for a real target and whose versions you retain before claiming a working board application.
 
 Bring up the simplest observable path first. Check register or transport access, then a transfer loopback, memory behavior and a small known matrix. Compare raw bytes and wider signed results before running the tiny MLP. If a complete inference fails, intermediate values should identify the first wrong layer rather than leaving arithmetic, packing and clocks mixed together.
 
@@ -123,11 +123,11 @@ Finish the complete reduction before activation and conversion. If larger K is c
 
 For this feed-forward model, independent input rows share weights and are processed without row-to-row dependence. Stacking rows into a matrix can therefore expose weight reuse and more array work. Compare a batched result with the stack of separately computed row results. This equality checks shape/layout and independence; it should be exact under the same integer operator, not a vague tolerance selected after failure.
 
-Batching changes the schedule and resource demand. It does not automatically improve single-request latency, especially when requests wait to form a batch. A larger batch can exceed the 4-row local tile and require software tiling or additional commands. Retain logical batch dimensions while mapping to physical tiles, and store only valid row/column outputs at boundaries.
+Batching changes the schedule and resource demand. It does not automatically improve single-request latency, especially when requests wait to form a batch, and a larger batch can exceed the 4-row local tile and require software tiling or additional commands, so retain logical batch dimensions while mapping to physical tiles and store only valid row/column outputs at boundaries.
 
 The functional model comparison verifies those numerical rows, not a measured serving throughput. A future performance experiment should separate batching wait, host transfer, compute and result retrieval. It also needs a task-quality dataset if the goal is evaluating model usefulness. The small deterministic MLP fixture supplies neither a commercial benchmark nor trained accuracy evidence.
 
-The chapter connects local operator correctness into a complete numerical application. Its strength is inspectable shapes, intermediate values and explicit scale/ordering rules. Readers can reproduce the software inference now, use the verified tile core as a building block, and know which physical transport and epilogue implementation steps remain before reporting an FPGA application.
+The chapter connects local operator correctness into a complete numerical application, and its strength is inspectable shapes, intermediate values and explicit scale/ordering rules, so readers can reproduce the software inference now, use the verified tile core as a building block, and know which physical transport and epilogue implementation steps remain before reporting an FPGA application.
 
 #### Extend the next boundary
 

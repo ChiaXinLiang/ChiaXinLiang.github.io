@@ -34,15 +34,15 @@ $$
 
 This simple check matters because applying a conventional attention-cache formula to all 40 layers would misclassify the recurrent state. Conversely, treating the entire model as constant-state recurrence would omit the 10 explicit-attention layers.
 
-The ordering also matters for behavior. Attention blocks appear at particular depths among recurrent blocks rather than as a separate preprocessing stage. Their outputs influence subsequent recurrent and expert computation through the language model's residual structure.
+The ordering also matters for behavior, because the 10 Gated Attention blocks appear at particular depths among the recurrent blocks rather than as a separate preprocessing stage, and their outputs influence the recurrent and expert computation that follows through the language model's residual structure.
 
 ### 2. Read recurrent heads separately
 
 The Gated DeltaNet section lists 32 value heads, 16 query-key heads, and head dimension 128. Those counts imply grouping or sharing relationships that should be confirmed in the actual implementation. They do not justify assuming 32 independent query-key heads.
 
-A recurrent matrix state's size depends on the actual mapping between key and value heads and on its key and value widths. The hybrid-state article derives a representative outer-product state, but a capacity audit should inspect the exported state tensors and any auxiliary history.
+A recurrent matrix state's size depends on the actual mapping between the 16 query-key heads and the 32 value heads and on its key and value widths, so while the hybrid-state article derives a representative outer-product state, a capacity audit should inspect the exported state tensors and any auxiliary history.
 
-Do not infer the complete recurrent memory requirement from the nominal hidden width. Projected branches can have different aggregate widths, and state precision can differ from ordinary activations. Read each interface and add its allocated representation explicitly.
+Do not infer the complete recurrent memory requirement from the nominal hidden width of 2,048, because projected branches can have different aggregate widths and state precision can differ from ordinary activations: read each interface and add its allocated representation explicitly.
 
 ### 3. Read attention heads independently
 
@@ -53,9 +53,9 @@ H_Qd_h=16\times256=4096,\qquad
 H_{KV}d_h=2\times256=512.
 $$
 
-A learned projection can map between these widths. Dividing hidden width by query count would yield the wrong head dimension for this release. The card explicitly supplies the dimension needed for the resource calculation.
+A learned projection can map between these widths, and dividing hidden width 2,048 by the 16 query heads would yield the wrong head dimension for this release, so use the dimension the card explicitly supplies for the resource calculation.
 
-Rotary dimension is another independent field. Only the specified positional subspace should be interpreted through that mechanism. A configuration reader should not silently apply full-head rotary behavior because another model family does so.
+Rotary dimension 64 is another independent field, so only the specified positional subspace should be interpreted through that mechanism, and a configuration reader should not silently apply full-head rotary behavior because another model family does so.
 
 ### 4. Derive the explicit cache component
 
@@ -67,7 +67,7 @@ $$
 M_A=2B\times10\times n\times2\times256\times s.
 $$
 
-This is conditional accounting, not a statement that every backend allocates exactly this amount. Window policy, quantization, padding, and other implementation details can change retained bytes. The equation makes the assumptions visible.
+This is conditional accounting for the 10 attention layers, not a statement that every backend allocates exactly this amount. Window policy, quantization, padding, and other implementation details can change retained bytes. The equation makes the assumptions visible.
 
 At 2 bytes per element, the term is 20,480 bytes per token for one sequence across those attention layers. Add recurrent state, auxiliary buffers, allocator overhead, and workspace separately. A text-only KV estimate is not the entire multimodal application's memory requirement.
 
@@ -75,7 +75,7 @@ At 2 bytes per element, the term is 20,480 bytes per token for one sequence acro
 
 ![Deep dive: 5. Account for recurrent state](./deep-dive-component-04.png)
 
-A representative recurrent-state estimate uses the product of key and value widths for each actual state head. The published head counts help identify what must be checked, but the precise state layout and sharing determine the multiplier.
+A representative recurrent-state estimate uses the product of key and value widths for each actual state head. The published counts, 32 value heads and 16 query-key heads, help identify what must be checked, but the precise state layout and sharing determine the multiplier.
 
 $$
 M_R=B\sum_{\ell\in\mathcal R}\operatorname{elements}(S_\ell)\,s_\ell.
@@ -83,7 +83,7 @@ $$
 
 This general expression is intentionally safer than inventing a fixed matrix count from incomplete overview information. It can include distinct dtypes by layer. Auxiliary convolution history or other retained tensors must be added if the implementation uses them.
 
-The recurrent term remains independent of processed sequence length under a bounded-state design, while the explicit attention term can grow. Their relative contribution changes with context and batch. Report both rather than one “cache size” that hides the composition.
+The recurrent term remains independent of processed sequence length under a bounded-state design, while the explicit attention term over 10 layers can grow. Their relative contribution changes with context and batch. Report both rather than one “cache size” that hides the composition.
 
 ### 6. Read the expert configuration
 
@@ -95,17 +95,17 @@ The reported 3-billion active figure remains a release claim with its own counti
 
 ### 7. Separate total parameters and device residency
 
-A small active count does not mean only those parameters occupy memory. The entire assigned expert collection may remain resident, distributed, or managed under a supported loading policy. Stored dtype and scale metadata change bytes per parameter.
+A small active count does not mean only those parameters occupy memory. The entire assigned collection of 256 experts may remain resident, distributed, or managed under a supported loading policy. Stored dtype and scale metadata change bytes per parameter.
 
 For a deployment, list weight partitions by device and their representation. Add cache and workspace before deciding what fits. A statement about aggregate total parameters is not the same as a single-device memory estimate.
 
-Expert dispatch can also introduce communication and grouping overhead. Small decode batches may activate many small expert groups, while prefill can provide larger groups. Parameter counts alone do not predict those efficiency differences.
+Expert dispatch can also introduce communication and grouping overhead. With 8 routed experts per token, small decode batches may activate many small expert groups, while prefill can provide larger groups. Parameter counts alone do not predict those efficiency differences.
 
 ### 8. Follow vision representations
 
 ![Deep dive: 8. Follow vision representations](./deep-dive-component-03.png)
 
-The card identifies a causal language model with a vision encoder. Images are converted into representations that enter the language computation under the model's supported input protocol. Their count depends on preprocessing and image shape rather than only on the text tokenizer.
+The card identifies Qwen3.6-35B-A3B as a causal language model with a vision encoder. Images are converted into representations that enter the language computation under the model's supported input protocol. Their count depends on preprocessing and image shape rather than only on the text tokenizer.
 
 A multimodal request therefore needs image preprocessing, encoder work, projected visual embeddings, and language-model state. Include those costs in time to first token when they occur within the request boundary. A cached image representation can change the boundary, but its reuse needs an explicit validity contract.
 
@@ -161,7 +161,7 @@ Variable lengths require a distribution-aware estimate. A short request and a lo
 
 Multimodal requests introduce another distribution. Image representations can contribute many language positions and vision workspace can create a temporary peak. If image encoding is serialized or performed on another device, its capacity boundary differs from a fused single-device path. The capacity sheet should match the actual pipeline.
 
-An informative experiment sweeps concurrency at several context buckets and records peak allocation, time to first token, decode latency, and failure or eviction behavior. The result can reveal whether weight bandwidth, explicit state, recurrent state, or expert communication limits the workload. It also prevents a theoretical cache reduction from being treated as an unconditional increase in useful throughput.
+An informative experiment sweeps concurrency at several context buckets and records peak allocation, time to first token, decode latency, and failure or eviction behavior, which reveals whether weight bandwidth, explicit state, recurrent state, or expert communication limits the workload, and it also prevents a theoretical cache reduction from being treated as an unconditional increase in useful throughput.
 
 Finally preserve a margin for resumption, compilation, and temporary buffers under the deployment's documented behavior. The margin should come from measured variability rather than an unexplained percentage copied from another system. Architecture-aware accounting narrows the uncertainty; actual allocation and scheduling tests establish the practical operating region.
 
