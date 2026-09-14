@@ -89,7 +89,7 @@ $$
 
 With $$h=4$$ and $$p=200$$, reducing $$m$$ from 0.05 to 0.01 changes the modeled average from fourteen cycles to 6. This is not automatically a 2.33× application speedup: a processor can overlap independent misses, and non-memory work remains.
 
-The way to improve locality is to change the reuse distance: how much distinct data you touch before revisiting a line. Blocking a matrix traversal keeps a smaller tile active, so useful lines survive until reuse instead of getting displaced by an entire matrix sweep. Check tile footprint against the relevant cache, including all inputs and outputs. Larger tiles improve reuse only until capacity or associativity pressure introduces new misses. Prefetching addresses predictable latency, while tiling reduces traffic; they solve related but different constraints.
+The way to improve locality is to change the reuse distance, meaning how much distinct data you touch before revisiting a line, and blocking a matrix traversal keeps a smaller tile active so useful lines survive until reuse instead of getting displaced by an entire matrix sweep, provided you check the tile footprint against the relevant cache with all inputs and outputs included, because larger tiles improve reuse only until capacity or associativity pressure introduces new misses. Prefetching addresses predictable latency, while tiling reduces traffic; they solve related but different constraints.
 
 ### A worked example you can feel: traversal order
 
@@ -114,7 +114,7 @@ This is the cheapest performance lesson in all of computing: **the loop order is
 
 A **direct-mapped** cache assigns each memory line exactly 1 slot, computed from its address bits. Lookup is trivial, but 2 hot addresses that map to the same slot evict each other forever, a pathology called **conflict misses**. A **fully associative** cache lets any line live anywhere, which eliminates conflicts but requires comparing against every slot at once. That's too slow and power-hungry at L1 sizes.
 
-Real caches split the difference with **set associativity**. An 8-way set-associative cache divides its slots into sets of 8. An address maps to exactly 1 set but may occupy any of the 8 "ways" within it. Typical modern L1 caches are 8-way; L2 and L3 go wider. When a set is full, a replacement policy, usually an approximation of LRU (least recently used), picks the victim. LRU is temporal locality again, now as an eviction policy: the line you touched longest ago is the 1 least likely to be needed.
+Real caches split the difference with **set associativity**. An 8-way set-associative cache divides its slots into sets of 8. An address maps to exactly 1 set but may occupy any of the 8 "ways" within it, typical modern L1 caches are 8-way while L2 and L3 go wider, and when a set is full a replacement policy, usually an approximation of LRU (least recently used), picks the victim, which is temporal locality again in the form of an eviction policy: the line you touched longest ago is the 1 least likely to be needed.
 
 Stack the levels and you get the actual hierarchy in your laptop: L1 at ~32–48 KB per core answering in ~4 cycles, L2 at ~1–2 MB per core in ~14 cycles, a shared L3 of tens of megabytes in ~40–50 cycles, then DRAM. Each level catches most of what the 1 above missed, so the brutal 200-cycle penalty is paid only by the small residue that misses everywhere.
 

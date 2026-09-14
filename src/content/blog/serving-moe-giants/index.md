@@ -28,9 +28,9 @@ DeepSeek-V3, the open model whose deployment is documented in the most detail, m
 
 Quick structural recap (if prefill/decode or transformer blocks are hazy, start with [how an LLM generates text](/blog/how-an-llm-generates-text/) and [the transformer architecture](/blog/transformer-architecture-in-one-picture/)). A dense transformer layer has attention plus 1 feed-forward network (FFN). An MoE layer replaces that single FFN with many parallel copies, the *experts*, plus a small learned router: for each token, the router scores all experts and sends the token's hidden state to the top-k of them. Classic designs used tiny k: GShard routed each token to its top 2 of up to 2048 experts; Switch Transformer cut that to top 1. Modern fine-grained MoEs go wider and shallower per expert: DeepSeek-V3 has 256 routed experts per MoE layer plus 1 always-on shared expert, and routes each token to 8 of them. Kimi K2 uses 384 experts, again selecting 8.
 
-Do the byte accounting for DeepSeek-V3 and you see where the mass lives. Hidden size is 7,168; each expert's intermediate size is 2,048; an expert is 3 projection matrices (gate, up, down), so 3 × 7,168 × 2,048 ≈ 44M parameters, about 44 MB in FP8. There are 58 MoE layers (the first 3 of 61 are dense), so the routed experts alone hold 58 × 256 × 44 MB ≈ 653 GB. Attention, the dense layers, embeddings, and shared experts account for only the remaining ~18 GB. In other words, roughly 97 percent of the model is expert weight, and any given token ignores nearly all of it.
+Do the byte accounting for DeepSeek-V3 and you see where the mass lives. Hidden size is 7,168; each expert's intermediate size is 2,048; an expert is 3 projection matrices (gate, up, down), so 3 × 7,168 × 2,048 ≈ 44M parameters, about 44 MB in FP8. There are 58 MoE layers (the first 3 of 61 are dense), so the routed experts alone hold 58 × 256 × 44 MB ≈ 653 GB. Attention, the dense layers, embeddings, and shared experts account for only the remaining ~18 GB. So roughly 97 percent of the model is expert weight, and any given token ignores nearly all of it.
 
-That is the promise: train and store a 671B model, pay 37B worth of FLOPs per token. The fine print is that the promise only survives deployment if you can (a) fit the weights, (b) keep every expert's load roughly equal, and (c) move tokens to experts fast enough that the network doesn't eat the FLOPs you saved.
+That is the promise: train and store a 671B model, pay 37B worth of FLOPs per token. The fine print: the promise only survives deployment if you can (a) fit the weights, (b) keep every expert's load roughly equal, and (c) move tokens to experts fast enough that the network doesn't eat the FLOPs you saved.
 
 ### 4 axes, 1 layout
 
@@ -45,7 +45,7 @@ Each parallelism axis answers a different question, and each fails alone.
 **Data parallelism (DP)** clones. 2 replicas serve 2 times the traffic. In modern MoE serving DP shows up *inside* the model too: DeepSeek runs attention data-parallel (each DP rank has its own requests and its own KV cache) while the expert layers below are shared across the whole EP group.
 
 
-The composition rule that falls out of the hardware: TP inside the node where NVLink makes all-reduce cheap, EP across the expert dimension because experts are naturally whole units, PP across nodes where bandwidth is scarce, DP wherever you need more throughput. Not chosen. Composed.
+The composition rule falls out of the hardware: TP inside the node where NVLink makes all-reduce cheap, EP across the expert dimension because experts are naturally whole units, PP across nodes where bandwidth is scarce, DP wherever you need more throughput. Not chosen. Composed.
 
 ### Worked example: fitting 671 GB on 8 vs 16 GPUs
 
@@ -66,7 +66,7 @@ Same model, same GPUs, and the difference between "does not fit," "fits but craw
 
 ![Deep dive: Going deeper: all-to-all and the hot-expert problem](./deep-dive-component-02.png)
 
-Composing the axes buys you fitting and fat GEMMs. It also creates the 2 failure modes that dominate MoE serving in practice.
+Composing the axes buys you fitting and fat GEMMs. It also creates the 2 failure modes that dominate MoE serving.
 
 **The all-to-all is the new bottleneck.** In dense serving, communication means all-reduce: a regular, symmetric pattern that NCCL has optimized for a decade. EP dispatch is different. Which GPU talks to which, and how much, is decided by the router *per token, per layer*. It is sparse, irregular, and latency-critical during decode, where each step moves only a few KB per token but sits on the critical path of every generated token. This is why DeepSeek open-sourced DeepEP, a dedicated all-to-all library: throughput-oriented kernels for prefill that saturate NVLink (~150 GB/s) intranode and RDMA (~40–50 GB/s per GPU) across nodes, and separate low-latency decode kernels that use pure RDMA with device-initiated transfers to keep dispatch in the low hundreds of microseconds even at EP sizes in the hundreds (numbers are DeepSeek's own, measured on H800). The same overlap discipline from [hiding the network](/blog/hide-the-network-overlap-communication/) applies here in sharpened form: DeepSeek runs 2 micro-batches per unit so that 1 micro-batch's attention executes while the other's dispatch/combine is in flight, and DeepEP's hook-based receive path costs 0 SM cycles while data streams in.
 
@@ -84,7 +84,7 @@ For 256 experts, 8 choices, and 128 tokens, the expectation is approximately 251
 
 Touching nearly every expert does not prove every weight crosses HBM each step. Placement, caching, reuse, and kernel grouping determine traffic. Nor does diversity imply balanced load: 1 expert can receive many more tokens than another.
 
-The method is to collect per-expert token counts and per-device completion times. Expert parallelism distributes resident weights; grouped execution reuses an expert's weights across its assigned tokens. Replication can reduce a hot expert's load but spends memory and complicates routing. Compare the slowest shard and exposed communication before and after placement changes. Aggregate active-parameter counts hide precisely the straggler that controls a synchronized step, so a capacity-fitting layout still needs a routing-aware latency evaluation.
+Collect per-expert token counts and per-device completion times. Expert parallelism distributes resident weights; grouped execution reuses an expert's weights across its assigned tokens. Replication can reduce a hot expert's load but spends memory and complicates routing. Compare the slowest shard and exposed communication before and after placement changes. Aggregate active-parameter counts hide the straggler that controls a synchronized step, so a capacity-fitting layout still needs a routing-aware latency evaluation.
 
 ### Common misconceptions
 
@@ -92,7 +92,7 @@ The method is to collect per-expert token counts and per-device completion times
 
 **"Pick the best parallelism for your model."** There is no best 1; the axes solve different problems and the units of a real deployment use different mixes. DeepSeek's own system runs TP4 attention, DP8 or DP80 attention replicas, EP32 or EP320 experts, and pipelines across deployment units, simultaneously. Even the prefill and decode phases of the *same request* run under different compositions, which is half the argument for [prefill/decode disaggregation](/blog/the-prefill-decode-disaggregation-story/).
 
-**"Expert load evens out on average, so ignore it."** Averages are exactly the wrong statistic. Step latency is a max over GPUs, not a mean, so a balanced *average* with per-step spikes still stalls every step that spikes. And the skew is not noise you can wait out: routing distributions shift with workload mix (code vs. chat vs. long documents), which is why EPLB re-derives placements from measured load rather than fixing them at deployment time.
+**"Expert load evens out on average, so ignore it."** Averages are the wrong statistic. Step latency is a max over GPUs, not a mean, so a balanced *average* with per-step spikes still stalls every step that spikes. And the skew is not noise you can wait out: routing distributions shift with workload mix (code vs. chat vs. long documents), which is why EPLB re-derives placements from measured load rather than fixing them at deployment time.
 
 ### The bigger picture
 
@@ -106,11 +106,11 @@ Serving MoE giants is where the themes of this series converge. The memory arith
 
 ### Sources
 
-- DeepSeek-AI, "DeepSeek-V3 Technical Report" — <https://arxiv.org/abs/2412.19437>
-- Kimi Team, "Kimi K2: Open Agentic Intelligence" — <https://arxiv.org/abs/2507.20534>
-- Fedus, Zoph, Shazeer, "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity" — <https://arxiv.org/abs/2101.03961>
-- Lepikhin et al., "GShard: Scaling Giant Models with Conditional Computation and Automatic Sharding" — <https://arxiv.org/abs/2006.16668>
-- DeepEP: an efficient expert-parallel communication library (self-reported benchmarks) — <https://github.com/deepseek-ai/DeepEP>
-- EPLB: Expert Parallelism Load Balancer — <https://github.com/deepseek-ai/EPLB>
+- DeepSeek-AI, "DeepSeek-V3 Technical Report": <https://arxiv.org/abs/2412.19437>
+- Kimi Team, "Kimi K2: Open Agentic Intelligence": <https://arxiv.org/abs/2507.20534>
+- Fedus, Zoph, Shazeer, "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity": <https://arxiv.org/abs/2101.03961>
+- Lepikhin et al., "GShard: Scaling Giant Models with Conditional Computation and Automatic Sharding": <https://arxiv.org/abs/2006.16668>
+- DeepEP: an efficient expert-parallel communication library (self-reported benchmarks): <https://github.com/deepseek-ai/DeepEP>
+- EPLB: Expert Parallelism Load Balancer: <https://github.com/deepseek-ai/EPLB>
 
 *Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

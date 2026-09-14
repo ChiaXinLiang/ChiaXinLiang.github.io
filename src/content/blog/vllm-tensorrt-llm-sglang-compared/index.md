@@ -101,11 +101,11 @@ Practical guidance, then. Shortlist by constraints first: hardware fleet, model 
 
 ### Sources
 
-- Kwon et al., "Efficient Memory Management for Large Language Model Serving with PagedAttention," SOSP 2023 — https://arxiv.org/abs/2309.06180
-- Zheng et al., "SGLang: Efficient Execution of Structured Language Model Programs" — https://arxiv.org/abs/2312.07104
-- Yu et al., "Orca: A Distributed Serving System for Transformer-Based Generative Models," OSDI 2022 — https://www.usenix.org/conference/osdi22/presentation/yu
-- vLLM project — https://github.com/vllm-project/vllm
-- SGLang project — https://github.com/sgl-project/sglang
-- NVIDIA TensorRT-LLM — https://github.com/NVIDIA/TensorRT-LLM
+- Kwon et al., "Efficient Memory Management for Large Language Model Serving with PagedAttention," SOSP 2023: https://arxiv.org/abs/2309.06180
+- Zheng et al., "SGLang: Efficient Execution of Structured Language Model Programs": https://arxiv.org/abs/2312.07104
+- Yu et al., "Orca: A Distributed Serving System for Transformer-Based Generative Models," OSDI 2022: https://www.usenix.org/conference/osdi22/presentation/yu
+- vLLM project: https://github.com/vllm-project/vllm
+- SGLang project: https://github.com/sgl-project/sglang
+- NVIDIA TensorRT-LLM: https://github.com/NVIDIA/TensorRT-LLM
 
 *Part of the [LLM Inference & Serving](/series/llm-serving/) learning path. Browse its published articles by topic.*

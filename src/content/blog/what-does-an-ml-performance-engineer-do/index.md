@@ -37,7 +37,7 @@ Every decision in this job trades between 3 quantities:
 - **Throughput**: how many users can we serve at once?
 - **Cost**: what does each answer cost us?
 
-The cruel part: they fight each other. The single biggest throughput lever is batching (processing many users' requests together). Waiting to assemble a batch can increase latency, and larger batches can increase step time. Faster hardware can improve capacity, but its unit cost depends on achieved useful throughput. Optimize any corner carelessly and the other 2 bite back.
+The cruel part: they fight each other. The single biggest throughput lever is batching (processing many users' requests together), but waiting to assemble a batch can increase latency, larger batches can increase step time, and faster hardware improves capacity at a unit cost that depends on achieved useful throughput. Optimize any corner carelessly and the other 2 bite back.
 
 A performance engineer's actual job description is 1 sentence: *find the point on this triangle that your product needs, and get there with the least hardware possible.*
 
@@ -52,13 +52,13 @@ What does that look like concretely? Across a week, a performance engineer might
 - **Do napkin math** on whether next quarter's model fits on current GPUs, or the company needs to buy more
 
 
-Notice the range: from chip-level memory access patterns to fleet-level capacity planning. That breadth (hardware, systems software, and algorithms in 1 head) is exactly why the role is scarce and well paid.
+Notice the range, from chip-level memory access patterns to fleet-level capacity planning, and that breadth of hardware, systems software, and algorithms in 1 head is exactly why the role is scarce and well paid.
 
 ### Why the money is real
 
 ![Deep dive: Why the money is real](./deep-dive-component-03.png)
 
-The economics are blunt. Inference at scale is priced per token, and every efficiency gain drops straight to the margin. Public benchmarks make the stakes visible: [MLPerf](https://mlcommons.org/benchmarks/inference-datacenter/) publishes results under specified benchmark rules, models, and quality constraints. Those results illustrate achievable performance, but they do not establish a universal 2–3× software speedup over an unspecified baseline.
+The economics are blunt. Inference at scale is priced per token, and every efficiency gain drops straight to the margin. Public benchmarks make the stakes visible: [MLPerf](https://mlcommons.org/benchmarks/inference-datacenter/) publishes results under specified benchmark rules, models, and quality constraints, and those results illustrate achievable performance without establishing a universal 2–3× software speedup over an unspecified baseline.
 
 DeepSeek made the sharpest case in recent memory: constrained to export-compliant GPUs with roughly half the interconnect bandwidth of the H100, their team [engineered around the limitation](https://arxiv.org/abs/2412.19437) with custom communication kernels and pipeline tricks, and reported an efficient training design. Its reported training computation cost is a scoped figure, not the full cost of research, development, data, or deployment.
 
@@ -79,13 +79,13 @@ Over the coming months, this series walks the whole stack in order, the way the 
 
 ![Deep dive: Define the promise before optimizing](./deep-dive-component-01.png)
 
-“Faster” needs a unit and a workload. An interactive assistant might promise that the first token arrives within 2 seconds and subsequent tokens appear smoothly. A document-processing service might instead promise that a nightly queue finishes before morning. Both run inference, but the right configuration can differ because 1 protects individual waiting time while the other concentrates on sustained completion rate.
+“Faster” needs a unit and a workload: an interactive assistant might promise that the first token arrives within 2 seconds and subsequent tokens appear smoothly, while a document-processing service might instead promise that a nightly queue finishes before morning. Both run inference, but the right configuration can differ because 1 protects individual waiting time while the other concentrates on sustained completion rate.
 
-For streaming language models, separate **time to first token**, which includes queueing and prompt processing, from **time per output token**, which describes generation after the first token. Also record the total response time and the input and output lengths. A short answer and a long answer can have identical token generation rates while giving users very different experiences. Measuring only tokens per second hides that distinction.
+For streaming language models, separate **time to first token**, which includes queueing and prompt processing, from **time per output token**, which describes generation after the first token. Also record the total response time and the input and output lengths, because a short answer and a long answer can have identical token generation rates while giving users very different experiences, and measuring only tokens per second hides that distinction.
 
-The quality promise matters too. Some changes, such as removing redundant copies or overlapping independent transfers, can preserve the computation. Others, including quantization and approximate attention, change numerical behavior. Even 2 exact mathematical implementations may produce slightly different floating-point results. The job is therefore to deliver a defined quality level within performance and cost constraints, and to prove that the implementation meets all 3.
+The quality promise matters too. Some changes, such as removing redundant copies or overlapping independent transfers, can preserve the computation, while others, including quantization and approximate attention, change numerical behavior, and even 2 exact mathematical implementations may produce slightly different floating-point results. The job is therefore to deliver a defined quality level within performance and cost constraints, and to prove that the implementation meets all 3.
 
-A useful experiment specification includes the model revision, precision, hardware, engine version, request distribution, concurrency, and service objectives. Without those details, “twice as fast” is difficult to reproduce and may describe a different problem. Keeping the specification small enough to repeat is more valuable than collecting a dashboard full of unexplained numbers.
+A useful experiment specification includes the model revision, precision, hardware, engine version, request distribution, concurrency, and service objectives, because without those details “twice as fast” is difficult to reproduce and may describe a different problem, and keeping the specification small enough to repeat is more valuable than collecting a dashboard full of unexplained numbers.
 
 ### 2 equations that guide the investigation
 
@@ -97,7 +97,7 @@ $$
 T_{\mathrm{operation}} \gtrsim \max\!\left(\frac{F}{C},\frac{D}{B}\right).
 $$
 
-This is an idealized bound, not a timing prediction. It omits launch overhead, dependency stalls, communication, and imperfect resource use. Still, it tells you where extra compute capacity can help. If reading the required bytes takes longer than doing the arithmetic, a faster arithmetic unit alone cannot remove the memory requirement. Changing data reuse or representation may matter more.
+This is an idealized bound, not a timing prediction, and it omits launch overhead, dependency stalls, communication, and imperfect resource use, but it still tells you where extra compute capacity can help. If reading the required bytes takes longer than doing the arithmetic, a faster arithmetic unit alone cannot remove the memory requirement. Changing data reuse or representation may matter more.
 
 For a deliberately simple example, suppose an operation streams 16 GB of weights through a memory system that sustains 2 TB/s. The weight transfer takes at least 8 milliseconds. If its arithmetic needs only 1 millisecond at sustainable compute speed, doubling that compute speed changes the shorter term to half a millisecond while leaving the 8-millisecond bound intact. This is why performance engineers count bytes before celebrating peak FLOPS.
 
@@ -107,25 +107,25 @@ $$
 S = \frac{1}{(1-p)+p/s}.
 $$
 
-If a kernel accounts for 10 percent of request time, making it 2 times as fast improves the request by about 5.3 percent. Even eliminating that kernel entirely cannot improve the original request by more than about 11 percent. A profiler identifies p; the optimization determines s. The equation stops attractive local improvements from being mistaken for large product wins.
+If a kernel accounts for 10 percent of request time, making it 2 times as fast improves the request by about 5.3 percent, and even eliminating that kernel entirely cannot improve the original request by more than about 11 percent. A profiler identifies p; the optimization determines s. The equation stops attractive local improvements from being mistaken for large product wins.
 
-The assumptions deserve attention. Once 1 bottleneck is removed, another can become dominant, and batching or scheduling changes may alter several runtime fractions at once. Use Amdahl's law to estimate a first experiment, then measure the new system rather than repeatedly applying an old profile.
+The assumptions deserve attention, because once 1 bottleneck is removed another can become dominant, and batching or scheduling changes may alter several runtime fractions at once, so use Amdahl's law to estimate a first experiment, then measure the new system rather than repeatedly applying an old profile.
 
 ### Follow 1 request through the stack
 
 ![Deep dive: Follow 1 request through the stack](./deep-dive-component-04.png)
 
-Imagine an assistant becomes slow when traffic rises. Start with the request timeline: admission, queueing, tokenization, host preparation, prompt processing, generation, and delivery. If most of the extra delay appears before GPU work starts, rewriting a GPU kernel is unlikely to fix the cause. Queue length, admission policy, and the request mix become the first places to investigate.
+Imagine an assistant becomes slow when traffic rises. Start with the request timeline: admission, queueing, tokenization, host preparation, prompt processing, generation, and delivery. If most of the extra delay appears before GPU work starts, rewriting a GPU kernel is unlikely to fix the cause, and queue length, admission policy, and the request mix become the first places to investigate.
 
 Next examine a representative GPU timeline. Long gaps between kernels can suggest host scheduling, synchronization, or missing input data. Long kernels with steady memory traffic suggest a different problem. A communication operation on the critical path calls for topology and overlap analysis. The trace is evidence about this configuration, and the next experiment should tell the plausible explanations apart.
 
-Suppose the trace shows that a CPU thread repeatedly asks for a GPU tensor's scalar value. The host must wait until that value is available, and the queue of future GPU work may drain. Moving nonessential logging out of the hot path is a reasonable experiment. The result should include end-to-end request time as well as the disappearance of the trace gap; a cleaner trace alone is not the product objective.
+Suppose the trace shows that a CPU thread repeatedly asks for a GPU tensor's scalar value: the host must wait until that value is available, the queue of future GPU work may drain, and moving nonessential logging out of the hot path becomes a reasonable experiment. The result should include end-to-end request time as well as the disappearance of the trace gap; a cleaner trace alone is not the product objective.
 
-Finally replay realistic arrivals. A configuration that succeeds at fixed concurrency may behave badly under bursts. Long prompts can interfere with short requests, and the queue can amplify small changes in service time. The performance engineer therefore connects the microsecond explanation to the second-scale user result.
+Finally replay realistic arrivals. A configuration that succeeds at fixed concurrency may behave badly under bursts, because long prompts can interfere with short requests and the queue can amplify small changes in service time, so the performance engineer connects the microsecond explanation to the second-scale user result.
 
 ### Make improvements safe to operate
 
-A change is useful only if the service can run it reliably. Measure warm-up time and model load time, not just steady state. Record memory headroom so a slightly longer prompt does not turn a successful benchmark into an out-of-memory failure. Check cancellation and unusual shapes when they are part of the product workload. These operational details determine whether the measured speedup survives deployment.
+A change is useful only if the service can run it reliably. Measure warm-up time and model load time, not just steady state, record memory headroom so a slightly longer prompt does not turn a successful benchmark into an out-of-memory failure, and check cancellation and unusual shapes when they are part of the product workload. These operational details determine whether the measured speedup survives deployment.
 
 Compare the baseline and candidate using the same request set and conditions. Repeat measurements enough to tell an improvement from noise. Keep latency distributions, not only averages: a lower mean can coexist with a worse tail. When results are close, report the uncertainty honestly and keep the simpler configuration unless the improvement justifies its maintenance cost.
 
@@ -135,11 +135,11 @@ Quality validation should match the proposed change. An exact scheduling change 
 
 Suppose a hypothetical node costs 16 dollars per hour and produces 20 million accepted output tokens in that hour. Its direct node cost is 80 cents per million tokens. If a validated change raises accepted output to 25 million tokens while preserving latency and quality, that cost becomes 64 cents per million. The arithmetic is useful precisely because the output definition and cost boundary are explicit.
 
-That 20-percent unit-cost reduction does not automatically become a 20-percent smaller bill. The fleet may have spare capacity, reserved commitments, or too little traffic to use the speedup. Capacity changes need a demand model, redundancy allowance, and headroom for failures and bursts. Performance engineering supplies the measured capacity; operational planning decides how much of it can be converted into savings.
+That 20-percent unit-cost reduction does not automatically become a 20-percent smaller bill, because the fleet may have spare capacity, reserved commitments, or too little traffic to use the speedup, and capacity changes need a demand model, redundancy allowance, and headroom for failures and bursts. Performance engineering supplies the measured capacity; operational planning decides how much of it can be converted into savings.
 
-So the strongest deliverable is more than a patch. It is a reproducible baseline, a causal explanation, a validated improvement, and a recommendation about where that configuration should run. This combination lets another engineer maintain the result after the original investigator moves on.
+So the strongest deliverable is more than a patch: it is a reproducible baseline, a causal explanation, a validated improvement, and a recommendation about where that configuration should run, and that combination lets another engineer maintain the result after the original investigator moves on.
 
-A useful experiment also documents the rejected alternatives. If higher batching raises aggregate output while violating streaming latency, keep that result as evidence for an offline pool instead of accepting it for interactive service. This keeps the reason for the chosen operating point on record and stops a later dashboard comparison from quietly relaxing the original promise.
+A useful experiment also documents the rejected alternatives: if higher batching raises aggregate output while violating streaming latency, keep that result as evidence for an offline pool instead of accepting it for interactive service. This keeps the reason for the chosen operating point on record and stops a later dashboard comparison from quietly relaxing the original promise.
 
 ## Conclusion
 

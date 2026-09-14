@@ -16,7 +16,7 @@ tags: ["FPGA", "AI Accelerator", "RTL"]
 
 This lesson extends one educational AI accelerator from its numerical specification toward verified RTL, FPGA integration and an ASIC implementation exercise. The overview shows this chapter's specific responsibility: Connect verified PEs and check operand skew, wavefronts and fill/drain cycles.
 
-The shared project begins with signed INT8 operands and INT32 accumulation, grows into a 4×4 output-stationary array, and provides a verified host-loaded tile top. The larger tiled inference/transport examples are software models, while external bus, board and physical-design integration remain explicit exercises. Follow the evidence labels rather than treating every diagram as an executed hardware result.
+The shared project begins with signed INT8 operands and INT32 accumulation, grows into a 4×4 output-stationary array, and provides a verified host-loaded tile top, while the larger tiled inference/transport examples are software models and external bus, board and physical-design integration remain explicit exercises, so follow the evidence labels rather than treating every diagram as an executed hardware result.
 
 Start after [Build a Processing Element: Local Accumulation and Operand Forwarding](/blog/fpga-ai-pe-1-build-a-processing-element/). Keep the previous fixture and source revision so this chapter's change can be checked independently.
 
@@ -68,7 +68,7 @@ Useful work counts only products required by the logical matrix. Multiplying zer
 
 The mask figure handles a tile with fewer than 4 valid rows or columns. The boundary driver sends invalid masks for absent operands. A PE with no valid pair contributes nothing, and the store stage writes only logical output elements.
 
-Clearing the array before each independent tile prevents stale sums from a previous full tile. Across K chunks, however, the logical output must combine partial sums before its epilogue. Our software tiler adds independent chunk outputs in a wider reference context; a hardware scheduler must choose an equivalent storage strategy.
+Clearing the array before each independent tile prevents stale sums from a previous full tile, but across K chunks the logical output must combine partial sums before its epilogue, so our software tiler adds independent chunk outputs in a wider reference context and a hardware scheduler must choose an equivalent storage strategy.
 
 Test a 3-row,2-column tile with varied signed inputs. Verify valid results and inactive PE values. Masking input arithmetic alone does not guarantee safe output stores.
 
@@ -80,7 +80,7 @@ The verification figure records 40 RTL array cases with irregular dimensions and
 
 Try altering a row skew by one step and rerun the small distinct-value fixture to observe the failure. Restore the correct skew before measuring. This controlled defect is more informative than changing several scheduling rules at once.
 
-The finished block is an educational matrix engine, not a complete TPU or FPGA application. Memory loading, commands and a board shell remain separate integration layers. The next lessons add tiling and storage while retaining the same bit-accurate matrix contract.
+The finished block is an educational matrix engine, not a complete TPU or FPGA application, because memory loading, commands and a board shell remain separate integration layers, and the next lessons add tiling and storage while retaining the same bit-accurate matrix contract.
 
 ### Run this lesson
 
@@ -128,7 +128,7 @@ Initialize a new output reduction once, combine every required contribution, and
 
 Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create heavy local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
 
-The direct matrix oracle remains independent of the systolic timing trace. Use the trace to debug alignment and the oracle to verify the final result. Global stalls consume clocks without changing logical step; maintain that distinction in both the driver and the array. Once the complete tile contract is correct, measure its useful work and integration overhead separately.
+The direct matrix oracle remains independent of the systolic timing trace, so use the trace to debug alignment and the oracle to verify the final result, remembering that global stalls consume clocks without changing logical step and that the distinction must hold in both the driver and the array, and once the complete tile contract is correct, measure its useful work and integration overhead separately.
 
 ### A worked engineering decision
 
@@ -152,7 +152,7 @@ Use distinct source values to diagnose collection order. A matrix fixture whose 
 
 The array shares a global step. If a front-end cannot provide a required boundary operand, it can hold the entire wavefront while retaining its pending inputs. Every PE's forwarding registers, validity masks and sum must follow the same hold. Advancing only the boundary skew counters would change the pairing when computation resumes. The controller's logical-step count must also hold, or it could capture results too early.
 
-The simulator inserts random hold clocks and compares completed tiles with the same independent numerical reference. A test that merely adds a fixed delay after the last input would not prove that the internal wavefront stayed aligned. Inspect accepted logical steps and masks in the trace, and compare final outputs for both unstalled and stalled sequences. The report records exercised stall clocks as evidence of the tested contract.
+The simulator inserts random hold clocks and compares completed tiles with the same independent numerical reference, because a test that merely adds a fixed delay after the last input would not prove that the internal wavefront stayed aligned: inspect accepted logical steps and masks in the trace, compare final outputs for both unstalled and stalled sequences, and note that the report records exercised stall clocks as evidence of the tested contract.
 
 The simplicity has a cost: 1 blocked boundary can stall all 16 cells. More elaborate architectures can queue operands or overlap tiles, but they introduce additional lifetime and arbitration state. Evaluate those changes against useful completed matrix work, not just the number of PE boxes. A small globally stepped array is a reasonable teaching baseline because its timing can be derived and reproduced.
 

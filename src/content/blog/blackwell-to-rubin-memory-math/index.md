@@ -26,7 +26,7 @@ A generation where capacity freezes while bandwidth explodes is not an accident.
 
 Blackwell Ultra and MI355X both specify: **288GB of HBM3e at 8 TB/s** (NVIDIA GB300, AMD MI355X). You can only compare precision-specific peak throughput under matched numerical-format and sparsity assumptions, so this article compares memory specifications instead.
 
-NVIDIA's [official HGX specifications](https://www.nvidia.com/en-us/data-center/hgx/) list Rubin with 288 GB HBM4 and up to 22 TB/s bandwidth. AMD's [MI400 series specifications](https://www.amd.com/en/products/accelerators/instinct/mi400.html) list MI455X with 432 GB HBM4 and up to 23.3 TB/s. These are vendor peak specifications, not measured application results. This comparison was checked September 13, 2026.
+NVIDIA's [official HGX specifications](https://www.nvidia.com/en-us/data-center/hgx/) list Rubin with 288 GB HBM4 and up to 22 TB/s bandwidth, while AMD's [MI400 series specifications](https://www.amd.com/en/products/accelerators/instinct/mi400.html) list MI455X with 432 GB HBM4 and up to 23.3 TB/s, and both are vendor peak specifications, not measured application results, checked September 13, 2026.
 
 ### Why bandwidth is the axis that matters
 
@@ -36,13 +36,13 @@ To see why NVIDIA spends its transistor and packaging budget on bandwidth, follo
 
 An unbatched dense-model decode step commonly reads much of its active weight data from memory. Caching, routing, and kernel design affect actual traffic. A 70B-parameter model in 8-bit needs about 70 GB of weight traffic per decode step in an idealized unbatched dense-model example. The compute involved is comparatively light, multiply-accumulates that the GPU finishes faster than the memory can feed it. Text generation is, in the standard framing, **memory-bandwidth-bound**: the GPU spends its time waiting for bytes, not crunching them.
 
-Run the division and the ceiling is stark: 8 TB/s ÷ 70GB ≈ **114 tokens/second** for a single stream, before any cleverness. Bandwidth is the speed limit; capacity just determines whether the model fits at all. Once weights fit, extra capacity may still allow longer contexts, larger batches, or fewer shards. Extra bandwidth raises a different ceiling.
+Run the division and the ceiling is stark: 8 TB/s ÷ 70GB ≈ **114 tokens/second** for a single stream, before any cleverness, so bandwidth is the speed limit while capacity just determines whether the model fits at all, and once weights fit, extra capacity may still allow longer contexts, larger batches, or fewer shards, whereas extra bandwidth raises a different ceiling.
 
 That's the roadmap decoded: 288 GB fits many models or individual shards, but not every large model and request configuration. Higher bandwidth raises an idealized weight-streaming ceiling; whether that is the best design trade depends on the intended workload.
 
 ### The pin-count story underneath
 
-The bandwidth jump has a physical cause: [HBM4 doubles the interface width to 2,048 pins per stack](https://news.skhynix.com/en/sk-hynix-completes-worlds-first-hbm4-development-and-readies-mass-production/), versus 1,024 since HBM2. SK hynix reports >40% better power efficiency alongside the 2× bandwidth per stack. Memory manufacturing and packaging are real supply constraints; specifications alone do not tell you which component gates a particular product launch.
+The bandwidth jump has a physical cause: [HBM4 doubles the interface width to 2,048 pins per stack](https://news.skhynix.com/en/sk-hynix-completes-worlds-first-hbm4-development-and-readies-mass-production/), versus 1,024 since HBM2, and SK hynix reports >40% better power efficiency alongside the 2× bandwidth per stack, though memory manufacturing and packaging are real supply constraints and specifications alone do not tell you which component gates a particular product launch.
 
 There is a second-order signal in AMD's 432GB counter-bet. Bigger memory pools reduce how many GPUs a giant model must be sharded across, which cuts inter-GPU communication, a different efficiency lever aimed at the same bill. 2 vendors, same physics, 2 positions on the capacity-bandwidth trade.
 
@@ -62,7 +62,7 @@ $$
 r_{\mathrm{decode}}\leq\frac{B}{W}.
 $$
 
-Substituting 8,000 GB/s and 70 GB gives about 114.3 tokens per second. Substituting 22,000 GB/s gives about 314.3. Their ratio is 2.75, exactly the ratio of the specified bandwidths. This is a consequence of holding the model and traffic assumptions fixed, not an observed speedup for a released inference engine.
+Substituting 8,000 GB/s and 70 GB gives about 114.3 tokens per second, and substituting 22,000 GB/s gives about 314.3, so their ratio is 2.75, exactly the ratio of the specified bandwidths, which follows from holding the model and traffic assumptions fixed rather than from an observed speedup for a released inference engine.
 
 The estimate omits KV-cache reads, activations, quantization scales, temporary buffers, launch costs, collective communication, and imperfect bandwidth utilization. If achieved bandwidth is 60% of peak in a hypothetical experiment, the corresponding weight-only rates become 68.6 and 188.6. Actual efficiency need not remain equal across 2 hardware generations.
 
@@ -72,7 +72,7 @@ The inequality also assumes the relevant weights are read each step. On-chip cac
 
 ![Deep dive: Why batching changes the interpretation](./deep-dive-component-01.png)
 
-If a decode batch contains b sequences, 1 streamed weight matrix can contribute to all b token predictions in a matrix multiplication. Ideally, the same weight bytes serve more useful arithmetic. The step produces b output tokens instead of 1, so aggregate throughput can improve even when each sequence waits for one step at a time.
+If a decode batch contains b sequences, 1 streamed weight matrix can contribute to all b token predictions in a matrix multiplication, so ideally the same weight bytes serve more useful arithmetic: the step produces b output tokens instead of 1, and aggregate throughput can improve even when each sequence waits for one step at a time.
 
 For a hypothetical batch of 8 and a weight-only step time of 8.75 milliseconds, the aggregate ceiling is about 914 tokens per second, while each sequence's step rate is about 114 tokens per second. This idealization ignores the extra work and memory needed for 8 distinct prefixes. It illustrates why aggregate tokens per second and per-user latency are different quantities.
 
@@ -84,7 +84,7 @@ Capacity directly enters this story. More memory can hold more active requests a
 
 ![Deep dive: Budget memory beyond the weights](./deep-dive-component-02.png)
 
-Suppose a model has 70 billion stored parameters. At 1 byte per parameter, parameter data alone occupy 70 GB in decimal units. At 2 bytes, they occupy 140 GB. Packed lower-precision representations need scale metadata and supported kernels; “4-bit weights” does not mean every allocation is exactly half a byte per parameter.
+Suppose a model has 70 billion stored parameters: at 1 byte per parameter, parameter data alone occupy 70 GB in decimal units, and at 2 bytes they occupy 140 GB, while packed lower-precision representations need scale metadata and supported kernels, so “4-bit weights” does not mean every allocation is exactly half a byte per parameter.
 
 KV memory adds a request-dependent term. For a conventional grouped-query attention stack, a rough uncompressed cache estimate is
 
@@ -113,7 +113,7 @@ The engineering method is to identify which traffic is shared and which grows wi
 
 Memory bandwidth depends on interface width, transfer rate, and the number of memory stacks. A wider interface can move more bits per transfer, but final GPU bandwidth also depends on how many stacks are integrated and what operating rate the system supports. Doubling interface width by itself does not prove a whole product will deliver exactly twice the application's useful bandwidth.
 
-HBM integrates stacked memory close to compute through advanced packaging. That reduces some distances and enables many parallel connections, while introducing manufacturing, thermal, yield, and packaging constraints. Capacity choices also depend on stack height and density. The vendor's chosen combination reflects multiple physical and commercial tradeoffs.
+HBM integrates stacked memory close to compute through advanced packaging, which reduces some distances and enables many parallel connections while introducing manufacturing, thermal, yield, and packaging constraints, and because capacity choices also depend on stack height and density, the vendor's chosen combination reflects multiple physical and commercial tradeoffs.
 
 It is tempting to read a product specification as a unique statement of designer intent. Equal capacity with higher bandwidth is consistent with targeting bandwidth-sensitive workloads, but it does not prove that every transistor or packaging dollar was allocated for that reason. Explain the engineering consequences we can calculate and label strategic interpretations as interpretations.
 
@@ -131,7 +131,7 @@ Finally convert useful throughput into cost using the actual ownership or rental
 
 Before comparing 2 accelerators, write down the model weight format, usable device memory, total cached tokens, expected batch size, and latency target. Estimate weight and KV allocations separately, then verify them with the inference engine. Measure sustained bandwidth and useful throughput on representative requests rather than synthetic traffic alone.
 
-If 1 configuration cannot meet the memory budget, check whether quantization, shorter context, or more shards changes that constraint. If both fit, check whether decode, prefill, communication, or idle capacity dominates the measured time. This worksheet makes the comparison reproducible and shows which assumption would need to change before a different hardware choice becomes attractive.
+If 1 configuration cannot meet the memory budget, check whether quantization, shorter context, or more shards changes that constraint, and if both fit, check whether decode, prefill, communication, or idle capacity dominates the measured time: the worksheet makes the comparison reproducible and shows which assumption would need to change before a different hardware choice becomes attractive.
 
 ### Common misconceptions
 

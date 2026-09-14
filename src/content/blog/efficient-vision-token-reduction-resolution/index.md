@@ -16,9 +16,9 @@ heroImage: './section-overview.png'
 
 ![Concept overview: Efficient Vision: Token Reduction and Resolution Tradeoffs](./section-overview.png)
 
-Efficient vision can cut the number of tokens that later transformer blocks process. Pruning discards selected tokens. Merging combines representations. Changing resolution alters the image information before embedding. All three reduce work through token count, but they preserve different information and create different execution overhead.
+Efficient vision can cut the number of tokens that later transformer blocks process in 3 ways: pruning discards selected tokens, merging combines representations, and changing resolution alters the image information before embedding. All three reduce work through token count, but they preserve different information and create different execution overhead.
 
-The useful design connects a reduction policy to quality and measured cost. A mask alone does not necessarily shrink a dense operation, and a clever similarity algorithm can eat the savings it was supposed to create. This article derives the major tradeoffs and explains Token Merging as a concrete mechanism.
+The useful design connects a reduction policy to quality and measured cost, because a mask alone does not necessarily shrink a dense operation and a clever similarity algorithm can eat the savings it was supposed to create, so this article derives the major tradeoffs and explains Token Merging as a concrete mechanism.
 
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*

@@ -16,7 +16,7 @@ tags: ['asic', 'eda', 'chip-design']
 
 ![Concept overview: RTL to GDSII: The Chip Design Flow in Plain Words](./section-overview.png)
 
-Designing 1 leading-edge chip costs somewhere around half a billion dollars. The figure most often quoted comes from International Business Strategies (IBS), whose estimates put a full 5nm design effort near $540 million. That total counts architecture, logic design, verification, physical design, and the software that ships with the silicon. Treat the exact number with care, since it is an analyst estimate that gets rounded differently in every press article. The order of magnitude is not in dispute.
+Designing 1 leading-edge chip costs somewhere around half a billion dollars. The figure most often quoted comes from International Business Strategies (IBS), whose estimates put a full 5nm design effort near $540 million. That total counts architecture, logic design, verification, physical design, and the software that ships with the silicon, and you should treat the exact figure with care, because it is an analyst estimate that gets rounded differently in every press article, though the order of magnitude is not in dispute.
 
 Here is the part I find genuinely funny. After all that money and 2 to 3 years of work, the entire project collapses into a single file, written in a binary format called GDSII that Calma introduced in 1978. That file, a giant hierarchical list of polygons, is what the factory turns into photomasks. Everything between the first line of Verilog and that file is called *the flow*, and this article walks through it in plain words.
 
@@ -32,7 +32,7 @@ A structural engineer then converts intent into components with known properties
 
 Next come the construction documents: exact coordinates for every beam, every pipe routed so it doesn't collide with the ductwork. That is **place and route**, where every gate gets an (x, y) position and every wire gets a geometric path through the metal layers.
 
-Then inspection. Before anyone pours concrete, the plans are checked against building codes and the structural math is re-verified. On a chip this is **verification and signoff**, and it is where most of the budget actually goes.
+Then inspection. Before anyone pours concrete, a reviewer checks the plans against building codes and re-verifies the structural math. On a chip that step is **verification and signoff**, and it is where most of the budget actually goes.
 
 Finally, the stamped permit set goes to the builder. That is **tapeout**: the GDSII file leaves the design team and goes to the mask shop.
 
@@ -49,11 +49,11 @@ always @(posedge clk) begin
 end
 ```
 
-Nothing here says *how* to multiply. There is no adder topology, no gate, no wire. You have written down behavior: on every clock edge, the accumulator either loads or adds a product. A modern CPU core is a few 100 1000 to a few million lines of this. The pipeline machinery I described in [What a CPU Actually Does](/blog/what-a-cpu-actually-does/) exists, in real projects, as exactly this kind of code.
+Nothing here says *how* to multiply, because there is no adder topology, no gate and no wire in those 4 lines: all you have written down is behavior, namely that on every clock edge the accumulator either loads a fresh value or adds a product to what it already holds. A modern CPU core is a few 100 1000 to a few million lines of this. The pipeline machinery I described in [What a CPU Actually Does](/blog/what-a-cpu-actually-does/) exists, in real projects, as exactly this kind of code.
 
-**Synthesis** is the job of a tool (Synopsys Design Compiler and Cadence Genus dominate commercially; Yosys is the open-source workhorse). The tool reads the RTL plus a standard-cell library and emits a *netlist*: a list of gate instances and the nets connecting them. A standard-cell library is the parts catalog for 1 specific factory process. It contains a few 100 to a few 1000 pre-designed, pre-characterized little layouts: NAND2, NOR3, inverters in 10 drive strengths, flip-flops, full adders. Each cell comes with measured data: delay as a function of load, power, area. The `a * b` above might become roughly 4 1000 gates arranged as a Wallace-tree multiplier if you asked for speed, or a smaller, slower array multiplier if you asked for area. The tool makes that trade based on constraints you write, chiefly the clock period.
+**Synthesis** is the job of a tool (Synopsys Design Compiler and Cadence Genus dominate commercially; Yosys is the open-source workhorse). The tool reads the RTL plus a standard-cell library and emits a *netlist*: a list of gate instances and the nets connecting them. A standard-cell library is the parts catalog for 1 specific factory process, holding a few 100 to a few 1000 pre-designed, pre-characterized little layouts, among them NAND2, NOR3, inverters in 10 drive strengths, flip-flops and full adders, and each cell arrives with measured data for delay as a function of load, for power and for area. The `a * b` above might become roughly 4 1000 gates arranged as a Wallace-tree multiplier if you asked for speed, or a smaller, slower array multiplier if you asked for area. The tool makes that trade based on constraints you write, chiefly the clock period.
 
-**Place and route** turns the netlist into geometry. First floorplanning: a human decides the die outline, where the RAM macros sit, where the power grid runs. Then placement: the tool assigns each of the millions of cells to a legal spot in neat rows. Then clock-tree synthesis: the clock must reach hundreds of thousands of flip-flops at very nearly the same instant, so the tool builds a balanced tree of buffers. Finally routing: every net gets drawn as actual metal, across 10 to 20 metal layers, without shorting anything. The output is no longer a program in any sense. It is a drawing.
+**Place and route** turns the netlist into geometry in 4 passes: floorplanning, where a human decides the die outline and where the RAM macros sit and where the power grid runs, then placement, where the tool assigns each of the millions of cells to a legal spot in neat rows, then clock-tree synthesis, where the tool builds a balanced tree of buffers because the clock must reach hundreds of thousands of flip-flops at very nearly the same instant, and finally routing, where every net gets drawn as actual metal across 10 to 20 metal layers without shorting anything. The output is no longer a program in any sense. It is a drawing.
 
 **Timing closure** is the loop that eats the schedule, and it deserves its own numbers.
 
@@ -63,7 +63,7 @@ Nothing here says *how* to multiply. There is no adder topology, no gate, no wir
 
 Take a target clock of 500 MHz. That gives every register-to-register path a budget of 2,000 picoseconds, and the arithmetic is simple enough to do on paper.
 
-A signal's journey each cycle has 4 parts. The launching flip-flop takes some time to present its output after the clock edge (clock-to-Q). The signal then ripples through the logic gates. It also spends time on the wires between gates. And it must arrive a little *before* the next clock edge, because the capturing flip-flop needs its input stable for a window called the setup time.
+A signal's journey each cycle has 4 parts: the launching flip-flop takes some time to present its output after the clock edge (clock-to-Q), the signal then ripples through the logic gates, it spends further time on the wires between those gates, and it must arrive a little *before* the next clock edge, because the capturing flip-flop needs its input stable for a window called the setup time.
 
 Suppose the worst path through our multiply-accumulate unit looks like this after synthesis:
 
@@ -80,7 +80,7 @@ Budget minus total: 2,000 − 1,890 = **+110 ps of slack**. Positive slack means
 Then the design gets routed, and the tool extracts the *actual* resistance and capacitance of the real wires. The placer couldn't keep every cell on this path close together, so the measured wire delay comes back at 420 ps instead of the estimated 250. Redo the sum: 80 + 1,500 + 420 + 60 = 2,060 ps. Slack is now **−60 ps**. The path fails, and correct operation at 500 MHz is not guaranteed under the analyzed conditions.
 
 
-Now you fix it, and every fix costs something. Swap gates on the path for higher drive strength versions from the library: faster, but bigger and more power-hungry. Restructure the logic to use 8 levels instead of 10: saves 300 ps, if the logic allows it. Nudge the placement so the cells sit closer: helps this path, possibly hurts a neighbor. Or accept reality and ship at 485 MHz, since 1/2,060 ps ≈ 485 MHz. A real SoC has millions of paths, the tools fix nearly all of them automatically, and engineers spend months on the stubborn last few 100. That months-long endgame is what people mean by "timing closure."
+Now you fix it, and every fix costs something: you can swap gates on the path for higher drive strength versions from the library, which run faster but come out bigger and more power-hungry, or restructure the logic to use 8 levels instead of 10, which saves 300 ps when the logic allows it, or nudge the placement so the cells sit closer, which helps this path and possibly hurts a neighbor. Or accept reality and ship at 485 MHz, since 1/2,060 ps ≈ 485 MHz. A real SoC has millions of paths, the tools fix nearly all of them automatically, and engineers spend months on the stubborn last few 100. That months-long endgame is what people mean by "timing closure."
 
 
 A precise setup constraint exposes assumptions hidden in the delay bar. Let $$t_{cq}$$ be launch clock-to-Q, $$t_g$$ logic delay, $$t_w$$ extracted wire delay, $$t_s$$ capture setup time, $$u$$ clock uncertainty, and $$\Delta$$ capture-clock arrival minus launch-clock arrival. Setup slack is
@@ -99,7 +99,7 @@ Physical closure improves on a purely logical synthesis result by folding placem
 
 The reason closure is hard is that the analysis keeps getting more honest as the design gets more physical.
 
-Static timing analysis (STA) is the engine underneath. Instead of simulating the chip, STA computes the worst-case delay of every path from the library's characterized cell delays plus extracted wire parasitics. It does this not once but across *corners*: combinations of process variation (fast or slow transistors, as manufactured), voltage (supply droops), and temperature. A modern signoff run checks dozens of corners, because a path can pass at −40 °C and fail at 125 °C, or the reverse.
+Static timing analysis (STA) is the engine underneath. Instead of simulating the chip, STA computes the worst-case delay of every path from the library's characterized cell delays plus extracted wire parasitics. It does this not once but across *corners*, meaning combinations of process variation (fast or slow transistors, as manufactured), voltage (supply droops) and temperature, and a modern signoff run checks dozens of them, because a path can pass at −40 °C and fail at 125 °C, or the reverse.
 
 And setup is only half the story. There is a mirror-image failure called a *hold violation*: a signal arriving too *fast*, racing through short logic and corrupting the capturing flop in the same cycle it was launched. Hold violations are nastier because you cannot fix them by lowering the clock frequency. The fix is inserting delay buffers, which is why fixing setup on 1 path can create hold problems on another, which is why the whole thing iterates.
 
@@ -107,12 +107,12 @@ Each iteration re-places, re-routes, re-extracts, and re-analyzes. On a large de
 
 ### Verification: where the money actually goes
 
-Ask people outside the industry where chip-design effort goes and they guess the creative part, the design. Industry surveys say otherwise. The biennial Wilson Research Group functional verification study, published by Siemens EDA, has consistently found that verification consumes more than half of total project effort on typical ASIC projects. It also reports that verification engineers now outnumber design engineers on many teams, and that only roughly a third of projects achieve working first silicon. The rest need at least 1 respin.
+Ask people outside the industry where chip-design effort goes and they guess the creative part, the design. Industry surveys say otherwise. The biennial Wilson Research Group functional verification study, published by Siemens EDA, has consistently found that verification consumes more than half of total project effort on typical ASIC projects, and it also reports that verification engineers now outnumber design engineers on many teams, and that only roughly a third of projects achieve working first silicon while the rest need at least 1 respin.
 
-The economics explain the paranoia. A bug caught in simulation costs an engineer-afternoon. The same bug caught after tapeout costs a new mask set, which at advanced nodes is commonly estimated in the tens of millions of dollars. It also costs roughly a quarter of calendar time while the fab manufactures the corrected chip. Software ships patches; silicon ships atoms.
+The economics explain the paranoia. A bug caught in simulation costs an engineer-afternoon, while the same bug caught after tapeout costs a new mask set, commonly estimated at advanced nodes in the tens of millions of dollars, plus roughly a quarter of calendar time while the fab manufactures the corrected chip. Software ships patches; silicon ships atoms.
 
 
-So verification runs in parallel with everything above. Functional simulation executes the RTL against millions of test scenarios, with constrained-random generators inventing corner cases no human would write. Formal verification mathematically proves properties like "this FIFO can never overflow" without simulating at all. Emulation loads the design into racks of FPGAs to run real software before silicon exists. And at the physical level, signoff checks the geometry itself. DRC (design-rule checking) confirms every polygon obeys the factory's rules, and LVS (layout-versus-schematic) confirms the drawn transistors still implement the verified netlist. Only when all of it is clean does anyone say the word tapeout.
+So verification runs in parallel with everything above. Functional simulation executes the RTL against millions of test scenarios, with constrained-random generators inventing corner cases no human would write, formal verification mathematically proves properties like "this FIFO can never overflow" without simulating at all, and emulation loads the design into racks of FPGAs to run real software before silicon exists. And at the physical level, signoff checks the geometry itself. DRC (design-rule checking) confirms every polygon obeys the factory's rules, and LVS (layout-versus-schematic) confirms the drawn transistors still implement the verified netlist. Only when all of it is clean does anyone say the word tapeout.
 
 ### Tapeout, and the open-source path
 
@@ -122,7 +122,7 @@ For decades the only way to experience this flow was to work at a company paying
 
 ### Common misconceptions
 
-**"Synthesis is like compilation, so once the RTL is done the rest is push-button."** A compiler targets an instruction set that always behaves the same way; synthesis and place-and-route target physics. A compile takes seconds and either works or doesn't. Physical design takes months, because timing, congestion, and power push against each other, and the tools need human-written constraints and floorplans to converge at all. The RTL freeze is closer to the midpoint of a project than the end.
+**"Synthesis is like compilation, so once the RTL is done the rest is push-button."** A compiler targets an instruction set that always behaves the same way, while synthesis and place-and-route target physics: a compile takes seconds and either works or doesn't, but physical design takes months, because timing, congestion and power push against each other, and the tools need human-written constraints and floorplans to converge at all. The RTL freeze is closer to the midpoint of a project than the end.
 
 **"Engineers design chips transistor by transistor."** For digital logic, nobody has done this at scale in decades. Humans write RTL; tools choose, place, and wire billions of transistors packaged inside pre-designed standard cells. Hand-drawn (full-custom) layout survives only where it pays: SRAM bit cells, analog blocks, and the most extreme datapaths. A billion-transistor chip is designed by perhaps a few 100 people precisely because of this abstraction stack.
 

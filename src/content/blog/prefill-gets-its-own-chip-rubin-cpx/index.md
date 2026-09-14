@@ -16,7 +16,7 @@ tags: [gpu, inference, roofline]
 
 ![Concept overview: Prefill Gets Its Own Chip: The Roofline Bet Behind Rubin CPX](./section-overview.png)
 
-30 petaflops of 4-bit compute, fed by gaming-class memory. That is Rubin CPX, the GPU NVIDIA announced for "massive-context inference". It carries 30 PFLOPS of NVFP4 next to 128 GB of GDDR7, the same memory family that ships on a $700 graphics card. Every serious datacenter GPU of the past 8 years has used HBM, the stacked memory whose price is a large slice of the entire board. Dropping it looks like corner-cutting. It is actually one of the most legible pieces of hardware-software co-design in years. You can derive the whole decision from a single chart called the roofline. This article draws that chart with real numbers.
+30 petaflops of 4-bit compute, fed by gaming-class memory. That is Rubin CPX, the GPU NVIDIA announced for "massive-context inference". It carries 30 PFLOPS of NVFP4 next to 128 GB of GDDR7, the same memory family that ships on a $700 graphics card. Every serious datacenter GPU of the past 8 years has used HBM, the stacked memory whose price is a large slice of the entire board, so dropping it looks like corner-cutting, when it is actually one of the most legible pieces of hardware-software co-design in years. You can derive the whole decision from a single chart called the roofline. This article draws that chart with real numbers.
 
 ## Deep dive
 
@@ -36,7 +36,7 @@ Rubin CPX is what happens when that software insight jumps the boundary into sil
 
 The roofline model, introduced by Williams, Waterman, and Patterson in 2009, answers 1 question. For a given piece of code on a given machine, is the ceiling set by compute or by memory bandwidth?
 
-You need 2 numbers. The first belongs to the workload: **arithmetic intensity**, the number of floating-point operations performed per byte moved from memory. The second belongs to the machine: its peak compute (FLOP/s) divided by its memory bandwidth (bytes/s), often called the **ridge point**, also measured in FLOPs per byte.
+You need 2 numbers: the first belongs to the workload, **arithmetic intensity**, the number of floating-point operations performed per byte moved from memory, and the second belongs to the machine, its peak compute (FLOP/s) divided by its memory bandwidth (bytes/s), often called the **ridge point**, also measured in FLOPs per byte.
 
 The rule is 1 comparison. If your workload's arithmetic intensity is below the machine's ridge point, you are memory-bound. The compute units idle while bytes trickle in, and attainable performance equals bandwidth times intensity. If intensity is above the ridge point, you are compute-bound: memory keeps up fine, and you hit the FLOP/s ceiling. Plotted on log-log axes, this gives a slanted line that flattens into a roof, hence the name.
 
@@ -67,11 +67,11 @@ $$
 I\approx\frac{2PT}{Ps+D_a},\qquad T_*\approx\frac{Cs}{2\beta}\quad(D_a\approx0).
 $$
 
-Here compute rate $$C$$ is useful operations per second and bandwidth $$\beta$$ is bytes per second on the same execution path. The earlier 4-bit payload estimate uses 0.5 bytes per weight. Including an 8-bit scale per 16 weights instead gives 0.5625 bytes. With 30 peta-operations per second and 2.1 terabytes per second, the ideal crossing rises from about 3,571 to about 4,018 prompt rows.
+Here compute rate $$C$$ is useful operations per second and bandwidth $$\beta$$ is bytes per second on the same execution path, and the earlier 4-bit payload estimate uses 0.5 bytes per weight, but including an 8-bit scale per 16 weights instead gives 0.5625 bytes, so with 30 peta-operations per second and 2.1 terabytes per second the ideal crossing rises from about 3,571 to about 4,018 prompt rows.
 
-Even that corrected crossing omits activations, attention history, staging, and shape inefficiency. A 200B model's 4-bit payload already takes 100 GB, and scale bytes raise it to 112.5 GB before runtime state. A 128 GB device does not automatically have room for arbitrary long contexts. Chunking and parallel placement can become necessary.
+Even that corrected crossing omits activations, attention history, staging, and shape inefficiency: a 200B model's 4-bit payload already takes 100 GB, and scale bytes raise it to 112.5 GB before runtime state, so a 128 GB device does not automatically have room for arbitrary long contexts, and chunking or parallel placement can become necessary.
 
-The specialization favors reuse-rich prefill. It does not make memory bandwidth irrelevant. Benchmark the actual format, prompt distribution, and handoff. Compared with buying the same expensive memory system for both phases, the design reallocates cost toward a different balance point, while accepting tighter capacity and communication constraints.
+The specialization favors reuse-rich prefill without making memory bandwidth irrelevant, so benchmark the actual format, prompt distribution, and handoff: compared with buying the same expensive memory system for both phases, the design reallocates cost toward a different balance point, while accepting tighter capacity and communication constraints.
 
 ### Going deeper: the handoff and the rack
 
@@ -80,14 +80,14 @@ The specialization favors reuse-rich prefill. It does not make memory bandwidth 
 Disaggregation only works if the KV cache built during prefill reaches the decode GPU quickly. That handoff is real machinery, not hand-waving. For a 200B-class model, a 100K-token context can mean tens of gigabytes of KV state that must move from CPX memory to an HBM Rubin GPU before the first output token. This is why NVIDIA ships Dynamo and NIXL alongside the silicon. Dynamo is the serving layer that orchestrates disaggregated pools, and NIXL is a transfer library that abstracts NVLink, InfiniBand, PCIe, and SSD paths. The KV cache has quietly become a first-class infrastructure object with its own transport layer and its own storage tiers.
 
 
-At rack scale, NVIDIA packages the split as the Vera Rubin NVL144 CPX: standard HBM Rubin GPUs for decode plus CPX chips for prefill in 1 system. NVIDIA claims 8 exaflops of NVFP4 and 7.5x the AI performance of a GB300 NVL72 rack. Treat both numbers as vendor claims until MLPerf-style submissions exist. The comparison spans different workload mixes and precisions. The Next Platform frames the economics more sharply. The CPX add-in delivers a claimed ~6x on long-context throughput for about 2.25x added compute cost, precisely because the added compute skips the most expensive component on a modern accelerator. HBM can account for on the order of half the bill of materials of a high-end datacenter GPU, and it is supply-constrained. Every stack not soldered onto a prefill chip is a stack available for a decode chip that actually needs it.
+At rack scale, NVIDIA packages the split as the Vera Rubin NVL144 CPX: standard HBM Rubin GPUs for decode plus CPX chips for prefill in 1 system, and NVIDIA claims 8 exaflops of NVFP4 and 7.5x the AI performance of a GB300 NVL72 rack, though you should treat both numbers as vendor claims until MLPerf-style submissions exist, because the comparison spans different workload mixes and precisions. The Next Platform frames the economics more sharply. The CPX add-in delivers a claimed ~6x on long-context throughput for about 2.25x added compute cost, precisely because the added compute skips the most expensive component on a modern accelerator. HBM can account for on the order of half the bill of materials of a high-end datacenter GPU, and it is supply-constrained. Every stack not soldered onto a prefill chip is a stack available for a decode chip that actually needs it.
 
 
-1 number from the launch deserves explicit labeling: NVIDIA's claim that $100M of CPX capex can generate "$5B in token revenue." That figure is pure marketing. It assumes a token price, a utilization rate, a workload mix, and a depreciation schedule, none of which NVIDIA publishes. It should never be quoted as an engineering result. The roofline argument stands on its own; the revenue projection does not.
+1 number from the launch deserves explicit labeling: NVIDIA's claim that $100M of CPX capex can generate "$5B in token revenue." That figure is pure marketing: it assumes a token price, a utilization rate, a workload mix, and a depreciation schedule, none of which NVIDIA publishes, and it should never be quoted as an engineering result. The roofline argument stands on its own; the revenue projection does not.
 
 ### Common misconceptions
 
-**"GDDR7 means it's a cut-down budget chip."** The opposite. The compute die is a full Rubin chiplet running at higher clocks than the flagship, per The Next Platform's reporting. Calling CPX "cheap" because of its memory is like calling a drag racer cheap because it lacks a trailer hitch. The part was deleted because the workload cannot use it, not to hit a price point. The design center is maximum FLOPs per dollar for a workload that sits on the compute roof.
+**"GDDR7 means it's a cut-down budget chip."** The opposite. The compute die is a full Rubin chiplet running at higher clocks than the flagship, per The Next Platform's reporting. Calling CPX "cheap" because of its memory is like calling a drag racer cheap because it lacks a trailer hitch: the part was deleted because the workload cannot use it, not to hit a price point, and the design center is maximum FLOPs per dollar for a workload that sits on the compute roof.
 
 **"Prefill is always compute-bound, so this works for any traffic."** Not quite. The worked example gives the honest boundary: on CPX the crossover sits near 3,600 tokens per batch. A chatbot serving short prompts with small batches can absolutely leave prefill memory-bound, and it gains little from this chip. CPX is aimed at the regime NVIDIA names in the announcement, million-token software and video workloads, where quadratic attention makes prefill overwhelmingly compute-dominated. The bet is that this regime is where inference demand is heading, not that it is where all inference lives today.
 

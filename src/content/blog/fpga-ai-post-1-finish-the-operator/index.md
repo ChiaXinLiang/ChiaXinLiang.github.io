@@ -26,9 +26,9 @@ Start after [Matrix Tiling: Run Problems Larger Than the Array](/blog/fpga-ai-ti
 
 ![Deep dive: Add bias in accumulator units](./deep-dive-component-01.png)
 
-The bias figure adds a column/channel bias in accumulator units. If the integer dot product represents scale sx*sw, its integer bias must use a compatible scale before addition. A real bias cannot be treated as an arbitrary INT8 payload.
+The bias figure adds a column or channel bias in accumulator units, and if the integer dot product represents scale sx*sw, its integer bias must use a compatible scale before addition, so a real bias cannot be treated as an arbitrary INT8 payload.
 
-The reference epilogue takes an integer bias and adds it before activation/conversion. Check the complete addition's width, not only the dot-product width. A valid sum can overflow after bias.
+The reference epilogue takes an integer bias and adds it before activation and conversion, so check the complete addition's width, not only the dot-product width, because a valid sum can overflow after bias.
 
 For a sum -3 and bias 5, the biased value is 2. This small cancellation fixture helps distinguish the operator order from a superficially similar activation-first implementation.
 
@@ -36,11 +36,11 @@ For a sum -3 and bias 5, the biased value is 2. This small cancellation fixture 
 
 ![Deep dive: Apply activation at the right stage](./deep-dive-component-02.png)
 
-The activation figure applies ReLU as max(sum,0) after bias. A signed comparison is required. Treating a two's-complement negative value as unsigned can make it appear very large and pass it through.
+The activation figure applies ReLU as max(sum,0) after bias, the comparison must be signed, and treating a two's-complement negative value as unsigned can make it appear very large and pass it through.
 
 ReLU is not distributed over partial sums: ReLU(5)+ReLU(-8)=5, but ReLU(5-8)=0. K tiling therefore cannot activate each chunk independently and add the results.
 
-The released MLP uses a fixed illustrative epilogue. Other activations, softmax and normalization are unsupported operators until implemented with their own numerical contracts. Naming them in a model does not create a hardware execution path.
+The released MLP uses a fixed illustrative epilogue, so other activations, softmax and normalization stay unsupported operators until someone implements them with their own numerical contracts, and naming them in a model does not create a hardware execution path.
 
 ### Requantize with a specified rounding rule
 
@@ -48,7 +48,7 @@ The released MLP uses a fixed illustrative epilogue. Other activations, softmax 
 
 The conversion figure multiplies by an integer numerator, divides by a power of two with the defined tie rule and clips to INT8. Our round_shift_away helper rounds negative half-steps symmetrically by working with magnitude and restoring sign.
 
-The scaling multiplication can need wider intermediate storage. Shift=0 is a valid special case; a negative shift is rejected. The output clamp occurs after rounding, preserving information until the final supported range is applied.
+The scaling multiplication can need wider intermediate storage, shift=0 is a valid special case while a negative shift is rejected, and the output clamp occurs after rounding, which preserves information until the final supported range is applied.
 
 Do not use the language's default rounding function without checking its semantics. Python round, an arithmetic right shift and the selected hardware rounding instruction can disagree at ties.
 
@@ -60,7 +60,7 @@ The checked epilogue converts [-8,3,300] using bias 0, ReLU and division by 2. R
 
 The test also checks -3/2=-2 under ties-away rounding when ReLU is disabled. Testing only nonnegative outputs would miss that conversion behavior.
 
-Record intermediate sums and converted outputs separately. An argmax can remain correct despite wrong logits, so the inference test compares values before predictions. A correct epilogue completes one supported operator, not an arbitrary network runtime.
+Record intermediate sums and converted outputs separately, because an argmax can remain correct despite wrong logits, which is why the inference test compares values before predictions and why a correct epilogue completes one supported operator rather than an arbitrary network runtime.
 
 ### Run this lesson
 
@@ -86,13 +86,13 @@ def epilogue(value,bias=0,multiplier=1,shift=0,relu=True):
 
 ### Preserve the complete matrix operation
 
-Keep logical dimensions separate from the physical array. The 4×4 engine computes tiles, while the software tiler covers larger matrices and K chunks. A boundary tile's inactive locations are not useful output elements. Masks and store bounds must preserve the allocated logical tensor even if the internal engine computes padded positions.
+Keep logical dimensions separate from the physical array: the 4×4 engine computes tiles while the software tiler covers larger matrices and K chunks, a boundary tile's inactive locations are not useful output elements, and masks and store bounds must preserve the allocated logical tensor even if the internal engine computes padded positions.
 
-Initialize a new output reduction once, combine every required contribution, and apply bias/activation/conversion only at the specified final stage. ReLU does not distribute over partial sums. A premature quantization can also change rounding and cancellation. Use mixed-sign fixtures so these mistakes cannot hide behind positive-only inputs.
+Initialize a new output reduction once, combine every required contribution, and apply bias, activation and conversion only at the specified final stage, because ReLU does not distribute over partial sums and a premature quantization can also change rounding and cancellation, so use mixed-sign fixtures where those mistakes cannot hide behind positive-only inputs.
 
 Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create a lot of local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
 
-The direct matrix oracle remains independent of the systolic timing trace. Use the trace to debug alignment and the oracle to verify the final result. Global stalls consume clocks without changing logical step; maintain that distinction in both the driver and the array. Once the complete tile contract is correct, measure its useful work and integration overhead separately.
+The direct matrix oracle remains independent of the systolic timing trace, so use the trace to debug alignment and the oracle to verify the final result, remember that global stalls consume clocks without changing logical step and keep that distinction in both the driver and the array, and once the complete tile contract is correct, measure its useful work and integration overhead separately.
 
 ### A worked engineering decision
 
@@ -110,7 +110,7 @@ An INT32 accumulator represents a sum of integer products. If model input and we
 
 Per-channel bias can vary across output columns. Test distinguishable bias values so broadcasting the first bias into every channel cannot pass. Likewise, per-channel output scale metadata needs the correct channel indexing if supported by a future implementation. A single multiplier/shift demonstration is not proof that every quantized network convention maps to it. Record the model conversion and parameter assumptions beside the deployed operator.
 
-Bias can enlarge the required wide range. Proving the un-biased K-term dot product fits INT32 does not automatically prove the biased value fits. The Python function checks its numerical contract with wider intermediate arithmetic, while a hardware epilogue must choose sufficient intermediate widths explicitly. A multiplier applied to an INT32 sum can require more than 32 product bits before shifting. Truncating that product early changes rounding and saturation behavior.
+Bias can enlarge the required wide range, and proving the un-biased K-term dot product fits INT32 does not automatically prove the biased value fits, so the Python function checks its numerical contract with wider intermediate arithmetic while a hardware epilogue must choose sufficient intermediate widths explicitly, since a multiplier applied to an INT32 sum can require more than 32 product bits before shifting. Truncating that product early changes rounding and saturation behavior.
 
 #### Explain why partial sums cannot be converted early
 

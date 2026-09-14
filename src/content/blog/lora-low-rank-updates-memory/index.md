@@ -18,7 +18,7 @@ heroImage: './section-overview.png'
 
 Low-rank adaptation changes which parameters are trained. LoRA keeps a pretrained weight matrix fixed and learns an additive update represented by 2 smaller matrices. The central efficiency win is less trainable state. The execution tradeoff depends on whether adapters stay separate or get merged for deployment.
 
-This article derives the matrix geometry, initialization, gradients, and memory accounting. A low-rank update is a structural constraint on adaptation, not a claim that the pretrained matrix itself has low rank. That distinction explains both the method's usefulness and the limits of parameter-count comparisons.
+This article derives the matrix geometry, the initialization, the gradients through its 2 factors, and the memory accounting: a low-rank update is a structural constraint on adaptation, not a claim that the pretrained matrix itself has low rank, and that distinction explains both the method's usefulness and the limits of parameter-count comparisons.
 
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
@@ -35,13 +35,13 @@ $$
 W_0\in\mathbb R^{d\times k},\quad A\in\mathbb R^{r\times k},\quad B\in\mathbb R^{d\times r},\qquad W=W_0+sBA.
 $$
 
-The scalar s controls the update scale. The original LoRA paper uses alpha divided by r under its stated convention. Implementations and variants can change scaling, so record the actual expression.
+The scalar s controls the size of the update added to W_0. The original LoRA paper uses alpha divided by r under its stated convention. Implementations and variants can change scaling, so record the actual expression.
 
-The rank of BA is at most r. W_0 can still be full rank, and so can the adapted matrix W. LoRA constrains the change to the model rather than replacing the whole pretrained mapping with a low-rank approximation.
+The rank of BA is at most r, while W_0 can still be full rank, and so can the adapted matrix W: LoRA constrains the change to the model rather than replacing the whole pretrained mapping with a low-rank approximation.
 
 ### 2. Count trainable parameters
 
-Full adaptation of this matrix trains d times k values. LoRA trains r times the sum of d and k, excluding any additional trainable biases or modules under the selected recipe.
+Full adaptation of this matrix trains d times k values. LoRA trains r times the sum of d and k, 2 factor matrices instead of 1 full one, excluding any additional trainable biases or modules under the selected recipe.
 
 $$
 N_{\mathrm{full}}=dk,\qquad N_{\mathrm{LoRA}}=r(d+k),\qquad \eta=\frac{r(d+k)}{dk}.
@@ -49,43 +49,43 @@ $$
 
 For an illustrative square matrix with width 4,096 and rank 16, the full matrix contains 16,777,216 weights. The factors contain 131,072 values, or about 0.781 percent as many trainable parameters for this matrix.
 
-That fraction does not describe complete training memory. The frozen base still occupies storage, and backward computation can require activations. Count every selected matrix and any trainable embedding, normalization, output head, or bias before reporting the whole-model trainable fraction.
+That 0.781 percent does not describe complete training memory, because the frozen base still occupies storage and backward computation can require activations, so count every selected matrix and any trainable embedding, normalization, output head, or bias before reporting the whole-model trainable fraction.
 
 ### 3. Interpret low-rank update geometry
 
-The product BA maps the input through an r-dimensional intermediate space before returning to the d-dimensional output. A selects combinations of input directions, while B maps those combinations into output directions.
+The product BA maps the input through an r-dimensional intermediate space, 16 dimensions in the example above, before returning to the d-dimensional output. A selects combinations of input directions, while B maps those combinations into output directions.
 
-This bottleneck limits the update's matrix rank. It does not require the adapted model's useful information to fit into only r dimensions globally, because the pretrained mapping remains available and several layers can receive independent adapters.
+This bottleneck limits the update's matrix rank. It does not require the adapted model's useful information to fit into only r dimensions globally, because the pretrained mapping W_0 remains available and several layers can receive independent adapters.
 
-Increasing r expands the possible update space while adding state and computation. The useful rank depends on the task, chosen layers, data, and optimization. Do not treat a rank chosen for one checkpoint or domain as a universal prescription for every adaptation problem.
+Increasing r expands the possible update space while adding state and computation, and the useful rank depends on the task, chosen layers, data, and optimization, so do not treat a rank of 16 chosen for one checkpoint or domain as a universal prescription for every adaptation problem.
 
 ### 4. Preserve the original function initially
 
-The original LoRA setup initializes A randomly and B to zero. So their product is zero at initialization, and the adapted layer starts with the original pretrained output under the stated conditions.
+The original LoRA setup initializes A randomly and B to zero. So their product is zero at initialization, and the adapted layer starts with the original pretrained output of W_0 under the stated conditions.
 
 $$
 B_0=0\quad\Longrightarrow\quad W_0+sB_0A_0=W_0.
 $$
 
-This is useful because adaptation starts from a known reference function. If both factors were initialized to zero, the bilinear parameterization would produce zero gradients for both under the ordinary loss derivative at that point.
+This is useful because adaptation starts from a known reference function, W_0 itself. If both factors were initialized to zero, the bilinear parameterization would produce zero gradients for both under the ordinary loss derivative at that point.
 
 Dropout, scaling, and additional trained modules can affect the complete recipe. Verify agreement in the actual inference and training modes rather than assuming the matrix identity makes every surrounding operation equal.
 
 ### 5. Derive gradients through the factors
 
-Let G be the derivative of the task loss with respect to the effective matrix W. Matrix calculus gives the factor gradients under the chosen orientation.
+Let G be the derivative of the task loss with respect to the effective matrix W. Matrix calculus gives the gradients of the 2 factors under the chosen orientation.
 
 $$
 \frac{\partial\mathcal L}{\partial B}=sGA^\top,\qquad \frac{\partial\mathcal L}{\partial A}=sB^\top G.
 $$
 
-At initialization with B equal to zero, the gradient of A is zero while B can receive a nonzero gradient because A is random. After B changes, A can also learn. This asymmetry explains why the initialization avoids the all-zero dead point.
+At initialization with B equal to zero, so that W equals W_0, the gradient of A is zero while B can receive a nonzero gradient because A is random, and after B changes A can also learn: this asymmetry explains why the initialization avoids the all-zero dead point.
 
 The formulas describe the ideal differentiable parameterization. Actual training includes optimizer state, finite precision, batching, and potentially dropout. A tiny numerical gradient check can verify shapes and scaling, but it says nothing about the quality of a complete adaptation run.
 
 ### 6. Explain parameterization nonuniqueness
 
-For any invertible r-by-r matrix R, the factors BR and R inverse A represent the same update. The effective matrix depends on their product, not on a unique set of factor coordinates.
+For any invertible r-by-r matrix R, 16-by-16 in the running example, the factors BR and R inverse A represent the same update. The effective matrix depends on their product, not on a unique set of factor coordinates.
 
 $$
 BA=(BR)(R^{-1}A).
@@ -93,7 +93,7 @@ $$
 
 Optimization still acts on the factors, so equivalent products need not follow identical training trajectories under different initializations and optimizer settings. Factor scale affects gradient magnitudes and conditioning.
 
-This is one reason rank and alpha do not fully specify a LoRA recipe. Initialization, learning rates, regularization, selected modules, and precision all influence training. Compare actual configurations under consistent data and evaluation rather than interpreting factor coordinates as a unique learned explanation.
+This is one reason rank and alpha do not fully specify a LoRA recipe: initialization, learning rates, regularization, selected modules, and precision all influence training, so compare actual configurations under consistent data and evaluation rather than interpreting factor coordinates as a unique learned explanation.
 
 ### 7. Account for optimizer memory
 
@@ -105,15 +105,15 @@ $$
 M_{\mathrm{trainable}}\approx N_{\mathrm{trainable}}(b_p+b_g+b_{m_1}+b_{m_2}+b_{\mathrm{master}}).
 $$
 
-Here each b denotes bytes per value for parameters, gradients, moments, and any master copy. Omit the master term only when the implementation does not allocate it. This accounting expression is configuration-dependent, not a fixed byte rule for all libraries.
+Here each b denotes bytes per value for parameters, gradients, the 2 Adam moments, and any master copy, so omit the master term only when the implementation does not allocate it: this accounting expression is configuration-dependent, not a fixed byte rule for all libraries.
 
-The frozen base, activations, workspace, and framework allocations remain separate terms. Verify that gradients and optimizer slots are absent for frozen tensors. Accidentally including base parameters in the optimizer can undo the intended memory reduction.
+The frozen base W_0, activations, workspace, and framework allocations remain separate terms. Verify that gradients and optimizer slots are absent for frozen tensors. Accidentally including base parameters in the optimizer can undo the intended memory reduction.
 
 ### 8. Do not erase activation cost
 
 Training A and B requires signals from layer inputs and backward propagation through the surrounding graph. Freezing W_0 does not mean the entire network can run without storing or recomputing activations.
 
-Long sequences and large batches can make activation memory large even when trainable parameter state is small. Activation checkpointing trades stored activations for recomputation, with its own execution cost. LoRA and checkpointing address different memory categories and can be combined deliberately.
+Long sequences and large batches can make activation memory large even when trainable parameter state is small, the 131,072 values of the earlier example, and activation checkpointing trades stored activations for recomputation at its own execution cost, so LoRA and checkpointing address different memory categories and can be combined deliberately.
 
 Measure peak allocation for the actual sequence length, batch, checkpoint policy, and precision. A trainable-parameter percentage is useful structural information, but it cannot tell you whether a training job fits. Preserve the complete memory model when comparing full adaptation and parameter-efficient alternatives.
 
@@ -127,13 +127,13 @@ $$
 
 These operation counts omit dispatch, memory traffic, dropout, and additions. Small matrix operations can run inefficiently, so do not present the parameter ratio as a latency ratio.
 
-For batches or sequences, the matrix shapes change and supported fused paths can matter. Measure the actual backend with the intended adapters active. An adapter that adds little arithmetic can still introduce visible overhead in a small-batch decode workload.
+For batches or sequences, the matrix shapes change and supported fused paths can matter, so measure the actual backend with the intended adapters active, because an adapter that adds little arithmetic can still introduce visible overhead in a small-batch decode workload.
 
 ### 10. Merge for a fixed deployment
 
 ![Deep dive: 10. Merge for a fixed deployment](./deep-dive-component-01.png)
 
-When the base is stored in a compatible representation and the deployment uses one fixed adapter, you can materialize the effective weight before inference. This removes the separate low-rank branch from the mathematical linear layer.
+When the base W_0 is stored in a compatible representation and the deployment uses one fixed adapter, you can materialize the effective weight before inference. This removes the separate low-rank branch from the mathematical linear layer.
 
 $$
 W_{\mathrm{merged}}=W_0+sBA.
@@ -141,15 +141,15 @@ $$
 
 Real-number equivalence does not imply bitwise equality after finite-precision arithmetic. Compare merged and unmerged outputs under defined tolerances. Quantized bases require additional care because dequantization, addition, and requantization can change the numerical artifact.
 
-A merge also changes operational flexibility. Switching adapters now involves selecting or rebuilding a merged checkpoint, while separate adapters can share one base. Choose the deployment arrangement from workload and support rather than assuming merging is always the best service architecture.
+A merge also changes operational flexibility, because switching adapters now involves selecting or rebuilding a merged checkpoint, while separate adapters can share one W_0: choose the deployment arrangement from workload and support rather than assuming merging is always the best service architecture.
 
 ### 11. Serve several adapters over one base
 
-A shared base plus separate adapter sets can reduce duplicated storage across tasks. If each adapter contains N_a values, K adapters add roughly K times their parameter bytes rather than K full copies of the base, before runtime overhead.
+A shared base W_0 plus separate adapter sets can reduce duplicated storage across tasks. If each adapter contains N_a values, K adapters add roughly K times their parameter bytes rather than K full copies of the base, before runtime overhead.
 
 Serving multiple adapters raises scheduling and kernel questions. Requests can select different updates, and batching across adapters may require specialized execution or grouping. The resulting throughput depends on the workload's adapter distribution and backend support.
 
-Report whether memory includes all resident adapters and whether the comparison batches compatible requests. A single-adapter benchmark does not tell you how a service behaves when it switches among many adapters. Shared storage and efficient mixed-adapter execution are related but separate engineering results.
+Report whether memory includes all resident adapters and whether the comparison batches compatible requests, since a single-adapter benchmark does not tell you how a service behaves when it switches among many adapters: shared storage and efficient mixed-adapter execution are related but separate engineering results.
 
 ### 12. Select modules and rank with evidence
 
@@ -163,11 +163,11 @@ Also inspect retained trainable modules outside LoRA. Training an output head or
 
 ![Deep dive: 13. Compare against full adaptation fairly](./deep-dive-component-04.png)
 
-Full adaptation and LoRA optimize different parameter spaces. Their learning-rate schedules, regularization, and suitable training budgets may differ. A comparison should document these choices rather than forcing an arbitrary identical recipe and declaring one method universally superior.
+Full adaptation and LoRA optimize different parameter spaces, 16,777,216 weights against 131,072 in the earlier example, so their learning-rate schedules, regularization, and suitable training budgets may differ, and a comparison should document these choices rather than forcing an arbitrary identical recipe and declaring one method universally superior.
 
 Evaluate on held-out tasks with the same preprocessing and generation policy. Include the pretrained reference so that readers can see the actual adaptation gain. Check whether domain gains come with regressions elsewhere when that matters to deployment.
 
-No model adaptation or GPU timing was performed for this article. The numerical parameter example and compute formulas are illustrative accounting. The original paper provides experiments under its configurations; a new task needs evidence from its own checkpoint, data, and backend.
+No model adaptation or GPU timing was performed for this article. The 4,096-wide parameter example and the compute formulas are illustrative accounting. The original paper provides experiments under its configurations; a new task needs evidence from its own checkpoint, data, and backend.
 
 ### 14. Connect LoRA to statistical constraints
 
@@ -175,19 +175,19 @@ Restricting updates to a low-rank product can act as an inductive constraint on 
 
 That interpretation does not guarantee improved generalization. A low rank can underfit, while several adapters across many layers can still provide substantial capacity. Regularization, data quality, and task structure remain important.
 
-LoRA's innovation is a concrete factorized update that preserves the pretrained mapping while reducing trainable state. Its deployment benefit depends on memory accounting and merge or adapter execution. Keep those mechanisms distinct from a broad claim that every low-rank training recipe is automatically cheaper in every phase.
+LoRA's innovation is a concrete factorized update, 2 matrices in place of 1, that preserves the pretrained mapping while reducing trainable state, and its deployment benefit depends on memory accounting and merge or adapter execution, so keep those mechanisms distinct from a broad claim that every low-rank training recipe is automatically cheaper in every phase.
 
 ### 15. Verify the numerical and export contract
 
 ![Deep dive: 15. Verify the numerical and export contract](./deep-dive-component-02.png)
 
-Run a small diagnostic that compares the direct effective matrix with the separate adapter branch on nontrivial inputs. Include a nonunit scale so that a missing alpha-over-r factor is visible. Verify the initial zero update and check factor gradients against finite differences in a small wider-precision example.
+Run a small diagnostic that compares the direct effective matrix with the separate adapter branch on nontrivial inputs. Include a nonunit scale so that a missing alpha-over-r factor is visible. Verify that the initial update leaves W_0 unchanged and check factor gradients against finite differences in a small wider-precision example.
 
-The exporter must preserve the selected modules, factor orientation, scale, and any trained bias. A checkpoint containing A and B without its base identity is not a self-contained description of the adapted function. Store the exact base revision and preprocessing settings with the adapter artifact.
+The exporter must preserve the selected modules, factor orientation, scale, and any trained bias. A checkpoint containing A and B without the identity of its W_0 base is not a self-contained description of the adapted function. Store the exact base revision and preprocessing settings with the adapter artifact.
 
 ## Conclusion
 
-For deployment, compare merged and separate outputs under the intended numerical policy, and check that training-only operations are disabled. Then measure the complete inference path rather than relying on the adapter's operation count. These checks connect the low-rank equation to a usable artifact without confusing algebraic equivalence with implementation correctness or measured speed.
+For deployment, compare merged and separate outputs under the intended numerical policy, check that training-only operations are disabled, and then measure the complete inference path rather than relying on the adapter's count of about 2r times k plus d: these checks connect the low-rank equation to a usable artifact without confusing algebraic equivalence with implementation correctness or measured speed.
 
 ### Sources
 

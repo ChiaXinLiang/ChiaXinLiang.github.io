@@ -38,9 +38,9 @@ The release's measure exercise reports analytic array steps, not measured board 
 
 The counter figure measures elapsed active clock cycles and accepted useful contributions. For the ideal 4×4,K=8 wavefront, useful MACs are 128 across 14 steps with 224 potential cell-step slots. The analytic utilization is 4/7.
 
-Actual global stalls consume clocks without advancing logical steps. Load/store and controller cycles add to complete tile time. A useful counter must distinguish valid cell products from elapsed capacity.
+Actual global stalls consume clocks without advancing any of the 14 logical steps, load/store and controller cycles add to the complete tile time, and a useful counter must separate the valid cell products from the 224 cell-step slots that merely elapsed.
 
-A physical clock rate comes from implemented timing and the actual board clock configuration. Multiplying an ideal model by an unachieved target clock produces an estimate, not a measurement.
+A physical clock rate comes from implemented timing and the actual board clock configuration, so multiplying an ideal model by an unachieved target, such as the release's illustrative 10-ns constraint, produces an estimate rather than a measurement.
 
 ### Build a bandwidth traffic ledger
 
@@ -48,19 +48,19 @@ A physical clock rate comes from implemented timing and the actual board clock c
 
 The byte ledger names external input, weight, output and temporary transfers. The standard tile has 32 input bytes, 32 weight bytes and 64 output bytes before repeated transfers or metadata.
 
-On-chip reads and forwarding use a different boundary from host/network/DMA traffic. A weight reused across several tiles may require one external load but many local accesses. Keep those quantities separate.
+On-chip reads and forwarding use a different boundary from host/network/DMA traffic, and a weight reused across several tiles may cost one external load of its 32 weight bytes but many local accesses, so keep those two quantities separate.
 
-Sustained bandwidth is measured bytes divided by the matching transfer interval. A full-duplex aggregate or estimated interface peak cannot replace that payload measurement. A slow host transport can dominate despite a fast local array.
+Sustained bandwidth is measured bytes divided by the matching transfer interval: a full-duplex aggregate or an estimated interface peak cannot replace that payload measurement, and a slow host transport carrying the tile's 32 input, 32 weight and 64 output bytes can dominate even when the local array runs fast.
 
 ### Warmup, repetitions, and power scope
 
 ![Deep dive: Warmup, repetitions, and power scope](./deep-dive-component-04.png)
 
-The repetition figure separates cold setup from warm execution. Save individual runs, report distributions and record shape, type, clock, tool version and software transport. A best sample hides variability and startup costs.
+The repetition figure separates cold setup from warm execution, so save individual runs, report distributions and record shape, type, clock, tool version (Icarus Verilog 13.0 for the RTL checks) and software transport, because a best sample hides both variability and startup costs.
 
-Power needs a stated instrument/scope. Tool estimates, FPGA rails and wall-plug power are different. The release stores unknown board power as null, never as zero or an invented value.
+Power needs a stated instrument and scope, since tool estimates, FPGA rails and wall-plug power measure different things, and the release stores unknown board power as null, never as zero and never as an invented value.
 
-Energy is integrated power over time under a defined boundary. A shorter job at higher power may or may not use less energy. Compare the same numerical workload and include the intended idle/transfer costs.
+Energy is integrated power over time under a defined boundary, so a shorter job at higher power may or may not use less energy, and a fair comparison runs the same numerical workload and includes the intended idle and transfer costs.
 
 ### Compare fairly and retain raw data
 
@@ -113,7 +113,7 @@ Counter instrumentation also changes the design. Define counter widths, reset po
 
 #### Build separate ledgers for data movement
 
-Unique tensor bytes are a capacity/lower-bound quantity under declared reuse assumptions. Actual external loads and stores include repeats and any partial-sum traffic. Local RAM accesses, register updates and PE-hop forwarding are different boundaries. Sustained bandwidth is bytes divided by time at one named boundary. Combining local and external totals into a single “memory bandwidth” can hide the bottleneck.
+Unique tensor bytes are a capacity and lower-bound quantity under declared reuse assumptions, while actual external loads and stores include repeats and any partial-sum traffic, and local RAM accesses, register updates and PE-hop forwarding sit at different boundaries again: sustained bandwidth is bytes divided by time at one named boundary, so combining local and external totals into a single “memory bandwidth” can hide the bottleneck.
 
 For the full tile, A and B each contain 32 unique INT8 bytes and C contains 64 INT32 bytes. A larger tiler may reload inputs across different output blocks; double buffering changes live storage and overlap but not the numerical tensor sizes. Count actual scheduled transfers for the selected model. Do not claim every mapping transfers only the unique tensor total.
 
@@ -123,7 +123,7 @@ An overlapped timeline also requires ownership evidence. A loader cannot overwri
 
 Tool-estimated power and instrumented board power have different inputs and boundaries. An implementation estimate depends on target models and switching assumptions; a board instrument may include memory, regulators and other components. Compare them only with declared scope and conditions. The current release records board power as unmeasured rather than inventing a value or an illustrative distribution that looks obtained.
 
-For executed timing, define warmup, repetition count, input distribution and environment. Keep raw samples, not only the best run. Report a summary appropriate to the application, including distributions when tail latency matters. State whether initialization, cold loads or batch formation are included. A warm kernel interval and a cold complete request can both be useful, but they answer different questions.
+For executed timing, define warmup, repetition count, input distribution and environment, keep the raw samples rather than only the best run, report a summary appropriate to the application, including distributions when tail latency matters, and state whether initialization, cold loads or batch formation are included, because a warm kernel interval and a cold complete request are both useful and answer different questions.
 
 Validate outputs during the experiment. A fast run that skips required work or reads unfinished output is not an optimization. Compare the same shapes, numerical format, model behavior and output boundary across baseline and accelerator. Retain source/tool versions with raw timing and counter records.
 

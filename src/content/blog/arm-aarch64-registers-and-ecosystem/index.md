@@ -16,7 +16,7 @@ tags: ['computer-architecture', 'isa', 'cpu']
 
 ![Concept overview: Arm and AArch64: Registers, Instructions, and the Processor Ecosystem](./section-overview.png)
 
-31 general-purpose integer registers form the visible working set of AArch64 assembly. Their names are familiar enough to read a short function: `x0` through `x30` for 64-bit operands, with corresponding `w` names for 32-bit operands. The processor ecosystem built around that model ranges from compact devices to servers, but the register names do not tell you how fast a particular core will run.
+31 general-purpose integer registers form the visible working set of AArch64 assembly, and their names are familiar enough to read a short function: `x0` through `x30` for 64-bit operands, with corresponding `w` names for 32-bit operands, while the processor ecosystem built around that model ranges from compact devices to servers without those register names telling you how fast a particular core will run.
 
 This article introduces Arm through the AArch64 programmer's model rather than through product rankings. We will read a small array-sum function, trace its state, and explain how Arm architecture, implementation, and software conventions fit together.
 
@@ -30,9 +30,9 @@ Read [the ISA contract article](../instruction-sets-software-hardware-contract/)
 
 Arm names the organization and architecture ecosystem, AArch64 names the 64-bit execution state introduced in the Armv8 architecture family, and A64 names the instruction set used in that state. The terms often appear together, but none identifies a specific processor model.
 
-AArch32 names a different execution state with 32-bit architectural registers and its associated instruction sets. Older Arm software and some embedded targets use different instruction-set details from the A64 examples here. Do not assume an instruction tutorial for 1 state applies unchanged to another.
+AArch32 names a different execution state with 32-bit architectural registers and its associated instruction sets, and older Arm software and some embedded targets use instruction-set details that differ from the A64 examples here. Do not assume an instruction tutorial for 1 state applies unchanged to another.
 
-Architecture revisions and optional features also matter. Supporting AArch64 does not mean a processor implements every later extension. A program using scalable vector instructions, cryptographic instructions, or specialized matrix features needs the corresponding hardware and software support.
+Architecture revisions and optional features also matter, because supporting AArch64 does not mean a processor implements every later extension, and a program using scalable vector instructions, cryptographic instructions or specialized matrix features needs the corresponding hardware and software support.
 
 For a deployment, name the relevant architecture features and the actual CPU implementation. “Arm server” alone omits core count, clock behavior, caches, memory channels, and vector capabilities, all of which can decide workload outcomes.
 
@@ -43,19 +43,19 @@ For a deployment, name the relevant architecture features and the actual CPU imp
 
 `x0` and `w0` refer to the same architectural register: `x0` names its full 64-bit value, while `w0` names the lower 32 bits, so the 2 names select different operand widths rather than 2 independently stored software values.
 
-Writing a W register sets the corresponding X register's upper 32 bits to 0. For example, suppose `x0` initially contains hexadecimal `ffffffff00000001`. Executing a 32-bit operation that writes the value 7 to `w0` leaves `x0` equal to `0000000000000007`.
+Writing a W register sets the corresponding X register's upper 32 bits to 0. Suppose `x0` initially contains hexadecimal `ffffffff00000001`: executing a 32-bit operation that writes the value 7 to `w0` leaves `x0` equal to `0000000000000007`, with the whole upper half cleared.
 
 This rule is useful when translating unsigned 32-bit computations or loading narrow values. It also creates mistakes when someone expects a W-register write to preserve the upper half. Width is part of the instruction's semantics and must be read alongside its mnemonic.
 
-Signed extension needs an operation that supplies it. A 32-bit value representing minus 1 has lower bits `ffffffff`; simply zero-extending that bit pattern to 64 bits gives 4,294,967,295. Sign extension instead gives the full 64-bit 2's-complement pattern for minus 1.
+Signed extension needs an operation that supplies it. A 32-bit value representing minus 1 has lower bits `ffffffff`, so simply zero-extending that bit pattern to 64 bits gives 4,294,967,295, whereas sign extension gives the full 64-bit 2's-complement pattern for minus 1.
 
 ### SP and the 0 register need context
 
-The stack pointer, `sp`, is architectural state with restricted instruction uses. The 0 register reads as 0 and discards written results. Its 64-bit assembly name is `xzr`; its 32-bit name is `wzr`.
+The stack pointer, `sp`, is architectural state with restricted instruction uses, while the 0 register reads as 0 and discards written results, and its 64-bit assembly name is `xzr` where its 32-bit name is `wzr`.
 
-Encoding space is reused: register field 31 can mean SP or the 0 register depending on the instruction and operand position. That does not create an ordinary general-purpose `x31` holding arbitrary values. Read the assembly operand and the instruction's allowed forms.
+Encoding space is reused, so register field 31 can mean SP or the 0 register depending on the instruction and operand position, which does not create an ordinary general-purpose `x31` holding arbitrary values. Read the assembly operand and the instruction's allowed forms.
 
-The 0 register makes some operations convenient without needing a stored constant. An instruction can compare a value by discarding a subtraction result, or build a value using 0 as an operand. Assembly aliases can hide these underlying forms.
+The 0 register makes some operations convenient without needing a stored constant, because an instruction can compare a value by discarding a subtraction result, or build a value using 0 as an operand. Assembly aliases can hide these underlying forms.
 
 The program counter is not another freely interchangeable X register. Branches control instruction flow through their defined operations. The link register convention uses `x30` to hold a return address for ordinary function calls, but architectural control flow and ABI conventions still deserve separate explanations.
 
@@ -75,7 +75,7 @@ The CPU holds the base address in a 64-bit register even when the loaded value i
 
 Addressing modes can include offsets or update a base pointer. We will use explicit pointer addition in the worked loop so each state change is easy to trace. Optimized compilers may choose shorter forms, vectorize, or transform the loop entirely.
 
-A load does not state where the bytes physically live. They may come from a cache, system memory, or a permitted device mapping. The same instruction can therefore have very different latency depending on the address and memory hierarchy.
+A load does not state where the bytes physically live, since they may come from a cache, from system memory or from a permitted device mapping, and the same instruction can therefore have very different latency depending on the address and the memory hierarchy behind it.
 
 ### A complete small array-sum function
 
@@ -108,9 +108,9 @@ The function is a teaching example, not performance-tuned. Its scalar dependency
 
 Suppose memory at `0x1000` contains the little-endian 32-bit values 3, 5, and 7. Entry state is `x0 = 0x1000`, `x1 = 3`, and `x30` contains the caller's return address.
 
-After initialization, `x2 = 0`. The first iteration loads 3 into `w3`, which makes `x3 = 3`. It adds that value to `x2`, advances `x0` to `0x1004`, and decreases `x1` to 2. The nonzero count sends execution back to the loop.
+After initialization, `x2 = 0`, and the first iteration loads 3 into `w3`, which makes `x3 = 3`, adds that value to `x2`, advances `x0` to `0x1004` and decreases `x1` to 2, after which the nonzero count sends execution back to the loop.
 
-The second iteration produces `x2 = 8`, pointer `0x1008`, and count 1. The third produces `x2 = 15`, pointer `0x100c`, and count 0. Execution falls through to `done`, copies 15 into `x0`, and returns.
+The second iteration produces `x2 = 8`, pointer `0x1008` and count 1, the third produces `x2 = 15`, pointer `0x100c` and count 0, and execution then falls through to `done`, copies 15 into `x0` and returns.
 
 For `n = 0`, the branch skips all loads and returns 0. That detail matters: a 0-length input should not force a memory access through a pointer that the function never needed to dereference. The trace also explains why pointer increments use 4 bytes even though the accumulator uses a 64-bit register.
 
@@ -122,9 +122,9 @@ x_0=p+4k,\qquad x_1=n-k,\qquad
 x_2=\left(\sum_{i=0}^{k-1}a_i\right)\bmod 2^{64}.
 $$
 
-Assume valid readable memory for all elements, no concurrent modifications, and pointer arithmetic within the mapped address range. The empty sum is 0. For values 3, 5, and 7 after 2 iterations, the pointer has advanced 8 bytes, the count is 1, and the accumulator is 8. Loading the final element produces 15 and terminates. Unsigned modular addition explains behavior when a much larger sum exceeds the 64-bit range; it is not an arbitrary-precision result.
+Assume valid readable memory for all elements, no concurrent modifications, and pointer arithmetic within the mapped address range, with the empty sum defined as 0: for values 3, 5 and 7 after 2 iterations the pointer has advanced 8 bytes, the count is 1 and the accumulator is 8, then loading the final element produces 15 and terminates, and unsigned modular addition explains behavior when a much larger sum exceeds the 64-bit range rather than promising an arbitrary-precision result.
 
-The method is to verify initialization, preservation across the load/add/pointer/count sequence, and termination at 0. Post-indexed addressing can combine memory access and pointer update in another encoding, reducing architectural instruction count, but that does not prove a cycle saving on every implementation. The core may break that instruction into internal operations, and the accumulated sum keeps a true dependency. This separates an ISA-level correctness improvement in expression from a microarchitecture-dependent performance claim. Benchmark both versions with equal alignment, memory residency, and calling convention before choosing 1.
+The method is to verify initialization, preservation across the load/add/pointer/count sequence, and termination at 0, and although post-indexed addressing can combine memory access and pointer update in another encoding, reducing architectural instruction count, that does not prove a cycle saving on every implementation, because the core may break that instruction into internal operations while the accumulated sum keeps a true dependency, which separates an ISA-level correctness improvement in expression from a microarchitecture-dependent performance claim. Benchmark both versions with equal alignment, memory residency, and calling convention before choosing 1.
 
 ### Count instructions without confusing count and speed
 
@@ -144,7 +144,7 @@ Arm's AAPCS64 assigns ordinary parameter and result roles to `x0` through `x7`, 
 
 Our function can overwrite `x0` through `x3` because those roles do not need their incoming values preserved for the caller. If we used callee-saved registers for temporary state, we would need to preserve and restore them according to the ABI.
 
-The stack must satisfy the required alignment rules when used. A function calling another function generally needs to protect its own return path because a new call updates the link register. Leaf functions can often be simpler, but optimization and platform requirements influence generated frames.
+The stack must satisfy the required alignment rules when used, and a function calling another function generally needs to protect its own return path, because a new call updates the link register. Leaf functions can often be simpler, but optimization and platform requirements influence generated frames.
 
 Operating systems can impose additional conventions, and the platform register role of `x18` deserves attention in portable handwritten assembly. Do not treat every general-purpose register as universally free just because arithmetic instructions accept it.
 
@@ -152,9 +152,9 @@ Operating systems can impose additional conventions, and the platform register r
 
 AArch64 also has SIMD/floating-point registers, used by the relevant instruction sets and calling-convention rules. Vector operations can process several array elements per instruction, so a sum loop can do more useful work than its scalar version.
 
-Scalable Vector Extension provides a different vector programming model from fixed-width SIMD. Software can be written to adapt to an implementation's vector length, but it still needs the extension and an appropriate operating-system context-management path. Matrix-oriented features add further capabilities with their own state and instruction rules.
+Scalable Vector Extension provides a different vector programming model from fixed-width SIMD, and software can be written to adapt to an implementation's vector length, though it still needs the extension and an appropriate operating-system context-management path, while matrix-oriented features add further capabilities with their own state and instruction rules.
 
-Do not assume every AArch64 processor has identical vector throughput. Instruction availability, execution-unit count, data width, frequency, and memory bandwidth all affect performance. A vectorized loop can still be limited by data movement rather than arithmetic.
+Do not assume every AArch64 processor has identical vector throughput. Instruction availability, execution-unit count, data width, frequency and memory bandwidth all affect performance. A vectorized loop can still be limited by data movement rather than arithmetic.
 
 For this introductory sequence, learn the scalar register and memory model first. Then [SIMD](../simd-one-instruction-many-numbers/) becomes a natural extension: 1 instruction performs related operations on multiple values while preserving a defined architectural contract.
 
@@ -162,7 +162,7 @@ For this introductory sequence, learn the scalar register and memory model first
 
 Arm provides architectures and also CPU core designs that other companies can integrate under the applicable arrangements. Companies can build systems around licensed cores, while some design their own compatible CPU implementations under the relevant architecture rights.
 
-That distinction explains why an Arm-based system is not necessarily built around the same pipeline as another. Cache hierarchy, interconnect, memory channels, and accelerator integration are system decisions. Architecture compatibility lets a software ecosystem span those variations.
+That distinction explains why an Arm-based system is not necessarily built around the same pipeline as another, since cache hierarchy, interconnect, memory channels and accelerator integration are all system decisions. Architecture compatibility lets a software ecosystem span those variations.
 
 Licensing terms and particular products change over time, so the useful foundation here is the structural distinction rather than a catalog of current agreements. For engineering comparisons, name the processor and system instead of using Arm as a synonym for 1 vendor's laptop or server.
 

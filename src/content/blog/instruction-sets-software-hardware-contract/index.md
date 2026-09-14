@@ -16,7 +16,7 @@ tags: ['computer-architecture', 'isa', 'cpu']
 
 ![Concept overview: Instruction Sets: The Contract Between Software and Hardware](./section-overview.png)
 
-The same 4-line calculation can execute on processors with very different pipelines. 1 core may run instructions in order, another may speculate far ahead, and both can produce the same architecturally correct result. The agreement between software and hardware is the instruction set architecture, usually shortened to ISA.
+The same 4-line calculation can execute on processors with very different pipelines, because 1 core may run instructions in order while another speculates far ahead, and both still produce the same architecturally correct result. The agreement between software and hardware is the instruction set architecture, usually shortened to ISA.
 
 After [the fetch-decode-execute introduction](../what-a-cpu-actually-does/), this is the next foundation. Fetch supplies instruction bits; decode interprets them according to an ISA; execution implements their defined effects. Understanding that boundary makes Arm, RISC-V, and x86-64 easier to compare without reducing each family to a marketing slogan.
 
@@ -26,19 +26,19 @@ We will trace a small integer calculation, distinguish architecture from microar
 
 ### What the ISA promises
 
-An ISA defines the machine state visible to software and how instructions change it. That state includes registers, memory effects, control flow, and the conditions under which an instruction raises an exception. A register is a small named storage location that instructions operate on directly. Memory is a much larger addressable collection of bytes.
+An ISA defines the machine state visible to software and how instructions change it. That state includes registers, memory effects, control flow, and the conditions under which an instruction raises an exception, where a register is a small named storage location that instructions operate on directly and memory is a much larger addressable collection of bytes.
 
 An instruction's specification describes operands and results: an integer addition might read 2 registers and write their sum to a third, a load reads bytes at an address and places a value in a register, and a branch chooses the address of the next instruction according to a condition.
 
 The ISA also defines encodings: the bit patterns that identify operations and operands. Assembly is a human-readable representation of those patterns, which an assembler translates into bytes for the processor to consume as machine code, while a disassembler works in the other direction by interpreting bytes as instructions. The processor does not consume the text string `add`.
 
-A programmer can rely on the defined behavior, but cannot infer execution time from the mnemonic alone. A load from nearby cache and a load from DRAM have the same architectural meaning while taking very different amounts of time.
+A programmer can rely on the defined behavior, but cannot infer execution time from the mnemonic alone, because a load from nearby cache and a load from DRAM carry the same architectural meaning while taking very different amounts of time.
 
 ### What the ISA leaves to implementation
 
 ![Deep dive: What the ISA leaves to implementation](./deep-dive-component-04.png)
 
-Microarchitecture is the machinery that implements the contract. Pipeline depth, issue width, execution units, cache sizes, branch prediction, and instruction scheduling are implementation choices. 2 processors with the same ISA can make different choices and have very different performance.
+Microarchitecture is the machinery that implements the contract. Pipeline depth, issue width, execution units, cache sizes, branch prediction and instruction scheduling are all implementation choices, so 2 processors with the same ISA can decide them differently and end up with very different performance.
 
 Suppose instructions first compute a value and then store it. An out-of-order core may overlap independent work or execute speculatively, but it must preserve the required architectural results and exceptions. The software-visible sequence is not a literal diagram of every internal event.
 
@@ -48,13 +48,13 @@ The ISA is therefore a behavioral contract rather than a complete chip blueprint
 
 ### 3 basic kinds of instructions
 
-Data-processing instructions transform register values. Examples include addition, subtraction, bitwise AND, shifts, and comparison. Some operations affect condition flags, while other architectures encode comparisons into branch instructions directly.
+Data-processing instructions transform register values, and the examples include addition, subtraction, bitwise AND, shifts and comparison, some of which affect condition flags, while other architectures encode comparisons into branch instructions directly.
 
 Load/store instructions move data between registers and memory, specifying both an access width and an address calculation so that, even at an identical base address, loading a 32-bit integer is a different operation from loading 8 bytes, with alignment, access permissions, and memory type also affecting whether the operation is valid.
 
-Control-flow instructions change which instruction executes next. Conditional branches support loops and decisions. Calls and returns support functions, usually with help from an ABI. System instructions manage privileged behavior, synchronization, or architectural controls, subject to the execution environment.
+Control-flow instructions change which instruction executes next: conditional branches support loops and decisions, while calls and returns support functions, usually with help from an ABI. System instructions manage privileged behavior, synchronization, or architectural controls, subject to the execution environment.
 
-The categories are useful for learning, but some instructions combine roles. An x86 arithmetic instruction may read a memory operand. An AArch64 load can update its base pointer. An instruction set's precise rules matter more than a rigid classification.
+The categories are useful for learning, but some instructions combine roles: an x86 arithmetic instruction may read a memory operand, and an AArch64 load can update its base pointer. An instruction set's precise rules matter more than a rigid classification.
 
 ### A worked load-add-store example
 
@@ -68,9 +68,9 @@ add x1, x1, #5
 str x1, [x0]
 ```
 
-The load reads 8 bytes because `x1` names a 64-bit register operand. After it completes architecturally, `x1` holds 7. The addition updates `x1` to 12. The store writes the 64-bit representation of 12 to the same address.
+The load reads 8 bytes because `x1` names a 64-bit register operand, so once it completes architecturally `x1` holds 7, the addition then updates `x1` to 12, and the store writes the 64-bit representation of 12 back to the same address.
 
-Under a little-endian memory convention, the initial 8 bytes are `07 00 00 00 00 00 00 00`. After the store they are `0c 00 00 00 00 00 00 00`. Endianness describes byte order in memory, not whether the mathematical value is 7 or 12.
+Under a little-endian memory convention, the initial 8 bytes are `07 00 00 00 00 00 00 00`, and after the store they are `0c 00 00 00 00 00 00 00`. Endianness describes byte order in memory, not whether the mathematical value is 7 or 12.
 
 For this trace, assume mapped normal memory, appropriate access permissions, and no competing writer. A real system must establish those conditions. The ISA defines the instructions, while the execution environment decides whether address `0x1000` is accessible to this program.
 
@@ -123,7 +123,7 @@ A single-thread trace is not a complete account of concurrent software. Differen
 
 A plain load-add-store sequence is not an atomic increment: if 2 threads both load 7, both compute 12, and both store 12, the final value can lose 1 update even though each thread followed the instruction rules correctly. You need an atomic read-modify-write operation or a correctly synchronized critical section when the behavior must be indivisible.
 
-Memory ordering and atomicity are related but distinct. An operation can be atomic while offering weak ordering for unrelated accesses. Acquire/release semantics describe synchronization relationships, and barriers can constrain ordering under specific rules. Learn the language-level atomic model together with the architecture's implementation.
+Memory ordering and atomicity are related but distinct, since an operation can be atomic while offering weak ordering for unrelated accesses, and acquire/release semantics describe synchronization relationships while barriers constrain ordering under specific rules. Learn the language-level atomic model together with the architecture's implementation.
 
 This matters most when a CPU talks to an accelerator or memory-mapped device. Normal cached memory and device memory may have different access rules. A convenient integer pointer is not a substitute for the platform's required device-access API.
 
@@ -131,7 +131,7 @@ This matters most when a CPU talks to an accelerator or memory-mapped device. No
 
 A useful computer must isolate applications and manage resources. Privileged architecture defines facilities for address translation, exceptions, interrupts, and protected control state. Ordinary application code cannot freely change every register just because the ISA documents it.
 
-A virtual address is translated through structures managed by the operating system and hardware. A valid-looking numeric pointer can still fault because no mapping exists or permissions forbid access. The ISA and system architecture define the fault behavior; the operating system decides how to respond.
+A virtual address is translated through structures managed by the operating system and hardware, so a valid-looking numeric pointer can still fault because no mapping exists or because permissions forbid access. The ISA and system architecture define the fault behavior; the operating system decides how to respond.
 
 Interrupts and exceptions also expose the difference between instruction semantics and system behavior. An arithmetic instruction may complete quickly, but the program can be interrupted before the next instruction. Timing measurements therefore include execution context as well as instruction costs.
 

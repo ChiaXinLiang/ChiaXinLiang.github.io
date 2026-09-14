@@ -26,31 +26,31 @@ Start after [Hardware Verification: Python Testbenches, Scoreboards, and Wavefor
 
 ![Deep dive: Place pipeline registers on long paths](./deep-dive-component-01.png)
 
-The pipeline figure places a register after multiplication so the adder consumes a product from an earlier edge. A matching valid bit records whether that product belongs to accepted work. Data without validity is just stale register content.
+The pipeline figure places a register after multiplication so the adder consumes a 16-bit product from an earlier edge, a matching valid bit records whether that product belongs to accepted work, and data without validity is just stale register content.
 
-In pipelined_mac.sv, an enabled edge captures a product and sets product_valid. The same edge accumulates the previous valid product. This uses nonblocking assignments intentionally. Clear/reset flush both the accumulator and pending product so work from the previous tile cannot leak into the next.
+In pipelined_mac.sv, an enabled edge captures a product and sets product_valid, the same edge accumulates the previous valid product, and this uses nonblocking assignments deliberately, while clear and reset flush both the INT32 accumulator and the pending product so work from the previous tile cannot leak into the next.
 
-The extra register can change timing and latency, but physical clock improvement requires synthesis/place-route evidence. A shorter source-level expression or more stages does not establish a higher implemented clock. The release verifies numerical/stage behavior in simulation and leaves physical timing to the implementation exercise.
+The extra register can change timing and latency, but physical clock improvement requires synthesis and place-route evidence, and a shorter source-level expression or a deeper stage count does not establish a higher implemented clock: the release verifies numerical and stage behavior in Icarus Verilog simulation and leaves physical timing to the implementation exercise.
 
 ### Separate latency from throughput
 
 ![Deep dive: Separate latency from throughput](./deep-dive-component-02.png)
 
-The latency figure separates first-result delay from initiation interval. A pipeline can accept work on consecutive cycles while producing each result after a fixed delay. The throughput interval can be one cycle even when individual work spans several stages.
+The latency figure separates first-result delay from initiation interval: a pipeline can accept work on consecutive cycles while producing each result after a fixed delay, and the throughput interval can be one cycle even when individual work spans the 2 stages of this design.
 
-For this MAC, a newly captured product contributes on the next active edge if not cleared. Its running sum is therefore shifted relative to mac.sv. After the last input, provide a drain edge so the pending contribution reaches the accumulator.
+For this MAC, a newly captured product contributes on the next active edge unless clear intervenes, its running sum is therefore shifted relative to mac.sv, and after the last input you must provide a drain edge so the pending contribution reaches the INT32 accumulator.
 
-Do not compare two modules at identical wall-clock edges without aligning their contracts. Check the sequence of accepted inputs and their expected contribution times. For a complete dot product, measure the final usable sum including startup and drain rather than report only steady-state issue rate.
+Do not compare the 2 circuits at identical wall-clock edges without aligning their contracts: check the sequence of accepted inputs and their expected contribution times, and for a complete dot product measure the final usable sum including startup and drain rather than reporting only a steady-state issue rate.
 
 ### Accumulation creates a dependency
 
 ![Deep dive: Accumulation creates a dependency](./deep-dive-component-03.png)
 
-The dependency figure shows why pipelining does not magically remove feedback. A running accumulation uses the previous sum. If the adder's result itself spans several cycles, a new contribution to that same chain may have to wait or use a deliberately changed accumulation scheme.
+The dependency figure shows why pipelining does not remove feedback: a running accumulation uses the previous INT32 sum, so if the adder's result itself spans several cycles, a new contribution to that same chain may have to wait or use a deliberately changed accumulation scheme.
 
-Interleaving independent partial sums can expose parallelism, then a final reduction combines them. That change needs numerical and scheduling analysis. Floating-point addition may change with reassociation; even integer arithmetic must fit the selected widths at every intermediate.
+Interleaving independent partial sums can expose parallelism, and a final reduction then combines them, but that change needs numerical and scheduling analysis: floating-point addition may shift with reassociation, and even integer arithmetic must fit the selected 16-bit product and 32-bit accumulator widths at every intermediate.
 
-Our simple pipeline registers the product and retains a one-edge sum update. It does not implement an arbitrarily deep adder pipeline. Start with the specific dependency graph and target timing report before selecting an interleaving or reduction design.
+Our simple pipeline registers the 16-bit product and retains a one-edge sum update, it does not implement an arbitrarily deep adder pipeline, and you should start with the specific dependency graph and target timing report before selecting an interleaving or reduction design.
 
 ### Prove alignment under stalls
 
@@ -60,7 +60,7 @@ The stall figure requires data and validity to remain aligned. The current pipel
 
 The harness checks 250 vectors with signed inputs, enabled gaps and periodic clear. The oracle separately tracks a pending product and the running sum. That catches an off-by-one valid delay or a failure to flush pending state.
 
-To extend it, define whether each stage can advance, which register holds during a stall and how reset invalidates occupancy. Then test arbitrary consumer stalls using a queue scoreboard. Adding ready signals without an ownership model can overwrite a product or count it twice.
+To extend it, define whether each stage can advance, which register holds during a stall and how reset invalidates occupancy, then test arbitrary consumer stalls with a queue scoreboard alongside the existing 250-vector harness, because adding ready signals without an ownership model can overwrite a product or count it twice.
 
 ### Run this lesson
 

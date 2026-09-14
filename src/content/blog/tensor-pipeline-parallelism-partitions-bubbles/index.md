@@ -16,7 +16,7 @@ tags: ["distributed-training", "ai-infrastructure"]
 
 ![Concept overview: Tensor and Pipeline Parallelism: Partitions, Bubbles, and the Network. A neural model is split into pipeline stages across GPU servers; within a stage a weight matrix is partitioned across tensor-parallel ranks.](./section-overview.png)
 
-When a model cannot be trained efficiently by replicating a complete instance, there are several ways to divide the work, and 2 of them run through this article: tensor parallelism splits operations inside layers, while pipeline parallelism assigns different layers to different stages. Both let multiple devices cooperate on one logical model, but their communication patterns and scheduling constraints are different.
+When a model cannot be trained efficiently by replicating a complete instance, there are several ways to divide the work, and 2 of them run through this article: tensor parallelism splits operations inside layers, while pipeline parallelism assigns different layers to different stages, and both let multiple devices cooperate on one logical model, but their communication patterns and scheduling constraints are different.
 
 A tensor-parallel rank may need a collective during nearly every block. A pipeline stage communicates at boundaries between layer ranges and can execute different microbatches concurrently with other stages. Combining the strategies requires 3 things: where tensors are partitioned, when their partial results must be combined, and how the process layout maps to physical links.
 
@@ -78,7 +78,7 @@ Place frequently communicating tensor groups within the fastest feasible local i
 
 A pipeline assigns consecutive or otherwise scheduled layer ranges to p stages. Forward activations move toward later stages; gradients flow backward. 1 microbatch by itself leaves most stages waiting while it progresses, while several microbatches let different stages work concurrently.
 
-A simple flush schedule first fills the forward pipeline, then runs backward and eventually drains it. A 1-forward-1-backward schedule can alternate operations after a warmup, which reduces the number of retained activations compared with storing an entire forward flush. Interleaved schedules give ranks multiple logical chunks and can reduce bubbles at additional scheduling and communication cost.
+A simple flush schedule first fills the forward pipeline, then runs backward and eventually drains it, while a 1-forward-1-backward schedule can alternate operations after a warmup, which reduces the number of retained activations compared with storing an entire forward flush, and interleaved schedules give ranks multiple logical chunks and can reduce bubbles at additional scheduling and communication cost.
 
 The schedule determines when an optimizer update is legal, since gradients for the intended accumulation interval must be complete and synchronized as required, and some pipeline algorithms change weight-version semantics or maintain multiple versions, which makes them learning-algorithm choices as well as systems choices.
 

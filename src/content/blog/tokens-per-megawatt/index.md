@@ -27,7 +27,7 @@ When an input becomes scarce, industries reorganize around the ratio of output t
 
 ### What tokens per megawatt actually measures
 
-A token, for our purposes, is 1 unit of LLM output, roughly 3-quarters of an English word. Serving a model means converting electricity into tokens, and tokens are what customers pay for. So tokens per megawatt is a revenue density: given a fixed allocation of grid power, how much sellable output can you generate?
+A token, for our purposes, is 1 unit of LLM output, roughly 3-quarters of an English word, and serving a model means converting electricity into tokens, which is what customers pay for, so tokens per megawatt is a revenue density: given a fixed allocation of grid power, how much sellable output can you generate?
 
 Note what the megawatt in the denominator represents. It is not an electricity bill. It is a *capacity*: the amount of power a site is permitted to draw at once. You negotiate that figure with a utility and secure it through the 5-to-7-year queue. Power capacity has become the asset that gates growth, the way spectrum licenses gate telecom. You can buy more GPUs next quarter. You cannot buy more megawatts next quarter, not at the sites you already operate.
 
@@ -41,7 +41,7 @@ Let's compute the tokens-per-megawatt of a current flagship system, using number
 
 Start with 1 megawatt at the grid meter.
 
-**Step 1: subtract facility overhead.** Cooling, power conversion, and networking consume power that never reaches a GPU. The ratio of total facility power to IT power is called PUE, for power usage effectiveness. A good modern AI facility runs around 1.2. So 1 MW at the meter yields 1,000 / 1.2 ≈ **833 kW of IT load**.
+**Step 1: subtract facility overhead.** Cooling, power conversion, and networking consume power that never reaches a GPU, and the ratio of total facility power to IT power is called PUE, for power usage effectiveness, which runs around 1.2 in a good modern AI facility, so 1 MW at the meter yields 1,000 / 1.2 ≈ **833 kW of IT load**.
 
 **Step 2: divide by rack power.** A GB300 NVL72 rack draws roughly 135 kW. NVIDIA's figures vary slightly by configuration, so treat this as approximate. That gives 833 / 135 ≈ **6.2 racks**, or about 444 GPUs, per megawatt.
 
@@ -49,7 +49,7 @@ Start with 1 megawatt at the grid meter.
 
 **Step 4: annualize.** A year is about 31.5 million seconds. The ceiling is 2.6M × 31.5M ≈ 8.2 × 10¹³, call it **82 trillion tokens per megawatt-year**.
 
-That ceiling assumes the offline benchmark scenario: perfectly batched work, no latency constraints, no idle time. Real serving has interactive latency targets, uneven daily load, failures, and maintenance. Suppose your fleet converts 40% of that ceiling into work customers actually accepted, which is a defensible planning number. You land near **33 trillion sellable tokens per megawatt-year**. At a round $1 per million output tokens, that single megawatt supports on the order of $33M of annual token revenue. The gap between the 82 and the 33 is exactly the goodput-versus-utilization distinction. It is also why serving efficiency is now a board-level topic rather than an engineering detail.
+That ceiling assumes the offline benchmark scenario, perfectly batched work with no latency constraints and no idle time, while real serving has interactive latency targets, uneven daily load, failures, and maintenance, so suppose your fleet converts 40% of that ceiling into work customers actually accepted, which is a defensible planning number. You land near **33 trillion sellable tokens per megawatt-year**. At a round $1 per million output tokens, that single megawatt supports on the order of $33M of annual token revenue. The gap between the 82 and the 33 is exactly the goodput-versus-utilization distinction. It is also why serving efficiency is now a board-level topic rather than an engineering detail.
 
 
 2 cautions on numbers like these. MLPerf figures are audited, but the marketing composites built on top of them are not. NVIDIA's "5x TPS per megawatt versus Hopper" and the "50x AI factory output" headline are vendor-constructed multiplications, not benchmark results. Any tokens-per-MW claim is also model-dependent. A sparser or smaller model shifts every step of the calculation. The method is the durable part.
@@ -62,7 +62,7 @@ $$
 R_g=\frac{P_g}{\mathrm{PUE}\,P_r}nr.
 $$
 
-At 1 million watts, PUE 1.2, rack draw 135,000 watts, 72 devices, and 5,842 outputs per device-second, the result is about 2.596 million outputs per second. This uses 6.173 rack-equivalents. A single installation buying whole racks can fit only 6 within that budget. Fractional racks describe averaging or planning, not an extra deployable machine.
+At 1 million watts, PUE 1.2, rack draw 135,000 watts, 72 devices, and 5,842 outputs per device-second, the result is about 2.596 million outputs per second, which uses 6.173 rack-equivalents, so a single installation buying whole racks can fit only 6 within that budget, because fractional racks describe averaging or planning, not an extra deployable machine.
 
 This improves on quoting accelerator efficiency alone because it accounts for supporting power and service requirements. Use rack IT power consistently: add external network power only when excluded from that measurement. Multiplying a maximum throughput benchmark by a nameplate power allocation mixes operating points. Measure both at the same load and quality target. Better batching can improve this ratio while worsening individual token latency, so compliant output belongs in the numerator. Energy, capacity reservation, and facility overhead remain separate decisions even when reported in 1 ratio.
 
@@ -72,13 +72,13 @@ This improves on quoting accelerator efficiency alone because it accounts for su
 
 If the megawatt is fixed, every watt spent on anything other than computation is revenue lost. Follow that logic through the stack and you can predict most of the current infrastructure roadmap.
 
-**Power delivery.** Today's racks distribute power at 54 volts DC. Power equals voltage times current, so at 54 V a 1 MW rack would need roughly 18,500 amps. Current is what dictates copper thickness. NVIDIA's engineers estimate a 1 MW rack at 54 V would need around 200 kg of copper busbar. Their answer is a transition to 800 VDC distribution. About 15x the voltage means the same conductor carries 85% more power in their design, with 45% less copper overall and lower resistive losses along the way. This lands in production with the 2027 Kyber generation at 576 GPUs per rack. When a chip company starts publishing power-electronics roadmaps, the constraint has clearly moved.
+**Power delivery.** Today's racks distribute power at 54 volts DC, and power equals voltage times current, so at 54 V a 1 MW rack would need roughly 18,500 amps, and since current dictates copper thickness, NVIDIA's engineers estimate such a rack would need around 200 kg of copper busbar. Their answer is a transition to 800 VDC distribution. About 15x the voltage means the same conductor carries 85% more power in their design, with 45% less copper overall and lower resistive losses along the way. This lands in production with the 2027 Kyber generation at 576 GPUs per rack. When a chip company starts publishing power-electronics roadmaps, the constraint has clearly moved.
 
 **Networking.** Traditional pluggable optics burn power in the long electrical trace between switch ASIC and transceiver. That trace costs roughly 22 dB of signal loss to overcome. Co-packaged optics move the conversion next to the ASIC and cut that to about 4 dB. NVIDIA reports a 3.5x power-efficiency gain for the switch tier. Watts saved in optics are watts freed for GPUs. Under a fixed envelope, that is a direct throughput increase.
 
 **Memory.** SK hynix reports HBM4 delivers over 40% better power efficiency than HBM3e alongside its doubled interface width. Memory power was a rounding error in the CPU era. At 22 TB/s per package, it no longer is.
 
-**Silicon itself.** Google's Ironwood TPU pods illustrate the scale: 9,216 chips per pod at roughly 10 MW, more power than many small towns. Google's headline metric for the part is perf/watt rather than peak FLOPS, self-reported at 2x per generation and about 30x since 2018. Read vendor efficiency claims with appropriate salt, but notice what they choose to advertise. Peak FLOPS sells chips to buyers with unlimited power. Perf/watt sells chips to buyers who have run out.
+**Silicon itself.** Google's Ironwood TPU pods illustrate the scale: 9,216 chips per pod at roughly 10 MW, more power than many small towns, and Google's headline metric for the part is perf/watt rather than peak FLOPS, self-reported at 2x per generation and about 30x since 2018, so read those efficiency claims with appropriate salt, but notice what they choose to advertise. Peak FLOPS sells chips to buyers with unlimited power. Perf/watt sells chips to buyers who have run out.
 
 The same pressure propagates upward into software and model design. 4-bit number formats, mixture-of-experts models that activate 3% of their weights per token, sparse attention, disaggregated serving: each of these is usually described as a cost or latency optimization. Under a fixed power envelope they are all the same move, more tokens through the same megawatts.
 
@@ -86,7 +86,7 @@ The same pressure propagates upward into software and model design. 4-bit number
 
 **"The bottleneck is GPU supply."** It was, in 2023. Today a well-capitalized operator can get GPUs in months but a grid connection in years. That makes power the binding constraint in the economic sense: the one that determines output when relaxed. The 50 GW of announced behind-the-meter gas is the clearest evidence. Operators only build their own power plants when buying grid power is impossible on relevant timescales. Chips queue in quarters. Interconnections queue in half-decades.
 
-**"Perf/watt matters because electricity is expensive."** Electricity is actually a modest slice of AI serving cost. The capital cost of the hardware dominates, since a GPU depreciates faster than it consumes its own price in power. Perf/watt matters because power is *rationed*, not because it is pricey. Doubling perf/watt at a power-capped site doubles output and therefore revenue, an effect roughly an order of magnitude larger than the saved electricity. This is why vendors advertise tokens per megawatt rather than tokens per dollar of electricity.
+**"Perf/watt matters because electricity is expensive."** Electricity is actually a modest slice of AI serving cost, because the capital cost of the hardware dominates: a GPU depreciates faster than it consumes its own price in power, so perf/watt matters because power is *rationed*, not because it is pricey. Doubling perf/watt at a power-capped site doubles output and therefore revenue, an effect roughly an order of magnitude larger than the saved electricity. This is why vendors advertise tokens per megawatt rather than tokens per dollar of electricity.
 
 **"190 GW announced means 190 GW is coming."** Announcements are free. Interconnections are not. The 777 projects behind that figure include speculative land grabs, duplicate site options, and projects that will die in the queue. Even the buildable fraction arrives on grid timelines, not press-release timelines. Treat announced capacity the way you would treat a startup's "signed LOIs": an indicator of demand, not a forecast of supply. The operational number, about 12 GW, growing at the pace transformers and substations allow, is the real supply curve.
 
@@ -94,7 +94,7 @@ The same pressure propagates upward into software and model design. 4-bit number
 
 ![Deep dive: The metric that reorders the stack](./deep-dive-component-03.png)
 
-Tokens per megawatt is doing something quietly important: it gives every layer of the AI stack a common denominator. A 4-bit quantization scheme, a better attention kernel, a co-packaged optical switch, and an 800 V busbar cannot be compared in their native units. Expressed as tokens per megawatt, they compose into a single number that maps directly to revenue per site. That is why the ratio is becoming the number that decides what gets built.
+Tokens per megawatt is doing something quietly important: it gives every layer of the AI stack a common denominator, because a 4-bit quantization scheme, a better attention kernel, a co-packaged optical switch, and an 800 V busbar cannot be compared in their native units, yet expressed as tokens per megawatt they compose into a single number that maps directly to revenue per site. That is why the ratio is becoming the number that decides what gets built.
 
 It also explains a pattern we have traced elsewhere in this series. The [Blackwell-to-Rubin memory math](/blog/blackwell-to-rubin-memory-math/) showed vendors holding capacity flat while pushing bandwidth. Bandwidth per watt is precisely where HBM4's efficiency gain bites. The [goodput versus utilization](/blog/goodput-vs-utilization/) distinction stops being an internal engineering metric and becomes the difference between 82 and 33 trillion sellable tokens on the same interconnection agreement. It also reframes the job description in [what an ML performance engineer does](/blog/what-does-an-ml-performance-engineer-do/). A 15% kernel speedup at a power-capped site is not a latency win, it is 15% more capacity from an asset with a 5-year replacement queue. That arithmetic is why those engineers have become some of the most leveraged people in the industry.
 

@@ -71,7 +71,7 @@ Now follow the numbers by hand:
 | 9,999 | 0.0099 s | 1.0099 s | 99x |
 | infinite | 0 s | 1.0 s | **100x** |
 
-With 99 lanes you get 50x, not 99x: the serial second is already half your runtime. Going from 999 lanes to 9,999 is a 10x increase in hardware, and it buys you the difference between 91x and 99x. The general formula below shows the ceiling: speedup saturates at the reciprocal of the serial fraction. A 1% serial fraction caps you at 100x forever, no matter how many billions of transistors you throw at the parallel part.
+With 99 lanes you get 50x, not 99x, because the serial second is already half your runtime, and going from 999 lanes to 9,999 is a 10x increase in hardware that buys you only the difference between 91x and 99x, which is the ceiling the general formula below makes explicit: speedup saturates at the reciprocal of the serial fraction, so a 1% serial fraction caps you at 100x forever, no matter how many billions of transistors you throw at the parallel part.
 
 
 This single curve explains the shape of the industry. It is why GPUs don't bother making individual threads fast, since the serial fraction runs on the CPU anyway, and why every serious system pairs a GPU with a strong host CPU to execute that 1% quickly. It is also why performance work is so often about shrinking `s`, by overlapping communication with compute and removing synchronization, rather than adding lanes.
@@ -94,7 +94,7 @@ This is the method behind the CPU/GPU division: speed up the parallel region and
 
 Amdahl tells you how much parallelism helps. It doesn't tell you how the GPU survives memory latency with no OoO engine and barely any cache. The answer is **latency hiding through massive multithreading**, and the mechanism is worth knowing precisely.
 
-Each SM keeps up to 64 warps (2,048 threads) *resident* simultaneously. Resident means their full register state lives permanently in the SM's register file for the duration of the kernel. Every cycle, the warp scheduler picks among resident warps that are ready and issues from one of them. When warp 7 issues a load and must wait several 100 cycles for HBM, the scheduler simply issues from warp 12 next cycle. Nothing is saved or restored. The context switch costs 0 cycles because every context is already in hardware.
+Each SM keeps up to 64 warps (2,048 threads) *resident* simultaneously, meaning their full register state lives permanently in the SM's register file for the duration of the kernel, and every cycle the warp scheduler picks among resident warps that are ready and issues from one of them, so when warp 7 issues a load and must wait several 100 cycles for HBM, the scheduler simply issues from warp 12 next cycle. Nothing is saved or restored. The context switch costs 0 cycles because every context is already in hardware.
 
 
 This is why GPU register files are enormous. Each H100 SM carries 256 KB of registers. Across 132 SMs that is about 33 MB of *registers*, more capacity than most desktop CPUs' entire L3 cache. The GPU replaces the CPU's "keep data close so 1 thread never waits" strategy with "keep so many threads in flight that waiting is free." A CPU hides latency with speculation inside 1 thread. A GPU hides it with concurrency across thousands.

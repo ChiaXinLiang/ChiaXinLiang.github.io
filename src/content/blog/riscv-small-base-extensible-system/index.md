@@ -28,9 +28,9 @@ This article builds the programmer's model with an RV64I array sum. Read [the IS
 
 ![Deep dive: The base ISA is the foundation](./deep-dive-component-04.png)
 
-RV32I and RV64I are base integer instruction sets with 32-bit and 64-bit integer register widths respectively. The width is commonly called XLEN. It describes architectural register width, not a promise that every operation or memory access uses that many bits.
+RV32I and RV64I are base integer instruction sets with 32-bit and 64-bit integer register widths respectively, and that width, commonly called XLEN, describes architectural register width rather than promising that every operation or memory access uses that many bits.
 
-The base includes integer arithmetic, logical operations, loads and stores, and control flow. A minimal integer program combines those operations to do more complicated work. Multiplication, floating point, vectors, and atomic operations are defined in extensions, not silently assumed in every RV64I implementation.
+The base includes integer arithmetic, logical operations, loads and stores, and control flow, so a minimal integer program combines those operations to do more complicated work, while multiplication, floating point, vectors and atomic operations are defined in extensions rather than silently assumed in every RV64I implementation.
 
 RISC-V's modular structure separates a small foundation from optional features. That helps implementations with different goals, but software must know its target. A binary that needs floating-point or vector instructions cannot run natively on a base RV32I or RV64I core.
 
@@ -97,7 +97,7 @@ With elements 3, 5, and 7 at `0x1000`, entry pointer is `a0 = 0x1000` and count 
 
 The count reaches 0 after the third element, and the return sequence puts 15 in `a0`. For a 0 count, the initial branch skips all memory loads and returns 0. This is the same architectural result as the AArch64 function even though register names and branch forms differ.
 
-Now replace the first element with hexadecimal `ffffffff`. As an unsigned 32-bit integer, it is 4,294,967,295. `lwu` produces that positive 64-bit value. `lw` instead produces the 64-bit 2's-complement representation of minus 1. A sum using the wrong load instruction would fail the intended unsigned semantics.
+Now replace the first element with hexadecimal `ffffffff`, which as an unsigned 32-bit integer is 4,294,967,295: `lwu` produces that positive 64-bit value, `lw` instead produces the 64-bit 2's-complement representation of minus 1, and a sum built on the wrong load instruction would fail the intended unsigned semantics.
 
 This example teaches more than comparing mnemonic counts in isolation. It shows that operand width, extension behavior, and ABI roles are all part of a correct translation.
 
@@ -111,7 +111,7 @@ $$
 
 The signed value is encoded in a 64-bit register by sign extension. For `0xffffffff`, $$u=4294967295$$: `LW` represents minus 1, whereas `LWU` represents 4294967295. Adding that loaded element to an accumulator of 2 therefore yields 1 or 4294967297, respectively, before any later overflow. Choosing the instruction is part of preserving the source language's intended type.
 
-This shows the small-base method: make data width and extension behavior explicit, then build the algorithm from those guarantees. That is more predictable than assuming every load has the same numeric interpretation. Extensions can add vectorized versions that process multiple elements. A correct vector rewrite still needs matching element signedness, accumulator width, remainder handling, and overflow semantics. A compiler and ABI decide how the source program maps onto those features. An open ISA makes these rules inspectable; it does not make a vendor core's throughput or power consumption follow from this algebra. Keep correctness proofs and benchmark claims separate when evaluating an extension.
+This shows the small-base method: make data width and extension behavior explicit, then build the algorithm from those guarantees. That is more predictable than assuming every load has the same numeric interpretation, and while extensions can add vectorized versions that process multiple elements, a correct vector rewrite still needs matching element signedness, accumulator width, remainder handling and overflow semantics, with a compiler and ABI deciding how the source program maps onto those features. An open ISA makes these rules inspectable; it does not make a vendor core's throughput or power consumption follow from this algebra. Keep correctness proofs and benchmark claims separate when evaluating an extension.
 
 ### Instruction size and compressed forms
 

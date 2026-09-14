@@ -75,7 +75,7 @@ The first command writes `reports/overlap-1.json`. Inspect its scope and result 
 
 ### Verify ownership and completion, not only payload
 
-A transfer request and a completed buffer are different states. Mark a tile READY only after the required bytes and response status are available. Keep a COMPUTE buffer owned until its last use, then permit refill. The two-buffer scheduler also prevents a load from overwriting the previous tile assigned to the same physical buffer.
+A transfer request and a completed buffer are different states, so mark a tile READY only after the required bytes and response status are available, keep a COMPUTE buffer owned until its last use and only then permit refill, and note that the two-buffer scheduler also prevents a load from overwriting the previous tile assigned to the same physical buffer.
 
 Address calculations use bytes throughout the interface. INT8 inputs and INT32 outputs have different element widths, so a correct index with the wrong multiplier still targets the wrong memory. Validate dimensions, range, alignment and relevant overlap before issuing work. The software model checks these preconditions and preserves memory when a command is rejected.
 
@@ -91,15 +91,15 @@ Assume an illustrative load takes 100 cycles and compute takes 150 cycles. Load 
 
 Tile 2 uses ping again. Its load cannot begin before compute tile 0 releases ping at 250, even though the loader finished tile 1 at 200. So load tile 2 occupies [250,350], followed by compute tile 2 over [400,550]. Tile 3 uses pong only after compute tile 1 releases it at 400. The ownership dependency is what makes the timeline valid; drawing overlapping colored bars without it can overwrite a live input.
 
-The supplied scheduler computes each load start from loader availability and the prior consumer of the same physical buffer. It computes each compute start from its own completed load and prior compute completion. Tests vary both stage durations and check those inequalities. A particular load/compute ratio is not required for correctness, although it changes whether stalls appear.
+The supplied scheduler computes each load start from loader availability and the prior consumer of the same physical buffer, it computes each compute start from its own completed load and prior compute completion, and the tests vary both stage durations to check those inequalities, so a particular load/compute ratio is not required for correctness, although it changes whether stalls appear.
 
 #### Explain steady-state throughput with its assumptions
 
 When independent load and compute resources overlap under the stated storage schedule, the long-run tile period approaches the slower stage's time, subject to setup and resource constraints. For the 100/150 example, compute is the limiting stage. The loader has intentional idle intervals because only 2 regions are available and ping or pong remains owned by computation. Those idle intervals do not imply the dependency rules should be bypassed.
 
-If store is another bottleneck, include its resource and storage lifetimes. A formula max(Tload,Tcompute) assumes store is hidden or not limiting in the selected model. An independent pipelined store stage would lead to a period constrained by all relevant stages, while a shared load/store interface can introduce combined bandwidth contention. State those conditions instead of using the 2-stage formula as a universal accelerator prediction.
+If store is another bottleneck, include its resource and storage lifetimes, since a formula max(Tload,Tcompute) assumes store is hidden or not limiting in the selected model: an independent pipelined store stage would lead to a period constrained by all relevant stages, while a shared load/store interface can introduce combined bandwidth contention, so state those conditions instead of using the 2-stage formula as a universal accelerator prediction.
 
-Finite jobs also include warmup and drain. The first tile must be loaded before computation, and the final tile must complete its declared output boundary. A steady-state diagram starting with pong already in compute should explicitly say it is after warmup. End-to-end latency for a short job can differ a lot from the number of tiles times the steady-state period.
+Finite jobs also include warmup and drain, because the first tile must be loaded before computation and the final tile must complete its declared output boundary, so a steady-state diagram starting with pong already in compute should say explicitly that it is after warmup, and end-to-end latency for a short job can differ a lot from the number of tiles times the steady-state period.
 
 #### Use ownership states as invariants
 

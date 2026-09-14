@@ -28,15 +28,15 @@ Start after [Ready/Valid Interfaces: Backpressure Without Lost Results](/blog/fp
 
 The PE figure adds forwarding to local accumulation. A travels horizontally, B vertically, and a local INT32 sum retains the output contribution. Clocked forwarding means a neighbor receives a value one accepted global step later.
 
-Each operand also carries validity. The PE accumulates only when both required operands are valid at that location. Padding with zero values alone is not a complete protocol: masks also distinguish a real zero from an absent operand.
+Each operand also carries validity, so the PE accumulates only when both required operands are valid at that location, and padding with zero values alone is not a complete protocol: a mask also distinguishes a real INT8 zero from an absent operand.
 
-The source uses a common step signal for every PE. When step is low, forwarding, masks and sums all hold. This makes a synchronous wavefront stall safely. It does not provide independent ready/valid queues on every link.
+The source uses a common step signal for every PE, so when step is low the forwarding registers, masks and sums all hold, which makes a synchronous wavefront stall safely across all 16 PEs, though it does not provide independent ready/valid queues on every link.
 
 ### Choose the PE transaction contract
 
 ![Deep dive: Choose the PE transaction contract](./deep-dive-component-02.png)
 
-The contract figure defines clear, step and result lifetime. Clear removes the previous sum and forwarding validity. A step samples current operands and propagates them; a valid pair contributes one product. The final sum becomes meaningful only after all required contributions arrive.
+The contract figure defines clear, step and result lifetime: clear removes the previous sum and forwarding validity, a step samples the current operands and propagates them, a valid pair contributes one product, and the final INT32 sum becomes meaningful only after all required contributions arrive.
 
 There is no autonomous K counter inside pe.sv. The array/system scheduler knows the tile's reduction length and fill/drain requirements. Confusing a PE's local value with a globally complete tile can cause early stores.
 
@@ -46,7 +46,7 @@ For pairs (2,3),(-4,5),(7,-2), the local products are 6,-20,-14 and the sum is -
 
 ![Deep dive: Skew operands so pairs meet](./deep-dive-component-03.png)
 
-The skew figure makes matching reduction indices arrive together. In a regular output-stationary array, row i's input enters after i initial steps and column j's weight enters after j. Their kth operands meet at location (i,j) on step k+i+j.
+The skew figure makes matching reduction indices arrive together, and in a regular output-stationary array row i's input enters after i initial steps while column j's weight enters after j, so their kth operands meet at location (i,j) on step k+i+j.
 
 Without skew, a PE away from the top-left can multiply operands from different reduction positions. The resulting output can look plausible for constant inputs while failing varied matrices. That is why test vectors must contain distinct values and signs.
 
@@ -95,7 +95,7 @@ endmodule
 
 ### Connect the block without changing its contract
 
-Write the accepted-work event for every boundary. For a ready/valid stream, it is valid AND ready at the sampled edge. For the released systolic core, it is a common global step. These are different protocols. Connecting them requires buffering or a scheduler that preserves matched operand pairs and advances every affected state consistently.
+Write the accepted-work event for every boundary: for a ready/valid stream it is valid AND ready at the sampled edge, while for the released systolic core it is a common global step, and because those are different protocols, connecting them requires buffering or a scheduler that preserves matched operand pairs and advances every affected state consistently.
 
 Track data and validity together. A register can contain old bits while its valid flag is false; those bits must not become an output transaction. Clear/reset invalidates pending work according to the chosen contract. If a pipeline is stalled, its payload, validity and ownership must remain aligned. A consumer may not reuse a buffer before its producer/previous consumer completes the relevant stage.
 
@@ -107,7 +107,7 @@ After a local block passes, connect one additional boundary at a time and retain
 
 #### Keep forwarded operands separate from arithmetic results
 
-An output-stationary processing element receives an A operand from its left and a B operand from above. It forwards those operands toward neighboring PEs and updates its own local accumulated C value. The forwarded A is still A, and the forwarded B is still B. Neither the product nor the local sum substitutes for them. A diagram that routes a multiplier output into A-out would describe a different computation and break the intended matrix mapping.
+An output-stationary processing element receives an A operand from its left and a B operand from above, forwards those operands toward neighboring PEs and updates its own local accumulated C value, and because the forwarded A is still A and the forwarded B is still B, neither the product nor the local sum substitutes for them, which is why a diagram that routes a multiplier output into A-out would describe a different computation and break the intended matrix mapping.
 
 The released PE registers its forwarded operands and their separate validity masks on a global step. The multiplier uses the matched current input pair, and its signed product contributes to local INT32 state only when both masks are valid. A step with one invalid operand still advances the forwarding state and masks, while skipping the local multiply. That is important during array filling and draining, where not every PE has useful work on every logical step.
 
@@ -135,7 +135,7 @@ Connecting 16 PEs creates more than 16 independent MACs. Boundary operand supply
 
 The output-stationary sum remains at its PE through the complete reduction. Result collection therefore needs access to every local C[i,j], not only outputs at the bottom row. The educational array exposes a packed result bus. A physical implementation may choose a serialized collection network or banked output storage, which introduces another schedule and completion boundary. That change should preserve local output ownership and be independently tested.
 
-A globally stepped architecture is intentionally simple. It avoids independent per-PE elastic state, but a missing required boundary operand can stall the whole array. More elaborate designs can overlap tiles or use local queues, yet must preserve matched reductions and bounded storage. Their benefit should be evaluated against the same useful operation rather than inferred from additional blocks in a drawing.
+A globally stepped architecture is intentionally simple, and it avoids independent per-PE elastic state, though a missing required boundary operand can stall all 16 PEs at once, while more elaborate designs can overlap tiles or use local queues and still must preserve matched reductions and bounded storage, so their benefit should be evaluated against the same useful operation rather than inferred from additional blocks in a drawing.
 
 The practical result of this lesson is a PE with a narrow, verified responsibility: forward unchanged operands and masks, update a local signed sum for valid matched pairs, and hold all relevant state consistently. That is enough to construct the next array chapter. It is not a complete accelerator instruction set, a DMA engine or a host protocol, and its local simulation does not establish a physical clock target.
 

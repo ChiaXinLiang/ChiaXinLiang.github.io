@@ -16,9 +16,9 @@ heroImage: './section-overview.png'
 
 ![Concept overview: Diffusion Distillation: Fewer Steps and Quality Tradeoffs](./section-overview.png)
 
-Step distillation trains a diffusion predictor to make larger useful moves during generation. Instead of changing only the numerical solver, it changes the model so that a shorter trajectory can approximate a slower teacher. The repeated inference work can shrink, while teacher execution and student training move cost into preparation.
+Step distillation trains a diffusion predictor to make larger useful moves during generation, so instead of changing only the numerical solver it changes the model itself, letting a shorter trajectory approximate a slower teacher: the repeated inference work can shrink, while teacher execution and student training move the cost into preparation.
 
-Progressive distillation provides a concrete example: one student update is trained to match 2 teacher updates, and the process can repeat to reduce the required step count. This article derives that target and explains why it differs from ordinary image reconstruction or classifier distillation. The numerical examples are illustrative, not measured generation results.
+Progressive distillation provides a concrete example: one student update is trained to match 2 teacher updates, and the process can repeat to reduce the required step count, so this article derives that target and explains why it differs from ordinary image reconstruction or classifier distillation, using numerical examples that are illustrative rather than measured generation results.
 
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
@@ -29,7 +29,7 @@ Progressive distillation provides a concrete example: one student update is trai
 
 A training-free sampler uses the existing predictor with another supported integration rule or timestep schedule. Step distillation changes predictor parameters using a teacher trajectory as supervision.
 
-The two interventions can be compared, but their preparation costs differ. A solver change can require validation without student training, while distillation adds teacher evaluations, optimization, and checkpoint management.
+The 2 interventions can be compared, but their preparation costs differ. A solver change can require validation without student training, while distillation adds teacher evaluations, optimization, and checkpoint management.
 
 Also preserve the intended inference scheduler. A student trained to make a particular coarse transition should not be treated as interchangeable with every generic many-step predictor. Its useful behavior belongs to a model-and-sampler pair with documented noise levels, conditioning, and guidance.
 
@@ -57,7 +57,7 @@ $$
 
 This expression assumes nonzero s_t and the stated deterministic setting. Endpoint and stochastic variants need their documented policies.
 
-The update combines a predicted clean direction with the current residual. It is not simply replacing x_t with the teacher's final image. That structure lets you solve for the clean prediction needed to reach a teacher-defined endpoint in one step.
+The update combines a predicted clean direction with the current residual. It is not simply replacing x_t with the teacher's final image. That structure lets you solve for the clean prediction needed to reach a teacher-defined endpoint in 1 step.
 
 ### 4. Rearrange the coarse transition
 
@@ -67,9 +67,9 @@ $$
 x_u=\frac{s_u}{s_t}x_t+\left(a_u-\frac{s_u}{s_t}a_t\right)\widehat x_0.
 $$
 
-The coefficient multiplying x_hat depends on the two selected noise levels. A coarse move changes that coefficient, so it changes the prediction needed to land at a particular endpoint.
+The coefficient multiplying x_hat depends on the 2 selected noise levels. A coarse move changes that coefficient, so it changes the prediction needed to land at a particular endpoint.
 
-This identity is exact for the stated update in real arithmetic. It does not establish that a finite student can learn every target perfectly. It supplies the numerical interface for defining supervision, while training and evaluation determine the approximation achieved by the student.
+This identity is exact for the stated update in real arithmetic, but exactness does not establish that a finite student can learn every target perfectly: the identity supplies the numerical interface for defining supervision, while training and evaluation determine the approximation the student actually achieves.
 
 ### 5. Construct the teacher endpoint
 
@@ -83,7 +83,7 @@ $$
 
 Composing the two updates is generally not the same as evaluating the teacher once at x_t. The predictor is nonlinear and the second state differs.
 
-Teacher parameters, conditioning, schedule, and numerical policy determine the endpoint. Under a deterministic teacher trajectory, that endpoint is fixed for a given starting state and condition. This gives the student a fixed target for learning a larger transition, not an ambiguous attempt to recover one unknown original image.
+Teacher parameters, conditioning, schedule, and numerical policy determine the endpoint, and under a deterministic teacher trajectory that endpoint is fixed for a given starting state and condition, which gives the student a fixed target for learning a larger transition rather than an ambiguous attempt to recover 1 unknown original image.
 
 ### 6. Derive the distillation target
 
@@ -95,7 +95,7 @@ $$
 
 The denominator must be valid under the selected schedule. Near-degenerate coefficients can create numerical sensitivity, so follow the method's timestep and parameterization policies.
 
-The target depends on the teacher's composed transition, not only on the original clean training sample. Progressive distillation uses this distinction to teach a student the behavior needed for a coarser generation path. A direct loss against x_0 would define a different estimation task.
+The target depends on the teacher's composed transition, not only on the original clean training sample, and progressive distillation uses that distinction to teach a student the behavior needed for a coarser generation path, because a direct loss against x_0 would define a different estimation task.
 
 ### 7. Work through a scalar target
 
@@ -103,7 +103,7 @@ Take illustrative amplitudes a_t equal to 0.6 and s_t equal to 0.8. At the targe
 
 Suppose the initial scalar state is 0.2 and the composed teacher endpoint is 0.5. The scale ratio is 0.75, and the target denominator is 0.35. The derived clean-prediction target is therefore 1.
 
-Substituting that target into the coarse update gives 0.15 plus 0.35, or 0.5, exactly under the stated arithmetic. The example verifies target inversion; it is not an image-quality result or proof that a trained student will reproduce the teacher on every input.
+Substituting that target into the coarse update gives 0.15 plus 0.35, or 0.5, exactly under the stated arithmetic, which verifies target inversion and nothing more: it is not an image-quality result or proof that a trained student will reproduce the teacher on every input.
 
 ### 8. Define a training objective
 
@@ -115,25 +115,25 @@ $$
 
 The target is treated as fixed with respect to student updates in the teacher-student procedure considered here. Teacher evaluation should not accidentally retain an unnecessary training graph.
 
-Prediction type and weighting matter. The progressive-distillation paper discusses parameterization and stability choices. A schematic MSE illustrates the supervision, but reproducing the method requires its full documented training and scheduler contract rather than only this generic expression.
+Prediction type and weighting matter. The Progressive Distillation paper discusses parameterization and stability choices. A schematic MSE illustrates the supervision, but reproducing the method requires its full documented training and scheduler contract rather than only this generic expression.
 
 ### 9. Explain the progressive stages
 
-A teacher requiring 2N steps can train a student intended for N steps. The student can then become the next teacher, and another stage can target N divided by 2 under a compatible schedule.
+A teacher requiring 2N steps can train a student intended for N steps, after which the student can itself become the next teacher so that another stage targets N divided by 2 under a compatible schedule.
 
-This repeated halving connects each coarse model to an already useful finer trajectory. The original method initializes the student from the teacher under its architecture and training design.
+This repeated halving, 2N steps to N and then N to N divided by 2, connects each coarse model to an already useful finer trajectory. The original method initializes the student from the teacher under its architecture and training design.
 
-Errors can accumulate across stages, and the very-few-step regime imposes a demanding approximation. Evaluate each stage. Successful halving at one budget does not guarantee equal quality at every later budget. Preserve checkpoint lineage and the target schedule with the final artifact.
+Errors can accumulate across stages, and the very-few-step regime imposes a demanding approximation. Evaluate each stage. Successful halving at 1 budget does not guarantee equal quality at every later budget. Preserve checkpoint lineage and the target schedule with the final artifact.
 
 ### 10. Distinguish step count from network size
 
 ![Deep dive: 10. Distinguish step count from network size](./deep-dive-component-03.png)
 
-A step-distilled model can keep the same architecture as its teacher while using fewer evaluations. Its parameter count and single-evaluation cost can therefore remain similar even when complete generation becomes cheaper.
+A step-distilled model can keep the same architecture as its teacher while using fewer evaluations, so its parameter count and its cost for 1 evaluation can remain similar even when complete generation becomes cheaper.
 
 This is different from distilling into a smaller network. The two can be combined, but then the experiment changes both predictor capacity and trajectory length.
 
-Report network evaluations, model bytes, peak allocation, and end-to-end time separately. Calling a model smaller because it uses fewer steps confuses architectural storage with repeated computation. The relevant efficiency mechanism here is a shorter useful generation path supported by learned coarse transitions.
+Report network evaluations, model bytes, peak allocation, and end-to-end time separately, because calling a model smaller when it merely drops from 2N steps to N confuses architectural storage with repeated computation: the efficiency mechanism here is a shorter useful generation path supported by learned coarse transitions.
 
 ### 11. Include guidance in the contract
 
@@ -141,7 +141,7 @@ Report network evaluations, model bytes, peak allocation, and end-to-end time se
 
 Guidance changes the predictor used by the sampler. Distillation can build in a chosen guidance policy, or it needs a documented supported range. Without evidence, do not assume a student handles arbitrary guidance scales.
 
-If the teacher endpoint uses conditional and unconditional evaluations, count both in preparation. If the deployed student avoids some repeated guidance work, verify that behavior in the actual inference path.
+If the teacher endpoint uses conditional and unconditional evaluations, count both of those 2 predictions in preparation, and if the deployed student avoids some repeated guidance work, verify that behavior in the actual inference path.
 
 Compare quality under the intended condition fidelity and diversity requirements. A faster configuration that silently changes guidance can answer a different generation question. Store prompts, conditioning encoders, scale conventions, and sampler settings alongside the step-distilled checkpoint.
 
@@ -149,57 +149,57 @@ Compare quality under the intended condition fidelity and diversity requirements
 
 ![Deep dive: 12. Account for preparation cost](./deep-dive-component-02.png)
 
-Each target can require multiple teacher predictions, and each training stage adds optimization work. Total preparation includes data handling, teacher evaluation, student training, stage validation, and export.
+Each target can require 2 or more teacher predictions, and each training stage adds optimization work. Total preparation includes data handling, teacher evaluation, student training, stage validation, and export.
 
 $$
 C_{\mathrm{prep}}\approx\sum_k\left(C_{\mathrm{teacher\ targets},k}+C_{\mathrm{student\ training},k}+C_{\mathrm{validation},k}\right).
 $$
 
-The units should be consistent and include discarded or failed work when it materially affects the resource claim. Shared targets can be reused, while online targets trade storage for repeated teacher execution.
+The units should be consistent and should include discarded or failed work when it materially affects the resource claim, and shared targets can be reused while online targets trade storage for repeated teacher execution.
 
-A widely reused generator can amortize this preparation over many outputs. A one-off deployment may prefer a verified training-free solver. Compare the phases explicitly. Reduced inference evaluations alone are not a complete lifecycle cost calculation.
+A widely reused generator can amortize this preparation over many outputs. A one-off deployment may prefer a verified training-free solver. Compare the phases explicitly. Halving the evaluation count from 2N to N is not by itself a complete lifecycle cost calculation.
 
 ### 13. Compare with strong sampler baselines
 
-Evaluate the original model with a supported efficient solver at several network-evaluation budgets. Compare the step-distilled student under its intended scheduler, not only against an unnecessarily long or weak teacher baseline.
+Evaluate the original model with a supported efficient solver at several network-evaluation budgets, then compare the step-distilled student under its intended scheduler rather than only against an unnecessarily long or weak teacher baseline.
 
 Use consistent conditions, resolution, output counts, and quality implementation. Record whether architecture, numerical precision, or conditioning also changes. Include preparation cost when the decision concerns total resource use.
 
-No diffusion training run or GPU benchmark was executed for this article. Its target inversion and cost equations are explanatory. The primary papers provide empirical evidence under their settings; a new artifact needs its own quality-resource measurements.
+No diffusion training run or GPU benchmark was executed for this article. Its target inversion and cost equations are explanatory. The Progressive Distillation and Consistency Models papers provide empirical evidence under their settings; a new artifact needs its own quality-resource measurements.
 
 ### 14. Relate consistency and distributional approaches
 
 ![Deep dive: 14. Relate consistency and distributional approaches](./deep-dive-component-04.png)
 
-Consistency models and distribution-matching distillation provide related ways to learn efficient generation, but they define different supervision and optimization problems. Consistency learning connects points on suitable trajectories, while distributional methods target generated-distribution properties under their formulations.
+Two other families, Consistency Models and Distribution Matching Distillation, provide related ways to learn efficient generation while defining different supervision and optimization problems: consistency learning connects points on suitable trajectories, and distributional methods target generated-distribution properties under their formulations.
 
 Do not label every few-step generator as progressive distillation. The teacher interface, loss, scheduler, and preparation procedure determine the actual mechanism.
 
-Compare these approaches through the information transferred and the deployment contract. A low evaluation count is a useful outcome, but it does not explain how the predictor learned it or whether the same quality, diversity, and conditioning requirements are preserved.
+Compare these approaches through the information transferred and the deployment contract, because a low evaluation count is a useful outcome that does not explain how the predictor learned it or whether the same quality, diversity, and conditioning requirements are preserved.
 
 ### 15. Validate the transition numerically
 
-A tiny scalar or matrix example can verify the composed teacher endpoint and target inversion. Substituting the derived target into the coarse update should reproduce that endpoint under appropriate numerical tolerance.
+A tiny scalar or matrix example can verify the composed teacher endpoint and target inversion, since substituting the derived target into the coarse update should reproduce that endpoint under appropriate numerical tolerance, the way 0.15 plus 0.35 reproduced 0.5 above.
 
-Check schedule indexing, predictor conversion, denominator handling, and teacher freeze status. Verify that the deployment uses the student schedule rather than accidentally retaining the teacher's finer grid.
+Check schedule indexing, predictor conversion, denominator handling, and teacher freeze status. Verify that the deployment uses the student schedule rather than accidentally retaining the teacher's finer 2N-step grid.
 
 Then evaluate held-out conditions and complete generation. A low training target loss does not establish identical images, diversity, or condition fidelity. The local transition objective supplies a useful learning mechanism, while task evidence determines whether the shorter trajectory is acceptable.
 
 ### 16. Choose the operating point from evidence
 
-Step distillation shifts work from repeated generation into preparation and learning. Its central innovation is a teacher-derived coarse transition target that changes what the predictor must estimate at each noise level.
+Step distillation shifts work from repeated generation into preparation and learning, and its central innovation is a coarse transition target derived from 2 composed teacher updates, which changes what the predictor must estimate at each noise level.
 
-Select the step budget using a quality-resource frontier under the intended conditions. Retain the network architecture, scheduler, guidance policy, numerical format, and preparation lineage with the artifact.
+Select the step budget, whether that is N or N divided by 2, using a quality-resource frontier under the intended conditions. Retain the network architecture, scheduler, guidance policy, numerical format, and preparation lineage with the artifact.
 
-This makes fewer-step generation understandable as a specific statistical and numerical system. It also clarifies the next deployment experiment: measure whether the reduced repeated work improves complete latency and throughput after fixed encoding, decoding, and service overhead are included.
+This makes fewer-step generation understandable as a specific statistical and numerical system, and it clarifies the next deployment experiment: measure whether the reduced repeated work improves complete latency and throughput after fixed encoding, decoding, and service overhead are included.
 
 ### 17. Inspect failure cases at very low budgets
 
-A coarse student can preserve broad composition while losing fine detail, or follow common conditions while failing unusual combinations. Inspect a documented held-out prompt population rather than only visually attractive outputs. Record whether failures concern condition fidelity, artifacts, diversity, or another task requirement.
+A coarse student can preserve broad composition while losing fine detail, or follow common conditions while failing unusual combinations, so inspect a documented held-out prompt population rather than only visually attractive outputs, and record whether failures concern condition fidelity, artifacts, diversity, or another task requirement.
 
 ## Conclusion
 
-Compare these cases with the teacher and a training-free sampler under similar resource budgets. The comparison helps distinguish limitations of the learned coarse transition from limitations already present in the teacher. It also guides the next preparation stage: more examples, a different loss or parameterization, or a less aggressive evaluation budget can address different observed problems.
+Compare these cases with the teacher and a training-free sampler under similar resource budgets, which helps distinguish limitations of the learned coarse transition from limitations already present in the teacher and guides the next preparation stage, where 3 remedies address different observed problems: more examples, a different loss or parameterization, or a less aggressive evaluation budget.
 
 ### Sources
 

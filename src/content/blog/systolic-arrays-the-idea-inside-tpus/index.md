@@ -16,7 +16,7 @@ tags: [tpu, hardware, matmul]
 
 ![Concept overview: Systolic Arrays: The 1978 Idea Inside Every TPU](./section-overview.png)
 
-92 trillion operations per second, from a chip clocked at 700 MHz. That was Google's first Tensor Processing Unit, deployed in 2015 and described at ISCA 2017. The architecture at its heart was published in 1978, the same year Intel's brand-new 8086 shipped with 29,000 transistors. H.T. Kung and Charles Leiserson called the idea a *systolic array*. For most of the intervening decades it sat in textbooks as a historical curiosity. Then deep learning made matrix multiplication the most economically important computation on Earth, and the curiosity became the blueprint.
+92 trillion operations per second, from a chip clocked at 700 MHz. That was Google's first Tensor Processing Unit, deployed in 2015 and described at ISCA 2017. The architecture at its heart was published in 1978, the same year Intel's brand-new 8086 shipped with 29,000 transistors. H.T. Kung and Charles Leiserson called the idea a *systolic array*, and for most of the intervening decades it sat in textbooks as a historical curiosity, until deep learning made matrix multiplication the most economically important computation on Earth and the curiosity became the blueprint.
 
 ## Deep dive
 
@@ -24,22 +24,22 @@ tags: [tpu, hardware, matmul]
 
 ![Deep dive: A heartbeat, drawn on paper](./deep-dive-component-01.png)
 
-In the late 1970s, Kung and Leiserson were at Carnegie Mellon, watching VLSI change the economics of hardware. VLSI, very-large-scale integration, was the then-new ability to put tens of thousands of transistors on 1 chip. Multipliers, once cabinet-sized, were about to become cheap enough to stamp out by the hundreds. Memory bandwidth was not getting cheaper at anything like the same rate. Kung later distilled the problem in his 1982 paper, "Why Systolic Architectures?". A processor that fetches 2 operands from memory for every arithmetic operation it performs makes the memory system the speed limit, not the arithmetic. The fix is to arrange the hardware so each value fetched from memory gets used many times before anything goes back.
+In the late 1970s, Kung and Leiserson were at Carnegie Mellon, watching VLSI change the economics of hardware. VLSI, very-large-scale integration, was the then-new ability to put tens of thousands of transistors on 1 chip. Multipliers, once cabinet-sized, were about to become cheap enough to stamp out by the hundreds, while memory bandwidth was not getting cheaper at anything like the same rate, and Kung later distilled the problem in his 1982 paper, "Why Systolic Architectures?": a processor that fetches 2 operands from memory for every arithmetic operation it performs makes the memory system the speed limit, not the arithmetic. The fix is to arrange the hardware so each value fetched from memory gets used many times before anything goes back.
 
-Their proposal: lay out a grid of small, identical processing elements, each doing 1 multiply and 1 add per clock cycle. Connect each element only to its immediate neighbors. Data enters at the edges and steps from neighbor to neighbor on every tick of the clock, like blood pushed through vessels by a contracting heart. "Systolic" comes from *systole*, the contraction phase of a heartbeat. The metaphor is exact: 1 global clock is the heart, and every beat moves every operand exactly 1 cell forward.
+Their proposal: lay out a grid of small, identical processing elements, each doing 1 multiply and 1 add per clock cycle, connect each element only to its immediate neighbors, and let data enter at the edges and step from neighbor to neighbor on every tick of the clock, like blood pushed through vessels by a contracting heart. "Systolic" comes from *systole*, the contraction phase of a heartbeat. The metaphor is exact: 1 global clock is the heart, and every beat moves every operand exactly 1 cell forward.
 
 3 properties fall out of this arrangement, and they are the whole story:
 
-1. **No instruction fetch.** The cells do not run programs. Each 1 repeats the same multiply-accumulate forever. A CPU spends control logic on decoding, branching, and scheduling (see [what a CPU actually does](/blog/what-a-cpu-actually-does/)). None of that logic exists here, so nearly all the silicon does math.
+1. **No instruction fetch.** The cells do not run programs: each 1 repeats the same multiply-accumulate forever, and while a CPU spends control logic on decoding, branching, and scheduling (see [what a CPU actually does](/blog/what-a-cpu-actually-does/)), none of that logic exists here, so nearly all the silicon does math.
 2. **No long wires.** Every connection is to a physical neighbor, millimeters away at most. Short wires switch fast and burn little energy. Reading a value from a neighboring cell costs far less energy than reading it from SRAM, and orders of magnitude less than DRAM.
 3. **Massive reuse.** A value entering the grid is used by every cell it passes through. Fetch once, compute many times, which is exactly Kung's prescription.
 
 ### The machine in 1 picture
 
-The variant inside the TPU is called *weight-stationary*, and it is the easiest to hold in your head. Picture an N×N grid. Before computation starts, the loader places 1 weight of the matrix W into each cell, where it sits unmoving. Then the input matrix streams in from the left edge, 1 row of cells per vector element, and partial sums flow downward through the columns.
+The variant inside the TPU is called *weight-stationary*, and it is the easiest to hold in your head. Picture an N×N grid: before computation starts, the loader places 1 weight of the matrix W into each cell, where it sits unmoving, and then the input matrix streams in from the left edge, 1 row of cells per vector element, while partial sums flow downward through the columns.
 
 
-Each cell does the same 3 things every cycle. It multiplies the input arriving from the left by the weight it holds, then adds the product to the partial sum arriving from above. Finally it passes the input to its right neighbor and the updated sum to the neighbor below. When a partial sum falls out of the bottom row, it has visited every cell in its column. It therefore holds the complete dot product of an input vector with 1 column of W. The bottom edge delivers finished results, 1 per column, cycle after cycle.
+Each cell does the same 3 things every cycle. It multiplies the input arriving from the left by the weight it holds, then adds the product to the partial sum arriving from above. Finally it passes the input to its right neighbor and the updated sum to the neighbor below. When a partial sum falls out of the bottom row, it has visited every cell in its column, so it holds the complete dot product of an input vector with 1 column of W, and the bottom edge delivers finished results, 1 per column, cycle after cycle.
 
 Notice what never happens. No cell reads a weight from memory during computation, and no input is fetched more than once. A partial sum reaches memory only when it is final. The memory system only touches the edges of the array.
 
@@ -67,7 +67,7 @@ Collect the outputs: [[19, 22], [43, 50]]. Check it the slow way: (1, 2)·(5, 7)
 
 Now scale the example and count memory traffic, because this is where the systolic array stops being cute and starts being a 92-teraop machine.
 
-Multiplying 2 256×256 matrices takes 256³ = 16,777,216 multiply-accumulates. A scalar loop that fetches both operands for every MAC performs 33,554,432 operand fetches. A 256×256 weight-stationary array loads each weight once and streams each input element in once. That comes to 2 × 256² = 131,072 loads, or 0.4% of the naive traffic. Every value that enters the grid is reused 256 times before the hardware is done with it.
+Multiplying 2 256×256 matrices takes 256³ = 16,777,216 multiply-accumulates. A scalar loop that fetches both operands for every MAC performs 33,554,432 operand fetches. A 256×256 weight-stationary array loads each weight once and streams each input element in once, which comes to 2 × 256² = 131,072 loads, or 0.4% of the naive traffic, because every value that enters the grid is reused 256 times before the hardware is done with it.
 
 
 The TPU v1 numbers show why this matters in practice. Its Matrix Multiply Unit is a 256×256 systolic array: 65,536 8-bit MAC cells. At 700 MHz, counting the multiply and the add separately, that is 65,536 × 700 MHz × 2 = 92 trillion operations per second of peak throughput. If every operand had to come from DRAM, feeding it would take roughly 92 TB/s of bandwidth. The card actually had 34 GB/s of DDR3, a gap of about 2,700×. Reuse inside the array, plus a 24 MiB on-chip buffer for activations, is the entire bridge. Google built the chip on a 28 nm process, at a clock slower than contemporaneous CPUs, inside a 75 W power envelope. It reported the chip running production inference 15 to 30 times faster than the server CPUs and K80 GPUs of 2015, at 30 to 80 times better performance per watt. Those comparisons are Google's own measurements, against hardware 2 process generations behind by publication time, so treat the ratios as directional. The architectural point survives any discount: the money is in the reuse, not the transistors.
@@ -82,7 +82,7 @@ $$
 
 For $$n=256$$, 1-byte inputs, and 4-byte accumulated outputs, intensity is about 85.3 operations per byte. This includes outputs omitted by the earlier operand-only comparison. A conventional CPU implementation can also cache and tile operands; “naive fetches” are not necessarily separate DRAM transfers.
 
-The architectural trick is local forwarding and predictable operand alignment. In the teaching weight-stationary array, with weights already loaded, $$B$$ streamed vectors produce their last result after roughly $$B+2n-2$$ cycles. For the 2-by-2 example with 2 vectors, that is 4 cycles, matching the trace. Longer streams amortize fill/drain time; weight reloads and output bandwidth add separate costs. Measure useful MACs per occupied array cycle across representative shapes, then compare equal-precision tiled baselines. This separates locality gains from lower precision and from peak throughput claims.
+The architectural trick is local forwarding and predictable operand alignment. In the teaching weight-stationary array, with weights already loaded, $$B$$ streamed vectors produce their last result after roughly $$B+2n-2$$ cycles. For the 2-by-2 example with 2 vectors, that is 4 cycles, matching the trace. Longer streams amortize fill/drain time, while weight reloads and output bandwidth add separate costs, so measure useful MACs per occupied array cycle across representative shapes, then compare equal-precision tiled baselines: that separates locality gains from lower precision and from peak throughput claims.
 
 ### Going deeper: skew, fill, and flavors of stationary
 
@@ -90,13 +90,13 @@ The architectural trick is local forwarding and predictable operand alignment. I
 
 A few mechanisms hide inside the clean picture.
 
-**Why the inputs are skewed.** In the worked example, row 2's input entered 1 cycle after row 1's. That is not an implementation quirk. The partial sum needs 1 cycle to travel from a row-1 cell down to a row-2 cell. Row 2's operand must therefore arrive 1 cycle late to meet it. In an N-row array, row *i* is delayed *i* cycles, which is why diagrams of systolic inputs always show that characteristic parallelogram of staggered data.
+**Why the inputs are skewed.** In the worked example, row 2's input entered 1 cycle after row 1's. That is not an implementation quirk: the partial sum needs 1 cycle to travel from a row-1 cell down to a row-2 cell, so row 2's operand must arrive 1 cycle late to meet it, and in an N-row array row *i* is delayed *i* cycles, which is why diagrams of systolic inputs always show that characteristic parallelogram of staggered data.
 
 **Fill and drain.** A result cannot exit until data has crossed the whole array. In this teaching dataflow the longest path adds roughly 2 array dimensions of startup and drain latency. Do not double-count that latency or treat it as a universal hardware rule. For N = 256 at 700 MHz it is under a microsecond. The cost is nothing if you stream thousands of input rows through, and ruinous if you multiply 1 tiny matrix and stop. Systolic arrays want long, steady streams. The same logic explains why small batch sizes hurt. With a batch of 8, most of the machinery idles between heartbeats, the kind of peak-versus-achieved gap covered in [goodput vs utilization](/blog/goodput-vs-utilization/).
 
 **Other dataflows.** Weight-stationary is 1 member of a family. *Output-stationary* arrays pin each accumulating result to a cell and stream both inputs past it. *Row-stationary*, used by MIT's Eyeriss chip, splits the difference to minimize total data movement for convolutions. The taxonomy matters because each choice fixes which operand gets maximum reuse. TPU v1 pinned weights because in 2015-era inference the same weights served millions of requests.
 
-**Where the bottleneck moved.** Kung's logic is recursive: kill 1 bottleneck and the next appears. TPU v1's array was so effective that its 34 GB/s DDR3 became the limiting factor for memory-bound layers. The paper's own roofline analysis shows several production workloads stuck against the bandwidth ceiling, not the compute 1. Successors moved to HBM largely for this reason, the same bandwidth arms race traced in [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/).
+**Where the bottleneck moved.** Kung's logic is recursive: kill 1 bottleneck and the next appears. TPU v1's array was so effective that its 34 GB/s DDR3 became the limiting factor for memory-bound layers, and the paper's own roofline analysis shows several production workloads stuck against the bandwidth ceiling, not the compute 1, so successors moved to HBM largely for this reason, the same bandwidth arms race traced in [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/).
 
 ### Common misconceptions
 
@@ -104,7 +104,7 @@ A few mechanisms hide inside the clean picture.
 
 **"The TPU was fast because of cutting-edge silicon."** Backwards. TPU v1 used a mature 28 nm process, ran at 700 MHz when GPUs ran above 1 GHz, and drew 75 W. The paper attributes its advantage to the overall design and workload comparison, including architecture and precision. The systolic organization lets its multipliers stay fed, and 8-bit integer math packs 25 times more multipliers per mm² than 32-bit floating point. A fast process would have helped, but it was not where the 15 to 30× came from.
 
-**"A 256×256 array can only multiply 256×256 matrices."** The compiler tiles large matrices: a 1024×1024 multiply becomes a sequence of 256-sized blocks. The accumulators carry partial sums between tiles, and utilization stays high. The genuine failure mode is the opposite direction. Multiply matrices with an inner dimension of 100 and only 100 of the 256 rows hold useful weights. Peak throughput drops by that ratio, no matter how clever the compiler is. This is why accelerator-era model designers pad dimensions to multiples of the array size, and why odd layer shapes quietly waste silicon.
+**"A 256×256 array can only multiply 256×256 matrices."** The compiler tiles large matrices: a 1024×1024 multiply becomes a sequence of 256-sized blocks. The accumulators carry partial sums between tiles, and utilization stays high. The genuine failure mode is the opposite direction: multiply matrices with an inner dimension of 100 and only 100 of the 256 rows hold useful weights, so peak throughput drops by that ratio no matter how clever the compiler is, which is why accelerator-era model designers pad dimensions to multiples of the array size and why odd layer shapes quietly waste silicon.
 
 ### The idea that waited
 

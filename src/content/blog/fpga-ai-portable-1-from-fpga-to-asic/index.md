@@ -26,31 +26,31 @@ Start after [Measure the Accelerator: Useful MACs, Bandwidth, Latency, and Power
 
 ![Deep dive: Replace FPGA primitives with wrappers](./deep-dive-component-01.png)
 
-The wrapper figure separates portable compute from device-specific resources. The PE and array use explicit arithmetic/state without FPGA primitive instances. A memory or clock wrapper exposes the contract that another technology must implement.
+The wrapper figure separates portable compute from device-specific resources: the PE and the 4×4 array use explicit arithmetic and state without FPGA primitive instances, and a memory or clock wrapper exposes the contract that another technology must implement.
 
-Replacing a DSP primitive with an RTL multiply can preserve arithmetic while changing timing and area. Replacing BRAM with an ASIC SRAM macro needs matching ports, read latency and collision behavior. A similar interface name is not equivalence.
+Replacing a DSP primitive with an RTL multiply of signed INT8 operands can preserve the arithmetic while changing timing and area, and replacing BRAM with an ASIC SRAM macro needs matching ports, read latency and collision behavior, because a similar interface name is not equivalence.
 
-The new integrated tile top uses banked behavioral storage for host-loaded operands. It is a small verified core, not a claim that those arrays become production SRAM automatically. Inspect the chosen synthesis mapping.
+The new integrated tile top uses banked behavioral storage for the host-loaded INT8 operands, and it is a small verified core rather than a claim that those arrays become production SRAM automatically, so inspect the chosen synthesis mapping.
 
 ### Memory macros define physical interfaces
 
 ![Deep dive: Memory macros define physical interfaces](./deep-dive-component-02.png)
 
-The macro figure shows a physical memory's logical, simulation and timing views. Width/depth alone do not define its behavior. Enables, byte masks, read latency and same-address policies also matter.
+The macro figure shows a physical memory's logical, simulation and Liberty timing views, width and depth alone do not define its behavior, and enables, byte masks, read latency and same-address policies all matter too.
 
-The released operand_ram contract is registered read-first. Choose a permitted macro or target primitive that matches it, or add a deliberate adapter and reverify. A black box with missing timing data cannot support a timing closure claim.
+The released operand_ram contract is registered read-first, so choose a permitted macro or target primitive that matches it, or add a deliberate adapter and reverify, because a black box with missing Liberty timing data cannot support a timing-closure claim.
 
-The educational Nangate45 array/core exercise does not instantiate a production SRAM macro. A larger chip needs an appropriate memory plan and licensed models. Keep that integration separate from the verified arithmetic source.
+The educational Nangate45 array and core exercise does not instantiate a production SRAM macro, a larger chip needs an appropriate memory plan and licensed models, and that integration stays separate from the verified arithmetic source.
 
 ### Clock/reset and initialization differ
 
 ![Deep dive: Clock/reset and initialization differ](./deep-dive-component-03.png)
 
-The initialization figure distinguishes reset control from valid data. FPGA configuration can initialize some resources; an ASIC cannot be assumed to receive those same contents. The portable design must define which state resets and which memory requires loading.
+The initialization figure distinguishes reset control from valid data: FPGA configuration can initialize some resources while an ASIC offers no such guarantee, so the portable design must define which state resets and which memory needs loading.
 
-Our sums/valid masks reset synchronously; operand memories are loaded before use. Control prevents invalid operands from contributing. The integrated top's outputs are meaningful only after done.
+Our INT32 sums and valid masks reset synchronously while operand memories are loaded before use, control prevents invalid operands from contributing, and the integrated top's outputs are meaningful only after done.
 
-A full-chip reset network also needs physical analysis. If an external reset is asynchronous, deassertion must follow the clock-domain strategy. Do not change reset style just to satisfy a synthesis warning without understanding the behavior.
+A full-chip reset network also needs physical analysis, and if an external reset is asynchronous its deassertion must follow the clock-domain strategy, so do not change reset style just to satisfy a synthesis warning without understanding the behavior.
 
 ### Check equivalence after substitution
 
@@ -60,7 +60,7 @@ The comparison figure runs the same numerical and protocol fixtures after substi
 
 Retain signed corners, pipeline flush, backpressure and irregular tiles. A wrapper can alter latency without altering stored data, so the scoreboard must align the documented timing contract.
 
-The practical outcome is a clean portability boundary. It does not make FPGA place/route reports into ASIC reports. Each technology still needs its own libraries, constraints, physical checks and integration evidence.
+The practical outcome is a clean portability boundary, it does not turn FPGA place and route reports into ASIC reports, and each technology still needs its own libraries, constraints, physical checks and integration evidence.
 
 ### Run this lesson
 
@@ -87,7 +87,7 @@ Retain a manifest of sources, tests, constraints and tool/model versions. Numeri
 
 #### Separate logical behavior from technology resources
 
-The portable numerical core describes signed products, local sums, masks and accepted state updates. FPGA DSP and BRAM resources are target-specific ways to implement parts of that behavior. An ASIC uses a selected standard-cell library and any permitted memory macros. Moving between them is not a literal replacement of a component named DSP with an identically named ASIC DSP block. Preserve the operation and expose resource-specific interfaces through documented wrappers.
+The portable numerical core describes signed products of INT8 operands, local INT32 sums, masks and accepted state updates, while FPGA DSP and BRAM resources are target-specific ways to implement parts of that behavior and an ASIC uses a selected standard-cell library with any permitted memory macros, so moving between them is not a literal replacement of a component named DSP with an identically named ASIC DSP block. Preserve the operation and expose resource-specific interfaces through documented wrappers.
 
 The released RTL uses behavioral arithmetic and storage rather than an instantiated proprietary primitive library. That provides an educational portability baseline, but does not prove every synthesis tool and technology maps it efficiently. The fixed operand top's access pattern may require storage restructuring for a physical macro. Such a change can affect read latency, banking and schedule, so it belongs in both the source review and verification evidence.
 
@@ -113,11 +113,11 @@ A reset during a job also affects ownership and pending work. Define whether the
 
 Drive the same legal input events into the golden portable design and the wrapped version. Compare output sequence, numerical values, validity and declared latency. Include stalls, reset/clear, signed endpoints and collision cases relevant to the replaced resource. A final matrix equality alone can miss a changed handshake or delayed status that breaks the surrounding system.
 
-A finite simulation is bounded evidence. Formal equivalence, when supported and executed, can establish a stronger relation under stated assumptions, but the release does not claim a formal run occurred. A synthesis netlist comparison likewise has a declared boundary and model set. Retain actual reports with source, tool and target versions instead of using “equivalent” as a generic label for matching one fixture.
+A finite simulation is bounded evidence, formal equivalence can establish a stronger relation under stated assumptions where the flow supports it and someone actually runs it, though the release does not claim a formal run occurred, and a synthesis netlist comparison likewise has a declared boundary and model set, so retain the actual reports with source, tool and target versions instead of using “equivalent” as a generic label for matching one fixture.
 
 Physical constraints remain technology-specific even when behavior matches. An ASIC implementation needs clocks, input/output delays, corners, physical libraries, power integration and routing rules. A core netlist that preserves arithmetic can still fail timing or lack required full-chip integration. Educational Nangate45 configuration is useful for learning that flow but is not a production foundry release.
 
-The architecture lesson is to retain a stable numerical and protocol boundary while changing its implementation resources. Each target wrapper should explain what it preserves, what it adapts and what evidence was executed. The current project provides portable behavioral RTL and tests; FPGA mapping and ASIC macro integration remain clearly scoped follow-up steps. That keeps the path from a learning circuit to a physical design precise instead of assuming portability from source syntax alone.
+The architecture lesson is to retain a stable numerical and protocol boundary while changing its implementation resources, so each target wrapper should explain what it preserves, what it adapts and what evidence was executed, and the current project provides portable behavioral RTL plus tests that run under Icarus Verilog, while FPGA mapping and ASIC macro integration remain clearly scoped follow-up steps that keep the path from a learning circuit to a physical design precise instead of assuming portability from source syntax alone.
 
 #### A release check for this boundary
 
