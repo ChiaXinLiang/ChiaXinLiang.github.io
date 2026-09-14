@@ -57,7 +57,7 @@ The loss being compared must also match. Training can use augmentation, dropout,
 
 ![Deep dive: Work an L2-regularized estimator by hand](./deep-dive-component-03.png)
 
-Consider the simplest regression model: every prediction is the same scalar parameter w. Our 3 illustrative targets are 1, 2, and 6. Use mean squared error with a factor 1 half, plus an L2 penalty with strength lambda greater than or equal to 0:
+Consider the simplest regression model: every prediction is the same scalar parameter w. Our 3 illustrative targets are 1, 2, and 6. Use mean squared error with a factor one half, plus an L2 penalty with strength lambda greater than or equal to 0:
 
 $$
 J(w)=\frac{1}{2n}\sum_{i=1}^{n}(w-y_i)^2+\frac{\lambda}{2}w^2.

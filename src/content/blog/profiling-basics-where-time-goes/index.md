@@ -68,7 +68,7 @@ For the example's 60-percent GPU execution fraction, infinitely fast kernels lea
 
 This model assumes the durations are on 1 serial critical path. Do not sum overlapping kernels across streams and call that elapsed GPU time; use the union of execution intervals or analyze the dependency path. Overlapping CPU preparation can hide work without reducing its own duration, so a kernel's percentage of summed GPU work is not automatically its percentage of request latency.
 
-Compared with choosing the visually largest kernel, this method ranks recoverable wall-clock time. Profile to identify dependencies, make 1 intervention, and measure unprofiled requests under the same workload. CUDA graphs can reduce launch overhead but restrict captured shapes and retain memory; asynchronous scheduling can hide bookkeeping but complicates buffer lifetime. The equation narrows the expected benefit before those engineering costs are paid.
+Compared with choosing the visually largest kernel, this method ranks recoverable wall-clock time. Profile to identify dependencies, make 1 intervention, and measure unprofiled requests under the same workload. CUDA graphs can reduce launch overhead but restrict captured shapes and retain memory; asynchronous scheduling can hide bookkeeping but complicates buffer lifetime. The equation narrows the expected benefit before you pay those engineering costs.
 
 ### Going deeper: why gaps form at all
 

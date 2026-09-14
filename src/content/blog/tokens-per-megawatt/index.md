@@ -21,7 +21,7 @@ There are 190 gigawatts of announced AI datacenter capacity in the pipeline, spr
 The numbers come from Bessemer Venture Partners' roadmap of the AI datacenter stack, and the reason for the gap is not money or chips. It is the electrical grid. A modern AI datacenter goes from groundbreaking to racks-online in 12 to 18 months. Getting permission to draw hundreds of megawatts from the grid, a process called interconnection, takes 5 to 7 years in most US markets. The queue is so long that some operators have stopped waiting: about 50 GW of "behind-the-meter" gas generation, power plants built on-site specifically to bypass the grid, was announced in 2025 alone. Even the components have queues now. Lead times for large grid transformers have stretched to 5 years.
 
 
-When an input becomes scarce, industries reorganize around the ratio of output to that input. Farming optimizes yield per acre. Mobile chips optimize performance per milliwatt of battery. AI infrastructure has found its version: tokens per megawatt. NVIDIA now markets it explicitly. Google frames every TPU generation around performance per watt. It is worth understanding exactly what this metric means, how to compute it, and what it changes.
+When an input becomes scarce, industries reorganize around the ratio of output to that input. Farming optimizes yield per acre. Mobile chips optimize performance per milliwatt of battery. AI infrastructure has found its version: tokens per megawatt. NVIDIA now markets it explicitly. Google frames every TPU generation around performance per watt. This article covers exactly what the metric means, how to compute it, and what it changes.
 
 ## Deep dive
 
@@ -62,9 +62,9 @@ $$
 R_g=\frac{P_g}{\mathrm{PUE}\,P_r}nr.
 $$
 
-At 1 million watts, PUE 1.2, rack draw 135,000 watts, 72 devices, and 5,842 outputs per device-second, the result is approximately 2.596 million outputs per second. This uses 6.173 rack-equivalents. A single installation buying whole racks can fit only 6 within that budget; fractional racks describe averaging or planning, not an extra deployable machine.
+At 1 million watts, PUE 1.2, rack draw 135,000 watts, 72 devices, and 5,842 outputs per device-second, the result is about 2.596 million outputs per second. This uses 6.173 rack-equivalents. A single installation buying whole racks can fit only 6 within that budget; fractional racks describe averaging or planning, not an extra deployable machine.
 
-The improvement over quoting accelerator efficiency alone is accounting for supporting power and service requirements. Use rack IT power consistently: add external network power only when excluded from that measurement. Multiplying a maximum throughput benchmark by a nameplate power allocation mixes operating points. Measure both at the same load and quality target. Better batching can improve this ratio while worsening individual token latency, so compliant output belongs in the numerator. Energy, capacity reservation, and facility overhead remain separate decisions even when reported in 1 ratio.
+This improves on quoting accelerator efficiency alone because it accounts for supporting power and service requirements. Use rack IT power consistently: add external network power only when excluded from that measurement. Multiplying a maximum throughput benchmark by a nameplate power allocation mixes operating points. Measure both at the same load and quality target. Better batching can improve this ratio while worsening individual token latency, so compliant output belongs in the numerator. Energy, capacity reservation, and facility overhead remain separate decisions even when reported in 1 ratio.
 
 ### Going deeper: where the watts actually go
 
@@ -94,7 +94,7 @@ The same pressure propagates upward into software and model design. 4-bit number
 
 ![Deep dive: The metric that reorders the stack](./deep-dive-component-03.png)
 
-Tokens per megawatt is doing something quietly important: it gives every layer of the AI stack a common denominator. A 4-bit quantization scheme, a better attention kernel, a co-packaged optical switch, and an 800 V busbar are incommensurable in their native units. Expressed as tokens per megawatt, they compose into a single number that maps directly to revenue per site, which is why it is becoming the number that decides what gets built.
+Tokens per megawatt is doing something quietly important: it gives every layer of the AI stack a common denominator. A 4-bit quantization scheme, a better attention kernel, a co-packaged optical switch, and an 800 V busbar cannot be compared in their native units. Expressed as tokens per megawatt, they compose into a single number that maps directly to revenue per site, which is why it is becoming the number that decides what gets built.
 
 It also explains a pattern we have traced elsewhere in this series. The [Blackwell-to-Rubin memory math](/blog/blackwell-to-rubin-memory-math/) showed vendors holding capacity flat while pushing bandwidth, and bandwidth per watt is precisely where HBM4's efficiency gain bites. The [goodput versus utilization](/blog/goodput-vs-utilization/) distinction stops being an internal engineering metric and becomes the difference between 82 and 33 trillion sellable tokens on the same interconnection agreement. And it reframes the job description in [what an ML performance engineer does](/blog/what-does-an-ml-performance-engineer-do/): a 15% kernel speedup at a power-capped site is not a latency win, it is 15% more capacity from an asset with a 5-year replacement queue, which is why those engineers have become some of the most leveraged people in the industry.
 

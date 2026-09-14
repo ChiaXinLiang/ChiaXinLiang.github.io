@@ -16,7 +16,7 @@ tags: ['dram', 'hbm', 'memory']
 
 ![Concept overview: From DRAM to HBM: How Memory Went 3D](./section-overview.png)
 
-A server-grade DDR5 module delivers about 50 GB/s. The HBM3e memory sitting on a flagship AI GPU delivers 8 TB/s per package, 160 times more. Both are built from the same 1-transistor memory cell that IBM's Robert Dennard patented in 1968, and their wires toggle at broadly similar speeds. Most of the illustrative package-level gap comes from interface width and stack count, with signaling rate also contributing: how many wires you can attach, and how far the bits have to travel. This article walks from a single DRAM cell up to a 3D stack of silicon, and shows you the arithmetic along the way.
+A server-grade DDR5 module delivers about 50 GB/s. The HBM3e memory sitting on a flagship AI GPU delivers 8 TB/s per package, 160 times more. Both are built from the same 1-transistor memory cell that IBM's Robert Dennard patented in 1968, and their wires toggle at broadly similar speeds. Most of the illustrative package-level gap comes from interface width and stack count, with signaling rate also contributing. It comes down to how many wires you can attach, and how far the bits have to travel. This article walks from a single DRAM cell up to a 3D stack of silicon, and shows you the arithmetic along the way.
 
 ## Deep dive
 
@@ -31,7 +31,7 @@ The bucket is absurdly small. A modern cell capacitor holds roughly 10–30 femt
 
 3 consequences fall straight out of this design, and they shape everything above it.
 
-First, **reads are destructive**. To read a cell, the bitline is precharged to a midpoint voltage, the wordline fires, and the capacitor's charge dribbles onto the bitline, nudging its voltage by a few tens of millivolts. A **sense amplifier** at the end of the bitline detects the nudge's direction and snaps to a full 0 or 1. In doing so the cell's charge is consumed, so the sensed value must be written back before the row closes.
+First, **reads are destructive**. To read a cell, the bitline is precharged to a midpoint voltage, the wordline fires, and the capacitor's charge dribbles onto the bitline, nudging its voltage by a few tens of millivolts. A **sense amplifier** at the end of the bitline detects the nudge's direction and snaps to a full 0 or 1. The read consumes the cell's charge, so the sensed value must be written back before the row closes.
 
 Second, **the bucket leaks**. Transistors are imperfect switches, and 40,000 electrons do not stay put. Every cell must be refreshed — read and rewritten — within 64 milliseconds per the JEDEC standard, faster when hot. The D in DRAM, *dynamic*, is a polite word for "forgets constantly."
 
@@ -45,7 +45,7 @@ If cells don't get faster, bandwidth has only 2 levers:
 
 A standard DDR5 module exposes 64 data wires (organized as 2 independent 32-bit subchannels). Every generation of DDR has pushed the second lever, per-wire speed: DDR3 at 1.6 Gb/s per pin, DDR4 at 3.2, DDR5 now at 6.4 and climbing. But those bits travel roughly 10 centimetres across motherboard traces, through a socket, a connector, and stub-riddled topology. At multi-gigabit rates that path behaves like a bad radio channel; it demands careful termination, equalization, and training, and each doubling costs disproportionate signal-integrity effort and energy. Sending a bit off-package over a board costs on the order of 10 picojoules or more, most of it spent just driving the wire.
 
-The first lever, adding wires, hits a wall even sooner: pins. Every data wire needs a pin on the memory package, a trace on the board, and a pin on the processor package. A big server CPU already spends thousands of its pins on a dozen memory channels; the board around the socket is a dense forest of length-matched traces. You cannot route 10 1000 data wires through a motherboard. At PCB scale, wires are a scarce resource.
+The first lever, adding wires, hits a wall even sooner: pins. Every data wire needs a pin on the memory package, a trace on the board, and a pin on the processor package. A big server CPU already spends thousands of its pins on a dozen memory channels; the board around the socket is a dense forest of length-matched traces. You cannot route 10,000 data wires through a motherboard. At PCB scale, wires are a scarce resource.
 
 So here is the trap circa 2013, when GPU designers saw compute throughput doubling on schedule while memory bandwidth crawled: cells can't clock faster, boards can't hold more wires, and per-pin speed is an expensive treadmill. The way out was to stop treating memory as a thing you plug into a board, and start treating it as a thing you build *next to the processor* — and up.
 
@@ -81,7 +81,7 @@ $$
 
 For 1 1,024-bit interface at 9.6 billion transfers per second, the result is 1.2288 TB/s in decimal units. 8 such interfaces would theoretically provide 9.8304 TB/s before controller limits or lower configured signaling rates. The earlier 8-TB/s package illustration intentionally uses about 1 TB/s per stack; it does not combine maximum stack rates with a different product's delivered specification.
 
-The method behind HBM is making many short parallel connections manufacturable through stacking and dense package wiring. Relative to adding board-level DDR channels, it trades socket routing pressure for package complexity, stack yield, and thermal constraints. Attainable bandwidth is $$\beta_{\mathrm{effective}}=u\beta_{\mathrm{peak}}$$, where $$u$$ is workload-dependent service efficiency. Random bank-conflicting accesses or insufficient outstanding requests can lower it. Measure transferred useful bytes and elapsed time, not just pin count. Stacking increases aggregate byte throughput; it does not remove row activation, sensing, or refresh work inside DRAM.
+HBM works by making many short parallel connections manufacturable through stacking and dense package wiring. Relative to adding board-level DDR channels, it trades socket routing pressure for package complexity, stack yield, and thermal constraints. Attainable bandwidth is $$\beta_{\mathrm{effective}}=u\beta_{\mathrm{peak}}$$, where $$u$$ is workload-dependent service efficiency. Random bank-conflicting accesses or insufficient outstanding requests can lower it. Measure transferred useful bytes and elapsed time, not just pin count. Stacking increases aggregate byte throughput; it does not remove row activation, sensing, or refresh work inside DRAM.
 
 ### Going 3D: TSVs and the interposer
 
@@ -104,7 +104,7 @@ HBM3 organizes its 1,024 data wires as **16 independent channels of 64 bits each
 
 The per-pin speeds are modest *by design*. Early HBM ran 1 Gb/s per pin when DDR4 ran 2.4 and GDDR5 ran 7. Slow, short, unterminated, massively parallel links are the low-energy corner of the design space; fast narrow links are the low-pin-count corner. HBM and GDDR are the 2 corners, built from the same cells.
 
-Stacking also concentrates the technology's oldest enemy: heat. DRAM retention worsens as temperature rises — above 85 °C the standard refresh interval halves — and an HBM stack sits millimetres from a die dissipating upward of a kilowatt. This is 1 reason the memory sits *beside* the processor rather than on top of it, and why cooling design and refresh management are quietly part of every HBM deployment.
+Stacking also concentrates the technology's oldest enemy: heat. DRAM retention worsens as temperature rises — above 85 °C the standard refresh interval halves — and an HBM stack sits millimetres from a die dissipating upward of a kilowatt. This is one reason the memory sits *beside* the processor rather than on top of it, and why cooling design and refresh management are quietly part of every HBM deployment.
 
 The width lever keeps moving. HBM4 doubles the interface to **2,048 wires per stack**; SK hynix announced completed development in 2025 with mass production readiness, claiming over 40% better power efficiency than its predecessor (a vendor figure, not yet independently verified). Doubled width at similar pin speeds is how next-generation GPUs are slated to jump from 8 toward 20+ TB/s.
 
@@ -122,7 +122,7 @@ The width lever keeps moving. HBM4 doubles the interface to **2,048 wires per st
 
 For 20 years the DRAM industry optimized for cost per bit, and memory was the boring commodity under the heatsink. Large-model AI inverted that. Generating tokens from a large language model is bandwidth-bound — the whole model streams through the compute units for every token — so the memory package, not the logic die, now sets the speed limit. I ran that arithmetic in [Blackwell to Rubin: capacity stays flat, bandwidth nearly triples](/blog/blackwell-to-rubin-memory-math/), and the roadmap conclusion is blunt: GPU generations are now paced by HBM generations.
 
-The industrial consequence is that HBM has become the choke point of the entire AI build-out. HBM manufacturing and advanced packaging are specialized capabilities, so stack availability and package assembly can constrain accelerator supply independently of logic-die production. Exact supplier commitments and bill-of-material fractions are time-dependent commercial facts, not needed to establish the architectural mechanism. The commodity became the crown jewel.
+The industrial consequence is that HBM has become the choke point of the entire AI build-out. HBM manufacturing and advanced packaging are specialized capabilities, so stack availability and package assembly can constrain accelerator supply independently of logic-die production. Exact supplier commitments and bill-of-material fractions are commercial facts that change over time; the architectural mechanism does not depend on them. The commodity became the crown jewel.
 
 For a performance engineer, this article is the floor under 2 earlier ones. When [a CPU's pipeline](/blog/what-a-cpu-actually-does/) stalls for hundreds of cycles on a miss, this page is what it's waiting for: a wordline, a sense amplifier, and a trip across too few wires. And when a training cluster burns FLOPs waiting on memory, the gap shows up precisely as the difference between [goodput and utilization](/blog/goodput-vs-utilization/) — the hardware is busy, the bytes just aren't there yet.
 

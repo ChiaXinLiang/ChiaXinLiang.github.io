@@ -69,7 +69,7 @@ Worth checking before celebrating: 1,024 floats is 4 KB, which sits comfortably 
 
 ![Deep dive: Going deeper: feeding 2 pipes with 8 chains](./deep-dive-component-01.png)
 
-The vectorized loop is still leaving most of the machine idle. The core can *start* 2 vector adds per cycle (2 execution ports), but each add takes 4 cycles to finish, and our single accumulator forces every add to wait for the previous 1. 1 add begins every 4 cycles on hardware built to begin 8 in that time. The vector units sit idle 87% of the loop.
+The vectorized loop is still leaving most of the machine idle. The core can *start* 2 vector adds per cycle (2 execution ports), but each add takes 4 cycles to finish, and our single accumulator forces every add to wait for the previous one. One add begins every 4 cycles on hardware built to begin 8 in that time. The vector units sit idle 87% of the loop.
 
 The fix is to break the chain: keep **8 independent accumulators**, add every eighth vector into each, and fold the 8 together at the end. Now the scheduler always has independent work, the loop becomes throughput-bound at 64 adds ÷ 2 per cycle = 32 cycles, and with the wind-down reduction the whole sum lands around 60 cycles, about 15 nanoseconds. Nearly 70× the scalar baseline.
 
@@ -86,7 +86,7 @@ $$
 
 With the example's assumed $$L=4$$ and $$r=2$$, 8 accumulators can cover the arithmetic dependency latency. 1 accumulator supplies only 0.25 adds per cycle. This checks the claimed 87.5% unused issue capacity, while also explaining why width and independent chains provide different benefits.
 
-The improvement over a single vector accumulator is software-created instruction-level parallelism. Its cost is additional live registers and a final reduction. Excessive unrolling can spill registers or enlarge instruction footprint, and reassociation changes floating-point rounding. LLVM documents that some targets can generate ordered reductions preserving the original order; it is therefore too broad to say every floating-point reduction requires fast-math. Inspect the actual vectorization report and numerical requirements, then measure both cache-resident and streaming inputs. A dependency-bound speedup is not a prediction for DRAM-bound arrays.
+The improvement over a single vector accumulator is software-created instruction-level parallelism. Its cost is additional live registers and a final reduction. Excessive unrolling can spill registers or enlarge instruction footprint, and reassociation changes floating-point rounding. LLVM documents that some targets can generate ordered reductions preserving the original order, so it is too broad to say every floating-point reduction requires fast-math. Inspect the actual vectorization report and numerical requirements, then measure both cache-resident and streaming inputs. A dependency-bound speedup is not a prediction for DRAM-bound arrays.
 
 ### Auto-vectorization and where it gives up
 
@@ -96,7 +96,7 @@ You rarely write `vaddps` by hand. Modern compilers auto-vectorize loops at `-O2
 
 - **Possible aliasing.** If the compiler cannot prove that the output array does not overlap an input array, vectorizing could change the program's meaning, so it won't. The `restrict` keyword exists to make that promise.
 - **Loop-carried dependencies.** A prefix sum (`out[i] = out[i-1] + a[i]`) genuinely needs the previous result each step. No legal transformation makes independent lanes out of it (parallel prefix algorithms exist, but they restructure the computation, which a compiler will not do on its own).
-- **Floating-point reductions.** Our running example! A freely reassociated tree reduction generally needs suitable floating-point permission, such as relevant fast-math flags or an applicable reduction directive. Some targets support ordered vector reductions that preserve the source order; compiler diagnostics reveal which transformation was chosen.
+- **Floating-point reductions.** Our running example! A freely reassociated tree reduction generally needs floating-point permission, such as fast-math flags or a reduction directive. Some targets support ordered vector reductions that preserve the source order; compiler diagnostics reveal which transformation was chosen.
 - **Branches and irregular access.** AVX-512 has per-lane mask registers (`k0`–`k7`) that let an instruction execute in some lanes and not others, plus gather and scatter instructions for non-contiguous addresses. They make vectorizing branchy or pointer-chasing code *possible*, not fast; a gather that touches 16 different cache lines does 16 cache accesses.
 
 2 more real-world cautions. Early AVX-512 chips (Skylake-SP, 2017) dropped their clock frequency under sustained 512-bit work, occasionally making vectorized code slower in mixed workloads; later generations largely fixed this, but it left a lasting folk memory. And the caveat pinned earlier: stream a 1 GB array from DRAM instead of 4 KB from L1 and a single core becomes memory-bandwidth-bound, at which point the sum runs at the speed of DRAM and the register width barely matters. Wide arithmetic only pays when the data can arrive fast enough, which is why [memory bandwidth, not FLOPs, is the number that decides modern accelerator designs](/blog/blackwell-to-rubin-memory-math/).

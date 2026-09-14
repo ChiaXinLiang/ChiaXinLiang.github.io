@@ -26,7 +26,7 @@ Start after [Check the Design: Timing Corners, Reset, CDC, and Testability](/blo
 
 ![Deep dive: Package a reproducible design release](./deep-dive-component-01.png)
 
-The release figure gathers RTL,reference/tests,constraints,tool versions and source permissions into a reproducible package. Checksums identify the exact files used. A later fix needs a new revision and refreshed evidence.
+The release figure gathers RTL, reference/tests, constraints, tool versions and source permissions into a reproducible package. Checksums identify the exact files used. A later fix needs a new revision and refreshed evidence.
 
 The lab includes original MIT-licensed source, Python exercises and recorded Icarus Verilog checks. It excludes simulator binaries and vendor libraries. Users obtain target tools under their own documented installation/licensing path.
 
@@ -36,7 +36,7 @@ A manifest is useful only if it corresponds to the checked source. Recompute it 
 
 ![Deep dive: Gate the release on evidence](./deep-dive-component-02.png)
 
-The gate figure separates numerical,protocol,implementation and physical evidence. The release's numerical/RTL gates are executed; Vivado,board deployment and ASIC physical checks are not. Those remain explicit milestones.
+The gate figure separates numerical, protocol, implementation and physical evidence. The release's numerical/RTL gates are executed; Vivado, board deployment and ASIC physical checks are not. Those remain explicit milestones.
 
 Preserve raw reports and seed/version information rather than one “all tests passed” sentence. A small fixture verifies a limited contract; record its scope. A new memory wrapper or board transport creates new checks.
 
@@ -46,17 +46,17 @@ The release can be useful educational material before fabrication. Label what is
 
 ![Deep dive: Plan first-silicon bring-up](./deep-dive-component-03.png)
 
-The bring-up figure starts with power,clock and reset,then register/transport access, memory tests and a small MAC/matrix fixture. Large inference comes only after those simpler checks succeed.
+The bring-up figure starts with power, clock and reset, then register/transport access, memory tests and a small MAC/matrix fixture. Large inference comes only after those simpler checks succeed.
 
 Define expected outputs before silicon or board access. The 2×2 fixture and small MLP provide known numerical values. Instrument status and timeouts so a missing completion is distinguishable from wrong arithmetic.
 
-First-silicon validation additionally needs a documented package/board,test access and electrical setup. This release supplies a plan,not fabricated hardware or measurements.
+First-silicon validation also needs a documented package/board, test access and electrical setup. This release supplies a plan, not fabricated hardware or measurements.
 
 ### Separate FPGA, layout, and fabricated silicon
 
 ![Deep dive: Separate FPGA, layout, and fabricated silicon](./deep-dive-component-04.png)
 
-The milestone figure distinguishes verified RTL,implemented FPGA core,working FPGA system,educational ASIC layout and optional fabricated silicon. Each requires different evidence. One cannot be renamed into the next by changing a status field.
+The milestone figure distinguishes verified RTL, implemented FPGA core, working FPGA system, educational ASIC layout and optional fabricated silicon. Each requires different evidence. One cannot be renamed into the next by changing a status field.
 
 The current deliverable is a tested educational RTL/project package plus implementation exercises. The integrated tile top provides host-loaded computation in simulation; a physical host interface, board shell and foundry implementation remain target-specific.
 
@@ -91,7 +91,7 @@ The current release is a verified educational software/RTL project: original sou
 
 A milestone table is more useful than checking every possible box. Verified RTL requires its functional evidence; an implemented FPGA core requires a constrained target run; a working board system requires physical interface and application results; educational ASIC layout requires executed flow artifacts; production silicon requires the selected full-chip and manufacturing obligations. A later milestone adds evidence rather than being created by editing a status label.
 
-The code is original educational MIT-licensed material. Include LICENSE and retain attribution. Do not package proprietary vendor libraries, restricted PDK files or third-party macro models merely because a local implementation flow references them. Readers should obtain required target inputs through their permitted channels. The archive can record expected versions and setup locations without redistributing those files.
+The code is original educational MIT-licensed material. Include LICENSE and retain attribution. Do not package proprietary vendor libraries, restricted PDK files or third-party macro models just because a local implementation flow references them. Readers should obtain required target inputs through their permitted channels. The archive can record expected versions and setup locations without redistributing those files.
 
 #### Build a manifest that binds source to evidence
 
@@ -105,7 +105,7 @@ Exclude caches, simulator binaries and generated temporary testbench executables
 
 Run the Python unit suite and deterministic lesson exercises from a fresh extracted lab. Install Icarus or set IVERILOG/VVP to documented executables, then run verify_top.py, which includes the block/array checks. Confirm the generated reports describe the same bounded contracts. A passing result on the author's old working tree is weaker release evidence if the archive omits a required source or contains an older version.
 
-Keep commands separated by purpose. Unit tests verify functional models and scheduling; RTL scripts compile and execute circuit fixtures; Vivado Tcl targets an out-of-context implementation exercise; OpenROAD configuration targets an educational physical flow. A reader can reproduce the first 2 without buying a board or attempting fabrication. The latter steps require their own installed tools and target models and remain unperformed in the shipped evidence.
+Keep commands separated by purpose. Unit tests verify functional models and scheduling; RTL scripts compile and execute circuit fixtures; Vivado Tcl targets an out-of-context implementation exercise; OpenROAD configuration targets an educational physical flow. A reader can reproduce the first two without buying a board or attempting fabrication. The latter steps require their own installed tools and target models and remain unperformed in the shipped evidence.
 
 Record tool differences if reproducing with another simulator or Python version. A new environment can reveal unsupported syntax or differing setup requirements without changing the mathematical contract. Preserve the new log and resolve discrepancies against the source and fixtures. Reproducibility does not mean assuming every environment must produce identical physical reports from an unspecified target.
 
@@ -123,7 +123,7 @@ When adding an RTL epilogue, external DMA, a physical host driver or a macro wra
 
 A performance follow-up should report useful work, precision, shape, timing boundary, repetitions, target and environment. A power follow-up should distinguish estimates from instrumented measurements. A physical-design follow-up should retain consistent netlist/layout/extraction/model artifacts and the actual checks run. These reports let readers compare new evidence with the earlier analytical model without conflating milestones.
 
-The final educational deliverable is therefore more than 24 isolated articles: 1 source-backed progression from specification through verified compute and system contracts to implementation and release exercises. Readers can reproduce the current software/RTL result and see the precise work required for the next hardware milestone. A clear archive, stable fixtures and honest evidence make that progression useful without claiming that a tutorial has already manufactured a commercial AI chip.
+The final educational deliverable is therefore more than 24 isolated articles: one source-backed progression from specification through verified compute and system contracts to implementation and release exercises. Readers can reproduce the current software/RTL result and see the precise work required for the next hardware milestone. A clear archive, stable fixtures and honest evidence make that progression useful without claiming that a tutorial has already manufactured a commercial AI chip.
 
 #### A release check for this boundary
 

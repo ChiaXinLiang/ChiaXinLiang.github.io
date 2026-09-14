@@ -75,7 +75,7 @@ The first command writes `reports/overlap-1.json`. Inspect its scope and result 
 
 ### Verify ownership and completion, not only payload
 
-A transfer request and a completed buffer are different states. Mark a tile READY only after the required bytes and response status are available. Keep a COMPUTE buffer owned until its last use, then permit refill. The two-buffer scheduler additionally prevents a load from overwriting the previous tile assigned to the same physical buffer.
+A transfer request and a completed buffer are different states. Mark a tile READY only after the required bytes and response status are available. Keep a COMPUTE buffer owned until its last use, then permit refill. The two-buffer scheduler also prevents a load from overwriting the previous tile assigned to the same physical buffer.
 
 Address calculations use bytes throughout the interface. INT8 inputs and INT32 outputs have different element widths, so a correct index with the wrong multiplier still targets the wrong memory. Validate dimensions, range, alignment and relevant overlap before issuing work. The software model checks these preconditions and preserves memory when a command is rejected.
 
@@ -89,7 +89,7 @@ Completion means the declared output is usable under the selected interface. An 
 
 Assume an illustrative load takes 100 cycles and compute takes 150 cycles. Load tile 0 into ping over [0,100], then compute it over [100,250]. During that computation, load tile 1 into pong over [100,200]. Tile 1 cannot compute until both its own load is complete and the compute resource is free, so it computes over [250,400]. These are analytical intervals, not measured FPGA timing.
 
-Tile 2 uses ping again. Its load cannot begin before compute tile 0 releases ping at 250, even though the loader finished tile 1 at 200. Thus load tile 2 occupies [250,350], followed by compute tile 2 over [400,550]. Tile 3 uses pong only after compute tile 1 releases it at 400. The ownership dependency is what makes the timeline valid; drawing overlapping colored bars without it can overwrite a live input.
+Tile 2 uses ping again. Its load cannot begin before compute tile 0 releases ping at 250, even though the loader finished tile 1 at 200. So load tile 2 occupies [250,350], followed by compute tile 2 over [400,550]. Tile 3 uses pong only after compute tile 1 releases it at 400. The ownership dependency is what makes the timeline valid; drawing overlapping colored bars without it can overwrite a live input.
 
 The supplied scheduler computes each load start from loader availability and the prior consumer of the same physical buffer. It computes each compute start from its own completed load and prior compute completion. Tests vary both stage durations and check those inequalities. A particular load/compute ratio is not required for correctness, although it changes whether stalls appear.
 
@@ -99,15 +99,15 @@ When independent load and compute resources overlap under the stated storage sch
 
 If store is another bottleneck, include its resource and storage lifetimes. A formula max(Tload,Tcompute) assumes store is hidden or not limiting in the selected model. An independent pipelined store stage would lead to a period constrained by all relevant stages, while a shared load/store interface can introduce combined bandwidth contention. State those conditions instead of using the 2-stage formula as a universal accelerator prediction.
 
-Finite jobs also include warmup and drain. The first tile must be loaded before computation, and the final tile must complete its declared output boundary. A steady-state diagram starting with pong already in compute should explicitly say it is after warmup. End-to-end latency for a short job can differ substantially from the number of tiles times the steady-state period.
+Finite jobs also include warmup and drain. The first tile must be loaded before computation, and the final tile must complete its declared output boundary. A steady-state diagram starting with pong already in compute should explicitly say it is after warmup. End-to-end latency for a short job can differ a lot from the number of tiles times the steady-state period.
 
 #### Use ownership states as invariants
 
 FREE permits a new producer to acquire the region. LOAD is producer-owned and incomplete. Successful fill makes READY, allowing the consumer to acquire it for COMPUTE. The consumer then releases FREE after its last use. READY comes from producer completion; FREE comes from consumer release. Reversing those signals can make a controller compute unfinished data or overwrite values still in use.
 
-At a given instant, the producer writes only its owned region and the consumer reads only its completed region. A figure showing both a write arrow and compute ownership on pong is invalid unless a permitted nonconflicting partition is explicitly defined. The simple exercise has whole-tile ownership, so it does not support that exception. Ping and pong are physical regions, not merely labels for 2 operations accessing the same bytes.
+At a given instant, the producer writes only its owned region and the consumer reads only its completed region. A figure showing both a write arrow and compute ownership on pong is invalid unless a permitted nonconflicting partition is explicitly defined. The simple exercise has whole-tile ownership, so it does not support that exception. Ping and pong are physical regions, not just labels for 2 operations accessing the same bytes.
 
-Reset invalidates the modeled states and cancels the selected pending work. The next job must refill any region whose contents are no longer declared valid. A production bus implementation must additionally handle outstanding responses and partially completed writes under its own recovery contract. The analytical scheduler does not execute that bus behavior and should not claim to do so.
+Reset invalidates the modeled states and cancels the selected pending work. The next job must refill any region whose contents are no longer declared valid. A production bus implementation must also handle outstanding responses and partially completed writes under its own recovery contract. The analytical scheduler does not execute that bus behavior and should not claim to do so.
 
 #### Test underrun, backpressure and resource reuse
 

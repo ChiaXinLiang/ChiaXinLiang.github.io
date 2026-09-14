@@ -18,7 +18,7 @@ tags: ['quantization', 'fp4', 'numerics']
 
 16. That is the complete vocabulary of a 4-bit floating-point number: 16 encodings, including signed zero, and once you account for the sign bit, just 8 magnitudes: 0, 0.5, 1, 1.5, 2, 3, 4, and 6. Every weight in a 4-bit large language model must be expressed as one of those 8 numbers, positive or negative. Nothing between 4 and 6 exists. Nothing above 6 exists at all.
 
-On its face this is a ridiculous way to store the parameters of 1 trillion-dollar industry's flagship products. Yet in 2026, 4-bit is rapidly becoming the default precision for serving big models, OpenAI ships its gpt-oss open-weight models natively in a 4-bit format, and NVIDIA built dedicated silicon for a competing 1. The 2 formats — **NVFP4** and **MXFP4** — agree on the 16 values. They disagree, sharply, on everything wrapped around them. That disagreement is worth understanding in detail, because it is one of the cleanest live examples of hardware and software co-design pulling in different directions: 1 format optimized for numerics, the other for openness and simplicity, with GPU silicon acting as the tiebreaker.
+On its face this is a ridiculous way to store the parameters of 1 trillion-dollar industry's flagship products. Yet in 2026, 4-bit is rapidly becoming the default precision for serving big models. OpenAI ships its gpt-oss open-weight models natively in a 4-bit format, and NVIDIA built dedicated silicon for a competing one. The 2 formats — **NVFP4** and **MXFP4** — agree on the 16 values. They disagree, sharply, on everything wrapped around them. That disagreement is worth understanding, because it is one of the cleanest live examples of hardware and software co-design pulling in different directions: 1 format built for numerics, the other for openness and simplicity, with GPU silicon acting as the tiebreaker.
 
 ## Deep dive
 
@@ -89,9 +89,9 @@ $$
 
 Groups of 32 therefore use 4.25 bits per value, or 0.53125 bytes. Groups of 16 use 4.5 bits, or 0.5625 bytes. A separate 32-bit tensor scale adds another $$32/N$$ bits per value for a tensor containing $$N$$ values. Padding and layout can add more; this calculation counts only the stated representation.
 
-Relative to BF16's 16 bits, the payload-plus-block-scale compression ratios are approximately 3.765 and 3.556. Neither is exactly fourfold. Smaller groups spend more metadata to adapt to local range; a more expressive scale can reduce error where power-of-2 choices are too coarse.
+Relative to BF16's 16 bits, the payload-plus-block-scale compression ratios are about 3.765 and 3.556. Neither is exactly fourfold. Smaller groups spend more metadata to adapt to local range; a more expressive scale can reduce error where power-of-2 choices are too coarse.
 
-The pencil example should be understood as a quantizer with its stated scale choice, rounding rule, grouping, and tensor scale, not a universal implementation mandate. Compare reconstruction error on identical blocks, then evaluate model quality and actual kernels. Reduced error can justify extra scale traffic, but a conversion-heavy execution path may erase the theoretical bandwidth advantage. 4-bit E2M1 has 16 bit patterns with signed 0, rather than 16 distinct real values. Format precision, storage efficiency, and native hardware support are separate properties.
+Treat the pencil example as one quantizer with its stated scale choice, rounding rule, grouping, and tensor scale, not a universal implementation mandate. Compare reconstruction error on identical blocks, then check model quality and actual kernels. Reduced error can justify extra scale traffic, but a conversion-heavy execution path may erase the theoretical bandwidth advantage. 4-bit E2M1 has 16 bit patterns with signed 0, rather than 16 distinct real values. Format precision, storage efficiency, and native hardware support are separate properties.
 
 ### Going deeper: why E8M0 exists at all
 

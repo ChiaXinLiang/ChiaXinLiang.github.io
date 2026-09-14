@@ -98,7 +98,7 @@ Which is why the single highest-value diagnostic step in this case is reading ke
 
 **"Quantization always speeds up inference."** It speeds up the regimes where weight bytes set the critical path: small-batch decode, single-user latency, memory-capacity-constrained serving. Compute-bound regimes, meaning prefill at almost any size and decode at high batch, see roughly nothing, and a fallback dequant path is actively slower than FP16 because it moves 2.3x the baseline's bytes. The honest claim is "quantization raises the memory-bound ceiling," which is only a speedup if that ceiling was the one pressing on you.
 
-**"The checkpoint quantized cleanly, so deployment is done."** Perplexity numbers validate the *format*; they say nothing about the *kernels*. The identical GPTQ checkpoint can run 3x faster than FP16 or 15% slower depending on whether the backend has a fused kernel for your exact GPU generation, group size, and quant config, and runtimes rarely fail loudly when they fall back. Quality evaluation and performance validation are separate sign-offs, and the second 1 requires a profiler, not a benchmark harness average.
+**"The checkpoint quantized cleanly, so deployment is done."** Perplexity numbers validate the *format*; they say nothing about the *kernels*. The identical GPTQ checkpoint can run 3x faster than FP16 or 15% slower depending on whether the backend has a fused kernel for your exact GPU generation, group size, and quant config, and runtimes rarely fail loudly when they fall back. Quality evaluation and performance validation are separate sign-offs, and the second one requires a profiler, not a benchmark harness average.
 
 ### The bigger picture
 

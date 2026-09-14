@@ -29,7 +29,7 @@ This article builds a performance model for that decision and explains why equal
 
 Specify the target device, backend, numerical format, batch, input resolution or sequence length, and concurrency. These settings determine the operations that the architecture actually executes.
 
-For image classification, an architecture might be evaluated on one fixed resolution and batch. For language serving, prefill and decode produce different matrix shapes and state lifetimes. A single architecture can occupy different performance regimes across those workloads.
+For image classification, you might evaluate an architecture on one fixed resolution and batch. For language serving, prefill and decode produce different matrix shapes and state lifetimes. A single architecture can occupy different performance regimes across those workloads.
 
 Also define the acceptance constraint: latency deadline, throughput, peak memory, energy, or a combination. Hardware-aware means the resource objective is attached to an operating envelope. Without that envelope, the phrase describes an intention rather than a testable design.
 
@@ -37,7 +37,7 @@ Also define the acceptance constraint: latency deadline, throughput, peak memory
 
 ![Deep-dive illustration: Count matrix work precisely](./deep-dive.png)
 
-For multiplication of an M-by-K matrix with a K-by-N matrix, dense arithmetic performs approximately 2MKN floating-point operations under the convention that multiplication and addition each count once.
+For multiplication of an M-by-K matrix with a K-by-N matrix, dense arithmetic performs about 2MKN floating-point operations under the convention that multiplication and addition each count once.
 
 $$
 C_{\mathrm{GEMM}}\approx2MKN.
@@ -45,7 +45,7 @@ $$
 
 This count describes mathematical work, not elapsed time. It does not include data movement, launch overhead, padding, conversion, or other operators surrounding the multiplication.
 
-Models with the same product MKN can present different tile utilization and parallelism. A thin dimension can limit available work per tile, while a small overall problem can leave much of a large device idle. Preserve shapes alongside operation counts in architecture comparisons.
+Models with the same product MKN can show different tile utilization and parallelism. A thin dimension can limit available work per tile, while a small overall problem can leave much of a large device idle. Keep shapes alongside operation counts in architecture comparisons.
 
 ### 3. Estimate arithmetic intensity
 
@@ -57,7 +57,7 @@ $$
 
 The denominator is a lower-level modeling assumption, not an exact measurement. Cache reuse, repeated reads, accumulation, fusion, and packing can change traffic. Define which boundary the estimate concerns, such as device memory rather than registers.
 
-This ratio helps explain why smaller batch or decode shapes can become bandwidth sensitive. More arithmetic reuse can raise intensity, but only when the execution path realizes that reuse. Use the model to form a hypothesis and inspect measured traffic or performance when available.
+This ratio helps explain why smaller batch or decode shapes can become bandwidth sensitive. More arithmetic reuse can raise intensity, but only when the execution path realizes that reuse. Use the model to form a hypothesis and check measured traffic or performance when available.
 
 ### 4. Apply a roofline bound
 
@@ -85,15 +85,15 @@ $$
 
 Actual kernels can use masked edges, specialized variants, or different scheduling, so this is a utilization illustration rather than a universal implementation formula.
 
-The expression shows why small changes in width can have discontinuous effects. Removing a few channels might reduce mathematical work while leaving the same tile footprint. A larger structured change can cross a shape boundary and affect execution more substantially. Verify the target kernel rather than assuming a smooth FLOP-to-latency relationship.
+The expression shows why small changes in width can have discontinuous effects. Removing a few channels might reduce mathematical work while leaving the same tile footprint. A larger structured change can cross a shape boundary and have a much bigger effect on execution. Verify the target kernel rather than assuming a smooth FLOP-to-latency relationship.
 
 ### 6. Work through shape utilization
 
-With an illustrative output tile width of 64, an output dimension of 65 spans 2 tiles along that axis. The conceptual tiled width is 128, giving approximately 50.8 percent useful columns under this simplified view.
+With an illustrative output tile width of 64, an output dimension of 65 spans 2 tiles along that axis. The conceptual tiled width is 128, giving about 50.8 percent useful columns under this simplified view.
 
 Reducing the dimension to 64 fits one tile and can change the utilization regime. Reducing it only to 64.5 is not a meaningful integer channel count, and reducing another dimension without changing this edge does not automatically remove the extra tile.
 
-This example does not predict a speedup of exactly 2. Kernel selection, occupancy, memory, and launch overhead still matter. It explains why architecture widths should be tested against supported execution shapes rather than selected solely from a continuous parameter-count target.
+This example does not predict a speedup of exactly 2. Kernel selection, occupancy, memory, and launch overhead still matter. It explains why you should test architecture widths against supported execution shapes rather than pick them solely from a continuous parameter-count target.
 
 ### 7. Model launch and boundary costs
 
@@ -103,9 +103,9 @@ $$
 T_{\mathrm{graph}}\approx\sum_i T_i+T_{\mathrm{dispatch}}+T_{\mathrm{conversion}}+T_{\mathrm{materialization}}.
 $$
 
-Many tiny operators can incur overhead disproportionate to their mathematical work. An architecture with fewer large compatible blocks can therefore execute differently from one with many small heterogeneous branches.
+Many tiny operators can pay overhead out of proportion to their mathematical work. An architecture with fewer large compatible blocks can therefore execute differently from one with many small heterogeneous branches.
 
-Fusion can avoid writing and rereading intermediates, but it depends on backend support and graph structure. Inspect the exported graph and compiled execution. A symbolic operator list does not establish which boundaries remain during deployment.
+Fusion can avoid writing and rereading intermediates, but it depends on backend support and graph structure. Inspect the exported graph and compiled execution. A symbolic operator list does not tell you which boundaries remain during deployment.
 
 ### 8. Include activation and state memory
 
@@ -119,9 +119,9 @@ Define tensor lifetimes and the workload when estimating peak memory. Summing ev
 
 An architecture can select operations that are theoretically efficient but poorly supported on the target backend. A depthwise convolution, unusual activation, sparse pattern, or dynamic selection rule may have a very different execution path across devices.
 
-Build representative microbenchmarks for the admissible operations and shapes before expensive model training. Inspect whether unsupported choices trigger decomposition or fallback. Keep correctness tests separate from resource acceptance.
+Build representative microbenchmarks for the admissible operations and shapes before expensive model training. Check whether unsupported choices trigger decomposition or fallback. Keep correctness tests separate from resource acceptance.
 
-The useful search space includes operators that can be exported and executed under the intended numerical policy. Excluding an unsupported option is a practical design decision, not proof that the mathematical operation is inherently inefficient on every possible system.
+The useful search space includes operators that can be exported and executed under the intended numerical policy. Excluding an unsupported option is a practical design decision, not proof that the mathematical operation is inefficient on every possible system.
 
 ### 10. Use latency lookup tables cautiously
 
@@ -129,15 +129,15 @@ A lookup table can store measured operator timings indexed by shape, format, and
 
 This approach is useful when the table covers the search space and operator costs approximately compose. Interpolation outside measured shapes, graph fusion, and memory interactions can weaken the estimate.
 
-Validate shortlisted complete architectures and inspect predictor error near the constraint boundary. A candidate predicted to be just below a deadline may be infeasible once exported. Keep measurements, backend versions, warmup, and repetition policy with the table so that it is reproducible evidence rather than an unexplained constant database.
+Validate shortlisted complete architectures and check predictor error near the constraint boundary. A candidate predicted to be just below a deadline may be infeasible once exported. Keep measurements, backend versions, warmup, and repetition policy with the table so that it is reproducible evidence rather than an unexplained constant database.
 
 ### 11. Connect width and depth to quality
 
-Reducing width or depth changes capacity and computation. Resolution and token reduction change the information presented to the model. These variables should be explored with quality-resource tradeoffs rather than only one cost metric.
+Reducing width or depth changes capacity and computation. Resolution and token reduction change the information presented to the model. Explore these variables with quality-resource tradeoffs rather than only one cost metric.
 
 A useful design objective can minimize latency under a quality threshold or maximize quality under a resource budget. The architecture parameters are discrete and interact with training, so a proxy score needs complete validation.
 
-Compare candidates under documented training budgets. An architecture trained longer or on more data can appear superior for reasons unrelated to its hardware mapping. Preserve the reference recipe and report any additional preparation cost needed to obtain the efficient candidate.
+Compare candidates under documented training budgets. An architecture trained longer or on more data can look better for reasons unrelated to its hardware mapping. Preserve the reference recipe and report any additional preparation cost needed to obtain the efficient candidate.
 
 ### 12. Understand device-specific rankings
 
@@ -145,11 +145,11 @@ Two devices can favor different operator types, widths, and numerical paths. Eve
 
 The papers' specific experiments belong to their stated devices and tasks. Their broader lesson is that resource feedback should match the deployment goal. It is not that one published architecture is universally optimal.
 
-When transferring an architecture to another backend, repeat complete measurements and inspect support. Similar advertised compute peaks do not establish equal operator performance or the same ordering between candidates.
+When transferring an architecture to another backend, repeat complete measurements and inspect support. Similar advertised compute peaks do not mean equal operator performance or the same ordering between candidates.
 
 ### 13. Build a controlled comparison
 
-Choose a baseline and several candidates that alter one interpretable design variable at a time where feasible. Record parameter count, operation count, activation or state bytes, measured latency, throughput, and task quality.
+Choose a baseline and several candidates that change one interpretable design variable at a time where feasible. Record parameter count, operation count, activation or state bytes, measured latency, throughput, and task quality.
 
 Use the same preprocessing and numerical contract. Warm up execution and report repetitions with an appropriate variability summary. Separate initialization and compilation from steady-state inference unless startup is itself the objective.
 
@@ -179,7 +179,7 @@ Finally, preserve the measured backend and artifact revision. Compiler changes c
 
 ## Conclusion
 
-A final comparison should keep the candidate's quality-resource point attached to its evidence. Store the architecture configuration, exported graph, numerical policy, workload, and measurement summary together. That package allows another engineer to test whether the same tradeoff holds after a device or compiler change. It also prevents a favorable operation count from being reused as if it were an independently measured latency result.
+A final comparison should keep the candidate's quality-resource point attached to its evidence. Store the architecture configuration, exported graph, numerical policy, workload, and measurement summary together. That package allows another engineer to test whether the same tradeoff holds after a device or compiler change. It also keeps a favorable operation count from being reused as if it were an independently measured latency result.
 
 ### Sources
 

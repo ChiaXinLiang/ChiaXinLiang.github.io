@@ -16,7 +16,7 @@ tags: ['rnn', 'lstm', 'sequences']
 
 ![Concept overview: RNN and LSTM: How Machines Learned Sequences — and Why They Hit a Wall](./section-overview.png)
 
-Before 2017, the state of the art in machine translation read a sentence the same way you do: left to right, 1 word at a time, updating a running memory. Attention-based models later became prominent for large-scale translation and language modeling.
+Before 2017, the state of the art in machine translation read a sentence the same way you do: left to right, one word at a time, updating a running memory. Attention-based models later became prominent for large-scale translation and language modeling.
 
 This article covers recurrent networks: the architecture that first made machines competent at language, the clever patch (LSTM) that kept it alive for 20 years, and the structural limitations that motivated highly parallel alternatives. Understanding these limitations is the setup for understanding why the Transformer looks the way it does.
 
@@ -86,7 +86,7 @@ This is the mechanism improved over a simple recurrent hidden-state update. It d
 
 **"RNNs are gone."** Their descendants are staging a comeback. Modern state-space models (Mamba and its hybrids) are recurrent at heart — constant memory per step, no quadratic attention bill — and are being blended into production LLMs precisely because [attention's costs](/blog/attention-in-plain-words/) hurt at long context. The relay idea wasn't wrong; it was waiting for a formulation that trains in parallel.
 
-### The wall: 1 word at a time
+### The wall: one word at a time
 
 But the second flaw had no patch. An RNN — LSTM included — is **inherently sequential**: step 50 cannot begin until step 49 finishes, because its input *is* step 49's output.
 
@@ -135,7 +135,7 @@ For a fair comparison with cached attention, specify state size, sequence length
 
 - RNNs read sequences with a running memory (hidden state) — 1 cell, reused across time. It made machines competent at language for 2 decades.
 - Flaw 1: long-range information and gradients fade over many steps (vanishing gradients); LSTM's gated express lane patched this well enough for translation-era systems.
-- Flaw 2, the fatal 1: strict state dependencies limit parallelism across time — so RNNs couldn't ride the scaling wave. The replacement had to connect all words directly, all at once.
+- Flaw 2, the fatal one: strict state dependencies limit parallelism across time — so RNNs couldn't ride the scaling wave. The replacement had to connect all words directly, all at once.
 
 
 A practical comparison should measure the complete task rather than only the recurrent cell. Hold the input representation, quality target, and evaluation split constant. Then report memory, latency, and accuracy separately. A compact streaming classifier and a general conversational model have different requirements, so a result on one does not establish superiority on the other. For streaming work, also test state resets and unusually long sequences. A system can look accurate on independent examples while drifting when hidden state carries across a continuous stream. Reset policy is therefore part of the model specification and its deployment contract.

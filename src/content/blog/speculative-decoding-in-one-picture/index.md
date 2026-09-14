@@ -95,7 +95,7 @@ L includes a target-produced correction or bonus token. At alpha equal to 0.7 an
 
 The classic setup needs a separate small model that behaves like the big 1, which is an annoying artifact to train, deploy, and keep in sync. The strongest recent methods dissolve the draft into the target itself.
 
-**Medusa** (Cai et al.) bolts extra decoding heads onto the target's final hidden state: head 1 predicts token t+2, head 2 predicts t+3, and so on, all from 1 forward pass, no separate model. Because each head alone is weak, Medusa drafts a small *tree* of candidate continuations and verifies the whole tree in 1 pass using a tree-shaped attention mask, so many alternative branches share 1 weight read. The paper reports 2.3-3.6x depending on model and task.
+**Medusa** (Cai et al.) bolts extra decoding heads onto the target's final hidden state: head 1 predicts token t+2, head 2 predicts t+3, and so on, all from 1 forward pass, no separate model. Because each head alone is weak, Medusa drafts a small *tree* of candidate continuations and verifies the whole tree in one pass using a tree-shaped attention mask, so many alternative branches share 1 weight read. The paper reports 2.3-3.6x depending on model and task.
 
 **EAGLE** (Li et al.) drafts at the feature level instead of the token level: a single lightweight transformer layer autoregressively extends the target's last hidden state, then reuses the target's own LM head to produce token candidates. The target's hidden features are much more predictable than sampled tokens, so acceptance rates jump. **EAGLE-2** goes further by making the draft tree dynamic: it uses the draft model's confidence scores to grow the tree where acceptance is likely and prune where it isn't, reporting speedups of roughly 3x to 4x (best on code generation, where text is most predictable). All these numbers are the authors' own benchmarks, single-request latency on their hardware, so treat them as upper bounds rather than what your cluster will see.
 
@@ -124,7 +124,7 @@ Speculative decoding is the third member of a family of tricks that all answer t
 
 ## Conclusion
 
-- Decode is bandwidth-bound, so verifying k drafted tokens in 1 target pass costs about the same as generating 1; acceptance rate α converts that slack into real speedup, (1 − α^(k+1))/(1 − α) expected tokens per pass.
+- Decode is bandwidth-bound, so verifying k drafted tokens in one target pass costs about the same as generating 1; acceptance rate α converts that slack into real speedup, (1 − α^(k+1))/(1 − α) expected tokens per pass.
 - The rejection-sampling acceptance rule makes the output distribution *exactly* the target model's. Speed without a quality trade, at the price of extra FLOPs.
 - Those extra FLOPs are free only when the GPU has idle compute: speculation is a low-batch latency optimization that fades, and can invert, at high batch.
 

@@ -19,7 +19,7 @@ This introductory lesson belongs to [FPGA & Digital Hardware Fundamentals](/seri
 
 This lesson extends one educational AI accelerator from its numerical specification toward verified RTL, FPGA integration and an ASIC implementation exercise. The overview shows this chapter's specific responsibility: Build a bit-accurate Python model; derive overflow bounds, rounding and saturation.
 
-The shared project begins with signed INT8 operands and INT32 accumulation, grows into a 4×4 output-stationary array, and provides a verified host-loaded tile top. The larger tiled inference/transport examples are software models, while external bus, board and physical-design integration remain explicit exercises. Follow the evidence labels rather than treating every diagram as an executed hardware result.
+The shared project starts with signed INT8 operands and INT32 accumulation, grows into a 4×4 output-stationary array, and provides a verified host-loaded tile top. The larger tiled inference/transport examples are software models. External bus, board and physical-design integration remain explicit exercises. Follow the evidence labels rather than treating every diagram as an executed hardware result.
 
 Start after [Digital Logic for AI Hardware: Registers, Clocks, and State Machines](/blog/fpga-ai-logic-1-digital-logic-for-ai-hardware/). Keep the previous fixture and source revision so this chapter's change can be checked independently.
 
@@ -31,7 +31,7 @@ Start after [Digital Logic for AI Hardware: Registers, Clocks, and State Machine
 
 The signed-number figure includes the most easily missed corner: signed 8-bit values range from -128 to 127. The maximum positive product is -128 times -128=16,384, not 127 squared=16,129. A product of two signed 8-bit operands fits in a signed 16-bit result.
 
-Two's-complement bit patterns require signed interpretation. The byte 0xff represents -1 under INT8, while an unsigned interpretation gives 255. Mixed signed/unsigned expressions can therefore produce a different product even though the input wires carry identical bits.
+Two's-complement bit patterns require signed interpretation. The byte 0xff represents -1 under INT8, while an unsigned interpretation gives 255. So mixed signed/unsigned expressions can produce a different product even though the input wires carry identical bits.
 
 The Python model checks input range explicitly, and RTL declares signed operands and product. Hardware has finite-width arithmetic; Python integers do not overflow automatically. The reference must apply the intended width/range contract rather than quietly using unlimited arithmetic to bless an overflowing implementation.
 
@@ -53,7 +53,7 @@ The quantization figure maps a real value to an integer using positive scale s a
 
 With symmetric quantization, zero point is 0 and the dot product's real scale is the product of input and weight scales. Nonzero zero points require centering or algebraically equivalent correction terms. Ignoring those corrections changes the mathematical function.
 
-Calibration, trained accuracy and per-channel scale selection belong to a larger model pipeline. Here we fix small illustrative scales and verify arithmetic. That allows circuit correctness to be separated from the separate question of whether a chosen quantized model preserves useful predictive quality.
+Calibration, trained accuracy and per-channel scale selection belong to a larger model pipeline. Here we fix small illustrative scales and verify arithmetic. That separates circuit correctness from the question of whether a chosen quantized model preserves useful predictive quality.
 
 ### Rounding and saturation are operators
 
@@ -101,9 +101,9 @@ def round_shift_away(x,shift):
 
 Create a new working copy of the lab and keep the numerical contract beside its sources. The opening work uses Python to make the values and accepted events explicit before circuit optimization. A direct matrix loop is the independent reference; a cycle-stepped array model explains timing without being the only numerical oracle.
 
-Start with known signed values, not only random data. Distinct elements expose row/column swaps and misaligned reductions. Zero and the signed endpoints expose conversion and width mistakes. A stalled event exposes the difference between offered work, accepted work and elapsed clocks. Retain each fixture so later changes can be compared against the same contract.
+Start with known signed values, not only random data. Distinct elements expose row/column swaps and misaligned reductions. Zero and the signed endpoints expose conversion and width mistakes. A stalled event exposes the difference between offered work, accepted work and elapsed clocks. Keep each fixture so you can compare later changes against the same contract.
 
-When moving the operation into RTL, draw the register boundaries and define reset/clear priority. A value observed before an active edge belongs to the previous state; a value observed after nonblocking updates belongs to the new state. Record that convention in the harness. Otherwise a testbench race can resemble a circuit defect.
+When moving the operation into RTL, draw the register boundaries and define reset/clear priority. A value observed before an active edge belongs to the previous state; a value observed after nonblocking updates belongs to the new state. Record that convention in the harness. Otherwise a testbench race can look like a circuit defect.
 
 The acceptance result is a defined behavior and an executed software/RTL check, not a physical clock achievement. Synthesis, board integration and measured performance belong to later milestones. This separation makes the early lesson useful without inventing a hardware result.
 
@@ -111,7 +111,7 @@ The acceptance result is a defined behavior and an executed software/RTL check, 
 
 #### Prove the width using the signed endpoints
 
-INT8 has values from -128 through 127. Its most negative input has a larger magnitude than its most positive input. The largest positive product is consequently (-128)×(-128)=16384, while the most negative product is (-128)×127=-16256. The product range is not symmetric and does not fit a signed 15-bit number, whose maximum is 16383. Use a signed 16-bit product so both endpoints are representable.
+INT8 has values from -128 through 127. Its most negative input has a larger magnitude than its most positive input. So the largest positive product is (-128)×(-128)=16384, while the most negative product is (-128)×127=-16256. The product range is not symmetric and does not fit a signed 15-bit number, whose maximum is 16383. Use a signed 16-bit product so both endpoints are representable.
 
 For K=8, the largest positive sum of products is 8×16384=131072. A signed 18-bit number reaches only 131071, so it misses the required maximum by 1. At least 19 signed bits are needed for this un-biased reduction. The released accumulator uses INT32, leaving room for the supported tile contract; a broader reduction or bias still requires its own bound. Choosing a familiar width is not a substitute for proving that the complete operation fits.
 
@@ -123,7 +123,7 @@ The INT8 bit pattern for -3 is 0xfd. Multiplying -3 by 5 gives -15, represented 
 
 Signedness belongs to declarations and expressions. A mixed signed/unsigned expression can change how a tool interprets a bit vector. Make the source operands signed, declare the product width explicitly and widen into the accumulator domain before addition. Keep a directed negative-product fixture in the simulator harness so refactoring a declaration cannot silently change the interpretation. An all-positive random test distribution would not expose this class of mistake reliably.
 
-The Python reference uses arbitrary-precision integers, but it is not permission for hardware to do so. The reference explicitly checks supported input and accumulator ranges. That creates 2 useful failure categories: incorrect finite-width hardware behavior and an operation outside the supported numerical contract. Treating every reference output as automatically representable would conceal the latter.
+The Python reference uses arbitrary-precision integers, but it is not permission for hardware to do so. The reference explicitly checks supported input and accumulator ranges. That creates 2 useful failure categories: incorrect finite-width hardware behavior and an operation outside the supported numerical contract. Treating every reference output as automatically representable would hide the latter.
 
 #### Make rounding an operator rather than an adjective
 
@@ -131,13 +131,13 @@ The lab defines division by powers of 2 with nearest rounding and ties away from
 
 An arithmetic right shift alone rounds negative values differently from nearest ties away. For example, -5 divided by 2 is -2.5; the chosen result is -3, whereas another rounding rule might select -2. For an exact -4 divided by 2, the result is -2 under either correct exact-division path. Test exact multiples, values just below and above thresholds, and positive and negative ties. A fixture only at 0 cannot distinguish these implementations.
 
-After scaling and rounding, clamp to the output range. A rounded 150 becomes 127 for signed INT8, while -150 becomes -128. Clamping is not wraparound. Casting an out-of-range wide integer directly to 8 bits may retain low bits and produce an unrelated signed value. Keep the clamp as an explicit operation and compare its boundary behavior. If ReLU is enabled earlier, some negative cases disappear, so test the rounding operator independently as well.
+After scaling and rounding, clamp to the output range. A rounded 150 becomes 127 for signed INT8, while -150 becomes -128. Clamping is not wraparound. Casting an out-of-range wide integer directly to 8 bits may keep low bits and produce an unrelated signed value. Keep the clamp as an explicit operation and compare its boundary behavior. If ReLU is enabled earlier, some negative cases disappear, so test the rounding operator independently as well.
 
 #### Connect the integer contract to model quantization
 
 A generic affine quantizer uses a positive scale and integer zero point. The real value represented by q is approximately scale×(q-zero_point). If inputs have nonzero zero points, matrix accumulation must subtract the appropriate offsets or use an algebraically equivalent implementation. The simple released signed matrix core does not automatically implement every framework's affine quantization convention. A compiler or preprocessing stage must map the model into a compatible operation.
 
-Bias needs compatible accumulator units. Adding a floating-point model bias directly to an INT32 sum is not a meaningful integer operator without a scale conversion. Likewise, output scaling can be per tensor or per channel, and the multiplier/shift approximation must retain that metadata. The tutorial's epilogue is a defined educational function rather than a claim to reproduce all quantized model formats.
+Bias needs compatible accumulator units. Adding a floating-point model bias directly to an INT32 sum is not a meaningful integer operator without a scale conversion. Likewise, output scaling can be per tensor or per channel, and the multiplier/shift approximation must keep that metadata. The tutorial's epilogue is a defined educational function rather than a claim to reproduce all quantized model formats.
 
 Record the numerical path as an ordered sequence: signed interpretation, product, widened reduction, compatible bias, optional activation, scaling, rounding and saturation. Compare intermediate values on a small fixture. A final mismatch then has a specific first divergence instead of a vague explanation that “quantization is inaccurate.” This numerical discipline is what lets a hardware optimization preserve the intended model behavior.
 

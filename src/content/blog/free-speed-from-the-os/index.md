@@ -106,7 +106,7 @@ t_{\mathrm{serial}}\approx c+\frac{D}{\beta},\qquad
 t_{\mathrm{overlapped}}\gtrsim\max\left(c,\frac{D}{\beta}\right).
 $$
 
-This assumes independent copy and compute engines, different batches, suitable streams, and correct readiness events. With 154 MB at 26 GB/s, the copy takes about 5.92 milliseconds. Against 180 milliseconds of compute, ideal overlap hides that time; it does not remove the transferred bytes or memory-controller pressure. Pageable transfers can sometimes make asynchronous progress through staging, so treat overlap as a measured outcome rather than a universal prohibition.
+This assumes independent copy and compute engines, different batches, suitable streams, and correct readiness events. With 154 MB at 26 GB/s, the copy takes about 5.92 milliseconds. Against 180 milliseconds of compute, ideal overlap hides that time; it does not remove the transferred bytes or memory-controller pressure. Pageable transfers can sometimes make asynchronous progress through staging, so measure overlap instead of assuming pageable copies never overlap.
 
 Prefetching buys the next batch's readiness with host memory. A rough queue budget is worker count times prefetch depth times batch payload: 8 workers and depth 2 with 154 MB batches suggest 2.46 GB of queued data before active batches and processing copies. Not every queued object is necessarily pinned. Measure resident and pinned memory separately, and test NUMA affinity against observed device topology rather than assuming the operating system automatically places GPU-facing buffers correctly.
 

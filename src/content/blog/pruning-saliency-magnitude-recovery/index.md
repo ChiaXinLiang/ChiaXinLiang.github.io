@@ -18,7 +18,7 @@ heroImage: './section-overview.png'
 
 Pruning removes selected connections or components from a learned network. Its appeal is straightforward: a model can contain more parameters than a deployment needs for its task. The difficult questions are which parameters to remove, how to recover useful behavior, and whether the resulting representation actually executes more efficiently.
 
-This article treats pruning as a constrained change to a trained function. It develops magnitude and loss-based importance criteria, explains their assumptions, and follows the recovery experiment. The next article addresses structured patterns and hardware execution. Separating those questions prevents a sparse checkpoint from being mistaken for a demonstrated speedup.
+This article treats pruning as a constrained change to a trained function. It develops magnitude and loss-based importance criteria, explains their assumptions, and follows the recovery experiment. The next article addresses structured patterns and hardware execution. Separating those questions keeps a sparse checkpoint from being mistaken for a demonstrated speedup.
 
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
@@ -36,9 +36,9 @@ $$
 m_i\in\{0,1\},\ \|m\|_0\le K.
 $$
 
-The zero-norm notation counts retained entries rather than defining an ordinary vector norm. The problem combines discrete structure selection with possible weight recovery. Solving it exactly is generally impractical for a large network, motivating importance heuristics and approximate optimization.
+The zero-norm notation counts retained entries rather than defining an ordinary vector norm. The problem combines discrete structure selection with possible weight recovery. Solving it exactly is usually impractical for a large network, which motivates importance heuristics and approximate optimization.
 
-A mask can remain applied to a dense tensor during experimentation. That establishes sparse semantics but not compressed storage or skipped arithmetic. Deployment requires a compatible representation and kernel. Keep the mathematical intervention separate from its execution.
+A mask can remain applied to a dense tensor during experimentation. That gives you sparse semantics but not compressed storage or skipped arithmetic. Deployment requires a compatible representation and kernel. Keep the mathematical intervention separate from its execution.
 
 ### 2. Explain magnitude pruning
 
@@ -50,7 +50,7 @@ $$
 m_i=\mathbf 1\{|\theta_i|\ge\tau\}.
 $$
 
-Small values can have small immediate effects in some settings, making magnitude a cheap useful signal. It is not a universal measure of importance. Input scale, normalization, parameterization, and downstream amplification affect the contribution of a weight.
+Small values can have small immediate effects in some settings, so magnitude is a cheap, useful signal. It is not a universal measure of importance. Input scale, normalization, parameterization, and downstream amplification affect the contribution of a weight.
 
 Define whether the ranking is global, per layer, or per component. A global threshold can remove disproportionate structure from a layer whose numerical scale differs from others. A per-layer budget protects against that particular imbalance but can retain unnecessary parameters in insensitive layers. Evaluate the allocation policy rather than treating its choice as harmless.
 
@@ -74,7 +74,7 @@ Computing exact curvature is expensive. Approximate diagonals, gradient statisti
 
 ![Deep dive: 4. Derive compensation with coupled curvature](./deep-dive-component-01.png)
 
-Removing one weight can be partly compensated by changing others. Under a quadratic loss model with positive-definite curvature, minimize perturbation cost while enforcing that the chosen coordinate becomes zero. A constrained solution uses a column of the inverse Hessian:
+You can partly compensate for removing one weight by changing others. Under a quadratic loss model with positive-definite curvature, minimize perturbation cost while enforcing that the chosen coordinate becomes zero. A constrained solution uses a column of the inverse Hessian:
 
 $$
 \delta=-\frac{\theta_i}{(H^{-1})_{ii}}H^{-1}e_i,\qquad
@@ -89,9 +89,9 @@ Singular or indefinite curvature needs additional treatment. A practical approxi
 
 Consider 2 scalar weights with magnitudes 0.1 and 1.0. Suppose the first coordinate has diagonal curvature 1,000 and the second has curvature 1 under the local stationary approximation. Their estimated removal costs are 5 and 0.5 respectively.
 
-Magnitude ranking would remove the smaller weight first, while this curvature model prefers removing the larger one. The example is hypothetical and does not establish that curvature always wins. It shows that weight magnitude and sensitivity can disagree because the surrounding function amplifies perturbations differently.
+Magnitude ranking would remove the smaller weight first, while this curvature model prefers removing the larger one. The example is hypothetical and does not prove that curvature always wins. It shows that weight magnitude and sensitivity can disagree because the surrounding function amplifies perturbations differently.
 
-Now introduce a nonzero gradient. The first-order term can change both rankings again. A saliency measured on one batch can also be noisy. Estimate it on representative data and test the actual pruned model. The approximation should help select an intervention, while validation establishes the resulting behavior.
+Now introduce a nonzero gradient. The first-order term can change both rankings again. A saliency measured on one batch can also be noisy. Estimate it on representative data and test the actual pruned model. Use the approximation to pick an intervention; use validation to establish the resulting behavior.
 
 ### 6. Examine rescaling invariance
 
@@ -107,7 +107,7 @@ One-shot pruning removes a selected fraction at once. Iterative pruning alternat
 
 Large one-shot perturbations can exceed the regime in which local saliency is informative. Iteration can update importance after the function changes, but it spends more training or calibration work. The appropriate schedule depends on task tolerance and available recovery resources.
 
-Keep the total recovery budget in comparisons. A method receiving substantially more retraining is not a controlled comparison of its selection rule alone. Record removed fraction, iterations, data, optimizer, and the final execution representation. A sparse result should be reproducible as an artifact rather than reconstructed from an ambiguous description.
+Keep the total recovery budget in comparisons. A method that gets much more retraining is not a controlled comparison of its selection rule alone. Record removed fraction, iterations, data, optimizer, and the final execution representation. A sparse result should be reproducible as an artifact rather than reconstructed from an ambiguous description.
 
 ### 8. Prevent unintended regrowth
 
@@ -137,7 +137,7 @@ Do not infer acceptable sparsity from a result on another architecture. Layer wi
 
 A pruned trained model and a newly trained smaller model are different procedures. They can have similar parameter counts but different structures, initialization, and training cost. Comparing them can be useful if the complete resource budget is explicit.
 
-Recovery preserves some learned weights, while training from scratch spends another optimization path. Distillation adds teacher supervision. None should be silently included in a pruning speed or quality claim without identifying its contribution.
+Recovery preserves some learned weights, while training from scratch spends another optimization path. Distillation adds teacher supervision. Do not silently include any of them in a pruning speed or quality claim without identifying its contribution.
 
 For an infrastructure decision, compare feasible artifacts and their acquisition cost. An expensive compression procedure can still be worthwhile for many repeated inferences, while a rarely used model may not amortize that work. The experiment should connect preparation cost with deployment frequency.
 
@@ -157,7 +157,7 @@ A scalable pruning procedure can minimize the difference between a layer's origi
 
 The convenience is also a limitation. Matching one layer's calibration outputs is a surrogate for preserving the final task behavior. Later nonlinearities, residual interactions, and changes in the activation distribution after earlier layers are pruned can affect that relationship. A sequence of locally good approximations can still accumulate error.
 
-A practical procedure should state whether it recalibrates later layers using the already modified network or keeps original activations. Those choices change which distribution the reconstruction objective sees. Neither should be treated as a trivial implementation detail when comparing results.
+A practical procedure should state whether it recalibrates later layers using the already modified network or keeps original activations. Those choices change which distribution the reconstruction objective sees. Do not treat either as a trivial implementation detail when comparing results.
 
 For a tiny example, retain the original activations and explicitly calculate the reconstruction error before and after compensation. Then compare the complete model's output under the same inputs. This separates a mistaken quadratic solver from a limitation of the surrogate objective. Use held-out task evaluation after selecting the policy, since the calibration objective itself cannot establish final quality.
 

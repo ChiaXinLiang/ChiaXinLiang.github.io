@@ -38,7 +38,7 @@ A serving benchmark is a function with at least 6 inputs. Publish the output wit
 
 **Warmup and caching.** The first requests hit CUDA graph capture, JIT compilation, and cold allocator paths. Skip warmup and you understate performance; benchmark with a repeated prompt against a server with prefix caching enabled and you overstate it wildly, because "prefill" becomes a cache lookup. vLLM's own benchmark harness disables prefix caching by default for exactly this reason.
 
-**Concurrency model.** Closed-loop (a fixed pool of clients, each sending its next request only after the previous 1 finishes) versus open-loop (requests arrive on a Poisson clock regardless of whether the server keeps up). This 1 is subtle and severe enough to get its own section below.
+**Concurrency model.** Closed-loop (a fixed pool of clients, each sending its next request only after the previous one finishes) versus open-loop (requests arrive on a Poisson clock regardless of whether the server keeps up). This 1 is subtle and severe enough to get its own section below.
 
 **The statistic.** Mean, median, p99. Latency distributions in queued systems are heavy-tailed, so the mean is dragged around by outliers while p50 hides them entirely. 2 services with identical p50 TPOT can differ 5x at p99, and your angriest users live at p99.
 

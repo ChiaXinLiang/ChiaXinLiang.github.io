@@ -71,7 +71,7 @@ Now follow the numbers by hand:
 | 9,999 | 0.0099 s | 1.0099 s | 99x |
 | infinite | 0 s | 1.0 s | **100x** |
 
-With 99 lanes you get 50x, not 99x: the serial second is already half your runtime. Going from 999 lanes to 9,999 — a 10x increase in hardware — buys you the difference between 91x and 99x. The general speedup formula below makes the saturation at the reciprocal of the serial fraction explicit. A 1% serial fraction caps you at 100x forever, no matter how many billions of transistors you throw at the parallel part.
+With 99 lanes you get 50x, not 99x: the serial second is already half your runtime. Going from 999 lanes to 9,999 — a 10x increase in hardware — buys you the difference between 91x and 99x. The general formula below shows the ceiling: speedup saturates at the reciprocal of the serial fraction. A 1% serial fraction caps you at 100x forever, no matter how many billions of transistors you throw at the parallel part.
 
 
 This single curve explains the shape of the industry. It is why GPUs don't bother making individual threads fast (the serial fraction runs on the CPU anyway), why every serious system pairs a GPU with a strong host CPU (someone has to execute that 1% quickly), and why performance work is so often about shrinking `s` — overlapping communication with compute, removing synchronization — rather than adding lanes.
@@ -86,7 +86,7 @@ $$
 
 For $$T_1=100$$ seconds, $$s=0.01$$, and $$N=99$$, the predicted time is 2 seconds and speedup is 50. Real systems add a workload-dependent overhead term $$H_N$$ for launches, communication, synchronization, and imbalance. Even 0.5 seconds of overhead lowers that example's speedup to 40.
 
-This identifies the method behind the CPU/GPU division: accelerate the parallel region and shorten or overlap its surrounding serial path. Compare full-job time before and after offload, including transfers, rather than comparing isolated arithmetic peaks. A faster kernel can lose overall when its launch and data movement exceed the saved compute time. Conversely, keeping data resident across several kernels amortizes those costs. The relevant threshold is useful parallel work per offload, not a universal lane-count ratio.
+This is the method behind the CPU/GPU division: speed up the parallel region and shorten or overlap its surrounding serial path. Compare full-job time before and after offload, including transfers, rather than comparing isolated arithmetic peaks. A faster kernel can lose overall when its launch and data movement exceed the saved compute time. Conversely, keeping data resident across several kernels amortizes those costs. The relevant threshold is useful parallel work per offload, not a universal lane-count ratio.
 
 ### Going deeper: how a GPU hides 500 cycles
 
@@ -117,7 +117,7 @@ This split is 1 instance of a theme that runs through the whole series: hardware
 
 If you want the latency machine's internals in detail — pipelines, hazards, and why branch prediction exists at all — that story is in [What a CPU Actually Does](/blog/what-a-cpu-actually-does/). The throughput machine's economics show up everywhere in ML infrastructure: the gap between peak FLOPS and delivered work is the subject of [Goodput vs Utilization](/blog/goodput-vs-utilization/), and the reason bandwidth (not lane count) is usually the binding constraint is worked through in [Blackwell to Rubin memory math](/blog/blackwell-to-rubin-memory-math/). And if this trade-off space looks like a career, it is 1: it's roughly the job description in [What Does an ML Performance Engineer Do?](/blog/what-does-an-ml-performance-engineer-do/)
 
-The next stop in this series pushes specialization 1 step further: if lockstep lanes beat general cores for parallel work, what beats lockstep lanes for *1 specific computation*? That is the systolic array, the design at the heart of Google's TPU.
+The next stop in this series pushes specialization one step further: if lockstep lanes beat general cores for parallel work, what beats lockstep lanes for *1 specific computation*? That is the systolic array, the design at the heart of Google's TPU.
 
 ## Conclusion
 

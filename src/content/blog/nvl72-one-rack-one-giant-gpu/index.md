@@ -77,7 +77,7 @@ Take a hypothetical dense 1-trillion-parameter transformer served in FP8. You ca
 
 Total ≈ 12.2 TB per step against 576 TB/s of aggregate HBM bandwidth: ≈ **21 ms per decode step**, or roughly 47 tokens/s per sequence and ~16,500 tokens/s for the rack, as a theoretical ceiling. Notice what the arithmetic just revealed: at full context occupancy, KV reads outweigh weight reads 11 to 1. The rack's marquee exaFLOPS never entered the calculation. This is why the industry's obsession has shifted from FLOPS to memory, a trend you can read directly off the [Blackwell-to-Rubin roadmap](/blog/blackwell-to-rubin-memory-math/).
 
-Aggregate capacity is conditional on a real partitioning plan. Let M be usable cache bytes after weights and buffers, m cache bytes per token, and S retained tokens per sequence:
+Aggregate capacity depends on a real partitioning plan. Let M be usable cache bytes after weights and buffers, m cache bytes per token, and S retained tokens per sequence:
 
 $$
 N_{\max}\le\left\lfloor\frac{M}{mS}\right\rfloor,\qquad
@@ -98,7 +98,7 @@ This does not prove that ordinary 72-way tensor parallelism realizes the bound. 
 
 **The switch fabric is flat, not a tree.** Each of the 9 switch trays carries 2 NVLink Switch ASICs; each GPU's 18 NVLink ports are spread across all 9 trays. The result is a non-blocking crossbar: 72 GPUs, any-to-any, 1 switch hop, full 1.8 TB/s. There is no oversubscription and no "near" versus "far" GPU inside the rack, which is why frameworks can shard tensors 72 ways without topology-aware placement logic. Contrast this with a fat-tree InfiniBand cluster, where bisection bandwidth and hop count degrade as you scale, and collective performance depends on careful rail-aware scheduling.
 
-And what did the benchmark record show when this fabric met real workloads? In MLPerf Inference v5.0 (March 2025), the first round with GB200 NVL72 submissions, Blackwell delivered on the order of 2 to 2.5x per-GPU throughput over Hopper on comparable benchmarks, with NVIDIA reporting up to about 3x per GPU on the new Llama 3.1 405B test. NVIDIA's headline "30x" rack-level claim on large-model inference, along with the "25x energy efficiency" figure from the Blackwell launch, compounds per-GPU gains with FP4 quantization and the larger NVLink domain against a smaller Hopper system. Treat those 2 as vendor-framed comparisons; the per-GPU MLPerf deltas are the peer-reviewed part.
+The benchmark record backs this up. In MLPerf Inference v5.0 (March 2025), the first round with GB200 NVL72 submissions, Blackwell delivered on the order of 2 to 2.5x per-GPU throughput over Hopper on comparable benchmarks, with NVIDIA reporting up to about 3x per GPU on the new Llama 3.1 405B test. NVIDIA's headline "30x" rack-level claim on large-model inference, along with the "25x energy efficiency" figure from the Blackwell launch, compounds per-GPU gains with FP4 quantization and the larger NVLink domain against a smaller Hopper system. Treat those 2 as vendor-framed comparisons; the per-GPU MLPerf deltas are the peer-reviewed part.
 
 ### Common misconceptions
 

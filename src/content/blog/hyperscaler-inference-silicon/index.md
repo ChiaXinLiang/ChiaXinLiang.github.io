@@ -26,7 +26,7 @@ Google's newest TPU pod wires 9,216 chips into a single machine that delivers 42
 
 A quick vocabulary check. *Training* is the phase where a model learns its weights from data; it runs for weeks on thousands of chips and tolerates restarts. *Inference* is everything after: the model's weights are frozen, and the job is to answer requests — billions of them, around the clock, under latency deadlines. The 2 phases stress hardware differently. Training wants enormous raw compute and fast gradient exchange between chips. Inference, especially the token-by-token *decode* phase of a large language model, mostly wants memory bandwidth: for each generated token, the chip streams the model's weights out of memory, does a comparatively modest amount of arithmetic, and moves on.
 
-An "inference accelerator" is a chip whose budget was allocated for that second profile. Less silicon spent on graphics heritage or double-precision math, more on matrix units at low precision, big fast memory, and the interconnect needed to spread 1 model across many chips.
+An "inference accelerator" is a chip whose budget goes to that second profile. Less silicon spent on graphics heritage or double-precision math, more on matrix units at low precision, big fast memory, and the interconnect needed to spread 1 model across many chips.
 
 For a decade the answer to "should a cloud build its own?" was mostly no. NVIDIA's GPUs were better, arrived sooner, and came with a software ecosystem nobody could match. Google was the lone exception, and even Google's TPUs were long viewed as an internal curiosity. The 2025–2026 generation is different in kind, not just degree. These are no longer hedges; they are volume products with named external customers, and each one is aimed squarely at inference.
 
@@ -77,9 +77,9 @@ $$
 Q_* = \frac{F}{c_g-c_a},\qquad c_g>c_a.
 $$
 
-For an illustrative investment of 200 million dollars and a 10-cent saving per million tokens, the threshold is 2 billion million-token units: 2 quadrillion delivered tokens. That is a scenario, not a disclosed hyperscaler budget. If savings disappear after workload changes, the threshold ceases to describe the investment.
+For an illustrative investment of 200 million dollars and a 10-cent saving per million tokens, the threshold is 2 billion million-token units: 2 quadrillion delivered tokens. That is a scenario, not a disclosed hyperscaler budget. If savings disappear after workload changes, the threshold no longer describes the investment.
 
-This exposes why owning sustained demand changes the decision. The baseline rents flexibility in a general platform; custom silicon concentrates investment on known execution patterns and integration. Its benefit depends on software migration, utilization, availability reserves, and quality-compatible output, not merely a cheaper die. Include ongoing compiler and model-support costs in the fixed or operating terms consistently. Quantization formats, attention variants, and model sizes continue changing, so a reusable compiler and enough architectural headroom can be as valuable as optimizing today's matrix shapes. Specialization pays only if the fleet delivers enough comparable useful work before its assumptions expire.
+This shows why owning sustained demand changes the decision. The baseline rents flexibility in a general platform; custom silicon concentrates investment on known execution patterns and integration. Its benefit depends on software migration, utilization, availability reserves, and quality-compatible output, not just a cheaper die. Include ongoing compiler and model-support costs in the fixed or operating terms consistently. Quantization formats, attention variants, and model sizes continue changing, so a reusable compiler and enough architectural headroom can be as valuable as optimizing today's matrix shapes. Specialization pays only if the fleet delivers enough comparable useful work before its assumptions expire.
 
 ### Going deeper: the fabric is the real design choice
 

@@ -38,7 +38,7 @@ A hardware scheduler needs explicit dimensions/masks for the same slices. Do not
 
 The reduction figure initializes C once and combines all K-chunk partials. The mathematical identity is C=sum_q A_q B_q. A chunk is not a finished neural-network output until the entire reduction is complete.
 
-Our software model computes an array result per chunk and adds it into the logical output. A hardware design could retain the accumulator or store wider partials in local memory, provided it implements the same result. Those strategies have different traffic and control costs.
+Our software model computes an array result per chunk and adds it into the logical output. A hardware design could keep the accumulator or store wider partials in local memory, as long as it implements the same result. Those strategies have different traffic and control costs.
 
 Bias, activation and requantization belong after the specified complete sum. Test chunks with cancellation, such as a positive partial followed by a negative partial, to catch an early activation.
 
@@ -68,7 +68,7 @@ Layout conversion is an explicit operation. If the physical engine wants banked 
 
 The testing figure compares tiled_matmul with direct matmul on deterministic irregular shapes. The tile-1 exercise uses 5×6 output and K=7 with signed small values. The broader corpus includes 1×1, tall, wide and multiple-chunk cases.
 
-Positive dimensions are required in the released command model. Empty operations are rejected rather than silently producing a ambiguous DONE event. A system choosing zero-work success must specify it and test it separately.
+The released command model requires positive dimensions. It rejects empty operations rather than silently producing an ambiguous DONE event. A system choosing zero-work success must specify it and test it separately.
 
 The practical artifact is a tiler whose results match the independent reference. RTL memory/control integration must then preserve its slice, mask and partial-sum behavior. Passing the Python tiler is not proof that a hardware DMA schedule implements it.
 
@@ -106,9 +106,9 @@ Keep logical dimensions separate from the physical array. The 4×4 engine comput
 
 Initialize a new output reduction once, combine every required contribution, and apply bias/activation/conversion only at the specified final stage. ReLU does not distribute over partial sums. A premature quantization can also change rounding and cancellation. Use mixed-sign fixtures so these mistakes cannot hide behind positive-only inputs.
 
-Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create substantial local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
+Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create a lot of local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
 
-The direct matrix oracle remains independent of the systolic timing trace. Use the trace to debug alignment and the oracle to verify the final result. Global stalls consume clocks without changing logical step; maintain that distinction in both the driver and the array. Once the complete tile contract is correct, measure its useful work and integration overhead separately.
+The direct matrix oracle remains independent of the systolic timing trace. Use the trace to debug alignment and the oracle to verify the final result. Global stalls consume clocks without changing logical step; keep that distinction in both the driver and the array. Once the complete tile contract is correct, measure its useful work and integration overhead separately.
 
 ### A worked engineering decision
 
@@ -118,27 +118,27 @@ Let M=5, N=6 and K=7, using a 4×4 output engine. The output needs a 2×2 grid o
 
 The useful reduction work is 5×6×7=210 MAC contributions. Splitting K into chunks changes how those contributions are scheduled, not the number required. If chunks have lengths 4 and 3, each output element combines both partial sums. The final chunk may be padded internally to a physical interface convention, but its invalid reduction positions cannot add arbitrary values. Masks or zero padding must follow the actual engine contract.
 
-A splits along its column/reduction dimension, while B splits along its row/reduction dimension. Drawing both splits horizontally would partition B along N instead of K. For output block C[i-range,j-range], the required sum is A[i-range,k0-range]B[k0-range,j-range] plus the next reduction block, continuing until all K is covered. Retain those indices in the schedule so a shape-compatible but wrong block cannot pass unnoticed.
+A splits along its column/reduction dimension, while B splits along its row/reduction dimension. Drawing both splits horizontally would partition B along N instead of K. For output block C[i-range,j-range], the required sum is A[i-range,k0-range]B[k0-range,j-range] plus the next reduction block, continuing until all K is covered. Keep those indices in the schedule so a shape-compatible but wrong block cannot pass unnoticed.
 
 #### Keep the accumulator alive across reduction chunks
 
 Initialize each output reduction once, then add every required chunk. Clearing C before each chunk discards earlier contributions. Storing only the last chunk likewise computes a different result. Use a mixed-sign fixture so the expected total cannot be guessed from the final contribution. Check the intermediate complete partial sums in the software tiler when debugging, while preserving the direct matmul as the independent final oracle.
 
-The released software tiler demonstrates this full operation with arbitrary supported logical shapes. The integrated RTL top computes 1 fixed-capacity tile operation and begins from cleared local sums for that command. Accumulating multiple K commands therefore requires the software or a future controller to combine their INT32 outputs, or a separately designed accumulator-lifetime extension. Do not assume the simple top retains partial state across commands when its source clears it.
+The released software tiler shows this full operation with arbitrary supported logical shapes. The integrated RTL top computes 1 fixed-capacity tile operation and begins from cleared local sums for that command. Accumulating multiple K commands therefore requires the software or a future controller to combine their INT32 outputs, or a separately designed accumulator-lifetime extension. Do not assume the simple top retains partial state across commands when its source clears it.
 
 Bias, ReLU and requantization follow the complete reduction. For partial sums -10 and 8, the correct sum is -2, and ReLU then yields 0. Applying ReLU separately yields 0+8=8, a different result. Early quantization can similarly alter cancellation and rounding. The tiler's lifetime rule is numerical as well as administrative: a partial result is not a completed layer output.
 
 #### Translate tile coordinates into byte addresses
 
-Compact row-major A uses baseA+i×K+k because each INT8 element occupies 1 byte. B uses baseB+k×N+j. INT32 C uses baseC+4×(i×N+j). A row's stride and C's row stride consequently differ even for related shapes. A correct logical index with the wrong element-size multiplier still targets the wrong byte. Keep indices, strides and byte addresses distinguishable in the interface.
+Compact row-major A uses baseA+i×K+k because each INT8 element occupies 1 byte. B uses baseB+k×N+j. INT32 C uses baseC+4×(i×N+j). So A row's stride and C's row stride differ even for related shapes. A correct logical index with the wrong element-size multiplier still targets the wrong byte. Keep indices, strides and byte addresses distinguishable in the interface.
 
-The integrated top uses padded A stride 8 and B stride 4 inside its fixed 64-byte operand loading space. A host bridging compact matrices to that top must copy each valid logical element into its padded location. Smaller dimensions do not change those physical strides. This packing step should have its own fixture so a correct matmul model does not conceal an incorrect board/top load layout.
+The integrated top uses padded A stride 8 and B stride 4 inside its fixed 64-byte operand loading space. A host bridging compact matrices to that top must copy each valid logical element into its padded location. Smaller dimensions do not change those physical strides. This packing step should have its own fixture so a correct matmul model does not hide an incorrect board/top load layout.
 
 For output stores, generate addresses only where the logical row is below M and column below N. A disabled store leaves memory unchanged; it is not a store of zero into an invalid address. Surround the output allocation with sentinel values in a software/integration fixture and verify they remain unchanged. Such a check exposes out-of-bounds writes that a final 5×6 matrix comparison alone would miss.
 
 #### Test shape boundaries rather than only full tiles
 
-Use 1×1×1, a full tile, the 5×6×7 fixture and dimensions immediately above a tile boundary. Distinct sizes reveal assumptions about divisibility and final chunk length. Nonpositive dimensions are rejected by the released command model before any memory writes. This is matrix multiplication: K can be larger than M or N, and no convolution-kernel-fitting rule applies.
+Use 1×1×1, a full tile, the 5×6×7 fixture and dimensions immediately above a tile boundary. Distinct sizes reveal assumptions about divisibility and final chunk length. The released command model rejects nonpositive dimensions before any memory writes. This is matrix multiplication: K can be larger than M or N, and no convolution-kernel-fitting rule applies.
 
 A shape validation failure should preserve memory and produce the declared error behavior. Address validation should include element width, alignment and allocated range. The software model is functional, while an external bus would additionally need response and partial-write recovery rules. A valid numerical shape does not guarantee a valid memory command.
 

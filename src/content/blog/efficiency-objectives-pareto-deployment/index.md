@@ -16,9 +16,9 @@ heroImage: './section-overview.png'
 
 ![Concept overview: Efficiency Objectives: Accuracy, Latency, Memory, and Pareto Tradeoffs](./section-overview.png)
 
-An efficient model is useful only in relation to a task and an operating environment. A smaller checkpoint can run slower, a lower arithmetic count can increase memory traffic, and a faster isolated kernel can leave request latency unchanged. Efficiency therefore begins with an explicit objective rather than a preferred compression technique.
+An efficient model is useful only in relation to a task and an operating environment. A smaller checkpoint can run slower, a lower arithmetic count can increase memory traffic, and a faster isolated kernel can leave request latency unchanged. Efficiency therefore starts with an explicit objective, not a favorite compression technique.
 
-This article connects model quality, resource constraints, and experimental evidence. The central picture is a feasible region: configurations satisfying the task and deployment requirements, with a frontier describing the best available tradeoffs. Pruning, quantization, distillation, and architecture search become ways to move through that region rather than interchangeable recipes for making a model small.
+This article connects model quality, resource constraints, and experimental evidence. The central picture is a feasible region: the set of configurations that meet the task and deployment requirements, with a frontier of the best available tradeoffs. Pruning, quantization, distillation, and architecture search become ways to move through that region, not interchangeable recipes for making a model small.
 
 
 *An original conceptual illustration. Numerical plots and examples are illustrative unless explicitly identified as measured evidence.*
@@ -44,17 +44,17 @@ $$
 Q(c;W)\ge Q_{\min},\ T(c;W)\le T_{\max},\ M(c;W)\le M_{\max}.
 $$
 
-The equation is an explanatory optimization model rather than an instruction to use one particular optimizer. Some quantities are distributions, and a latency constraint may apply to a defined percentile. The chosen quality threshold must come from the task rather than from whichever compressed result is easiest to publish.
+The equation is a way to state the problem, not an instruction to run one particular optimizer. Some quantities are distributions, and a latency constraint may apply to a defined percentile. The chosen quality threshold must come from the task rather than from whichever compressed result is easiest to publish.
 
 Hard constraints differ from preferences. A configuration that slightly exceeds memory capacity may fail completely, while a modest energy increase can remain acceptable. Combining everything into one score can hide such distinctions unless the weights and feasibility rules are explicit.
 
 ### 3. Understand Pareto dominance
 
-Suppose several configurations meet mandatory requirements. One dominates another if it is no worse on every compared objective and strictly better on at least one. The nondominated configurations form a Pareto frontier. A point on that frontier is not automatically the right deployment choice; it preserves a tradeoff requiring application judgment.
+Suppose several configurations meet mandatory requirements. One dominates another if it is no worse on every compared objective and strictly better on at least one. The nondominated configurations form a Pareto frontier. A point on that frontier is not automatically the right deployment choice; it still leaves a tradeoff the application has to judge.
 
 For illustrative configurations, A has quality 0.92, latency 20 milliseconds, and memory 4 gigabytes. B has quality 0.92, latency 25 milliseconds, and memory 5 gigabytes. A dominates B under those metrics. C has quality 0.94, latency 30 milliseconds, and memory 4 gigabytes, so neither A nor C dominates the other.
 
-The example assumes measured quantities are sufficiently certain and comparable. If confidence intervals overlap, the claim of strict improvement can be weak. If the workload or precision differs, the points do not belong on the same controlled frontier without identifying that difference.
+The example assumes the measured quantities are certain enough to compare. If confidence intervals overlap, the claim of strict improvement can be weak. If the workload or precision differs, the points do not belong on the same controlled frontier without identifying that difference.
 
 ### 4. Separate parameters, arithmetic, and traffic
 
@@ -64,7 +64,7 @@ Parameter count describes learned storage under a counting convention. Arithmeti
 
 A pruned matrix can have fewer nonzero values while using a kernel that still executes dense arithmetic. A sparse representation can save payload bytes but introduce index traffic and irregular access. A quantized checkpoint can require decoding and higher-precision accumulation. The relevant comparison is the complete supported path.
 
-The roofline model provides a useful first approximation. With arithmetic F, transferred bytes B, peak compute P, and bandwidth beta, ideal execution is bounded below by the larger of compute time and transfer time:
+The roofline model gives a useful first approximation. With arithmetic F, transferred bytes B, peak compute P, and bandwidth beta, ideal execution is bounded below by the larger of compute time and transfer time:
 
 $$
 T\ge\max\left(\frac{F}{P},\frac{B}{\beta}\right).
@@ -82,7 +82,7 @@ $$
 
 If an expert matrix operation occupies 20 percent of request time and becomes twice as fast, the ideal request gain is only about 1.11 times. That is a schedule calculation, not a measured result. It explains why a sound local optimization can have a modest user-visible effect.
 
-The assumptions matter. Compression can change several components at once, including cache capacity, batching, and communication. In that case, measure the new pipeline rather than attributing the complete gain to one local speedup. Conversely, a capacity improvement can enable a different concurrency region even if isolated latency barely changes.
+The assumptions matter. Compression can change several components at once, including cache capacity, batching, and communication. In that case, measure the new pipeline instead of crediting the whole gain to one local speedup. Conversely, a capacity improvement can open up a different concurrency region even if isolated latency barely changes.
 
 ### 6. Use quality measurements with uncertainty
 
@@ -94,9 +94,9 @@ L(p)\propto p^s(1-p)^{N-s},\qquad
 p\mid s\sim\operatorname{Beta}(a+s,b+N-s).
 $$
 
-This model does not claim every benchmark task is independent or every quality measure is Bernoulli. Correlated variants and distribution shift can invalidate that simple interpretation. Use a metric and uncertainty method appropriate to the actual task population.
+This model does not claim every benchmark task is independent or every quality measure is Bernoulli. Correlated variants and distribution shift can break that simple interpretation. Use a metric and uncertainty method that fit the actual task population.
 
-A compressed model passing a small sample is not proven equivalent to its baseline. Define an acceptable quality difference before evaluation, preserve held-out data, and examine important subgroups. An average can hide a failure mode that matters disproportionately to the deployment.
+A compressed model that passes a small sample is not proven equal to its baseline. Define an acceptable quality difference before evaluation, preserve held-out data, and examine important subgroups. An average can hide a failure mode that matters disproportionately to the deployment.
 
 ### 7. Measure the actual workload boundary
 
@@ -106,11 +106,11 @@ Include preprocessing, transfers, model execution, and postprocessing when they 
 
 Warm up the intended path and use a valid completion boundary for device work. Host enqueue duration alone does not establish GPU execution time. Repeat measurements and report the chosen summary and sample population. A minimum can describe an optimistic execution but rarely describes user-facing tail behavior.
 
-Record hardware, driver, backend, numerical representation, shapes, and relevant configuration. A result without this context is difficult to reproduce or interpret after a software update. The experiment should make clear which changes belong to the model and which belong to the execution system.
+Record hardware, driver, backend, numerical representation, shapes, and relevant configuration. A result without this context is hard to reproduce or interpret after a software update. The experiment should make clear which changes belong to the model and which belong to the execution system.
 
 ### 8. Distinguish energy, power, and duration
 
-Energy integrates power over time. Lower instantaneous power does not necessarily reduce energy if execution lasts much longer. A power cap can improve efficiency or hurt useful throughput depending on the operating region and task constraints.
+Energy integrates power over time. Lower instantaneous power does not always reduce energy if the run lasts much longer. A power cap can improve efficiency or hurt useful throughput depending on the operating region and task constraints.
 
 $$
 E=\int_0^T P(t)\,dt,\qquad
@@ -127,7 +127,7 @@ Start with a reproducible baseline. Change one mechanism when diagnosing its eff
 
 Record both theoretical and measured quantities. Theoretical parameter bytes explain capacity hypotheses. Measured peak allocation includes workspace and allocator behavior. Arithmetic estimates explain expected compute changes. Timings establish the actual execution result. Discrepancies between them are useful evidence about the limiting resource.
 
-Do not discard slower or lower-quality candidates from the record merely because they complicate the story. Their failure helps define the frontier and explains which tradeoff the chosen configuration makes. A transparent experiment is more valuable than a single unexplained speedup.
+Do not drop slower or lower-quality candidates from the record just because they complicate the story. Their failure helps define the frontier and explains which tradeoff the chosen configuration makes. A transparent experiment is more valuable than a single unexplained speedup.
 
 ### 10. Work through a deployment choice
 
@@ -135,11 +135,11 @@ Suppose an application requires quality at least 0.90, latency at most 25 millis
 
 A and B are feasible, while C violates the latency constraint despite its higher quality. If the application values lower latency and memory after reaching the quality threshold, B can be preferable. If a quality margin matters more, A can remain attractive. The decision follows the stated contract rather than a universal claim that the smallest model wins.
 
-Now suppose B's quality estimate has wide uncertainty because it was tested on very few cases. The experiment has not yet established adequate quality evidence. More independent evaluation may be needed before choosing it. Resource improvements do not compensate for an unverified task requirement.
+Now suppose B's quality estimate has wide uncertainty because it was tested on very few cases. The experiment has not yet established adequate quality evidence. More independent evaluation may be needed before choosing it. Resource gains do not make up for an unverified task requirement.
 
 ### 11. Plan the compression sequence
 
-Pruning removes selected structure, quantization changes numerical storage, distillation trains another model, and low-rank adaptation changes which updates are learned. Architecture design changes shapes and computation. These interventions can interact and should be evaluated in an order reflecting their dependencies.
+Pruning removes selected structure, quantization changes numerical storage, distillation trains another model, and low-rank adaptation changes which updates are learned. Architecture design changes shapes and computation. These interventions interact, so evaluate them in an order that reflects their dependencies.
 
 A practical sequence establishes the task and baseline, applies one supported transformation, validates semantics and quality, measures deployment behavior, and then combines compatible transformations. A transformation that helps in isolation can interact poorly with another precision or sparse-kernel choice.
 
@@ -149,7 +149,7 @@ Preserve artifacts and configuration so the result can be revisited. No device b
 
 ![Deep dive: 12. Avoid optimizing a proxy after it stops predicting the goal](./deep-dive-component-02.png)
 
-A proxy metric is useful when it predicts the quantity that matters. Parameter count can predict storage, and arithmetic count can predict compute pressure under suitable kernels. Their value weakens when representation overhead, bandwidth, or scheduling changes. The proxy should remain a hypothesis checked against the actual objective.
+A proxy metric is useful when it predicts the quantity that matters. Parameter count can predict storage, and arithmetic count can predict compute pressure under suitable kernels. Their value weakens when representation overhead, bandwidth, or scheduling changes. Keep the proxy as a hypothesis you check against the actual objective.
 
 Consider an architecture search using arithmetic operations as its latency proxy. Two candidates can have equal operations but very different matrix shapes. One may align well with a device's supported tiles, while another creates small irregular groups and extra launches. A search ranking by operations alone can therefore favor the slower candidate. Target-device measurements or a validated latency model can improve the ranking.
 
@@ -157,7 +157,7 @@ The same issue arises with quality proxies. Calibration reconstruction error can
 
 ## Conclusion
 
-A useful review records where each proxy is used and how it was validated. If the deployment changes device, compiler, precision, or workload, revisit that relationship. The saved artifact should include both proxy predictions and actual outcomes. This allows a future reader to distinguish a failed model of cost from a failed optimization method and prevents an outdated proxy from silently becoming the application objective.
+A useful review records where each proxy is used and how it was validated. If the deployment changes device, compiler, precision, or workload, revisit that relationship. The saved artifact should include both proxy predictions and actual outcomes. This lets a future reader tell a failed cost model from a failed optimization method. It also keeps an outdated proxy from quietly becoming the application objective.
 
 ### Sources
 

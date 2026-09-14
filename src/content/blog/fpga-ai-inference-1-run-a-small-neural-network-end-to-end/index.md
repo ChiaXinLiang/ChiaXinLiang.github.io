@@ -30,7 +30,7 @@ The network figure defines a tiny supported graph: 4 inputs, a 4×4 dense layer,
 
 Use the released input [[1,2,-1,3]] and fixed weights in test_small_mlp. The first layer's integer sums are [6,1,6,6]. ReLU and division by 2 with ties-away rounding produce hidden values [3,1,3,3]. The second layer produces [5,4], with argmax index 0.
 
-These small distinct values let every product be checked. A larger random network is useful later but makes the first debugging step harder. Only implemented operators belong in the supported graph.
+These small distinct values let you check every product. A larger random network is useful later but makes the first debugging step harder. Only implemented operators belong in the supported graph.
 
 ### Retain scales across layer boundaries
 
@@ -115,9 +115,9 @@ Use mixed-sign inputs and distinguishable weight columns. Positive-only fixtures
 
 The first layer's output quantization targets a chosen hidden scale, which becomes the second layer's input interpretation if no additional rescale is inserted. The first accumulator scale and hidden-output scale are not automatically identical. A generic affine model may also carry zero points and per-channel parameters, while the simple released function uses a narrower defined contract. Record any model conversion rather than assuming universal quantized-format support.
 
-Compatible integer bias is prepared in each layer's accumulator units. Copying the first layer's bias into the second layer's input buffer changes the operation. Likewise, changing a multiplier or shift to avoid saturation changes the numerical model and should be evaluated against its intended outputs. Hardware correctness preserves a chosen contract; it does not select calibration parameters on behalf of the model author.
+Prepare compatible integer bias in each layer's accumulator units. Copying the first layer's bias into the second layer's input buffer changes the operation. Likewise, changing a multiplier or shift to avoid saturation changes the numerical model and should be evaluated against its intended outputs. Hardware correctness preserves a chosen contract; it does not select calibration parameters on behalf of the model author.
 
-The complete reduction precedes activation and conversion. If larger K is chunked, combine every INT32 partial result before ReLU. The same -10 and 8 cancellation fixture used in the epilogue lesson exposes premature nonlinear processing. A tiler that activates each chunk can produce a plausible hidden vector while computing a different network.
+Finish the complete reduction before activation and conversion. If larger K is chunked, combine every INT32 partial result before ReLU. The same -10 and 8 cancellation fixture used in the epilogue lesson exposes premature nonlinear processing. A tiler that activates each chunk can produce a plausible hidden vector while computing a different network.
 
 #### Batch independent inputs without mixing rows
 

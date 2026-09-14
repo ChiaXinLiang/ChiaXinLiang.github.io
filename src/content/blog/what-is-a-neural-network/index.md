@@ -81,7 +81,7 @@ A sigmoid activation maps this number to approximately 0.7408. That is a number 
 
 Now change vibration from minus 1 to 1 while holding temperature fixed. The pre-activation falls to 0.55, and the sigmoid output falls to approximately 0.6341. The negative vibration weight makes larger vibration input reduce this neuron's output. A trained model might learn the opposite sign; the example illustrates arithmetic, not a claim about machine failures.
 
-Input scaling matters. A weight of 0.5 attached to a temperature measured in degrees cannot be compared directly with the same weight attached to a standardized temperature. Units, preprocessing, and the input distribution determine what a coefficient means. This is 1 reason inspecting raw weight magnitudes rarely gives a complete explanation of a prediction.
+Input scaling matters. A weight of 0.5 attached to a temperature measured in degrees cannot be compared directly with the same weight attached to a standardized temperature. Units, preprocessing, and the input distribution determine what a coefficient means. This is one reason inspecting raw weight magnitudes rarely gives a complete explanation of a prediction.
 
 ### Activation means more than squashing
 

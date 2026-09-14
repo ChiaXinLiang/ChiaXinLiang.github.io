@@ -93,7 +93,7 @@ So 1 H100 serves this model with a modeled capacity ceiling of 47 concurrent 8k-
 - **Offload to CPU RAM.** It works for weight storage, but PCIe Gen5 moves ~64 GB/s against HBM3's 3,350 GB/s. Fine for loading, occasionally tolerable for rarely-used expert weights, ruinous for anything on the per-token path.
 
 
-Use an admission inequality rather than rounding a capacity estimate upward. Let $$H$$ be device capacity, $$u$$ the admitted memory fraction, $$P$$ parameter count, $$b_w$$ effective bytes per weight, $$A$$ separately budgeted activation and workspace memory, and $$k=2Lh_{kv}db_{kv}$$ cache bytes per token. For $$B$$ equal-length requests of $$S$$ live tokens,
+Use an admission inequality instead of rounding a capacity estimate up. Let $$H$$ be device capacity, $$u$$ the admitted memory fraction, $$P$$ parameter count, $$b_w$$ effective bytes per weight, $$A$$ separately budgeted activation and workspace memory, and $$k=2Lh_{kv}db_{kv}$$ cache bytes per token. For $$B$$ equal-length requests of $$S$$ live tokens,
 
 $$
 Pb_w+A+BSk\le uH,\qquad
@@ -102,7 +102,7 @@ $$
 
 Here $$L$$ is layer count, $$h_{kv}$$ KV-head count, $$d$$ head dimension, and $$b_{kv}$$ cache element bytes. With the rounded 16.1 GB weight budget, 5 GB reserve, and exact $$Sk=1073741824$$ bytes, the available 50.9 decimal GB admits at most 47 requests, not 48. The 48th requires 51.54 GB of cache. This is a capacity ceiling under specified assumptions, not a guaranteed serving throughput or stable worst-case floor.
 
-Paging changes allocation granularity and avoids reserving unused future tokens; it cannot violate this inequality. Admit by projected live-token growth, include generation allowances, and validate measured high-water memory. Sharding also needs per-device accounting: 141.2 GB of FP16 70B weights split across 2 GPUs leaves 70.6 GB of weights on each, not 35.3 GB. Under a 72 GB budget with a 5 GB reserve, that illustrative configuration has no positive cache budget. More devices, lower precision, or a different measured reserve are required.
+Paging changes allocation granularity and avoids reserving unused future tokens; it cannot violate this inequality. Admit by projected live-token growth, include generation allowances, and check measured high-water memory. Sharding also needs per-device accounting: 141.2 GB of FP16 70B weights split across 2 GPUs leaves 70.6 GB of weights on each, not 35.3 GB. Under a 72 GB budget with a 5 GB reserve, that illustrative configuration has no positive cache budget. You need more devices, lower precision, or a different measured reserve.
 
 ### Going deeper: training, and where the formulas come from
 
@@ -121,7 +121,7 @@ The optimizer's states alone are 12 bytes per parameter, 6 times the model itsel
 
 Back on the inference side, 2 mechanisms deserve 1 more level of detail.
 
-**GQA changes attention architecture to reduce cache storage and traffic.** Multi-head attention in the 8B model would carry 32 KV heads: 524 KB per token, 4.3 GB per 8k sequence, and our 47-sequence H100 becomes an 11-sequence H100. The 70B with its 64 query heads would pay 2.6 MB per token under MHA; GQA's 8 KV heads cut that by 8x. Ainslie et al. (2023) showed the quality cost of this sharing is small, which is why many dense transformer families use it, while other architectures employ different cache designs. When you evaluate a new checkpoint, `n_kv_heads` in the config file tells you more about its serving economics than the parameter count does.
+**GQA changes attention architecture to reduce cache storage and traffic.** Multi-head attention in the 8B model would carry 32 KV heads: 524 KB per token, 4.3 GB per 8k sequence, and our 47-sequence H100 becomes an 11-sequence H100. The 70B with its 64 query heads would pay 2.6 MB per token under MHA; GQA's 8 KV heads cut that by 8x. Ainslie et al. (2023) showed the quality cost of this sharing is small, which is why many dense transformer families use it, while other architectures use different cache designs. When you evaluate a new checkpoint, `n_kv_heads` in the config file tells you more about its serving economics than the parameter count does.
 
 **PagedAttention is why the "floor" isn't the ceiling.** Naive serving pre-allocates each request's KV cache at maximum context length, so a 200-token chat inside an 8k reservation wastes 97 percent of its gigabyte. vLLM's PagedAttention (Kwon et al., 2023) allocates KV memory in fixed-size blocks (16 tokens by default) on demand, exactly like OS virtual memory pages, reporting under 4 percent waste versus 60 to 80 percent for contiguous pre-allocation. The napkin math gives you the worst-case bound; paging is what lets real systems live near the average case instead.
 
@@ -148,7 +148,7 @@ Later in the series, the napkin-math articles push this further: per-request cos
 - "Fits" is not binary. FP8 70B on 1 H100 loads but cannot serve; INT4 or TP=2 turn the same model into a real deployment. Always finish the subtraction before choosing the topology.
 
 
-Capacity planning should include a small experiment that checks the estimate under the intended request distribution. Start with the chosen precision and engine configuration, then measure memory after loading, after warmup, and at the target concurrency. Use the longest admitted context rather than an average context when setting an admission limit. Record both allocated and reserved memory, since allocator behavior can leave a gap between them. A safe operating budget also allows temporary workspaces and variations in request shape. An arithmetic estimate tells you where to begin; these measurements tell you whether that configuration is stable enough to serve.
+Capacity planning should include a small experiment that checks the estimate under the intended request distribution. Start with the chosen precision and engine configuration, then measure memory after loading, after warmup, and at the target concurrency. Use the longest admitted context, not an average context, when setting an admission limit. Record both allocated and reserved memory, since allocator behavior can leave a gap between them. A safe operating budget also leaves room for temporary workspaces and variations in request shape. An arithmetic estimate tells you where to begin; these measurements tell you whether that configuration is stable enough to serve.
 
 ### Sources
 

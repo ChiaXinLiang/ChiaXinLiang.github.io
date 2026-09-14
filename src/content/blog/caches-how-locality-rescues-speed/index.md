@@ -89,7 +89,7 @@ $$
 
 With $$h=4$$ and $$p=200$$, reducing $$m$$ from 0.05 to 0.01 changes the modeled average from fourteen cycles to 6. This is not automatically a 2.33× application speedup: a processor can overlap independent misses, and non-memory work remains.
 
-The method that improves locality is to change the reuse distance: how much distinct data is accessed before revisiting a line. Blocking a matrix traversal keeps a smaller tile active, so useful lines survive until reuse instead of being displaced by an entire matrix sweep. Check tile footprint against the relevant cache, including all inputs and outputs. Larger tiles improve reuse only until capacity or associativity pressure introduces new misses. Prefetching addresses predictable latency, while tiling reduces traffic; they solve related but different constraints.
+The way to improve locality is to change the reuse distance: how much distinct data you touch before revisiting a line. Blocking a matrix traversal keeps a smaller tile active, so useful lines survive until reuse instead of getting displaced by an entire matrix sweep. Check tile footprint against the relevant cache, including all inputs and outputs. Larger tiles improve reuse only until capacity or associativity pressure introduces new misses. Prefetching addresses predictable latency, while tiling reduces traffic; they solve related but different constraints.
 
 ### A worked example you can feel: traversal order
 
@@ -118,7 +118,7 @@ Real caches split the difference with **set associativity**. An 8-way set-associ
 
 Stack the levels and you get the actual hierarchy in your laptop: L1 at ~32–48 KB per core answering in ~4 cycles, L2 at ~1–2 MB per core in ~14 cycles, a shared L3 of tens of megabytes in ~40–50 cycles, then DRAM. Each level catches most of what the 1 above missed, so the brutal 200-cycle penalty is paid only by the small residue that misses everywhere.
 
-2 more pieces of machinery matter in practice. **Hardware prefetchers** watch the miss stream, detect strides, and fetch lines *before* you ask, which is why streaming through memory in a predictable pattern can hide much of the access latency even when the data can't fit in cache. And because writes also flow through this hierarchy, caches track **dirty lines** that must be written back on eviction, which is 1 reason random writes over a large footprint hurt roughly twice as much as random reads.
+2 more pieces of machinery matter in practice. **Hardware prefetchers** watch the miss stream, detect strides, and fetch lines *before* you ask, which is why streaming through memory in a predictable pattern can hide much of the access latency even when the data can't fit in cache. And because writes also flow through this hierarchy, caches track **dirty lines** that must be written back on eviction, which is one reason random writes over a large footprint hurt roughly twice as much as random reads.
 
 ### Common misconceptions
 

@@ -18,7 +18,7 @@ tags: [asic, fpga, gpu]
 
 When Google published the details of its first Tensor Processing Unit in 2017, the headline number was 30 to 80 times better performance per watt than the contemporary CPUs and GPUs it was benchmarked against. Those are Google's own measurements, on Google's own workloads, against 2015-era competition, so apply the usual discount for vendor-reported numbers. But even a discounted version of that gap explains why every large cloud company now designs its own chips, and why "we should build an ASIC" comes up in every serious conversation about AI infrastructure cost.
 
-This article is about what that sentence actually means. What is an ASIC, physically? What is an FPGA, and why does it sit between a GPU and an ASIC? And when does spending tens of millions of dollars on a chip that can only do 1 thing beat buying chips that can do anything?
+This article is about what that sentence actually means. What is an ASIC, physically? What is an FPGA, and why does it sit between a GPU and an ASIC? And when does spending tens of millions of dollars on a chip that can only do one thing beat buying chips that can do anything?
 
 ## Deep dive
 
@@ -30,7 +30,7 @@ Line up the 4 big compute substrates and you get a spectrum. At 1 end, maximum f
 
 **GPU.** Still a programmable instruction-following machine, but restructured for throughput: thousands of simple arithmetic units, wide SIMD execution, and a memory system built for streaming. A GPU keeps the instruction machinery but amortizes it, 1 decoded instruction drives 32 lanes of math instead of 1.
 
-**FPGA.** A field-programmable gate array. Here a circuit-oriented implementation can operate without an ordinary instruction stream; an FPGA can also contain soft or hardened processors. You configure logic and routing to implement that circuit until the fabric is reprogrammed. Data flows through wired-up logic every clock cycle with no fetch, no decode, no scheduler.
+**FPGA.** A field-programmable gate array. A circuit built on an FPGA can run without an ordinary instruction stream; the fabric can also contain soft or hardened processors. You configure logic and routing to form that circuit, and it stays until the fabric is reprogrammed. Data flows through wired-up logic every clock cycle with no fetch, no decode, no scheduler.
 
 **ASIC.** An application-specific integrated circuit. The circuit is not configured into a flexible fabric; it is etched permanently into silicon. Its fabricated hardware structure is fixed, but it can include programmable processors, instruction streams, and configurable dataflow; application-specific does not mean 1 immutable computation.
 
@@ -93,7 +93,7 @@ $$
 
 Using the hypothetical values above gives $$N_*\approx50{,}000{,}000/25{,}856\approx1{,}934$$ GPU-equivalents. If the savings term becomes 0 or negative, no positive volume recovers the development cost under this model.
 
-What changes relative to buying GPUs is both the marginal work cost and who owns workload risk. The assumed 10-to-1 replacement must be established on complete supported models, including memory stalls and software overhead—not inferred from peak MAC density. Test a workload portfolio against a GPU baseline and include the cost of bridging the development interval. A programmable ASIC can retain operator and scheduling flexibility, while fixing arithmetic formats and memory interfaces. The right design freezes stable expensive mechanisms and keeps likely-changing decisions programmable; it does not need to freeze 1 entire model forever.
+What changes relative to buying GPUs is both the marginal work cost and who owns workload risk. Prove the assumed 10-to-1 replacement on complete supported models, including memory stalls and software overhead—do not infer it from peak MAC density. Test a workload portfolio against a GPU baseline and include the cost of bridging the development interval. A programmable ASIC can retain operator and scheduling flexibility, while fixing arithmetic formats and memory interfaces. The right design freezes stable expensive mechanisms and keeps likely-changing decisions programmable; it does not need to freeze 1 entire model forever.
 
 ### Going deeper: what specialization actually deletes
 
@@ -113,7 +113,7 @@ A GPU, note, has been sprinting along this same path: tensor cores, FP8 and FP4 
 
 ### Common misconceptions
 
-**"An ASIC is always faster than a GPU."** Raw speed is not the reliable win; efficiency and unit cost are. A modern GPU is itself a highly specialized chip fabbed on the best available node, and its matrix units are ASIC-grade at matrix math. A first-generation custom ASIC on a trailing node, with an immature compiler, can easily deliver fewer useful FLOPs than a well-tuned GPU kernel. Potential ASIC advantages are performance per watt and per dollar at sufficient volume on supported workloads; they must be demonstrated rather than assumed.
+**"An ASIC is always faster than a GPU."** Raw speed is not the reliable win; efficiency and unit cost are. A modern GPU is itself a highly specialized chip fabbed on the best available node, and its matrix units are ASIC-grade at matrix math. A first-generation custom ASIC on a trailing node, with an immature compiler, can easily deliver fewer useful FLOPs than a well-tuned GPU kernel. Potential ASIC advantages are performance per watt and per dollar at sufficient volume on supported workloads; they must be shown, not assumed.
 
 **"FPGAs are just for prototyping ASICs."** Prototyping is 1 use, but FPGAs are a production endpoint in their own right wherever volume is low, standards are moving, or deterministic latency matters: cellular base stations, high-frequency trading, defense radios, network switches. Microsoft deployed FPGAs at cloud scale in its Catapult and Brainwave projects for exactly the middle-of-the-spectrum reason: more efficient than CPUs, still reprogrammable when the algorithms changed. If your break-even math says "not quite ASIC volume," the FPGA column deserves a serious look.
 

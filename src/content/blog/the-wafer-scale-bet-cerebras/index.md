@@ -18,7 +18,7 @@ tags: ['cerebras', 'sram', 'accelerators']
 
 46,225 square millimeters. That is the silicon area of the Cerebras Wafer-Scale Engine 3 (WSE-3), the largest chip ever sold, roughly 57 times the area of the biggest GPU die NVIDIA has shipped. It exists because Cerebras looked at a step every other chipmaker performs, slicing the finished wafer into hundreds of separate chips, and simply refused to do it.
 
-Every processor you own began life on a circular slab of silicon about 300 mm across. A lithography machine projects the chip's pattern onto that wafer 1 rectangular exposure at a time; the exposure window, called the **reticle**, tops out around 850 mm², which is why big GPU dies all cluster just under that size. Afterward the wafer is diced into individual dies, each die is tested, and the defective ones are discarded. The wafer is scaffolding; the die is the product.
+Every processor you own began life on a circular slab of silicon about 300 mm across. A lithography machine projects the chip's pattern onto that wafer 1 rectangular exposure at a time; the exposure window, called the **reticle**, tops out around 850 mm², which is why big GPU dies all cluster just under that size. Afterward the fab dices the wafer into individual dies, tests each one, and discards the defective ones. The wafer is scaffolding; the die is the product.
 
 Cerebras keeps the whole wafer as 1 part. The WSE-3, built on TSMC's 5 nm process, packs 4 trillion transistors into about 900,000 small compute cores. Each core owns a private slice of memory sitting micrometers from its arithmetic units, and those slices add up to the 2 numbers this article orbits: **44 GB of on-wafer SRAM, readable at an aggregate 21 petabytes per second** (Cerebras's own spec, like all peak figures here).
 
@@ -42,7 +42,7 @@ The trade is symmetric and unforgiving. HBM's density buys the GPU 192 GB but th
 
 ![Deep dive: A worked example you can do on paper](./deep-dive-component-03.png)
 
-Why does bandwidth dominate this discussion at all? Because of how [transformers generate text](/blog/transformer-architecture-in-one-picture/): producing 1 token requires streaming essentially every active model weight through the compute units, and tokens are produced 1 after another. For a single user, decode is a memory-reading exercise with some math attached.
+Why does bandwidth dominate this discussion at all? Because of how [transformers generate text](/blog/transformer-architecture-in-one-picture/): producing 1 token requires streaming essentially every active model weight through the compute units, and the model produces tokens 1 after another. For a single user, decode is a memory-reading exercise with some math attached.
 
 Take a 70B-parameter dense model in 16-bit precision. The numbers:
 
@@ -65,7 +65,7 @@ $$
 
 A 140 GB weight payload with 44 GB per wafer and 4 GB reserved needs at least 4 wafers. An 800 GB payload needs at least 19 even with 0 reservation, since 18 provide only 792 GB. These decimal-unit calculations are capacity floors, not vendor deployment specifications.
 
-The innovation is distributing weights and computation near many SRAM banks. Aggregate SRAM bandwidth does not make those banks 1 globally accessible memory channel. Mapping must balance stages and communicate activations between them. A pipeline's steady-state rate is constrained by its slowest stage, so adding bank bandwidth at another stage may produce no gain. Evaluate per-stage bytes, compute, link traffic, and bubbles rather than dividing whole-model bytes by the sum of every bank's peak bandwidth. Compared with an HBM design, locality can reduce repeated external weight traffic; the tradeoffs include mapping complexity, capacity expansion, and inter-wafer communication. A headline bandwidth ratio cannot establish the usable model-level speedup.
+The innovation is distributing weights and computation near many SRAM banks. Aggregate SRAM bandwidth does not make those banks 1 globally accessible memory channel. Mapping must balance stages and communicate activations between them. A pipeline's steady-state rate is constrained by its slowest stage, so adding bank bandwidth at another stage may produce no gain. Evaluate per-stage bytes, compute, link traffic, and bubbles rather than dividing whole-model bytes by the sum of every bank's peak bandwidth. Compared with an HBM design, locality can reduce repeated external weight traffic; the tradeoffs include mapping complexity, capacity expansion, and inter-wafer communication. A headline bandwidth ratio cannot tell you the usable model-level speedup.
 
 ### The number Cerebras leads with
 
@@ -101,7 +101,7 @@ Capacity gets solved by systems design rather than silicon. For **training**, Ce
 
 Zoom out and the WSE-3 stops looking like an oddity and starts looking like a data point: the far end of a spectrum every accelerator sits on. Memory close to compute is fast and small; memory far from compute is big and cheap. NVIDIA's Rubin CPX puts 128 GB of inexpensive GDDR7 on a prefill-specialized GPU because prefill barely needs bandwidth. Flagship HBM parts hold the middle. Groq builds SRAM-only chips at normal die size (230 MB each) and gangs hundreds together. Cerebras takes the same SRAM bet and scales the die to the wafer. Nobody is wrong; they are answering different sub-questions of "what does serving a model actually cost?"
 
-The bet's weak flank is the part specs never show: ecosystem. GPUs come with CUDA, PyTorch-native everything, a decade of kernels, and [a job market of people who tune them](/blog/what-does-an-ml-performance-engineer-do/). A wafer needs its own compiler stack, and every new model architecture needs porting before it runs well. Cerebras's countermove is to sell tokens instead of silicon — an API where the exotic hardware hides behind an OpenAI-compatible endpoint — which is a tacit admission that the hardest part of a novel chip is everything around the chip.
+The bet's weak flank is the part specs never show: ecosystem. GPUs come with CUDA, PyTorch-native everything, a decade of kernels, and [a job market of people who tune them](/blog/what-does-an-ml-performance-engineer-do/). A wafer needs its own compiler stack, and every new model architecture needs porting before it runs well. Cerebras's countermove is to sell tokens instead of silicon — an API where the exotic hardware hides behind an OpenAI-compatible endpoint — which is a tacit admission that the hardest part of a new chip is everything around the chip.
 
 What makes the WSE-3 worth studying is not that it wins; it is that it is *legible*. 1 decision — never cut the wafer — mechanically produces everything else: the PB/s bandwidth, the 44 GB ceiling, the yield trick, the 20 kW cold plate, the multi-system pipelines, the single-stream speed records, and the capacity economics. Few chips let you trace cause to effect that cleanly.
 

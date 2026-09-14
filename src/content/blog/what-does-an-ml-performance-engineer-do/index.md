@@ -97,7 +97,7 @@ $$
 T_{\mathrm{operation}} \gtrsim \max\!\left(\frac{F}{C},\frac{D}{B}\right).
 $$
 
-This is an idealized bound, not a timing prediction. It omits launch overhead, dependency stalls, communication, and imperfect resource use. Nevertheless, it tells you where additional compute capacity can help. If reading the required bytes takes longer than doing the arithmetic, a faster arithmetic unit alone cannot remove the memory requirement. Changing data reuse or representation may matter more.
+This is an idealized bound, not a timing prediction. It omits launch overhead, dependency stalls, communication, and imperfect resource use. Still, it tells you where extra compute capacity can help. If reading the required bytes takes longer than doing the arithmetic, a faster arithmetic unit alone cannot remove the memory requirement. Changing data reuse or representation may matter more.
 
 For a deliberately simple example, suppose an operation streams 16 GB of weights through a memory system that sustains 2 TB/s. The weight transfer takes at least 8 milliseconds. If its arithmetic needs only 1 millisecond at sustainable compute speed, doubling that compute speed changes the shorter term to half a millisecond while leaving the 8-millisecond bound intact. This is why performance engineers count bytes before celebrating peak FLOPS.
 
@@ -115,9 +115,9 @@ The assumptions deserve attention. Once 1 bottleneck is removed, another can bec
 
 ![Deep dive: Follow 1 request through the stack](./deep-dive-component-04.png)
 
-Imagine an assistant becomes slow when traffic rises. Start with the request timeline: admission, queueing, tokenization, host preparation, prompt processing, generation, and delivery. If most of the additional delay appears before GPU work starts, rewriting a GPU kernel is unlikely to address the cause. Queue length, admission policy, and the request mix become the first places to investigate.
+Imagine an assistant becomes slow when traffic rises. Start with the request timeline: admission, queueing, tokenization, host preparation, prompt processing, generation, and delivery. If most of the extra delay appears before GPU work starts, rewriting a GPU kernel is unlikely to fix the cause. Queue length, admission policy, and the request mix become the first places to investigate.
 
-Next examine a representative GPU timeline. Long gaps between kernels can suggest host scheduling, synchronization, or missing input data. Long kernels with steady memory traffic suggest a different problem. A communication operation on the critical path calls for topology and overlap analysis. The trace is evidence about this configuration, and the next experiment should discriminate between plausible explanations.
+Next examine a representative GPU timeline. Long gaps between kernels can suggest host scheduling, synchronization, or missing input data. Long kernels with steady memory traffic suggest a different problem. A communication operation on the critical path calls for topology and overlap analysis. The trace is evidence about this configuration, and the next experiment should tell the plausible explanations apart.
 
 Suppose the trace shows that a CPU thread repeatedly asks for a GPU tensor's scalar value. The host must wait until that value is available, and the queue of future GPU work may drain. Moving nonessential logging out of the hot path is a reasonable experiment. The result should include end-to-end request time as well as the disappearance of the trace gap; a cleaner trace alone is not the product objective.
 
@@ -127,19 +127,19 @@ Finally replay realistic arrivals. A configuration that succeeds at fixed concur
 
 A change is useful only if the service can run it reliably. Measure warm-up time and model load time, not just steady state. Record memory headroom so a slightly longer prompt does not turn a successful benchmark into an out-of-memory failure. Check cancellation and unusual shapes when they are part of the product workload. These operational details determine whether the measured speedup survives deployment.
 
-Compare the baseline and candidate using the same request set and conditions. Repeat measurements sufficiently to distinguish an improvement from noise. Preserve latency distributions rather than only averages: a lower mean can coexist with a worse tail. When results are close, report the uncertainty honestly and retain the simpler configuration unless the improvement justifies its maintenance cost.
+Compare the baseline and candidate using the same request set and conditions. Repeat measurements enough to tell an improvement from noise. Keep latency distributions, not only averages: a lower mean can coexist with a worse tail. When results are close, report the uncertainty honestly and keep the simpler configuration unless the improvement justifies its maintenance cost.
 
-Quality validation should match the proposed change. An exact scheduling change may need output and numerical consistency checks. A quantized model needs representative quality evaluation, including tasks sensitive to the precision reduction. A stochastic decoder requires distribution-aware or task-level evaluation; comparing 1 generated sentence is not enough to establish equivalence.
+Quality validation should match the proposed change. An exact scheduling change may need output and numerical consistency checks. A quantized model needs representative quality evaluation, including tasks sensitive to the precision reduction. A stochastic decoder needs distribution-aware or task-level evaluation; comparing 1 generated sentence is not enough to establish equivalence.
 
 ### Turn throughput into a capacity decision
 
 Suppose a hypothetical node costs 16 dollars per hour and produces 20 million accepted output tokens in that hour. Its direct node cost is 80 cents per million tokens. If a validated change raises accepted output to 25 million tokens while preserving latency and quality, that cost becomes 64 cents per million. The arithmetic is useful precisely because the output definition and cost boundary are explicit.
 
-That 20-percent unit-cost reduction does not automatically become a 20-percent smaller bill. The fleet may have spare capacity, reserved commitments, or insufficient traffic to exploit the speedup. Capacity changes require a demand model, redundancy allowance, and headroom for failures and bursts. Performance engineering supplies the measured capacity; operational planning decides how much of it can be converted into savings.
+That 20-percent unit-cost reduction does not automatically become a 20-percent smaller bill. The fleet may have spare capacity, reserved commitments, or too little traffic to use the speedup. Capacity changes need a demand model, redundancy allowance, and headroom for failures and bursts. Performance engineering supplies the measured capacity; operational planning decides how much of it can be converted into savings.
 
-The strongest deliverable is consequently more than a patch. It is a reproducible baseline, a causal explanation, a validated improvement, and a recommendation about where that configuration should run. This combination lets another engineer maintain the result after the original investigator moves on.
+So the strongest deliverable is more than a patch. It is a reproducible baseline, a causal explanation, a validated improvement, and a recommendation about where that configuration should run. This combination lets another engineer maintain the result after the original investigator moves on.
 
-A useful experiment also documents the rejected alternatives. If higher batching raises aggregate output while violating streaming latency, retain that result as evidence for an offline pool rather than accepting it for interactive service. This preserves the reason for the chosen operating point and prevents a later dashboard comparison from silently relaxing the original promise.
+A useful experiment also documents the rejected alternatives. If higher batching raises aggregate output while violating streaming latency, keep that result as evidence for an offline pool instead of accepting it for interactive service. This keeps the reason for the chosen operating point on record and stops a later dashboard comparison from quietly relaxing the original promise.
 
 ## Conclusion
 

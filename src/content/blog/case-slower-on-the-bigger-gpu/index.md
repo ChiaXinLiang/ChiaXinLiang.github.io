@@ -16,7 +16,7 @@ tags: [troubleshooting, bandwidth, inference]
 
 ![Concept overview: Case File: Same Model, 3x Slower on the "Bigger" GPU](./section-overview.png)
 
-312 versus 362 TFLOPS. 80 GB versus 96 GB. 1 generation newer. The new instance beat the old 1 on every line quoted in the migration ticket, and decode throughput still fell from 52 tokens per second to 18. Nobody changed the model, the serving stack, or a single flag.
+312 versus 362 TFLOPS. 80 GB versus 96 GB. 1 generation newer. The new instance beat the old one on every line quoted in the migration ticket, and decode throughput still fell from 52 tokens per second to 18. Nobody changed the model, the serving stack, or a single flag.
 
 This is the fourth case file in the troubleshooting series, and it is the most common 1 I see in the wild, because it is baked into how cloud instances are marketed. In this hypothetical incident, a team serving a 13B model on a single A100 80GB gets a cost-optimization nudge: a newer instance type with 2 NVIDIA L40S GPUs is cheaper per hour, has 96 GB of total VRAM instead of 80, supports FP8, and carries an Ada Lovelace headline of "1,466 TFLOPS." They migrate. Time-to-first-token barely moves. Per-token decode speed drops by roughly 3x, users notice streaming has turned to molasses, and the rollback discussion starts before lunch.
 
@@ -92,7 +92,7 @@ Notice what the calculation never asked for: TFLOPS, VRAM size, architecture gen
 
 The instance has 2 L40S cards, so the obvious counter is tensor parallelism: split the model across both, halve the bytes each card reads per token. Here the arithmetic gets quietly brutal.
 
-First, aggregate bandwidth. 2 L40S give you 2 x 864 = 1,728 GB/s of combined memory bandwidth. That is still **15 percent less than the single A100 you left**, before any parallelization overhead. There is no configuration of this instance whose total byte-moving capacity matches the old 1.
+First, aggregate bandwidth. 2 L40S give you 2 x 864 = 1,728 GB/s of combined memory bandwidth. That is still **15 percent less than the single A100 you left**, before any parallelization overhead. There is no configuration of this instance whose total byte-moving capacity matches the old one.
 
 Second, the interconnect tax. L40S has no NVLink; the 2 cards talk over PCIe Gen4 x16, about 32 GB/s per direction, substantially less than an NVLink-connected pair. Megatron-style tensor parallelism needs 2 all-reduces per transformer layer per token. 40 layers means 80 all-reduces per decode step, and at batch 1 each message is tiny (hidden size 5,120 in FP16 is 10 KB), so they are latency-bound rather than bandwidth-bound: each one costs tens of microseconds of PCIe round trip plus kernel launch and synchronization. Call it 30 to 50 µs each; that is another 2.5 to 4 ms per token that exists on neither card's datasheet.
 

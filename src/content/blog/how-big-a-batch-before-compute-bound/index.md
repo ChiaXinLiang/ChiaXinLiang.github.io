@@ -56,7 +56,7 @@ $$
 F\approx2MKN.
 $$
 
-For a decode linear layer, $$M$$ can represent active token rows, often approximately the number of active sequences. The weight matrix has $$KN$$ values, while input and output contain $$MK$$ and $$MN$$ values.
+For a decode linear layer, $$M$$ can represent active token rows, often about the number of active sequences. The weight matrix has $$KN$$ values, while input and output contain $$MK$$ and $$MN$$ values.
 
 If all are stored as 2-byte elements and each is read or written once across HBM, a basic traffic estimate is
 
@@ -70,13 +70,13 @@ $$
 I\approx\frac{MKN}{KN+MK+MN}.
 $$
 
-When $$M$$ is small relative to large weight dimensions, the $$KN$$ term dominates and intensity is approximately $$M$$ FLOP/byte. As $$M$$ grows, activation traffic becomes less negligible. The simple linear increase is therefore an approximation, not an unlimited law.
+When $$M$$ is small relative to large weight dimensions, the $$KN$$ term dominates and intensity is about $$M$$ FLOP/byte. As $$M$$ grows, activation traffic becomes less negligible. The simple linear increase is therefore an approximation, not an unlimited law.
 
 ### Derive the weight-only batch crossing
 
 ![Deep dive: Derive the weight-only batch crossing](./deep-dive-component-01.png)
 
-For a rounded dense model with $$P$$ active parameters, linear-layer work per step is approximately $$2PB$$ operations. If weights use $$b_w$$ bytes each and 1 model read is shared across the batch, traffic is approximately $$Pb_w$$.
+For a rounded dense model with $$P$$ active parameters, linear-layer work per step is about $$2PB$$ operations. If weights use $$b_w$$ bytes each and 1 model read is shared across the batch, traffic is about $$Pb_w$$.
 
 Then
 
@@ -93,7 +93,7 @@ $$
 \qquad B_*\approx\frac{Cb_w}{2\beta}.
 $$
 
-For BF16 weights, $$b_w=2$$, so $$B_*\approx C/\beta$$. NVIDIA's current H100 SXM table gives BF16 Tensor Core throughput with a sparsity qualification. Dense arithmetic uses approximately half that sparse figure, around 989 trillion operations per second, rather than the approximately 1,979 trillion sparse rate.
+For BF16 weights, $$b_w=2$$, so $$B_*\approx C/\beta$$. NVIDIA's current H100 SXM table gives BF16 Tensor Core throughput with a sparsity qualification. Dense arithmetic uses about half that sparse figure, around 989 trillion operations per second, rather than the roughly 1,979 trillion sparse rate.
 
 With peak bandwidth $$3.35\times10^{12}$$ bytes per second,
 
@@ -111,7 +111,7 @@ Use a hypothetical dense 8B model with BF16 weights and ignore history for the m
 
 At batch 32, approximate linear work is $$2\times8\times10^9\times32=512\times10^9$$ operations. At the ideal dense compute rate, that takes about 0.518 ms. Memory service is much larger, so the weight-only model predicts a memory-bound step.
 
-At batch 512, work is about 8.192 trillion operations, requiring at least 8.28 ms at that compute ceiling. Weight traffic still requires 4.78 ms. The model now predicts a compute-bound step.
+At batch 512, work is about 8.192 trillion operations, which needs at least 8.28 ms at that compute ceiling. Weight traffic still requires 4.78 ms. The model now predicts a compute-bound step.
 
 These numbers omit cache, activations, non-linear operations, and overhead. A sufficiently large set of short requests may fit the smaller model's memory budget, but the exact checkpoint geometry and engine allocations must establish that. The example isolates how the 2 time curves cross.
 
@@ -127,7 +127,7 @@ $$
 
 Smaller weight traffic raises intensity at a smaller batch. This explains why quantization can expose compute constraints sooner. It does not establish that a real 4-bit kernel becomes compute-bound at batch 78.
 
-Weight-only quantization kernels may unpack integer values into a supported arithmetic representation, with conversion overhead and shape-specific efficiency. Other kernels use different instructions. The applicable $$C$$ must reflect that path, preferably from measured GEMMs. An advertised INT8, FP8, or sparse TFLOPS number cannot be chosen just because it makes the estimate look favorable.
+Weight-only quantization kernels may unpack integer values into a supported arithmetic representation, with conversion overhead and shape-specific efficiency. Other kernels use different instructions. The applicable $$C$$ must reflect that path, preferably from measured GEMMs. Do not pick an advertised INT8, FP8, or sparse TFLOPS number just because it makes the estimate look favorable.
 
 The metadata term also belongs in traffic. A nominal 0.5-byte estimate yields a different crossing from 0.53125. If scales remain in cache or are repeatedly fetched, the measured traffic may differ again. Use the actual format layout and profiling evidence.
 

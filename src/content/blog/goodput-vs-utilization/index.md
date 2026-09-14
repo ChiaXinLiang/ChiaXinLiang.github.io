@@ -38,7 +38,7 @@ Some overheads leave GPU kernels active, while others leave the device idle. Rep
 
 ### What Meta actually measured
 
-Meta's infrastructure team analyzed research-cluster reliability in [Revisiting Reliability in Large-Scale Machine Learning Research Clusters](https://arxiv.org/abs/2410.21680). Their effective training time ratio evaluates reliability and job overhead at a defined scope. It should not be read as a universal claim that 70 percent of every fully utilized GPU cluster is wasted. The study motivates measuring retained progress over the full job lifecycle.
+Meta's infrastructure team analyzed research-cluster reliability in [Revisiting Reliability in Large-Scale Machine Learning Research Clusters](https://arxiv.org/abs/2410.21680). Their effective training time ratio evaluates reliability and job overhead at a defined scope. Do not read it as a universal claim that 70 percent of every fully utilized GPU cluster is wasted. The study motivates measuring retained progress over the full job lifecycle.
 
 The following figure is an illustrative accounting schematic, not a reproduction of Meta's measured fleet results.
 
@@ -68,11 +68,11 @@ The first time a team runs this exercise, the result is usually uncomfortable. T
 
 The word goodput appears in several systems contexts, and its exact definition must accompany the number. A network may count application bytes delivered after excluding protocol overhead and retransmissions. A training system may count retained progress per elapsed hour. A serving system may count requests or tokens that meet latency and quality requirements. These quantities share the idea of useful completion, but they are not interchangeable ratios.
 
-For a training run, an operational definition is retained training tokens divided by wall-clock time. “Retained” means that repeated work after a rollback counts only once. If a run processes 1 million tokens, loses the last hundred thousand, then recomputes them, raw processed tokens exceed useful progress. Tracking checkpoint position and optimizer progress prevents the repeated computation from inflating the result.
+For a training run, an operational definition is retained training tokens divided by wall-clock time. “Retained” means that repeated work after a rollback counts only once. If a run processes 1 million tokens, loses the last hundred thousand, then recomputes them, raw processed tokens exceed useful progress. Tracking checkpoint position and optimizer progress stops the repeated computation from inflating the result.
 
 For serving, 1 possible definition is the rate of requests that satisfy a specified service objective. If a benchmark accepts 1,000 requests during 100 seconds and only 900 meet the required latency and quality, request goodput is 9 requests per second. It is neither the offered rate of 10 requests per second nor the GPU's utilization. The failed or late requests still consumed resources, but they did not satisfy the promised service.
 
-Token goodput is another legitimate definition, but length weighting changes the result. A long response contributes more tokens than a short response, and an aggregate token objective can conceal poor treatment of short interactive requests. Publish both the weighting and the acceptance rule so the team understands which behavior the metric rewards.
+Token goodput is another legitimate definition, but length weighting changes the result. A long response contributes more tokens than a short response, and an aggregate token objective can hide poor treatment of short interactive requests. Publish both the weighting and the acceptance rule so the team knows which behavior the metric rewards.
 
 ### A consistent illustrative calculation
 
@@ -100,17 +100,17 @@ Published peak compute is a different denominator from the clean-run baseline. A
 
 The Meta reliability study analyzes a particular set of research-cluster jobs and models effective training time as a function of job and system parameters. Its effective training time ratio concerns retained training progress and the effects of reliability and job overhead. It is evidence that failures, recovery, scheduling, and job duration matter at scale. It is not evidence that every GPU fleet loses 70 percent of its compute to 1 universal set of causes.
 
-A reliability ratio also does not directly measure kernel efficiency or model FLOPS utilization. A job can retain nearly all of its executed progress while using inefficient kernels. Another can use efficient kernels during healthy execution and lose substantial wall time to recovery. Combining these views is helpful; collapsing them into 1 unexplained percentage makes diagnosis harder.
+A reliability ratio also does not directly measure kernel efficiency or model FLOPS utilization. A job can retain nearly all of its executed progress while using inefficient kernels. Another can use efficient kernels during healthy execution and lose a lot of wall time to recovery. Combining these views helps; collapsing them into 1 unexplained percentage makes diagnosis harder.
 
-The practical lesson is to inspect the population behind a published number: training or inference, large jobs or small jobs, allocated time or active execution, measured outcomes or modeled projections. Then choose a matching metric for your own workload. A benchmark is context for reasoning, not a substitute for local measurement.
+The practical lesson is to check the population behind a published number: training or inference, large jobs or small jobs, allocated time or active execution, measured outcomes or modeled projections. Then pick a matching metric for your own workload. A benchmark is context for reasoning, not a substitute for local measurement.
 
 ### Why tails change the answer in serving
 
 ![Deep dive: Why tails change the answer in serving](./deep-dive-component-02.png)
 
-Suppose a service delivers 100 requests per second at moderate load, and nearly all requests meet a 2-second first-token objective. Increasing offered traffic to 130 requests per second might raise raw throughput while causing queue delays that push many requests past the objective. The hardware can become busier as the useful completion rate becomes worse.
+Suppose a service delivers 100 requests per second at moderate load, and nearly all requests meet a 2-second first-token objective. Raising offered traffic to 130 requests per second might raise raw throughput while causing queue delays that push many requests past the objective. The hardware can get busier while the useful completion rate gets worse.
 
-The relationship follows from a simple queueing fact: stable operation requires average arrival demand to remain below service capacity. Near capacity, variability has little room to dissipate. Bursts accumulate, long prompts occupy resources, and 1 slow request can delay others. A steady arrival benchmark and a bursty production trace can therefore produce different goodput at the same average request rate.
+The relationship follows from a simple queueing fact: stable operation needs average arrival demand to stay below service capacity. Near capacity, variability has little room to dissipate. Bursts pile up, long prompts hold resources, and 1 slow request can delay others. A steady arrival benchmark and a bursty production trace can therefore produce different goodput at the same average request rate.
 
 Little's law relates average in-system work L, accepted arrival rate lambda, and average time in the system W, under stable conditions:
 
@@ -120,7 +120,7 @@ $$
 
 If a stable service accepts 50 requests per second and each spends an average of 2 seconds in the system, it holds about 100 requests on average. The equation is not a tail-latency prediction, and it does not establish that a system overloaded by arbitrary arrivals is stable. It is a consistency check connecting concurrency, rate, and waiting time.
 
-Admission control can protect latency by rejecting or deferring work before it overloads the service. That policy should expose both accepted goodput and the rejection rate. Otherwise a configuration can appear excellent by accepting only an easy subset of requests. An honest report includes offered load, completed load, accepted goodput, and the latency distribution.
+Admission control can protect latency by rejecting or deferring work before it overloads the service. That policy should expose both accepted goodput and the rejection rate. Otherwise a configuration can look excellent by accepting only an easy subset of requests. An honest report includes offered load, completed load, accepted goodput, and the latency distribution.
 
 ### Measure progress across the whole lifecycle
 
@@ -132,9 +132,9 @@ The dashboard should then support a concrete investigation. A fall in retained p
 
 ### Choose the intervention by recovered output
 
-Return to the hypothetical training example. Recovering half of the 600-second unavailable interval adds 300 seconds at 8,000 tokens per second: 2.4 million additional retained tokens per hour. Improving the active rate from 8,000 to 9,000 over the original 3,000 seconds adds 3 million tokens. Either may be worthwhile, and their engineering costs and risks can differ substantially.
+Return to the hypothetical training example. Recovering half of the 600-second unavailable interval adds 300 seconds at 8,000 tokens per second: 2.4 million additional retained tokens per hour. Improving the active rate from 8,000 to 9,000 over the original 3,000 seconds adds 3 million tokens. Either may be worthwhile, and their engineering costs and risks can differ a lot.
 
-The comparison makes priorities explicit. Count useful output recovered per unit of cost, and verify that a local improvement persists in the full job. Faster checkpoint writes can affect both pause duration and the best checkpoint interval. A communication change can improve step time while increasing fragility. Goodput rewards the final retained or accepted work, so those interactions belong in the measurement.
+The comparison makes priorities explicit. Count useful output recovered per unit of cost, and verify that a local improvement survives in the full job. Faster checkpoint writes can affect both pause duration and the best checkpoint interval. A communication change can improve step time while making the job more fragile. Goodput rewards the final retained or accepted work, so those interactions belong in the measurement.
 
 A busy GPU is still a useful observation. It tells you that some work is executing. Pair it with completion, progress, and service objectives, and it becomes part of an explanation rather than the explanation itself.
 
@@ -145,7 +145,7 @@ A busy GPU is still a useful observation. It tells you that some work is executi
 - Track retained or accepted output against an explicitly defined baseline. The gap you find is the highest-ROI engineering work available to your team.
 
 
-A goodput dashboard should expose the denominator as clearly as the numerator. Show the observation interval, admitted request count, completion count, and the exact conditions used to accept a result. If requests can be cancelled or retried, report how those events enter the calculation. Otherwise, the same serving system can appear to improve simply because difficult requests disappeared from the measured sample. Preserve a workload description alongside each comparison, including prompt lengths, output lengths, and concurrency. This makes an improvement reproducible and helps distinguish a scheduler change from a change in the traffic it happened to receive.
+A goodput dashboard should expose the denominator as clearly as the numerator. Show the observation interval, admitted request count, completion count, and the exact conditions used to accept a result. If requests can be cancelled or retried, report how those events enter the calculation. Otherwise, the same serving system can seem to improve simply because hard requests disappeared from the measured sample. Keep a workload description alongside each comparison, including prompt lengths, output lengths, and concurrency. This makes an improvement reproducible and helps tell a scheduler change from a change in the traffic it happened to receive.
 
 ### Sources
 

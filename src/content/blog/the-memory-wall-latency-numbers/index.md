@@ -16,7 +16,7 @@ tags: [memory, latency, hardware]
 
 ![Concept overview: The Memory Wall: Latency Numbers Every Engineer Should Feel](./section-overview.png)
 
-Reading a value from a CPU register takes about 0.3 nanoseconds. Reading the same value from main memory takes about 100 nanoseconds, roughly 300 times longer, and a random read from an SSD costs another one000 times on top of that. Those 3 numbers explain more real-world performance mysteries than any profiler feature I know, and most engineers have never sat down and felt how big the ratios actually are.
+Reading a value from a CPU register takes about 0.3 nanoseconds. Reading the same value from main memory takes about 100 nanoseconds, roughly 300 times longer, and a random read from an SSD costs another 1,000 times on top of that. Those 3 numbers explain more real-world performance mysteries than any profiler feature I know, and most engineers have never sat down and felt how big the ratios actually are.
 
 This article is about building that feel. We'll walk the canonical latency table, rescale it to human time, count exactly what 1 cache miss costs in wasted arithmetic, look at why the gap exists in the first place, and end with the place the memory wall bites hardest today: generating tokens from a large language model.
 
@@ -24,7 +24,7 @@ This article is about building that feel. We'll walk the canonical latency table
 
 ### The table, and why it looks the way it does
 
-Every working systems engineer eventually memorizes some version of this table. It descends from a slide Jeff Dean showed at Google in 2009 ("Numbers Everyone Should Know"), which Peter Norvig had published a version of earlier, and which Colin Scott later turned into an interactive chart that extrapolates the trends year by year. The rough 2020s values:
+Every working systems engineer eventually memorizes some version of this table. It descends from a slide Jeff Dean showed at Google in 2009 ("Numbers Everyone Should Know"). Peter Norvig had published a version earlier, and Colin Scott later turned it into an interactive chart that extrapolates the trends year by year. The rough 2020s values:
 
 | Operation | Latency |
 |---|---|
@@ -39,7 +39,7 @@ Every working systems engineer eventually memorizes some version of this table. 
 
 2 things to notice before the numbers blur together. First, each tier is not a little slower than the 1 above it; the steps are factors of 4 to 1,000. Second, the table spans 9 orders of magnitude, from 0.3 nanoseconds to 150 milliseconds. Human intuition is terrible at 9 orders of magnitude, which is why the rescaling trick below is worth doing at least once in your life.
 
-Quick vocabulary so nothing is taken on faith. A *register* is one of a few dozen storage slots inside the CPU core itself, physically adjacent to the arithmetic units. A *cache* is a small, fast memory on the CPU die that keeps copies of recently used data; L1, L2, and L3 are successively larger and slower levels of it. *DRAM* (dynamic random-access memory) is main memory, the "16 GB of RAM" in your laptop, sitting centimeters away across a bus. An *SSD* stores bits in flash cells and is persistent; DRAM forgets everything at power-off. *Latency* is how long 1 access takes from request to data; it is a different quantity from *bandwidth*, which is how many bytes per second you can stream, and confusing the 2 is the most common memory-performance mistake there is. We'll come back to that.
+Quick vocabulary so nothing is taken on faith. A *register* is one of a few dozen storage slots inside the CPU core itself, physically adjacent to the arithmetic units. A *cache* is a small, fast memory on the CPU die that keeps copies of recently used data; L1, L2, and L3 are successively larger and slower levels of it. *DRAM* (dynamic random-access memory) is main memory, the "16 GB of RAM" in your laptop, sitting centimeters away across a bus. An *SSD* stores bits in flash cells and is persistent; DRAM forgets everything at power-off. *Latency* is how long 1 access takes from request to data. *Bandwidth* is a different quantity: how many bytes per second you can stream. Confusing the 2 is the most common memory-performance mistake there is. We'll come back to that.
 
 ### Scaled to human time
 
@@ -83,7 +83,7 @@ $$
 
 For a dependent list reading 4 useful bytes per node with $$Q=1$$ and $$\ell=100$$ nanoseconds, useful throughput is at most 40 MB/s. 10 million values therefore take at least 1 second in this simplified model. If 16 genuinely independent streams sustain the same latency, the concurrency bound rises to 640 MB/s of useful payload, until another resource limits it.
 
-The innovation behind prefetching and memory-level parallelism is moving from “discover the next address after the previous load” to having multiple requests ready together. Array layout enables that transformation; a dependent pointer chain often does not. A request may transfer a whole cache line while only 4 bytes are used, so physical bus traffic exceeds useful payload. Measure both dependencies and bytes transferred. The 2-millisecond array estimate above is a bandwidth floor under its assumed 20-GB/s service rate, not a universal measured 500× application speedup.
+The trick behind prefetching and memory-level parallelism is moving from “discover the next address after the previous load” to having multiple requests ready together. Array layout makes that possible; a dependent pointer chain often does not. A request may transfer a whole cache line while only 4 bytes are used, so physical bus traffic exceeds useful payload. Measure both dependencies and bytes transferred. The 2-millisecond array estimate above is a bandwidth floor under its assumed 20-GB/s service rate, not a universal measured 500× application speedup.
 
 ### Why the wall exists: compute sprinted, memory walked
 
@@ -108,15 +108,15 @@ There is an energy version of the wall too, and it decides chip architecture as 
 
 ### The memory wall, at datacenter scale: LLM decode
 
-Here is the modern punchline. When a large language model generates text, it produces 1 token at a time, and each new token's computation must read essentially every weight of the model once while performing only about 2 floating-point operations per weight read. That ratio, FLOPs per byte moved, is called arithmetic intensity, and at batch size 1 it sits around 1–2. Many modern accelerator arithmetic paths require intensity in the hundreds to approach peak, with the threshold dependent on precision and memory interface.
+Here is the modern punchline. When a large language model generates text, it produces 1 token at a time, and each new token's computation must read essentially every weight of the model once while performing only about 2 floating-point operations per weight read. That ratio, FLOPs per byte moved, is called arithmetic intensity, and at batch size 1 it sits around 1–2. Many modern accelerator arithmetic paths need intensity in the hundreds to approach peak; the threshold depends on precision and memory interface.
 
 Concretely: a 70-billion-parameter model at 16-bit precision is 140 GB of weights. An NVIDIA H100 offers 3.35 TB/s of HBM bandwidth (vendor-reported, like all peak specs). The floor for 1 decode step is
 
 140 GB ÷ 3.35 TB/s ≈ 42 ms per token, or about **24 tokens per second**,
 
-This is a counterfactual single-interface illustration: 140 GB of BF16 weights does not fit an 80 GB H100 SXM. A deployable sharded or quantized configuration needs its own traffic and communication budget.
-
 no matter that the same chip advertises near a petaflop of tensor throughput. During single-stream decode the multipliers idle at under 1% utilization; the workload is a pure bandwidth play. This is exactly the linked-list lesson at warehouse scale: performance set by data movement, with compute along for the ride.
+
+This is a counterfactual single-interface illustration: 140 GB of BF16 weights does not fit an 80 GB H100 SXM. A deployable sharded or quantized configuration needs its own traffic and communication budget.
 
 
 The entire modern inference stack is a response to this. Batching lets N concurrent requests share 1 read of the weights, multiplying arithmetic intensity by N. Quantization to 8 or 4 bits shrinks the bytes that must move. KV caches, speculative decoding, HBM stacked ever higher and wider: all of it is memory-wall engineering. It's why I keep insisting that [an ML performance engineer's job](/blog/what-does-an-ml-performance-engineer-do/) is mostly moving bytes, why [goodput and utilization tell such different stories](/blog/goodput-vs-utilization/) on decode-heavy fleets, and why the [Blackwell-to-Rubin roadmap is best read as memory math](/blog/blackwell-to-rubin-memory-math/) rather than FLOPs math. And if the pipeline mechanics of a core stalling on a load are fuzzy, the picture in [What a CPU Actually Does](/blog/what-a-cpu-actually-does/) is the prequel to this article.

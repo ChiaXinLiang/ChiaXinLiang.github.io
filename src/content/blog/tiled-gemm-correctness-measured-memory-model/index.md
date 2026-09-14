@@ -18,9 +18,9 @@ tags: ["gpu-performance", "ai-infrastructure"]
 
 Matrix multiplication becomes fast by reusing operands close to computation. A naive output-element kernel can repeatedly load values that neighboring threads also need. Tiling gives a group ownership of an output region and lets it reuse loaded input blocks across many multiply-accumulate operations.
 
-The method is more than selecting large dimensions. Output ownership, reduction boundaries, shared-buffer lifetime, accumulator storage, and numerical behavior must remain correct. A larger tile can improve reuse while exhausting registers or reducing the number of concurrent groups.
+Tiling is more than picking large dimensions. Output ownership, reduction boundaries, shared-buffer lifetime, accumulator storage, and numerical behavior must remain correct. A larger tile can improve reuse while exhausting registers or reducing the number of concurrent groups.
 
-We will derive a tiled execution and its logical traffic model, then connect that model to measurement. Numerical examples are illustrative. Hardware-specific matrix instructions and supported layouts should follow current CUDA and library documentation.
+We will derive a tiled execution and its logical traffic model, then connect that model to measurement. Numerical examples are illustrative. For hardware-specific matrix instructions and supported layouts, follow current CUDA and library documentation.
 
 ## Deep dive
 
@@ -46,7 +46,7 @@ A simple baseline assigns one output element to a thread and loops over K. It ha
 
 The baseline is useful for reference and diagnosis even if it is not fast. It separates the mathematical operation from later reuse, layouts, and specialized instructions. Preserve it or an equivalent suitable reference when developing the tiled path.
 
-Count work before optimization. Under the usual multiply-plus-add counting convention, the operation has approximately 2MNK floating-point operations. The exact convention matters for small K and special forms, so state it in the report.
+Count work before optimization. Under the usual multiply-plus-add counting convention, the operation has about 2MNK floating-point operations. The exact convention matters for small K and special forms, so state it in the report.
 
 The scalar baseline can load the same A value for many output columns and the same B value for many rows. Caches may capture some reuse, but explicit tiling changes where and how that reuse is organized. A logical load count is not automatically physical HBM traffic.
 
@@ -60,13 +60,13 @@ $$
 
 Each group owns a disjoint output tile under the chosen grid. Within the group, threads or supported matrix operations distribute accumulator ownership. The mapping must cover every valid output exactly once or use an explicitly supported combining mechanism.
 
-Tail rows and columns are masked at global accesses. A partial reduction tile needs invalid k positions to contribute zero under the supported representation and operation. Final stores write only valid C positions.
+Mask tail rows and columns at global accesses. A partial reduction tile needs invalid k positions to contribute zero under the supported representation and operation. Final stores write only valid C positions.
 
 The complete reduction is the union of consecutive k chunks covering 0 through K minus 1. This coverage argument is independent of the hardware schedule and provides a useful correctness proof before optimization.
 
 ### 4. Stage operands with two ownership boundaries
 
-A cooperative group can load an A tile and a B tile into shared storage, then use them for the current multiply-accumulate work. Loads are distributed across participating threads and guard global boundaries.
+A cooperative group can load an A tile and a B tile into shared storage, then use them for the current multiply-accumulate work. The participating threads split the loads between them and guard the global boundaries.
 
 The execution pattern is conceptually
 
@@ -118,7 +118,7 @@ For 128-by-128 output tiles, B_K=32, and 2-byte inputs, this is 16 KiB. Two oper
 
 The output has B_M B_N accumulators. At FP32 width, a 128-by-128 tile represents 64 KiB of accumulator values distributed through the supported execution mapping. That is an aggregate state budget, not a claim that one thread holds all values.
 
-Registers also hold addresses, operands, loop state, and temporary results. The compiler's allocation and hardware granularity determine actual occupancy and spills. A source-level estimate helps explain pressure but should be checked against compiled resource usage.
+Registers also hold addresses, operands, loop state, and temporary results. The compiler's allocation and hardware granularity determine actual occupancy and spills. A source-level estimate helps explain pressure; check it against compiled resource usage.
 
 Larger tiles can improve logical reuse while reducing concurrency. The best shape follows measured instruction efficiency and resource balance, not a universal preference for maximum tile area.
 
@@ -126,7 +126,7 @@ Larger tiles can improve logical reuse while reducing concurrency. The best shap
 
 Supported matrix instructions can perform dense tile arithmetic efficiently, but they impose shape, dtype, layout, and synchronization requirements. An implementation must transform staged operands into the expected representation and preserve accumulator ownership.
 
-A naive scalar tile and a matrix-instruction tile can therefore have similar logical reuse while very different execution efficiency. The traffic model alone does not predict the complete result. Non-matrix arithmetic, layout conversion, and synchronization can limit the optimized path.
+A naive scalar tile and a matrix-instruction tile can therefore have similar logical reuse with very different execution efficiency. The traffic model alone does not predict the complete result. Non-matrix arithmetic, layout conversion, and synchronization can limit the optimized path.
 
 Use current supported libraries or APIs for the target architecture where appropriate. Preserve the executed kernel and configuration in comparisons. A high-level GEMM call can select different implementations based on shape, dtype, and layout.
 
@@ -162,7 +162,7 @@ $$
 P_{\mathrm{achieved}}\le\min(P_{\mathrm{compute}},B_{\mathrm{memory}}I),
 $$
 
-with intensity and bandwidth defined at a compatible memory level. Logical tile bytes and physical HBM bandwidth cannot be mixed without acknowledging cache and transaction behavior.
+with intensity and bandwidth defined at a compatible memory level. Do not mix logical tile bytes with physical HBM bandwidth unless you account for cache and transaction behavior.
 
 Sweep representative matrix shapes, not only one large square. Skinny matrices, small batches, and partial tiles can use different paths or provide less parallel work. Preserve actual layout and application frequency when ranking configurations.
 

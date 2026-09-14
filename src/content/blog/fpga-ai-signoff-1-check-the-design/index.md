@@ -46,7 +46,7 @@ Test reset while work is outstanding and define whether it cancels or drains tra
 
 ![Deep dive: Physical checks are complementary](./deep-dive-component-03.png)
 
-The checks figure separates DRC,LVS and STA. Geometry rules, layout connectivity and timing are complementary. A generated layout picture is not evidence that any of these passed.
+The checks figure separates DRC, LVS and STA. Geometry rules, layout connectivity and timing are complementary. A generated layout picture is not evidence that any of these passed.
 
 The release checklist marks physical checks as unperformed. RTL numerical/protocol checks remain recorded separately. Unknown evidence is unclosed, not a successful result or a zero-error assumption.
 
@@ -66,9 +66,9 @@ DFT can change area, timing and reset/control behavior. Integrate it deliberatel
 
 ![Deep dive: Review corners and assumptions](./deep-dive-component-05.png)
 
-The corner figure records process,voltage,temperature and modeling assumptions. Different corners can dominate setup and hold. Include memory, I/O and clock models where they participate in paths.
+The corner figure records process, voltage, temperature and modeling assumptions. Different corners can dominate setup and hold. Include memory, I/O and clock models where they participate in paths.
 
-A report should state which checks remain missing. For this release, the checklist explicitly leaves STA,DRC,LVS and scan insertion unperformed. It can serve as a gate for a later educational or fabrication milestone.
+A report should state which checks remain missing. For this release, the checklist explicitly leaves STA, DRC, LVS and scan insertion unperformed. It can serve as a gate for a later educational or fabrication milestone.
 
 The useful outcome is an honest signoff evidence map. It connects every claim to an executed check and prevents a passing RTL simulation from being mistaken for a manufactured chip's readiness.
 
@@ -109,7 +109,7 @@ A single-bit stable control level may use a suitable synchronizer, while a pulse
 
 Reset release must be appropriate to each destination clock domain and target requirements. An ideal simulation reset does not establish physical recovery/removal behavior or metastability risk. Review clock availability, reset sequencing and macro-specific assumptions. A board shell or full-chip wrapper can introduce crossings absent from the single-clock portable core, so its checks are new work rather than inherited proof.
 
-A CDC structure also needs functional protocol verification. A queue can have safe clock-domain pointer handling yet still lose transactions through a wrong full/empty or reset policy. Track accepted and consumed events with the declared cancellation rules. Timing exceptions, structural CDC checks and numerical/transaction simulation complement each other; 1 category does not replace the others.
+A CDC structure also needs functional protocol verification. A queue can have safe clock-domain pointer handling yet still lose transactions through a wrong full/empty or reset policy. Track accepted and consumed events with the declared cancellation rules. Timing exceptions, structural CDC checks and numerical/transaction simulation complement each other; one category does not replace the others.
 
 #### Keep physical checks distinct from functional checks
 

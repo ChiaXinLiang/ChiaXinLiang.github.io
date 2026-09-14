@@ -101,7 +101,7 @@ Every fact needed for the good answer was already in the base model. The lifecyc
 
 **P(A ≻ B) = σ(r(A) − r(B))**
 
-where σ is the sigmoid function, σ(x) = 1/(1 + e⁻ˣ). Try it with real numbers. Suppose the reward model scores a concise, correct answer at 2.0 and a rambling 1 at 0.5. Then P = σ(1.5) = 1/(1 + e⁻¹·⁵) ≈ **0.82**: an 82% chance the human prefers the first. Training minimizes the log loss of these predictions over all human-labeled pairs, so scores get pushed apart exactly when humans disagree with the model's current ranking. Only score *differences* matter, which is why reward values themselves are meaningless in isolation.
+where σ is the sigmoid function, σ(x) = 1/(1 + e⁻ˣ). Try it with real numbers. Suppose the reward model scores a concise, correct answer at 2.0 and a rambling one at 0.5. Then P = σ(1.5) = 1/(1 + e⁻¹·⁵) ≈ **0.82**: an 82% chance the human prefers the first. Training minimizes the log loss of these predictions over all human-labeled pairs, so scores get pushed apart exactly when humans disagree with the model's current ranking. Only score *differences* matter, which is why reward values themselves are meaningless in isolation.
 
 The PPO objective then maximizes, per response y to prompt x:
 

@@ -45,7 +45,7 @@ $$
 
 For a variance-preserving schedule, the amplitudes satisfy a_t squared plus s_t squared equal to 1. Other formulations can use another schedule while preserving an appropriate predictor conversion.
 
-The ordering of t depends on the corruption convention. In this article, u denotes a less noisy level reached from t during generation. Record actual scheduler coefficients instead of inferring them from labels such as early or late, which can be reversed between implementations.
+The ordering of t depends on the corruption convention. In this article, u denotes a less noisy level reached from t during generation. Record actual scheduler coefficients instead of inferring them from labels such as early or late. Those labels can be reversed between implementations.
 
 ### 3. Express one deterministic update
 
@@ -57,7 +57,7 @@ $$
 
 This expression assumes nonzero s_t and the stated deterministic setting. Endpoint and stochastic variants need their documented policies.
 
-The update combines a predicted clean direction with the current residual. It is not simply replacing x_t with the teacher's final image. That structure makes it possible to solve for the clean prediction required to reach a teacher-defined endpoint in one step.
+The update combines a predicted clean direction with the current residual. It is not simply replacing x_t with the teacher's final image. That structure lets you solve for the clean prediction needed to reach a teacher-defined endpoint in one step.
 
 ### 4. Rearrange the coarse transition
 
@@ -67,7 +67,7 @@ $$
 x_u=\frac{s_u}{s_t}x_t+\left(a_u-\frac{s_u}{s_t}a_t\right)\widehat x_0.
 $$
 
-The coefficient multiplying x_hat depends on the two selected noise levels. A coarse move changes that coefficient and therefore changes the prediction needed to land at a particular endpoint.
+The coefficient multiplying x_hat depends on the two selected noise levels. A coarse move changes that coefficient, so it changes the prediction needed to land at a particular endpoint.
 
 This identity is exact for the stated update in real arithmetic. It does not establish that a finite student can learn every target perfectly. It supplies the numerical interface for defining supervision, while training and evaluation determine the approximation achieved by the student.
 
@@ -81,9 +81,9 @@ $$
 x_v=\Phi_{t\to v}^{\mathrm{teacher}}(x_t),\qquad x_u^{\mathrm{teacher}}=\Phi_{v\to u}^{\mathrm{teacher}}(x_v).
 $$
 
-The composition is generally not equivalent to evaluating the teacher only once at x_t. The predictor is nonlinear and the second state differs.
+Composing the two updates is generally not the same as evaluating the teacher once at x_t. The predictor is nonlinear and the second state differs.
 
-Teacher parameters, conditioning, schedule, and numerical policy determine the endpoint. Under a deterministic teacher trajectory, that endpoint is fixed for a given starting state and condition. This creates a target for learning a larger student transition rather than an ambiguous attempt to recover one unknown original image.
+Teacher parameters, conditioning, schedule, and numerical policy determine the endpoint. Under a deterministic teacher trajectory, that endpoint is fixed for a given starting state and condition. This gives the student a fixed target for learning a larger transition, not an ambiguous attempt to recover one unknown original image.
 
 ### 6. Derive the distillation target
 
@@ -123,7 +123,7 @@ A teacher requiring 2N steps can train a student intended for N steps. The stude
 
 This repeated halving connects each coarse model to an already useful finer trajectory. The original method initializes the student from the teacher under its architecture and training design.
 
-Errors can accumulate across stages, and the very-few-step regime imposes a demanding approximation. Evaluate each stage rather than assuming successful halving at one budget guarantees equal quality at every later budget. Preserve checkpoint lineage and the target schedule with the final artifact.
+Errors can accumulate across stages, and the very-few-step regime imposes a demanding approximation. Evaluate each stage. Successful halving at one budget does not guarantee equal quality at every later budget. Preserve checkpoint lineage and the target schedule with the final artifact.
 
 ### 10. Distinguish step count from network size
 
@@ -139,7 +139,7 @@ Report network evaluations, model bytes, peak allocation, and end-to-end time se
 
 ![Deep dive: 11. Include guidance in the contract](./deep-dive-component-05.png)
 
-Guidance changes the predictor used by the sampler. Distillation can incorporate a chosen guidance policy or otherwise require a documented supported range. A student is not automatically compatible with arbitrary guidance scales absent evidence.
+Guidance changes the predictor used by the sampler. Distillation can build in a chosen guidance policy, or it needs a documented supported range. Without evidence, do not assume a student handles arbitrary guidance scales.
 
 If the teacher endpoint uses conditional and unconditional evaluations, count both in preparation. If the deployed student avoids some repeated guidance work, verify that behavior in the actual inference path.
 
@@ -157,7 +157,7 @@ $$
 
 The units should be consistent and include discarded or failed work when it materially affects the resource claim. Shared targets can be reused, while online targets trade storage for repeated teacher execution.
 
-A widely reused generator can amortize this preparation over many outputs. A one-off deployment may prefer a verified training-free solver. Compare the phases explicitly instead of presenting reduced inference evaluations as a complete lifecycle cost calculation.
+A widely reused generator can amortize this preparation over many outputs. A one-off deployment may prefer a verified training-free solver. Compare the phases explicitly. Reduced inference evaluations alone are not a complete lifecycle cost calculation.
 
 ### 13. Compare with strong sampler baselines
 

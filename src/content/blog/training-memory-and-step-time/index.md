@@ -16,23 +16,23 @@ tags: ["distributed-training", "ai-infrastructure"]
 
 ![Concept overview: Training Memory and Step Time: Account for Every State. GPU memory is shown as a physical stack of parameter, gradient, optimizer, and activation blocks.](./section-overview.png)
 
-A model with 7 billion parameters does not require only 14 GB to train because its inference weights fit in that space. Training retains additional state, creates intermediate tensors, and performs operations whose temporary allocations can overlap. A deployment that fits for generation can fail before the first optimizer update. Conversely, a careful sharding or recomputation schedule can train a model that would never fit as a fully replicated training instance.
+A model with 7 billion parameters does not require only 14 GB to train because its inference weights fit in that space. Training keeps extra state, creates intermediate tensors, and runs operations whose temporary allocations can overlap. A deployment that fits for generation can fail before the first optimizer update. The reverse also holds: a careful sharding or recomputation schedule can train a model that would never fit as a fully replicated training instance.
 
-The useful question is therefore precise: which tensors must exist on each device at the same instant, and which operations determine how quickly that device can finish a step? Memory capacity and execution time interact, but they are different constraints. An optimization that reduces persistent optimizer state can leave an activation peak unchanged. A schedule that reduces the peak can introduce enough communication to make useful training slower.
+So the useful question is precise: which tensors must exist on each device at the same instant, and which operations determine how quickly that device can finish a step? Memory capacity and execution time interact, but they are different constraints. An optimization that reduces persistent optimizer state can leave an activation peak unchanged. A schedule that reduces the peak can introduce enough communication to make useful training slower.
 
-This article builds a transparent accounting model for a hypothetical dense model with mixed-precision Adam. The numbers are illustrative, rather than measured GPU results. The method applies more broadly if you replace the state sizes with the actual optimizer, precision policy, parameter layout, and execution schedule used by your framework.
+This article builds a transparent accounting model for a hypothetical dense model with mixed-precision Adam. The numbers are illustrative, not measured GPU results. The method applies more broadly if you replace the state sizes with the actual optimizer, precision policy, parameter layout, and execution schedule used by your framework.
 
 ## Deep dive
 
 ### 1. Separate the objects before counting bytes
 
-Parameters are the values used during the forward computation. Gradients record derivatives accumulated during backward. Optimizer state stores information needed for future updates. Adam commonly maintains a first moment and a second moment for each optimized parameter. Some mixed-precision implementations also maintain a higher-precision master copy of the parameters. These objects can use different numerical representations.
+Parameters are the values used during the forward computation. Gradients record derivatives accumulated during backward. Optimizer state stores information needed for future updates. Adam commonly keeps a first moment and a second moment for each optimized parameter. Some mixed-precision implementations also keep a higher-precision master copy of the parameters. These objects can use different numerical representations.
 
-Activations are intermediate values required to compute gradients. Their shapes depend on batch size, sequence length, hidden dimensions, and layer implementation. Saved tensors are not simply every tensor created during forward: automatic differentiation retains what its backward rules require, and fused operations or recomputation can change that set. Attention implementations also differ in whether they materialize large score matrices.
+Activations are intermediate values needed to compute gradients. Their shapes depend on batch size, sequence length, hidden dimensions, and layer implementation. Saved tensors are not simply every tensor created during forward: automatic differentiation keeps what its backward rules require, and fused operations or recomputation can change that set. Attention implementations also differ in whether they materialize large score matrices.
 
-Temporary workspaces, communication buffers, and materialized parameter shards form another category. They may be short-lived, but a short lifetime does not make their contribution to a peak disappear. A framework can prefetch the next layer while computing the current layer, causing 2 allocations that look separate in source code to coexist on the device.
+Temporary workspaces, communication buffers, and materialized parameter shards form another category. They may be short-lived, but a short lifetime does not make their contribution to a peak disappear. A framework can prefetch the next layer while computing the current layer, so 2 allocations that look separate in source code coexist on the device.
 
-Finally, allocator reservation differs from live tensor allocation. A caching allocator may keep freed blocks available for reuse. Reserved memory can exceed allocated memory without indicating a leak. Fragmentation and non-framework allocations can nevertheless reduce the space available for the next operation. Record what each reported memory quantity actually measures.
+Finally, allocator reservation differs from live tensor allocation. A caching allocator may keep freed blocks available for reuse. Reserved memory can exceed allocated memory without indicating a leak. Fragmentation and non-framework allocations can still reduce the space available for the next operation. Record what each reported memory quantity actually measures.
 
 ### 2. Derive the persistent-state budget
 
@@ -48,7 +48,7 @@ One illustrative configuration uses 2-byte compute weights, 2-byte gradients, 4-
 
 This is a configuration example, not a universal Adam constant. Some systems accumulate gradients in higher precision, omit a separate master copy, compress optimizer state, or partition objects across ranks. Optimizer initialization may allocate its state lazily, so a measurement before the first update can substantially understate steady-state training memory. Inspect the actual state dictionaries and tensor dtypes after an optimizer step.
 
-The accounting also explains why changing the compute-weight dtype alone is insufficient. Moving weights from 4 bytes to 2 bytes saves 2P bytes. If optimizer and gradient state dominate the total, that saving helps but does not halve training memory. The relevant denominator is the complete budget, not the single object highlighted by a precision setting.
+The accounting also explains why changing the compute-weight dtype alone is not enough. Moving weights from 4 bytes to 2 bytes saves 2P bytes. If optimizer and gradient state dominate the total, that saving helps but does not halve training memory. The relevant denominator is the complete budget, not the single object highlighted by a precision setting.
 
 ### 3. Add the schedule-dependent peak
 
@@ -63,7 +63,7 @@ The maximum is over execution time. Summing the independent maximum of every cat
 
 For a simple activation approximation, a saved hidden-state tensor with microbatch size B, sequence length L, hidden width H, and b-byte elements consumes BLHb bytes. If B is 2, L is 4096, H is 4096, and b is 2, one such tensor occupies 67,108,864 bytes, or 64 MiB. Saving several tensors per layer across many layers multiplies this amount. That calculation is a building block, not a full activation estimator.
 
-An attention score tensor can add a separate quadratic term when it is materialized. Its shape includes batch, heads, query positions, and key positions. Memory-efficient exact attention methods avoid retaining the complete score matrix in high-bandwidth memory, changing the implementation budget without changing the mathematical attention result. Always connect a formula to the algorithm actually executing.
+An attention score tensor can add a separate quadratic term when it is materialized. Its shape includes batch, heads, query positions, and key positions. Memory-efficient exact attention methods avoid keeping the complete score matrix in high-bandwidth memory. That changes the implementation budget without changing the mathematical attention result. Always connect a formula to the algorithm actually executing.
 
 ### 4. Gradient accumulation changes the microbatch constraint
 
@@ -75,7 +75,7 @@ $$
 
 For sequence training, token counts and padding determine the more informative work budget. Equal example counts can contain very different numbers of useful tokens. If sequences have unequal lengths, also distinguish padded tokens processed by kernels from valid tokens entering the loss.
 
-Gradient accumulation allows a smaller microbatch to contribute to a larger optimizer batch. After each microstep, gradients accumulate into buffers that remain live until the update. Activations for completed microsteps can usually be released before the next forward pass, provided the implementation does not retain entire graphs unnecessarily. Persistent state therefore stays roughly fixed while activation requirements can fall.
+Gradient accumulation lets a smaller microbatch contribute to a larger optimizer batch. After each microstep, gradients accumulate into buffers that remain live until the update. Activations for completed microsteps can usually be released before the next forward pass, as long as the implementation does not keep entire graphs unnecessarily. So persistent state stays roughly fixed while activation needs can fall.
 
 The time consequences depend on scheduling. Smaller microbatches may reduce matrix efficiency and increase repeated launch overhead. Synchronizing gradients after every microstep can also introduce communication that an accumulation-aware schedule would defer. Conversely, deferring synchronization requires correct framework usage and compatible control flow across ranks. Measure the resulting optimizer-step time rather than assuming accumulation is free.
 
@@ -102,7 +102,7 @@ Optimizer-state sharding partitions persistent objects across ranks. Gradient sh
 
 Activation checkpointing instead saves a smaller set of intermediate values and recomputes omitted values during backward. It primarily changes saved-activation memory and computation. It does not automatically shard Adam moments or reduce model weights. The 2 approaches are complementary because they target different terms in the budget.
 
-A useful planning table therefore records both the object affected and the new cost introduced. Parameter sharding adds all-gather dependencies. Optimizer offload adds host memory and transfer requirements. Recomputation adds forward-like arithmetic. More aggressive prefetch can improve overlap while increasing the number of concurrently materialized tensors. The right configuration is the one that satisfies capacity while improving the actual training objective.
+So a useful planning table records both the object affected and the new cost introduced. Parameter sharding adds all-gather dependencies. Optimizer offload adds host memory and transfer requirements. Recomputation adds forward-like arithmetic. More aggressive prefetch can improve overlap while increasing the number of concurrently materialized tensors. The right configuration is the one that satisfies capacity while improving the actual training objective.
 
 ### 7. Measure one complete steady-state step
 
@@ -110,7 +110,7 @@ A useful planning table therefore records both the object affected and the new c
 
 Warm up enough iterations to initialize optimizer state, compile relevant graphs, and stabilize the representative execution path. Reset peak-memory statistics immediately before a defined measurement interval. Record allocated and reserved peaks, device-level usage where available, and the timing boundary of the optimizer step. Synchronize only where required to make the measured interval meaningful.
 
-Log the model configuration, numerical representations, microbatch size, sequence lengths, accumulation factor, rank layout, attention implementation, checkpoint policy, and optimizer variant. Without this metadata, a quoted training-memory number is difficult to reproduce or compare. A memory reduction caused by changing the workload is a different claim from a reduction at fixed useful work.
+Log the model configuration, numerical representations, microbatch size, sequence lengths, accumulation factor, rank layout, attention implementation, checkpoint policy, and optimizer variant. Without this metadata, a quoted training-memory number is hard to reproduce or compare. A memory reduction caused by changing the workload is a different claim from a reduction at fixed useful work.
 
 Inspect several iterations rather than only the first successful one. Variable-length inputs can produce intermittent peaks, asynchronous work can shift timing between iteration boundaries, and allocator behavior can depend on earlier shapes. Deliberately include the longest admitted sequence and the largest supported microbatch when evaluating capacity guarantees.
 
@@ -120,9 +120,9 @@ For performance, report valid training tokens per second alongside step time. A 
 
 An out-of-memory failure near the optimizer update suggests a different missing object than a failure during attention forward. A failure at a parameter all-gather may identify concurrent materialization rather than persistent state. These observations help locate the omitted term, but they do not prove it without allocation evidence and controlled changes.
 
-Change one mechanism at a time where practical. Reduce the microbatch to test activation sensitivity. Disable a prefetch option to test overlapping gathered parameters. Compare optimizer state after initialization to the predicted byte count. Keep the rest of the workload fixed, and record whether the change moved the peak or merely changed allocator reservation.
+Change one mechanism at a time where practical. Reduce the microbatch to test activation sensitivity. Disable a prefetch option to test overlapping gathered parameters. Compare optimizer state after initialization to the predicted byte count. Keep the rest of the workload fixed, and record whether the change moved the peak or just changed allocator reservation.
 
-Do not fill every remaining byte when planning production training. Runtime changes, occasional longer inputs, debugging instrumentation, and recovery paths can introduce additional demand. Choose headroom based on observed variation and supported workload limits. An arbitrary reserve percentage is less defensible than a measured worst-case budget with explicit assumptions.
+Do not fill every remaining byte when planning production training. Runtime changes, occasional longer inputs, debugging instrumentation, and recovery paths can add demand. Choose headroom based on observed variation and supported workload limits. An arbitrary reserve percentage is less defensible than a measured worst-case budget with explicit assumptions.
 
 ## Conclusion
 

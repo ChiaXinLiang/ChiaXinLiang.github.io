@@ -40,7 +40,7 @@ The burst figure divides one byte range into legal interface requests. The exerc
 
 The 4-KiB rule is AXI-specific, not a universal property of all DMA protocols. A real interface also constrains beat size, alignment, length encoding and responses. This simple splitter models byte coverage only.
 
-Verify that requests are contiguous, cover exactly the requested bytes and never cross the configured boundary. A correct total count can still hide a duplicated or skipped range if addresses are not checked.
+Verify that requests are contiguous, cover exactly the requested bytes and never cross the configured boundary. A correct total count can still hide a duplicated or skipped range if you do not check addresses.
 
 ### Responses and completion are state
 
@@ -99,7 +99,7 @@ Completion means the declared output is usable under the selected interface. An 
 
 For compact row-major matrices, INT8 A[i,k] uses baseA+i×K+k and INT8 B[k,j] uses baseB+k×N+j. INT32 C[i,j] uses baseC+4×(i×N+j). Keep all resulting addresses in bytes. A shape or element index is not itself a DMA address, and the input and output element sizes differ. A transfer descriptor must also declare byte length and the permitted memory region.
 
-The functional Memory model provides bounded byte reads and writes, while the Accelerator command model validates the complete operation before performing it. These models do not implement an RTL AXI master or a physical board transport. The burst exercise teaches an AXI-style 4-KiB boundary rule as a separate scheduling constraint. It should not be mistaken for proof that a hardware DMA engine has passed a bus protocol regression.
+The functional Memory model provides bounded byte reads and writes, while the Accelerator command model validates the complete operation before performing it. These models do not implement an RTL AXI master or a physical board transport. The burst exercise teaches an AXI-style 4-KiB boundary rule as a separate scheduling constraint. Do not mistake it for proof that a hardware DMA engine has passed a bus protocol regression.
 
 Use a transfer starting at byte address 4080 with length 600 and a maximum chunk of 256 bytes. The splitter produces lengths 16,256,256,72 at addresses 4080,4096,4352,4608. The lengths sum to 600, addresses are contiguous and no chunk crosses its selected 4-KiB region. The first short chunk arises from the boundary, not from a missing tensor element. Reconstruct the original byte interval from the chunks as an independent check.
 
@@ -117,11 +117,11 @@ A request can be offered while the interface is blocked, accepted into an outsta
 
 Keep response status beside returned data. A short or errored fill cannot become a complete buffer merely because its last observed beat arrived. Assembly must account for expected bytes and the interface's declared response semantics. A future external-memory implementation needs recovery rules for partial writes and canceled commands; the functional model supplies deterministic behavior but not those physical bus details.
 
-A consumer waits for successful fill completion before reading operands. The producer owns LOAD storage until it marks READY. A separate buffer can be computed while the next fill is outstanding, but the corresponding live buffer cannot be overwritten. The upcoming double-buffer schedule demonstrates the lifetime constraints without treating accepted requests as instantly usable data.
+A consumer waits for successful fill completion before reading operands. The producer owns LOAD storage until it marks READY. A separate buffer can be computed while the next fill is outstanding, but the corresponding live buffer cannot be overwritten. The upcoming double-buffer schedule shows the lifetime constraints without treating accepted requests as instantly usable data.
 
 #### Build a transport regression with explicit fault categories
 
-First compare a legal transfer's exact bytes, including signed INT8 bit patterns and wider output decoding. Then insert offered-request stalls and delayed responses while retaining the same accepted sequence. Confirm that the output is unchanged and completion is delayed appropriately. For an RTL bus extension, random stimulus must obey stable-payload and channel requirements so a failure is attributable to the component under test.
+First compare a legal transfer's exact bytes, including signed INT8 bit patterns and wider output decoding. Then insert offered-request stalls and delayed responses while retaining the same accepted sequence. Confirm that the output is unchanged and completion is delayed appropriately. For an RTL bus extension, random stimulus must obey stable-payload and channel requirements so a failure can be traced to the component under test.
 
 Add range, alignment, length and prohibited-overlap rejection fixtures. Add response errors and truncated completion to the proposed transport model with declared expected behavior. The current bounded-memory and splitter tests check their implemented contracts; they do not claim a cycle-accurate memory response simulator exists when only a functional path was executed. Keep planned faults and executed evidence distinguishable.
 

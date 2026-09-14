@@ -28,9 +28,9 @@ Start after [Build a 4×4 Systolic Array and Trace Every Cycle](/blog/fpga-ai-ar
 
 The output-stationary figure keeps each C element in a PE while A and B move. This is the released RTL array's dataflow. It avoids routing partial sums between cells during the local reduction, but requires operands to arrive in the correct skewed order.
 
-Local accumulation does not imply that the complete model fits locally. K chunks and multiple output tiles still need a schedule, and weights may be refilled between tiles. Name which boundary holds the output and for how long.
+Local accumulation does not mean the complete model fits locally. K chunks and multiple output tiles still need a schedule, and weights may be refilled between tiles. Name which boundary holds the output and for how long.
 
-The advantage should be expressed as a traffic/ownership property, not a universal speedup. For some shapes, keeping outputs local reduces expensive partial-sum movement; for others, weight reuse across many input rows becomes more important.
+State the advantage as a traffic/ownership property, not a universal speedup. For some shapes, keeping outputs local reduces expensive partial-sum movement; for others, weight reuse across many input rows becomes more important.
 
 ### Weight-stationary keeps weights local
 
@@ -66,7 +66,7 @@ Use irregular shapes to test every loop boundary. A loop ordering that works for
 
 ![Deep dive: Select from capacity and operator shapes](./deep-dive-component-05.png)
 
-The choice figure combines shape, capacity, port demand and routing. No dataflow name is optimal for every operator. A tall matrix, a wide matrix and a short reduction expose different reuse opportunities.
+The choice figure combines shape, capacity, port demand and routing. No dataflow name is best for every operator. A tall matrix, a wide matrix and a short reduction expose different reuse opportunities.
 
 Before selecting a mapping, estimate all simultaneously live storage and count accesses per bank per step. If the array requires four operands while one memory port supplies one, the mapping needs banking, staging or a slower step rate.
 
@@ -89,7 +89,7 @@ Keep logical dimensions separate from the physical array. The 4×4 engine comput
 
 Initialize a new output reduction once, combine every required contribution, and apply bias/activation/conversion only at the specified final stage. ReLU does not distribute over partial sums. A premature quantization can also change rounding and cancellation. Use mixed-sign fixtures so these mistakes cannot hide behind positive-only inputs.
 
-Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create substantial local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
+Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create heavy local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
 
 The direct matrix oracle remains independent of the systolic timing trace. Use the trace to debug alignment and the oracle to verify the final result. Global stalls consume clocks without changing logical step; maintain that distinction in both the driver and the array. Once the complete tile contract is correct, measure its useful work and integration overhead separately.
 
@@ -99,7 +99,7 @@ The direct matrix oracle remains independent of the systolic timing trace. Use t
 
 Stationary names identify which values remain at a chosen local boundary while other work proceeds. In the released output-stationary array, C partial sums remain in PE registers while A and B move through forwarding paths. A weight-stationary alternative retains weights locally while activations and partial sums follow another schedule. The labels do not by themselves determine external traffic, because tiling and residency at larger memory boundaries still matter.
 
-Use the same logical M, N and K and the same input/output types for a comparison. If 1 mapping computes a convolution and another computes a different matrix shape, its traffic difference cannot be attributed solely to stationarity. Likewise, changing the accumulator width or applying activation earlier changes the numerical contract. Keep the complete operator and epilogue fixed before comparing storage and movement.
+Use the same logical M, N and K and the same input/output types for a comparison. If 1 mapping computes a convolution and another computes a different matrix shape, you cannot credit the traffic difference to stationarity alone. Likewise, changing the accumulator width or applying activation earlier changes the numerical contract. Keep the complete operator and epilogue fixed before comparing storage and movement.
 
 For a 4×4 output with K=8 and INT8 A/B plus INT32 C, unique external tensor bytes are 32+32+64=128 under a one-load/one-final-store assumption. That is a lower-bound ledger for this operation, not the automatic traffic of every schedule. Reloading A across N tiles, reloading B across M tiles or spilling partial sums adds bytes. A mapping can keep C local at a PE while repeatedly loading the same input from another boundary.
 
@@ -115,7 +115,7 @@ PE-hop transfers are another quantity. Forwarding 1 A value across several colum
 
 Draw when a block is loaded, when each consumer reads it and when its final consumer releases it. A block marked resident cannot share its physical space with a newly loaded block before that release. Add the simultaneously live operands and accumulators to the capacity budget. Double buffering deliberately increases live storage to overlap work; it is not a free reuse mechanism.
 
-Ports matter as well as bytes. A memory large enough for 2 blocks may still lack the reads needed to supply all PE lanes in a logical step. Banking can create parallel access, but a bank mapping can collide under a particular stride. Resource feasibility consequently includes storage size, port count, read latency and routing. An attractive reuse ratio without those obligations is an incomplete architecture comparison.
+Ports matter as well as bytes. A memory large enough for 2 blocks may still lack the reads needed to supply all PE lanes in a logical step. Banking can create parallel access, but a bank mapping can collide under a particular stride. Resource feasibility therefore includes storage size, port count, read latency and routing. An attractive reuse ratio without those obligations is an incomplete architecture comparison.
 
 The lesson's software ledger makes the counting assumptions explicit, while the released RTL implements only OS. It does not include a verified WS array that can be benchmarked against OS in hardware. Readers can implement that alternative as an extension, but must preserve the operator, numerical oracle and complete traffic boundary. Label an analytical comparison as such rather than implying a measured energy result.
 
@@ -125,7 +125,7 @@ A useful cost model can weight external bytes, local reads/writes, register upda
 
 Inspect complete latency too. A schedule that minimizes bytes may serialize computation, require an extra reduction phase or increase command setup. Conversely, a schedule with more local movement may reduce expensive external traffic and improve overall completion. Compare the same correctness and timing boundaries and retain the assumptions beside the result.
 
-The architectural lesson is to make reuse concrete. Specify the value, its residence boundary, its consumers and the movement avoided. Then verify that the schedule has enough capacity and ports to deliver it. This transforms a stationarity slogan into a design decision that can be implemented and tested, while keeping the 4×4 OS engine as an unchanged numerical baseline.
+The architectural lesson is to make reuse concrete. Specify the value, its residence boundary, its consumers and the movement avoided. Then verify that the schedule has enough capacity and ports to deliver it. This turns a stationarity slogan into a design decision you can implement and test, while keeping the 4×4 OS engine as an unchanged numerical baseline.
 
 ## Conclusion
 

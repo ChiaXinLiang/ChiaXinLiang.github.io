@@ -31,7 +31,7 @@ A mask defines which contributions are absent from the function. Physical remova
 
 If an entire output channel is removed from a linear layer, its output dimension can shrink. The following layer must remove the corresponding input channel. A compatible conversion then executes smaller dense matrices rather than requiring arbitrary sparse operations.
 
-Removing isolated weights does not create the same opportunity. The matrix dimensions remain unchanged, and a dense kernel can still perform every multiply. The quality experiment establishes which contributions can disappear; deployment conversion establishes whether the platform benefits from that pattern.
+Removing isolated weights does not create the same opportunity. The matrix dimensions remain unchanged, and a dense kernel can still perform every multiply. The quality experiment shows which contributions can disappear; deployment conversion shows whether the platform benefits from that pattern.
 
 ### 2. Follow channel dependencies
 
@@ -65,7 +65,7 @@ The example explains why a moderate number of zeros may not reduce bytes under a
 
 ### 4. Understand block sparsity
 
-Block-sparse formats retain or remove groups of entries. One index can describe a block, amortizing metadata across its values. Blocks can also align with tiled arithmetic and regular memory access.
+Block-sparse formats retain or remove groups of entries. One index can describe a block, which amortizes metadata across its values. Blocks can also align with tiled arithmetic and regular memory access.
 
 The price is coarser selection. A block containing a few important weights may need to remain even if most entries are unnecessary. Smaller blocks allow finer selection but can increase metadata and scheduling overhead. Larger blocks can improve arithmetic organization while sacrificing representational flexibility.
 
@@ -83,7 +83,7 @@ $$
 
 The group axis, operand orientation, type, and kernel requirements are part of the hardware contract. A matrix with half its entries zero globally does not necessarily satisfy the pattern. A random sparse mask can violate many groups despite having the desired overall density.
 
-The provider's peak sparse arithmetic figure describes supported hardware capability. It is not a promise that a complete application becomes twice as fast. Conversion, memory, noneligible operations, and actual utilization remain relevant.
+The provider's peak sparse arithmetic figure describes supported hardware capability. It is not a promise that a complete application becomes twice as fast. Conversion, memory, noneligible operations, and actual utilization still matter.
 
 ### 6. Derive application speedup
 
@@ -95,7 +95,7 @@ $$
 
 For an illustrative eligible fraction of 60 percent and local speedup of 1.5, the ideal application gain is 1.25 times. That estimate excludes new conversion and scheduling costs. The numerical example is not a device benchmark.
 
-Measure eligible operations and their actual duration before translating a peak claim into an application result. If sparse execution increases another cost, include it in the critical path. If it reduces capacity pressure and enables a different batch, report that operating-region change separately.
+Measure eligible operations and their actual duration before translating a peak claim into an application result. If sparse execution increases another cost, include it in the critical path. If it reduces capacity pressure and allows a different batch, report that operating-region change separately.
 
 ### 7. Account for conversion and amortization
 
@@ -111,7 +111,7 @@ $$
 
 The formula compares time in consistent units and ignores storage or energy benefits. It explains why preparation cost belongs in a complete efficiency decision. A frequently served model can justify expensive conversion that a short-lived experiment cannot amortize.
 
-Keep a versioned packed artifact when the backend supports it. A later layout or kernel revision can invalidate that artifact even if the underlying logical weights remain compatible. Loading and conversion behavior should be included in cold-start measurement.
+Keep a versioned packed artifact when the backend supports it. A later layout or kernel revision can invalidate that artifact even if the underlying logical weights remain compatible. Include loading and conversion behavior in cold-start measurement.
 
 ### 8. Check dimensions after channel removal
 
@@ -127,13 +127,13 @@ Training with a structured mask can keep a dense parameter and optimizer state a
 
 If the method requires repeated mask updates or regrowth, state that policy and its preparation cost. If the mask is fixed, verify optimizer behavior does not reintroduce effective contributions. The supported sparse artifact must match the recovered checkpoint.
 
-A comparison should identify whether the reported resource figure covers training, masked inference, or converted inference. These stages can have different memory and arithmetic behavior. Combining them into one “sparsity gain” obscures the mechanism.
+A comparison should identify whether the reported resource figure covers training, masked inference, or converted inference. These stages can have different memory and arithmetic behavior. Combining them into one “sparsity gain” hides the mechanism.
 
 ### 10. Preserve numerical and task semantics
 
 Sparse kernels can change floating-point reduction order or use another accumulation path. Compare with the intended masked or physically reduced reference under a defined tolerance. Structural equivalence in real arithmetic does not guarantee bitwise equality.
 
-Task quality also needs evaluation after imposing the pattern and recovery procedure. A hardware-friendly pattern can remove different information from an unconstrained saliency selection. Report that tradeoff rather than claiming execution support makes the pruning decision quality-neutral.
+You also need to evaluate task quality after imposing the pattern and recovery procedure. A hardware-friendly pattern can remove different information from an unconstrained saliency selection. Report that tradeoff rather than claiming execution support makes the pruning decision quality-neutral.
 
 Test important task slices and supported shapes. A quality average can hide sensitive classes, long contexts, or rare inputs. Primary-paper results establish evidence within their training and evaluation setup; the deployment checkpoint needs its own checks.
 
@@ -141,7 +141,7 @@ Test important task slices and supported shapes. A quality average can hide sens
 
 Compare dense and sparse paths implementing the same logical matrix and input population. Verify the sparse pattern, pack weights using the supported operation, and warm up the actual kernel. Use a valid device completion boundary.
 
-Record dimensions, dtype, retained pattern, packed bytes, workspace, and measured duration. Sweep representative batches or token groups because small matrices can be dominated by overhead. An enormous matrix benchmark may not represent decode-sized expert groups.
+Record dimensions, dtype, retained pattern, packed bytes, workspace, and measured duration. Sweep representative batches or token groups because overhead can dominate small matrices. An enormous matrix benchmark may not represent decode-sized expert groups.
 
 Then measure the complete application. Packing, dispatch, other layers, and request scheduling can change the result. A microbenchmark explains local behavior; it does not automatically establish end-to-end efficiency.
 
@@ -151,13 +151,13 @@ Consider a hypothetical 1,000-entry matrix with 2-byte values. Dense payload use
 
 A channel-removal conversion can instead reduce dimensions and retain ordinary dense storage, provided surrounding interfaces change consistently. A supported 2:4 representation can use a more compact regular encoding under its actual format. These paths have different quality and execution requirements despite a similar removed fraction.
 
-The example demonstrates why a report should show both logical retained count and physical bytes. It also shows why selecting a pruning pattern begins with the target's supported execution rather than ending with an arbitrary zero mask.
+The example shows why a report should give both logical retained count and physical bytes. It also shows why selecting a pruning pattern begins with the target's supported execution rather than ending with an arbitrary zero mask.
 
 ### 13. Validate the graph conversion adversarially
 
 Use small tensors with distinct channels and known masks. Check every retained coordinate and downstream column mapping. Exercise residual branches, normalization, grouped operations, and supported tied structures where applicable.
 
-For N:M patterns, verify every logical group along the actual required axis. For block sparsity, test partial boundaries and block indexing. Compare packed execution with an explicit reference on nontrivial values. A global density count cannot establish group correctness.
+For N:M patterns, verify every logical group along the actual required axis. For block sparsity, test partial boundaries and block indexing. Compare packed execution with an explicit reference on nontrivial values. A global density count cannot prove group correctness.
 
 No device benchmark was performed for this article. Its calculations are representation and timing models. The production sequence is to select a supported structure, recover useful behavior, convert the complete graph or packed artifact, validate semantics, and measure both local and application results.
 
@@ -173,7 +173,7 @@ Document failed candidates and their limiting resources. If a sparse artifact is
 
 ## Conclusion
 
-For a reproducible report, retain the original checkpoint, logical mask, converted artifact, and backend configuration as separate objects. That separation lets a later reviewer determine whether a discrepancy arose in structure selection, recovery, packing, or execution. It also prevents an old packed file from being mistaken for the latest recovered weights when several experiments share a directory.
+For a reproducible report, retain the original checkpoint, logical mask, converted artifact, and backend configuration as separate objects. That separation lets a later reviewer tell whether a discrepancy arose in structure selection, recovery, packing, or execution. It also keeps an old packed file from being mistaken for the latest recovered weights when several experiments share a directory.
 
 ### Sources
 

@@ -16,7 +16,7 @@ tags: ["ai-networking", "ai-infrastructure"]
 
 ![Concept overview: Ethernet, InfiniBand, and RDMA: The Data Path and Its Guarantees. Two illustrated servers with application buffers, registered memory, queue pairs, NICs, and a network switch.](./section-overview.png)
 
-Ethernet, InfiniBand, and RDMA are often presented as interchangeable choices for an AI cluster. That framing mixes different layers. Ethernet and InfiniBand describe networking technologies and fabrics. Remote direct memory access describes communication semantics that allow supported adapters to access registered memory with less per-transfer involvement from a remote CPU. RDMA can operate over InfiniBand and over Ethernet through supported transports such as RoCE.
+People often present Ethernet, InfiniBand, and RDMA as interchangeable choices for an AI cluster. That framing mixes different layers. Ethernet and InfiniBand describe networking technologies and fabrics. Remote direct memory access describes communication semantics that allow supported adapters to access registered memory with less per-transfer involvement from a remote CPU. RDMA can operate over InfiniBand and over Ethernet through supported transports such as RoCE.
 
 Understanding the layers matters because bandwidth, reliability, ordering, and memory visibility are different properties. A link can be fast while an application uses a poor staging path. A reliable transport can deliver bytes correctly while the application launches a consumer before those bytes are safe to use.
 
@@ -32,15 +32,15 @@ InfiniBand combines a specialized fabric with defined addressing and transport c
 
 At the programming layer, verbs describe operations such as posting sends, receives, reads, and writes. The transport service selected for those operations supplies particular reliability and ordering behavior. The application must understand the service actually in use rather than borrowing assumptions from another queue-pair type.
 
-Keep a diagram of the layers beside performance measurements: application operation, communication library, RDMA interface, adapter, link, and switches. An observation at one layer does not establish the implementation at every other layer. Packet counters can show network activity without proving a direct GPU-memory path.
+Keep a diagram of the layers beside performance measurements: application operation, communication library, RDMA interface, adapter, link, and switches. An observation at one layer does not prove the implementation at every other layer. Packet counters can show network activity without proving a direct GPU-memory path.
 
 ### 2. Registration makes a memory region accessible under a contract
 
 ![Deep-dive illustration: Registration makes a memory region accessible under a contract](./deep-dive.png)
 
-An RDMA operation does not normally accept an arbitrary virtual address and make it universally reachable. Memory registration associates a supported region with the adapter's access machinery and permissions. The resulting keys and metadata participate in validating access to that region.
+An RDMA operation does not normally accept an arbitrary virtual address and make it universally reachable. Memory registration associates a supported region with the adapter's access machinery and permissions. The resulting keys and metadata help validate access to that region.
 
-The application still owns the buffer's lifetime. It cannot free or reuse memory while outstanding operations depend on it. Registration can also have nontrivial setup cost, making repeated registration of short-lived buffers expensive relative to the transfer itself.
+The application still owns the buffer's lifetime. It cannot free or reuse memory while outstanding operations depend on it. Registration can also have real setup cost, so repeatedly registering short-lived buffers is expensive relative to the transfer itself.
 
 A simplified repeated-transfer cost is
 
@@ -58,15 +58,15 @@ For an illustrative registration cost of 100 microseconds and 1000 transfers, th
 
 A send operation delivers data through a corresponding receive path. The receiver must have the appropriate resources and protocol state available. The application or communication library arranges these resources and determines how completed messages reach consumers.
 
-An RDMA write targets an accessible remote memory region using the required addressing and access information. An RDMA read retrieves data from such a region. These operations reduce the remote CPU's involvement in moving the payload, but they do not eliminate remote coordination about where data belongs and when it can be consumed.
+An RDMA write targets an accessible remote memory region using the required addressing and access information. An RDMA read retrieves data from such a region. These operations reduce the remote CPU's involvement in moving the payload, but they do not remove remote coordination about where data belongs and when it can be consumed.
 
 One-sided describes the data operation, not the entire distributed protocol. The participants still exchange region information, manage lifetimes, enforce ownership, and signal higher-level progress. A remote buffer can contain newly delivered bytes without the receiving application knowing that a complete logical message is ready.
 
-Choose the operation based on the protocol's requirements. A library can combine one-sided data movement with separate notification messages or other synchronization. Measuring the payload alone excludes that control path, so an application-level latency budget should include the signaling required for safe use.
+Choose the operation based on the protocol's requirements. A library can combine one-sided data movement with separate notification messages or other synchronization. Measuring the payload alone leaves out that control path, so an application-level latency budget should include the signaling required for safe use.
 
 ### 4. Completion is an event with a particular scope
 
-A completion queue reports events defined by the operation and transport. A local completion can indicate that local resources are no longer needed by a completed operation under its contract. It should not be casually interpreted as proof that a remote application has consumed the data.
+A completion queue reports events defined by the operation and transport. A local completion can indicate that local resources are no longer needed by a completed operation under its contract. Do not read it as proof that a remote application has consumed the data.
 
 Remote arrival, remote notification, memory visibility, and consumer execution are separate milestones. The protocol must connect them appropriately. If the producer overwrites a buffer when only posting has finished, or the consumer reads before the relevant completion and visibility conditions, a fast transfer can become a data race.
 
@@ -76,9 +76,9 @@ Batching and unsignaled operations can reduce completion-processing overhead in 
 
 ### 5. Reliable delivery does not imply arbitrary cross-operation ordering
 
-A reliable transport can retry and preserve specified ordering properties within its supported scope. That does not establish a global order across all queue pairs, devices, streams, or memory consumers. The scope of each guarantee should be explicit in the application design.
+A reliable transport can retry and preserve specified ordering properties within its supported scope. That does not create a global order across all queue pairs, devices, streams, or memory consumers. Make the scope of each guarantee explicit in the application design.
 
-For example, a notification issued through a different path cannot automatically be assumed to follow every payload write merely because both operations originate from one process. The protocol needs an ordering mechanism that covers the paths and operations it uses.
+For example, do not assume a notification issued through a different path follows every payload write just because both operations originate from one process. The protocol needs an ordering mechanism that covers the paths and operations it uses.
 
 Do not turn a transport guarantee into a language-level memory guarantee without the required integration. CPU threads, compiler transformations, device execution, and adapter DMA each have their own synchronization rules. The communication library's supported API is often the appropriate boundary at which these details are coordinated.
 
@@ -110,9 +110,9 @@ $$
 
 where D_j is required traffic over resource j and B_j its available bandwidth. This bound captures pipelined resource demand but excludes startup and dependency delays. The same payload can generate different D_j values on staged and direct paths.
 
-Measure host memory traffic, adapter counters, and device transfer events alongside network throughput. A slow external-link measurement can originate from an internal bottleneck feeding the adapter. Conversely, a direct path can remain limited by an oversubscribed switch cut or competing traffic outside the server.
+Measure host memory traffic, adapter counters, and device transfer events alongside network throughput. A slow external-link measurement can come from an internal bottleneck feeding the adapter. Conversely, a direct path can remain limited by an oversubscribed switch cut or competing traffic outside the server.
 
-Use compatible units and distinguish payload from physical transport bytes. Headers, retransmissions, and control messages can increase link traffic without increasing useful application payload. Useful throughput and wire utilization therefore need not move together.
+Use compatible units and distinguish payload from physical transport bytes. Headers, retransmissions, and control messages can increase link traffic without increasing useful application payload. So useful throughput and wire utilization need not move together.
 
 ### 8. Verify the path through a layered test sequence
 
@@ -120,7 +120,7 @@ Use compatible units and distinguish payload from physical transport bytes. Head
 
 Start with device and driver discovery, registration support, and a simple correctness transfer using the intended memory type. Next test representative message sizes between the actual GPU-adapter pairs. Then run the collective or application protocol with its real completion and notification behavior.
 
-Inspect communication-library diagnostics to identify the selected transport and any fallback. Logs should be interpreted with benchmark behavior and counters; one configuration flag does not prove that every exchange used the requested path. Preserve versions and topology in the record.
+Inspect communication-library diagnostics to identify the selected transport and any fallback. Interpret logs together with benchmark behavior and counters; one configuration flag does not prove that every exchange used the requested path. Keep versions and topology in the record.
 
 Exercise buffer reuse, cancellation, and repeated transfers to expose lifetime problems. A single successful transfer into a never-reused buffer is a weak correctness test for a high-throughput system. Include direction changes and concurrency where the production protocol uses them.
 
@@ -132,13 +132,13 @@ A useful repeated-transfer test writes a sequence number and a deterministic pay
 
 Document the memory type, registration lifetime, selected operation, transport service, completion scope, notification mechanism, and consumer synchronization. This record is as important as the adapter rate because it defines what makes the delivered data safe to use.
 
-Separate correctness tests from throughput tests, while ensuring that the throughput path retains the same essential guarantees. Removing required synchronization can make a benchmark faster while invalidating the application. Adding unnecessary global synchronization can hide available overlap and exaggerate transport latency.
+Separate correctness tests from throughput tests, while making sure the throughput path keeps the same essential guarantees. Removing required synchronization can make a benchmark faster while invalidating the application. Adding unnecessary global synchronization can hide available overlap and exaggerate transport latency.
 
 Recheck the contract after changes to drivers, allocation strategies, communication libraries, and process placement. The supported device-memory path and its registration behavior can change even when the network hardware remains identical.
 
 ## Conclusion
 
-The central distinction is between moving bytes and transferring safe ownership. Ethernet or InfiniBand supplies the fabric, RDMA supplies supported memory-access operations, and the application supplies the protocol that connects completion to consumption. Performance engineering succeeds when all 3 layers are measured without weakening their correctness contract.
+The central distinction is between moving bytes and transferring safe ownership. Ethernet or InfiniBand supplies the fabric, RDMA supplies supported memory-access operations, and the application supplies the protocol that connects completion to consumption. Performance engineering succeeds when you measure all 3 layers without weakening their correctness contract.
 
 ### Sources
 

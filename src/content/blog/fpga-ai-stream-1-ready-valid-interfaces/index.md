@@ -26,11 +26,11 @@ Start after [Pipeline the MAC: Latency, Throughput, and Timing](/blog/fpga-ai-pi
 
 ![Deep dive: A transfer happens on valid AND ready](./deep-dive-component-01.png)
 
-The handshake figure defines one transfer at a sampled edge when valid and ready are both true. Valid says the producer offers a payload; ready says the consumer can accept it. Either alone is insufficient to count a transaction.
+The handshake figure defines one transfer at a sampled edge when valid and ready are both true. Valid says the producer offers a payload; ready says the consumer can accept it. Either alone is not enough to count a transaction.
 
 A producer may assert valid before the consumer is ready. While blocked, it must keep the offered payload stable under this stream contract. The consumer can change ready according to capacity, subject to the interface's timing rules.
 
-This turns arithmetic enable into a meaningful event: enable equals accepted work, not simply offered work. A counter and accumulator should advance only when their required transaction actually occurs. The distinction is essential for memory stalls and later tile scheduling.
+This turns arithmetic enable into a meaningful event: enable equals accepted work, not simply offered work. A counter and accumulator should advance only when their required transaction actually occurs. The distinction matters for memory stalls and later tile scheduling.
 
 ### Hold payload under backpressure
 
@@ -38,7 +38,7 @@ This turns arithmetic enable into a meaningful event: enable equals accepted wor
 
 The backpressure figure holds the same item across several ready-low cycles. When ready rises, the item transfers once. The producer may then offer the next item. A design that changes data each blocked cycle silently discards values.
 
-A simulation monitor should sample valid, ready and data at the accepted edge. An assertion can require stable valid/payload across blocked cycles until acceptance or reset. Reset semantics must be defined because invalidating a transaction changes what the receiver may expect.
+A simulation monitor should sample valid, ready and data at the accepted edge. An assertion can require stable valid/payload across blocked cycles until acceptance or reset. Define the reset semantics, because invalidating a transaction changes what the receiver may expect.
 
 Backpressure does not solve sustained rate mismatch. If a producer permanently offers more work than a consumer can process, finite queues eventually fill. Ready propagates that constraint upstream. Buffers absorb bursts and break timing paths; they do not create unlimited throughput.
 
@@ -56,9 +56,9 @@ Combinational ready paths can grow through many connected buffers. A larger desi
 
 ![Deep dive: Check loss, duplication, and reset](./deep-dive-component-04.png)
 
-The sequence figure compares accepted inputs with accepted outputs. The shared test supplies a retained offered item and randomized output readiness, then checks the FIFO order. It verifies data values as well as count, so loss and duplication cannot cancel each other unnoticed.
+The sequence figure compares accepted inputs with accepted outputs. The shared test supplies a retained offered item and randomized output readiness, then checks the FIFO order. It checks data values as well as count, so loss and duplication cannot cancel each other unnoticed.
 
-The recorded run includes 500 cycles and 133 blocked-input cycles. Simultaneous replacement and final drain are exercised. Payloads are simple sequence numbers because they make an incorrect order visible; arithmetic modules use signed/random values separately.
+The recorded run includes 500 cycles and 133 blocked-input cycles. The run exercises simultaneous replacement and final drain. Payloads are simple sequence numbers because they make an incorrect order visible; arithmetic modules use signed/random values separately.
 
 An elastic stream can surround a MAC or memory consumer, but the internal unit must obey the same advance conditions. A globally stalled systolic array is one distinct contract; independently stallable PEs require a more complex protocol and are not implied by this one-entry buffer.
 
@@ -100,7 +100,7 @@ Track data and validity together. A register can contain old bits while its vali
 
 Use a FIFO scoreboard to check sequence as well as values. A test that counts transactions alone can miss swapped payloads, while a test of a final sum alone can hide duplicated and missing items that cancel numerically. Directed reset/stall fixtures supplement reproducible random traffic.
 
-After a local block passes, connect one additional boundary at a time and retain the same oracle. A passing simulation supports the exercised contract, not physical timing or every possible sequence. Keep the released test report with the exact source revision so a later wrapper or pipeline change creates an explicit new verification step.
+After a local block passes, connect one additional boundary at a time and keep the same oracle. A passing simulation supports the exercised contract, not physical timing or every possible sequence. Keep the released test report with the exact source revision so a later wrapper or pipeline change creates an explicit new verification step.
 
 ### A worked engineering decision
 
@@ -116,17 +116,17 @@ Now let output-ready become 1 while the source offers valid B. Before that edge,
 
 A transaction occurs on the sampled edge when valid and ready are both high. Valid going high between edges is not independently an accepted item. Ready can be high when valid is low without transferring anything. A producer holding valid across several blocked clocks is offering the same item, not sending a new item each clock. These distinctions determine how a scoreboard counts input and output sequences.
 
-Keep an expected FIFO of accepted input payloads. On each accepted output, remove and compare the oldest expected item. The difference between cumulative input and output accept counts is the occupancy within a reset-free interval. It must be 0 or 1 for this buffer. Equal total counts alone are insufficient, because swapped payloads can preserve the count. Numerical equality alone is also insufficient if repeated identical inputs conceal duplication.
+Keep an expected FIFO of accepted input payloads. On each accepted output, remove and compare the oldest expected item. The difference between cumulative input and output accept counts is the occupancy within a reset-free interval. It must be 0 or 1 for this buffer. Equal total counts alone are not enough, because swapped payloads can preserve the count. Numerical equality alone is also not enough if repeated identical inputs hide duplication.
 
 Reset clears output validity. The payload bits need not be meaningful while invalid, so the checker should not demand a particular idle payload unless the interface promises one. It must demand that stale data is not accepted as a valid output after reset. Clear the canceled expectation queue under the stated reset policy, then send a new distinguishable payload to expose stale-state leakage.
 
 #### Preserve the source's obligations under backpressure
 
-A legal source holds both valid and payload while its offered item is blocked. Random traffic must honor that rule. If a test randomly changes payload every blocked clock, a later accepted item might be whichever bits happened to be present, and the checker would be testing an undefined producer contract. The released simulation harness retains offered payloads until acceptance and randomizes consumer readiness to create backpressure.
+A legal source holds both valid and payload while its offered item is blocked. Random traffic must honor that rule. If a test randomly changes payload every blocked clock, a later accepted item might be whichever bits happened to be present, and the checker would be testing an undefined producer contract. The released simulation harness keeps offered payloads until acceptance and randomizes consumer readiness to create backpressure.
 
-This rule is about the source interface, not the internal buffer's ability to accept when empty. An empty buffer may absorb 1 item despite downstream blocking, then assert backpressure when full. That is the useful decoupling provided by storage. A direct wire cannot provide the same behavior because it has no place to retain the item. A deeper FIFO expands the amount of decoupling, but introduces additional occupancy and pointer state.
+This rule is about the source interface, not the internal buffer's ability to accept when empty. An empty buffer may absorb 1 item despite downstream blocking, then assert backpressure when full. That is the useful decoupling provided by storage. A direct wire cannot provide the same behavior because it has no place to retain the item. A deeper FIFO adds more decoupling, but also more occupancy and pointer state.
 
-Also inspect the combinational ready path. The equation includes downstream ready when the buffer is full, so a long chain of such buffers can create a timing path through readiness logic. Breaking that path requires a different buffering/control arrangement with its own acceptance proof. Do not call the single-entry circuit a universal timing-isolation solution merely because it stores payload data.
+Also inspect the combinational ready path. The equation includes downstream ready when the buffer is full, so a long chain of such buffers can create a timing path through readiness logic. Breaking that path requires a different buffering/control arrangement with its own acceptance proof. Do not call the single-entry circuit a universal timing-isolation solution just because it stores payload data.
 
 #### Connect elastic events to the systolic core carefully
 
@@ -136,7 +136,7 @@ If only A is available, independently accepting and forwarding it into a globall
 
 Use distinct payload tags when verifying a proposed bridge. A tag identifying logical row, column and reduction index can reveal incorrect pairing even when numerical inputs happen to produce the same product. Tags may be verification-only metadata rather than hardware fields. The independent matrix oracle still checks the resulting complete operation.
 
-The executed buffer regression checks 500 clocks, including recorded blocked intervals and sequence comparisons. That bounded evidence supports the released ready/valid behavior. It does not prove every possible traffic sequence or the physical timing of a long ready chain. The engineering outcome is a small, understandable storage boundary whose acceptance, replacement, hold and reset behavior can be reproduced before it is connected to larger compute.
+The executed buffer regression checks 500 clocks, including recorded blocked intervals and sequence comparisons. That bounded evidence supports the released ready/valid behavior. It does not prove every possible traffic sequence or the physical timing of a long ready chain. The engineering outcome is a small, understandable storage boundary whose acceptance, replacement, hold and reset behavior you can reproduce before connecting it to larger compute.
 
 ## Conclusion
 

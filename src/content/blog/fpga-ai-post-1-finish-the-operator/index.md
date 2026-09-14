@@ -90,7 +90,7 @@ Keep logical dimensions separate from the physical array. The 4×4 engine comput
 
 Initialize a new output reduction once, combine every required contribution, and apply bias/activation/conversion only at the specified final stage. ReLU does not distribute over partial sums. A premature quantization can also change rounding and cancellation. Use mixed-sign fixtures so these mistakes cannot hide behind positive-only inputs.
 
-Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create substantial local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
+Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create a lot of local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
 
 The direct matrix oracle remains independent of the systolic timing trace. Use the trace to debug alignment and the oracle to verify the final result. Global stalls consume clocks without changing logical step; maintain that distinction in both the driver and the array. Once the complete tile contract is correct, measure its useful work and integration overhead separately.
 
@@ -114,7 +114,7 @@ Bias can enlarge the required wide range. Proving the un-biased K-term dot produ
 
 #### Explain why partial sums cannot be converted early
 
-Take 2 reduction chunks with sums -10 and 8. The complete sum is -2 and ReLU then gives 0. ReLU on each chunk instead produces 8 after addition. Nonlinear activation therefore belongs after complete reduction. Even when a conversion is linear in real arithmetic, finite-width rounding and saturation can make chunk-wise conversion differ from converting the total.
+Take two reduction chunks with sums -10 and 8. The complete sum is -2 and ReLU then gives 0. ReLU on each chunk instead produces 8 after addition. Nonlinear activation therefore belongs after complete reduction. Even when a conversion is linear in real arithmetic, finite-width rounding and saturation can make chunk-wise conversion differ from converting the total.
 
 A producer-owned accumulating buffer is not epilogue input until completion. A diagram can show the ownership transition as a gate, but should not draw unfinished partials directly into activation and label the final result valid. In an overlapped system, another completed buffer may be converted while the next reduction accumulates elsewhere. That is a buffer schedule with separate lifetimes, not permission to process an incomplete value.
 
@@ -132,7 +132,7 @@ The resulting epilogue contract is small enough to implement and inspect. It con
 
 #### Extend the next boundary
 
-A useful extension experiment implements only the integer requantizer first, with the same explicit multiplier/shift and ties-away rule. Keep bias and ReLU in the independent reference until the new block passes its own threshold fixtures, then connect stages incrementally. This isolates multiply-width, signed division and clamp behavior from array timing. A ready/valid epilogue additionally needs an expected FIFO, blocked-output stability and reset cancellation checks. Record both the numerical intermediate and its valid transaction; a correctly rounded value presented on the wrong transaction is still incorrect. Use the source function as an oracle, not a screenshot of the generated diagram's formula.
+A useful extension experiment implements only the integer requantizer first, with the same explicit multiplier/shift and ties-away rule. Keep bias and ReLU in the independent reference until the new block passes its own threshold fixtures, then connect stages incrementally. This isolates multiply-width, signed division and clamp behavior from array timing. A ready/valid epilogue also needs an expected FIFO, blocked-output stability and reset cancellation checks. Record both the numerical intermediate and its valid transaction; a correctly rounded value presented on the wrong transaction is still incorrect. Use the source function as an oracle, not a screenshot of the generated diagram's formula.
 
 ## Conclusion
 

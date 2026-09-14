@@ -46,7 +46,7 @@ A physical clock rate comes from implemented timing and the actual board clock c
 
 ![Deep dive: Build a bandwidth traffic ledger](./deep-dive-component-03.png)
 
-The byte ledger names external input, weight, output and temporary transfers. The standard tile has 32 input bytes,32 weight bytes and64 output bytes before repeated transfers or metadata.
+The byte ledger names external input, weight, output and temporary transfers. The standard tile has 32 input bytes, 32 weight bytes and 64 output bytes before repeated transfers or metadata.
 
 On-chip reads and forwarding use a different boundary from host/network/DMA traffic. A weight reused across several tiles may require one external load but many local accesses. Keep those quantities separate.
 
@@ -85,7 +85,7 @@ The first command writes `reports/measure-1.json`. Inspect its scope and result 
 
 ### Retain a reproducible integration boundary
 
-The released project verifies software and RTL simulation. Its FPGA Tcl is a core-only out-of-context implementation exercise, and the host transport is a functional model. A board-ready system additionally needs documented clock/reset, pins, memory and physical host I/O. Select those for a real target and retain their versions before claiming a working board application.
+The released project verifies software and RTL simulation. Its FPGA Tcl is a core-only out-of-context implementation exercise, and the host transport is a functional model. A board-ready system also needs documented clock/reset, pins, memory and physical host I/O. Select those for a real target and retain their versions before claiming a working board application.
 
 Bring up the simplest observable path first. Check register or transport access, then a transfer loopback, memory behavior and a small known matrix. Compare raw bytes and wider signed results before running the tiny MLP. If a complete inference fails, intermediate values should identify the first wrong layer rather than leaving arithmetic, packing and clocks mixed together.
 
@@ -99,9 +99,9 @@ Tool-estimated power and physical board measurements are different evidence. The
 
 For a full 4×4 output with K=8, useful work is 128 MAC contributions. The ideal array window uses 14 logical steps, providing 16 cell slots per step. Useful occupancy is therefore 128/(14×16)=4/7. This is an analytical count under an unstalled logical-window assumption. It is not a measured utilization percentage from a board counter, and it excludes the integrated top's clear/capture and host-load intervals.
 
-A global hold adds elapsed clocks without adding useful MACs. A complete command window also includes setup and result capture, while a host window can include packing, transfers, polling and retrieval. Choose the boundary before computing throughput or utilization. Comparing 1 system's isolated array window with another's end-to-end time is not a fair application comparison.
+A global hold adds elapsed clocks without adding useful MACs. A complete command window also includes setup and result capture, while a host window can include packing, transfers, polling and retrieval. Choose the boundary before computing throughput or utilization. Comparing one system's isolated array window with another's end-to-end time is not a fair application comparison.
 
-If counting each MAC as 2 operations, report that convention beside the useful operation rate. Do not include padded or invalid positions as useful model work. Physical cell activity can be higher than useful work if padding or redundant execution occurs. A useful-work counter should count valid matched A/B contributions under the array's actual step event, not simply clocks in RUN.
+If you count each MAC as 2 operations, report that convention beside the useful operation rate. Do not include padded or invalid positions as useful model work. Physical cell activity can be higher than useful work if padding or redundant execution occurs. A useful-work counter should count valid matched A/B contributions under the array's actual step event, not simply clocks in RUN.
 
 #### Keep cycle counts, frequency and wall time distinct
 
@@ -113,7 +113,7 @@ Counter instrumentation also changes the design. Define counter widths, reset po
 
 #### Build separate ledgers for data movement
 
-Unique tensor bytes are a capacity/lower-bound quantity under declared reuse assumptions. Actual external loads and stores include repeats and any partial-sum traffic. Local RAM accesses, register updates and PE-hop forwarding are different boundaries. Sustained bandwidth is bytes divided by time at 1 named boundary. Combining local and external totals into a single “memory bandwidth” can conceal the bottleneck.
+Unique tensor bytes are a capacity/lower-bound quantity under declared reuse assumptions. Actual external loads and stores include repeats and any partial-sum traffic. Local RAM accesses, register updates and PE-hop forwarding are different boundaries. Sustained bandwidth is bytes divided by time at one named boundary. Combining local and external totals into a single “memory bandwidth” can hide the bottleneck.
 
 For the full tile, A and B each contain 32 unique INT8 bytes and C contains 64 INT32 bytes. A larger tiler may reload inputs across different output blocks; double buffering changes live storage and overlap but not the numerical tensor sizes. Count actual scheduled transfers for the selected model. Do not claim every mapping transfers only the unique tensor total.
 
@@ -131,7 +131,7 @@ The lesson supplies analytical counts, deterministic scheduling reports and exec
 
 #### Extend the next boundary
 
-Before a future benchmark, save a run manifest containing the logical shape, input distribution, numerical parameters, source hashes and exact start/end events. Compare measured counters with the analytical MAC and traffic ledger before summarizing throughput. A disagreement may indicate instrumentation scope rather than an arithmetic defect. Retain both raw values and the explanation of their boundaries. If a run fails its output or completion check, exclude it from ordinary performance summaries and report the failure separately instead of allowing an incomplete fast interval to improve the average.
+Before a future benchmark, save a run manifest containing the logical shape, input distribution, numerical parameters, source hashes and exact start/end events. Compare measured counters with the analytical MAC and traffic ledger before summarizing throughput. A disagreement may indicate instrumentation scope rather than an arithmetic defect. Retain both raw values and the explanation of their boundaries. If a run fails its output or completion check, exclude it from ordinary performance summaries and report the failure separately. Do not let an incomplete fast interval improve the average.
 
 ## Conclusion
 

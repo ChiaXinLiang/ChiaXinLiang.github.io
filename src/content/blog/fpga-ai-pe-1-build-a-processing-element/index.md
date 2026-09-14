@@ -111,13 +111,13 @@ An output-stationary processing element receives an A operand from its left and 
 
 The released PE registers its forwarded operands and their separate validity masks on a global step. The multiplier uses the matched current input pair, and its signed product contributes to local INT32 state only when both masks are valid. A step with one invalid operand still advances the forwarding state and masks, while skipping the local multiply. That is important during array filling and draining, where not every PE has useful work on every logical step.
 
-A global hold leaves forwarding data, masks and the accumulator unchanged together. Holding only the sum while forwarding operands would change the wavefront alignment, while holding operands but updating the sum could duplicate a product. The common step is consequently a protocol for the entire PE state, not just an arithmetic enable. The test harness and array driver use that same event definition.
+A global hold leaves forwarding data, masks and the accumulator unchanged together. Holding only the sum while forwarding operands would change the wavefront alignment, while holding operands but updating the sum could duplicate a product. So the common step is a protocol for the entire PE state, not just an arithmetic enable. The test harness and array driver use that same event definition.
 
 #### Derive the local reduction from the intended pair
 
 For output C[i,j], the PE must combine A[i,k] with B[k,j] for each required reduction index k. The shared index is k, not the row or column index. Row and column skew at the array boundary ensures corresponding k values meet after forwarding delays. Before connecting the array, a local fixture can directly supply matched pairs and compare the expected running sum.
 
-Use A sequence [2,-4,7] and B sequence [3,5,-2], yielding products [6,-20,-14] and total -28. Insert an invalid A mask on 1 offered clock and confirm that the sum does not update for that clock. Then use an invalid B mask, a global hold and clear. Compare forwarded values/masks separately from the arithmetic sum. A correct total does not establish correct forwarding, because other PEs depend on those forwarded operands.
+Use A sequence [2,-4,7] and B sequence [3,5,-2], yielding products [6,-20,-14] and total -28. Insert an invalid A mask on one offered clock and confirm that the sum does not update for that clock. Then use an invalid B mask, a global hold and clear. Compare forwarded values/masks separately from the arithmetic sum. A correct total does not establish correct forwarding, because other PEs depend on those forwarded operands.
 
 Clear begins a new local reduction under the declared control priority. It is not a command queue or a host-visible DONE mechanism. The PE does not accept K as a configured counter limit and does not decide that the complete tile has finished. The tile controller knows how many logical array steps are required and when all local results can be captured. Keeping those responsibilities separate makes the small PE reusable and its figure accurate.
 
@@ -131,7 +131,7 @@ Randomized global stalls are useful because they separate elapsed clocks from lo
 
 #### Understand the cost of scaling the PE
 
-Connecting 16 PEs creates more than 16 independent MACs. Boundary operand supply, skew storage, clear/step fan-out, result collection and physical routing become system resources. The local reuse is valuable because 1 incoming A can reach several columns and 1 B can reach several rows, but forwarding consumes registers and switching activity. It is not zero-cost broadcast or unlimited bandwidth.
+Connecting 16 PEs creates more than 16 independent MACs. Boundary operand supply, skew storage, clear/step fan-out, result collection and physical routing become system resources. The local reuse is valuable because one incoming A can reach several columns and one B can reach several rows, but forwarding consumes registers and switching activity. It is not zero-cost broadcast or unlimited bandwidth.
 
 The output-stationary sum remains at its PE through the complete reduction. Result collection therefore needs access to every local C[i,j], not only outputs at the bottom row. The educational array exposes a packed result bus. A physical implementation may choose a serialized collection network or banked output storage, which introduces another schedule and completion boundary. That change should preserve local output ownership and be independently tested.
 

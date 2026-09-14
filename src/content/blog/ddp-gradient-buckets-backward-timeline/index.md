@@ -18,7 +18,7 @@ tags: ["distributed-training", "ai-infrastructure"]
 
 Adding a second GPU to a training script does not automatically halve its step time. DistributedDataParallel, usually abbreviated DDP, replicates the model, assigns different inputs to participating ranks, and synchronizes gradients before each optimizer update. The useful extra work is parallel computation over those inputs. The cost is coordination and communication needed to keep the replicas consistent.
 
-DDP is especially instructive because its optimization rests on the structure of backpropagation. Gradients for later layers become ready before gradients for earlier layers. The framework can therefore begin reducing completed portions while the remaining backward computation continues. Understanding that timeline explains why bucket size, rank imbalance, loss normalization, and accumulation settings matter more than an isolated network bandwidth number.
+DDP is especially instructive because its optimization rests on the structure of backpropagation. Gradients for later layers become ready before gradients for earlier layers. So the framework can begin reducing completed portions while the remaining backward computation continues. Understanding that timeline explains why bucket size, rank imbalance, loss normalization, and accumulation settings matter more than an isolated network bandwidth number.
 
 We will derive the average-gradient objective, model bucket completion times, and work a small overlap example. The timings are hypothetical and use a simplified serialized communication model. They are a tool for reasoning about a trace, not a prediction that every NCCL implementation follows the same exact execution schedule.
 
@@ -28,7 +28,7 @@ We will derive the average-gradient objective, model bucket completion times, an
 
 A DDP rank normally keeps a full model replica and its optimizer state. Each rank runs forward and backward on a local batch. If every rank starts with the same parameter values, receives the same synchronized gradient, and applies the same optimizer update, the replicas remain consistent. Synchronization does not require broadcasting every updated parameter on every step in this basic model.
 
-The ranks must also agree on the distributed program. Collectives need compatible participants, tensor shapes, and ordering. One rank skipping a synchronization that others enter can stall the whole job. A training function that is individually valid on each GPU can consequently be invalid as a distributed execution when control flow differs across ranks.
+The ranks must also agree on the distributed program. Collectives need compatible participants, tensor shapes, and ordering. One rank skipping a synchronization that others enter can stall the whole job. A training function that is valid on each GPU by itself can still be invalid as a distributed execution when control flow differs across ranks.
 
 DDP does not itself divide an arbitrary input batch among devices. The data pipeline must arrange which samples each rank processes. Distributed sampling, deterministic epoch handling, and a consistent stopping policy are part of the correctness story. Accidentally feeding identical examples to all ranks can make the reported device throughput rise without increasing the useful distinct training data processed.
 
@@ -54,13 +54,13 @@ Loss weighting can correct the difference if counts and reduction factors are ha
 
 ![Deep dive: 3. Why gradients travel in buckets](./deep-dive-component-01.png)
 
-An all-reduce for every small parameter tensor would incur many launches and message startup costs. Waiting until the entire backward pass finishes would instead lose most overlap opportunities. Buckets balance these extremes by grouping gradients into larger communication units.
+An all-reduce for every small parameter tensor would pay many launch and message startup costs. Waiting until the entire backward pass finishes would instead lose most overlap opportunities. Buckets balance these extremes by grouping gradients into larger communication units.
 
-Autograd hooks inform the reducer when gradients become available. A bucket becomes eligible when all required gradients assigned to that bucket are ready. The reducer must also preserve a collective order compatible across ranks. Actual runtime readiness alone cannot determine a different communication order on every rank.
+Autograd hooks tell the reducer when gradients become available. A bucket becomes eligible when all required gradients assigned to that bucket are ready. The reducer must also preserve a collective order compatible across ranks. Actual runtime readiness alone cannot determine a different communication order on every rank.
 
 Parameter registration order and the framework’s bucket organization influence how closely communication follows the backward computation. Models with branches, shared parameters, or uneven layer costs can violate a simple expectation that reverse registration order perfectly matches gradient readiness. Use the actual profiler timeline and reducer behavior to inspect the relationship.
 
-A bucket is also a memory object. Some configurations let gradients refer directly to bucket storage, reducing copies and memory usage. Such options can affect assumptions about gradient views and supported operations. Consult the installed framework version before applying code that expects independently allocated gradient tensors.
+A bucket is also a memory object. Some configurations let gradients refer directly to bucket storage, which reduces copies and memory use. Such options can affect assumptions about gradient views and supported operations. Check the installed framework version before applying code that expects independently allocated gradient tensors.
 
 ### 4. Derive the exposed tail
 
@@ -76,9 +76,9 @@ The maximum captures 2 constraints: a bucket cannot transmit before its gradient
 
 Consider 3 buckets ready at 2, 5, and 8 milliseconds. Suppose each takes 3 milliseconds and backward compute ends at 10 milliseconds. Their completion times are 5, 8, and 11 milliseconds. Total communication is 9 milliseconds, but only 1 millisecond remains exposed under this model.
 
-The example also shows why total communication time being shorter than backward time is not sufficient. A final bucket ready at the very end creates a tail regardless of how successfully earlier buckets overlapped. Readiness distributions, message startup, and serialization matter alongside the sum of bytes.
+The example also shows why total communication time being shorter than backward time is not enough. A final bucket ready at the very end creates a tail regardless of how successfully earlier buckets overlapped. Readiness distributions, message startup, and serialization matter alongside the sum of bytes.
 
-For unequal ranks, the effective start of a collective depends on participation by the other ranks. A local readiness timestamp is therefore incomplete evidence. One slow input pipeline or expensive layer on one rank can delay the useful reduction even when another rank has already enqueued it.
+For unequal ranks, the effective start of a collective depends on participation by the other ranks. So a local readiness timestamp is incomplete evidence. One slow input pipeline or expensive layer on one rank can delay the useful reduction even when another rank has already enqueued it.
 
 ### 5. Bucket size changes both startup and readiness
 
@@ -90,15 +90,15 @@ $$
 T_{\mathrm{ring}}\approx2(D-1)\left(\alpha+\frac{S}{D\beta}\right).
 $$
 
-This is an analytical approximation for a logical ring, not a complete NCCL performance model. Algorithms can change with message size and topology, and effective bandwidth includes contention and transport overhead. It nevertheless exposes why tiny buckets pay disproportionately for startup.
+This is an analytical approximation for a logical ring, not a complete NCCL performance model. Algorithms can change with message size and topology, and effective bandwidth includes contention and transport overhead. It still shows why tiny buckets pay disproportionately for startup.
 
-A useful tuning experiment sweeps several bucket capacities while keeping the model, rank placement, sequence lengths, accumulation factor, and numerical policy fixed. Record step time, bucket readiness, communication tail, and compute slowdown. Selecting the capacity with the shortest isolated all-reduce time can be inferior to selecting the capacity with the best complete-step timeline.
+A useful tuning experiment sweeps several bucket capacities while keeping the model, rank placement, sequence lengths, accumulation factor, and numerical policy fixed. Record step time, bucket readiness, communication tail, and compute slowdown. The capacity with the shortest isolated all-reduce time can be worse than the capacity with the best complete-step timeline.
 
 ### 6. Gradient accumulation changes synchronization frequency
 
 If an optimizer step contains A local microsteps, accumulating gradients can defer synchronization until the final microstep. PyTorch exposes a no_sync context for this purpose. The forward pass must also occur inside the context for the intended behavior; wrapping only backward is an easy mistake.
 
-For equally weighted microbatches, dividing each microbatch loss by A gives the intended mean over the accumulation interval. Unequal valid-token counts again require explicit weighting. Gradient clipping should be applied to the gradient whose meaning matches the intended optimizer update, not accidentally to unrelated partial gradients on each rank.
+For equally weighted microbatches, dividing each microbatch loss by A gives the intended mean over the accumulation interval. Unequal valid-token counts again require explicit weighting. Apply gradient clipping to the gradient whose meaning matches the intended optimizer update, not to unrelated partial gradients on each rank.
 
 The accumulation schedule exchanges communication frequency for memory and compute behavior. A smaller microbatch may reduce activation memory but lower matrix efficiency. Deferring synchronization can remove repeated collective startups, yet the final reduction still needs to complete before the optimizer consumes its result.
 
@@ -106,7 +106,7 @@ Use a minimal correctness comparison against a reference update with an equivale
 
 ### 7. Compilation can reshape the overlap opportunity
 
-A compiler that fuses a large backward graph can change when reducer hooks become observable and when collectives launch. Compilation benefits and communication overlap must therefore be assessed together. PyTorch’s DDP design documentation describes bucket-aware compiler behavior intended to retain useful overlap opportunities.
+A compiler that fuses a large backward graph can change when reducer hooks become observable and when collectives launch. So assess compilation benefits and communication overlap together. PyTorch’s DDP design documentation describes bucket-aware compiler behavior intended to retain useful overlap opportunities.
 
 Do not assume a faster single-rank compiled model produces the same proportional gain across ranks. A changed kernel schedule can make communication dominant, expose a different final bucket, or compete differently for streaming multiprocessors and memory bandwidth. The distributed critical path is the relevant measurement.
 
@@ -128,7 +128,7 @@ Finally, validate useful work and numerical behavior. Count distinct valid train
 
 DDP is attractive when the complete model, gradients, optimizer state, and activation peak fit on each rank. It provides a comparatively simple ownership model and can achieve strong scaling when local computation is large enough to amortize synchronization.
 
-When persistent training state does not fit, tuning gradient buckets cannot solve the capacity problem. Parameter, gradient, or optimizer sharding changes ownership and introduces different collective sequences. Pipeline and tensor parallelism partition the computation itself. These designs should be compared against a feasible baseline, rather than against an imaginary replicated instance that exceeds device memory.
+When persistent training state does not fit, tuning gradient buckets cannot solve the capacity problem. Parameter, gradient, or optimizer sharding changes ownership and introduces different collective sequences. Pipeline and tensor parallelism partition the computation itself. Compare these designs against a feasible baseline, not against an imaginary replicated instance that exceeds device memory.
 
 The transition is also a measurement transition. A DDP all-reduce timeline does not directly predict FSDP all-gather peaks or expert-parallel dispatch. Carry forward the principles of readiness, consistent ordering, critical paths, and useful work, but rebuild the byte and dependency model for the new algorithm.
 

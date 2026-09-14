@@ -134,7 +134,7 @@ If the fixed-cost story is right, there should be a cheat: share the fixed costs
 
 Matt Venn's project books a slot on a multi-project wafer shuttle, splits 1 mask set and 1 wafer run across hundreds of independent designs, and sells tiles of silicon (about 160 × 100 micrometers each) for roughly €70 apiece, plus a few 100 euros for the dev board that carries your chip home. Hobbyists, students, and university classes have taped out thousands of designs this way on 130nm-class processes, using the open-source OpenROAD/OpenLane flow, so the EDA line item is 0 too.
 
-Nothing about the physics got cheaper. The mask set for that shuttle still cost what mask sets cost; the wafer still ran through the same fab. What changed is the denominator: hundreds of designs sharing 1 set of fixed costs, on a mature node where those fixed costs are thousands of times lower than at 2nm. Tiny Tapeout is the amortization equation run in reverse, and the fact that it lands at pizza-money prices is the cleanest demonstration that chip cost was never really about the silicon.
+Nothing about the physics got cheaper. The mask set for that shuttle still cost what mask sets cost; the wafer still ran through the same fab. What changed is the denominator: hundreds of designs sharing 1 set of fixed costs, on a mature node where those fixed costs are thousands of times lower than at 2nm. Tiny Tapeout is the amortization equation run in reverse, and the fact that it lands at pizza-money prices is the cleanest proof that chip cost was never really about the silicon.
 
 ### Common misconceptions
 

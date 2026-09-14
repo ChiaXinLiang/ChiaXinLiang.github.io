@@ -16,7 +16,7 @@ heroImage: './section-overview.png'
 
 ![Concept overview: Vision and Generation Deployment: A Controlled Experiment](./section-overview.png)
 
-Efficient vision and generation should be evaluated as complete task systems. A smaller token sequence, fewer denoising evaluations, or reduced weight precision can save a specific resource while changing information, quality, or another pipeline stage. The useful result is an accepted operating point under a reproducible workload.
+Evaluate efficient vision and generation as complete task systems. A smaller token sequence, fewer denoising evaluations, or reduced weight precision can save a specific resource while changing information, quality, or another pipeline stage. The useful result is an accepted operating point under a reproducible workload.
 
 This guide brings patch design, token reduction, diffusion solvers, and step distillation into one controlled experiment. It derives cost and quality accounting and provides illustrative decisions. It does not report a trained-model or GPU benchmark; the protocol is intended to produce that evidence for an actual deployment.
 
@@ -45,7 +45,7 @@ Record warmup, compilation, allocation, and batching policies. Keep baseline and
 
 For vision, candidates can vary resolution, patch size, token-reduction schedule, width, or numerical format. For generation, vary a supported solver, evaluation budget, guidance policy, or a step-distilled model.
 
-Change one interpretable variable at a time where feasible and include combined candidates only when they address a specific hypothesis. Record preparation changes such as recovery training or distillation.
+Change one interpretable variable at a time where feasible. Include combined candidates only when they test a specific hypothesis. Record preparation changes such as recovery training or distillation.
 
 A lower resolution and a faster attention kernel are different interventions: one changes input information, the other can preserve a supported mathematical operation. The candidate matrix should make that distinction visible instead of labeling both simply as accelerated vision.
 
@@ -65,7 +65,7 @@ For a dense latent denoiser, resolution similarly changes feature-map shapes, bu
 
 ### 5. Count generation evaluations and fixed stages
 
-A generator's total time can be organized into predictor evaluations, scheduler work, and fixed stages. Guidance can change the prediction work per update.
+Split a generator's total time into predictor evaluations, scheduler work, and fixed stages. Guidance can change the prediction work per update.
 
 $$
 T\approx\sum_{j=1}^{\mathrm{NFE}}T_{\mathrm{predictor},j}+T_{\mathrm{condition}}+T_{\mathrm{decode}}+T_{\mathrm{other}}.
@@ -91,7 +91,7 @@ $$
 M_{\mathrm{peak}}=M_{\mathrm{resident}}+M_{\mathrm{simultaneously\ live\ runtime}}.
 $$
 
-The compact expression emphasizes that unrelated per-stage maxima should not automatically be added. Conversely, simultaneous requests can overlap buffers that were separate in a one-request test.
+The compact expression makes one point: do not automatically add unrelated per-stage maxima. Conversely, simultaneous requests can overlap buffers that were separate in a one-request test.
 
 Report resolution, batch, concurrency, numerical format, and backend allocation policy with the peak. A reduced checkpoint can still fail capacity at a large resolution or under several concurrent generations. Test the documented maximum operating case.
 
@@ -135,7 +135,7 @@ A conditional generator can produce visually plausible images while failing the 
 
 Use task-appropriate condition evaluation and inspect a documented held-out condition set. Include compositional and difficult cases rather than only common prompts. Preserve the output-selection policy: reporting the best of many samples changes both quality and generation cost.
 
-Human evaluation can add useful evidence when implemented with a clear protocol, blinding, and sample population. Automatic metrics and qualitative examples should retain their limits. Neither one attractive image nor one scalar score is a complete conditional-generation assessment.
+Human evaluation can add useful evidence when it has a clear protocol, blinding, and sample population. Report the limits of automatic metrics and qualitative examples. Neither one attractive image nor one scalar score is a complete conditional-generation assessment.
 
 ### 12. Preserve stochastic evaluation policies
 
@@ -163,7 +163,7 @@ $$
 
 K denotes the number of uses under a simplified stable-cost model. Choose consistent units and include teacher targets, training, search, and failed preparation where relevant.
 
-A widely reused generator can justify substantial preparation for lower repeated cost. A one-off task can prefer a supported solver adjustment. Capacity or condition-quality benefits can also matter independently of a simple monetary calculation. State which objective supports the decision.
+A widely reused generator can justify a large preparation bill in exchange for lower repeated cost. A one-off task can prefer a supported solver adjustment. Capacity or condition-quality benefits can also matter independently of a simple monetary calculation. State which objective supports the decision.
 
 ### 15. Select the accepted frontier
 
@@ -193,7 +193,7 @@ $$
 C_{\mathrm{usable}}\approx\frac{C_{\mathrm{attempt}}}{p},\qquad p>0.
 $$
 
-Independence and constant cost are assumptions; retries can change prompts or budgets in a real system. The model nevertheless explains why a faster individual attempt can be less efficient when its acceptance rate falls substantially.
+Independence and constant cost are assumptions; retries can change prompts or budgets in a real system. The model still explains why a faster individual attempt can be less efficient when its acceptance rate falls far enough.
 
 ## Conclusion
 

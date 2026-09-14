@@ -106,7 +106,7 @@ After a local block passes, connect one additional boundary at a time and retain
 
 #### Compare the same input sequence across 2 circuits
 
-The baseline MAC multiplies and adds before 1 accumulator register. The pipelined version first stores a product and its valid state, then accumulates the stored product on a later edge. This divides the combinational work, but changes when an accepted input affects the accumulator. Use the same signed input sequence for both circuits and compare the aligned running results after allowing the pipeline to drain.
+The baseline MAC multiplies and adds before one accumulator register. The pipelined version first stores a product and its valid state, then accumulates the stored product on a later edge. This divides the combinational work, but changes when an accepted input affects the accumulator. Use the same signed input sequence for both circuits and compare the aligned running results after allowing the pipeline to drain.
 
 For 3 accepted pairs yielding products [6,-20,-14], the final numerical sum remains -28. Immediately after accepting the first pair, however, the pipelined accumulator may still show its previous value because the product has only entered its register. A test expecting the baseline's output at the same edge will fail even when the pipeline is correct. Write an edge ledger containing accepted pair, stored product-valid state and accumulated result.
 
@@ -114,11 +114,11 @@ A bubble is a clock with no newly accepted valid product. It must not make stale
 
 #### Identify the feedback path before adding registers
 
-The accumulator is a recurrence: its next value depends on its current value and the selected product. The released design has 1 accumulator register whose Q output feeds the adder directly. Adding another register in that feedback path changes which previous sum the adder sees. It is not an innocent extension of a feed-forward pipeline. Draw the exact recurrence and test consecutive accepted products before claiming equivalence.
+The accumulator is a recurrence: its next value depends on its current value and the selected product. The released design has one accumulator register whose Q output feeds the adder directly. Adding another register in that feedback path changes which previous sum the adder sees. It is not an innocent extension of a feed-forward pipeline. Draw the exact recurrence and test consecutive accepted products before claiming equivalence.
 
-A deep arithmetic pipeline may need several interleaved accumulators or another schedule to handle feedback latency. For example, independent even- and odd-index partial sums can break 1 long dependency chain, but the complete result then requires a final reduction. The arrangement changes storage and scheduling, and finite-width arithmetic or floating-point reassociation can affect numerical behavior. The chapter's interleaving figure is an architectural alternative, not the implementation inside the released pipelined MAC.
+A deep arithmetic pipeline may need several interleaved accumulators or another schedule to handle feedback latency. For example, independent even- and odd-index partial sums can break one long dependency chain, but the complete result then requires a final reduction. The arrangement changes storage and scheduling, and finite-width arithmetic or floating-point reassociation can affect numerical behavior. The chapter's interleaving figure is an architectural alternative, not the implementation inside the released pipelined MAC.
 
-Separate feed-forward input stages from feedback state. A product register can delay an operand pair without introducing a second accumulator recurrence. An input register can additionally delay when the product is formed. If the source has only a product and accumulator register, its figure should not silently add input registers and then advertise the resulting latency as the source's behavior.
+Separate feed-forward input stages from feedback state. A product register can delay an operand pair without introducing a second accumulator recurrence. An input register can also delay when the product is formed. If the source has only a product and accumulator register, its figure should not silently add input registers and then advertise the resulting latency as the source's behavior.
 
 #### Distinguish latency from sustained throughput
 

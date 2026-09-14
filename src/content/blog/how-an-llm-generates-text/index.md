@@ -59,7 +59,7 @@ Take a 7B-parameter model in 16-bit precision on a single NVIDIA A100. 3 publish
 
 **Decode step.** A forward pass costs roughly 2 FLOPs per parameter per token (1 multiply, 1 add), so 1 new token needs about 2 × 7B = **14 GFLOPs**. At 312 TFLOP/s that is 14 × 10⁹ / 312 × 10¹² ≈ **0.045 ms** of arithmetic. But the pass must also read all 14 GB of weights: 14 GB / (2,000 GB/s) ≈ **7 ms**. Memory traffic outweighs compute by a factor of ~150. The compute units are working well under 1% of the time; the realistic ceiling is 1 token every ~7 ms, or about **140 tokens per second** for a single request — and real systems land below that.
 
-**Prefill step.** Now push a 1,000-token prompt through in 1 pass. Compute scales up a thousandfold to ~14 TFLOPs, while the weights are still read essentially once. Even at an optimistic 50% of peak compute, that is 14 × 10¹² / 156 × 10¹² ≈ **90 ms** of math against ~7 ms of weight traffic. The ratio has flipped: arithmetic now dominates by more than 10×.
+**Prefill step.** Now push a 1,000-token prompt through in one pass. Compute scales up a thousandfold to ~14 TFLOPs, while the weights are still read essentially once. Even at an optimistic 50% of peak compute, that is 14 × 10¹² / 156 × 10¹² ≈ **90 ms** of math against ~7 ms of weight traffic. The ratio has flipped: arithmetic now dominates by more than 10×.
 
 Same model, same GPU, same request. 1 phase saturates the multipliers; the other saturates the memory bus. Hold onto the 7 ms number — it is also why serving systems batch many users' decode steps together, sharing 1 14 GB weight read across dozens of requests.
 

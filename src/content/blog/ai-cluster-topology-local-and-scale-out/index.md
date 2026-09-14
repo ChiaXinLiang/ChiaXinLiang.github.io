@@ -20,7 +20,7 @@ A cluster topology is a map of communication opportunities and shared bottleneck
 
 The useful engineering task is to connect a logical exchange to its actual path. A tensor-parallel all-reduce, pipeline boundary transfer, and expert all-to-all can stress different resources even when they run on the same devices. Topology-aware placement starts by identifying those exchanges rather than treating every GPU pair as equivalent.
 
-This article develops a method for drawing local and scale-out paths, deriving simple capacity bounds, and testing placement decisions. It avoids generation-specific link-rate claims: product specifications and supported topologies should be checked for the actual platform. Numerical examples are illustrative traffic calculations.
+This article develops a method for drawing local and scale-out paths, deriving simple capacity bounds, and testing placement decisions. It avoids generation-specific link-rate claims: check product specifications and supported topologies for the actual platform. Numerical examples are illustrative traffic calculations.
 
 ## Deep dive
 
@@ -38,21 +38,21 @@ Keep the two graphs visible during diagnosis. A topology diagram without a workl
 
 Within a server or a supported accelerator domain, GPUs may communicate through dedicated accelerator links, a switching fabric, PCIe paths, or a combination. NVLink and NVSwitch describe NVIDIA accelerator interconnection technologies, but supported connectivity and bandwidth vary by platform and generation.
 
-A fully connected-looking software view does not guarantee identical bandwidth for every pair. Traffic can traverse different numbers of links or share switch resources. A fabric can also provide strong aggregate capacity while a particular group uses only a subset of its available paths.
+A fully connected-looking software view does not guarantee identical bandwidth for every pair. Traffic can cross different numbers of links or share switch resources. A fabric can also provide strong aggregate capacity while a particular group uses only a subset of its available paths.
 
 PCIe is another important local path. Devices can share downstream switches and upstream connections, and their relationship to CPU root complexes matters. A GPU and NIC located beneath the same switch can have a different path from devices connected through separate CPU domains.
 
-Discover the actual machine rather than inferring it from the GPU model name. Record GPU identifiers, PCI bus locations, NUMA relationships, and peer-access capabilities. The same accelerator product can appear in systems with materially different host and interconnect layouts.
+Discover the actual machine rather than guessing it from the GPU model name. Record GPU identifiers, PCI bus locations, NUMA relationships, and peer-access capabilities. The same accelerator product can appear in systems with very different host and interconnect layouts.
 
 ### 3. Peer accessibility is a capability, not a benchmark result
 
-A programming interface can report whether one device can access another device's memory under supported conditions. That capability does not establish the achieved transfer bandwidth or guarantee that every application operation uses the intended direct path.
+A programming interface can report whether one device can access another device's memory under supported conditions. That capability does not tell you the achieved transfer bandwidth or guarantee that every application operation uses the intended direct path.
 
-CUDA peer-access queries and related topology information are useful checks at this layer. Peer access, unified addressing, and allocation behavior have specific programming semantics. An application still needs the appropriate setup and supported operations to exploit the capability.
+CUDA peer-access queries and related topology information are useful checks at this layer. Peer access, unified addressing, and allocation behavior have specific programming semantics. An application still needs the appropriate setup and supported operations to use the capability.
 
-Test representative transfers between relevant pairs and preserve directionality. A peer-access matrix says which relationships are supported; a bandwidth and latency matrix says how those relationships perform under a defined benchmark. They answer different questions.
+Test representative transfers between relevant pairs and record the direction. A peer-access matrix says which relationships are supported; a bandwidth and latency matrix says how those relationships perform under a defined benchmark. They answer different questions.
 
-Do not substitute a host-memory copy test for a device-to-device path test. Buffer location, transfer API, synchronization boundary, and process model affect what the experiment measures. Verify these details before attributing a surprising result to the physical interconnect.
+Do not substitute a host-memory copy test for a device-to-device path test. Buffer location, transfer API, synchronization boundary, and process model affect what the experiment measures. Check these details before blaming a surprising result on the physical interconnect.
 
 ### 4. Trace the GPU-to-NIC path before the leaf switch
 
@@ -60,7 +60,7 @@ Do not substitute a host-memory copy test for a device-to-device path test. Buff
 
 Scale-out communication begins inside the source server. Data must reach a network adapter through a supported transport path, which may use direct GPU memory access or staging through host memory. The server-side path can limit performance even when the external fabric is healthy.
 
-Draw the GPU, its relevant PCIe or accelerator connections, the NIC, and the host NUMA domains. Include shared upstream links. If a GPU's preferred NIC is physically distant, traffic may traverse a resource that neighboring GPU-NIC pairs avoid.
+Draw the GPU, its relevant PCIe or accelerator connections, the NIC, and the host NUMA domains. Include shared upstream links. If a GPU's preferred NIC is physically distant, traffic may cross a resource that neighboring GPU-NIC pairs avoid.
 
 For a simplified path with required segments of available bandwidth B_j, a basic capacity bound is
 
@@ -70,7 +70,7 @@ $$
 
 This is a bottleneck bound, not a complete latency model. Pipelined segments need not add their full serialization times, but no required bottleneck can sustain more traffic than its available capacity. Shared traffic further reduces what one exchange can obtain.
 
-A server with several high-rate adapters therefore needs a mapping that can use them effectively. Port count and aggregate advertised rate do not establish balanced traffic across adapters. Inspect per-adapter counters and application path selection when one part of the server underperforms.
+A server with several high-rate adapters therefore needs a mapping that can use them effectively. Port count and aggregate advertised rate do not guarantee balanced traffic across adapters. Inspect per-adapter counters and application path selection when one part of the server underperforms.
 
 ### 5. Model leaf-spine capacity through relevant cuts
 
@@ -84,7 +84,7 @@ $$
 
 For an illustrative cut requiring 64 GB of traffic with 400 GB/s available capacity, transfer time cannot be less than 0.16 seconds under that accounting. The calculation excludes startup and other delays, so it is a lower bound. If competing traffic consumes half the capacity, the corresponding bound becomes 0.32 seconds.
 
-The cut must match the required direction and paths. Adding unrelated links elsewhere in the rack does not increase this cut's capacity. Likewise, a bidirectional total cannot be assigned entirely to traffic traveling one way. This method exposes why an impressive aggregate fabric specification can coexist with a bottleneck for a particular placement.
+The cut must match the required direction and paths. Adding unrelated links elsewhere in the rack does not increase this cut's capacity. Likewise, a bidirectional total cannot be assigned entirely to traffic traveling one way. This method shows why an impressive aggregate fabric specification can coexist with a bottleneck for a particular placement.
 
 ### 6. Oversubscription is a workload-dependent constraint
 
@@ -98,11 +98,11 @@ $$
 \rho=B_{\mathrm{down}}/B_{\mathrm{up}}.
 $$
 
-A ratio greater than 1 indicates potential oversubscription under this definition. It does not imply every transfer slows by that factor. Communication staying within the leaf may avoid the uplinks, while cross-leaf all-to-all can stress them heavily.
+A ratio greater than 1 indicates potential oversubscription under this definition. It does not mean every transfer slows by that factor. Communication staying within the leaf may avoid the uplinks, while cross-leaf all-to-all can stress them heavily.
 
-Use the application's traffic matrix to estimate how much work remains local and how much crosses the boundary. Hierarchical algorithms and placement can reduce traffic over expensive cuts, but they may add other communication phases. Evaluate the net critical-path effect rather than optimizing one traffic count in isolation.
+Use the application's traffic matrix to estimate how much work remains local and how much crosses the boundary. Hierarchical algorithms and placement can reduce traffic over expensive cuts, but they may add other communication phases. Judge the net critical-path effect rather than tune one traffic count in isolation.
 
-Measure under realistic multi-job conditions when the cluster shares fabric capacity. A single job's isolated benchmark can miss contention patterns created by neighboring jobs. Preserve placement and background-load conditions in reports so later comparisons remain meaningful.
+Measure under realistic multi-job conditions when the cluster shares fabric capacity. A single job's isolated benchmark can miss contention patterns created by neighboring jobs. Record placement and background-load conditions in reports so later comparisons remain meaningful.
 
 ### 7. Map parallelism dimensions onto locality deliberately
 
@@ -114,13 +114,13 @@ These are starting hypotheses, not fixed placement rules. A model with unusual l
 
 For each candidate process mesh, count which exchanges cross which physical cuts. Compare expected traffic and frequency with measured link behavior. A mesh that minimizes one dimension's traffic can increase another's or leave compute stages imbalanced.
 
-Record rank-to-device and rank-to-NIC mappings as part of the experiment. Keep the mapping available alongside every measured run. A process launcher or scheduler can change placement between runs without changing application code. Without the mapping, a topology-sensitive regression can look nondeterministic and be difficult to reproduce.
+Record rank-to-device and rank-to-NIC mappings as part of the experiment. Keep the mapping available alongside every measured run. A process launcher or scheduler can change placement between runs without changing application code. Without the mapping, a topology-sensitive regression can look nondeterministic and be hard to reproduce.
 
-Consider a simplified 16-GPU job split across 2 servers with 8 GPUs each. A tensor-parallel group of 4 can remain within one server, while a data-parallel group can connect corresponding local groups across servers. An alternative interleaving places every tensor-parallel group across both servers and makes its frequent layer exchanges use the scale-out path. This example does not prove the first layout optimal, but it identifies a specific traffic difference to measure. Compare layer communication, synchronization tails, and memory feasibility before selecting the mapping.
+Consider a simplified 16-GPU job split across 2 servers with 8 GPUs each. A tensor-parallel group of 4 can remain within one server, while a data-parallel group can connect corresponding local groups across servers. An alternative interleaving places every tensor-parallel group across both servers and makes its frequent layer exchanges use the scale-out path. This example does not prove the first layout best, but it identifies a specific traffic difference to measure. Compare layer communication, synchronization tails, and memory feasibility before selecting the mapping.
 
 ### 8. Verify with a hierarchy of experiments
 
-Begin with topology discovery and capability checks. Then measure representative device pairs and GPU-NIC paths. Next run the relevant collective across the intended rank group. Finally measure the application timeline, because good isolated paths do not establish effective overlap or balanced readiness.
+Start with topology discovery and capability checks. Then measure representative device pairs and GPU-NIC paths. Next run the relevant collective across the intended rank group. Finally measure the application timeline, because good isolated paths do not guarantee effective overlap or balanced readiness.
 
 At each level, preserve message sizes, buffer location, directions, process count, and timing boundaries. Include both latency and large-message bandwidth where the workload needs them. A pair test with one large transfer cannot explain a collective dominated by many small rounds.
 

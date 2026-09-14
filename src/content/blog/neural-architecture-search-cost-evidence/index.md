@@ -57,15 +57,15 @@ $$
 
 For an illustrative 12 locations with 4 choices each, there are 16,777,216 combinations. Training each independently is usually impractical, even before device evaluation.
 
-This motivates cheaper candidate evaluation and more selective exploration. The same calculation also explains why a search budget must be reported. A method that explores more candidates or uses a larger preparation resource can gain an advantage unrelated to the elegance of its optimizer.
+This motivates cheaper candidate evaluation and more selective exploration. The same calculation also explains why a search budget must be reported. A method that explores more candidates or uses a larger preparation resource can gain an advantage that has nothing to do with its optimizer.
 
 ### 4. Use random search as an informative baseline
 
-Sampling feasible architectures provides a transparent baseline against which more elaborate selection can be assessed. It can reveal whether the search space already contains many good candidates or whether resource constraints exclude most of it.
+Sampling feasible architectures gives a transparent baseline for judging more elaborate selection. It can reveal whether the search space already contains many good candidates or whether resource constraints exclude most of it.
 
 A random baseline should use the same candidate evaluation and search budget where feasible. Otherwise a comparison can confuse optimizer quality with evaluator cost or training effort.
 
-Inspect the distribution of quality and resource use across sampled candidates. If a sophisticated method barely improves over that distribution, the search mechanism may contribute less than the space and training recipe. An understandable baseline makes that conclusion visible rather than hiding it behind one selected model.
+Check the distribution of quality and resource use across sampled candidates. If a sophisticated method barely improves over that distribution, the search mechanism may contribute less than the space and training recipe. An understandable baseline makes that conclusion visible rather than hiding it behind one selected model.
 
 ### 5. Explain a differentiable relaxation
 
@@ -77,7 +77,7 @@ $$
 
 Gradients can then update architecture weights alongside model weights under a chosen procedure. DARTS is a primary example of this broad relaxation approach.
 
-The mixed training graph is not the final discrete architecture. Running several candidate operations can increase search memory and computation. Selecting one operation afterward also changes the graph, so relaxed performance and discrete deployment performance require separate evaluation.
+The mixed training graph is not the final discrete architecture. Running several candidate operations can increase search memory and computation. Selecting one operation afterward also changes the graph, so you must evaluate relaxed performance and discrete deployment performance separately.
 
 ### 6. Understand the bilevel formulation
 
@@ -91,7 +91,7 @@ $$
 
 Exact nested optimization is costly. Practical methods approximate the inner solution and architecture gradients, with method-specific assumptions. Those approximations can influence which structures are selected.
 
-Preserve the training and validation split used during search. Architecture parameters can overfit selection data just as ordinary hyperparameters can. A final held-out evaluation remains necessary even when the search itself never directly updates weights on that test population.
+Preserve the training and validation split used during search. Architecture parameters can overfit selection data just as ordinary hyperparameters can. You still need a final held-out evaluation even when the search itself never directly updates weights on that test population.
 
 ### 7. Bring resource cost into the objective
 
@@ -103,7 +103,7 @@ $$
 
 The expression is illustrative and not the exact loss of every named search method. The coefficient lambda converts a resource preference into the optimization convention; a constrained formulation can handle budgets more explicitly.
 
-Operator timings need the target shapes, datatype, and device. Fusion and conversion can violate additive assumptions. Verify final exported architectures, especially those predicted to sit close to the acceptance boundary.
+Operator timings need the target shapes, datatype, and device. Fusion and conversion can break the additive assumptions. Verify final exported architectures, especially those predicted to sit close to the acceptance boundary.
 
 ### 8. Explain target-aware innovations
 
@@ -119,15 +119,15 @@ A supernet contains several candidate subnetworks that share some parameters. Tr
 
 The quality of a subnet using inherited weights is an estimate of its eventual performance under a defined specialization policy. Shared training can favor some paths or create interference. Candidate rankings under shared weights need not match rankings after independent training.
 
-Document path sampling, shared parameter interfaces, and the final candidate training procedure. If candidates are evaluated under unequal exposure during supernet training, the search score can reflect training history as well as architectural quality.
+Document path sampling, shared parameter interfaces, and the final candidate training procedure. If candidates get unequal exposure during supernet training, the search score can reflect training history as well as architectural quality.
 
 ### 10. Understand once-for-all specialization
 
-Once-for-All separates a substantial shared training phase from selecting subnetworks for several deployment constraints. Its progressive shrinking procedure supports variation in dimensions such as depth, width, kernel size, and resolution under the paper's design.
+Once-for-All separates a large shared training phase from selecting subnetworks for several deployment constraints. Its progressive shrinking procedure supports variation in dimensions such as depth, width, kernel size, and resolution under the paper's design.
 
 This makes preparation amortization part of the efficiency story. One trained family can serve several target operating points without repeating the entire independent architecture-training process for each.
 
-The benefit depends on reuse and the covered space. A deployment outside the trained family's supported options may still need new work. Report the shared training cost, specialization procedure, candidate validation, and device measurement rather than describing specialization as universally costless.
+The benefit depends on reuse and the covered space. A deployment outside the trained family's supported options may still need new work. Report the shared training cost, specialization procedure, candidate validation, and device measurement rather than describing specialization as always free.
 
 ### 11. Work through amortization
 
@@ -137,17 +137,17 @@ $$
 C_{\mathrm{independent}}=100K,\qquad C_{\mathrm{shared}}=500+5K.
 $$
 
-Under those assumptions, shared preparation becomes cheaper once K exceeds approximately 5.26, so at least 6 targets are needed for this integer comparison.
+Under those assumptions, shared preparation becomes cheaper once K exceeds about 5.26, so at least 6 targets are needed for this integer comparison.
 
 These invented costs explain the accounting rather than report any paper's benchmark. Include differences in candidate quality, device coverage, and final training before using amortization to make a real decision. A cheaper preparation phase is not useful if the resulting artifacts miss the required operating points.
 
 ### 12. Validate rankings and constraints
 
-Compare predicted and measured latency for shortlisted candidates. Inspect quality rankings under inherited weights and the intended final training policy. The most important errors are those that change candidate selection or budget feasibility.
+Compare predicted and measured latency for shortlisted candidates. Check quality rankings under inherited weights and the intended final training policy. The most important errors are those that change candidate selection or budget feasibility.
 
 A high average correlation can hide mistakes near the Pareto frontier. Evaluate the actual contenders, not only a broad random set dominated by obviously poor candidates.
 
-Store the exported graph and measurement configuration with each selected architecture. Constraint satisfaction must refer to the complete artifact under the intended workload. A search log's estimated latency does not establish that a production request meets its deadline.
+Store the exported graph and measurement configuration with each selected architecture. Constraint satisfaction must refer to the complete artifact under the intended workload. A search log's estimated latency does not show that a production request meets its deadline.
 
 ### 13. Report the full search bill
 
@@ -161,9 +161,9 @@ No architecture-search run, training experiment, or GPU timing was performed for
 
 ![Deep dive: 14. Choose search when the space justifies it](./deep-dive-component-04.png)
 
-Search is most useful when there are meaningful architectural alternatives, an evaluator that predicts relevant outcomes, and enough reuse to justify preparation. A small design space can sometimes be explored more transparently with controlled manual experiments.
+Search is most useful when there are meaningful architectural alternatives, an evaluator that predicts relevant outcomes, and enough reuse to justify preparation. You can sometimes explore a small design space more transparently with controlled manual experiments.
 
-Begin from supported operations and a strong baseline. Identify whether the difficult decision is structure, numerical representation, or an execution bottleneck better solved in the backend. Searching architecture variables cannot repair every software issue.
+Begin from supported operations and a strong baseline. Identify whether the difficult decision is structure, numerical representation, or an execution bottleneck better solved in the backend. Searching architecture variables cannot fix every software issue.
 
 The useful result is a reproducible quality-resource point with a known preparation cost. Explaining how the candidate was selected and validated makes neural architecture search an engineering method rather than a black box that produces an impressive model name.
 
@@ -173,7 +173,7 @@ The useful result is a reproducible quality-resource point with a known preparat
 
 An evaluator trained or calibrated on a limited candidate population can favor structures similar to those it has seen. Extrapolating to different widths, operator families, or devices can change both timing and quality rankings.
 
-Inspect coverage before trusting a predictor. Add measurements where uncertainty affects the selected frontier and reserve independent candidate checks for final validation. A predictor can reduce search cost without becoming a substitute for target-system evidence.
+Check coverage before trusting a predictor. Add measurements where uncertainty affects the selected frontier and reserve independent candidate checks for final validation. A predictor can reduce search cost without becoming a substitute for target-system evidence.
 
 The same principle applies to supernet weights. Shared exposure is not uniform unless the procedure makes it so, and even uniform sampling does not guarantee identical optimization difficulty across paths. Report how subnet scores are obtained and what final training changes.
 
@@ -185,11 +185,11 @@ These limitations do not make automated search unhelpful. They identify the assu
 
 Architecture parameters from a relaxed search are not a complete deployment artifact. Export the selected operators, widths, depth, resolution, numerical policy, and trained weights explicitly. Verify branch dimensions and preprocessing after discretization, because the final graph can differ from the mixed graph used during search.
 
-A small reproducibility package should contain the search-space definition, evaluator settings, selected candidate configuration, final training policy, and measured resource envelope. This allows another engineer to distinguish reproducing the search from simply evaluating the published candidate.
+A small reproducibility package should contain the search-space definition, evaluator settings, selected candidate configuration, final training policy, and measured resource envelope. This lets another engineer distinguish reproducing the search from simply evaluating the published candidate.
 
 ## Conclusion
 
-Those are different tasks with different costs. A deployment can reuse a verified candidate without repeating the entire search, while a research comparison may need to rerun selection under an equal preparation budget. Keeping the distinction explicit prevents inference efficiency from being confused with the cost of discovering the architecture.
+Those are different tasks with different costs. A deployment can reuse a verified candidate without repeating the entire search, while a research comparison may need to rerun selection under an equal preparation budget. Keeping the distinction explicit prevents anyone from confusing inference efficiency with the cost of discovering the architecture.
 
 ### Sources
 

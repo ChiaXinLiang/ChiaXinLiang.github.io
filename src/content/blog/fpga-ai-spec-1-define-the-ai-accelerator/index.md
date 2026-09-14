@@ -57,7 +57,7 @@ Add buffers, scale metadata and temporary state to the storage ledger before cho
 
 ![Deep dive: Create a reference and acceptance tests](./deep-dive-component-04.png)
 
-The acceptance figure sends identical accepted work to an oracle and the implementation. Compare output values first, then report latency and throughput separately. A test that merely compares two copies of the same hardware algorithm can repeat its mistake; the independent direct matrix loop provides a different reference.
+The acceptance figure sends identical accepted work to an oracle and the implementation. Compare output values first, then report latency and throughput separately. A test that only compares two copies of the same hardware algorithm can repeat its mistake. The independent direct matrix loop gives a different reference.
 
 Start with the hand-checkable 2×2 case producing [[19,22],[43,50]]. Add signed extremes, irregular shapes and invalid commands. The test corpus checks tiled execution against direct matmul, while RTL tests check forwarding, masks and global stalls. No board measurement is implied by those results.
 
@@ -78,9 +78,9 @@ The first command writes `reports/spec-1.json`. Inspect its scope and result tog
 
 Create a new working copy of the lab and keep the numerical contract beside its sources. The opening work uses Python to make the values and accepted events explicit before circuit optimization. A direct matrix loop is the independent reference; a cycle-stepped array model explains timing without being the only numerical oracle.
 
-Start with known signed values, not only random data. Distinct elements expose row/column swaps and misaligned reductions. Zero and the signed endpoints expose conversion and width mistakes. A stalled event exposes the difference between offered work, accepted work and elapsed clocks. Retain each fixture so later changes can be compared against the same contract.
+Start with known signed values, not only random data. Distinct elements expose row/column swaps and misaligned reductions. Zero and the signed endpoints expose conversion and width mistakes. A stalled event exposes the difference between offered work, accepted work and elapsed clocks. Keep each fixture so you can compare later changes against the same contract.
 
-When moving the operation into RTL, draw the register boundaries and define reset/clear priority. A value observed before an active edge belongs to the previous state; a value observed after nonblocking updates belongs to the new state. Record that convention in the harness. Otherwise a testbench race can resemble a circuit defect.
+When moving the operation into RTL, draw the register boundaries and define reset/clear priority. A value observed before an active edge belongs to the previous state; a value observed after nonblocking updates belongs to the new state. Record that convention in the harness. Otherwise a testbench race can look like a circuit defect.
 
 The acceptance result is a defined behavior and an executed software/RTL check, not a physical clock achievement. Synthesis, board integration and measured performance belong to later milestones. This separation makes the early lesson useful without inventing a hardware result.
 
@@ -92,11 +92,11 @@ Use a 2×2 matrix as the first executable specification. Let A contain rows [1,2
 
 Next include a negative value. Replacing A[0,0] with -1 changes the first output row to [9,10] while preserving the second row. INT8 serialization stores -1 as the byte 0xff, but its numerical interpretation remains signed. A host that later reads that byte as 255 has changed the operation before the multiplier is involved. Put signed interpretation into the contract rather than trusting a programming-language default. Keep the raw byte fixture beside the expected signed result.
 
-The operation produces a wider result. It does not promise that every C element fits INT8. Even a 1-term product of -128 with -128 is 16384. A specification that calls the result “8-bit AI output” without declaring a conversion cannot be implemented consistently. State whether the primary result is INT32, whether bias is included, and whether an optional output epilogue subsequently converts to INT8. The released tile top stops at INT32 matrix output; the epilogue is independently executable Python behavior.
+The operation produces a wider result. It does not promise that every C element fits INT8. Even a 1-term product of -128 with -128 is 16384. A specification that calls the result “8-bit AI output” without declaring a conversion cannot be implemented consistently. State whether the primary result is INT32, whether bias is included, and whether an optional output epilogue then converts to INT8. The released tile top stops at INT32 matrix output; the epilogue is independently executable Python behavior.
 
 #### Turn the logical shape into storage obligations
 
-For the full educational tile M=N=4 and K=8, A holds 32 INT8 elements and B holds another 32. C holds 16 INT32 elements, which require 64 bytes. The unique tensor storage budget is consequently 128 bytes before any double buffers, metadata or implementation overhead. This is a capacity calculation, not a statement that a synthesized system will use exactly 128 bytes of physical memory. Mapping, ports, padding and registers affect the latter.
+For the full educational tile M=N=4 and K=8, A holds 32 INT8 elements and B holds another 32. C holds 16 INT32 elements, which require 64 bytes. So the unique tensor storage budget is 128 bytes before any double buffers, metadata or implementation overhead. This is a capacity calculation, not a statement that a synthesized system will use exactly 128 bytes of physical memory. Mapping, ports, padding and registers affect the latter.
 
 The useful work is M×N×K, or 128 multiply-accumulate contributions. Counting 1 MAC as 2 arithmetic operations gives 256 operations under that stated convention. Neither count is a measured rate. To produce a rate, a later experiment needs a time interval and a defined completion boundary. A device may spend clocks clearing state, injecting operands, draining the array, capturing results and waiting on transport. The specification should make those stages visible rather than letting an attractive arithmetic count imply application performance.
 
@@ -106,9 +106,9 @@ Separate logical dimensions from physical storage. The integrated tile top reser
 
 A command should snapshot the operation it accepts. Otherwise a host changing M, N or K during computation could silently alter a running reduction. The integrated top accepts a legal start while idle, validates M and N from 1 through 4 and K from 1 through 8, and retains that job's dimensions. A broader matrix tiler can cover larger shapes by invoking smaller operations, but it is not permission to send an unsupported large dimension to this fixed top.
 
-Define what happens to writes and additional starts during busy. This project ignores those events in the simple integrated interface. That policy is easy to simulate, but a production transport might return a backpressure or error response instead. Whichever policy is selected, callers must be able to distinguish accepted work from offered work. A software driver should not reuse an operand buffer merely because it issued a write; it must follow the transport's actual acceptance and completion contract.
+Define what happens to writes and additional starts during busy. This project ignores those events in the simple integrated interface. That policy is easy to simulate, but a production transport might return a backpressure or error response instead. Whichever policy you pick, callers must be able to tell accepted work from offered work. A software driver should not reuse an operand buffer just because it issued a write; it must follow the transport's actual acceptance and completion contract.
 
-DONE describes captured usable results in this interface. In a future external-memory system, DONE may additionally need successful write responses and platform visibility rules. The event cannot be carried unchanged across a new bus by assumption. Document reset and recovery too: does reset cancel the job, invalidate outputs and require operands to be reloaded? A timeout can tell the host that completion did not arrive, but it does not by itself make partially written memory safe.
+DONE describes captured usable results in this interface. In a future external-memory system, DONE may also need successful write responses and platform visibility rules. You cannot assume the event carries unchanged across a new bus. Document reset and recovery too: does reset cancel the job, invalidate outputs and require operands to be reloaded? A timeout can tell the host that completion did not arrive, but it does not by itself make partially written memory safe.
 
 #### Review the specification as an independent artifact
 
@@ -116,7 +116,7 @@ Before optimizing, ask another reader to predict the 2×2 fixture from the writt
 
 Keep a table of requirements and evidence. A Python result supports the mathematical and functional-memory behavior it executes. A simulator result supports the exercised RTL sequence. A timing report supports a constrained implementation in a specified target flow. A board measurement supports an actual integrated system and its test conditions. The progression from reference to circuit becomes reproducible when those records stay distinct.
 
-The first design decision is therefore modest but consequential: a small signed matrix operation with a precise output and command boundary. That leaves enough structure to build the MAC, PE, array, controller and host lessons without pretending to have designed a complete commercial AI processor. Later architectural choices can be evaluated against a stable operation instead of repeatedly changing what success means.
+The first design decision is therefore modest but important: a small signed matrix operation with a precise output and command boundary. That leaves enough structure to build the MAC, PE, array, controller and host lessons without pretending to have designed a complete commercial AI processor. You can then judge later architectural choices against a stable operation instead of repeatedly changing what success means.
 
 ## Conclusion
 

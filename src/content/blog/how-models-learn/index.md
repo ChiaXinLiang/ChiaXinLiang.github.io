@@ -35,7 +35,7 @@ The catch: for a real model the landscape has billions of dimensions and you can
 Here's what you *can* do while blind on a hillside: feel which way the ground slopes under your feet, and step downhill. Repeat.
 
 
-That is the entire algorithm, called **gradient descent**. The "slope under your feet" is the *gradient* — for each of the billions of weights, the answer to 1 question: *if I nudged this weight slightly, would the loss go up or down, and how steeply?* Take a small step for every weight in its downhill direction, and the loss decreases. Do it millions of times, and a network that started as random noise becomes a digit reader — or a language model.
+That is the entire algorithm, called **gradient descent**. The "slope under your feet" is the *gradient* — for each of the billions of weights, the answer to one question: *if I nudged this weight slightly, would the loss go up or down, and how steeply?* Take a small step for every weight in its downhill direction, and the loss decreases. Do it millions of times, and a network that started as random noise becomes a digit reader — or a language model.
 
 The step size (the *learning rate*) is a genuine tuning art: too small and training takes forever; too large and you overshoot valleys entirely. But the concept stays this simple.
 
@@ -90,7 +90,7 @@ $$
 
 Use input 2, target 6, and initial weight 1. The prediction is 2, residual minus 4, loss 8, and gradient minus 8. With learning rate 0.1, gradient descent updates the weight to $$w_{\mathrm{new}}=1-0.1(-8)=1.8$$.
 
-The new prediction is 3.6 and the new loss is 2.88. 1 step improved this example, but that does not guarantee every step in a general training run decreases the full-data objective. Minibatch gradients are estimates, learning rates can be too large, and complex landscapes can contain difficult regions.
+The new prediction is 3.6 and the new loss is 2.88. One step improved this example, but that does not guarantee every step in a general training run decreases the full-data objective. Minibatch gradients are estimates, learning rates can be too large, and complex landscapes can contain difficult regions.
 
 Here the exact best weight is 3. Setting the derivative to 0 finds it immediately. Iterative optimization becomes necessary when the parameter space and objective make an exact closed-form solution impractical. The tiny example shows the sign and scale of an update without requiring a picture of billions of dimensions.
 

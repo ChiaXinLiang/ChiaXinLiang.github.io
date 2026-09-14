@@ -129,7 +129,7 @@ The initial clock period is an illustrative 10 ns, with illustrative 2-ns input/
 
 #### Read resource mapping as an implementation result
 
-The source declares signed arithmetic and behavioral storage. Synthesis can infer DSP resources, LUT/flip-flop structures or memory resources according to the target and access pattern. An array large enough to hold operands does not automatically infer BRAM if its concurrent reads do not match a supported port configuration. Inspect actual mapped cells and reports rather than using the RTL variable name to classify the physical resource.
+The source declares signed arithmetic and behavioral storage. Synthesis can infer DSP resources, LUT/flip-flop structures or memory resources according to the target and access pattern. An array large enough to hold operands does not automatically infer BRAM if its concurrent reads do not match a supported port configuration. Inspect actual mapped cells and reports. The RTL variable name does not classify the physical resource.
 
 The integrated top's fixed operand banks make its simulation understandable, but a reader may choose registered memory wrappers to match a target's RAM resources. That introduces read latency and possibly a changed supply schedule. Preserve the numerical oracle and match masks/tags to returned operands. A resource optimization that silently changes which reduction index reaches a PE is a functional defect even if it saves LUTs.
 
@@ -141,7 +141,7 @@ Clock nets drive registers and supported clocked resources. Combinational logic 
 
 A board host or memory interface can introduce another clock domain. Use a synchronization method appropriate to the signal and protocol: a stable single-bit level differs from a multi-bit payload or pulse. A multi-bit transfer often needs a handshake or asynchronous FIFO rather than independent bit synchronizers. Review the CDC structure and reset release for each domain, and apply targeted timing exceptions justified by that structure. Do not blanket-exclude asynchronous interfaces from analysis.
 
-The released core uses a simple clocked simulation environment and has no verified board CDC shell. A proposed shell consequently creates new verification and implementation obligations. Keep it outside the portable numerical core where possible, and retain its target-specific sources and constraints in the board release. Passing the existing array regression does not establish that shell's correctness.
+The released core uses a simple clocked simulation environment and has no verified board CDC shell. A proposed shell therefore creates new verification and implementation obligations. Keep it outside the portable numerical core where possible, and retain its target-specific sources and constraints in the board release. Passing the existing array regression does not establish that shell's correctness.
 
 #### Bring up the integrated board in increasing scope
 
@@ -149,7 +149,7 @@ Begin with an observable clock/reset and register or transport sanity check supp
 
 Use the fixed tile top's contract when loading operands: padded A stride 8, padded B stride 4 and supported dimensions. Compare captured INT32 results after DONE. If a shell translates MMIO or a serial packet into host-load writes, test accepted writes and command ordering independently. A packet parser receiving bytes is not proof that every required operand reached its intended address.
 
-A generated bitstream is an implementation artifact, while programming a board and executing the fixture provides hardware evidence. Retain both milestones separately. A tool-estimated power report is another artifact and should not be labeled measured board power. Instrumented measurement needs a named boundary and test conditions.
+A generated bitstream is an implementation artifact, while programming a board and executing the fixture provides hardware evidence. Retain both milestones separately. A tool-estimated power report is another artifact; do not label it measured board power. Instrumented measurement needs a named boundary and test conditions.
 
 The chapter's outcome in this release is a concrete, inspectable core implementation script and a board-integration procedure. It supplies the source boundary and verification baseline needed to perform those steps, while reporting only the software/RTL checks already executed. The path to hardware is explicit and reproducible rather than implied by an FPGA-shaped illustration.
 

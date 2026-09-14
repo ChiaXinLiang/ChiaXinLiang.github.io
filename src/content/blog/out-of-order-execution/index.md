@@ -85,7 +85,7 @@ $$
 
 For our 4-instruction example, $$N=4$$, $$w=1$$, and the load-to-add chain takes 5 cycles. The lower bound is therefore 5 cycles, which the illustrated out-of-order schedule reaches. The in-order schedule takes 8: elapsed time falls by 37.5%, while throughput for this fixed task rises by a factor of $$8/5=1.6$$. Those are different percentage conventions.
 
-The innovation over in-order issue is readiness-based scheduling, not elimination of dependencies. Renaming removes name conflicts; it cannot shorten the actual load-to-add chain. To evaluate a larger window, measure whether it exposes independent instructions or additional simultaneous cache misses. Extra bookkeeping buys little if every useful operation still waits on the same pointer chain, while scheduler ports and comparisons consume area and energy.
+The innovation over in-order issue is readiness-based scheduling, not removing dependencies. Renaming removes name conflicts; it cannot shorten the actual load-to-add chain. To evaluate a larger window, measure whether it exposes independent instructions or additional simultaneous cache misses. Extra bookkeeping buys little if every useful operation still waits on the same pointer chain, while scheduler ports and comparisons consume area and energy.
 
 ### Register renaming, in plain words
 
@@ -102,7 +102,7 @@ I4: MUL R5 ← R8 × R9    # writes R5 again
 
 I2 genuinely must wait for the divide. But look at I3: it only *writes* R5. Nothing about its computation involves I1 or I2. Yet if the core ran I3 early, it would overwrite R5 before the stalled I2 got a chance to read the old value. Wrong answer. This is a **write-after-read hazard** (I3 must not write before I2 reads), and I4 piles on a **write-after-write hazard** (if I4 finished before I3, R5 would end up holding I3's stale result). Both are false dependencies: accidents of having too few register names.
 
-The cure is **register renaming**. The core keeps a large pool of hidden physical registers, far more than the named ones: Golden Cove has 280 integer physical registers behind x86's 16 names. Every time an instruction writes a named register, the renamer hands it a fresh physical register and updates a map from names to physical locations. Subsequent readers of that name are pointed at the new physical register; earlier readers keep their pointer to the old 1, which stays alive until they're done with it.
+The cure is **register renaming**. The core keeps a large pool of hidden physical registers, far more than the named ones: Golden Cove has 280 integer physical registers behind x86's 16 names. Every time an instruction writes a named register, the renamer hands it a fresh physical register and updates a map from names to physical locations. The renamer points later readers of that name at the new physical register; earlier readers keep their pointer to the old one, which stays alive until they're done with it.
 
 After renaming, our sequence becomes (P-numbers are physical registers):
 
@@ -113,10 +113,10 @@ I3: SUB P9  ← R6 − R7     # R5 now lives in P9 — no conflict
 I4: MUL P10 ← R8 × R9     # R5 now lives in P10 — no conflict
 ```
 
-I3 and I4 can now run immediately, in any order, while the divide grinds. The only dependency left is the real 1, I1 to I2, carried by P7. Renaming deletes every false dependency and leaves the true dataflow graph, which is exactly what the scheduler wants to see.
+I3 and I4 can now run immediately, in any order, while the divide grinds. The only dependency left is the real one, I1 to I2, carried by P7. Renaming deletes every false dependency and leaves the true dataflow graph, which is exactly what the scheduler wants to see.
 
 
-The everyday analogy: a kitchen with 1 cutting board forces cooks to queue even when their recipes are unrelated. Renaming is buying a stack of cutting boards and handing a clean 1 to each cook. The recipes didn't change; the phony contention evaporated.
+The everyday analogy: a kitchen with one cutting board forces cooks to queue even when their recipes are unrelated. Renaming is buying a stack of cutting boards and handing a clean one to each cook. The recipes didn't change; the phony contention evaporated.
 
 ### Going 1 level deeper
 

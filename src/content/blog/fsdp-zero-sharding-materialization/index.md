@@ -16,11 +16,11 @@ tags: ["distributed-training", "ai-infrastructure"]
 
 ![Concept overview: FSDP and ZeRO: What Gets Sharded and What Must Be Materialized. Several GPU servers each own a colored parameter shard.](./section-overview.png)
 
-Replicated data parallelism keeps a complete training instance on every rank. When the persistent state alone exceeds device capacity, the problem cannot be solved by sending gradients more efficiently. The ranks must change which objects they own. ZeRO and Fully Sharded Data Parallel, usually called FSDP, distribute training state while preserving the logical model and its update.
+Replicated data parallelism keeps a complete training instance on every rank. When the persistent state alone exceeds device capacity, sending gradients more efficiently cannot solve the problem. The ranks must change which objects they own. ZeRO and Fully Sharded Data Parallel, usually called FSDP, distribute training state while preserving the logical model and its update.
 
-The important distinction is between ownership and availability. A rank may own only a parameter shard at rest, yet need the complete parameter values for the layer it is about to execute. Those values have to be materialized, used, and released according to an execution schedule. A theoretical persistent-state reduction is therefore only the beginning of the memory analysis.
+The important distinction is between ownership and availability. A rank may own only a parameter shard at rest, yet need the complete parameter values for the layer it is about to execute. Those values have to be materialized, used, and released according to an execution schedule. So a theoretical persistent-state reduction is only the beginning of the memory analysis.
 
-We will account for the familiar ZeRO stages, derive a simplified per-rank budget, and examine why sharding units, all-gather prefetch, and gradient accumulation affect the peak. Framework APIs evolve; the article explains mechanisms rather than prescribing a version-independent configuration snippet.
+We will account for the familiar ZeRO stages, derive a simplified per-rank budget, and examine why sharding units, all-gather prefetch, and gradient accumulation affect the peak. Framework APIs change; the article explains mechanisms rather than prescribing a version-independent configuration snippet.
 
 ## Deep dive
 
@@ -28,11 +28,11 @@ We will account for the familiar ZeRO stages, derive a simplified per-rank budge
 
 A conventional mixed-precision Adam example can contain compute weights, gradients, higher-precision master weights, and 2 optimizer moments. With 2-byte weights, 2-byte gradients, and 12 bytes of master and moment state, the persistent total is 16 bytes per parameter. This is an illustrative representation policy, not a mandatory property of every optimizer implementation.
 
-Let P denote logical parameter count and D the data-parallel sharding degree. Let the byte contributions for parameters, gradients, and optimizer-related state be w, g, and o per logical parameter. Keeping those contributions separate makes it possible to describe sharding without assuming a particular precision policy.
+Let P denote logical parameter count and D the data-parallel sharding degree. Let the byte contributions for parameters, gradients, and optimizer-related state be w, g, and o per logical parameter. Keeping those contributions separate lets us describe sharding without assuming a particular precision policy.
 
-Ownership determines which rank retains an object between computations. Communication determines which other ranks need access to it and when. Optimizer-state sharding can assign responsibility for updating a subset of parameters to each rank. Gradient sharding supplies each responsible rank with the synchronized derivative for that subset. Parameter sharding also changes which weight values remain locally available.
+Ownership determines which rank keeps an object between computations. Communication determines which other ranks need access to it and when. Optimizer-state sharding can assign responsibility for updating a subset of parameters to each rank. Gradient sharding supplies each responsible rank with the synchronized derivative for that subset. Parameter sharding also changes which weight values remain locally available.
 
-A logical model is still complete across the group. Sharding is not pruning parameters or reducing the amount of training data. It reorganizes storage and communication for the same computation, subject to floating-point and implementation differences that should be assessed in the usual correctness comparisons.
+A logical model is still complete across the group. Sharding is not pruning parameters or reducing the amount of training data. It reorganizes storage and communication for the same computation, subject to floating-point and implementation differences that you check with the usual correctness comparisons.
 
 ### 2. Derive the stage-by-stage persistent budget
 
@@ -56,7 +56,7 @@ for the idealized fully partitioned case. These expressions omit activations, wo
 
 Take P equal to 7 billion, D equal to 8, w equal to 2, g equal to 2, and o equal to 12 bytes. The replicated persistent state is 112 GB. The 3 stage estimates are 38.5 GB, 26.25 GB, and 14 GB per rank. All quantities here use decimal GB consistently.
 
-The diminishing benefit depends on the original state mix. If an optimizer has much smaller state, optimizer sharding removes less memory. If activations dominate the measured peak, even complete persistent-state partitioning may leave the main capacity constraint intact. Begin with the actual tensor inventory rather than applying a stage number as a universal memory multiplier.
+The diminishing benefit depends on the original state mix. If an optimizer has much smaller state, optimizer sharding removes less memory. If activations dominate the measured peak, even complete persistent-state partitioning may leave the main capacity constraint intact. Start with the actual tensor inventory rather than applying a stage number as a universal memory multiplier.
 
 ### 3. Parameter sharding introduces materialization
 
@@ -64,17 +64,17 @@ The diminishing benefit depends on the original state mix. If an optimizer has m
 
 A compute kernel generally needs the parameter values for the operation it executes. A fully sharded schedule can all-gather the parameter shards for a chosen unit before forward, compute with the materialized values, and reshard afterward. Backward may require another all-gather, depending on what the schedule retained.
 
-Gradients can be synchronized and partitioned using reduce-scatter, giving each rank the reduced gradient shard corresponding to its ownership. This differs from DDP’s replicated final gradient. The local optimizer can update its assigned parameter shard using locally retained optimizer state.
+A reduce-scatter can synchronize and partition gradients, so each rank gets the reduced gradient shard corresponding to its ownership. This differs from DDP’s replicated final gradient. The local optimizer can update its assigned parameter shard using locally retained optimizer state.
 
-These operations preserve the logical data-parallel computation but alter the communication sequence. All-gathers create readiness dependencies before compute. Reduce-scatters create dependencies before updates. Prefetch can move some communication earlier, but it cannot remove the need to obtain the values or the resources required to transfer them.
+These operations preserve the logical data-parallel computation but change the communication sequence. All-gathers create readiness dependencies before compute. Reduce-scatters create dependencies before updates. Prefetch can move some communication earlier, but it cannot remove the need to get the values or the resources needed to transfer them.
 
-The FSDP documentation describes full-shard behavior in terms of unsharding before forward and backward and resharding after those phases. Other strategies and newer APIs expose different controls. Verify the semantics of the installed version, particularly options governing retention, accumulation, and mixed precision, before mapping a profiler trace to the generic model.
+The FSDP documentation describes full-shard behavior in terms of unsharding before forward and backward and resharding after those phases. Other strategies and newer APIs expose different controls. Check the semantics of the installed version, particularly options governing retention, accumulation, and mixed precision, before mapping a profiler trace to the generic model.
 
 ### 4. The sharding unit is a scheduling decision
 
 A sharding unit defines which parameter values are gathered together. Large units amortize collective startup and can reduce the number of communication operations. They also materialize more memory at once and can delay compute until a larger transfer finishes.
 
-Small units reduce the size of an individual materialization, but may produce many collectives with startup and launch overhead. A very fine partition can also limit overlap if the next unit is not issued early enough. Layer boundaries are useful starting points because they reflect computational dependencies, yet they are not guaranteed to be optimal communication boundaries.
+Small units reduce the size of an individual materialization, but may produce many collectives with startup and launch overhead. A very fine partition can also limit overlap if the next unit is not issued early enough. Layer boundaries are useful starting points because they reflect computational dependencies, but nothing guarantees they are the best communication boundaries.
 
 Consider a model whose idealized persistent local state is 14 GB. If the active full parameter unit needs 1 GB, one additional prefetched unit needs another 1 GB, and activation and workspace demand together peaks at 12 GB, the simple concurrent total is 28 GB. Counting only the 14-GB shard set would understate that peak by a factor of 2.
 
@@ -100,9 +100,9 @@ Tune lookahead and unit size together under a fixed capacity limit. Record both 
 
 Accumulating multiple microsteps changes when synchronized gradients and parameter materializations can be released. A configuration intended to avoid repeated communication may retain more local gradient state than the ideal steady-state sharding expression suggests.
 
-This behavior depends on the sharding strategy and API. In particular, disabling synchronization is not simply the DDP memory story applied to a fully sharded instance. Consult the framework documentation for the specific retention and accumulation semantics, and measure the largest accumulation interval supported by the training job.
+This behavior depends on the sharding strategy and API. In particular, disabling synchronization is not simply the DDP memory story applied to a fully sharded instance. Check the framework documentation for the specific retention and accumulation semantics, and measure the largest accumulation interval supported by the training job.
 
-Loss normalization remains essential. Sharding state does not decide whether the desired objective averages valid tokens, examples, or ranks. Preserve the same effective global batch and weighting when comparing configurations. If one layout uses a different microbatch or accumulation factor to fit, document that change and its effect on useful work.
+Loss normalization still matters. Sharding state does not decide whether the desired objective averages valid tokens, examples, or ranks. Preserve the same effective global batch and weighting when comparing configurations. If one layout uses a different microbatch or accumulation factor to fit, document that change and its effect on useful work.
 
 Gradient clipping also requires the correct global norm. The local norm of one gradient shard is not generally the norm of the entire logical gradient. Use framework-supported distributed clipping or an explicitly correct reduction of squared norms, accounting for replicated versus partitioned contributions to avoid counting some values multiple times.
 
@@ -112,7 +112,7 @@ Gradient clipping also requires the correct global norm. The local norm of one g
 
 The representation of retained shards may differ from the representation used for compute or communication. A parameter all-gather can use a reduced-precision representation, while an optimizer update maintains a higher-precision local state. Gradient reduction policies can likewise differ from gradient accumulation policies.
 
-Each choice affects at least 3 questions: how many bytes are retained, how many bytes cross the collective, and what numerical behavior the update has. A lower communication byte count should be computed from the actual transfer dtype, not inferred from a model configuration field alone.
+Each choice affects at least 3 questions: how many bytes are retained, how many bytes cross the collective, and what numerical behavior the update has. Compute a lower communication byte count from the actual transfer dtype; do not infer it from a model configuration field alone.
 
 For a gathered unit containing U logical parameters in b-byte transport representation, the per-rank received payload in a simple balanced all-gather is approximately U b times D minus 1 divided by D. Algorithm startup, topology, and contention remain separate contributions. The bytes sent or reported as collective bandwidth can use conventions that differ from this payload accounting.
 
@@ -134,13 +134,13 @@ For the target model, list the feasible configurations under the device capacity
 
 Separate the constraints in the final results. Persistent state explains an ownership reduction. Measured peak explains whether execution fits. Step time explains scheduling efficiency. Useful tokens and training quality explain whether the job makes comparable learning progress. A single headline such as “8 times less memory” cannot substitute for all 4.
 
-If scale-out performance deteriorates, inspect the expensive all-gather and reduce-scatter paths. Smaller per-rank state does not imply smaller total communication, and crossing a different network boundary can erase a gain from memory capacity. Place the sharding group deliberately and connect its process topology to the physical links used by its collectives.
+If scale-out performance gets worse, inspect the expensive all-gather and reduce-scatter paths. Smaller per-rank state does not mean smaller total communication, and crossing a different network boundary can erase a gain from memory capacity. Place the sharding group deliberately and connect its process topology to the physical links used by its collectives.
 
 ## Conclusion
 
 ZeRO and FSDP change ownership of training state. Full parameter sharding also requires temporary materialization for computation, so peak memory depends on unit size, retention, and prefetch. The ideal shard budget is a useful lower layer of the analysis, not a complete execution estimate.
 
-Choose a feasible schedule by measuring capacity and critical-path time together. Preserve the intended update, count transport representations explicitly, and test checkpoint recovery. The best configuration uses sharding to enable useful training rather than merely producing an impressive persistent-memory ratio.
+Choose a feasible schedule by measuring capacity and critical-path time together. Preserve the intended update, count transport representations explicitly, and test checkpoint recovery. The best configuration uses sharding to make useful training possible, not just to produce an impressive persistent-memory ratio.
 
 ### Sources
 

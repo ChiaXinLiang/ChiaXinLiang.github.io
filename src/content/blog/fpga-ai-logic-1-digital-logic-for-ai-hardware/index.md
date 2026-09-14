@@ -19,7 +19,7 @@ This introductory lesson belongs to [FPGA & Digital Hardware Fundamentals](/seri
 
 This lesson extends one educational AI accelerator from its numerical specification toward verified RTL, FPGA integration and an ASIC implementation exercise. The overview shows this chapter's specific responsibility: Build counters, synchronous registers and an FSM; trace their behavior cycle by cycle.
 
-The shared project begins with signed INT8 operands and INT32 accumulation, grows into a 4×4 output-stationary array, and provides a verified host-loaded tile top. The larger tiled inference/transport examples are software models, while external bus, board and physical-design integration remain explicit exercises. Follow the evidence labels rather than treating every diagram as an executed hardware result.
+The shared project starts with signed INT8 operands and INT32 accumulation, grows into a 4×4 output-stationary array, and provides a verified host-loaded tile top. The larger tiled inference/transport examples are software models. External bus, board and physical-design integration remain explicit exercises. Follow the evidence labels rather than treating every diagram as an executed hardware result.
 
 Start after [Define the AI Accelerator: Workload, Interfaces, and Success Criteria](/blog/fpga-ai-spec-1-define-the-ai-accelerator/). Keep the previous fixture and source revision so this chapter's change can be checked independently.
 
@@ -29,7 +29,7 @@ Start after [Define the AI Accelerator: Workload, Interfaces, and Success Criter
 
 ![Deep dive: Combinational logic and clocked state](./deep-dive-component-01.png)
 
-The register figure divides combinational calculation from stored state. Combinational logic reacts to its inputs; a clocked register changes at its specified edge. A counter's next value is calculated from its current value, but the stored count updates only when the clocked process samples the relevant enable.
+The register figure separates combinational calculation from stored state. Combinational logic reacts to its inputs; a clocked register changes at its specified edge. The logic computes a counter's next value from its current value, but the stored count updates only when the clocked process samples the enable.
 
 In SystemVerilog, always_ff with nonblocking assignments expresses sequential state. All right-hand sides use the sampled pre-update state. Replacing a nonblocking assignment with a blocking assignment inside a multi-register pipeline can change simulation behavior and obscure the intended circuit.
 
@@ -41,9 +41,9 @@ Our core uses one clock and synchronous active-high reset. That is a deliberate 
 
 The state-machine figure shows IDLE, RUN and DONE. A start accepted in IDLE begins a job. RUN increments the work counter only when the required work event is accepted. A stall must hold the count. DONE remains visible until the chosen acknowledgement policy releases it.
 
-The logic-1 exercise includes a stalled step and demonstrates that elapsed cycles differ from accepted work. Counting every clock instead would finish the operation early when input is unavailable. The completion condition must match the last valid operation, not just a timer started at launch.
+The logic-1 exercise includes a stalled step and shows that elapsed cycles differ from accepted work. Counting every clock instead would finish the operation early when input is unavailable. The completion condition must match the last valid operation, not just a timer started at launch.
 
-Define priority when events coincide. Reset dominates ordinary progress; new commands during busy execution have a documented response. A state machine whose transitions depend on undocumented host behavior is difficult to reuse. Verify reset and acknowledgement alongside the normal path.
+Define priority when events coincide. Reset dominates ordinary progress; new commands during busy execution have a documented response. A state machine whose transitions depend on undocumented host behavior is hard to reuse. Verify reset and acknowledgement alongside the normal path.
 
 ### FPGA resources behind the RTL
 
@@ -70,9 +70,9 @@ The first command writes `reports/logic-1.json`. Inspect its scope and result to
 
 Create a new working copy of the lab and keep the numerical contract beside its sources. The opening work uses Python to make the values and accepted events explicit before circuit optimization. A direct matrix loop is the independent reference; a cycle-stepped array model explains timing without being the only numerical oracle.
 
-Start with known signed values, not only random data. Distinct elements expose row/column swaps and misaligned reductions. Zero and the signed endpoints expose conversion and width mistakes. A stalled event exposes the difference between offered work, accepted work and elapsed clocks. Retain each fixture so later changes can be compared against the same contract.
+Start with known signed values, not only random data. Distinct elements expose row/column swaps and misaligned reductions. Zero and the signed endpoints expose conversion and width mistakes. A stalled event exposes the difference between offered work, accepted work and elapsed clocks. Keep each fixture so you can compare later changes against the same contract.
 
-When moving the operation into RTL, draw the register boundaries and define reset/clear priority. A value observed before an active edge belongs to the previous state; a value observed after nonblocking updates belongs to the new state. Record that convention in the harness. Otherwise a testbench race can resemble a circuit defect.
+When moving the operation into RTL, draw the register boundaries and define reset/clear priority. A value observed before an active edge belongs to the previous state; a value observed after nonblocking updates belongs to the new state. Record that convention in the harness. Otherwise a testbench race can look like a circuit defect.
 
 The acceptance result is a defined behavior and an executed software/RTL check, not a physical clock achievement. Synthesis, board integration and measured performance belong to later milestones. This separation makes the early lesson useful without inventing a hardware result.
 
@@ -88,7 +88,7 @@ Distinguish the value before an edge from the value after it. Combinational logi
 
 #### Draw the feedback that makes the logic sequential
 
-The next-state function depends on current state. A diagram must consequently feed the register's Q output back into the combinational function, as well as expose any state-derived outputs. Without that feedback, a block labeled f(input,state) has an undeclared state input. The missing connection can be more misleading than a missing decorative label because it changes how a reader understands a hold or conditional transition.
+The next-state function depends on current state. So a diagram must feed the register's Q output back into the combinational function and expose any state-derived outputs. Without that feedback, a block labeled f(input,state) has an undeclared state input. The missing connection can be more misleading than a missing decorative label because it changes how a reader understands a hold or conditional transition.
 
 A counter is another feedback path. The incrementer computes count+1 from the current count, while the register decides whether to capture that value, retain the old count or clear it. An enable is not a new asynchronous clock. In ordinary synchronous RTL, it chooses the data captured at a clock edge. A target synthesis tool may implement this behavior using a supported enable feature or a data multiplexer; the source behavior must remain the same.
 
@@ -96,17 +96,17 @@ Reset policy needs equal precision. The released compute blocks use synchronous 
 
 #### Separate computation, storage and control resources
 
-A combinational multiplier maps differently from a state register, and a small memory with many simultaneous reads can map differently from a single-port RAM. FPGA LUTs, flip-flops, DSP blocks and BRAM are implementation resources with target-specific capabilities. Writing multiplication in RTL does not prove the mapper selected a DSP, just as declaring an array does not prove the implementation uses BRAM. Inspect the actual synthesis report when that flow is executed.
+A combinational multiplier maps differently from a state register, and a small memory with many simultaneous reads can map differently from a single-port RAM. FPGA LUTs, flip-flops, DSP blocks and BRAM are implementation resources with target-specific capabilities. Writing multiplication in RTL does not prove the mapper picked a DSP. Declaring an array does not prove the implementation uses BRAM. Inspect the actual synthesis report when that flow is executed.
 
-Control logic commonly includes comparisons, state selection and address generation. The counter width should follow its representable range, and the final-work comparison should use the intended pre-edge or post-edge convention. A counter that reaches 3 requires values 0 through 3; a controller that detects count==3 before incrementing may finish a clock later than one that detects the third accepted event. Draw the condition and test the event sequence rather than guessing from a familiar state name.
+Control logic often includes comparisons, state selection and address generation. The counter width should follow its representable range, and the final-work comparison should use the intended pre-edge or post-edge convention. A counter that reaches 3 requires values 0 through 3; a controller that detects count==3 before incrementing may finish a clock later than one that detects the third accepted event. Draw the condition and test the event sequence rather than guessing from a familiar state name.
 
-Nonblocking sequential assignments use old right-hand-side state within the same edge. If a clocked block assigns acc<=acc+product and memory[addr]<=acc, the stored memory value is the previous accumulator unless a separately computed next sum is used. That behavior is sometimes intentional, but it should not be mistaken for a new accumulated output. The later capture stage in the integrated top makes the distinction explicit by waiting until the array's sequential updates are available.
+Nonblocking sequential assignments use old right-hand-side state within the same edge. If a clocked block assigns acc<=acc+product and memory[addr]<=acc, the stored memory value is the previous accumulator unless a separately computed next sum is used. That behavior is sometimes intentional, but do not mistake it for a new accumulated output. The later capture stage in the integrated top makes the distinction explicit by waiting until the array's sequential updates are available.
 
 #### Use a short event ledger to expose failures
 
 Write each edge as a row containing current state, start, accepted work, acknowledgement, reset, current count and expected next state/count. The uninterrupted case is only the first ledger. Add start while RUN, acknowledgement before DONE, a work stall, reset during RUN and a second complete job. These cases reveal whether control events have a defined priority and whether stale state can leak into a later operation.
 
-Do not use a final counter alone as the checker. An erroneous increment during a stall followed by a missed increment can cancel numerically. Compare every transition in the ledger and retain the accepted-work sequence. Likewise, a final IDLE state does not prove DONE was observable for the required interval. Check the lifetime of status events, not just the final state.
+Do not use a final counter alone as the checker. A wrong increment during a stall followed by a missed increment can cancel numerically. Compare every transition in the ledger and keep the accepted-work sequence. Likewise, a final IDLE state does not prove DONE was observable for the required interval. Check the lifetime of status events, not just the final state.
 
 For the supplied exercise, a passing report documents a small deterministic state-machine model. It is not a formally proven RTL controller. The integrated accelerator controller arrives in a later chapter and is tested with actual matrix jobs in simulation. The foundation here is the reasoning pattern: state, edge, accepted event, priority and observable output.
 

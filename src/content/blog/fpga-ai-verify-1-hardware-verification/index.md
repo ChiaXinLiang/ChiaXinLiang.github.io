@@ -26,11 +26,11 @@ Start after [Your First SystemVerilog Compute Block: A Verified Multiply–Accum
 
 ![Deep dive: Build a scoreboard around transactions](./deep-dive-component-01.png)
 
-The scoreboard figure tracks accepted transactions rather than clock count. A driver offers work to the DUT, a monitor observes accepted input/output events, and a queue matches those outputs with an independent reference. Variable latency is handled by preserving transaction order under the interface's contract.
+The scoreboard figure tracks accepted transactions rather than clock count. A driver offers work to the DUT, a monitor observes accepted input/output events, and a queue matches those outputs with an independent reference. The scoreboard handles variable latency by preserving transaction order under the interface's contract.
 
-For a stream, acceptance is valid AND ready at the sampled edge. Record the payload at that edge. An asserted valid during backpressure is still the same offered item. Counting it every cycle would make the scoreboard expect duplicate work and conceal a real protocol defect.
+For a stream, acceptance is valid AND ready at the sampled edge. Record the payload at that edge. An asserted valid during backpressure is still the same offered item. Counting it every cycle would make the scoreboard expect duplicate work and hide a real protocol defect.
 
-The shared harness uses Python to generate and evaluate deterministic RTL tests. A cocotb testbench is another supported approach to Python-driven HDL verification, described in its official documentation. Whichever harness is chosen, state the edge/sample convention and avoid races between drive, register update and observation.
+The shared harness uses Python to generate and evaluate deterministic RTL tests. A cocotb testbench is another supported approach to Python-driven HDL verification, described in its official documentation. Whichever harness you choose, state the edge/sample convention and avoid races between drive, register update and observation.
 
 ### Test signed extremes and reset
 
@@ -38,7 +38,7 @@ The shared harness uses Python to generate and evaluate deterministic RTL tests.
 
 The directed-case figure lists values and lifecycle events that random traffic can miss. Test the signed extrema, zero, negative products, reset, clear and pipeline drain. A reset must invalidate outstanding output expectations according to the module contract.
 
-Our MAC tests give clear priority over enable, while pipeline clear also flushes its registered product-valid state. The elastic buffer resets output validity so stale payload bits cannot be treated as a transaction. Memory contents are not assumed to be cleared merely because control validity resets.
+Our MAC tests give clear priority over enable, while pipeline clear also flushes its registered product-valid state. The elastic buffer resets output validity so stale payload bits cannot be treated as a transaction. Do not assume memory contents clear just because control validity resets.
 
 Separate data correctness from protocol correctness. A numerical oracle can pass while the DUT duplicates a result, and a transaction-count check can pass while its payload is wrong. Both the sequence and each value need verification.
 
@@ -46,7 +46,7 @@ Separate data correctness from protocol correctness. A numerical oracle can pass
 
 ![Deep dive: Randomization and reproducible seeds](./deep-dive-component-03.png)
 
-The randomization figure retains a seed and varies stalls separately from data. This creates reproducible histories: if a failure occurs, the exact sequence can be regenerated. Randomized tests supplement directed fixtures rather than replacing them.
+The randomization figure keeps a seed and varies stalls separately from data. This creates reproducible histories: if a failure occurs, you can regenerate the exact sequence. Randomized tests supplement directed fixtures rather than replacing them.
 
 The release report uses seed 20260913. It records 500 elastic-stream cycles and 133 backpressure cycles, plus 40 array cases and 161 injected global stall cycles. Those numbers describe the executed test corpus, not a claim that all possible behaviors were proven.
 
@@ -56,11 +56,11 @@ Use a reference with different structure from the implementation. Direct matrix 
 
 ![Deep dive: Read a failing waveform](./deep-dive-component-04.png)
 
-The waveform figure illustrates a one-cycle alignment error. Drive inputs before the active edge, then observe after sequential updates settle. A product pipeline delays the contribution relative to the unpipelined MAC. The testbench must compare the correct stage's result.
+The waveform figure shows a one-cycle alignment error. Drive inputs before the active edge, then observe after sequential updates settle. A product pipeline delays the contribution relative to the unpipelined MAC. The testbench must compare the correct stage's result.
 
 When an output mismatch appears, locate the first wrong accepted item. Inspect input acceptance, valid propagation, operand register values and sum update. If every output is shifted by one cycle, investigate the harness's timing before changing arithmetic.
 
-Retain the failing seed, generated testbench and waveform when debugging. The normal harness uses temporary files, so a debugging extension should save them for failed cases. Passing a simulation is evidence for the exercised RTL contract; synthesis, physical timing and board behavior require their own checks.
+Keep the failing seed, generated testbench and waveform when debugging. The normal harness uses temporary files, so a debugging extension should save them for failed cases. Passing a simulation is evidence for the exercised RTL contract; synthesis, physical timing and board behavior require their own checks.
 
 ### Run this lesson
 
@@ -81,23 +81,23 @@ Track data and validity together. A register can contain old bits while its vali
 
 Use a FIFO scoreboard to check sequence as well as values. A test that counts transactions alone can miss swapped payloads, while a test of a final sum alone can hide duplicated and missing items that cancel numerically. Directed reset/stall fixtures supplement reproducible random traffic.
 
-After a local block passes, connect one additional boundary at a time and retain the same oracle. A passing simulation supports the exercised contract, not physical timing or every possible sequence. Keep the released test report with the exact source revision so a later wrapper or pipeline change creates an explicit new verification step.
+After a local block passes, connect one additional boundary at a time and keep the same oracle. A passing simulation supports the exercised contract, not physical timing or every possible sequence. Keep the released test report with the exact source revision so a later wrapper or pipeline change creates an explicit new verification step.
 
 ### A worked engineering decision
 
 #### Make the checker fail for the right reason
 
-A testbench is another program and can contain defects. Begin by deliberately corrupting 1 expected value in a temporary fixture, then confirm that the comparison fails at the corresponding transaction. Remove the corruption afterward. This experiment checks that the oracle output is actually consumed by the scoreboard, that mismatches reach the test result and that a passing report is not produced unconditionally. It does not prove the entire checker, but it exposes a common disconnected-check failure.
+A testbench is another program and can contain defects. Begin by deliberately corrupting 1 expected value in a temporary fixture, then confirm that the comparison fails at the corresponding transaction. Remove the corruption afterward. This experiment checks that the scoreboard actually consumes the oracle output, that mismatches reach the test result and that a passing report is not produced unconditionally. It does not prove the entire checker, but it exposes a common disconnected-check failure.
 
 The numerical oracle receives original accepted inputs independently of the DUT. For a MAC, it tracks its own accumulator and control priority. For a matrix array, it computes direct dot products without relying only on the same wavefront algorithm that drives hardware. Shared timing logic is useful for explaining arrivals, but it should not be the only mathematical reference. Otherwise an identical row/column mapping defect in driver and oracle can agree on a wrong answer.
 
-Observe transactions at their declared interface. A ready/valid input is accepted when valid and ready are both high at the sampled edge. A globally stepped PE advances on step; its useful multiply additionally requires both operand-valid masks. These are different events. A test that increments its expected queue on every clock will misclassify intentional stalls, while 1 that increments only on a convenient output pulse can conceal dropped input work.
+Observe transactions at their declared interface. A ready/valid input is accepted when valid and ready are both high at the sampled edge. A globally stepped PE advances on step; its useful multiply additionally requires both operand-valid masks. These are different events. A test that increments its expected queue on every clock will misclassify intentional stalls, while one that increments only on a convenient output pulse can hide dropped input work.
 
 #### Track order, lifetime and numerical state
 
 An expected FIFO holds the results of accepted work in sequence. An output monitor removes the matching expectation when an output transaction is consumed. If the block is allowed to reorder, the checker needs declared identifiers and a different matching policy; the small educational stream is ordered. Never choose a convenient matching rule after observing a failing output, because that changes the protocol being checked.
 
-For an accumulator, compare the running state as well as the final output. The sequence products [6,-20,-14] gives running sums [6,-14,-28]. Dropping the second product changes the intermediate and final state. A more complicated sequence could contain canceling terms, so checking only the total risks missing 2 defects. A forwarding check similarly compares each operand and mask, not merely the local sum derived from them.
+For an accumulator, compare the running state as well as the final output. The sequence products [6,-20,-14] gives running sums [6,-14,-28]. Dropping the second product changes the intermediate and final state. A more complicated sequence could contain canceling terms, so checking only the total risks missing 2 defects. A forwarding check similarly compares each operand and mask, not just the local sum derived from them.
 
 Reset cancels pending work according to the block contract. The scoreboard must clear or explicitly mark those canceled expectations; it must not report missing outputs for transactions the interface declares invalidated. At the same time, it should detect stale output validity after reset. A queue emptied by the testbench while the DUT continues returning old results is not a clean reset. Check post-reset validity before introducing a new accepted transaction.
 
@@ -105,9 +105,9 @@ Reset cancels pending work according to the block contract. The scoreboard must 
 
 Seeded random traffic supplements directed fixtures. It explores different signed values, control combinations and stall patterns, but cannot guarantee every corner case occurred. Log the seed, iteration count and traffic constraints. The released RTL script records deterministic seed 20260913 and the actual exercised block and array counts. A different simulator version or source revision should appear beside a newly generated report.
 
-Use constraints that produce legal behavior at the boundary under test. A ready/valid producer must retain a blocked valid payload until acceptance; randomizing it freely while ready is low tests an illegal source rather than the buffer's promised behavior. Conversely, a negative test can deliberately violate a precondition if its purpose and expected response are stated. Keep legal traffic and rejection tests distinguishable in the report.
+Use constraints that produce legal behavior at the boundary under test. A ready/valid producer must keep a blocked valid payload until acceptance; randomizing it freely while ready is low tests an illegal source rather than the buffer's promised behavior. Conversely, a negative test can deliberately violate a precondition if its purpose and expected response are stated. Keep legal traffic and rejection tests distinguishable in the report.
 
-When a random failure occurs, retain the exact short event sequence around its first divergence. Replaying the full seed is valuable, but a reduced directed fixture is easier to understand and remains stable if the random generator changes. Reduce the sequence without removing the condition that causes failure. That creates a permanent regression for the actual defect rather than merely increasing the number of random iterations.
+When a random failure occurs, keep the exact short event sequence around its first divergence. Replaying the full seed is valuable, but a reduced directed fixture is easier to understand and remains stable if the random generator changes. Reduce the sequence without removing the condition that causes failure. That creates a permanent regression for the actual defect rather than just increasing the number of random iterations.
 
 #### Read waveforms from the first divergence
 

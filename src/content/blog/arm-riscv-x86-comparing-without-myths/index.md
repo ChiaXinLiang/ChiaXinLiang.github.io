@@ -79,7 +79,7 @@ Each example expresses the same useful computation. The instruction organization
 
 For a nonzero 3-element input, the x86 example executes 3 setup instructions, 15 loop instructions, and 1 return: 19 dynamic instructions. Its 9 static instruction lines match the static count of our AArch64 and RV64I examples.
 
-A64 uses fixed 32-bit instruction encodings, so its 9 instructions occupy 36 bytes of instruction payload. The uncompressed base RISC-V example also uses 36 bytes. x86 instructions have variable lengths; determine its size from actual assembled bytes, including selected encodings, rather than from line count.
+A64 uses fixed 32-bit instruction encodings, so its 9 instructions occupy 36 bytes of instruction payload. The uncompressed base RISC-V example also uses 36 bytes. x86 instructions have variable lengths; find its size from actual assembled bytes, including selected encodings, rather than from line count.
 
 RISC-V compressed forms can reduce some encodings to 16 bits when the target and operand patterns permit. AArch64 can use an addressing mode that combines pointer update with a load. x86 can encode arithmetic with a memory operand in other computations. Different translations can therefore change counts and sizes without changing the useful task.
 
@@ -97,7 +97,7 @@ where $$f$$ is clock frequency and CPI is average cycles per retired instruction
 
 For an illustrative million-instruction workload at average CPI 1 and frequency 2 GHz, time is 0.5 ms. If another translation uses 800,000 instructions but averages CPI 1.5 at the same frequency, its time is 0.6 ms. Fewer instructions do not guarantee lower time.
 
-Modern superscalar cores can retire multiple instructions per cycle, so average CPI can be below 1. Conversely, memory stalls and dependency chains can raise it substantially. CPI is workload- and implementation-dependent, not a constant belonging to an ISA family.
+Modern superscalar cores can retire multiple instructions per cycle, so average CPI can be below 1. Memory stalls and dependency chains can push it much higher. CPI is workload- and implementation-dependent, not a constant belonging to an ISA family.
 
 Frequency also changes under power and thermal policies. A comparison using nominal clock labels can misinterpret the actual run. Measure elapsed time and, when useful, effective frequency and hardware counters rather than multiplying advertised specifications blindly.
 
@@ -117,7 +117,7 @@ The correct comparison can include both portable baseline and tuned performance,
 
 A sum over a large array reads at least 4 input bytes per element. If the working set exceeds caches, memory bandwidth can become the main constraint. Increasing arithmetic throughput then has little effect once data cannot arrive faster.
 
-An ideal bandwidth-only element rate is approximately $$\beta/4$$ for useful input bytes, ignoring extra traffic. Real memory behavior includes cache lines, prefetching, page mappings, and other system activity. The corresponding arithmetic work is small relative to data movement.
+An ideal bandwidth-only element rate is about $$\beta/4$$ for useful input bytes, ignoring extra traffic. Real memory behavior includes cache lines, prefetching, page mappings, and other system activity. The corresponding arithmetic work is small relative to data movement.
 
 A cache-resident small array can produce a different ranking because it tests execution and cache behavior more directly. Specify dataset size and whether it is warmed. Repeatedly summing the same small array is not a proxy for streaming through a large fresh dataset.
 
@@ -133,10 +133,10 @@ A regular instruction set can simplify some front-end tasks. Dense encoding can 
 
 Modern cores in multiple families use sophisticated prediction, speculation, and out-of-order scheduling. A simple ISA does not require a simple pipeline, and a complex ISA does not mean every instruction executes through slow microcode. Inspect the particular instruction and processor.
 
-For a teaching comparison, describe the visible difference you can point to: fixed versus variable encoding, branch operands versus flags, or available addressing forms. Then explain the potential implication and measure it instead of converting it into a universal ranking.
+For a teaching comparison, describe the visible difference you can point to: fixed versus variable encoding, branch operands versus flags, or available addressing forms. Then explain what it might imply and measure it, instead of turning it into a universal ranking.
 
 
-Equal functionality also permits a finite-work energy comparison. Let $$P$$ be average measured power during an execution interval and $$T$$ its duration; for approximately steady power, energy is
+Equal functionality also allows a finite-work energy comparison. Let $$P$$ be average measured power during an execution interval and $$T$$ its duration; for roughly steady power, energy is
 
 $$
 E\approx PT,\qquad e_{\mathrm{task}}=E/n_{\mathrm{completed}}.
@@ -148,7 +148,7 @@ This improves the ISA-label baseline by evaluating a complete implementation run
 
 ### Energy efficiency needs a system boundary
 
-Energy per useful task is power integrated over execution time. A lower-power processor can consume more energy if it takes sufficiently longer; a higher-power processor can finish sooner. Idle power and the chosen measurement boundary matter as well.
+Energy per useful task is power integrated over execution time. A lower-power processor can use more energy if it takes long enough; a higher-power processor can finish sooner. Idle power and the chosen measurement boundary matter too.
 
 Process technology, cache sizes, voltage/frequency settings, memory, and packaging all influence energy. Assigning an observed laptop-versus-server difference entirely to the ISA ignores those variables. Compare equivalent performance requirements and state which components are included.
 
@@ -158,7 +158,7 @@ For an inference service, useful output under latency requirements is often a be
 
 RISC-V's openly specified architecture supports implementation freedom. Arm and x86 have different ownership and licensing structures. Those distinctions affect design strategy and business constraints, but do not directly supply a benchmark result.
 
-Software ecosystem maturity matters independently: compilers, debugging tools, libraries, operating systems, and optimized kernels determine how easily useful applications run. A capable instruction can remain unused if software support is absent or immature for the target.
+Software ecosystem maturity matters on its own: compilers, debugging tools, libraries, operating systems, and optimized kernels decide how easily useful applications run. A capable instruction can sit unused if software support is missing or immature for the target.
 
 Treat performance, compatibility, implementation rights, and ecosystem readiness as separate questions. A design can be attractive for customization while requiring extra software work. Another can offer readily available binaries while providing less freedom for a new processor implementation.
 

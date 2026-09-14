@@ -93,9 +93,9 @@ f'(\tau)=-\frac{\delta}{\tau^2}+\frac1{2M},\qquad
 \tau^*=\sqrt{2\delta M}.
 $$
 
-The first term buys durability; the second prices recomputation. With M equal to 178000 seconds and delta equal to 196 seconds, the optimum is approximately 8353 seconds and the estimated loss is 4.69%. Reducing delta to 16.3 seconds moves the optimum to 2409 seconds and loss to 1.35%. These are model outputs, not measured reliability guarantees. Correlated failures, restart duration, incomplete checkpoints, and asynchronous writes require additional terms.
+The first term buys durability; the second prices recomputation. With M equal to 178000 seconds and delta equal to 196 seconds, the optimum is approximately 8353 seconds and the estimated loss is 4.69%. Reducing delta to 16.3 seconds moves the optimum to 2409 seconds and loss to 1.35%. These are model outputs, not measured reliability guarantees. Correlated failures, restart duration, incomplete checkpoints, and asynchronous writes need extra terms.
 
-Asynchronous checkpointing changes the blocking term but still must drain bytes to durable storage. For checkpoint size S and delivered storage bandwidth beta, a necessary steady-state condition is S/beta no greater than tau. Otherwise unfinished checkpoints accumulate. Measure both training stalls and time to durable completion; faster acknowledgments alone do not establish a safer recovery point.
+Asynchronous checkpointing changes the blocking term but still must drain bytes to durable storage. For checkpoint size S and delivered storage bandwidth beta, a necessary steady-state condition is S/beta no greater than tau. Otherwise unfinished checkpoints accumulate. Measure both training stalls and time to durable completion; a faster acknowledgment alone does not give you a safer recovery point.
 
 ### Going deeper: shortening δ at the systems level
 

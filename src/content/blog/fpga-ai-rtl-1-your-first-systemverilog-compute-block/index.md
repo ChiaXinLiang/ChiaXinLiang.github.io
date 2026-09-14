@@ -103,15 +103,15 @@ The acceptance result is a defined behavior and an executed software/RTL check, 
 
 #### Reconstruct the MAC from its state equation
 
-The multiply-accumulate block has 1 persistent numerical state: its accumulator. On an enabled edge, it adds the signed product of the current input pair to the previous accumulator. Reset has the highest priority, clear follows, and enable follows both. With no reset, clear or enable, the accumulator retains its previous value. The multiplier itself is combinational in this baseline, so the complete product-plus-add path lies between input/state sources and the accumulator register.
+The multiply-accumulate block has one persistent numerical state: its accumulator. On an enabled edge, it adds the signed product of the current input pair to the previous accumulator. Reset has the highest priority, clear follows, and enable follows both. With no reset, clear or enable, the accumulator retains its previous value. The multiplier itself is combinational in this baseline, so the complete product-plus-add path lies between input/state sources and the accumulator register.
 
-Begin with accumulator 0 and input pair (2,3). An enabled edge produces 6. The next enabled pair (-4,5) produces a product of -20 and a new accumulator of -14. A clock with enable 0 must retain -14 regardless of offered input bits. A final enabled pair (7,-2) produces -28. This short sequence checks signed products, feedback, accumulation and hold behavior in a way that 1 isolated multiplication cannot.
+Begin with accumulator 0 and input pair (2,3). An enabled edge produces 6. The next enabled pair (-4,5) produces a product of -20 and a new accumulator of -14. A clock with enable 0 must retain -14 regardless of offered input bits. A final enabled pair (7,-2) produces -28. This short sequence checks signed products, feedback, accumulation and hold behavior in a way that one isolated multiplication cannot.
 
 Clear with enable simultaneously high must produce 0, not the offered product. Reset with clear and enable also high must produce 0. Those cases prove the priority encoded by the clocked if/else chain. Clear here does not mean “clear and begin a new multiplication on the same edge.” If an integration wants that behavior, it needs a different contract and independent fixtures. Avoid altering priority during a performance refactor without recognizing that it is a functional change.
 
 #### Keep product and accumulator widths distinct
 
-For W=8, the product is signed 16-bit, while the accumulator is signed 32-bit. The source explicitly sign-extends the product into the accumulator domain. Calling the accumulator “2W” would describe a different circuit and would fail longer reductions. The parameter relationship therefore matters as much as the arithmetic expression: operands, product and accumulated result do not share 1 universal width.
+For W=8, the product is signed 16-bit, while the accumulator is signed 32-bit. The source explicitly sign-extends the product into the accumulator domain. Calling the accumulator “2W” would describe a different circuit and would fail longer reductions. The parameter relationship therefore matters as much as the arithmetic expression: operands, product and accumulated result do not share one universal width.
 
 Parameterization is useful only within a supported range. If a reader changes W or ACC_W, they must ensure the extension remains valid and the required reduction fits. A generated part-select with a negative replication count is not a legal way to truncate a larger product. The educational default is intentionally simple; production-quality parameter guards and additional numerical configurations are follow-up work rather than assumed verified behavior.
 
@@ -131,7 +131,7 @@ An FPGA mapper may place multiplication and accumulation in a DSP block, distrib
 
 Likewise, the combinational path has no measured delay in this release. A later implementation run must constrain the clock, interface timing and target part before reporting timing closure. Pipelining can divide the path, but it introduces state and validity that must be verified. The next lesson makes that change while preserving the numerical sequence; it does not rename a simulator cycle count as an achieved FPGA frequency.
 
-A useful baseline is small enough that every state change can be explained from the source and fixture. Preserve that baseline as a reference even after adding pipeline stages or an array. When a larger accelerator fails, 1 tested MAC provides a trustworthy local component, while the integration still needs its own operand pairing, forwarding and completion checks. Verified building blocks make the project easier to reason about without implying that their composition is automatically correct.
+A useful baseline is small enough that every state change can be explained from the source and fixture. Preserve that baseline as a reference even after adding pipeline stages or an array. When a larger accelerator fails, one tested MAC provides a trustworthy local component, while the integration still needs its own operand pairing, forwarding and completion checks. Verified building blocks make the project easier to reason about without implying that their composition is automatically correct.
 
 ## Conclusion
 

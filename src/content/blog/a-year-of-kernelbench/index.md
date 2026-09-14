@@ -59,11 +59,11 @@ $$
 P_i(n)=1-(1-p_i)^n.
 $$
 
-At probability 0.04 and 1 hundred attempts, this is approximately 0.9831. The result describes that task under those assumptions. It is not the dataset success rate obtained by substituting the average task probability. For many tasks, average success is the average of their individual expressions, and hard tasks can remain unsolved while easy tasks receive many redundant successes.
+At probability 0.04 and 1 hundred attempts, this is about 0.9831. The result describes that task under those assumptions. It is not the dataset success rate obtained by substituting the average task probability. For many tasks, average success is the average of their individual expressions, and hard tasks can remain unsolved while easy tasks receive many redundant successes.
 
 Attempts can also share code patterns, prompts, and failure modes, making independence doubtful. Observing lower coverage than the homogeneous calculation therefore suggests model mismatch; it does not uniquely prove a bimodal difficulty distribution.
 
-The method improvement is to distinguish coverage from repeated sampling. Report task-level coverage, correctness, speed threshold, attempt budget, and held-out shapes. Reinforcement learning aims to change the proposal distribution, whereas more attempts spend additional search compute on the current 1. Both can improve results, but verifier leakage and shape-specific shortcuts can create apparent gains. Compare with the original framework implementation under the same precision and validation policy before counting a candidate as an optimization.
+The method improvement is to distinguish coverage from repeated sampling. Report task-level coverage, correctness, speed threshold, attempt budget, and held-out shapes. Reinforcement learning aims to change the proposal distribution, whereas more attempts spend more search compute on the current 1. Both can improve results, but verifier leakage and shape-specific shortcuts can create apparent gains. Compare with the original framework implementation under the same precision and validation policy before counting a candidate as an optimization.
 
 ### Going deeper: the reward hacker in the loop
 

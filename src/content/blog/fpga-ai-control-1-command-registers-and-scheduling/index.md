@@ -40,7 +40,7 @@ The snapshot figure validates and copies fields when start is accepted. Active e
 
 The functional model checks busy and rejects a second submission when already busy. Its synchronous execution makes busy duration short in software; an asynchronous hardware implementation needs explicit busy-write behavior and a realistic concurrency test.
 
-Define which configuration writes are accepted during execution and whether they configure the next command. Avoid relying on the host never issuing an inconvenient transaction.
+Define which configuration writes are accepted during execution and whether they configure the next command. Do not rely on the host never issuing an inconvenient transaction.
 
 ### Schedule load, compute, and store
 
@@ -164,7 +164,7 @@ Completion means the declared output is usable under the selected interface. An 
 
 The integrated top accepts host operand writes while idle into fixed padded A/B storage. A legal START snapshots M, N and K. It clears local array state, runs the required logical steps under step_enable, captures the complete packed result, and reports DONE. Its source uses a small internal sequence rather than an external DMA command queue. The simple host-load ports are not MMIO or AXI, and the diagrams distinguish a proposed broader register interface from this implemented core.
 
-For M=N=4 and K=8, the array needs 14 logical updates. Holding step_enable during RUN retains the wavefront and the controller's logical count. Clear and capture use separate control edges. Capturing in the same scheduling region as the last accumulation without accounting for nonblocking updates could retain the previous sums; the explicit capture stage avoids that ambiguity. DONE describes those captured local outputs.
+For M=N=4 and K=8, the array needs 14 logical updates. Holding step_enable during RUN retains the wavefront and the controller's logical count. Clear and capture use separate control edges. Capturing in the same scheduling region as the last accumulation, without accounting for nonblocking updates, could retain the previous sums. The explicit capture stage avoids that ambiguity. DONE describes those captured local outputs.
 
 Dimension validation permits M,N from 1 through 4 and K from 1 through 8. An invalid start sets the declared error behavior before work. The simulation includes an invalid dimension case and checks that the top is not reported as busy or done for that rejected operation. Larger matrices use the software tiler or a future scheduler; they are not legal direct commands to this fixed-capacity interface.
 
@@ -188,7 +188,7 @@ A conceptual external sequence might CHECK, LOAD, COMPUTE, STORE and DONE. Those
 
 In an external-memory design, issuing an output request is not the same as receiving a successful completion. DONE must follow the declared successful output boundary. The host then performs required platform-specific acquisition/cache handling before consuming the output. Drawing cache handling after the read is too late to establish visibility. The exact operations depend on the platform and should come from its documented memory model.
 
-A status poll needs a timeout and a distinguishable failure path. Timeout indicates that the expected completion was not observed; it does not establish that hardware stopped or that memory is safe to reuse. A cancellation/reset operation must define what happens to outstanding requests and owned buffers. Production control complexity comes from those lifetimes as much as from the number of normal-operation states.
+A status poll needs a timeout and a distinguishable failure path. A timeout means the expected completion was not observed. It does not prove that hardware stopped or that memory is safe to reuse. A cancellation/reset operation must define what happens to outstanding requests and owned buffers. Production control complexity comes from those lifetimes as much as from the number of normal-operation states.
 
 The current regression verifies 20 integrated signed matrix jobs, global holds, snapshot protection, busy interference and invalid dimensions in simulation. It does not execute a board driver, MMIO bus or external-memory DMA. Retain that report beside the source so future wrappers can add evidence without inflating the current scope.
 

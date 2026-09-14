@@ -58,7 +58,7 @@ Handle timeouts and errors with a documented buffer-lifetime policy. Retrying af
 
 The simulated-transport figure lets the host harness run before a board is chosen. The exercise checks the matrix result [[19,22],[43,50]], its 16 encoded bytes and done status. Invalid bounds/alignment tests check rejection before writes.
 
-A board adapter implements the same logical operations but must be tested for transfers, coherency and reset. Passing the model is a prerequisite, not proof the adapter works.
+A board adapter implements the same logical operations, but you must still test its transfers, coherency and reset. Passing the model is a prerequisite, not proof the adapter works.
 
 Retain a simple loopback test and compare raw bytes before running inference. This isolates transport from compute and makes the later hardware result reviewable.
 
@@ -146,13 +146,13 @@ The host writes all required A/B bytes, completes the transport's required visib
 
 A proposed MMIO or packet interface needs field widths, byte units, alignment, supported dimensions and submission behavior. A functional Python Command object is not a physical packet parser, and the simple RTL top has dimension/start ports rather than address registers. A driver for a new transport must serialize exactly the fields its wrapper implements. Keep a version or schema identifier if the protocol will evolve.
 
-Busy handling is also part of submission. The current top ignores additional starts and operand writes while busy. A wrapper may return backpressure or a defined busy response, but it must not report acceptance for work the top discards. The host should wait for the declared accepted/completed state and avoid reusing live buffers. A driver that writes faster than the core can accept is not inherently a higher-throughput system.
+Busy handling is also part of submission. The current top ignores additional starts and operand writes while busy. A wrapper may return backpressure or a defined busy response, but it must not report acceptance for work the top discards. The host should wait for the declared accepted/completed state and avoid reusing live buffers. A driver that writes faster than the core can accept is not automatically a higher-throughput system.
 
 #### Consume results only after the declared completion
 
 For the simple top, DONE follows capture of local INT32 outputs. For an external-memory extension, successful output writes and platform visibility may add another completion condition. Host polling must wait for that event, perform required platform-specific acquisition/cache handling, then decode the output. Cache handling after an already completed read cannot retroactively establish correct visibility.
 
-A timeout is a distinct outcome. It says the driver did not observe completion within its interval; it does not prove the device stopped or its memory is safe to overwrite. Define cancellation/reset and outstanding-transfer recovery for the selected wrapper. Keep error status distinguishable from numerical mismatch so a transport failure does not look like a wrong model prediction.
+A timeout is a distinct outcome. It says the driver did not observe completion within its interval. It does not prove the device stopped or its memory is safe to overwrite. Define cancellation/reset and outstanding-transfer recovery for the selected wrapper. Keep error status distinguishable from numerical mismatch so a transport failure does not look like a wrong model prediction.
 
 The bounded functional transport completes deterministically and validates commands before its writes. It does not exercise a real board's queues, cache hierarchy, interrupts or electrical interface. A future driver can reuse the numerical fixtures, but must add those transport-specific checks. Label its evidence with the actual board and interface rather than treating a software API as hardware execution.
 

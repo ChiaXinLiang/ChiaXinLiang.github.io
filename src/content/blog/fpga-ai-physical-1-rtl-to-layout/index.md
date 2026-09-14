@@ -70,7 +70,7 @@ The artifact figure packages netlists, constraints, layout and reports with tool
 
 From a supported checkout, run make -C flow DESIGN_CONFIG=/absolute/path/to/accelerator-lab/asic/config.mk. Inspect the actual output paths produced by that revision rather than assuming one universal report location.
 
-A successful educational run teaches implementation tradeoffs. Foundry fabrication additionally requires permitted PDK/models, full-chip integration, test strategy and appropriate signoff. The distinction is a learning milestone, not a reason to invent a completed chip.
+A successful educational run teaches implementation tradeoffs. Foundry fabrication also requires permitted PDK/models, full-chip integration, test strategy and appropriate signoff. The distinction is a learning milestone, not a reason to invent a completed chip.
 
 ### Run this lesson
 

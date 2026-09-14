@@ -103,7 +103,7 @@ The useful innovation in batching is reuse of a weight read across more outputs.
 
 **"Decode is slow because the GPU doesn't have enough compute."** It has vastly too much. The worked example shows compute finishing 295× ahead of memory. This is also testable with hardware: an H200 has essentially the same TFLOPS as an H100 but 4.8 TB/s of HBM3e, and single-stream decode speeds up by roughly the bandwidth ratio (~1.4×), not at all by the unchanged compute. Buying TFLOPS for a batch-1 decode workload is buying the wrong number on the spec sheet.
 
-**"Warp switching makes memory latency free, so memory isn't the problem."** Warp switching hides *latency*; it cannot manufacture *bandwidth*. With enough warps, no cycle is wasted waiting on any individual load, yet the kernel still can't move more than 3.35 TB/s of data. Latency hiding determines whether you reach the bandwidth roof; arithmetic intensity determines whether the bandwidth roof is the one you hit. These are 2 different walls, and decode-phase inference hits the second 1 with the first fully solved.
+**"Warp switching makes memory latency free, so memory isn't the problem."** Warp switching hides *latency*; it cannot manufacture *bandwidth*. With enough warps, no cycle is wasted waiting on any individual load, yet the kernel still can't move more than 3.35 TB/s of data. Latency hiding determines whether you reach the bandwidth roof; arithmetic intensity determines whether the bandwidth roof is the one you hit. These are 2 different walls, and decode-phase inference hits the second one with the first fully solved.
 
 ### The bigger picture
 

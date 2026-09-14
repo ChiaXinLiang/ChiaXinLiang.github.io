@@ -32,7 +32,7 @@ The distinction matters for ownership and communication. A data-parallel gradien
 
 Sharding optimizer state is another ownership decision. It need not coincide with either the tensor partition or the pipeline stage boundary. Describe the complete layout rather than assuming the term “distributed” identifies one algorithm. The same device count can represent very different memory budgets and traffic patterns.
 
-The starting point should be the logical computation: matrix shapes, layer dependencies, batch and sequence dimensions, and gradient flow. Then assign those objects to ranks. Starting with a desired GPU count and only later discovering which collectives it requires can produce an expensive or infeasible layout.
+Start from the logical computation: matrix shapes, layer dependencies, batch and sequence dimensions, and gradient flow. Then assign those objects to ranks. Starting with a desired GPU count and only later discovering which collectives it requires can produce an expensive or infeasible layout.
 
 ### 2. Work a column-partitioned linear layer
 
@@ -48,11 +48,11 @@ Y_i=XW_i,
 Y=[Y_1\;Y_2\;\cdots\;Y_t].
 $$
 
-Each rank needs X and its own parameter slice. If the next operation can consume the partitioned output, a full all-gather of Y may be unnecessary. A compatible second linear transformation can instead use a row partition and combine partial results at the appropriate point.
+Each rank needs X and its own parameter slice. If the next operation can consume the partitioned output, a full all-gather of Y may not be needed. A compatible second linear transformation can instead use a row partition and combine partial results at the appropriate point.
 
-For a row-partitioned matrix product, splitting the reduction dimension yields partial outputs whose sum forms the final result. That sum introduces a synchronization dependency, often expressed with all-reduce or a reduce-scatter followed by later distribution. The exact collective depends on the activation layout maintained between operations.
+For a row-partitioned matrix product, splitting the reduction dimension gives partial outputs whose sum forms the final result. That sum adds a synchronization dependency, often expressed with all-reduce or a reduce-scatter followed by later distribution. The exact collective depends on the activation layout maintained between operations.
 
-For an H by F weight matrix, ideal parameter storage falls to approximately HF divided by t elements per rank. Arithmetic also partitions ideally, but startup and communication do not necessarily fall with t. Increasing tensor degree eventually makes small local operations and frequent synchronization dominate. The best degree is a workload and topology decision.
+For an H by F weight matrix, ideal parameter storage falls to about HF divided by t elements per rank. Arithmetic also partitions ideally, but startup and communication do not necessarily fall with t. Increasing tensor degree eventually makes small local operations and frequent synchronization dominate. The best degree is a workload and topology decision.
 
 ### 3. Account for tensor-parallel communication frequency
 
@@ -66,9 +66,9 @@ $$
 T_{\mathrm{communication}}\approx\sum_{k=1}^{K}\left(\alpha_k+\frac{S_k}{\beta_k}\right),
 $$
 
-where alpha represents startup, S payload under the chosen convention, and beta effective throughput. This is a schematic critical-path contribution before overlap, not an exact collective algorithm formula.
+where alpha is startup, S is payload under the chosen convention, and beta is effective throughput. This is a schematic critical-path contribution before overlap, not an exact collective algorithm formula.
 
-Small tensor-parallel messages can be latency-sensitive because the schedule synchronizes repeatedly. A network with excellent bulk bandwidth may still produce poor step time if each operation pays significant startup or crosses a slow topology boundary. Measure the actual sizes and rank groups rather than substituting one large all-reduce benchmark.
+Small tensor-parallel messages can be latency-sensitive because the schedule synchronizes repeatedly. A network with excellent bulk bandwidth may still produce poor step time if each operation pays a large startup cost or crosses a slow topology boundary. Measure the actual sizes and rank groups rather than substituting one large all-reduce benchmark.
 
 Place frequently communicating tensor groups within the fastest feasible local interconnect domain when the model and resource constraints allow it. That is a reasoned starting point, not a guarantee that every optimal layout follows one rule. Memory capacity, expert placement, and total group dimensions can force tradeoffs that need complete measurements.
 
@@ -76,9 +76,9 @@ Place frequently communicating tensor groups within the fastest feasible local i
 
 ![Deep dive: 4. Pipeline stages process a stream of microbatches](./deep-dive-component-01.png)
 
-A pipeline assigns consecutive or otherwise scheduled layer ranges to p stages. Forward activations move toward later stages; gradients flow backward. One microbatch by itself leaves most stages waiting while it progresses. Several microbatches allow different stages to work concurrently.
+A pipeline assigns consecutive or otherwise scheduled layer ranges to p stages. Forward activations move toward later stages; gradients flow backward. One microbatch by itself leaves most stages waiting while it progresses. Several microbatches let different stages work concurrently.
 
-A simple flush schedule first fills the forward pipeline, then performs backward and eventually drains it. A 1-forward-1-backward schedule can alternate operations after a warmup, reducing the number of retained activations compared with storing an entire forward flush. Interleaved schedules give ranks multiple logical chunks and can reduce bubbles at additional scheduling and communication cost.
+A simple flush schedule first fills the forward pipeline, then runs backward and eventually drains it. A 1-forward-1-backward schedule can alternate operations after a warmup, which reduces the number of retained activations compared with storing an entire forward flush. Interleaved schedules give ranks multiple logical chunks and can reduce bubbles at additional scheduling and communication cost.
 
 The schedule determines when an optimizer update is legal. Gradients for the intended accumulation interval must be complete and synchronized as required. Some pipeline algorithms change weight-version semantics or maintain multiple versions; those are learning-algorithm choices as well as systems choices.
 
@@ -98,13 +98,13 @@ The model assumes comparable stage times and a specific fill-and-drain interpret
 
 With p equal to 8 and m equal to 32, the estimated bubble fraction is 7 divided by 39, about 17.9%. Increasing m to 128 gives 7 divided by 135, about 5.2%. That change also increases the accumulation interval unless other batch dimensions change.
 
-Microbatch count cannot be increased without considering memory and the intended training batch. A flush schedule may retain more activations as more microbatches remain in flight. Smaller microbatches can lower local compute efficiency. Gradient accumulation affects optimizer-update frequency and loss scaling. Report these changes when using a larger m to improve pipeline utilization.
+You cannot raise the microbatch count without considering memory and the intended training batch. A flush schedule may keep more activations as more microbatches remain in flight. Smaller microbatches can lower local compute efficiency. Gradient accumulation affects optimizer-update frequency and loss scaling. Report these changes when using a larger m to improve pipeline utilization.
 
 ### 6. Stage imbalance can dominate the bubble
 
 Dividing layers equally does not necessarily divide execution time equally. Embeddings, output projections, attention lengths, expert routing, checkpoint recomputation, and communication can make some layer ranges more expensive than others. The slowest stage limits steady-state throughput.
 
-If stage durations are c_i, an idealized steady-state microbatch interval is bounded below by the largest c_i. With stages taking 4, 4, 7, and 4 milliseconds, the interval cannot be 4 milliseconds simply because most stages achieve it. The 7-millisecond stage creates waiting upstream and downstream.
+If stage durations are c_i, an idealized steady-state microbatch interval is bounded below by the largest c_i. With stages taking 4, 4, 7, and 4 milliseconds, the interval cannot be 4 milliseconds just because most stages achieve it. The 7-millisecond stage creates waiting upstream and downstream.
 
 Balance stages using measured representative workloads, including backward and recomputation. Parameter count is useful for storage placement but is not a complete proxy for stage execution cost. Variable sequence lengths can also change the balance, so evaluate the admitted workload distribution rather than one unusually short batch.
 
@@ -120,23 +120,23 @@ $$
 
 For B equal to 2, L equal to 4096, H equal to 4096, and b equal to 2, the payload is 64 MiB. A corresponding backward gradient can create another similar-sized transfer, depending on partitioning and representation. Multiply by the number of microbatches and relevant boundaries to understand aggregate traffic.
 
-This calculation does not assume every implementation transfers the complete replicated activation. Sequence or tensor partitioning can change the boundary shape. Compression, fused communication, or layout conversions can alter bytes and additional work. Inspect the actual tensors transmitted by the schedule.
+This calculation does not assume every implementation transfers the complete replicated activation. Sequence or tensor partitioning can change the boundary shape. Compression, fused communication, or layout conversions can change bytes and additional work. Inspect the actual tensors transmitted by the schedule.
 
-Boundary bandwidth matters when the transfer cannot finish inside available overlap. Startup matters when many small microbatches generate many transfers. Shared links can also carry tensor, data, or expert-parallel traffic at the same time. An isolated point-to-point benchmark is a useful component check, but it does not establish complete pipeline performance.
+Boundary bandwidth matters when the transfer cannot finish inside available overlap. Startup matters when many small microbatches generate many transfers. Shared links can also carry tensor, data, or expert-parallel traffic at the same time. An isolated point-to-point benchmark is a useful component check, but it does not prove complete pipeline performance.
 
 ### 8. Build and place the process mesh deliberately
 
-A simple combined layout has data, tensor, and pipeline degrees d, t, and p, with total rank count d times t times p. Additional expert or context dimensions require specifying whether they replace, factor, or overlap parts of those groups. Multiplying every named parallelism degree blindly can double-count ranks.
+A simple combined layout has data, tensor, and pipeline degrees d, t, and p, with total rank count d times t times p. For additional expert or context dimensions, specify whether they replace, factor, or overlap parts of those groups. Multiplying every named parallelism degree blindly can double-count ranks.
 
 Define each process group and identify its dominant messages. Tensor groups often communicate frequently within blocks. Pipeline groups exchange boundary states. Data groups synchronize parameter gradients or state shards. Map these groups onto local and scale-out links with attention to bandwidth, startup, and contention.
 
-Keep the layout description with the experiment configuration. A rank-number permutation can change physical routes without changing the logical model code. Conversely, moving from one node type to another can change the optimal factorization. Topology-aware placement is part of the method, not an incidental launch detail.
+Keep the layout description with the experiment configuration. A rank-number permutation can change physical routes without changing the logical model code. Conversely, moving from one node type to another can change the best factorization. Topology-aware placement is part of the method, not an incidental launch detail.
 
-Before a long run, test every relevant collective and point-to-point route with representative payloads. Verify correctness and timeout behavior across the actual ranks. A process mesh that launches successfully can still contain an unintended slow path that only appears during the full schedule.
+Before a long run, test every relevant collective and point-to-point route with representative payloads. Check correctness and timeout behavior across the actual ranks. A process mesh that launches successfully can still contain an unintended slow path that only appears during the full schedule.
 
 ### 9. Compare complete feasible schedules
 
-Begin with a small correctness reference whose full model fits. Validate the partitioned update under the same loss and accumulation convention. Check activation and gradient shapes at boundaries, including the longest supported sequence and any padding masks.
+Start with a small correctness reference whose full model fits. Validate the partitioned update under the same loss and accumulation convention. Check activation and gradient shapes at boundaries, including the longest supported sequence and any padding masks.
 
 For the target workload, report per-rank peak memory, useful tokens per optimizer step, complete step time, and observed stage or tensor-group imbalance. Compare feasible layouts rather than a replicated baseline that would not fit. Include warmup, compilation, and communication initialization separately from steady-state timing where they matter.
 

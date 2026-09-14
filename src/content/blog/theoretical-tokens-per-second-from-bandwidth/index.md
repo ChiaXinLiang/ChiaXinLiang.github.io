@@ -40,7 +40,7 @@ $$
 
 For a batch of 1, aggregate rate and per-request streaming rate coincide. For a batch of 32, the aggregate rate counts 32 emitted tokens per step, while an individual request receives 1. Both metrics are legitimate, but they answer different questions.
 
-This distinction is developed in [Tokens per Second: What It Means and What It Hides](../tokens-per-second-what-it-hides/). Here we focus on the physical model that supplies the denominator. A hardware bandwidth specification becomes meaningful only after describing which bytes cross that interface.
+This distinction is developed in [Tokens per Second: What It Means and What It Hides](../tokens-per-second-what-it-hides/). Here we focus on the physical model that supplies the denominator. A hardware bandwidth specification means something only after you say which bytes cross that interface.
 
 ### Why weights dominate short-context decode
 
@@ -79,7 +79,7 @@ $$
 
 or 90.08 output tokens per second for a batch of 1. A nominal 4-bit payload without metadata would suggest 95.71 tokens per second. The 5-token difference is entirely accounting: it appears before discussing kernel efficiency.
 
-Quantization does not guarantee that the engine reaches either ceiling. Some weight formats unpack or convert values as part of a fused GEMM. Their actual execution may have a different compute ceiling from dense BF16 Tensor Cores. Small shapes can underfill the device, and launch overhead is more noticeable as weight traffic shrinks. A smaller representation removes 1 constraint while potentially exposing another.
+Quantization does not guarantee that the engine reaches either ceiling. Some weight formats unpack or convert values as part of a fused GEMM. Their actual execution may have a different compute ceiling from dense BF16 Tensor Cores. Small shapes can underfill the device, and launch overhead is more noticeable as weight traffic shrinks. A smaller representation removes 1 constraint and can expose another.
 
 Introduce a measured bandwidth efficiency $$\eta_b$$ when available:
 
@@ -99,7 +99,7 @@ $$
 R_{\mathrm{aggregate}}\le\frac{B\beta}{D_w}.
 $$
 
-At batch 16, the quantized example's ideal aggregate ceiling is approximately 1,441 tokens per second. It does not mean 1 user receives 1,441 tokens per second. The ideal per-sequence rate remains around 90, and real per-sequence speed can decline as cache and compute work grow.
+At batch 16, the quantized example's ideal aggregate ceiling is about 1,441 tokens per second. It does not mean 1 user receives 1,441 tokens per second. The ideal per-sequence rate remains around 90, and real per-sequence speed can decline as cache and compute work grow.
 
 This simple model explains the economic appeal of continuous batching. A server can admit requests into available slots as others finish, keeping useful rows in the matrix multiplication. It also explains why a high aggregate benchmark can coexist with worse individual latency.
 
@@ -119,7 +119,7 @@ $$
 
 This assumes ideal sharing across query heads and counts logical K and V reads once. Actual traffic depends on the attention kernel, tiling, and memory hierarchy; it may be larger. Sliding-window or other attention mechanisms require a different history model.
 
-For batch 16 with each history at 8,192 tokens, logical cache reads are approximately 42.95 GB per step. Add 37.1875 GB of weight traffic:
+For batch 16 with each history at 8,192 tokens, logical cache reads are about 42.95 GB per step. Add 37.1875 GB of weight traffic:
 
 $$
 D\approx80.14\ \mathrm{GB}.
@@ -127,17 +127,17 @@ $$
 
 The bandwidth-only step time becomes about 23.92 ms. Aggregate throughput is at most about 669 tokens per second, and per-request streaming at most about 41.8 tokens per second. Those are already less than half the ideal weight-only batch result.
 
-This particular batch also needs approximately 42.95 GB merely to store its BF16 cache, so it exceeds the worked 1-GPU memory budget in the preceding article once headroom is included. Traffic calculations do not establish capacity feasibility. A smaller batch, shorter histories, or different cache representation is required.
+This particular batch also needs about 42.95 GB just to store its BF16 cache, so it exceeds the worked 1-GPU memory budget in the preceding article once headroom is included. Traffic calculations do not establish capacity feasibility. You need a smaller batch, shorter histories, or a different cache representation.
 
 ### A capacity-compatible example
 
 ![Deep dive: A capacity-compatible example](./deep-dive-component-04.png)
 
-Take batch 8 at 8,192 retained tokens per request. Its logical cache payload is 20 GiB, approximately 21.47 GB, which fits the illustrative 34.81 GB cache pool from the preceding article.
+Take batch 8 at 8,192 retained tokens per request. Its logical cache payload is 20 GiB, about 21.47 GB, which fits the illustrative 34.81 GB cache pool from the preceding article.
 
-Weight plus logical cache reads total approximately 58.66 GB per step. Peak-bandwidth arithmetic gives 17.51 ms per step, 57.1 tokens per second per request, and 456.9 aggregate tokens per second. These remain ceilings: temporary traffic, kernel efficiency, sampling, and scheduling can lower the observed rates.
+Weight plus logical cache reads total about 58.66 GB per step. Peak-bandwidth arithmetic gives 17.51 ms per step, 57.1 tokens per second per request, and 456.9 aggregate tokens per second. These remain ceilings: temporary traffic, kernel efficiency, sampling, and scheduling can lower the observed rates.
 
-This is a useful pair of numbers to attach to a measurement. If observed streaming is 35 tokens per second and aggregate throughput is 280, the gap can be investigated. If someone claims 1,000 aggregate tokens per second for the same assumptions, inspect cache dtype, actual histories, prefix sharing, GPU count, and whether the metric counts input tokens as well as outputs.
+This is a useful pair of numbers to attach to a measurement. If observed streaming is 35 tokens per second and aggregate throughput is 280, you have a gap worth investigating. If someone claims 1,000 aggregate tokens per second for the same assumptions, inspect cache dtype, actual histories, prefix sharing, GPU count, and whether the metric counts input tokens as well as outputs.
 
 ### Going deeper: the compute ceiling
 
@@ -161,7 +161,7 @@ The final GPU Math article derives [the batch size at the compute-bound transiti
 
 ### Prefill is a different calculation
 
-Prefill processes many prompt tokens together, creating large matrix multiplications with more weight reuse. Its arithmetic intensity can be far higher than 1-token decode. A prompt ingestion rate therefore cannot be inferred by dividing bandwidth by model weight size.
+Prefill processes many prompt tokens together, which creates large matrix multiplications with more weight reuse. Its arithmetic intensity can be far higher than 1-token decode. So you cannot infer a prompt ingestion rate by dividing bandwidth by model weight size.
 
 Attention work also grows with sequence length for ordinary full attention, though optimized algorithms avoid materializing a full score matrix in HBM. Long prompts may expose compute or workspace constraints that are absent in short decode. Separate input-token throughput, time to first token, output-token throughput, and time per output token in every report.
 

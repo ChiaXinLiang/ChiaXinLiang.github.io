@@ -46,7 +46,7 @@ Test pack/unpack mappings with distinct signed values. Repeated values can hide 
 
 ![Deep dive: Track valid buffer contents](./deep-dive-component-03.png)
 
-The ownership figure moves a tile through FREE, LOAD, READY and COMPUTE. The load producer must finish before readers use it; the compute consumer must finish before the next load overwrites it.
+The ownership figure moves a tile through FREE, LOAD, READY and COMPUTE. The load producer must finish before readers use the tile. The compute consumer must finish before the next load overwrites it.
 
 A valid bit is meaningful only with a lifetime contract. Set READY after successful fill completion, not after issuing the first write. Error/reset invalidates the tile so stale bytes are not consumed.
 
@@ -114,9 +114,9 @@ Consider 4 addresses whose bank rule is index modulo 4. Consecutive indices 4,5,
 
 A registered read returns data after the declared edge latency. The address offered now and the data observed now need not describe the same request. Carry an appropriate validity/tag or maintain a schedule that associates the returned operand with its logical row, column and reduction index. Feeding a new address's mask beside an old address's returned data can create numerically wrong pairs despite individually correct memory and multiplier blocks.
 
-A directed fixture writes distinct values into several addresses, issues a known read sequence and compares after the defined latency. Include a same-address read/write edge to check the chosen read-first behavior. The old stored value is returned for that behavioral collision while the new value is written. A target macro with another collision policy must not be substituted without adapting or preserving the contract and checking the resulting timing.
+A directed fixture writes distinct values into several addresses, issues a known read sequence and compares after the defined latency. Include a same-address read/write edge to check the chosen read-first behavior. The old stored value is returned for that behavioral collision while the new value is written. Do not swap in a target macro with another collision policy without adapting or preserving the contract and checking the resulting timing.
 
-Memory contents are not automatically cleared by local reset in this wrapper. Validity and ownership must prevent uninitialized contents from becoming useful operands. A host-loaded top requires all needed operand locations to be written before starting the job. Resetting a controller does not establish that those bytes contain a legal matrix. Use an explicit preload sequence and document whether reset requires it to be repeated.
+Local reset does not clear memory contents in this wrapper. Validity and ownership must prevent uninitialized contents from becoming useful operands. A host-loaded top requires all needed operand locations to be written before starting the job. Resetting a controller does not establish that those bytes contain a legal matrix. Use an explicit preload sequence and document whether reset requires it to be repeated.
 
 #### Treat ownership as a permission to access
 

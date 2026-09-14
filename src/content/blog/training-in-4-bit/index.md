@@ -38,7 +38,7 @@ The trick that makes 4 bits usable is **block scaling**: group nearby values, st
 - **NVFP4** (NVIDIA's format, native in Blackwell tensor cores): blocks of 16 values, each block scaled by an FP8 E4M3 factor, plus 1 FP32 scale for the whole tensor.
 
 
-Smaller blocks mean each scale factor only has to cover 16 neighbors instead of 32, so it can hug the local distribution more tightly. A real-valued (rather than power-of-2) scale removes another rounding step. Those 2 choices are why NVFP4 is the format that made it into a serious pretraining run. NVIDIA reports the combination holds accuracy within about 1% of FP8 while using roughly 1.8x less memory for the quantized tensors, a vendor-measured figure but 1 consistent with the published training curves.
+Smaller blocks mean each scale factor only has to cover 16 neighbors instead of 32, so it can hug the local distribution more tightly. A real-valued (rather than power-of-2) scale removes another rounding step. Those 2 choices are why NVFP4 is the format that made it into a serious pretraining run. NVIDIA reports the combination holds accuracy within about 1% of FP8 while using roughly 1.8x less memory for the quantized tensors, a vendor-measured figure but one consistent with the published training curves.
 
 If you want the blow-by-blow of the format war itself, that was the previous article in this series. Here we care about what happens when you push these formats into the training loop.
 
@@ -59,7 +59,7 @@ Now every weight is divided by 0.008 and snapped to the nearest of the 16 FP4 va
 | 0.005 | 0.625 | 0.5 | 0.004 | −20% |
 | −0.033 | −4.125 | −4 | −0.032 | −3% |
 
-Errors of 10–20% on individual weights sound alarming, but aggregation can reduce their effect when errors are not strongly aligned with important features. Cancellation is conditional, not guaranteed: correlated error and clipping can survive a matrix multiply. This motivates block scaling and explicit model-quality evaluation.
+Errors of 10–20% on individual weights sound alarming, but they partly cancel when summed inside a matrix multiply, as long as they do not line up with important features. That cancellation is conditional, not guaranteed: correlated error and clipping can survive a matrix multiply. This is why block scaling exists, and why you still have to measure model quality directly.
 
 Now poison the block. Keep the same 16 weights but let one of them be 0.48, 10 times larger than anything else. Outliers like this are not hypothetical; transformer activations and gradients grow them constantly, and a handful of channels can sit orders of magnitude above the rest. The scale must stretch to cover the outlier:
 
@@ -112,7 +112,7 @@ $$
 
 These are normalized units; multiplying by a block scale multiplies variance by that scale squared. Unbiasedness applies inside the representable range with the stated randomization. Clipping outliers breaks that guarantee, and nonlinear optimizer updates need not preserve it.
 
-This explains the method more precisely than saying quantization errors cancel. Deterministic rounding can systematically erase small updates; stochastic rounding preserves their expectation at the cost of added variance. Block scaling and outlier handling control the range, while the optimizer and accumulation precision determine how noise propagates. Training quality must still be checked against a higher-precision baseline across seeds and downstream tasks. Unbiased local rounding is a useful mechanism, not a convergence theorem or proof that every 4-bit recipe is lossless.
+This explains the method more precisely than saying quantization errors cancel. Deterministic rounding can systematically erase small updates; stochastic rounding preserves their expectation at the cost of added variance. Block scaling and outlier handling control the range, while the optimizer and accumulation precision determine how noise propagates. You still need to check training quality against a higher-precision baseline, across seeds and downstream tasks. Unbiased local rounding is a useful mechanism, not a convergence theorem or proof that every 4-bit recipe is lossless.
 
 ### Common misconceptions
 

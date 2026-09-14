@@ -69,7 +69,7 @@ Run the all-reduce *after* the backward pass and your step is 4.4 + 8.8 + 5.5 = 
 
 The trick that makes overlap possible is an accident of calculus: backpropagation computes gradients in reverse layer order. The moment the backward pass finishes layer 47's computation, layer 47's gradients are final and will never be touched again, even though layers 46 down to 1 are still hours of microseconds away. There is no reason to wait.
 
-PyTorch's DistributedDataParallel exploits this with **gradient bucketing** (described in Li et al.'s PyTorch Distributed paper, arXiv:2006.15704). Parameters are grouped into buckets, 25 MB by default, ordered roughly by when their gradients become ready. As each bucket fills, DDP fires an asynchronous NCCL all-reduce for it on a separate CUDA stream and immediately returns to computing the next layer's backward. Communication for late layers streams out while early layers are still crunching. By the time the backward pass retires, only the final bucket or 2, the gradients of the earliest layers, can still be in flight. Those are the only bytes the wall clock ever sees.
+PyTorch's DistributedDataParallel exploits this with **gradient bucketing** (described in Li et al.'s PyTorch Distributed paper, arXiv:2006.15704). DDP groups parameters into buckets, 25 MB by default, ordered roughly by when their gradients become ready. As each bucket fills, DDP fires an asynchronous NCCL all-reduce for it on a separate CUDA stream and immediately returns to computing the next layer's backward. Communication for late layers streams out while early layers are still crunching. By the time the backward pass retires, only the final bucket or 2, the gradients of the earliest layers, can still be in flight. Those are the only bytes the wall clock ever sees.
 
 The bucket size is a real tuning knob. Too small and you pay per-collective launch latency dozens of extra times; too large and the first all-reduce cannot start until deep into the backward pass, shrinking the overlap window. The same logic generalizes: FSDP overlaps its all-gathers with forward compute by prefetching the next layer's parameters while the current layer runs, and pipeline schedules overlap activation sends with the compute of other microbatches.
 
@@ -85,7 +85,7 @@ The arithmetic condition for full hiding is blunt: communication time ≤ the co
 
 **Overlap is not free, because NCCL runs on SMs.** Communication kernels need streaming multiprocessors to move and reduce data, and those SMs come out of the same pool as your matmuls. The most public accounting of this cost is DeepSeek-V3's technical report (arXiv:2412.19437): to overlap the all-to-all traffic of expert parallelism with compute, they dedicated 20 of the H800's 132 SMs, 15% of the chip, to communication kernels, and designed the DualPipe schedule so each microbatch's dispatch and combine phases hide behind another microbatch's attention and MLP compute. Their DeepEP library later pushed much of that work off SMs and onto NIC-driven RDMA precisely because the SM tax was too high. "Hidden" communication still shows up somewhere; the honest metric is end-to-end step time, never a communication timer.
 
-**Inference hides transfers behind other requests.** A prefill worker shipping a 40k-token KV cache to a decode worker cannot hide the transfer behind that request's own compute; the request is *waiting* on the move. Instead, NIXL-style transfer engines make the copy fully asynchronous so the decode GPU keeps generating tokens for the requests it already has, and stream the cache layer by layer while prefill for later layers is still running. Different trick, same principle: the wire is busy, the GPUs never idle.
+**Inference hides transfers behind other requests.** A prefill worker shipping a 40k-token KV cache to a decode worker cannot hide the transfer behind that request's own compute; the request is *waiting* on the move. Instead, NIXL-style transfer engines make the copy fully asynchronous, so the decode GPU keeps generating tokens for the requests it already has. They also stream the cache layer by layer while prefill for later layers is still running. Different trick, same principle: the wire is busy, the GPUs never idle.
 
 A ring model separates bandwidth cost from message startup. For N participants, S bytes per participant, per-link bandwidth beta, and startup alpha:
 
@@ -95,14 +95,14 @@ $$
 
 At N equal to 64, S equal to 140 GB, beta equal to 50 GB/s, and alpha equal to 2 microseconds, the bandwidth term is 5.5125 seconds and startup adds 0.252 milliseconds. For a 64-KiB payload, startup instead dominates. The 140-GB gradient-buffer example is an analytical collective model; it is not a runnable replicated 70B training setup on 80-GB GPUs. Sharded training uses different buffer sizes and collective sequences.
 
-Enough total backward time is not sufficient to hide communication. If bucket j becomes ready at r_j and takes t_j to transmit on 1 serialized communication stream, its finish time is
+Enough total backward time alone does not hide communication. If bucket j becomes ready at r_j and takes t_j to transmit on 1 serialized communication stream, its finish time is
 
 $$
 C_j=\max(r_j,C_{j-1})+t_j,\qquad
 E_{\mathrm{exposed}}=\max(0,C_{\mathrm{last}}-t_{\mathrm{backward}}).
 $$
 
-A late final bucket remains exposed even when earlier transfers overlap perfectly. Tune bucket size against readiness timestamps and message startup, then measure compute slowdown from shared SM, memory, and network resources. Hierarchical collectives change the bytes crossing expensive links; overlap changes when those bytes travel. Evaluate both mechanisms independently rather than attributing the whole gain to asynchronous execution.
+A late final bucket remains exposed even when earlier transfers overlap perfectly. Tune bucket size against readiness timestamps and message startup, then measure compute slowdown from shared SM, memory, and network resources. Hierarchical collectives change the bytes crossing expensive links; overlap changes when those bytes travel. Measure each mechanism on its own; do not credit the whole gain to asynchronous execution.
 
 ### Common misconceptions
 

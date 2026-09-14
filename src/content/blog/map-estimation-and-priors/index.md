@@ -168,7 +168,7 @@ In standard gradient descent, adding an L2 penalty contributes a gradient propor
 
 MLE transforms naturally under a 1-to-1 parameter change: the parameter representing the maximizing model distribution changes coordinates along with the estimate. Posterior density modes behave differently because densities include a Jacobian under a coordinate transformation.
 
-A mode computed for a probability theta need not transform into the mode computed for its log-odds. Probability mass assigned to corresponding regions remains consistent, but density per unit coordinate changes. This is 1 reason to avoid presenting a MAP point as an uniquely privileged expression of uncertainty.
+A mode computed for a probability theta need not transform into the mode computed for its log-odds. Probability mass assigned to corresponding regions remains consistent, but density per unit coordinate changes. This is one reason to avoid presenting a MAP point as an uniquely privileged expression of uncertainty.
 
 The practical lesson is modest: specify the parameterization and prior together. A “flat prior” in 1 coordinate system is generally not flat in another. When a scientific or operational decision depends on uncertainty, posterior intervals or predictive integration may be more informative than a mode alone.
 

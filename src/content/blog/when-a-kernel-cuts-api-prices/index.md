@@ -18,7 +18,7 @@ tags: ['sparse-attention', 'co-design', 'inference']
 
 On September 29, 2025, the price of 1 million output tokens from DeepSeek's API dropped from $1.68 to $0.42. Input tokens fell from $0.56 to $0.28. The hardware serving those tokens did not change. The model's benchmark scores did not change in any meaningful way. What changed was the attention mechanism inside the model and the GPU kernels that run it, and DeepSeek published both, the same day, in the same release notes as the price cut.
 
-That release, [DeepSeek-V3.2-Exp](https://api-docs.deepseek.com/news/news250929/), is the cleanest public demonstration of a claim this series keeps circling: kernels are not an implementation detail under the economics. Kernels *are* the economics. Most of the time the chain from "engineer makes attention faster" to "customer pays less" is hidden inside a company's margins. Here the entire chain was published at once — architecture, kernels, and price sheet.
+That release, [DeepSeek-V3.2-Exp](https://api-docs.deepseek.com/news/news250929/), is the cleanest public example of a claim this series keeps circling: kernels are not an implementation detail under the economics. Kernels *are* the economics. Most of the time the chain from "engineer makes attention faster" to "customer pays less" is hidden inside a company's margins. Here the entire chain was published at once — architecture, kernels, and price sheet.
 
 This article walks through what DeepSeek Sparse Attention (DSA) actually does, why it cuts the bill, and what the episode says about where efficiency gains end up.
 
@@ -45,7 +45,7 @@ DeepSeek Sparse Attention splits attention into 2 stages, described in the [V3.2
 **Stage 2: real attention, top-k only.** The indexer's scores pick the top 2,048 tokens, and full-precision attention runs over those 2,048 alone. Everything else in the layer — the latent KV cache, the 128 query heads, the output projection — works exactly as before, just over a shortlist instead of the whole history.
 
 
-The crucial word in "trainable sparse attention" is *trainable*. Fixed sparsity patterns (sliding windows, strided blocks) decide what to ignore before seeing your data. DSA's indexer is a learned component: it was trained to predict which tokens the full model would have attended to. Selection adapts to the content of every individual query.
+The key word in "trainable sparse attention" is *trainable*. Fixed sparsity patterns (sliding windows, strided blocks) decide what to ignore before seeing your data. DSA's indexer is a learned component: it was trained to predict which tokens the full model would have attended to. Selection adapts to the content of every individual query.
 
 The complexity story: main attention drops from O(L²) to O(L·k) with k = 2,048 fixed. The indexer keeps an O(L²) term, but with a constant so small it stays cheap deep into the 6-figure context range.
 
@@ -76,7 +76,7 @@ $$
 N_s=\sum_{t=1}^{L}\min(t,k)=kL-\frac{k(k-1)}2,\qquad L\ge k.
 $$
 
-With length 131,072 and selection size 2,048, these counts are 8,590,000,128 and 266,339,328: approximately a 32.25-fold reduction in main attention pairs. The early positions matter slightly; multiplying length by selection size overcounts them.
+With length 131,072 and selection size 2,048, these counts are 8,590,000,128 and 266,339,328: about a 32.25-fold reduction in main attention pairs. The early positions matter slightly; multiplying length by selection size overcounts them.
 
 That is not an end-to-end speedup. A useful first model is
 
@@ -84,7 +84,7 @@ $$
 T_{\mathrm{DSA}}\approx c_iN_d+c_aN_s+T_{\mathrm{other}},
 $$
 
-where the 2 coefficients express measured indexer and main-attention cost per pair. The indexer still scans history, but with a cheaper representation. Its work, routing overhead, projections, and memory transfers do not vanish. Compared with dense attention, the innovation moves expensive full-vector interactions behind a learned selection stage. It trades additional machinery and possible selection error for fewer costly interactions. Check quality, the indexer timeline, and total request latency before interpreting the pair ratio as a saving. A public release and price cut establish contemporaneous changes; they do not isolate hardware, margin, or every contributing serving change in a controlled experiment.
+where the 2 coefficients express measured indexer and main-attention cost per pair. The indexer still scans history, but with a cheaper representation. Its work, routing overhead, projections, and memory transfers do not vanish. Compared with dense attention, the innovation moves expensive full-vector interactions behind a learned selection stage. It trades additional machinery and possible selection error for fewer costly interactions. Check quality, the indexer timeline, and total request latency before interpreting the pair ratio as a saving. A public release and price cut show the changes happened together; they do not isolate hardware, margin, or every other serving change in a controlled experiment.
 
 ### The lineage: MLA made DSA possible
 
@@ -92,7 +92,7 @@ DSA did not appear from nowhere. It is the third step in a lineage of DeepSeek a
 
 **MLA (May 2024).** [DeepSeek-V2](https://arxiv.org/abs/2405.04434) introduced Multi-head Latent Attention, which attacks the *memory* side of the bill: instead of caching full keys and values for every head, MLA compresses each token's KV state into a single 576-value latent vector, shrinking the KV cache by roughly 93% versus standard multi-head attention. That is what made 128K contexts affordable to *store*. But compute stayed quadratic — every query still touched every latent.
 
-**NSA (February 2025).** DeepSeek's [Native Sparse Attention paper](https://arxiv.org/abs/2502.11089) demonstrated the other half: sparsity you train into the model from the start, with block layouts chosen so GPUs can actually exploit them. Earlier sparse-attention research had a credibility problem — theoretical FLOP savings that never became wall-clock savings because the access patterns fought the hardware. NSA's contribution was showing trainable sparsity that wins on real GPUs, not just in complexity notation.
+**NSA (February 2025).** DeepSeek's [Native Sparse Attention paper](https://arxiv.org/abs/2502.11089) showed the other half: sparsity you train into the model from the start, with block layouts chosen so GPUs can actually exploit them. Earlier sparse-attention research had a credibility problem — theoretical FLOP savings that never became wall-clock savings because the access patterns fought the hardware. NSA's contribution was showing trainable sparsity that wins on real GPUs, not just in complexity notation.
 
 **DSA (September 2025).** V3.2-Exp fuses the 2 ideas: fine-grained, per-token selection (sharper than NSA's blocks) running on top of MLA's compact latents. The combination is not accidental. Because MLA in its decode form behaves like multi-query attention — all 128 query heads share the same per-token latent — the 2,048 selected latents are fetched once and reused by every head. A sparse gather that would be scattered, bandwidth-wasting reads in a standard attention layout becomes a dense, reusable working set of about 1.2 million values. The architecture 2 generations back is what makes the sparse kernel efficient today.
 

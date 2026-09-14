@@ -50,7 +50,7 @@ The initialization figure distinguishes reset control from valid data. FPGA conf
 
 Our sums/valid masks reset synchronously; operand memories are loaded before use. Control prevents invalid operands from contributing. The integrated top's outputs are meaningful only after done.
 
-A full-chip reset network also needs physical analysis. If an external reset is asynchronous, deassertion must follow the clock-domain strategy. Do not change reset style merely to satisfy a synthesis warning without understanding the behavior.
+A full-chip reset network also needs physical analysis. If an external reset is asynchronous, deassertion must follow the clock-domain strategy. Do not change reset style just to satisfy a synthesis warning without understanding the behavior.
 
 ### Check equivalence after substitution
 
@@ -91,7 +91,7 @@ The portable numerical core describes signed products, local sums, masks and acc
 
 The released RTL uses behavioral arithmetic and storage rather than an instantiated proprietary primitive library. That provides an educational portability baseline, but does not prove every synthesis tool and technology maps it efficiently. The fixed operand top's access pattern may require storage restructuring for a physical macro. Such a change can affect read latency, banking and schedule, so it belongs in both the source review and verification evidence.
 
-Write a wrapper contract before selecting a macro: data/address widths, depth, write/read enables, read latency, collision behavior, reset and initialization assumptions. Those properties determine whether the consumer can use a returned operand correctly. A wrapper name is not a contract. If 2 targets use different latencies, a bridge must adapt the schedule or the public interface must explicitly change.
+Write a wrapper contract before selecting a macro: data/address widths, depth, write/read enables, read latency, collision behavior, reset and initialization assumptions. Those properties determine whether the consumer can use a returned operand correctly. A wrapper name is not a contract. If two targets use different latencies, a bridge must adapt the schedule or the public interface must explicitly change.
 
 #### Follow a read request through the macro boundary
 
@@ -113,7 +113,7 @@ A reset during a job also affects ownership and pending work. Define whether the
 
 Drive the same legal input events into the golden portable design and the wrapped version. Compare output sequence, numerical values, validity and declared latency. Include stalls, reset/clear, signed endpoints and collision cases relevant to the replaced resource. A final matrix equality alone can miss a changed handshake or delayed status that breaks the surrounding system.
 
-A finite simulation is bounded evidence. Formal equivalence, when supported and executed, can establish a stronger relation under stated assumptions, but the release does not claim a formal run occurred. A synthesis netlist comparison likewise has a declared boundary and model set. Retain actual reports with source, tool and target versions instead of using “equivalent” as a generic label for matching 1 fixture.
+A finite simulation is bounded evidence. Formal equivalence, when supported and executed, can establish a stronger relation under stated assumptions, but the release does not claim a formal run occurred. A synthesis netlist comparison likewise has a declared boundary and model set. Retain actual reports with source, tool and target versions instead of using “equivalent” as a generic label for matching one fixture.
 
 Physical constraints remain technology-specific even when behavior matches. An ASIC implementation needs clocks, input/output delays, corners, physical libraries, power integration and routing rules. A core netlist that preserves arithmetic can still fail timing or lack required full-chip integration. Educational Nangate45 configuration is useful for learning that flow but is not a production foundry release.
 
@@ -121,7 +121,7 @@ The architecture lesson is to retain a stable numerical and protocol boundary wh
 
 #### A release check for this boundary
 
-For a concrete wrapper acceptance experiment, keep a read address stable while the declared read enable is absent, then issue a single enabled read and inspect the returned validity/data at the specified edge. Repeat after reset with no preceding write and confirm that uninitialized storage is not declared useful. Then write a distinguishable value and read it through both implementations. These fixtures expose an enable polarity, latency or initialization mismatch that an uninterrupted matrix run might miss. Add the same-address collision case separately, retaining the permitted reference semantics. If the selected macro forbids that collision, prevent it in control and verify the prevention instead of accepting an arbitrary response.
+For a concrete wrapper acceptance experiment, keep a read address stable while the declared read enable is absent. Then issue a single enabled read and inspect the returned validity/data at the specified edge. Repeat after reset with no preceding write and confirm that uninitialized storage is not declared useful. Then write a distinguishable value and read it through both implementations. These fixtures expose an enable polarity, latency or initialization mismatch that an uninterrupted matrix run might miss. Add the same-address collision case separately, retaining the permitted reference semantics. If the selected macro forbids that collision, prevent it in control and verify the prevention instead of accepting an arbitrary response.
 
 ## Conclusion
 

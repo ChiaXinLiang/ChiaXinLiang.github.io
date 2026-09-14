@@ -30,7 +30,7 @@ The grid figure connects 16 verified PEs. Each row forwards A values left-to-rig
 
 Packed boundary buses carry 4 signed bytes and 4 validity bits per operand direction. Each output occupies a 32-bit slice in row-major PE order. Flattening the result does not change its numerical meaning, but the host/testbench must use the same index convention.
 
-The top-level source uses generate loops, not 16 hand-copied instances. This reduces wiring duplication while leaving the topology explicit. Parameterization describes R rows and C columns; the released test instance is 4×4. It is still necessary to verify a changed parameter combination.
+The top-level source uses generate loops, not 16 hand-copied instances. This reduces wiring duplication while leaving the topology explicit. Parameterization describes R rows and C columns; the released test instance is 4×4. You still need to verify a changed parameter combination.
 
 ### Compute the input skew
 
@@ -48,7 +48,7 @@ The testbench uses different random signed values so mismatched k indices become
 
 The checked matrix produces [[19,22],[43,50]] from [[1,2],[3,4]] and [[5,6],[7,8]]. PE(0,0) adds 5 then 14. PE(0,1) adds 6 then 16. PE(1,0) adds 15 then 28. PE(1,1) adds 18 then 32.
 
-The software exercise records the active contributions at each logical step. Compare that trace with the RTL waveform's sampled products and sums. It is possible for different cells to finish at different steps, so a locally stable sum is not proof the entire output tile is complete.
+The software exercise records the active contributions at each logical step. Compare that trace with the RTL waveform's sampled products and sums. Different cells can finish at different steps, so a locally stable sum does not prove the whole output tile is complete.
 
 The full-array oracle uses direct matrix multiplication. It checks final values independently of the systolic trace so a skew formula copied incorrectly into both driver and trace does not become the only reference.
 
@@ -126,7 +126,7 @@ Keep logical dimensions separate from the physical array. The 4×4 engine comput
 
 Initialize a new output reduction once, combine every required contribution, and apply bias/activation/conversion only at the specified final stage. ReLU does not distribute over partial sums. A premature quantization can also change rounding and cancellation. Use mixed-sign fixtures so these mistakes cannot hide behind positive-only inputs.
 
-Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create substantial local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
+Count traffic at named boundaries. External tensor bytes, local RAM reads, register access and forwarded operands are different quantities. Reuse that avoids a host or external-memory load can still create heavy local traffic. A dataflow comparison needs the same shapes, types, numerical output and storage assumptions.
 
 The direct matrix oracle remains independent of the systolic timing trace. Use the trace to debug alignment and the oracle to verify the final result. Global stalls consume clocks without changing logical step; maintain that distinction in both the driver and the array. Once the complete tile contract is correct, measure its useful work and integration overhead separately.
 
@@ -136,7 +136,7 @@ The direct matrix oracle remains independent of the systolic timing trace. Use t
 
 For output C[i,j], product index k must meet at the corresponding PE. A[i,k] enters row i with delay i, then travels j PE hops. B[k,j] enters column j with delay j, then travels i hops. Both therefore reach the same PE at logical step k+i+j under the common stepping convention. This equality is the reason for skewing; simply sending every row and column at once would pair different k values away from the first PE.
 
-Follow the bottom-right PE of a 4×4 tile. Its first k=0 pair arrives after the combined row/column skew of 6 logical positions, and its last K=8 pair has k=7. The complete array requires K+4+4-2=14 stepped updates under the released model's convention. A hold clock advances none of those positions. The integrated top adds clear and capture control edges outside that logical-step count, so 14 must not be described as complete host-command latency.
+Follow the bottom-right PE of a 4×4 tile. Its first k=0 pair arrives after the combined row/column skew of 6 logical positions, and its last K=8 pair has k=7. The complete array requires K+4+4-2=14 stepped updates under the released model's convention. A hold clock advances none of those positions. The integrated top adds clear and capture control edges outside that logical-step count, so do not describe 14 as complete host-command latency.
 
 The active-MAC counts for the full K=8 tile are [1,3,6,10,13,15,16,16,15,13,10,6,3,1]. They sum to 128 useful contributions. The useful occupancy against 16 cells across 14 logical steps is 128/(16×14)=4/7. A chart showing all 16 cells active for most of 8 full steps would not match that ledger. Verify a figure's totals just as you verify a numerical output.
 
@@ -158,7 +158,7 @@ The simplicity has a cost: 1 blocked boundary can stall all 16 cells. More elabo
 
 #### Separate array simulation from implementation capacity
 
-A generate loop constructs the logical grid, but does not report achieved frequency, DSP use, wire congestion or buffer bandwidth. Those properties require a selected device and executed implementation flow. Clear/step fan-out, operand routing and a wide result bus can become physical constraints as the grid grows. Scaling from 4×4 to a larger array is consequently more than changing a parameter.
+A generate loop constructs the logical grid, but does not report achieved frequency, DSP use, wire congestion or buffer bandwidth. Those properties require a selected device and executed implementation flow. Clear/step fan-out, operand routing and a wide result bus can become physical constraints as the grid grows. Scaling from 4×4 to a larger array is therefore more than changing a parameter.
 
 The next lessons retain this exact output-stationary baseline while studying reuse and software tiling. Preserve its complete numerical contract, timing convention and result order. A larger matrix can be decomposed into valid tiles, but the decomposition must carry every reduction chunk and respect boundary stores. The array is the verified local engine; the scheduler and memory path remain independently reviewable parts of the system.
 
