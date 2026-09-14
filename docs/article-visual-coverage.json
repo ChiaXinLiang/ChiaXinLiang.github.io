@@ -1024,5 +1024,197 @@
     "overview_images": 1,
     "deep_dive_images": 3,
     "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/gpu-architecture-simt-tensor-cores-memory/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/tpu-architecture-matrix-engines-ici/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/dpu-architecture-network-storage-isolation/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/npu-architecture-edge-inference-dataflow/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/aws-ai-chips-trainium-neuroncore-architecture/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/wafer-scale-architecture-sram-fabric/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/accelerator-packaging-chiplets-hbm/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 6
+  },
+  {
+    "content_path": "src/content/blog/accelerator-interconnects-nvlink-ualink-cxl/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-spec-1-define-the-ai-accelerator/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-logic-1-digital-logic-for-ai-hardware/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 3,
+    "scope_sections": 7
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-number-1-int8-arithmetic/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-rtl-1-your-first-systemverilog-compute-block/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-verify-1-hardware-verification/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-pipe-1-pipeline-the-mac/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-stream-1-ready-valid-interfaces/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-pe-1-build-a-processing-element/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-array-1-build-a-4x4-systolic-array-and-trace-every-cycle/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 6,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-dataflow-1-weight-stationary-vs-output-stationary/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-tile-1-matrix-tiling/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-post-1-finish-the-operator/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-buffer-1-on-chip-buffers/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-dma-1-move-tensors-with-dma/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-overlap-1-double-buffering/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-control-1-command-registers-and-scheduling/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-fpga-1-synthesize-and-implement-the-accelerator-on-an-fpga/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 10
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-host-1-host-to-fpga-integration/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-inference-1-run-a-small-neural-network-end-to-end/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-measure-1-measure-the-accelerator/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-portable-1-from-fpga-to-asic/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 8
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-physical-1-rtl-to-layout/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 11
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-signoff-1-check-the-design/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 5,
+    "scope_sections": 9
+  },
+  {
+    "content_path": "src/content/blog/fpga-ai-release-1-prepare-the-ai-chip-release/index.md",
+    "overview_images": 1,
+    "deep_dive_images": 4,
+    "scope_sections": 8
   }
 ]
