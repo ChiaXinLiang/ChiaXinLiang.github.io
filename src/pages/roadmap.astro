@@ -18,14 +18,16 @@ const steps = [
  {id:'efficient-ml', before:['llm-basics','ai-performance'], goal:'Connect pruning, quantization, distillation, and model design to quality and deployment cost.'},
  {id:'efficient-vision', before:['llm-basics','gpu-performance'], goal:'Understand image tokens, diffusion objectives, sampling, and efficient generation.'},
  {id:'efficient-ai', before:['comp-arch','llm-architectures','gpu-performance'], goal:'Evaluate quantization and algorithm–hardware design tradeoffs.'},
+ {id:'fpga-ai-chip', before:['comp-arch'], goal:'Build and verify a small AI accelerator, then learn the steps toward FPGA deployment and an educational ASIC.'},
 ].map(step => ({...step, ...SERIES.find(s => s.id === step.id)!, articles:publishedSeriesOrder(posts.filter(p=>p.data.series===step.id)).map(p=>({id:p.id,title:p.data.title,href:`/blog/${p.id}/`}))})).filter(s=>s.articles.length);
-const paths = {all:steps.map(s=>s.id),infra:['comp-arch','llm-basics','ai-performance','ai-networking','gpu-performance','distributed-training','llm-serving'],models:['llm-basics','llm-architectures','efficient-ml','efficient-vision','llm-serving'].filter(id=>steps.some(s=>s.id===id)),hardware:['comp-arch','ai-performance','gpu-performance','llm-architectures','efficient-ai']};
+const paths = {all:steps.map(s=>s.id),infra:['comp-arch','llm-basics','ai-performance','ai-networking','gpu-performance','distributed-training','llm-serving'],models:['llm-basics','llm-architectures','efficient-ml','efficient-vision','llm-serving'].filter(id=>steps.some(s=>s.id===id)),hardware:['comp-arch','ai-performance','gpu-performance','llm-architectures','efficient-ai','fpga-ai-chip']};
 const stages = [
  {title: 'Stage 1 · Start here', hint: 'No background needed. Pick the side that interests you — models or hardware.', ids: ['llm-basics', 'comp-arch']},
  {title: 'Stage 2 · Core concepts', hint: 'Performance thinking and how modern models are put together.', ids: ['ai-performance', 'llm-architectures']},
  {title: 'Stage 3 · Systems deep dives', hint: 'How data moves between machines and how GPUs execute work.', ids: ['ai-networking', 'gpu-performance']},
  {title: 'Stage 4 · Training & serving at scale', hint: 'Combine everything to train and serve large models in production.', ids: ['distributed-training', 'llm-serving']},
  {title: 'Stage 5 · Efficiency & co-design', hint: 'Make models smaller, faster, and matched to the hardware.', ids: ['efficient-ml', 'efficient-vision', 'efficient-ai']},
+ {title: 'Stage 6 · Build an accelerator', hint: 'Start with digital logic and progress through verified RTL toward FPGA and ASIC implementation.', ids: ['fpga-ai-chip']},
 ].map(stage => ({...stage, steps: stage.ids.map(id => steps.findIndex(s => s.id === id)).filter(i => i >= 0)})).filter(stage => stage.steps.length);
 ---
 <!doctype html><html lang="en"><head><BaseHead title="Learning Roadmap" description="An interactive learning map through published AI infrastructure articles." /></head><body><Header /><main>
