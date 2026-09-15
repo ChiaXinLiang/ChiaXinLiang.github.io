@@ -19,7 +19,7 @@ Parallelism layout and physical placement should be chosen together; tensor, pip
 
 Heterogeneous clusters make this coupling visible. In the illustrated 16-rank job, a synchronous group can wait for its slowest member, while pipeline stages can assign different amounts of work to different device groups. A slower network boundary may be acceptable between stages and expensive inside a frequently communicating tensor-parallel group.
 
-[Harp](https://arxiv.org/abs/2509.24859), introduced in 2025, confines intra-operator parallelism to homogeneous subclusters and searches finer-grained inter-operator plans. This article uses that design boundary alongside [RAPID-LLM](https://arxiv.org/abs/2512.19606) to explain joint layout and placement. The examples are illustrative stage budgets, not measurements of either system.
+Harp [\[1\]](https://arxiv.org/abs/2509.24859), introduced in 2025, confines intra-operator parallelism to homogeneous subclusters and searches finer-grained inter-operator plans. This article uses that design boundary alongside RAPID-LLM [\[2\]](https://arxiv.org/abs/2512.19606) to explain joint layout and placement. The examples are illustrative stage budgets, not measurements of either system.
 
 ## Deep dive
 
@@ -41,7 +41,7 @@ For the illustrated PP2 job, the candidate identity should include stage partiti
 
 A tensor-parallel group repeatedly exchanges intermediate results within layers. Mixing devices with different compute rates can create synchronized waiting, while crossing a slow network can expose communication on the step’s critical path. A homogeneous local group is therefore a useful candidate, although its benefit still depends on the actual operator and collective profile.
 
-Harp avoids slow cross-cluster intra-operator collectives by keeping those groups inside homogeneous subclusters and introducing heterogeneity at the inter-operator level. Its planner searches stage assignments at finer granularity to recover balance. This is a research strategy with its own supported execution model, not proof that every mixed-device training system should use the same restriction.
+Harp [\[1\]](https://arxiv.org/abs/2509.24859) avoids slow cross-cluster intra-operator collectives by keeping those groups inside homogeneous subclusters and introducing heterogeneity at the inter-operator level. Its planner searches stage assignments at finer granularity to recover balance. This is a research strategy with its own supported execution model, not proof that every mixed-device training system should use the same restriction.
 
 For an illustrative 2-stage pipeline, Stage A uses a faster 4-device group and Stage B a slower 4-device group; assigning half the layers to each can leave B as the bottleneck; a finer partition may assign more work to A and less to B, subject to memory and the runtime’s valid partition boundaries. Pipeline placement still needs compatible transfers. The stages must agree on activation shapes, numerical representation, and schedule. Crossing device classes or software stacks does not remove these requirements. A runtime-supported boundary is an executable capability, while a favorable latency prediction is merely performance evidence. Data-parallel placement introduces another path. Replicas synchronize gradients or sharded state according to the runtime. Keeping TP groups local does not eliminate scale-out communication. The joint model should retain every communication group and avoid pricing only the most visible pipeline boundary.
 
@@ -95,5 +95,5 @@ The next articles change the queue and running allocations. Backfill, preemption
 
 ### Sources
 
-- [HARP: Orchestrating Automated Parallel Training on Heterogeneous GPU Clusters (2025 preprint; revised 2026)](https://arxiv.org/abs/2509.24859)
-- [RAPID-LLM: Resilience-Aware Performance analysis of Infrastructure for Distributed LLM Training and Inference (2025 preprint; revised 2026)](https://arxiv.org/abs/2512.19606)
+- [\[1\]](https://arxiv.org/abs/2509.24859) HARP: Orchestrating Automated Parallel Training on Heterogeneous GPU Clusters (2025 preprint; revised 2026)
+- [\[2\]](https://arxiv.org/abs/2512.19606) RAPID-LLM: Resilience-Aware Performance analysis of Infrastructure for Distributed LLM Training and Inference (2025 preprint; revised 2026)

@@ -19,7 +19,7 @@ Topology-aware placement should price the paths the workload actually uses; phys
 
 The scheduler needs 2 layers. Hard topology requirements determine whether a communication group can use a candidate allocation. Supported performance estimates then compare the feasible paths, while queue state prices fragmentation and future options. This article builds on the workload groups in `sched-2` and the feasibility boundary in `sched-3`.
 
-[BandPilot](https://arxiv.org/abs/2506.15595), introduced in 2025, uses effective collective bandwidth as a dispatch-level objective. It combines sparse NCCL measurements with a predictor and explicitly limits its optimization to the current request. The illustrative examples here add queue consequences as a separate policy concern; they are not reported BandPilot experiments.
+BandPilot [\[1\]](https://arxiv.org/abs/2506.15595), introduced in 2025, uses effective collective bandwidth as a dispatch-level objective. It combines sparse NCCL measurements with a predictor and explicitly limits its optimization to the current request. The illustrative examples here add queue consequences as a separate policy concern; they are not reported BandPilot experiments.
 
 ## Deep dive
 
@@ -39,7 +39,7 @@ Topology constraints should be explicit; a requirement that a TP4 group remain i
 
 ![Deep dive: A collective profile identifies subset, operation, payload, software, and traffic state](./deep-dive-component-02.png)
 
-BandPilot defines standalone bandwidth for a GPU subset under an idle cluster and effective bandwidth under a traffic profile. It obtains standalone measurements with NCCL benchmarks. The distinction matters because the same subset can deliver less bandwidth when active jobs consume shared network capacity.
+BandPilot [\[1\]](https://arxiv.org/abs/2506.15595) defines standalone bandwidth for a GPU subset under an idle cluster and effective bandwidth under a traffic profile. It obtains standalone measurements with NCCL benchmarks. The distinction matters because the same subset can deliver less bandwidth when active jobs consume shared network capacity.
 
 A measurement record should include GPU subset, collective, payload size, runtime and library versions, concurrency, topology, and traffic conditions. A link specification is not a collective benchmark. Endpoint bandwidth can exceed the rate realized by an operation whose algorithm, synchronization, or shared path limits progress.
 
@@ -49,7 +49,7 @@ The operation’s frequency determines its job impact. An extra 0.2 seconds once
 
 ### Use sparse profiles without hiding uncertainty
 
-Exhaustively benchmarking every GPU subset under every traffic state is infeasible at cluster scale. BandPilot uses sparse measurements and a surrogate to estimate candidate bandwidth. That approach saves profiling effort, but the estimate should retain its provenance and support conditions when it reaches the scheduler.
+Exhaustively benchmarking every GPU subset under every traffic state is infeasible at cluster scale. BandPilot [\[1\]](https://arxiv.org/abs/2506.15595) uses sparse measurements and a surrogate to estimate candidate bandwidth. That approach saves profiling effort, but the estimate should retain its provenance and support conditions when it reaches the scheduler.
 
 A measured subset, a supported interpolation, and an untested extrapolation are different evidence states; if an illustrative table contains 2 tested 4-GPU domains, predicting an unseen cross-domain subset requires assumptions about the path and operation; the predictor may be useful, yet its uncertainty should not disappear merely because the output has units of GiB/s. Calibration should use later measurements from the configurations the dispatcher actually considers. Audit error by operation, subset shape, and traffic regime. A low average error can hide the contended configurations that carry the placement decision. Track underprediction and overprediction of cost separately if their operational consequences differ. The allocator should document its fallback. When bandwidth support is missing, it may choose a tested compact subset, preserve the incumbent policy, or request a profile offline. Giving an unsupported candidate the same confidence as a measured one rewards missing evidence and makes later failures difficult to explain.
 
@@ -73,7 +73,7 @@ A placement score uses a snapshot; before commitment, recheck that the devices, 
 
 Commit the distributed group as one allocation unit. Partial admission can strand ranks and hold devices while the remaining workers wait. Record the expected communicator membership, launch condition, and timeout release policy. This is coordinated resource allocation rather than an engine-level collective implementation.
 
-After launch, compare observed communication and step time with the estimate. A bandwidth proxy may improve while application runtime does not, because compute or another communication group dominates. BandPilot explicitly optimizes collective bandwidth rather than application-level step time; an end-to-end scheduler evaluation should preserve that distinction.
+After launch, compare observed communication and step time with the estimate. A bandwidth proxy may improve while application runtime does not, because compute or another communication group dominates. BandPilot [\[1\]](https://arxiv.org/abs/2506.15595) explicitly optimizes collective bandwidth rather than application-level step time; an end-to-end scheduler evaluation should preserve that distinction.
 
 The observation record should include co-tenants and traffic regime; without that context, a slow collective can be attributed incorrectly to the selected GPU subset; a later predictor trained on the incomplete record may learn that a good topology is inherently slow when the real cause was transient shared-link contention.
 
@@ -99,5 +99,5 @@ The next article broadens the comparison to heterogeneous devices and power limi
 
 ### Sources
 
-- [BandPilot: Toward Performance- and Contention-Aware GPU Dispatching in AI Clusters (2025)](https://arxiv.org/abs/2506.15595)
-- [RAPID-LLM: Resilience-Aware Performance analysis of Infrastructure for Distributed LLM Training and Inference (2025 preprint; revised 2026)](https://arxiv.org/abs/2512.19606)
+- [\[1\]](https://arxiv.org/abs/2506.15595) BandPilot: Toward Performance- and Contention-Aware GPU Dispatching in AI Clusters (2025)
+- [\[2\]](https://arxiv.org/abs/2512.19606) RAPID-LLM: Resilience-Aware Performance analysis of Infrastructure for Distributed LLM Training and Inference (2025 preprint; revised 2026)

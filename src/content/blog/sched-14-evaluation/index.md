@@ -19,7 +19,7 @@ A scheduler should be evaluated as a decision system; prediction error is one co
 
 The evaluation needs a workload trace, an incumbent policy, explicit objectives, and a reproducible information boundary. It should report useful work, GPU-hour-weighted impact, tail wait or SLO attainment, fairness, and violations. Utilization alone cannot establish that the cluster improved.
 
-[Kant](https://arxiv.org/abs/2510.01256), introduced in 2025, studies unified scheduling for large AI clusters. [Acme](https://arxiv.org/abs/2403.07648), published in 2024, supplies production workload and failure context. This article uses those sources as research anchors and develops an illustrative evaluation protocol for the preceding 13 articles. It does not quote unverified gains from the supplied research map.
+Kant [\[1\]](https://arxiv.org/abs/2510.01256), introduced in 2025, studies unified scheduling for large AI clusters. Acme [\[2\]](https://arxiv.org/abs/2403.07648), published in 2024, supplies production workload and failure context. This article uses those sources as research anchors and develops an illustrative evaluation protocol for the preceding 13 articles. It does not quote unverified gains from the supplied research map.
 
 ## Deep dive
 
@@ -31,7 +31,7 @@ The baseline should be the incumbent policy or a clearly defined alternative; re
 
 Both policies should receive the same workload arrivals and the same observations available at each decision. Do not give the proposed predictor actual future runtimes while the baseline uses requested limits. That comparison measures an oracle advantage rather than a deployable improvement.
 
-For an illustrative replay, train the predictor on January data, calibrate on February, and evaluate March decisions. At a March submission, expose only the snapshot and labels already available. A long-running February job whose final duration arrives in April cannot be used to calibrate the March forecast retroactively. Kant’s unified scheduling context motivates evaluating workload mix and fragmentation together. The local protocol should preserve the classes and policy conditions of its own cluster rather than transfer a paper’s headline result to a different inventory. Acme also shows why LLM development contains several job types instead of one homogeneous stream. Separate simulation, shadow decisions, and online trials. Simulation tests a model of the system; shadow mode records proposed actions without applying them; an online trial observes real transitions. Each supplies different evidence. A replay gain should remain labeled as replay until the operational assumptions are verified.
+For an illustrative replay, train the predictor on January data, calibrate on February, and evaluate March decisions. At a March submission, expose only the snapshot and labels already available. A long-running February job whose final duration arrives in April cannot be used to calibrate the March forecast retroactively. Kant’s unified scheduling context motivates evaluating workload mix and fragmentation together. The local protocol should preserve the classes and policy conditions of its own cluster rather than transfer a paper’s headline result to a different inventory. Acme [\[2\]](https://arxiv.org/abs/2403.07648) also shows why LLM development contains several job types instead of one homogeneous stream. Separate simulation, shadow decisions, and online trials. Simulation tests a model of the system; shadow mode records proposed actions without applying them; an online trial observes real transitions. Each supplies different evidence. A replay gain should remain labeled as replay until the operational assumptions are verified.
 
 ### Measure useful work and resource-weighted impact
 
@@ -99,6 +99,6 @@ The series now forms one decision pipeline: describe work, filter feasibility, e
 
 ### Sources
 
-- [Kant: An Efficient Unified Scheduling System for Large-Scale AI Clusters (2025)](https://arxiv.org/abs/2510.01256)
-- [Characterization of Large Language Model Development in the Datacenter (2024)](https://arxiv.org/abs/2403.07648)
-- [Conformalized Quantile Regression (2019)](https://arxiv.org/abs/1905.03222)
+- [\[1\]](https://arxiv.org/abs/2510.01256) Kant: An Efficient Unified Scheduling System for Large-Scale AI Clusters (2025)
+- [\[2\]](https://arxiv.org/abs/2403.07648) Characterization of Large Language Model Development in the Datacenter (2024)
+- [\[3\]](https://arxiv.org/abs/1905.03222) Conformalized Quantile Regression (2019)

@@ -19,7 +19,7 @@ A heterogeneous allocator should compare configurations rather than assign every
 
 For serving, request sizes, arrival rate, and latency targets affect the capacity needed. For training, layout and remaining work affect duration and transition cost. These workloads can share a cluster while requiring different performance models and different units of useful output.
 
-[Mélange](https://arxiv.org/abs/2404.14527), published in 2024, formulates heterogeneous serving allocation as cost-aware bin packing. Its workload dimensions include request size, request rate, and SLO. This article develops the allocator interface around that idea and the feasibility checks in `sched-3`. All Device A and Device B numbers below are illustrative profiles, not product specifications or measured vendor comparisons.
+Mélange [\[1\]](https://arxiv.org/abs/2404.14527), published in 2024, formulates heterogeneous serving allocation as cost-aware bin packing. Its workload dimensions include request size, request rate, and SLO. This article develops the allocator interface around that idea and the feasibility checks in `sched-3`. All Device A and Device B numbers below are illustrative profiles, not product specifications or measured vendor comparisons.
 
 ## Deep dive
 
@@ -39,7 +39,7 @@ For an illustrative service, Device A can hold one model replica with the requir
 
 Serving capacity should be measured under the demand profile and SLO; a maximum token rate without latency conditions does not show how many requests the configuration can serve acceptably; Prompt and output distributions, batching, routing, and cache state all affect the operational envelope.
 
-Mélange treats workload slices as items and GPU capacities as bins under service constraints. This makes heterogeneity useful: different slices can have different cost-efficient devices. The formulation concerns serving, so it does not establish a training allocation rule or a universal device ordering.
+Mélange [\[1\]](https://arxiv.org/abs/2404.14527) treats workload slices as items and GPU capacities as bins under service constraints. This makes heterogeneity useful: different slices can have different cost-efficient devices. The formulation concerns serving, so it does not establish a training allocation rule or a universal device ordering.
 
 Suppose an illustrative measured profile says one A configuration supports 6 requests per second under the required latency target, while one B configuration supports 3. If demand is 10 requests per second, 2 A configurations supply 12 units of profiled capacity. One A plus 2 B also supplies 12. Both are candidates, subject to routing, burst margin, and whether the profiles compose under shared resources.
 
@@ -95,5 +95,5 @@ The next article chooses layout together with placement. That step is necessary 
 
 ### Sources
 
-- [Mélange: Cost Efficient Large Language Model Serving by Exploiting GPU Heterogeneity (2024)](https://arxiv.org/abs/2404.14527)
-- [RAPID-LLM: Resilience-Aware Performance analysis of Infrastructure for Distributed LLM Training and Inference (2025 preprint; revised 2026)](https://arxiv.org/abs/2512.19606)
+- [\[1\]](https://arxiv.org/abs/2404.14527) Mélange: Cost Efficient Large Language Model Serving by Exploiting GPU Heterogeneity (2024)
+- [\[2\]](https://arxiv.org/abs/2512.19606) RAPID-LLM: Resilience-Aware Performance analysis of Infrastructure for Distributed LLM Training and Inference (2025 preprint; revised 2026)

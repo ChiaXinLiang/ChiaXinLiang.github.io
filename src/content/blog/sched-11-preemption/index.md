@@ -17,7 +17,7 @@ tags: ["ai-infrastructure", "gpu-scheduling", "resource-allocation"]
 
 Preemption should free a usable allocation, not merely enough devices; an incoming distributed job can require a particular topology, memory envelope, and coordinated launch; a victim set that releases 8 scattered GPUs may still leave it unschedulable while damaging several running jobs. Priority determines which work may displace other work. Victim selection determines how that displacement happens. Keep the policy permission separate from the cost model: a cheap interruption is irrelevant when the victim is protected, and a legal interruption can still be a poor choice when rollback and restart consume more useful work than the incoming job gains.
 
-[Topology-aware Preemptive Scheduling for Co-located LLM Workloads](https://arxiv.org/abs/2411.11560), published in 2024, studies topology-aware victim selection in simulation. This article uses its mechanism boundary without generalizing its reported improvement to arbitrary clusters. The examples are illustrative GPU-hour accounting, building on feasibility and layout in `sched-3` and `sched-9`.
+Topology-aware Preemptive Scheduling for Co-located LLM Workloads [\[1\]](https://arxiv.org/abs/2411.11560), published in 2024, studies topology-aware victim selection in simulation. This article uses its mechanism boundary without generalizing its reported improvement to arbitrary clusters. The examples are illustrative GPU-hour accounting, building on feasibility and layout in `sched-3` and `sched-9`.
 
 ## Deep dive
 
@@ -99,5 +99,5 @@ The next article defines entitlement, borrowing, and fair share. Those rules det
 
 ### Sources
 
-- [Topology-aware Preemptive Scheduling for Co-located LLM Workloads (2024)](https://arxiv.org/abs/2411.11560)
-- [Characterization of Large Language Model Development in the Datacenter (2024)](https://arxiv.org/abs/2403.07648)
+- [\[1\]](https://arxiv.org/abs/2411.11560) Topology-aware Preemptive Scheduling for Co-located LLM Workloads (2024)
+- [\[2\]](https://arxiv.org/abs/2403.07648) Characterization of Large Language Model Development in the Datacenter (2024)

@@ -17,7 +17,7 @@ tags: ["ai-infrastructure", "gpu-scheduling", "resource-allocation"]
 
 Backfilling starts a lower-priority job in an idle resource gap without delaying protected higher-priority work; the opportunity is temporal: devices can be idle now while reserved for a larger job later; a scheduler needs both a legal placement and a defensible release-time bound before it uses that gap.
 
-[Slurm’s scheduling documentation](https://slurm.schedmd.com/sched_config.html) describes backfill in these terms and notes its dependence on job time limits and expected completion. AI jobs add topology, checkpoint, and runtime uncertainty. A short job that overruns can consume the exact domain a reserved distributed job needs.
+Slurm’s scheduling documentation [\[1\]](https://slurm.schedmd.com/sched_config.html) describes backfill in these terms and notes its dependence on job time limits and expected completion. AI jobs add topology, checkpoint, and runtime uncertainty. A short job that overruns can consume the exact domain a reserved distributed job needs.
 
 This article builds on queue replay in `sched-5` and calibrated estimates in `sched-6`. It separates prediction from the policy that handles overruns. The timeline examples are illustrative; they do not claim a measured utilization gain or a universal reservation-safety probability.
 
@@ -93,5 +93,5 @@ The next article examines preemption directly. It selects victim sets whose rele
 
 ### Sources
 
-- [Slurm scheduling configuration: backfill and time limits](https://slurm.schedmd.com/sched_config.html)
-- [Predicting batch queue job wait times for informed scheduling of urgent HPC workloads (2022)](https://arxiv.org/abs/2204.13543)
+- [\[1\]](https://slurm.schedmd.com/sched_config.html) Slurm scheduling configuration: backfill and time limits
+- [\[2\]](https://arxiv.org/abs/2204.13543) Predicting batch queue job wait times for informed scheduling of urgent HPC workloads (2022)

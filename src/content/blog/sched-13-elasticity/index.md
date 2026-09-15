@@ -19,7 +19,7 @@ Idle capacity is an opportunity, but consuming it can impose a transition or rec
 
 Elasticity is a runtime capability and a policy decision. The runtime defines supported resize boundaries and state transitions; the scheduler decides when those transitions are worthwhile under queue, ownership, and uncertainty constraints. A favorable throughput estimate cannot create a missing resharding capability.
 
-[ElasWave](https://arxiv.org/abs/2510.00606), introduced in 2025, studies elastic-native hybrid-parallel training, including communicator adaptation and state migration. This article uses those mechanism boundaries without transferring its reported recovery performance to other runtimes. The examples are illustrative horizon calculations, building on `sched-9` and the reclaim contract in `sched-12`.
+ElasWave [\[1\]](https://arxiv.org/abs/2510.00606), introduced in 2025, studies elastic-native hybrid-parallel training, including communicator adaptation and state migration. This article uses those mechanism boundaries without transferring its reported recovery performance to other runtimes. The examples are illustrative horizon calculations, building on `sched-9` and the reclaim contract in `sched-12`.
 
 ## Deep dive
 
@@ -29,7 +29,7 @@ Elasticity is a runtime capability and a policy decision. The runtime defines su
 
 An elastic request should state minimum and maximum sizes, supported layouts, safe resize points, and the memory and communication required during transition; it should also state whether global batch or optimizer semantics change; the scheduler needs those permissions before it treats additional devices as interchangeable progress capacity.
 
-For an illustrative job, supported sizes might be 8 and 16 ranks with 2 validated layouts. A request for 12 ranks is not automatically legal. The runtime may lack that factorization or checkpoint mapping. Feasibility applies to the transition as well as the final steady state. ElasWave adapts affected communicators and migrates model state under its execution design. Its mechanism includes reusing intact connections and changing affected groups rather than rebuilding every group indiscriminately. A cluster allocator should consume a supported transition profile; it should not assume another runtime has the same behavior because both accept a new rank count. A transition can require extra temporary memory. State may exist at source and destination while migration proceeds, and activation or gradient handling must preserve training correctness. The admission envelope should include that peak. A final layout that fits can still be unreachable with the currently available transition resources.
+For an illustrative job, supported sizes might be 8 and 16 ranks with 2 validated layouts. A request for 12 ranks is not automatically legal. The runtime may lack that factorization or checkpoint mapping. Feasibility applies to the transition as well as the final steady state. ElasWave [\[1\]](https://arxiv.org/abs/2510.00606) adapts affected communicators and migrates model state under its execution design. Its mechanism includes reusing intact connections and changing affected groups rather than rebuilding every group indiscriminately. A cluster allocator should consume a supported transition profile; it should not assume another runtime has the same behavior because both accept a new rank count. A transition can require extra temporary memory. State may exist at source and destination while migration proceeds, and activation or gradient handling must preserve training correctness. The admission envelope should include that peak. A final layout that fits can still be unreachable with the currently available transition resources.
 
 Checkpoint state and progress must be consistent. If a resize changes partitioning, the runtime needs a safe mapping for parameters, optimizer state, and accumulated work. The scheduler should retain the checkpoint or transition identifier so a failure can recover to a known state rather than an ambiguous partially migrated allocation.
 
@@ -97,5 +97,5 @@ The final article evaluates the complete scheduler. It combines prediction quali
 
 ### Sources
 
-- [ElasWave: An Elastic-Native System for Scalable Hybrid-Parallel Training (2025)](https://arxiv.org/abs/2510.00606)
-- [Slurm scheduling configuration](https://slurm.schedmd.com/sched_config.html)
+- [\[1\]](https://arxiv.org/abs/2510.00606) ElasWave: An Elastic-Native System for Scalable Hybrid-Parallel Training (2025)
+- [\[2\]](https://slurm.schedmd.com/sched_config.html) Slurm scheduling configuration

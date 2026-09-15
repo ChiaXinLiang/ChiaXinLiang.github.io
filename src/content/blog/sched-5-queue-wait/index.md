@@ -19,7 +19,7 @@ A job’s runtime and its queue wait answer different questions; Runtime describ
 
 Queue-wait estimates should therefore describe a state-dependent distribution. A point such as “starts in 30 minutes” hides uncertainty about running-job completion, future demand, and the policy used to allocate newly released resources. An interval is useful only when its assumptions and coverage are visible.
 
-[Predicting batch queue job wait times for informed scheduling of urgent HPC workloads](https://arxiv.org/abs/2204.13543), published in 2022, examines queue-state features and stochastic workload scenarios. Its experiments concern HPC systems, so its fitted coefficients and accuracy do not transfer automatically to an AI cluster. This article uses the method boundary to construct an illustrative policy-replay estimator, building on the duration model in `sched-4`.
+Predicting batch queue job wait times for informed scheduling of urgent HPC workloads [\[1\]](https://arxiv.org/abs/2204.13543), published in 2022, examines queue-state features and stochastic workload scenarios. Its experiments concern HPC systems, so its fitted coefficients and accuracy do not transfer automatically to an AI cluster. This article uses the method boundary to construct an illustrative policy-replay estimator, building on the duration model in `sched-4`.
 
 ## Deep dive
 
@@ -99,5 +99,5 @@ The next article addresses that calibration directly. It also explains drift and
 
 ### Sources
 
-- [Predicting batch queue job wait times for informed scheduling of urgent HPC workloads (2022)](https://arxiv.org/abs/2204.13543)
-- [Slurm scheduling configuration: backfill and time limits](https://slurm.schedmd.com/sched_config.html)
+- [\[1\]](https://arxiv.org/abs/2204.13543) Predicting batch queue job wait times for informed scheduling of urgent HPC workloads (2022)
+- [\[2\]](https://slurm.schedmd.com/sched_config.html) Slurm scheduling configuration: backfill and time limits

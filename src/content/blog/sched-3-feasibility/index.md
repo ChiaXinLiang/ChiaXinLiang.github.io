@@ -19,7 +19,7 @@ A scheduler should reject an impossible allocation before asking whether it is f
 
 Feasibility is also more than a device specification. A GPU may support a format in hardware while the selected software stack lacks the kernel required by the workload. A performance model may produce a value for that configuration even though it has never observed the runtime combination. The scheduler needs separate answers to 3 questions: can the job run, is the estimate supported, and how attractive is the legal allocation?
 
-This article extends the workload description from `sched-2`. It uses [RAPID-LLM](https://arxiv.org/abs/2512.19606), introduced in 2025, to explain peak live memory and the limitations of analytical performance models. The worked budgets are illustrative and use declared usable capacity rather than a named product’s nominal specification. The existing [training-memory article](/blog/training-memory-and-step-time/) supplies the underlying state categories; here the focus is admission and decision authority.
+This article extends the workload description from `sched-2`. It uses RAPID-LLM [\[1\]](https://arxiv.org/abs/2512.19606), introduced in 2025, to explain peak live memory and the limitations of analytical performance models. The worked budgets are illustrative and use declared usable capacity rather than a named product’s nominal specification. The existing [training-memory article](/blog/training-memory-and-step-time/) supplies the underlying state categories; here the focus is admission and decision authority.
 
 ## Deep dive
 
@@ -37,7 +37,7 @@ A filter should produce a reason when it rejects a candidate. Distinguish insuff
 
 Training memory contains persistent state and temporary live state. Parameters, gradients, and optimizer state can remain allocated across steps, while activations and communication buffers appear and disappear as the runtime executes. The admission question concerns the maximum simultaneous total, not the average reported by a monitoring interval.
 
-RAPID-LLM counts rank-assigned state after parallelism partitioning and tracks activation lifetimes under the selected recomputation policy; it also accounts for transient parameter materialization under sharding; this matters because the same parameter partition can fit under one execution schedule and exceed capacity under another, even when a spreadsheet gives both configurations the same persistent-state total.
+RAPID-LLM [\[1\]](https://arxiv.org/abs/2512.19606) counts rank-assigned state after parallelism partitioning and tracks activation lifetimes under the selected recomputation policy; it also accounts for transient parameter materialization under sharding; this matters because the same parameter partition can fit under one execution schedule and exceed capacity under another, even when a spreadsheet gives both configurations the same persistent-state total.
 
 Consider an illustrative rank with 26 GiB persistent state. During its peak phase it holds 16 GiB activations, 5 GiB collective buffers, and 3 GiB temporary workspace. The simultaneous total is 50 GiB. Add a declared 6 GiB operating reserve and the admission requirement becomes 56 GiB; on a device with 60 GiB currently usable, the allocation retains 4 GiB beyond that requirement.
 
@@ -61,7 +61,7 @@ A capability check should be reproducible; record the manifest version, containe
 
 A support envelope describes where a predictor has evidence. It can include device type, runtime version, model shape, layout, sequence regime, and traffic state. A configuration may be executable but outside that envelope. The scheduler should preserve feasibility while marking its performance estimate unavailable or weakly supported.
 
-Measured evidence and interpolation are different. Suppose an illustrative table contains step-time measurements at sequence lengths 2,048 and 4,096 for one layout and runtime. A prediction at 3,072 can be labeled interpolation under the stated model. A prediction at 16,384 is extrapolation; the same formula may return a number, yet new activation peaks, attention shapes, or communication behavior can invalidate the fitted relationship. RAPID-LLM states that its analytical operator model is intended for design-space exploration rather than cycle-accurate prediction. It abstracts compiler-specific behavior, including exact fusion choices and software serving effects. That limitation should survive into a scheduler interface: an analytical estimate is useful evidence, but it is not a substitute for a tested executable capability or a locally calibrated latency profile.
+Measured evidence and interpolation are different. Suppose an illustrative table contains step-time measurements at sequence lengths 2,048 and 4,096 for one layout and runtime. A prediction at 3,072 can be labeled interpolation under the stated model. A prediction at 16,384 is extrapolation; the same formula may return a number, yet new activation peaks, attention shapes, or communication behavior can invalidate the fitted relationship. RAPID-LLM [\[1\]](https://arxiv.org/abs/2512.19606) states that its analytical operator model is intended for design-space exploration rather than cycle-accurate prediction. It abstracts compiler-specific behavior, including exact fusion choices and software serving effects. That limitation should survive into a scheduler interface: an analytical estimate is useful evidence, but it is not a substitute for a tested executable capability or a locally calibrated latency profile.
 
 A fallback policy gives the allocator defined behavior when the model abstains; for a legal but unsupported candidate, the scheduler might use a documented compact-placement baseline, restrict speculative backfill, or request a profile before making a high-impact choice; the fallback must be part of policy, because silently assigning zero cost to a missing prediction rewards the configuration with the least evidence.
 
@@ -93,5 +93,5 @@ The next articles build duration and queue-wait estimates inside those boundarie
 
 ### Sources
 
-- [RAPID-LLM: Resilience-Aware Performance analysis of Infrastructure for Distributed LLM Training and Inference (2025 preprint; revised 2026)](https://arxiv.org/abs/2512.19606)
-- [Kubernetes scheduler: filtering and scoring](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/)
+- [\[1\]](https://arxiv.org/abs/2512.19606) RAPID-LLM: Resilience-Aware Performance analysis of Infrastructure for Distributed LLM Training and Inference (2025 preprint; revised 2026)
+- [\[2\]](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/) Kubernetes scheduler: filtering and scoring

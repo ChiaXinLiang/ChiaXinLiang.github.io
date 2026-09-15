@@ -29,7 +29,7 @@ This article follows that loop for one illustrative distributed training job. It
 
 Suppose a team submits a training job requesting 8 GPUs. The count tells the scheduler how many devices to reserve, yet it says nothing about whether the job fits or performs acceptably. A useful request also records the device capabilities, per-rank memory requirement, parallelism layout, communication groups, estimated duration, checkpoint state, priority, ownership, and any deadline or reservation constraint.
 
-The layout changes the meaning of the count. Let the training configuration use tensor parallelism of 4 and data parallelism of 2, written TP4×DP2. Each TP group contains 4 ranks that exchange intermediate results within model layers; the 2 DP replicas synchronize gradients. The scheduler should therefore receive 2 tight four-GPU groups rather than 8 interchangeable slots. [Acme](https://arxiv.org/abs/2403.07648), a 6-month trace study of 4,704 A100 GPUs, describes LLM development as a mix of pretraining, fine-tuning, evaluation, and other jobs, with intricate parallelization and markedly different resource patterns. Its authors report that pretraining jobs represented 3.2% of jobs but 94.0% of GPU time in one studied cluster, while evaluation jobs dominated job count and waited longer because most resources were reserved for pretraining.
+The layout changes the meaning of the count. Let the training configuration use tensor parallelism of 4 and data parallelism of 2, written TP4×DP2. Each TP group contains 4 ranks that exchange intermediate results within model layers; the 2 DP replicas synchronize gradients. The scheduler should therefore receive 2 tight four-GPU groups rather than 8 interchangeable slots. Acme [\[1\]](https://arxiv.org/abs/2403.07648), a 6-month trace study of 4,704 A100 GPUs, describes LLM development as a mix of pretraining, fine-tuning, evaluation, and other jobs, with intricate parallelization and markedly different resource patterns. Its authors report that pretraining jobs represented 3.2% of jobs but 94.0% of GPU time in one studied cluster, while evaluation jobs dominated job count and waited longer because most resources were reserved for pretraining.
 
 That trace does not define every cluster. It does show why the scheduler needs workload class and policy context in addition to device count. The same 8 free GPUs can be suitable for one job, slow for another, and unavailable to a third because a quota or reservation protects them.
 
@@ -47,7 +47,7 @@ These fields also prevent 3 common category errors. Memory belongs in feasibilit
 
 ![Three candidate allocations: immediate A+B fails per-rank memory, A+C+D fails topology, and A+B becomes legal when B3 is available; only legal candidates are scored](./deep-dive-component-02.png)
 
-Kubernetes documents this split directly: filtering produces the nodes where a pod is feasible, then scoring ranks the remaining choices. If filtering returns no node, the pod remains unscheduled. An AI scheduler needs the same separation at a larger scope, because a distributed job may require a set of nodes and links rather than one node.
+Kubernetes [\[4\]](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/) documents this split directly: filtering produces the nodes where a pod is feasible, then scoring ranks the remaining choices. If filtering returns no node, the pod remains unscheduled. An AI scheduler needs the same separation at a larger scope, because a distributed job may require a set of nodes and links rather than one node.
 
 Consider an illustrative 12-GPU cluster. Node A contains GPUs A0–A3 in one high-bandwidth domain. Node B contains B0–B3 in a second. Nodes C and D each expose 2 GPUs over ordinary PCIe, giving C0–C1 and D0–D1. The incoming TP4×DP2 job needs 8 GPUs, at least 70 GiB of usable memory per rank, and each TP4 group must remain inside one four-GPU high-bandwidth domain.
 
@@ -59,7 +59,7 @@ Now add one concrete obstacle: B3 has only 60 GiB available because another allo
 
 Aggregate capacity says that choices 1 and 2 contain 8 GPUs. Only the third satisfies the full job object. A real scheduler may have additional feasible sets, but it should never let a favorable score compensate for a broken hard constraint.
 
-Physical proximity alone is also an imperfect score. [BandPilot](https://arxiv.org/abs/2506.15595) defines effective collective bandwidth for a candidate GPU subset and observes that background traffic can reduce it below the subset’s idle measurement. The system uses sparse NCCL measurements and a surrogate because exhaustively benchmarking every subset under every traffic state is infeasible. Its paper also states a boundary that matters here: BandPilot selects a GPU subset for the current request and does not optimize unknown future arrivals or long-term fragmentation.
+Physical proximity alone is also an imperfect score. BandPilot [\[2\]](https://arxiv.org/abs/2506.15595) defines effective collective bandwidth for a candidate GPU subset and observes that background traffic can reduce it below the subset’s idle measurement. The system uses sparse NCCL measurements and a surrogate because exhaustively benchmarking every subset under every traffic state is infeasible. Its paper also states a boundary that matters here: BandPilot selects a GPU subset for the current request and does not optimize unknown future arrivals or long-term fragmentation.
 
 The scheduler can therefore use predicted bandwidth as one scored feature while retaining its provenance. A measured value, a supported interpolation, and an assumption should not appear equally certain on the decision record.
 
@@ -81,9 +81,9 @@ For an illustrative normalization, let the duration term be hours and let destro
 
 ![Deep dive: Queue timeline comparing immediate fragmented placement with waiting for a contiguous GPU group](./deep-dive-component-03.png)
 
-A placement consumes future options. The scheduler must therefore inspect running work, queued demand, reservations, and uncertain completion times before committing scarce topology. The Acme study supplies a concrete warning: reserving most resources for large pretraining jobs reduced their waits while short evaluation jobs experienced the longest queue delay. The allocation policy improved one class and imposed the cost on another.
+A placement consumes future options. The scheduler must therefore inspect running work, queued demand, reservations, and uncertain completion times before committing scarce topology. The Acme [\[1\]](https://arxiv.org/abs/2403.07648) study supplies a concrete warning: reserving most resources for large pretraining jobs reduced their waits while short evaluation jobs experienced the longest queue delay. The allocation policy improved one class and imposed the cost on another.
 
-Backfilling makes the time dimension explicit. Slurm’s documentation says its backfill scheduler may start a lower-priority job only when doing so does not delay the expected start of a higher-priority job. That condition depends on running-job completion estimates and requested time limits. A short job can use an otherwise idle gap; a job that overruns the gap can violate the reservation it was meant to preserve.
+Backfilling makes the time dimension explicit. Slurm’s documentation [\[5\]](https://slurm.schedmd.com/sched_config.html) says its backfill scheduler may start a lower-priority job only when doing so does not delay the expected start of a higher-priority job. That condition depends on running-job completion estimates and requested time limits. A short job can use an otherwise idle gap; a job that overruns the gap can violate the reservation it was meant to preserve.
 
 Return to the illustrative cluster. A four-GPU evaluation job can start immediately on a slice spanning Nodes A and B and finish in an estimated 25–40 minutes. A reserved TP8 job expects A and B in 50 minutes. Starting the evaluation is defensible only if the scheduler’s overrun policy and uncertainty margin protect that reservation. A point estimate of 30 minutes is not enough evidence when the observed interval reaches 40 and cleanup also takes time.
 
@@ -95,9 +95,9 @@ The later articles in this series separate these pieces. `sched-4` models durati
 
 Scheduling does not end when the launcher starts processes. A job may fail its runtime capability check, hang during communicator setup, run more slowly than predicted, reach a durable checkpoint, or exit without releasing every reservation. Each outcome changes the cluster state and supplies evidence for future estimates.
 
-The Acme trace records submission, start and end times, requested resources, final status, infrastructure measurements, runtime logs, and profiling data for selected jobs. That combination is more useful than a final utilization average because it links the scheduler’s choice to what the workload did. The study also found that many errors occurred near job startup, while infrastructure failures damaged long-running pretraining. A scheduler that records only successful completion time will train its estimates on a filtered history and understate launch and recovery costs.
+The Acme [\[1\]](https://arxiv.org/abs/2403.07648) trace records submission, start and end times, requested resources, final status, infrastructure measurements, runtime logs, and profiling data for selected jobs. That combination is more useful than a final utilization average because it links the scheduler’s choice to what the workload did. The study also found that many errors occurred near job startup, while infrastructure failures damaged long-running pretraining. A scheduler that records only successful completion time will train its estimates on a filtered history and understate launch and recovery costs.
 
-Preemption adds another state transition. [Topology-aware Preemptive Scheduling for Co-located LLM Workloads](https://arxiv.org/abs/2411.11560) shows why freeing enough resources is insufficient: the victim set must release a topology that the incoming workload can actually use. In the paper’s simulation, the proposed method raised topology-affinity hits from 44.5% to 100% across 5,000 evaluated preemptions. That result belongs to the paper’s simulated workload and baseline, so it is evidence for the mechanism rather than a universal expected improvement.
+Preemption adds another state transition. Topology-aware Preemptive Scheduling for Co-located LLM Workloads [\[3\]](https://arxiv.org/abs/2411.11560) shows why freeing enough resources is insufficient: the victim set must release a topology that the incoming workload can actually use. In the paper’s simulation, the proposed method raised topology-affinity hits from 44.5% to 100% across 5,000 evaluated preemptions. That result belongs to the paper’s simulated workload and baseline, so it is evidence for the mechanism rather than a universal expected improvement.
 
 Before executing a placement, the scheduler should retain a compact certificate:
 
@@ -122,8 +122,8 @@ The next article, **A GPU Count Is Not a Workload Model**, will define the reque
 
 ### Sources
 
-- [Characterization of Large Language Model Development in the Datacenter](https://arxiv.org/abs/2403.07648)
-- [BandPilot: Toward Performance- and Contention-Aware GPU Dispatching in AI Clusters](https://arxiv.org/abs/2506.15595)
-- [Topology-aware Preemptive Scheduling for Co-located LLM Workloads](https://arxiv.org/abs/2411.11560)
-- [Kubernetes Scheduler](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/)
-- [Slurm Scheduling Configuration Guide](https://slurm.schedmd.com/sched_config.html)
+- [\[1\]](https://arxiv.org/abs/2403.07648) Characterization of Large Language Model Development in the Datacenter
+- [\[2\]](https://arxiv.org/abs/2506.15595) BandPilot: Toward Performance- and Contention-Aware GPU Dispatching in AI Clusters
+- [\[3\]](https://arxiv.org/abs/2411.11560) Topology-aware Preemptive Scheduling for Co-located LLM Workloads
+- [\[4\]](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/) Kubernetes Scheduler
+- [\[5\]](https://slurm.schedmd.com/sched_config.html) Slurm Scheduling Configuration Guide

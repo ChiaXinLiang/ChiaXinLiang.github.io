@@ -19,7 +19,7 @@ A shared cluster needs an ownership contract as well as a placement algorithm; Q
 
 Training and serving also need different service measures. GPU-hours describe allocated resources; completed training progress describes useful work; token-denominated serving cost describes request processing. A token-fair serving policy does not automatically solve training fair share.
 
-[Fairness in Serving Large Language Models](https://arxiv.org/abs/2401.00588), first posted in December 2023 and revised in 2024, introduces Virtual Token Counter for request-level serving fairness. This article preserves that scope and develops an illustrative cluster entitlement model around the queue and preemption mechanisms in `sched-10` and `sched-11`. The policy examples are declared operator rules rather than claims that the supplied papers establish one universal fair-share design.
+Fairness in Serving Large Language Models [\[1\]](https://arxiv.org/abs/2401.00588), first posted in December 2023 and revised in 2024, introduces Virtual Token Counter for request-level serving fairness. This article preserves that scope and develops an illustrative cluster entitlement model around the queue and preemption mechanisms in `sched-10` and `sched-11`. The policy examples are declared operator rules rather than claims that the supplied papers establish one universal fair-share design.
 
 ## Deep dive
 
@@ -61,9 +61,9 @@ Job splitting can manipulate naive measures. A tenant with one 16-GPU job and an
 
 ![Deep dive: Serving fairness meters request processing cost, while training allocation uses a separate ownership measure](./deep-dive-component-04.png)
 
-Virtual Token Counter, or VTC, addresses request-level fairness in LLM serving. It uses a service-cost accounting model tied to input and output tokens and schedules clients according to virtual service state. This concerns the inference engine’s distribution of request processing, not tenant GPU entitlement for finite training jobs.
+Virtual Token Counter [\[1\]](https://arxiv.org/abs/2401.00588), or VTC, addresses request-level fairness in LLM serving. It uses a service-cost accounting model tied to input and output tokens and schedules clients according to virtual service state. This concerns the inference engine’s distribution of request processing, not tenant GPU entitlement for finite training jobs.
 
-Token counts require weights when input and output processing have different costs; for an illustrative service model, charge 1 unit per input token and 4 per output token; a request with 1,000 input and 100 output tokens costs 1,400 units; a request with 100 input and 1,000 output costs 4,100. Equal request count would not equal service cost under this declared model. The weights are a model assumption, not a universal hardware fact. The serving runtime and workload determine whether they approximate processing cost adequately. Preserve the paper’s conditions when discussing its fairness result, and validate any local cost model before using it to compare clients. A cluster scheduler can use serving fairness as a constraint on a capacity profile. For example, the profiled service capacity may assume a particular client mix and VTC policy. The allocator then assigns resources to meet that profile. It should not retell engine-internal ordering as the cluster’s training fair-share mechanism.
+Token counts require weights when input and output processing have different costs; for an illustrative service model, charge 1 unit per input token and 4 per output token; a request with 1,000 input and 100 output tokens costs 1,400 units; a request with 100 input and 1,000 output costs 4,100. Equal request count would not equal service cost under this declared model. The weights are a model assumption, not a universal hardware fact. The serving runtime and workload determine whether they approximate processing cost adequately. Preserve the paper’s conditions when discussing its fairness result, and validate any local cost model before using it to compare clients. A cluster scheduler can use serving fairness as a constraint on a capacity profile. For example, the profiled service capacity may assume a particular client mix and VTC [\[1\]](https://arxiv.org/abs/2401.00588) policy. The allocator then assigns resources to meet that profile. It should not retell engine-internal ordering as the cluster’s training fair-share mechanism.
 
 Training fairness remains a separate design problem in the supplied research map. GPU-hours, slowdown relative to an isolated baseline, completion delay, and useful progress offer different perspectives. A series article should expose these alternatives and their limitations rather than fill the gap with token counters that measure a different form of service.
 
@@ -93,5 +93,5 @@ Serving token fairness supplies a useful request-level mechanism within its scop
 
 ### Sources
 
-- [Fairness in Serving Large Language Models (2023 preprint; revised 2024)](https://arxiv.org/abs/2401.00588)
-- [Slurm scheduling configuration](https://slurm.schedmd.com/sched_config.html)
+- [\[1\]](https://arxiv.org/abs/2401.00588) Fairness in Serving Large Language Models (2023 preprint; revised 2024)
+- [\[2\]](https://slurm.schedmd.com/sched_config.html) Slurm scheduling configuration
