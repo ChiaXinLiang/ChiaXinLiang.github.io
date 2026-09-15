@@ -23,7 +23,7 @@ This article develops that description for training and serving. It follows the 
 
 ### Describe the training work before its allocation
 
-![Deep dive: A training request records model, tokens, batch, precision, optimizer, checkpoint, and supported layouts](./deep-dive-component-01.png)
+![Training work remaining: normal continuation from 60,000 executed steps leaves 40,000, while recovery from a durable 59,500-step checkpoint leaves 40,500](./deep-dive-component-01.png)
 
 A training request should first identify the work that remains. Record the model configuration, sequence-length regime, global batch, numerical formats, optimizer, dataset or token budget, completed progress, and stopping condition. These fields explain what the job will do even when the scheduler considers a different allocation.
 

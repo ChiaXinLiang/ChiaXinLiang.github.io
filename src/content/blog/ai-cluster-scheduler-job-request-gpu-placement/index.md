@@ -45,7 +45,7 @@ These fields also prevent 3 common category errors. Memory belongs in feasibilit
 
 ### Filter feasibility before scoring fitness
 
-![Deep dive: A 12-GPU illustrative cluster and candidate placements rejected by memory and TP4 topology before two feasible choices are scored](./deep-dive-component-02.png)
+![Three candidate allocations: immediate A+B fails per-rank memory, A+C+D fails topology, and A+B becomes legal when B3 is available; only legal candidates are scored](./deep-dive-component-02.png)
 
 Kubernetes documents this split directly: filtering produces the nodes where a pod is feasible, then scoring ranks the remaining choices. If filtering returns no node, the pod remains unscheduled. An AI scheduler needs the same separation at a larger scope, because a distributed job may require a set of nodes and links rather than one node.
 
